@@ -121,49 +121,8 @@ final class ServerManager: ObservableObject {
                 logger.info("Created default workspace: \(self.workspaces[0].name)")
             }
 
-            // Check for orphaned servers (workspaceId doesn't match any workspace)
-            let workspaceIds = Set(workspaces.map { $0.id })
-            let orphanedServers = servers.filter { !workspaceIds.contains($0.workspaceId) }
-            if !orphanedServers.isEmpty {
-                logger.warning("Found \(orphanedServers.count) ORPHANED servers (workspaceId doesn't match any workspace):")
-                for server in orphanedServers {
-                    logger.warning("  - \(server.name) (id: \(server.id)) references missing workspaceId: \(server.workspaceId)")
-                }
-
-                // Auto-repair: reassign orphaned servers to first workspace
-                let defaultWorkspace = workspaces[0]
-                logger.info("Auto-repairing: reassigning orphaned servers to workspace '\(defaultWorkspace.name)'")
-                for i in servers.indices {
-                    if !workspaceIds.contains(servers[i].workspaceId) {
-                        let oldWorkspaceId = servers[i].workspaceId
-                        servers[i] = Server(
-                            id: servers[i].id,
-                            workspaceId: defaultWorkspace.id,
-                            environment: servers[i].environment,
-                            name: servers[i].name,
-                            host: servers[i].host,
-                            port: servers[i].port,
-                            username: servers[i].username,
-                            authMethod: servers[i].authMethod,
-                            tags: servers[i].tags,
-                            notes: servers[i].notes,
-                            lastConnected: servers[i].lastConnected,
-                            isFavorite: servers[i].isFavorite,
-                            createdAt: servers[i].createdAt,
-                            updatedAt: Date(),
-                            keychainCredentialId: servers[i].keychainCredentialId
-                        )
-                        logger.info("Reassigned server '\(self.servers[i].name)' from \(oldWorkspaceId) to \(defaultWorkspace.id)")
-
-                        // Save updated server to CloudKit
-                        do {
-                            try await cloudKit.saveServer(servers[i])
-                        } catch {
-                            logger.warning("Failed to save repaired server to CloudKit: \(error.localizedDescription)")
-                        }
-                    }
-                }
-            }
+            // Check for and repair orphaned servers (workspaceId doesn't match any workspace)
+            await repairOrphanedServers()
 
             // Save merged data locally
             saveLocalData()
@@ -190,6 +149,53 @@ final class ServerManager: ObservableObject {
             colorHex: "#007AFF",
             order: 0
         )
+    }
+
+    /// Repairs servers that reference non-existent workspaces by reassigning them to the first available workspace
+    private func repairOrphanedServers() async {
+        let workspaceIds = Set(workspaces.map { $0.id })
+        let orphanedServers = servers.filter { !workspaceIds.contains($0.workspaceId) }
+
+        guard !orphanedServers.isEmpty else { return }
+
+        logger.warning("Found \(orphanedServers.count) ORPHANED servers (workspaceId doesn't match any workspace):")
+        for server in orphanedServers {
+            logger.warning("  - \(server.name) (id: \(server.id)) references missing workspaceId: \(server.workspaceId)")
+        }
+
+        // Auto-repair: reassign orphaned servers to first workspace
+        let defaultWorkspace = workspaces[0]
+        logger.info("Auto-repairing: reassigning orphaned servers to workspace '\(defaultWorkspace.name)'")
+        for i in servers.indices {
+            if !workspaceIds.contains(servers[i].workspaceId) {
+                let oldWorkspaceId = servers[i].workspaceId
+                servers[i] = Server(
+                    id: servers[i].id,
+                    workspaceId: defaultWorkspace.id,
+                    environment: servers[i].environment,
+                    name: servers[i].name,
+                    host: servers[i].host,
+                    port: servers[i].port,
+                    username: servers[i].username,
+                    authMethod: servers[i].authMethod,
+                    tags: servers[i].tags,
+                    notes: servers[i].notes,
+                    lastConnected: servers[i].lastConnected,
+                    isFavorite: servers[i].isFavorite,
+                    createdAt: servers[i].createdAt,
+                    updatedAt: Date(),
+                    keychainCredentialId: servers[i].keychainCredentialId
+                )
+                logger.info("Reassigned server '\(self.servers[i].name)' from \(oldWorkspaceId) to \(defaultWorkspace.id)")
+
+                // Save updated server to CloudKit
+                do {
+                    try await cloudKit.saveServer(servers[i])
+                } catch {
+                    logger.warning("Failed to save repaired server to CloudKit: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     /// Push local data to CloudKit to auto-create schema in development mode

@@ -122,8 +122,25 @@ actor SSHClient {
 
 // MARK: - Keyboard Interactive Auth Helper
 
-// Global storage for keyboard-interactive password (needed for C callback)
-private var kbdintPassword: String?
+/// Thread-safe storage for keyboard-interactive password (needed for C callback)
+private final class KeyboardInteractivePassword: @unchecked Sendable {
+    static let shared = KeyboardInteractivePassword()
+    private var _password: String?
+    private let lock = NSLock()
+
+    var password: String? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _password
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _password = newValue
+        }
+    }
+}
 
 // C callback for keyboard-interactive authentication
 private let kbdintCallback: @convention(c) (
@@ -136,7 +153,7 @@ private let kbdintCallback: @convention(c) (
     UnsafeMutablePointer<LIBSSH2_USERAUTH_KBDINT_RESPONSE>?,  // responses
     UnsafeMutablePointer<UnsafeMutableRawPointer?>?  // abstract
 ) -> Void = { name, nameLen, instruction, instructionLen, numPrompts, prompts, responses, abstract in
-    guard numPrompts > 0, let responses = responses, let password = kbdintPassword else {
+    guard numPrompts > 0, let responses = responses, let password = KeyboardInteractivePassword.shared.password else {
         return
     }
 
@@ -294,9 +311,9 @@ actor SSHSession {
             if authResult != 0 {
                 logger.info("Password auth failed, trying keyboard-interactive...")
 
-                // Store password for the callback
-                kbdintPassword = password
-                defer { kbdintPassword = nil }
+                // Store password for the callback (thread-safe)
+                KeyboardInteractivePassword.shared.password = password
+                defer { KeyboardInteractivePassword.shared.password = nil }
 
                 authResult = libssh2_userauth_keyboard_interactive_ex(
                     session,

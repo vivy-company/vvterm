@@ -7,6 +7,123 @@
 
 import SwiftUI
 import os.log
+
+// MARK: - SSH Terminal Coordinator Protocol
+
+/// Protocol for shared SSH terminal coordinator functionality across platforms
+protocol SSHTerminalCoordinator: AnyObject {
+    var server: Server { get }
+    var credentials: ServerCredentials { get }
+    var sessionId: UUID { get }
+    var onProcessExit: () -> Void { get }
+    var terminalView: GhosttyTerminalView? { get set }
+    var sshClient: SSHClient { get }
+    var shellTask: Task<Void, Never>? { get set }
+    var logger: Logger { get }
+
+    /// Platform-specific hook called after shell starts (before reading output)
+    func onShellStarted(terminal: GhosttyTerminalView) async
+
+    /// Platform-specific hook called before starting shell (after connect, after registering client)
+    func onBeforeShellStart(cols: Int, rows: Int) async
+}
+
+extension SSHTerminalCoordinator {
+    func sendToSSH(_ data: Data) {
+        Task {
+            do {
+                try await sshClient.write(data)
+            } catch {
+                logger.error("Failed to send to SSH: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func cancelShell() {
+        shellTask?.cancel()
+        shellTask = nil
+        // Immediately abort SSH connection to unblock any pending I/O
+        sshClient.abort()
+        // Clear terminal reference and callbacks to break retain cycles
+        if let terminal = terminalView {
+            terminal.writeCallback = nil
+            terminal.onReady = nil
+            terminal.onProcessExit = nil
+        }
+        terminalView = nil
+    }
+
+    func startSSHConnection(terminal: GhosttyTerminalView) {
+        shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
+            guard let self = self, let terminal = terminal else { return }
+
+            let sshClient = self.sshClient
+            let server = self.server
+            let credentials = self.credentials
+            let sessionId = self.sessionId
+            let onProcessExit = self.onProcessExit
+            let logger = self.logger
+
+            do {
+                logger.info("Connecting to \(server.host)...")
+                _ = try await sshClient.connect(to: server, credentials: credentials)
+
+                guard !Task.isCancelled else { return }
+
+                await MainActor.run {
+                    ConnectionSessionManager.shared.registerSSHClient(sshClient, for: sessionId)
+                }
+
+                let size = await terminal.terminalSize()
+                let cols = Int(size?.columns ?? 80)
+                let rows = Int(size?.rows ?? 24)
+
+                // Platform-specific hook before shell start
+                await self.onBeforeShellStart(cols: cols, rows: rows)
+
+                let outputStream = try await sshClient.startShell(cols: cols, rows: rows)
+
+                guard !Task.isCancelled else { return }
+
+                // Platform-specific hook after shell starts
+                await self.onShellStarted(terminal: terminal)
+
+                // Read data in background, feed to terminal on main thread
+                for await data in outputStream {
+                    guard !Task.isCancelled else { break }
+                    let isValid = await MainActor.run {
+                        self.terminalView != nil &&
+                        ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
+                    }
+                    guard isValid else { break }
+                    await MainActor.run {
+                        terminal.feedData(data)
+                    }
+                }
+
+                guard !Task.isCancelled else { return }
+                logger.info("SSH shell ended")
+                await MainActor.run {
+                    onProcessExit()
+                }
+            } catch {
+                guard !Task.isCancelled else { return }
+                logger.error("SSH connection failed: \(error.localizedDescription)")
+                let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
+                if let data = errorMsg.data(using: .utf8) {
+                    await MainActor.run {
+                        terminal.feedData(data)
+                    }
+                }
+            }
+        }
+    }
+
+    // Default no-op implementations for hooks
+    func onShellStarted(terminal: GhosttyTerminalView) async {}
+    func onBeforeShellStart(cols: Int, rows: Int) async {}
+}
+
 #if os(macOS)
 import AppKit
 
@@ -101,16 +218,16 @@ struct SSHTerminalWrapper: NSViewRepresentable {
 
     // MARK: - Coordinator
 
-    class Coordinator {
+    class Coordinator: SSHTerminalCoordinator {
         let server: Server
         let credentials: ServerCredentials
         let sessionId: UUID
         let onProcessExit: () -> Void
         weak var terminalView: GhosttyTerminalView?
 
-        private let sshClient = SSHClient()
-        private var shellTask: Task<Void, Never>?
-        private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
+        let sshClient = SSHClient()
+        var shellTask: Task<Void, Never>?
+        let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
 
         /// Last known terminal size to detect changes
         private var lastSize: (cols: Int, rows: Int) = (0, 0)
@@ -139,95 +256,13 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             }
         }
 
-        func startSSHConnection(terminal: GhosttyTerminalView) {
-            // Run SSH operations in background, only hop to main for UI updates
-            shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, sessionId, onProcessExit, logger] in
-                guard let self = self, let terminal = terminal else { return }
+        // MARK: - SSHTerminalCoordinator hooks
 
-                do {
-                    // Connect to SSH server
-                    logger.info("Connecting to \(server.host)...")
-                    _ = try await sshClient.connect(to: server, credentials: credentials)
-
-                    guard !Task.isCancelled else { return }
-
-                    // Register SSH client with session manager for stats/command access
-                    await MainActor.run {
-                        ConnectionSessionManager.shared.registerSSHClient(sshClient, for: sessionId)
-                    }
-
-                    // Get terminal size
-                    let size = await terminal.terminalSize()
-                    let cols = Int(size?.columns ?? 80)
-                    let rows = Int(size?.rows ?? 24)
-
-                    // Store initial size to avoid redundant resize on first update
-                    await MainActor.run {
-                        self.lastSize = (cols, rows)
-                    }
-
-                    // Start shell and read output
-                    let outputStream = try await sshClient.startShell(cols: cols, rows: rows)
-
-                    guard !Task.isCancelled else { return }
-
-                    // Read data in background, feed to terminal on main thread
-                    for await data in outputStream {
-                        guard !Task.isCancelled else { break }
-                        // Check if session and terminal are still valid
-                        let isValid = await MainActor.run {
-                            self.terminalView != nil &&
-                            ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
-                        }
-                        guard isValid else { break }
-                        // Feed data on main thread
-                        await MainActor.run {
-                            terminal.feedData(data)
-                        }
-                    }
-
-                    guard !Task.isCancelled else { return }
-                    // Shell ended
-                    logger.info("SSH shell ended")
-                    await MainActor.run {
-                        onProcessExit()
-                    }
-                } catch {
-                    guard !Task.isCancelled else { return }
-                    logger.error("SSH connection failed: \(error.localizedDescription)")
-                    // Show error in terminal
-                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
-                    if let data = errorMsg.data(using: .utf8) {
-                        await MainActor.run {
-                            terminal.feedData(data)
-                        }
-                    }
-                }
+        func onBeforeShellStart(cols: Int, rows: Int) async {
+            // Store initial size to avoid redundant resize on first update
+            await MainActor.run {
+                self.lastSize = (cols, rows)
             }
-        }
-
-        func sendToSSH(_ data: Data) {
-            Task {
-                do {
-                    try await sshClient.write(data)
-                } catch {
-                    logger.error("Failed to send to SSH: \(error.localizedDescription)")
-                }
-            }
-        }
-
-        func cancelShell() {
-            shellTask?.cancel()
-            shellTask = nil
-            // Immediately abort SSH connection to unblock any pending I/O
-            sshClient.abort()
-            // Clear terminal reference and callbacks to break retain cycles
-            if let terminal = terminalView {
-                terminal.writeCallback = nil
-                terminal.onReady = nil
-                terminal.onProcessExit = nil
-            }
-            terminalView = nil
         }
 
         deinit {
@@ -385,16 +420,16 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
     // MARK: - Coordinator
 
-    class Coordinator {
+    class Coordinator: SSHTerminalCoordinator {
         let server: Server
         let credentials: ServerCredentials
         let sessionId: UUID
         let onProcessExit: () -> Void
         weak var terminalView: GhosttyTerminalView?
 
-        private let sshClient = SSHClient()
-        private var shellTask: Task<Void, Never>?
-        private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
+        let sshClient = SSHClient()
+        var shellTask: Task<Void, Never>?
+        let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
 
         init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void) {
             self.server = server
@@ -403,89 +438,13 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             self.onProcessExit = onProcessExit
         }
 
-        func startSSHConnection(terminal: GhosttyTerminalView) {
-            // Run SSH operations in background, only hop to main for UI updates
-            shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, sessionId, onProcessExit, logger] in
-                guard let self = self, let terminal = terminal else { return }
+        // MARK: - SSHTerminalCoordinator hooks
 
-                do {
-                    logger.info("Connecting to \(server.host)...")
-                    _ = try await sshClient.connect(to: server, credentials: credentials)
-
-                    guard !Task.isCancelled else { return }
-
-                    await MainActor.run {
-                        ConnectionSessionManager.shared.registerSSHClient(sshClient, for: sessionId)
-                    }
-
-                    let size = await terminal.terminalSize()
-                    let cols = Int(size?.columns ?? 80)
-                    let rows = Int(size?.rows ?? 24)
-
-                    let outputStream = try await sshClient.startShell(cols: cols, rows: rows)
-
-                    guard !Task.isCancelled else { return }
-
-                    // Force refresh after shell starts (must be on main thread)
-                    await MainActor.run {
-                        terminal.forceRefresh()
-                    }
-
-                    // Read data in background, feed to terminal on main thread
-                    for await data in outputStream {
-                        guard !Task.isCancelled else { break }
-                        // Check if session and terminal are still valid
-                        let isValid = await MainActor.run {
-                            self.terminalView != nil &&
-                            ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
-                        }
-                        guard isValid else { break }
-                        // Feed data on main thread
-                        await MainActor.run {
-                            terminal.feedData(data)
-                        }
-                    }
-
-                    guard !Task.isCancelled else { return }
-                    logger.info("SSH shell ended")
-                    await MainActor.run {
-                        onProcessExit()
-                    }
-                } catch {
-                    guard !Task.isCancelled else { return }
-                    logger.error("SSH connection failed: \(error.localizedDescription)")
-                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
-                    if let data = errorMsg.data(using: .utf8) {
-                        await MainActor.run {
-                            terminal.feedData(data)
-                        }
-                    }
-                }
+        func onShellStarted(terminal: GhosttyTerminalView) async {
+            // Force refresh after shell starts (must be on main thread)
+            await MainActor.run {
+                terminal.forceRefresh()
             }
-        }
-
-        func sendToSSH(_ data: Data) {
-            Task {
-                do {
-                    try await sshClient.write(data)
-                } catch {
-                    logger.error("Failed to send to SSH: \(error.localizedDescription)")
-                }
-            }
-        }
-
-        func cancelShell() {
-            shellTask?.cancel()
-            shellTask = nil
-            // Immediately abort SSH connection to unblock any pending I/O
-            sshClient.abort()
-            // Clear terminal reference and callbacks to break retain cycles
-            if let terminal = terminalView {
-                terminal.writeCallback = nil
-                terminal.onReady = nil
-                terminal.onProcessExit = nil
-            }
-            terminalView = nil
         }
 
         deinit {

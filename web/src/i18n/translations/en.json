@@ -1,0 +1,165 @@
+{
+  "hero": {
+    "title": "VVTerm",
+    "subtitle": "Your servers. Everywhere. The SSH terminal for iOS and macOS.",
+    "download": "Download",
+    "appStore": "App Store",
+    "viewOnGithub": "View on GitHub",
+    "requirements": "Requires iOS 16+ or macOS 13+ (Apple Silicon)"
+  },
+  "showcase": {
+    "mac": "Mac",
+    "ios": "iOS"
+  },
+  "features": {
+    "title": "Servers. Terminal. Everywhere.",
+    "servers": {
+      "title": "Server Management",
+      "desc": "Add, edit, and organize your servers. Group them into workspaces by client, project, or environment."
+    },
+    "terminal": {
+      "title": "GPU Terminal",
+      "desc": "Powered by libghostty. GPU-accelerated rendering, custom themes, and full terminal emulation."
+    },
+    "ssh": {
+      "title": "SSH Connections",
+      "desc": "Password, SSH key, or key with passphrase. Secure authentication stored in Keychain."
+    },
+    "sync": {
+      "title": "iCloud Sync",
+      "desc": "Server configurations sync across all your Apple devices. Connect from iPhone, iPad, or Mac."
+    },
+    "workspaces": {
+      "title": "Workspaces",
+      "desc": "Organize servers by client, project, or team. Color-coded workspaces with environment filters."
+    },
+    "voice": {
+      "title": "Voice-to-Command",
+      "desc": "Speak commands instead of typing. On-device transcription with MLX Whisper."
+    },
+    "tabs": {
+      "title": "Multiple Connections",
+      "desc": "Connect to multiple servers simultaneously. Tab between connections without losing state."
+    },
+    "keychain": {
+      "title": "Keychain Security",
+      "desc": "Credentials stored securely in Apple Keychain. Never synced to the cloud."
+    }
+  },
+  "howItWorks": {
+    "title": "How it works",
+    "step1": {
+      "title": "Add your servers",
+      "desc": "Enter host, port, and credentials. SSH keys or passwords stored securely in Keychain. Organize into workspaces."
+    },
+    "step2": {
+      "title": "Connect from anywhere",
+      "desc": "Server configs sync via iCloud. Pick up your iPhone and connect to the same servers you use on your Mac."
+    },
+    "step3": {
+      "title": "Manage with ease",
+      "desc": "Filter by environment (Production, Staging, Dev). Open multiple tabs. Run commands with voice input."
+    }
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Start free, upgrade for unlimited",
+    "free": {
+      "name": "Free",
+      "description": "Get started",
+      "price": "$0",
+      "period": "/forever",
+      "features": [
+        "1 workspace",
+        "3 servers",
+        "1 connection tab",
+        "GPU terminal (libghostty)",
+        "iCloud sync",
+        "Voice-to-command",
+        "Keychain security"
+      ],
+      "cta": "Download Free"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Unlimited everything",
+      "monthly": {
+        "price": "$6.49",
+        "period": "/mo"
+      },
+      "yearly": {
+        "price": "$19.99",
+        "period": "/yr",
+        "save": "Save 74%"
+      },
+      "features": [
+        "Unlimited workspaces",
+        "Unlimited servers",
+        "Unlimited connection tabs",
+        "Custom environments",
+        "Priority support",
+        "All future features"
+      ],
+      "ctaMonthly": "Subscribe Monthly",
+      "ctaYearly": "Subscribe Yearly"
+    },
+    "lifetime": {
+      "name": "Lifetime",
+      "description": "One-time purchase",
+      "price": "$29.99",
+      "badge": "Best Value",
+      "features": [
+        "Everything in Pro",
+        "Pay once, own forever",
+        "All future updates",
+        "Priority support forever"
+      ],
+      "cta": "Buy Lifetime",
+      "guarantee": "30-day money-back guarantee"
+    }
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "q1": {
+      "question": "What is VVTerm?",
+      "answer": "VVTerm is an SSH terminal app for iOS and macOS. It lets you manage and connect to remote servers (VPS, cloud instances, home lab) with iCloud sync across all your Apple devices."
+    },
+    "q2": {
+      "question": "How does iCloud sync work?",
+      "answer": "Server configurations (name, host, port, username) sync via iCloud to all your devices. Passwords and SSH keys are stored locally in Keychain and never synced — you'll need to re-enter credentials on each device."
+    },
+    "q3": {
+      "question": "Which authentication methods are supported?",
+      "answer": "Password, SSH key, and SSH key with passphrase. All credentials are stored securely in Apple Keychain."
+    },
+    "q4": {
+      "question": "Does VVTerm work on iPad?",
+      "answer": "Yes! VVTerm works on iPhone, iPad, and Mac. The iOS version has a keyboard toolbar with Esc, Tab, Ctrl, and arrow keys for easy terminal navigation."
+    },
+    "q5": {
+      "question": "What terminal emulator does it use?",
+      "answer": "VVTerm uses libghostty, the same GPU-accelerated terminal rendering engine from Ghostty. It provides fast, accurate terminal emulation with custom theme support."
+    },
+    "q6": {
+      "question": "What's included in Free vs Pro?",
+      "answer": "Free includes 1 workspace, 3 servers, and 1 connection tab — enough for personal use. Pro unlocks unlimited everything: workspaces, servers, simultaneous connections, and custom environments."
+    },
+    "q7": {
+      "question": "Can I use one purchase on multiple devices?",
+      "answer": "Yes. Your Pro purchase syncs via App Store. Sign in with the same Apple ID on all your devices to unlock Pro everywhere."
+    },
+    "q8": {
+      "question": "What's the refund policy?",
+      "answer": "We offer a 30-day money-back guarantee. If you're not satisfied, contact us within 30 days for a full refund."
+    },
+    "q9": {
+      "question": "What are the system requirements?",
+      "answer": "iOS 16+ (iPhone, iPad) or macOS 13+ Ventura (Apple Silicon only). Intel Macs are not supported due to GPU driver limitations."
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Vivy Technologies Co., Limited",
+    "discord": "Discord",
+    "github": "GitHub"
+  }
+}

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vvterm.com/sitemap.xml

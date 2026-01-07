@@ -1,0 +1,165 @@
+{
+  "hero": {
+    "title": "VVTerm",
+    "subtitle": "服务器随身携带。iOS 与 macOS 上的 SSH 终端。",
+    "download": "下载",
+    "appStore": "App Store",
+    "viewOnGithub": "GitHub",
+    "requirements": "需要 iOS 16+ 或 macOS 13+（Apple Silicon）"
+  },
+  "showcase": {
+    "mac": "Mac",
+    "ios": "iOS"
+  },
+  "features": {
+    "title": "服务器。终端。随处可用。",
+    "servers": {
+      "title": "服务器管理",
+      "desc": "添加、编辑和整理服务器。按客户、项目或环境分组到工作区。"
+    },
+    "terminal": {
+      "title": "GPU 终端",
+      "desc": "基于 libghostty。GPU 加速渲染，自定义主题，完整终端模拟。"
+    },
+    "ssh": {
+      "title": "SSH 连接",
+      "desc": "密码、SSH 密钥或带密码短语的密钥。凭据安全存储在钥匙串中。"
+    },
+    "sync": {
+      "title": "iCloud 同步",
+      "desc": "服务器配置在所有 Apple 设备间同步。从 iPhone、iPad 或 Mac 连接。"
+    },
+    "workspaces": {
+      "title": "工作区",
+      "desc": "按客户、项目或团队整理服务器。带颜色编码和环境筛选的工作区。"
+    },
+    "voice": {
+      "title": "语音转命令",
+      "desc": "说话代替打字。基于 MLX Whisper 的本地语音识别。"
+    },
+    "tabs": {
+      "title": "多连接",
+      "desc": "同时连接多台服务器。在标签页间切换，状态不丢失。"
+    },
+    "keychain": {
+      "title": "钥匙串安全",
+      "desc": "凭据安全存储在 Apple 钥匙串中。绝不同步到云端。"
+    }
+  },
+  "howItWorks": {
+    "title": "使用方法",
+    "step1": {
+      "title": "添加服务器",
+      "desc": "输入主机、端口和凭据。SSH 密钥或密码安全存储在钥匙串中。整理到工作区。"
+    },
+    "step2": {
+      "title": "随处连接",
+      "desc": "服务器配置通过 iCloud 同步。拿起 iPhone 就能连接 Mac 上的同一批服务器。"
+    },
+    "step3": {
+      "title": "轻松管理",
+      "desc": "按环境筛选（生产、预发、开发）。打开多个标签页。用语音输入命令。"
+    }
+  },
+  "pricing": {
+    "title": "价格",
+    "subtitle": "免费开始，升级解锁无限",
+    "free": {
+      "name": "免费版",
+      "description": "立即开始",
+      "price": "¥0",
+      "period": "/永久",
+      "features": [
+        "1 个工作区",
+        "3 台服务器",
+        "1 个连接标签",
+        "GPU 终端 (libghostty)",
+        "iCloud 同步",
+        "语音转命令",
+        "钥匙串安全"
+      ],
+      "cta": "免费下载"
+    },
+    "pro": {
+      "name": "专业版",
+      "description": "无限一切",
+      "monthly": {
+        "price": "¥45",
+        "period": "/月"
+      },
+      "yearly": {
+        "price": "¥138",
+        "period": "/年",
+        "save": "省 74%"
+      },
+      "features": [
+        "无限工作区",
+        "无限服务器",
+        "无限连接标签",
+        "自定义环境",
+        "优先支持",
+        "所有未来功能"
+      ],
+      "ctaMonthly": "按月订阅",
+      "ctaYearly": "按年订阅"
+    },
+    "lifetime": {
+      "name": "终身版",
+      "description": "一次购买",
+      "price": "¥198",
+      "badge": "最佳选择",
+      "features": [
+        "专业版全部功能",
+        "一次付款，永久拥有",
+        "所有未来更新",
+        "终身优先支持"
+      ],
+      "cta": "购买终身版",
+      "guarantee": "30 天无理由退款"
+    }
+  },
+  "faq": {
+    "title": "常见问题",
+    "q1": {
+      "question": "VVTerm 是什么？",
+      "answer": "VVTerm 是一款 iOS 和 macOS 上的 SSH 终端应用。它让你管理和连接远程服务器（VPS、云实例、家庭实验室），并通过 iCloud 在所有 Apple 设备间同步。"
+    },
+    "q2": {
+      "question": "iCloud 同步如何工作？",
+      "answer": "服务器配置（名称、主机、端口、用户名）通过 iCloud 同步到所有设备。密码和 SSH 密钥存储在本地钥匙串中，绝不同步——你需要在每台设备上重新输入凭据。"
+    },
+    "q3": {
+      "question": "支持哪些认证方式？",
+      "answer": "密码、SSH 密钥、带密码短语的 SSH 密钥。所有凭据安全存储在 Apple 钥匙串中。"
+    },
+    "q4": {
+      "question": "VVTerm 在 iPad 上能用吗？",
+      "answer": "可以！VVTerm 支持 iPhone、iPad 和 Mac。iOS 版本有键盘工具栏，提供 Esc、Tab、Ctrl 和方向键，方便终端操作。"
+    },
+    "q5": {
+      "question": "使用什么终端模拟器？",
+      "answer": "VVTerm 使用 libghostty，与 Ghostty 相同的 GPU 加速终端渲染引擎。提供快速、精确的终端模拟和自定义主题支持。"
+    },
+    "q6": {
+      "question": "免费版和专业版有什么区别？",
+      "answer": "免费版包含 1 个工作区、3 台服务器、1 个连接标签——足够个人使用。专业版解锁无限一切：工作区、服务器、同时连接数、自定义环境。"
+    },
+    "q7": {
+      "question": "一次购买能在多台设备上使用吗？",
+      "answer": "可以。你的专业版购买通过 App Store 同步。在所有设备上使用同一 Apple ID 登录即可解锁专业版。"
+    },
+    "q8": {
+      "question": "退款政策是什么？",
+      "answer": "我们提供 30 天无理由退款保证。如果不满意，30 天内联系我们即可全额退款。"
+    },
+    "q9": {
+      "question": "系统要求是什么？",
+      "answer": "iOS 16+（iPhone、iPad）或 macOS 13+ Ventura（仅限 Apple Silicon）。由于 GPU 驱动限制，不支持 Intel Mac。"
+    }
+  },
+  "footer": {
+    "copyright": "© 2025 Vivy Technologies Co., Limited",
+    "discord": "Discord",
+    "github": "GitHub"
+  }
+}

@@ -8,6 +8,8 @@ struct ProUpgradeSheet: View {
     @ObservedObject private var storeManager = StoreManager.shared
 
     @State private var selectedProduct: Product?
+    @State private var showSuccess = false
+    @State private var errorMessage: String?
 
     private var features: [(icon: String, title: String, description: String, color: Color)] {
         [
@@ -123,6 +125,64 @@ struct ProUpgradeSheet: View {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
         }
+        .onChange(of: storeManager.purchaseState) { _, newState in
+            switch newState {
+            case .purchased:
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showSuccess = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
+            case .failed(let message):
+                errorMessage = message
+            default:
+                break
+            }
+        }
+        .overlay {
+            if showSuccess {
+                successOverlay
+            }
+        }
+        .alert("Purchase Failed", isPresented: .init(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? "Unknown error")
+        }
+    }
+
+    // MARK: - Success Overlay
+
+    private var successOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.6)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.green)
+
+                Text("Welcome to Pro!")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+
+                Text("You now have unlimited access")
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.8))
+            }
+            .padding(32)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(.ultraThinMaterial)
+            )
+        }
+        .transition(.opacity)
     }
 
     // MARK: - Header
