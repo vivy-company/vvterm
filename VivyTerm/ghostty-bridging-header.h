@@ -9,9 +9,9 @@
 #define ghostty_bridging_header_h
 
 // Import the main Ghostty C API
-// Note: ghostty.h already includes all necessary definitions
+// Uses HEADER_SEARCH_PATHS which are SDK-specific (ios/ios-simulator/macos)
 // Do NOT include ghostty/vt.h as it causes duplicate enum definitions
-#import "../Vendor/libghostty/include/ghostty.h"
+#include <ghostty.h>
 
 // Import libssh2 for SSH connections
 // Uses header search paths configured in Xcode build settings

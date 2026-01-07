@@ -78,7 +78,6 @@ struct iOSServerListView: View {
     @State private var showingAddWorkspace = false
     @State private var showingSettings = false
     @State private var showingWorkspacePicker = false
-    @State private var showingSupport = false
     @State private var searchText = ""
     @State private var serverToEdit: Server?
 
@@ -181,18 +180,10 @@ struct iOSServerListView: View {
             }
 
             ToolbarItem(placement: .navigationBarLeading) {
-                HStack(spacing: 16) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gear")
-                    }
-
-                    Button {
-                        showingSupport = true
-                    } label: {
-                        Image(systemName: "bubble.left.and.bubble.right")
-                    }
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gear")
                 }
             }
         }
@@ -238,11 +229,6 @@ struct iOSServerListView: View {
                     server: server,
                     onSave: { _ in serverToEdit = nil }
                 )
-            }
-        }
-        .sheet(isPresented: $showingSupport) {
-            NavigationStack {
-                SupportSheet()
             }
         }
     }

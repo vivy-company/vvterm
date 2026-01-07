@@ -6,6 +6,8 @@
 import SwiftUI
 #if os(macOS)
 import AppKit
+#else
+import UIKit
 #endif
 
 // MARK: - About Settings View
@@ -26,7 +28,11 @@ struct AboutSettingsView: View {
         }
         return Image(systemName: "terminal")
         #else
-        if let uiImage = UIImage(named: "AppIcon") {
+        if let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+           let primaryIcon = icons["CFBundlePrimaryIcon"] as? [String: Any],
+           let iconFiles = primaryIcon["CFBundleIconFiles"] as? [String],
+           let lastIcon = iconFiles.last,
+           let uiImage = UIImage(named: lastIcon) {
             return Image(uiImage: uiImage)
         }
         return Image(systemName: "terminal")

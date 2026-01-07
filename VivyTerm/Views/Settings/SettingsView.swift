@@ -177,6 +177,16 @@ struct SettingsView: View {
                         Label("About", systemImage: "info.circle")
                     }
                 }
+
+                Section {
+                    NavigationLink {
+                        SupportSettingsView()
+                            .navigationTitle("Get in Touch")
+                            .navigationBarTitleDisplayMode(.inline)
+                    } label: {
+                        Label("Get in Touch", systemImage: "bubble.left.and.bubble.right")
+                    }
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
