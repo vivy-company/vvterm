@@ -160,52 +160,12 @@ struct AppearancePreviewCard: View {
 
 struct GeneralSettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
-    @AppStorage("confirmBeforeDisconnect") private var confirmBeforeDisconnect = true
-    @AppStorage("autoReconnect") private var autoReconnect = false
-    @AppStorage("showConnectionNotifications") private var showConnectionNotifications = true
 
     var body: some View {
         Form {
-            // MARK: - Appearance
-
             Section("Appearance") {
                 AppearancePickerView(selection: $appearanceMode)
                     .frame(maxWidth: .infinity)
-            }
-
-            // MARK: - Connection Behavior
-
-            Section("Connection") {
-                Toggle("Confirm before disconnecting", isOn: $confirmBeforeDisconnect)
-                    .help("Show confirmation dialog before closing a connection")
-
-                Toggle("Auto-reconnect on disconnect", isOn: $autoReconnect)
-                    .help("Automatically attempt to reconnect when connection is lost")
-
-                Toggle("Show connection notifications", isOn: $showConnectionNotifications)
-                    .help("Display notifications when connection status changes")
-            }
-
-            // MARK: - iCloud Sync
-
-            Section {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("iCloud Sync")
-                            .font(.headline)
-                        Text("Servers and credentials sync across your Apple devices")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "checkmark.icloud.fill")
-                        .foregroundStyle(.green)
-                        .font(.title2)
-                }
-            } header: {
-                Text("Sync")
             }
         }
         .formStyle(.grouped)

@@ -31,13 +31,14 @@ struct VivyTermApp: App {
             #if os(iOS)
             iOSContentView()
                 .environmentObject(ghosttyApp)
+                .modifier(AppearanceModifier())
                 .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
                     ghosttyApp.reloadConfig()
                 }
             #else
             ContentView()
                 .environmentObject(ghosttyApp)
-                // Watch for terminal settings changes and reload config immediately
+                .modifier(AppearanceModifier())
                 .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
                     ghosttyApp.reloadConfig()
                 }
