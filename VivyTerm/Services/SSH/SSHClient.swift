@@ -316,6 +316,7 @@ actor SSHSession {
             // Write key to temp file (libssh2 requires file path)
             let tempKeyPath = NSTemporaryDirectory() + UUID().uuidString + ".key"
             try keyData.write(to: URL(fileURLWithPath: tempKeyPath))
+            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: tempKeyPath)
             defer { try? FileManager.default.removeItem(atPath: tempKeyPath) }
 
             logger.info("Attempting publickey auth for user: \(username)")

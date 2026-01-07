@@ -531,18 +531,14 @@ private struct ExtendedKeysPopover: View {
 #Preview("Full Toolbar") {
     VStack {
         Spacer()
-        TerminalKeyboardToolbar { key in
-            print("Key: \(key)")
-        }
+        TerminalKeyboardToolbar { _ in }
     }
 }
 
 #Preview("Compact Toolbar") {
     VStack {
         Spacer()
-        CompactTerminalToolbar { key in
-            print("Key: \(key)")
-        }
+        CompactTerminalToolbar { _ in }
     }
 }
 #endif

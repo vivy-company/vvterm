@@ -117,7 +117,8 @@ struct ProUpgradeSheet: View {
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
         }
-        .frame(width: 420, height: 520)
+        .frame(width: 420)
+        .fixedSize(horizontal: false, vertical: true)
         .task {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct

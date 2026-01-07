@@ -44,11 +44,15 @@ struct SettingsView: View {
         #if os(macOS)
         NavigationSplitView {
             List(selection: $selection) {
-                // Pro at top
-                proNavigationRow
-                    .tag(SettingsSelection.pro)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
+                // Pro at top (not part of selection - has its own styling)
+                Button {
+                    selection = .pro
+                } label: {
+                    proNavigationRow
+                }
+                .buttonStyle(.plain)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
 
                 Divider()
                     .listRowSeparator(.hidden)
@@ -261,7 +265,7 @@ struct SettingsView: View {
                         )
                 )
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 8)
         .padding(.horizontal, 10)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -271,7 +275,6 @@ struct SettingsView: View {
                         .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                 )
         )
-        .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
     }
 
     private func settingsRow(_ title: String, icon: String, tag: SettingsSelection) -> some View {
