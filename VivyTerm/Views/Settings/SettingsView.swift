@@ -66,8 +66,8 @@ struct SettingsView: View {
                 settingsRow("About", icon: "info.circle", tag: .about)
             }
             .listStyle(.sidebar)
-            .frame(minWidth: 200, maxHeight: .infinity)
-            .navigationSplitViewColumnWidth(200)
+            .frame(minWidth: 240, maxHeight: .infinity)
+            .navigationSplitViewColumnWidth(240)
             .removingSidebarToggle()
         } detail: {
             detailView
@@ -177,15 +177,6 @@ struct SettingsView: View {
                         Label("About", systemImage: "info.circle")
                     }
                 }
-
-                Section("Developer") {
-                    NavigationLink {
-                        DebugTerminalView()
-                            .navigationBarTitleDisplayMode(.inline)
-                    } label: {
-                        Label("Terminal Debug", systemImage: "ant")
-                    }
-                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -247,7 +238,7 @@ struct SettingsView: View {
                     .foregroundStyle(.white)
             }
 
-            Text("VVTerm Pro")
+            Text("Premium")
                 .fontWeight(.medium)
 
             Spacer()
