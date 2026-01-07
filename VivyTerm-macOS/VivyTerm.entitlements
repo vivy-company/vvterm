@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App Sandbox (required for App Store) -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+
+    <!-- Network: Outgoing connections (SSH) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- Keychain: Credential storage -->
+    <key>com.apple.security.keychain</key>
+    <true/>
+
+    <!-- iCloud/CloudKit -->
+    <key>com.apple.developer.icloud-container-identifiers</key>
+    <array>
+        <string>iCloud.app.vivy.VivyTerm</string>
+    </array>
+    <key>com.apple.developer.icloud-services</key>
+    <array>
+        <string>CloudKit</string>
+    </array>
+    <key>com.apple.developer.ubiquity-kvstore-identifier</key>
+    <string>$(TeamIdentifierPrefix)app.vivy.VivyTerm</string>
+
+    <!-- Keychain sharing (include both bundle ID and legacy for migration) -->
+    <key>keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)app.vivy.VivyTerm</string>
+        <string>$(AppIdentifierPrefix)com.vivy.vivyterm</string>
+    </array>
+
+    <!-- Microphone (voice-to-command) -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+
+    <!-- Hardened Runtime (required for notarization) -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <false/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <false/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <false/>
+</dict>
+</plist>
