@@ -26,19 +26,26 @@ declare global {
   }
 }
 
+// TODO: Update with actual App Store URL when available
+const APP_STORE_URL = "https://apps.apple.com/app/vvterm/id0000000000";
+
 const FAQSection = lazy(() => import("./components/FAQSection"));
 
 type ShowcaseTab = "mac" | "ios";
 
 type BillingCycle = "monthly" | "yearly";
 
-function LanguageSwitcher() {
+function LanguageSwitcher({ onLanguageChange }: { onLanguageChange?: (lang: string) => void }) {
   const { language, setLanguage, availableLanguages } = useLanguage();
 
   return (
     <select
       value={language}
-      onChange={(e) => setLanguage(e.target.value as Language)}
+      onChange={(e) => {
+        const newLang = e.target.value as Language;
+        setLanguage(newLang);
+        onLanguageChange?.(newLang);
+      }}
       className="bg-transparent border-none text-sm text-zinc-500 cursor-pointer hover:text-blue-500 transition-colors appearance-none"
     >
       {Object.entries(availableLanguages).map(([code, name]) => (
@@ -94,7 +101,7 @@ function AppContent() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
             <a
-              href="#"
+              href={APP_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("appstore_click")}
@@ -219,8 +226,10 @@ function AppContent() {
                 ))}
               </ul>
               <a
-                href="#"
-                onClick={() => trackEvent("appstore_click")}
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("pricing_free_click")}
                 className="block w-full py-3 text-center text-[17px] font-normal border border-white/20 text-white rounded-full hover:bg-white/5 transition-all duration-200"
               >
                 {t("pricing.free.cta")}
@@ -234,13 +243,13 @@ function AppContent() {
               {/* Billing Toggle */}
               <div className="flex bg-white/[0.05] rounded-full p-1 mb-6">
                 <button
-                  onClick={() => setBillingCycle("monthly")}
+                  onClick={() => { trackEvent("billing_toggle_monthly"); setBillingCycle("monthly"); }}
                   className={`flex-1 py-2 px-4 text-sm font-medium rounded-full transition-all duration-200 ${billingCycle === "monthly" ? "bg-white/10 text-white" : "text-[#86868b] hover:text-white"}`}
                 >
                   Monthly
                 </button>
                 <button
-                  onClick={() => setBillingCycle("yearly")}
+                  onClick={() => { trackEvent("billing_toggle_yearly"); setBillingCycle("yearly"); }}
                   className={`flex-1 py-2 px-4 text-sm font-medium rounded-full transition-all duration-200 relative ${billingCycle === "yearly" ? "bg-white/10 text-white" : "text-[#86868b] hover:text-white"}`}
                 >
                   Yearly
@@ -260,8 +269,10 @@ function AppContent() {
                 ))}
               </ul>
               <a
-                href="#"
-                onClick={() => trackEvent("pro_subscribe_click")}
+                href={APP_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent(billingCycle === "monthly" ? "pricing_pro_monthly_click" : "pricing_pro_yearly_click")}
                 className="block w-full py-3 text-center text-[17px] font-normal border border-white/20 text-white rounded-full hover:bg-white/5 transition-all duration-200"
               >
                 {billingCycle === "monthly" ? t("pricing.pro.ctaMonthly") : t("pricing.pro.ctaYearly")}
@@ -286,8 +297,10 @@ function AppContent() {
               </ul>
               <div>
                 <a
-                  href="#"
-                  onClick={() => trackEvent("lifetime_buy_click")}
+                  href={APP_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent("pricing_lifetime_click")}
                   className="block w-full py-3 text-center text-[17px] font-normal bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-200"
                 >
                   {t("pricing.lifetime.cta")}
@@ -309,10 +322,10 @@ function AppContent() {
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center md:items-center gap-6">
           <p className="text-sm text-[#86868b] text-center md:text-left">{t("footer.copyright")}</p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
-            <a href="https://discord.gg/eKW7GNesuS" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
+            <a href="https://discord.gg/eKW7GNesuS" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.discord")}
             </a>
-            <a href="https://github.com/vivy-company/vvterm" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/vivy-company/vvterm" onClick={() => trackEvent("footer_github_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.github")}
             </a>
             <span className="text-zinc-700 hidden sm:inline">|</span>
@@ -326,7 +339,7 @@ function AppContent() {
               Refunds
             </a>
             <span className="text-zinc-700 hidden sm:inline">|</span>
-            <LanguageSwitcher />
+            <LanguageSwitcher onLanguageChange={(lang) => trackEvent(`language_change_${lang}`)} />
           </div>
         </div>
       </footer>

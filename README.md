@@ -65,9 +65,7 @@ open VivyTerm.xcodeproj
 
 ## Installation
 
-Download from [vvterm.com](https://vvterm.com)
-
-Signed and notarized with an Apple Developer certificate.
+[![Download on the App Store](https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg)](https://apps.apple.com/app/vvterm)
 
 ## Pro Tier
 
