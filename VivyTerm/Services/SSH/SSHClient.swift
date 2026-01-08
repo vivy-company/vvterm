@@ -124,11 +124,11 @@ actor SSHClient {
 
 /// Thread-safe storage for keyboard-interactive password (needed for C callback)
 private final class KeyboardInteractivePassword: @unchecked Sendable {
-    static let shared = KeyboardInteractivePassword()
+    nonisolated(unsafe) static let shared = KeyboardInteractivePassword()
     private var _password: String?
     private let lock = NSLock()
 
-    var password: String? {
+    nonisolated var password: String? {
         get {
             lock.lock()
             defer { lock.unlock() }
@@ -143,7 +143,7 @@ private final class KeyboardInteractivePassword: @unchecked Sendable {
 }
 
 // C callback for keyboard-interactive authentication
-private let kbdintCallback: @convention(c) (
+nonisolated(unsafe) private let kbdintCallback: @convention(c) (
     UnsafePointer<CChar>?,  // name
     Int32,                   // name_len
     UnsafePointer<CChar>?,  // instruction

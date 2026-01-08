@@ -103,9 +103,9 @@ struct WindowsStatsCollector: PlatformStatsCollector {
             stats.networkRxTotal = netRx
 
             let now = Date()
-            let (prevRx, prevTx, prevTime) = context.getNetworkPrev()
+            let (prevRx, _, prevTime) = context.getNetworkPrev()
 
-            if let prevTime = prevTime, prevRx > 0 || prevTx > 0 {
+            if let prevTime = prevTime, prevRx > 0 {
                 let elapsed = now.timeIntervalSince(prevTime)
                 if elapsed > 0 {
                     stats.networkRxSpeed = UInt64(Double(netRx - prevRx) / elapsed)
@@ -119,7 +119,7 @@ struct WindowsStatsCollector: PlatformStatsCollector {
             stats.networkTxTotal = netTx
 
             let now = Date()
-            let (prevRx, prevTx, prevTime) = context.getNetworkPrev()
+            let (_, prevTx, prevTime) = context.getNetworkPrev()
 
             if let prevTime = prevTime, prevTx > 0 {
                 let elapsed = now.timeIntervalSince(prevTime)

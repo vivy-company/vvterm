@@ -96,7 +96,7 @@ class SpeechRecognitionService: ObservableObject {
 
         if let channel = buffer.floatChannelData?.pointee {
             samples.withUnsafeBufferPointer { ptr in
-                channel.assign(from: ptr.baseAddress!, count: samples.count)
+                channel.update(from: ptr.baseAddress!, count: samples.count)
             }
         }
 

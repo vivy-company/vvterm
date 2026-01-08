@@ -45,7 +45,7 @@ final class KeychainStore: @unchecked Sendable {
 
     nonisolated func get(_ key: String) throws -> Data? {
         // First try with iCloud sync (kSecAttrSynchronizable = true)
-        var query: [String: Any] = [
+        let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecAttrAccount as String: key,
@@ -55,7 +55,7 @@ final class KeychainStore: @unchecked Sendable {
         ]
 
         var item: CFTypeRef?
-        var status = SecItemCopyMatching(query as CFDictionary, &item)
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
 
         guard status != errSecItemNotFound else {
             return nil

@@ -135,7 +135,7 @@ struct iOSWorkspacePickerView: View {
                 } label: {
                     HStack {
                         Circle()
-                            .fill(Color.fromHex(workspace.colorHex ?? "#007AFF"))
+                            .fill(Color.fromHex(workspace.colorHex))
                             .frame(width: 12, height: 12)
 
                         Text(workspace.name)
