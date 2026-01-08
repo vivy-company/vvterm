@@ -338,6 +338,7 @@
 				);
 				INFOPLIST_FILE = VivyTerm/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
+				INFOPLIST_KEY_CFBundleName = VVTerm;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VVTerm needs microphone access to transcribe voice commands to terminal input.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VVTerm uses speech recognition to convert voice to terminal commands.";
@@ -469,6 +470,7 @@
 				);
 				INFOPLIST_FILE = VivyTerm/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
+				INFOPLIST_KEY_CFBundleName = VVTerm;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VVTerm needs microphone access to transcribe voice commands to terminal input.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VVTerm uses speech recognition to convert voice to terminal commands.";

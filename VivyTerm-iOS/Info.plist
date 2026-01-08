@@ -47,11 +47,11 @@
 
     <!-- Microphone usage -->
     <key>NSMicrophoneUsageDescription</key>
-    <string>VivyTerm needs microphone access to transcribe voice commands to terminal input.</string>
+    <string>VVTerm needs microphone access to transcribe voice commands to terminal input.</string>
 
     <!-- Speech recognition -->
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>VivyTerm uses speech recognition to convert voice to terminal commands.</string>
+    <string>VVTerm uses speech recognition to convert voice to terminal commands.</string>
 
     <!-- Background modes -->
     <key>UIBackgroundModes</key>
