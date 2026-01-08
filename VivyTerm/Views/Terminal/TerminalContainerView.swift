@@ -10,10 +10,16 @@ import SwiftUI
 struct TerminalContainerView: View {
     let session: ConnectionSession
     let server: Server?
+    var isActive: Bool = true
     @EnvironmentObject var ghosttyApp: Ghostty.App
     @State private var isReady = false
     @State private var errorMessage: String?
     @State private var credentials: ServerCredentials?
+
+    /// Check if terminal already exists (was previously created)
+    private var terminalAlreadyExists: Bool {
+        ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
+    }
 
     // Voice input state
     #if os(macOS)
@@ -48,6 +54,7 @@ struct TerminalContainerView: View {
                             session: session,
                             server: server,
                             credentials: credentials,
+                            isActive: isActive,
                             onProcessExit: {
                                 ConnectionSessionManager.shared.closeSession(session)
                             },
@@ -55,8 +62,12 @@ struct TerminalContainerView: View {
                                 isReady = true
                             }
                         )
-                        .opacity(isReady ? 1 : 0)
+                        .opacity(isReady || terminalAlreadyExists ? 1 : 0)
                         .onAppear {
+                            // If terminal already exists, mark as ready immediately
+                            if terminalAlreadyExists {
+                                isReady = true
+                            }
                             ConnectionSessionManager.shared.getTerminal(for: session.id)?.resumeRendering()
                         }
                         .onDisappear {
@@ -64,17 +75,30 @@ struct TerminalContainerView: View {
                         }
                     }
 
-                    if !isReady || ghosttyApp.readiness != .ready {
+                    if !isReady && !terminalAlreadyExists && ghosttyApp.readiness == .ready {
                         VStack(spacing: 12) {
                             ProgressView()
                                 .progressViewStyle(.circular)
-                            if ghosttyApp.readiness == .error {
-                                Text("Terminal initialization failed")
-                                    .foregroundStyle(.red)
-                            } else {
-                                Text("Initializing terminal...")
-                                    .foregroundStyle(.secondary)
-                            }
+                            Text("Initializing terminal...")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if ghosttyApp.readiness == .error {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text("Terminal initialization failed")
+                                .foregroundStyle(.red)
+                        }
+                    }
+
+                    if ghosttyApp.readiness != .ready && ghosttyApp.readiness != .error {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text("Initializing terminal...")
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }

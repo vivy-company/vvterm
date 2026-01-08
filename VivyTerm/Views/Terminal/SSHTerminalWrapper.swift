@@ -30,7 +30,9 @@ protocol SSHTerminalCoordinator: AnyObject {
 
 extension SSHTerminalCoordinator {
     func sendToSSH(_ data: Data) {
-        Task {
+        // Use high-priority detached task to minimize latency
+        // Task.detached avoids inheriting actor context, reducing overhead
+        Task.detached(priority: .userInitiated) { [sshClient, logger] in
             do {
                 try await sshClient.write(data)
             } catch {
@@ -42,13 +44,18 @@ extension SSHTerminalCoordinator {
     func cancelShell() {
         shellTask?.cancel()
         shellTask = nil
+
         // Immediately abort SSH connection to unblock any pending I/O
         sshClient.abort()
-        // Clear terminal reference and callbacks to break retain cycles
+
+        // Disconnect SSH in background to cleanup resources
+        Task.detached(priority: .high) { [sshClient] in
+            await sshClient.disconnect()
+        }
+
+        // Cleanup terminal to break retain cycles and release resources
         if let terminal = terminalView {
-            terminal.writeCallback = nil
-            terminal.onReady = nil
-            terminal.onProcessExit = nil
+            terminal.cleanup()
         }
         terminalView = nil
     }
@@ -89,16 +96,17 @@ extension SSHTerminalCoordinator {
                 await self.onShellStarted(terminal: terminal)
 
                 // Read data in background, feed to terminal on main thread
+                // CVDisplayLink in GhosttyTerminalView handles frame-rate batching
                 for await data in outputStream {
                     guard !Task.isCancelled else { break }
-                    let isValid = await MainActor.run {
-                        self.terminalView != nil &&
-                        ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
-                    }
-                    guard isValid else { break }
-                    await MainActor.run {
+
+                    // Feed data to terminal - display link batches rendering
+                    let shouldContinue = await MainActor.run { [weak self] () -> Bool in
+                        guard self?.terminalView != nil else { return false }
                         terminal.feedData(data)
+                        return true
                     }
+                    if !shouldContinue { break }
                 }
 
                 guard !Task.isCancelled else { return }
@@ -133,6 +141,7 @@ struct SSHTerminalWrapper: NSViewRepresentable {
     let session: ConnectionSession
     let server: Server
     let credentials: ServerCredentials
+    var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
 
@@ -148,6 +157,41 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             return NSView(frame: .zero)
         }
 
+        let coordinator = context.coordinator
+
+        // Check if terminal already exists for this session (reuse to save memory)
+        // Each Ghostty surface uses ~50-100MB (font atlas, Metal textures, scrollback)
+        if let existingTerminal = ConnectionSessionManager.shared.getTerminal(for: session.id) {
+            // Mark coordinator as reusing existing terminal - don't cleanup on deinit
+            coordinator.isReusingTerminal = true
+            coordinator.terminalView = existingTerminal
+
+            // Update resize callback to use session manager's registered SSH client
+            // (the old coordinator that created the connection is being deallocated)
+            existingTerminal.onResize = { [session] cols, rows in
+                guard cols > 0 && rows > 0 else { return }
+                Task {
+                    if let client = ConnectionSessionManager.shared.sshClient(for: session) {
+                        try? await client.resize(cols: cols, rows: rows)
+                    }
+                }
+            }
+
+            // Re-wrap in scroll view
+            let scrollView = TerminalScrollView(
+                contentSize: NSSize(width: 800, height: 600),
+                surfaceView: existingTerminal
+            )
+
+            // Terminal is already ready - call onReady immediately
+            // Use async to avoid calling during view construction
+            DispatchQueue.main.async {
+                onReady()
+            }
+
+            return scrollView
+        }
+
         // Create Ghostty terminal with custom I/O for SSH
         // Using useCustomIO: true means the terminal won't spawn a subprocess
         // Instead, it will use callbacks for I/O (for SSH via libssh2)
@@ -160,7 +204,6 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             useCustomIO: true  // Use callback backend for SSH
         )
 
-        let coordinator = context.coordinator
         terminalView.onReady = { [weak coordinator, weak terminalView] in
             onReady()
             // Start SSH connection after terminal is ready
@@ -232,6 +275,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
         /// Last known terminal size to detect changes
         private var lastSize: (cols: Int, rows: Int) = (0, 0)
 
+        /// If true, this coordinator is reusing an existing terminal and should NOT cleanup on deinit
+        var isReusingTerminal = false
+
         init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void) {
             self.server = server
             self.credentials = credentials
@@ -266,6 +312,14 @@ struct SSHTerminalWrapper: NSViewRepresentable {
         }
 
         deinit {
+            // Don't cleanup if we're just reusing an existing terminal (e.g., switching to split view)
+            // isReusingTerminal is set when we find an existing terminal in makeNSView
+            guard !isReusingTerminal else { return }
+
+            // Check if terminal view is still alive (session manager holds strong reference)
+            // If it is, the terminal is being reused by another view (e.g., split view)
+            guard terminalView == nil else { return }
+
             cancelShell()
         }
     }
@@ -282,6 +336,7 @@ struct SSHTerminalWrapper: View {
     let session: ConnectionSession
     let server: Server
     let credentials: ServerCredentials
+    var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
 
@@ -292,6 +347,7 @@ struct SSHTerminalWrapper: View {
                 server: server,
                 credentials: credentials,
                 size: geo.size,
+                isActive: isActive,
                 onProcessExit: onProcessExit,
                 onReady: onReady
             )
@@ -305,6 +361,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     let server: Server
     let credentials: ServerCredentials
     let size: CGSize
+    var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
 
@@ -335,6 +392,21 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             return placeholder
         }
 
+        let coordinator = context.coordinator
+
+        // Check if terminal already exists for this session (reuse to save memory)
+        // Each Ghostty surface uses ~50-100MB (font atlas, Metal textures, scrollback)
+        if let existingTerminal = ConnectionSessionManager.shared.getTerminal(for: session.id) {
+            coordinator.terminalView = existingTerminal
+
+            // Re-register handlers in case coordinator changed
+            ConnectionSessionManager.shared.registerShellCancelHandler({ [weak coordinator] in
+                coordinator?.cancelShell()
+            }, for: session.id)
+
+            return existingTerminal
+        }
+
         // Create Ghostty terminal with custom I/O for SSH
         let terminalView = GhosttyTerminalView(
             frame: CGRect(origin: .zero, size: size),
@@ -345,7 +417,6 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             useCustomIO: true
         )
 
-        let coordinator = context.coordinator
         terminalView.onReady = { [weak coordinator, weak terminalView] in
             onReady()
             if let terminalView = terminalView {
@@ -390,15 +461,24 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         // This is critical - SwiftUI determines the size, we pass it to Ghostty
         terminalView.sizeDidChange(size)
 
-        // Ensure terminal has focus only when visible
-        if terminalView.window != nil && !terminalView.isFirstResponder {
-            _ = terminalView.becomeFirstResponder()
+        // Only capture keyboard focus when terminal is active (not hidden behind stats view)
+        if isActive {
+            if terminalView.window != nil && !terminalView.isFirstResponder {
+                _ = terminalView.becomeFirstResponder()
+            }
+        } else {
+            if terminalView.isFirstResponder {
+                terminalView.resignFirstResponder()
+            }
         }
     }
 
     static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
         // Unregister cancel handler since we're handling cleanup here
         ConnectionSessionManager.shared.unregisterShellCancelHandler(for: coordinator.sessionId)
+
+        // CRITICAL: Unregister terminal from session manager to release strong reference
+        ConnectionSessionManager.shared.unregisterTerminal(for: coordinator.sessionId)
 
         // Critical: Cancel SSH shell task immediately to prevent blocking
         coordinator.cancelShell()
@@ -409,10 +489,11 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             terminalView.pauseRendering()
             terminalView.resignFirstResponder()
 
-            // Defer heavy cleanup until after the pop animation finishes.
+            // Cleanup is now called synchronously in cancelShell() which calls terminal.cleanup()
+            // The asyncAfter cleanup is kept as a safety net for edge cases
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak terminalView] in
                 guard let terminalView = terminalView else { return }
-                terminalView.cleanup()
+                terminalView.cleanup()  // Safe to call multiple times
                 terminalView.removeFromSuperview()
             }
         }

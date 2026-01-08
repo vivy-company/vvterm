@@ -5,6 +5,13 @@
 
 import SwiftUI
 
+// MARK: - Notification Names
+
+extension Notification.Name {
+    static let newTerminalTab = Notification.Name("newTerminalTab")
+    static let closeTerminalPane = Notification.Name("closeTerminalPane")
+}
+
 @main
 struct VivyTermApp: App {
     #if os(macOS)
@@ -24,7 +31,7 @@ struct VivyTermApp: App {
     @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
     @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
-    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = false
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
 
     var body: some Scene {
         WindowGroup {
@@ -56,10 +63,16 @@ struct VivyTermApp: App {
             }
 
             CommandGroup(replacing: .newItem) {
-                Button("New Connection") {
-                    // Open new connection
+                Button("New Tab") {
+                    // Open new tab handled by focused value
+                    NotificationCenter.default.post(name: .newTerminalTab, object: nil)
                 }
                 .keyboardShortcut("t", modifiers: .command)
+
+                Button("Close Tab") {
+                    NotificationCenter.default.post(name: .closeTerminalPane, object: nil)
+                }
+                .keyboardShortcut("w", modifiers: .command)
             }
 
             CommandGroup(replacing: .appSettings) {
@@ -80,6 +93,9 @@ struct VivyTermApp: App {
                 }
                 .keyboardShortcut("]", modifiers: [.command, .shift])
             }
+
+            // Split commands (Pro feature)
+            SplitCommands()
         }
         #endif
     }

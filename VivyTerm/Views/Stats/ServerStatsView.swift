@@ -16,13 +16,13 @@ private let screenBackground = Color(NSColor.windowBackgroundColor)
 
 struct ServerStatsView: View {
     let server: Server
-    let session: ConnectionSession
+    let isVisible: Bool
 
     @StateObject private var statsCollector = ServerStatsCollector()
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
+            LazyVStack(spacing: 16) {
                 // Header with server name and OS
                 ServerHeaderCard(
                     serverName: server.name,
@@ -59,21 +59,24 @@ struct ServerStatsView: View {
                     rxTotal: statsCollector.stats.networkRxTotal
                 )
 
-                // Volumes
-                if !statsCollector.stats.volumes.isEmpty {
-                    VolumesCard(volumes: statsCollector.stats.volumes)
-                }
+                // Volumes - always show, empty state handled inside
+                VolumesCard(volumes: statsCollector.stats.volumes)
 
-                // Top Processes
-                if !statsCollector.stats.topProcesses.isEmpty {
-                    ProcessesCard(processes: statsCollector.stats.topProcesses)
-                }
+                // Top Processes - always show, empty state handled inside
+                ProcessesCard(processes: statsCollector.stats.topProcesses)
             }
             .padding()
+            .drawingGroup()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(screenBackground)
-        .task {
-            await statsCollector.startCollecting(for: session)
+        .task(id: isVisible) {
+            // Start/stop collection based on visibility
+            if isVisible {
+                await statsCollector.startCollecting(for: server)
+            } else {
+                statsCollector.stopCollecting()
+            }
         }
         .onDisappear {
             statsCollector.stopCollecting()
@@ -83,7 +86,7 @@ struct ServerStatsView: View {
 
 // MARK: - Server Header Card
 
-private struct ServerHeaderCard: View {
+private struct ServerHeaderCard: View, Equatable {
     let serverName: String
     let osInfo: String
 
@@ -107,7 +110,7 @@ private struct ServerHeaderCard: View {
 
 // MARK: - CPU Stats Card
 
-private struct CPUStatsCard: View {
+private struct CPUStatsCard: View, Equatable {
     let usage: Double
     let user: Double
     let system: Double
@@ -117,6 +120,13 @@ private struct CPUStatsCard: View {
     let cores: Int
     let uptime: TimeInterval
     let loadAverage: (Double, Double, Double)
+
+    static func == (lhs: CPUStatsCard, rhs: CPUStatsCard) -> Bool {
+        lhs.usage == rhs.usage && lhs.user == rhs.user && lhs.system == rhs.system &&
+        lhs.iowait == rhs.iowait && lhs.steal == rhs.steal && lhs.idle == rhs.idle &&
+        lhs.cores == rhs.cores && lhs.uptime == rhs.uptime &&
+        lhs.loadAverage.0 == rhs.loadAverage.0 && lhs.loadAverage.1 == rhs.loadAverage.1 && lhs.loadAverage.2 == rhs.loadAverage.2
+    }
 
     var body: some View {
         VStack(spacing: 12) {
@@ -140,7 +150,8 @@ private struct CPUStatsCard: View {
                 ZStack {
                     CircularGauge(value: usage / 100, color: cpuColor)
                     Text("\(Int(usage))%")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .font(.system(size: 12, weight: .semibold, design: .monospaced))
+                        .frame(width: 36)
                 }
                 .frame(width: 50, height: 50)
             }
@@ -175,7 +186,7 @@ private struct CPUStatsCard: View {
 
 // MARK: - Memory Stats Card
 
-private struct MemoryStatsCard: View {
+private struct MemoryStatsCard: View, Equatable {
     let used: UInt64
     let free: UInt64
     let cached: UInt64
@@ -201,11 +212,11 @@ private struct MemoryStatsCard: View {
             // Ring chart with percentage
             ZStack {
                 CircularGauge(value: percent / 100, color: memoryColor)
-                    .frame(width: 50, height: 50)
                 Text("\(Int(percent))%")
-                    .font(.caption2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .frame(width: 36)
             }
+            .frame(width: 50, height: 50)
         }
         .padding()
         .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
@@ -227,7 +238,7 @@ private struct MemoryStatsCard: View {
 
 // MARK: - Network Stats Card
 
-private struct NetworkStatsCard: View {
+private struct NetworkStatsCard: View, Equatable {
     let txSpeed: UInt64
     let rxSpeed: UInt64
     let txTotal: UInt64
@@ -300,17 +311,19 @@ private struct VolumesCard: View {
     let volumes: [VolumeInfo]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Volumes")
-                .font(.headline)
-                .padding(.horizontal)
+        if !volumes.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Volumes")
+                    .font(.headline)
+                    .padding(.horizontal)
 
-            ForEach(volumes) { volume in
-                VolumeRow(volume: volume)
+                ForEach(volumes) { volume in
+                    VolumeRow(volume: volume)
+                }
             }
+            .padding(.vertical)
+            .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
         }
-        .padding(.vertical)
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -335,17 +348,17 @@ private struct VolumeRow: View {
             }
 
             // Progress bar
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color.secondary.opacity(0.2))
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color.secondary.opacity(0.2))
 
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(volumeColor)
-                        .frame(width: geo.size.width * min(volume.percent / 100, 1))
-                }
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(volumeColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .scaleEffect(x: min(volume.percent / 100, 1), y: 1, anchor: .leading)
             }
             .frame(height: 8)
+            .frame(maxWidth: .infinity)
         }
         .padding(.horizontal)
     }
@@ -372,58 +385,60 @@ private struct ProcessesCard: View {
     let processes: [ProcessInfo]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Top Processes")
-                    .font(.headline)
-
-                Spacer()
-
-                HStack(spacing: 24) {
-                    Text("CPU")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 50, alignment: .trailing)
-                    Text("MEM")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 50, alignment: .trailing)
-                }
-            }
-
-            Divider()
-
-            ForEach(processes.prefix(5)) { process in
+        if !processes.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(process.name)
-                        .font(.subheadline)
-                        .lineLimit(1)
+                    Text("Top Processes")
+                        .font(.headline)
 
                     Spacer()
 
-                    Text(String(format: "%.1f%%", process.cpuPercent))
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(process.cpuPercent > 50 ? .orange : .secondary)
-                        .frame(width: 50, alignment: .trailing)
-
-                    Text(String(format: "%.1f%%", process.memoryPercent))
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundStyle(process.memoryPercent > 50 ? .orange : .secondary)
-                        .frame(width: 50, alignment: .trailing)
+                    HStack(spacing: 24) {
+                        Text("CPU")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 50, alignment: .trailing)
+                        Text("MEM")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 50, alignment: .trailing)
+                    }
                 }
-                .padding(.vertical, 2)
+
+                Divider()
+
+                ForEach(processes.prefix(5)) { process in
+                    HStack {
+                        Text(process.name)
+                            .font(.subheadline)
+                            .lineLimit(1)
+
+                        Spacer()
+
+                        Text(String(format: "%.1f%%", process.cpuPercent))
+                            .font(.caption)
+                            .monospacedDigit()
+                            .foregroundStyle(process.cpuPercent > 50 ? .orange : .secondary)
+                            .frame(width: 50, alignment: .trailing)
+
+                        Text(String(format: "%.1f%%", process.memoryPercent))
+                            .font(.caption)
+                            .monospacedDigit()
+                            .foregroundStyle(process.memoryPercent > 50 ? .orange : .secondary)
+                            .frame(width: 50, alignment: .trailing)
+                    }
+                    .padding(.vertical, 2)
+                }
             }
+            .padding()
+            .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
         }
-        .padding()
-        .background(cardBackground, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
 // MARK: - Reusable Components
 
-private struct StatLabel: View {
+private struct StatLabel: View, Equatable {
     let color: Color
     let label: String
     let value: String
@@ -441,11 +456,13 @@ private struct StatLabel: View {
             Text(value)
                 .font(.caption)
                 .fontWeight(.medium)
+                .monospacedDigit()
+                .frame(minWidth: 40, alignment: .leading)
         }
     }
 }
 
-private struct StatColumn: View {
+private struct StatColumn: View, Equatable {
     let label: String
     let value: String
 
@@ -457,6 +474,7 @@ private struct StatColumn: View {
             Text(value)
                 .font(.caption)
                 .fontWeight(.semibold)
+                .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
@@ -464,10 +482,14 @@ private struct StatColumn: View {
     }
 }
 
-private struct CircularGauge: View {
+private struct CircularGauge: View, Equatable {
     let value: Double
     let color: Color
     var lineWidth: CGFloat = 6
+
+    static func == (lhs: CircularGauge, rhs: CircularGauge) -> Bool {
+        lhs.value == rhs.value && lhs.lineWidth == rhs.lineWidth
+    }
 
     var body: some View {
         ZStack {

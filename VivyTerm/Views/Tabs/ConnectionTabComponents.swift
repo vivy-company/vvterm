@@ -15,6 +15,7 @@ struct ConnectionTabsScrollView: View {
     let onNew: () -> Void
 
     @State private var isNewTabHovering = false
+    @State private var showingProUpgrade = false
 
     var body: some View {
         HStack(spacing: 4) {
@@ -77,6 +78,9 @@ struct ConnectionTabsScrollView: View {
             .help("New connection")
             .padding(.trailing, 8)
         }
+        .sheet(isPresented: $showingProUpgrade) {
+            ProUpgradeSheet()
+        }
     }
 
     @ViewBuilder
@@ -105,6 +109,10 @@ struct ConnectionTabsScrollView: View {
     }
 
     private func duplicateTab(_ session: ConnectionSession) {
+        guard sessionManager.canOpenNewTab else {
+            showingProUpgrade = true
+            return
+        }
         guard let server = sessionManager.sessions
             .first(where: { $0.id == session.id })
             .flatMap({ s in ServerManager.shared.servers.first { $0.id == s.serverId } })

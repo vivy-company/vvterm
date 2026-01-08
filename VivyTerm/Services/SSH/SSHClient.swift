@@ -188,6 +188,12 @@ actor SSHSession {
     /// Atomic socket storage for emergency abort from any thread
     private let atomicSocket = AtomicSocket()
 
+    /// Track if libssh2 was initialized to avoid double-exit
+    private var libssh2Initialized = false
+
+    /// Track if cleanup has been performed
+    private var hasBeenCleaned = false
+
     init(config: SSHSessionConfig) {
         self.config = config
     }
@@ -209,6 +215,7 @@ actor SSHSession {
         guard rc == 0 else {
             throw SSHError.unknown("libssh2_init failed: \(rc)")
         }
+        libssh2Initialized = true
 
         // Create socket
         socket = Darwin.socket(AF_INET, SOCK_STREAM, 0)
@@ -237,6 +244,23 @@ actor SSHSession {
             throw SSHError.connectionFailed("Failed to connect: \(String(cString: strerror(errno)))")
         }
 
+        // Disable Nagle's algorithm for low-latency interactive typing
+        // Without this, small packets (keystrokes) are batched causing 40-200ms delays
+        var noDelay: Int32 = 1
+        setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, &noDelay, socklen_t(MemoryLayout<Int32>.size))
+
+        // Optimize socket buffers for interactive SSH:
+        // - Small send buffer (8KB) reduces buffering delay for keystrokes
+        // - Larger receive buffer (64KB) improves throughput for command output
+        var sendBufSize: Int32 = 8192
+        var recvBufSize: Int32 = 65536
+        setsockopt(socket, SOL_SOCKET, SO_SNDBUF, &sendBufSize, socklen_t(MemoryLayout<Int32>.size))
+        setsockopt(socket, SOL_SOCKET, SO_RCVBUF, &recvBufSize, socklen_t(MemoryLayout<Int32>.size))
+
+        // Prevent SIGPIPE on broken connections (handle errors in code instead)
+        var noSigPipe: Int32 = 1
+        setsockopt(socket, SOL_SOCKET, SO_NOSIGPIPE, &noSigPipe, socklen_t(MemoryLayout<Int32>.size))
+
         // Store in atomic storage for emergency abort
         atomicSocket.socket = socket
 
@@ -246,6 +270,17 @@ actor SSHSession {
             Darwin.close(socket)
             throw SSHError.unknown("Failed to create libssh2 session")
         }
+
+        // Prefer fast ciphers - AES-GCM and ChaCha20 are hardware-accelerated on Apple Silicon
+        // This reduces CPU overhead for encryption/decryption
+        let fastCiphers = "aes128-gcm@openssh.com,aes256-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes256-ctr"
+        libssh2_session_method_pref(session, LIBSSH2_METHOD_CRYPT_CS, fastCiphers)
+        libssh2_session_method_pref(session, LIBSSH2_METHOD_CRYPT_SC, fastCiphers)
+
+        // Prefer fast MACs (message authentication codes)
+        let fastMACs = "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512"
+        libssh2_session_method_pref(session, LIBSSH2_METHOD_MAC_CS, fastMACs)
+        libssh2_session_method_pref(session, LIBSSH2_METHOD_MAC_SC, fastMACs)
 
         // Set blocking mode for handshake
         libssh2_session_set_blocking(session, 1)
@@ -385,6 +420,10 @@ actor SSHSession {
     }
 
     private func cleanupLibssh2() {
+        // Prevent double cleanup
+        guard !hasBeenCleaned else { return }
+        hasBeenCleaned = true
+
         if let channel = channel {
             libssh2_channel_close(channel)
             libssh2_channel_free(channel)
@@ -395,7 +434,12 @@ actor SSHSession {
             libssh2_session_free(session)
             libssh2Session = nil
         }
-        libssh2_exit()
+
+        // Only call exit if we initialized
+        if libssh2Initialized {
+            libssh2_exit()
+            libssh2Initialized = false
+        }
     }
 
     private func cleanup() {
@@ -487,55 +531,110 @@ actor SSHSession {
 
     private func readLoop() async {
         var buffer = [CChar](repeating: 0, count: 32768)
+        var batchBuffer = Data()
+        let batchThreshold = 65536  // 64KB batch threshold
+        var lastYieldTime = DispatchTime.now().uptimeNanoseconds
+
+        // Adaptive batch delay: track data rate to switch between interactive and bulk modes
+        // Interactive mode (keystrokes): 1ms delay for minimum latency
+        // Bulk mode (command output): 5ms delay for better throughput
+        let interactiveDelay: UInt64 = 1_000_000   // 1ms
+        let bulkDelay: UInt64 = 5_000_000          // 5ms
+        let interactiveThreshold = 100             // bytes - below this is interactive
+        let bulkThreshold = 1000                   // bytes - above this is bulk
+        var recentBytesPerRead: Int = 0            // exponential moving average
 
         while !Task.isCancelled, let channel = channel, let session = libssh2Session {
             // Use _ex variant since macros not available in Swift (stream_id 0 = stdout)
             let bytesRead = libssh2_channel_read_ex(channel, 0, &buffer, buffer.count)
 
             if bytesRead > 0 {
-                let data = Data(bytes: buffer, count: Int(bytesRead))
-                shellContinuation?.yield(data)
+                let readCount = Int(bytesRead)
+                batchBuffer.append(Data(bytes: buffer, count: readCount))
+
+                // Update exponential moving average (alpha = 0.3 for quick adaptation)
+                recentBytesPerRead = (recentBytesPerRead * 7 + readCount * 3) / 10
+
+                // Adaptive delay based on data rate
+                let maxBatchDelay: UInt64
+                if recentBytesPerRead < interactiveThreshold {
+                    maxBatchDelay = interactiveDelay  // Fast for keystrokes
+                } else if recentBytesPerRead > bulkThreshold {
+                    maxBatchDelay = bulkDelay         // Slower for bulk data
+                } else {
+                    // Linear interpolation between modes
+                    let ratio = UInt64(recentBytesPerRead - interactiveThreshold) * 100 / UInt64(bulkThreshold - interactiveThreshold)
+                    maxBatchDelay = interactiveDelay + (bulkDelay - interactiveDelay) * ratio / 100
+                }
+
+                // Yield batch when threshold reached or enough time passed
+                let now = DispatchTime.now().uptimeNanoseconds
+                let timeSinceYield = now - lastYieldTime
+
+                if batchBuffer.count >= batchThreshold || timeSinceYield >= maxBatchDelay {
+                    shellContinuation?.yield(batchBuffer)
+                    batchBuffer = Data()
+                    lastYieldTime = now
+                }
             } else if bytesRead == Int(LIBSSH2_ERROR_EAGAIN) {
-                // Would block, wait and retry
+                // Flush any pending data before waiting
+                if !batchBuffer.isEmpty {
+                    shellContinuation?.yield(batchBuffer)
+                    batchBuffer = Data()
+                    lastYieldTime = DispatchTime.now().uptimeNanoseconds
+                }
+                // Reset to interactive mode when idle (waiting for input)
+                recentBytesPerRead = 0
+                // Would block, wait for socket with efficient poll
                 await waitForSocket()
             } else if bytesRead < 0 {
-                // Error
+                // Error - flush remaining data first
+                if !batchBuffer.isEmpty {
+                    shellContinuation?.yield(batchBuffer)
+                }
                 logger.error("Read error: \(bytesRead)")
                 break
             }
 
             // Check for EOF
             if libssh2_channel_eof(channel) != 0 {
+                // Flush remaining data
+                if !batchBuffer.isEmpty {
+                    shellContinuation?.yield(batchBuffer)
+                }
                 logger.info("Channel EOF")
                 break
             }
 
-            // Small yield to prevent tight loop
-            try? await Task.sleep(for: .milliseconds(1))
+            // Always yield to prevent starving other tasks (especially important during rapid typing)
+            // This ensures write operations and UI updates get CPU time
+            await Task.yield()
         }
 
         shellContinuation?.finish()
     }
 
     private func waitForSocket() async {
-        guard let session = libssh2Session else { return }
+        guard let session = libssh2Session, socket >= 0 else { return }
 
         let direction = libssh2_session_block_directions(session)
+        guard direction != 0 else { return }
 
-        var readfds = fd_set()
-        var writefds = fd_set()
-        fdZero(&readfds)
-        fdZero(&writefds)
+        // Use poll() for reliable, low-overhead socket waiting
+        // This is simpler and more reliable than DispatchSource for this use case
+        var pfd = pollfd()
+        pfd.fd = socket
+        pfd.events = 0
 
         if direction & LIBSSH2_SESSION_BLOCK_INBOUND != 0 {
-            fdSet(socket, &readfds)
+            pfd.events |= Int16(POLLIN)
         }
         if direction & LIBSSH2_SESSION_BLOCK_OUTBOUND != 0 {
-            fdSet(socket, &writefds)
+            pfd.events |= Int16(POLLOUT)
         }
 
-        var timeout = timeval(tv_sec: 0, tv_usec: 10000) // 10ms
-        _ = select(socket + 1, &readfds, &writefds, nil, &timeout)
+        // Poll with 5ms timeout - short enough for responsiveness, long enough to avoid busy spinning
+        _ = poll(&pfd, 1, 5)
     }
 
     // MARK: - Write
@@ -545,28 +644,30 @@ actor SSHSession {
             throw SSHError.notConnected
         }
 
-        try data.withUnsafeBytes { buffer in
-            guard let ptr = buffer.baseAddress?.assumingMemoryBound(to: CChar.self) else {
-                return
+        // Copy data to array for async-safe access (withUnsafeBytes doesn't support async)
+        var bytes = [UInt8](data)
+        var remaining = bytes.count
+        var offset = 0
+
+        while remaining > 0 {
+            // Use _ex variant since macros not available in Swift (stream_id 0 = stdin)
+            let written = bytes.withUnsafeMutableBufferPointer { buffer -> Int in
+                guard let ptr = buffer.baseAddress else { return -1 }
+                return Int(libssh2_channel_write_ex(
+                    channel, 0,
+                    UnsafeRawPointer(ptr.advanced(by: offset)).assumingMemoryBound(to: CChar.self),
+                    remaining
+                ))
             }
 
-            var remaining = data.count
-            var offset = 0
-
-            while remaining > 0 {
-                // Use _ex variant since macros not available in Swift (stream_id 0 = stdin)
-                let written = libssh2_channel_write_ex(channel, 0, ptr.advanced(by: offset), remaining)
-
-                if written > 0 {
-                    offset += Int(written)
-                    remaining -= Int(written)
-                } else if written == Int(LIBSSH2_ERROR_EAGAIN) {
-                    // Would block, wait
-                    Task { await waitForSocket() }
-                    continue
-                } else {
-                    throw SSHError.socketError("Write failed: \(written)")
-                }
+            if written > 0 {
+                offset += written
+                remaining -= written
+            } else if written == Int(LIBSSH2_ERROR_EAGAIN) {
+                // Would block - actually wait for socket to be ready
+                await waitForSocket()
+            } else {
+                throw SSHError.socketError("Write failed: \(written)")
             }
         }
     }
@@ -742,3 +843,4 @@ final class AtomicSocket: @unchecked Sendable {
         }
     }
 }
+

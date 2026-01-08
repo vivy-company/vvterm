@@ -1,6 +1,9 @@
 import Foundation
 import Combine
 import os.log
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - Connection Session Manager
 
@@ -11,9 +14,28 @@ final class ConnectionSessionManager: ObservableObject {
     @Published var sessions: [ConnectionSession] = []
     @Published var selectedSessionId: UUID?
 
-    /// The server we're currently connected to (persists even when all terminals closed)
-    /// Only cleared when user explicitly disconnects
-    @Published var connectedServerId: UUID?
+    /// Servers we're currently connected to (persists even when all terminals closed)
+    /// Cleared when user explicitly disconnects from a server
+    @Published var connectedServerIds: Set<UUID> = []
+
+    /// Per-server view state (stats/terminal) - persists when switching servers
+    @Published var selectedViewByServer: [UUID: String] = [:]
+
+    /// Per-server selected terminal tab - persists when switching servers
+    @Published var selectedSessionByServer: [UUID: UUID] = [:]
+
+
+    /// Legacy single server ID for backward compatibility
+    var connectedServerId: UUID? {
+        get { connectedServerIds.first }
+        set {
+            if let id = newValue {
+                connectedServerIds.insert(id)
+            } else {
+                connectedServerIds.removeAll()
+            }
+        }
+    }
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ConnectionSession")
 
@@ -25,6 +47,15 @@ final class ConnectionSessionManager: ObservableObject {
 
     /// Shell cancel handlers indexed by session ID - called before closing to cancel async tasks
     private var shellCancelHandlers: [UUID: () -> Void] = [:]
+
+    // MARK: - LRU Terminal Cache
+
+    /// Maximum number of terminal surfaces to keep in memory
+    /// Each Ghostty surface uses ~50-100MB (font atlas, Metal textures, scrollback)
+    private let maxTerminals = 20
+
+    /// LRU access order - most recently accessed at the end
+    private var terminalAccessOrder: [UUID] = []
 
     private init() {}
 
@@ -187,14 +218,64 @@ final class ConnectionSessionManager: ObservableObject {
         sshClients[session.id]
     }
 
-    // MARK: - Terminal Registration
+    // MARK: - Terminal Registration (with LRU caching)
 
     func registerTerminal(_ terminal: GhosttyTerminalView, for sessionId: UUID) {
+        // Evict oldest terminals if we're at capacity
+        evictOldTerminalsIfNeeded()
+
         terminalViews[sessionId] = terminal
+        touchTerminal(sessionId)
+
+        logger.debug("Registered terminal for session, total: \(self.terminalViews.count)/\(self.maxTerminals)")
     }
 
     func unregisterTerminal(for sessionId: UUID) {
-        terminalViews.removeValue(forKey: sessionId)
+        if let terminal = terminalViews.removeValue(forKey: sessionId) {
+            // Ensure cleanup is called to free Ghostty surface
+            terminal.cleanup()
+        }
+        terminalAccessOrder.removeAll { $0 == sessionId }
+        logger.debug("Unregistered terminal, remaining: \(self.terminalViews.count)")
+    }
+
+    /// Update access order for LRU tracking
+    private func touchTerminal(_ sessionId: UUID) {
+        terminalAccessOrder.removeAll { $0 == sessionId }
+        terminalAccessOrder.append(sessionId)
+    }
+
+    /// Evict least recently used terminals if over capacity
+    private func evictOldTerminalsIfNeeded() {
+        while terminalViews.count >= maxTerminals, let oldestId = terminalAccessOrder.first {
+            // Don't evict the currently selected session
+            if oldestId == selectedSessionId {
+                terminalAccessOrder.removeFirst()
+                terminalAccessOrder.append(oldestId)
+                continue
+            }
+
+            logger.info("Evicting oldest terminal to free memory (count: \(self.terminalViews.count))")
+
+            // Remove from access order
+            terminalAccessOrder.removeFirst()
+
+            // Cleanup and remove terminal
+            if let terminal = terminalViews.removeValue(forKey: oldestId) {
+                terminal.cleanup()
+            }
+
+            // Also cleanup associated SSH client
+            if let client = sshClients.removeValue(forKey: oldestId) {
+                Task.detached {
+                    await client.disconnect()
+                }
+            }
+
+            // Call shell cancel handler
+            shellCancelHandlers[oldestId]?()
+            shellCancelHandlers.removeValue(forKey: oldestId)
+        }
     }
 
     // MARK: - Shell Cancel Handler Registration
@@ -208,7 +289,11 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func getTerminal(for sessionId: UUID) -> GhosttyTerminalView? {
-        terminalViews[sessionId]
+        if let terminal = terminalViews[sessionId] {
+            touchTerminal(sessionId)
+            return terminal
+        }
+        return nil
     }
 
     /// Send text to the terminal for a given session (used by voice input)
@@ -238,6 +323,7 @@ final class ConnectionSessionManager: ObservableObject {
             sessions[index].connectionState = .connected
         }
     }
+
 }
 
 // MARK: - Connection Reliability Manager

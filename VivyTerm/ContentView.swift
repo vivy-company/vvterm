@@ -7,7 +7,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var serverManager = ServerManager.shared
-    @StateObject private var sessionManager = ConnectionSessionManager.shared
+    @StateObject private var tabManager = TerminalTabManager.shared
     @StateObject private var storeManager = StoreManager.shared
 
     @State private var selectedWorkspace: Workspace?
@@ -15,10 +15,51 @@ struct ContentView: View {
     @State private var selectedEnvironment: ServerEnvironment?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
-    /// Server we're connected to (from connectedServerId)
-    private var connectedServer: Server? {
-        guard let id = sessionManager.connectedServerId else { return nil }
-        return serverManager.servers.first { $0.id == id }
+    /// Whether the selected server is connected
+    private var isSelectedServerConnected: Bool {
+        guard let selected = selectedServer else { return false }
+        return tabManager.connectedServerIds.contains(selected.id)
+    }
+
+    /// Whether we have any connected servers
+    private var hasConnectedServers: Bool {
+        !tabManager.connectedServerIds.isEmpty
+    }
+
+    @ViewBuilder
+    private var detailContent: some View {
+        if let server = selectedServer {
+            // A server is selected
+            if isSelectedServerConnected {
+                // Server is connected - show its terminal container
+                ConnectionTerminalContainer(
+                    tabManager: tabManager,
+                    serverManager: serverManager,
+                    server: server
+                )
+                .id(server.id) // Ensure isolation per server
+            } else if !hasConnectedServers {
+                // Not connected to any server - can connect freely
+                ServerConnectEmptyState(server: server) {
+                    connectToServer(server)
+                }
+            } else if storeManager.isPro {
+                // Pro user already connected to other servers - can connect to more
+                ServerConnectEmptyState(server: server) {
+                    connectToServer(server)
+                }
+            } else {
+                // Free user already connected to different server - show upgrade
+                MultiConnectionUpgradeEmptyState(server: server)
+            }
+        } else {
+            // Nothing selected
+            NoServerSelectedEmptyState()
+        }
+    }
+
+    private func connectToServer(_ server: Server) {
+        tabManager.connectedServerIds.insert(server.id)
     }
 
     var body: some View {
@@ -32,22 +73,8 @@ struct ContentView: View {
             )
             .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
         } detail: {
-            // RIGHT: Terminal with toolbar tabs
-            if sessionManager.connectedServerId != nil {
-                // Connected to a server - show terminal container (handles empty state internally)
-                ConnectionTerminalContainer(
-                    sessionManager: sessionManager,
-                    serverManager: serverManager,
-                    selectedServer: selectedServer ?? connectedServer
-                )
-            } else if let server = selectedServer {
-                // Not connected - show connect button
-                ServerConnectEmptyState(server: server) {
-                    Task { try? await sessionManager.openConnection(to: server) }
-                }
-            } else {
-                NoServerSelectedEmptyState()
-            }
+            // RIGHT: Detail view based on selection state
+            detailContent
         }
         .onAppear {
             // Select first workspace

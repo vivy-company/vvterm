@@ -11,6 +11,7 @@ import Metal
 import OSLog
 import SwiftUI
 import IOSurface
+import QuartzCore
 
 /// NSView that embeds a Ghostty terminal surface with Metal rendering
 ///
@@ -57,6 +58,16 @@ class GhosttyTerminalView: NSView {
 
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "win.aizen.app", category: "GhosttyTerminal")
 
+    // MARK: - Display Link Rendering (event-driven for SSH)
+
+    private var displayLink: CVDisplayLink?
+    private var needsRender = false
+
+    /// Idle detection for display link - stops after timeout to save CPU
+    private var lastActivityTime: CFAbsoluteTime = 0
+    private var idleCheckTimer: DispatchSourceTimer?
+    private static let idleTimeout: CFTimeInterval = 0.1  // 100ms idle before stopping display link
+
     // MARK: - Handler Components
 
     private var imeHandler: GhosttyIMEHandler!
@@ -66,7 +77,13 @@ class GhosttyTerminalView: NSView {
     /// Observation for appearance changes
     private var appearanceObservation: NSKeyValueObservation?
 
-    // MARK: - Rendering Control (no-op on macOS)
+    /// Observer for config reload notifications
+    private var configReloadObserver: NSObjectProtocol?
+
+    // MARK: - Rendering Control
+
+    /// Flag to prevent operations during cleanup
+    private var isShuttingDown = false
 
     /// iOS pauses rendering when views are offscreen. On macOS rendering is
     /// event-driven, so these are intentionally no-ops for API parity.
@@ -74,6 +91,46 @@ class GhosttyTerminalView: NSView {
     }
 
     func resumeRendering() {
+    }
+
+    /// Explicitly cleanup the terminal before removal from view hierarchy.
+    /// Call this when closing a session to ensure proper cleanup.
+    func cleanup() {
+        isShuttingDown = true
+
+        // Stop display link first
+        stopDisplayLink()
+
+        // Remove config reload observer
+        if let observer = configReloadObserver {
+            NotificationCenter.default.removeObserver(observer)
+            configReloadObserver = nil
+        }
+
+        // Clear all callbacks to break retain cycles
+        onReady = nil
+        onProcessExit = nil
+        onTitleChange = nil
+        onProgressReport = nil
+        onResize = nil
+        writeCallback = nil
+
+        // Stop rendering/input callbacks
+        if let cSurface = surface?.unsafeCValue {
+            ghostty_surface_set_write_callback(cSurface, nil, nil)
+            ghostty_surface_set_focus(cSurface, false)
+        }
+
+        // Unregister surface from app wrapper synchronously
+        if let wrapper = ghosttyAppWrapper, let ref = surfaceReference {
+            wrapper.unregisterSurface(ref)
+        }
+        surfaceReference = nil
+
+        // CRITICAL: Explicitly free the surface to release Metal resources
+        // Do not rely on deinit - Task.detached may never run
+        surface?.free()
+        surface = nil
     }
 
     // MARK: - Initialization
@@ -109,6 +166,10 @@ class GhosttyTerminalView: NSView {
         setupTrackingArea()
         setupAppearanceObservation()
         setupFrameObservation()
+        setupConfigReloadObservation()
+        if useCustomIO {
+            setupDisplayLink()
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -116,6 +177,13 @@ class GhosttyTerminalView: NSView {
     }
 
     deinit {
+        // Stop display link immediately (CVDisplayLink operations are thread-safe)
+        if let link = displayLink {
+            CVDisplayLinkStop(link)
+        }
+        // Release the retained weak reference to prevent memory leak
+        displayLinkWeakRef?.release()
+
         // Surface cleanup happens via Surface's deinit
         // Note: Cannot access @MainActor properties in deinit
         // Tracking areas are automatically cleaned up by NSView
@@ -200,6 +268,127 @@ class GhosttyTerminalView: NSView {
         self.postsFrameChangedNotifications = false
     }
 
+    private func setupConfigReloadObservation() {
+        configReloadObserver = NotificationCenter.default.addObserver(
+            forName: Ghostty.configDidReloadNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.forceRefresh()
+            }
+        }
+    }
+
+    /// Weak reference retained by display link - must be released when display link stops
+    private var displayLinkWeakRef: Unmanaged<Weak<GhosttyTerminalView>>?
+
+    /// Setup CVDisplayLink for display-synchronized rendering (SSH mode only)
+    /// Event-driven: starts on activity, stops after idle timeout to save CPU
+    private func setupDisplayLink() {
+        var link: CVDisplayLink?
+        CVDisplayLinkCreateWithActiveCGDisplays(&link)
+        guard let displayLink = link else { return }
+
+        // Prevent capture of self in C callback by using a weak reference wrapper
+        let weakSelf = Weak(self)
+        let retainedRef = Unmanaged.passRetained(weakSelf)
+        displayLinkWeakRef = retainedRef
+
+        CVDisplayLinkSetOutputCallback(displayLink, { _, _, _, _, _, userInfo -> CVReturn in
+            guard let userInfo = userInfo else { return kCVReturnSuccess }
+            let weak = Unmanaged<Weak<GhosttyTerminalView>>.fromOpaque(userInfo).takeUnretainedValue()
+            guard let view = weak.value else { return kCVReturnSuccess }
+
+            DispatchQueue.main.async {
+                view.displayLinkTick()
+            }
+            return kCVReturnSuccess
+        }, retainedRef.toOpaque())
+
+        self.displayLink = displayLink
+        // Don't start immediately - will start on first activity
+        setupIdleCheckTimer()
+    }
+
+    /// Called by display link callback - checks if we should continue or go idle
+    private func displayLinkTick() {
+        guard !isShuttingDown else { return }
+
+        // Check if we've been idle too long
+        let now = CFAbsoluteTimeGetCurrent()
+        if now - lastActivityTime > Self.idleTimeout && !needsRender {
+            // Stop display link to save CPU when idle
+            if let link = displayLink, CVDisplayLinkIsRunning(link) {
+                CVDisplayLinkStop(link)
+                Self.logger.debug("Display link stopped (idle)")
+            }
+            return
+        }
+
+        // Process any pending render
+        if needsRender, let surface = surface?.unsafeCValue {
+            needsRender = false
+            ghostty_surface_refresh(surface)
+            ghostty_surface_draw(surface)
+        }
+
+        // Always tick for cursor blink when active
+        ghosttyAppWrapper?.appTick()
+    }
+
+    /// Setup timer to periodically check for idle state
+    private func setupIdleCheckTimer() {
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + Self.idleTimeout, repeating: Self.idleTimeout)
+        timer.setEventHandler { [weak self] in
+            self?.checkIdleState()
+        }
+        timer.resume()
+        idleCheckTimer = timer
+    }
+
+    /// Check if display link should be stopped due to idle
+    private func checkIdleState() {
+        guard !isShuttingDown else { return }
+        guard let link = displayLink, CVDisplayLinkIsRunning(link) else { return }
+
+        let now = CFAbsoluteTimeGetCurrent()
+        if now - lastActivityTime > Self.idleTimeout && !needsRender {
+            CVDisplayLinkStop(link)
+            Self.logger.debug("Display link stopped by idle timer")
+        }
+    }
+
+    /// Request a render - starts display link if needed
+    private func requestRender() {
+        guard !isShuttingDown else { return }
+        lastActivityTime = CFAbsoluteTimeGetCurrent()
+        needsRender = true
+
+        // Start display link if not running
+        if let link = displayLink, !CVDisplayLinkIsRunning(link) {
+            CVDisplayLinkStart(link)
+            Self.logger.debug("Display link started (activity)")
+        }
+    }
+
+    /// Stop and release the display link, including the weak reference
+    private func stopDisplayLink() {
+        // Cancel idle check timer
+        idleCheckTimer?.cancel()
+        idleCheckTimer = nil
+
+        if let link = displayLink {
+            CVDisplayLinkStop(link)
+        }
+        displayLink = nil
+
+        // Release the retained weak reference to prevent memory leak
+        displayLinkWeakRef?.release()
+        displayLinkWeakRef = nil
+    }
+
     // MARK: - NSView Overrides
 
     override var acceptsFirstResponder: Bool {
@@ -239,11 +428,16 @@ class GhosttyTerminalView: NSView {
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        // Single refresh when view moves to window
+        // Manage display link based on window attachment
         if window != nil {
+            // Request render to start display link if needed
             DispatchQueue.main.async { [weak self] in
+                self?.requestRender()
                 self?.forceRefresh()
             }
+        } else {
+            // Stop display link when removed from window
+            stopDisplayLink()
         }
     }
 
@@ -429,12 +623,15 @@ class GhosttyTerminalView: NSView {
     /// Feed data from SSH channel to the terminal for rendering
     func feedData(_ data: Data) {
         guard let surface = surface?.unsafeCValue else { return }
+
+        // Feed data immediately - SSH read loop already batches appropriately
         data.withUnsafeBytes { buffer in
             guard let ptr = buffer.baseAddress?.assumingMemoryBound(to: UInt8.self) else { return }
             ghostty_surface_feed_data(surface, ptr, buffer.count)
         }
-        // Trigger redraw after feeding data
-        ghosttyAppWrapper?.appTick()
+
+        // Request render via display link (event-driven, will auto-stop when idle)
+        requestRender()
     }
 
     /// Setup the write callback to capture keyboard input
@@ -449,16 +646,15 @@ class GhosttyTerminalView: NSView {
             let view = Unmanaged<GhosttyTerminalView>.fromOpaque(userdata).takeUnretainedValue()
             guard let data = data, len > 0 else { return }
             let swiftData = Data(bytes: data, count: len)
-            DispatchQueue.main.async {
-                view.writeCallback?(swiftData)
-            }
+            // Call directly - Ghostty calls this from main thread, no queue hop needed
+            view.writeCallback?(swiftData)
         }, userdata)
     }
 
     /// Send text to the terminal (used by voice input)
     func sendText(_ text: String) {
         surface?.sendText(text)
-        ghosttyAppWrapper?.appTick()
+        requestRender()
     }
 
     /// Send a special key to the terminal
@@ -466,7 +662,7 @@ class GhosttyTerminalView: NSView {
         guard let surface = surface else { return }
         let escapeSequence = TerminalSpecialKeySequence.escapeSequence(for: key)
         surface.sendText(escapeSequence)
-        ghosttyAppWrapper?.appTick()
+        requestRender()
     }
 
     /// Send a control key combination (Ctrl+C, Ctrl+D, etc.)
@@ -474,7 +670,7 @@ class GhosttyTerminalView: NSView {
         guard let surface = surface else { return }
         if let controlChar = TerminalControlKey.controlCharacter(for: char) {
             surface.sendText(String(controlChar))
-            ghosttyAppWrapper?.appTick()
+            requestRender()
         }
     }
 }
@@ -527,6 +723,16 @@ extension GhosttyTerminalView: NSTextInputClient {
 
     func characterIndex(for point: NSPoint) -> Int {
         return imeHandler.characterIndex(for: point)
+    }
+}
+
+// MARK: - Weak Reference Wrapper for CVDisplayLink callback
+
+/// Thread-safe weak reference wrapper for use in C callbacks
+private final class Weak<T: AnyObject>: @unchecked Sendable {
+    weak var value: T?
+    init(_ value: T) {
+        self.value = value
     }
 }
 

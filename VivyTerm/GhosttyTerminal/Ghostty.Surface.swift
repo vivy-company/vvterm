@@ -4,16 +4,19 @@ extension Ghostty {
     /// Represents a single surface within Ghostty.
     ///
     /// Wraps a `ghostty_surface_t`
-    final class Surface: Sendable {
-        private let surface: ghostty_surface_t
-        private struct Handle: @unchecked Sendable {
-            let value: ghostty_surface_t
-        }
+    final class Surface: @unchecked Sendable {
+        private var surface: ghostty_surface_t?
+        private let lock = NSLock()
+
+        /// Track if surface has been explicitly freed
+        private var hasBeenFreed = false
 
         /// Read the underlying C value for this surface. This is unsafe because the value will be
         /// freed when the Surface class is deinitialized.
-        var unsafeCValue: ghostty_surface_t {
-            surface
+        var unsafeCValue: ghostty_surface_t? {
+            lock.lock()
+            defer { lock.unlock() }
+            return surface
         }
 
         /// Initialize from the C structure.
@@ -21,15 +24,37 @@ extension Ghostty {
             self.surface = cSurface
         }
 
+        /// Explicitly free the surface. Call this from cleanup() on main actor.
+        /// This is preferred over relying on deinit since Task.detached may not run.
+        @MainActor
+        func free() {
+            lock.lock()
+            guard !hasBeenFreed, let surf = surface else {
+                lock.unlock()
+                return
+            }
+            hasBeenFreed = true
+            surface = nil
+            lock.unlock()
+
+            ghostty_surface_free(surf)
+        }
+
         deinit {
-            // deinit is not guaranteed to happen on the main actor and our API
-            // calls into libghostty must happen there so we capture the surface
-            // value so we don't capture `self` and then we detach it in a task.
-            // We can't wait for the task to succeed so this will happen sometime
-            // but that's okay.
-            let handle = Handle(value: surface)
-            Task.detached { @MainActor in
-                ghostty_surface_free(handle.value)
+            // If free() was already called, do nothing
+            lock.lock()
+            guard !hasBeenFreed, let surf = surface else {
+                lock.unlock()
+                return
+            }
+            hasBeenFreed = true
+            surface = nil
+            lock.unlock()
+
+            // Fallback: schedule free on main actor
+            // This is a safety net - prefer calling free() explicitly
+            Task { @MainActor in
+                ghostty_surface_free(surf)
             }
         }
 
@@ -37,6 +62,7 @@ extension Ghostty {
         /// shortcuts and other encodings do not take effect.
         @MainActor
         func sendText(_ text: String) {
+            guard let surface = unsafeCValue else { return }
             let len = text.utf8CString.count
             if (len == 0) { return }
 
@@ -55,6 +81,7 @@ extension Ghostty {
         /// - Parameter event: The key event to send to the terminal
         @MainActor
         func sendKeyEvent(_ event: Input.KeyEvent) {
+            guard let surface = unsafeCValue else { return }
             event.withCValue { cEvent in
                 ghostty_surface_key(surface, cEvent)
             }
@@ -67,7 +94,8 @@ extension Ghostty {
         /// a terminal application enables mouse reporting mode.
         @MainActor
         var mouseCaptured: Bool {
-            ghostty_surface_mouse_captured(surface)
+            guard let surface = unsafeCValue else { return false }
+            return ghostty_surface_mouse_captured(surface)
         }
 
         /// Whether closing this terminal requires user confirmation.
@@ -76,7 +104,8 @@ extension Ghostty {
         /// Uses Ghostty's internal prompt detection to avoid confirming idle shells.
         @MainActor
         var needsConfirmQuit: Bool {
-            ghostty_surface_needs_confirm_quit(surface)
+            guard let surface = unsafeCValue else { return false }
+            return ghostty_surface_needs_confirm_quit(surface)
         }
 
         /// Send a mouse button event to the terminal.
@@ -88,6 +117,7 @@ extension Ghostty {
         /// - Parameter event: The mouse button event to send to the terminal
         @MainActor
         func sendMouseButton(_ event: Input.MouseButtonEvent) {
+            guard let surface = unsafeCValue else { return }
             ghostty_surface_mouse_button(
                 surface,
                 event.action.cMouseState,
@@ -104,6 +134,7 @@ extension Ghostty {
         /// - Parameter event: The mouse position event to send to the terminal
         @MainActor
         func sendMousePos(_ event: Input.MousePosEvent) {
+            guard let surface = unsafeCValue else { return }
             ghostty_surface_mouse_pos(
                 surface,
                 event.x,
@@ -120,6 +151,7 @@ extension Ghostty {
         /// - Parameter event: The mouse scroll event to send to the terminal
         @MainActor
         func sendMouseScroll(_ event: Input.MouseScrollEvent) {
+            guard let surface = unsafeCValue else { return }
             ghostty_surface_mouse_scroll(
                 surface,
                 event.x,
@@ -135,6 +167,7 @@ extension Ghostty {
         /// Returns true if the action was performed. Invalid actions return false.
         @MainActor
         func perform(action: String) -> Bool {
+            guard let surface = unsafeCValue else { return false }
             let len = action.utf8CString.count
             if (len == 0) { return false }
             return action.withCString { cString in
@@ -154,7 +187,8 @@ extension Ghostty {
 
         /// Get current terminal size
         @MainActor
-        func terminalSize() -> TerminalSize {
+        func terminalSize() -> TerminalSize? {
+            guard let surface = unsafeCValue else { return nil }
             let cSize = ghostty_surface_size(surface)
             return TerminalSize(
                 columns: cSize.columns,
@@ -177,6 +211,7 @@ extension Ghostty {
         /// - Parameter data: The raw terminal data to display
         @MainActor
         func feedData(_ data: Data) {
+            guard let surface = unsafeCValue else { return }
             guard !data.isEmpty else { return }
             data.withUnsafeBytes { buffer in
                 if let ptr = buffer.baseAddress?.assumingMemoryBound(to: UInt8.self) {
@@ -212,6 +247,7 @@ extension Ghostty {
         ///   - userdata: Opaque pointer passed to the callback (e.g., reference to SSH session)
         @MainActor
         func setWriteCallback(_ callback: WriteCallback?, userdata: UnsafeMutableRawPointer?) {
+            guard let surface = unsafeCValue else { return }
             ghostty_surface_set_write_callback(surface, callback, userdata)
         }
     }

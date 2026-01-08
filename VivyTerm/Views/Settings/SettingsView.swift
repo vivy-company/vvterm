@@ -40,6 +40,10 @@ struct SettingsView: View {
     @State private var selection: SettingsSelection? = .pro
     @StateObject private var storeManager = StoreManager.shared
 
+    #if os(iOS)
+    @Environment(\.dismiss) private var dismiss
+    #endif
+
     var body: some View {
         #if os(macOS)
         NavigationSplitView {
@@ -177,19 +181,21 @@ struct SettingsView: View {
                         Label("About", systemImage: "info.circle")
                     }
                 }
-
-                Section {
-                    NavigationLink {
-                        SupportSettingsView()
-                            .navigationTitle("Get in Touch")
-                            .navigationBarTitleDisplayMode(.inline)
-                    } label: {
-                        Label("Get in Touch", systemImage: "bubble.left.and.bubble.right")
-                    }
-                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
         #endif
     }

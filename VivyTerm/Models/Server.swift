@@ -115,11 +115,22 @@ struct SSHKeyEntry: Identifiable, Codable, Hashable {
     var name: String
     var hasPassphrase: Bool
     var createdAt: Date
+    var keyType: SSHKeyType?
+    var publicKey: String?
 
-    init(id: UUID = UUID(), name: String, hasPassphrase: Bool = false, createdAt: Date = Date()) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        hasPassphrase: Bool = false,
+        createdAt: Date = Date(),
+        keyType: SSHKeyType? = nil,
+        publicKey: String? = nil
+    ) {
         self.id = id
         self.name = name
         self.hasPassphrase = hasPassphrase
         self.createdAt = createdAt
+        self.keyType = keyType
+        self.publicKey = publicKey
     }
 }
