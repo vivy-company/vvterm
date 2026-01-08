@@ -208,9 +208,7 @@ struct iOSServerListView: View {
             }
         }
         .sheet(isPresented: $showingSettings) {
-            NavigationStack {
-                SettingsView()
-            }
+            SettingsView()
         }
         .sheet(isPresented: $showingWorkspacePicker) {
             NavigationStack {
@@ -271,7 +269,7 @@ struct iOSTerminalView: View {
     var body: some View {
         ZStack {
             // Terminal view
-            TerminalContainerView(session: session, server: server)
+            TerminalContainerView(session: session, server: server, isActive: selectedView == "terminal")
                 .opacity(selectedView == "terminal" ? 1 : 0)
                 .allowsHitTesting(selectedView == "terminal")
 

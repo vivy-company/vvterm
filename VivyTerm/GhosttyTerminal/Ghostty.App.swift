@@ -20,6 +20,9 @@ import SwiftUI
 enum Ghostty {
     static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm", category: "Ghostty")
 
+    /// Notification posted when terminal config is reloaded and views should refresh
+    static let configDidReloadNotification = Notification.Name("GhosttyConfigDidReload")
+
     /// Wrapper to hold reference to a surface for tracking
     /// Note: ghostty_surface_t is an opaque pointer, so we store it directly
     /// The surface is freed when the GhosttyTerminalView is deallocated
@@ -75,7 +78,7 @@ extension Ghostty {
         @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
         @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
         @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
-        @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = false
+        @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
         @AppStorage("appearanceMode") private var appearanceMode = "system"
 
         private var effectiveThemeName: String {
@@ -311,6 +314,9 @@ extension Ghostty {
             unsetenv("XDG_CONFIG_HOME")
 
             Ghostty.logger.info("Configuration reloaded and propagated to \(self.activeSurfaces.count) surfaces")
+
+            // Notify views to refresh their rendering
+            NotificationCenter.default.post(name: Ghostty.configDidReloadNotification, object: nil)
         }
 
         // MARK: - Private Helpers
@@ -355,6 +361,10 @@ extension Ghostty {
 
                 # Disable audible bell
                 audible-bell = false
+
+                # Limit scrollback to prevent unbounded memory growth
+                # 10000 lines is plenty for most use cases (~5-10MB)
+                scrollback-limit = 10000
 
                 # Custom keybinds
                 keybind = shift+enter=text:\\n

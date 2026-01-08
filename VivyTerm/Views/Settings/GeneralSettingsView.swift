@@ -46,7 +46,6 @@ struct AppearanceModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .preferredColorScheme(colorScheme)
-            .id("appearance-\(appearanceMode)")
     }
 }
 

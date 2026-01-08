@@ -180,11 +180,19 @@ final class KeychainManager {
     }
 
     /// Store a new SSH key in the keychain library
-    func storeSSHKeyEntry(name: String, privateKey: Data, passphrase: String?) throws -> SSHKeyEntry {
+    func storeSSHKeyEntry(
+        name: String,
+        privateKey: Data,
+        passphrase: String?,
+        keyType: SSHKeyType? = nil,
+        publicKey: String? = nil
+    ) throws -> SSHKeyEntry {
         let entry = SSHKeyEntry(
             name: name,
             hasPassphrase: passphrase != nil && !passphrase!.isEmpty,
-            createdAt: Date()
+            createdAt: Date(),
+            keyType: keyType,
+            publicKey: publicKey
         )
 
         // Store the actual key data

@@ -126,7 +126,7 @@ struct TerminalKeyboardToolbar: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
         }
-        .background(.bar)
+        .adaptiveBarBackground()
     }
 
     private func sendKey(_ key: TerminalKey) {
@@ -167,9 +167,10 @@ private struct KeyButton: View {
                 }
             }
             .frame(minWidth: 36, minHeight: 32)
+            .contentShape(Rectangle())
             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
     }
 }
 
@@ -187,13 +188,14 @@ private struct ModifierKeyButton: View {
                 .font(.system(.footnote, design: .monospaced))
                 .fontWeight(.medium)
                 .frame(minWidth: 40, minHeight: 32)
+                .contentShape(Rectangle())
                 .background {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(isActive ? AnyShapeStyle(Color.accentColor) : AnyShapeStyle(.quaternary))
                 }
                 .foregroundStyle(isActive ? .white : .primary)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderless)
     }
 }
 
@@ -364,9 +366,10 @@ struct CompactTerminalToolbar: View {
                 Text("Esc")
                     .font(.system(.caption2, design: .monospaced))
                     .frame(minWidth: 32, minHeight: 28)
+                    .contentShape(Rectangle())
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
 
             Button {
                 onKey(.tab)
@@ -374,9 +377,10 @@ struct CompactTerminalToolbar: View {
                 Image(systemName: "arrow.right.to.line")
                     .font(.caption2)
                     .frame(minWidth: 32, minHeight: 28)
+                    .contentShape(Rectangle())
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
 
             Button {
                 onKey(.ctrlC)
@@ -384,9 +388,10 @@ struct CompactTerminalToolbar: View {
                 Text("^C")
                     .font(.system(.caption2, design: .monospaced))
                     .frame(minWidth: 32, minHeight: 28)
+                    .contentShape(Rectangle())
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
 
             Spacer()
 
@@ -396,35 +401,39 @@ struct CompactTerminalToolbar: View {
                     Image(systemName: "arrow.left")
                         .font(.caption2)
                         .frame(minWidth: 28, minHeight: 28)
+                        .contentShape(Rectangle())
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
 
                 VStack(spacing: 2) {
                     Button { onKey(.arrowUp) } label: {
                         Image(systemName: "arrow.up")
                             .font(.caption2)
                             .frame(minWidth: 28, minHeight: 13)
+                            .contentShape(Rectangle())
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
 
                     Button { onKey(.arrowDown) } label: {
                         Image(systemName: "arrow.down")
                             .font(.caption2)
                             .frame(minWidth: 28, minHeight: 13)
+                            .contentShape(Rectangle())
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                 }
 
                 Button { onKey(.arrowRight) } label: {
                     Image(systemName: "arrow.right")
                         .font(.caption2)
                         .frame(minWidth: 28, minHeight: 28)
+                        .contentShape(Rectangle())
                         .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.borderless)
             }
 
             // More button
@@ -434,16 +443,17 @@ struct CompactTerminalToolbar: View {
                 Image(systemName: "ellipsis")
                     .font(.caption)
                     .frame(minWidth: 32, minHeight: 28)
+                    .contentShape(Rectangle())
                     .background(.quaternary, in: RoundedRectangle(cornerRadius: 4))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderless)
             .popover(isPresented: $showExtendedKeys) {
                 ExtendedKeysPopover(onKey: onKey)
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(.bar)
+        .adaptiveBarBackground()
     }
 }
 
@@ -471,9 +481,10 @@ private struct ExtendedKeysPopover: View {
                         Text(key)
                             .font(.system(.footnote, design: .monospaced))
                             .frame(width: 44, height: 36)
+                            .contentShape(Rectangle())
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                 }
             }
 
@@ -493,9 +504,10 @@ private struct ExtendedKeysPopover: View {
                         Text("F\(num)")
                             .font(.system(.footnote, design: .monospaced))
                             .frame(width: 44, height: 36)
+                            .contentShape(Rectangle())
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                 }
             }
 
@@ -515,9 +527,10 @@ private struct ExtendedKeysPopover: View {
                         Text(key)
                             .font(.system(.caption2, design: .monospaced))
                             .frame(width: 44, height: 36)
+                            .contentShape(Rectangle())
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 6))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless)
                 }
             }
         }

@@ -17,8 +17,7 @@ DerivedData/
 *.swp
 *~
 
-# Vendor binaries (pre-built, rebuild with scripts/)
-Vendor/
+# Vendor binaries committed directly for Xcode Cloud
 
 # CocoaPods (if used)
 Pods/

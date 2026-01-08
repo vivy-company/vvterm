@@ -8,7 +8,7 @@ struct ServerRow: View {
     let onEdit: (Server) -> Void
     let onSelect: () -> Void
 
-    @ObservedObject private var sessionManager = ConnectionSessionManager.shared
+    @ObservedObject private var tabManager = TerminalTabManager.shared
 
     var body: some View {
         HStack(spacing: 12) {
@@ -49,7 +49,7 @@ struct ServerRow: View {
         }
         .contextMenu {
             Button("Connect") {
-                Task { try? await sessionManager.openConnection(to: server) }
+                tabManager.connectedServerIds.insert(server.id)
             }
             Button("Edit") {
                 onEdit(server)
@@ -62,9 +62,18 @@ struct ServerRow: View {
     }
 
     private var statusColor: Color {
-        // Check if connected
-        let isConnected = sessionManager.sessions.contains { $0.serverId == server.id && $0.connectionState.isConnected }
-        return isConnected ? .green : .secondary.opacity(0.3)
+        // Check if server is connected (viewing stats/terminal)
+        let isConnected = tabManager.connectedServerIds.contains(server.id)
+        // Check if has terminal tabs open
+        let hasTerminals = !tabManager.tabs(for: server.id).isEmpty
+
+        if hasTerminals {
+            return .green // Active SSH terminals
+        } else if isConnected {
+            return .orange // Connected (stats) but no terminals
+        } else {
+            return .secondary.opacity(0.3) // Not connected
+        }
     }
 
     @ViewBuilder

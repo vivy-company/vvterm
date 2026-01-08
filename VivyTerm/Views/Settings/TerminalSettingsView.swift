@@ -16,7 +16,7 @@ struct TerminalSettingsView: View {
 
     @AppStorage("terminalThemeName") private var themeName = "Aizen Dark"
     @AppStorage("terminalThemeNameLight") private var themeNameLight = "Aizen Light"
-    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = false
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
     @AppStorage("terminalNotificationsEnabled") private var terminalNotificationsEnabled = true
     @AppStorage("terminalProgressEnabled") private var terminalProgressEnabled = true
     @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true

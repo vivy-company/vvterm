@@ -78,6 +78,60 @@ struct NoServerSelectedEmptyState: View {
     }
 }
 
+struct MultiConnectionUpgradeEmptyState: View {
+    let server: Server
+    @State private var showingProUpgrade = false
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            VStack(spacing: 16) {
+                Image(systemName: "star.fill")
+                    .font(.system(size: 56))
+                    .foregroundStyle(.orange)
+
+                VStack(spacing: 8) {
+                    Text(server.name)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+
+                    Text("Multiple connections require Pro")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+
+                    Text("Upgrade to connect to multiple servers simultaneously")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 32)
+                }
+            }
+
+            Button {
+                showingProUpgrade = true
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "star.fill")
+                    Text("Upgrade to Pro")
+                        .fontWeight(.medium)
+                }
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(.orange, in: RoundedRectangle(cornerRadius: 10))
+                .foregroundStyle(.white)
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .sheet(isPresented: $showingProUpgrade) {
+            ProUpgradeSheet()
+        }
+    }
+}
+
 struct NoServersEmptyState: View {
     let onAddServer: () -> Void
 

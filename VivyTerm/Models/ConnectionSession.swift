@@ -49,6 +49,8 @@ struct ConnectionSession: Identifiable, Hashable {
     var lastActivity: Date
     var terminalSurfaceId: String?
     var autoReconnect: Bool
+    /// If set, this session is a split child of the parent session (not shown in tabs)
+    var parentSessionId: UUID?
 
     init(
         id: UUID = UUID(),
@@ -58,7 +60,8 @@ struct ConnectionSession: Identifiable, Hashable {
         createdAt: Date = Date(),
         lastActivity: Date = Date(),
         terminalSurfaceId: String? = nil,
-        autoReconnect: Bool = true
+        autoReconnect: Bool = true,
+        parentSessionId: UUID? = nil
     ) {
         self.id = id
         self.serverId = serverId
@@ -68,6 +71,12 @@ struct ConnectionSession: Identifiable, Hashable {
         self.lastActivity = lastActivity
         self.terminalSurfaceId = terminalSurfaceId
         self.autoReconnect = autoReconnect
+        self.parentSessionId = parentSessionId
+    }
+
+    /// Whether this is a root tab session (not a split child)
+    var isTabRoot: Bool {
+        parentSessionId == nil
     }
 
     var isConnected: Bool {

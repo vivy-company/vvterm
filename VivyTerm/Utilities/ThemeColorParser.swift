@@ -53,4 +53,31 @@ struct ThemeColorParser {
 
         return nil
     }
+
+    /// Computes the split divider color based on the background color
+    /// Uses Ghostty's algorithm: darken by 8% for light backgrounds, 40% for dark
+    static func splitDividerColor(for themeName: String) -> Color {
+        guard let bgColor = backgroundColor(for: themeName) else {
+            return Color(white: 0.3)
+        }
+
+        #if os(macOS)
+        let nsColor = NSColor(bgColor)
+        let brightness = nsColor.brightnessComponent
+        let isLight = brightness > 0.5
+
+        // Darken by 8% for light, 40% for dark (matching Ghostty)
+        let factor = isLight ? 0.92 : 0.6
+        let adjusted = NSColor(
+            hue: nsColor.hueComponent,
+            saturation: nsColor.saturationComponent,
+            brightness: nsColor.brightnessComponent * factor,
+            alpha: nsColor.alphaComponent
+        )
+        return Color(adjusted)
+        #else
+        // iOS fallback
+        return Color(white: 0.3)
+        #endif
+    }
 }

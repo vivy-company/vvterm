@@ -50,6 +50,10 @@ class GhosttyTerminalView: UIView {
     private var displayLink: CADisplayLink?
     private var needsRender = false
 
+    /// Idle detection for display link - stops after timeout to save CPU
+    private var lastActivityTime: CFAbsoluteTime = 0
+    private static let idleTimeout: CFTimeInterval = 0.1  // 100ms idle before stopping display link
+
     /// Cell size in points for row-to-pixel conversion
     var cellSize: CGSize = .zero
 
@@ -59,6 +63,7 @@ class GhosttyTerminalView: UIView {
     private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm", category: "GhosttyTerminal")
 
     private var isSelecting = false
+    private var isScrolling = false
     private lazy var selectionRecognizer: UILongPressGestureRecognizer = {
         let recognizer = UILongPressGestureRecognizer(
             target: self,
@@ -70,6 +75,18 @@ class GhosttyTerminalView: UIView {
         return recognizer
     }()
 
+    private lazy var scrollRecognizer: UIPanGestureRecognizer = {
+        let recognizer = UIPanGestureRecognizer(
+            target: self,
+            action: #selector(handlePanGesture(_:))
+        )
+        recognizer.maximumNumberOfTouches = 1
+        return recognizer
+    }()
+
+    /// Observer for config reload notifications
+    private var configReloadObserver: NSObjectProtocol?
+
     // MARK: - Rendering Components
 
     private let renderingSetup = GhosttyRenderingSetup()
@@ -80,9 +97,12 @@ class GhosttyTerminalView: UIView {
         guard let surface = surface?.unsafeCValue else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
 
+        lastActivityTime = CFAbsoluteTimeGetCurrent()
         needsRender = true
+
+        // Start display link if not running
         if displayLink == nil {
-            performRender(surface: surface)
+            startDisplayLink()
         }
     }
 
@@ -91,6 +111,7 @@ class GhosttyTerminalView: UIView {
         let link = CADisplayLink(target: self, selector: #selector(displayLinkTick))
         link.add(to: .main, forMode: .common)
         displayLink = link
+        Self.logger.debug("Display link started (activity)")
     }
 
     private func stopDisplayLink() {
@@ -99,6 +120,17 @@ class GhosttyTerminalView: UIView {
     }
 
     @objc private func displayLinkTick() {
+        guard !isShuttingDown, !isPaused else { return }
+
+        // Check if we've been idle too long
+        let now = CFAbsoluteTimeGetCurrent()
+        if now - lastActivityTime > Self.idleTimeout && !needsRender {
+            stopDisplayLink()
+            Self.logger.debug("Display link stopped (idle)")
+            return
+        }
+
+        // Only render if needed
         guard needsRender, let surface = surface?.unsafeCValue else { return }
         performRender(surface: surface)
     }
@@ -138,8 +170,15 @@ class GhosttyTerminalView: UIView {
         self.contentScaleFactor = UIScreen.main.scale
 
         setupSurface()
+
+        // Setup gesture recognizers with delegate for simultaneous recognition
+        selectionRecognizer.delegate = self
+        scrollRecognizer.delegate = self
         addGestureRecognizer(selectionRecognizer)
+        addGestureRecognizer(scrollRecognizer)
         isUserInteractionEnabled = true
+
+        setupConfigReloadObservation()
     }
 
     required init?(coder: NSCoder) {
@@ -163,6 +202,12 @@ class GhosttyTerminalView: UIView {
         isPaused = true
         stopDisplayLink()
 
+        // Remove config reload observer
+        if let observer = configReloadObserver {
+            NotificationCenter.default.removeObserver(observer)
+            configReloadObserver = nil
+        }
+
         // Clear all callbacks first to prevent any further interactions
         onReady = nil
         onProcessExit = nil
@@ -171,20 +216,22 @@ class GhosttyTerminalView: UIView {
         writeCallback = nil
 
         // Stop rendering/input callbacks and mark as occluded
-        if let surface = surface?.unsafeCValue {
-            ghostty_surface_set_write_callback(surface, nil, nil)
-            ghostty_surface_set_focus(surface, false)
-            ghostty_surface_set_occlusion(surface, true)
+        if let cSurface = surface?.unsafeCValue {
+            ghostty_surface_set_write_callback(cSurface, nil, nil)
+            ghostty_surface_set_focus(cSurface, false)
+            ghostty_surface_set_occlusion(cSurface, true)
         }
 
         // Unregister surface from app wrapper synchronously
         if let wrapper = ghosttyAppWrapper, let ref = surfaceReference {
             wrapper.unregisterSurface(ref)
         }
-
-        // Clear surface reference to stop any further operations
-        surface = nil
         surfaceReference = nil
+
+        // CRITICAL: Explicitly free the surface to release Metal resources
+        // Do not rely on deinit - Task.detached may never run
+        surface?.free()
+        surface = nil
     }
 
     /// Pause rendering and input without destroying the surface.
@@ -203,11 +250,13 @@ class GhosttyTerminalView: UIView {
     func resumeRendering() {
         guard !isShuttingDown else { return }
         isPaused = false
-        startDisplayLink()
 
         if let surface = surface?.unsafeCValue {
             ghostty_surface_set_occlusion(surface, false)
         }
+
+        // Request a render to restart display link if needed
+        requestRender()
     }
 
     // MARK: - Layer Type
@@ -218,6 +267,18 @@ class GhosttyTerminalView: UIView {
     // MARK: - Setup
 
     /// Create and configure the Ghostty surface
+    private func setupConfigReloadObservation() {
+        configReloadObserver = NotificationCenter.default.addObserver(
+            forName: Ghostty.configDidReloadNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.needsRender = true
+            }
+        }
+    }
+
     private func setupSurface() {
         guard let app = ghosttyApp else {
             Self.logger.error("Cannot create surface: ghostty_app_t is nil")
@@ -375,10 +436,10 @@ class GhosttyTerminalView: UIView {
                 CATransaction.commit()
             }
             sizeDidChange(frame.size)
-            DispatchQueue.main.async { [weak self] in
-                _ = self?.becomeFirstResponder()
-            }
-            startDisplayLink()
+            // Note: becomeFirstResponder is now handled by SSHTerminalWrapper.updateUIView
+            // based on isActive flag to avoid keyboard showing when terminal is hidden
+            // Request render to start display link if needed (event-driven)
+            requestRender()
         } else {
             stopDisplayLink()
         }
@@ -399,67 +460,66 @@ class GhosttyTerminalView: UIView {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
+        // Tap just focuses keyboard - no mouse events (avoids accidental selection)
         becomeFirstResponder()
-
-        if isSelecting { return }
-        guard let surface = surface, let touch = touches.first else { return }
-        let location = ghosttyPoint(touch.location(in: self))
-
-        // Send mouse press event
-        let mouseEvent = Ghostty.Input.MouseButtonEvent(
-            action: .press,
-            button: .left,
-            mods: []
-        )
-        surface.sendMouseButton(mouseEvent)
-
-        // Send position
-        let posEvent = Ghostty.Input.MousePosEvent(
-            x: location.x,
-            y: location.y,
-            mods: []
-        )
-        surface.sendMousePos(posEvent)
-        requestRender()
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesMoved(touches, with: event)
-
-        if isSelecting { return }
-        guard let surface = surface, let touch = touches.first else { return }
-        let location = ghosttyPoint(touch.location(in: self))
-
-        let posEvent = Ghostty.Input.MousePosEvent(
-            x: location.x,
-            y: location.y,
-            mods: []
-        )
-        surface.sendMousePos(posEvent)
-        requestRender()
+        // Pan gesture handles scrolling, long press handles selection
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesEnded(touches, with: event)
-
-        if isSelecting { return }
-        guard let surface = surface else { return }
-        let mouseEvent = Ghostty.Input.MouseButtonEvent(
-            action: .release,
-            button: .left,
-            mods: []
-        )
-        surface.sendMouseButton(mouseEvent)
-        requestRender()
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        touchesEnded(touches, with: event)
+        super.touchesCancelled(touches, with: event)
     }
 
     private func ghosttyPoint(_ location: CGPoint) -> CGPoint {
         // UIKit coordinates are top-left origin; Ghostty iOS expects the same.
         location
+    }
+
+    // MARK: - Scroll Gesture
+
+    @objc private func handlePanGesture(_ recognizer: UIPanGestureRecognizer) {
+        guard let surface = surface else { return }
+        if isSelecting { return }
+
+        let translation = recognizer.translation(in: self)
+
+        switch recognizer.state {
+        case .began:
+            isScrolling = true
+        case .changed:
+            // Send scroll delta directly (like macOS trackpad)
+            // Multiply by 2 for better scroll speed (matches macOS precision multiplier)
+            let scrollEvent = Ghostty.Input.MouseScrollEvent(
+                x: Double(translation.x) * 2,
+                y: Double(translation.y) * 2,
+                mods: Ghostty.Input.ScrollMods(precision: true, momentum: .changed)
+            )
+            surface.sendMouseScroll(scrollEvent)
+            requestRender()
+
+            // Reset translation so we get delta on next call
+            recognizer.setTranslation(.zero, in: self)
+        case .ended:
+            isScrolling = false
+            // Send momentum end
+            let endEvent = Ghostty.Input.MouseScrollEvent(
+                x: 0,
+                y: 0,
+                mods: Ghostty.Input.ScrollMods(precision: true, momentum: .ended)
+            )
+            surface.sendMouseScroll(endEvent)
+        case .cancelled, .failed:
+            isScrolling = false
+        default:
+            break
+        }
     }
 
     @objc private func handleSelectionPress(_ recognizer: UILongPressGestureRecognizer) {
@@ -700,12 +760,266 @@ class GhosttyTerminalView: UIView {
             let view = Unmanaged<GhosttyTerminalView>.fromOpaque(userdata).takeUnretainedValue()
             guard let data = data, len > 0 else { return }
             let swiftData = Data(bytes: data, count: len)
-            DispatchQueue.main.async {
-                view.writeCallback?(swiftData)
-            }
+            // Call directly - Ghostty calls this from main thread, no queue hop needed
+            view.writeCallback?(swiftData)
         }, userdata)
     }
 
+}
+
+// MARK: - Gesture Recognizer Delegate
+
+extension GhosttyTerminalView: UIGestureRecognizerDelegate {
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        // Allow pan and long press to recognize simultaneously
+        // The handlers check isSelecting/isScrolling to avoid conflicts
+        return true
+    }
+
+    func gestureRecognizer(
+        _ gestureRecognizer: UIGestureRecognizer,
+        shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer
+    ) -> Bool {
+        // Long press should win over pan when held long enough
+        if gestureRecognizer == scrollRecognizer && otherGestureRecognizer == selectionRecognizer {
+            // Only require failure if long press is about to recognize
+            return otherGestureRecognizer.state == .began
+        }
+        return false
+    }
+}
+
+// MARK: - Keyboard Accessory View
+
+extension GhosttyTerminalView {
+    private static var keyboardToolbarKey: UInt8 = 0
+
+    private var keyboardToolbar: TerminalInputAccessoryView? {
+        get { objc_getAssociatedObject(self, &Self.keyboardToolbarKey) as? TerminalInputAccessoryView }
+        set { objc_setAssociatedObject(self, &Self.keyboardToolbarKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+
+    override var inputAccessoryView: UIView? {
+        if keyboardToolbar == nil {
+            let toolbar = TerminalInputAccessoryView { [weak self] key in
+                self?.handleToolbarKey(key)
+            }
+            keyboardToolbar = toolbar
+        }
+        return keyboardToolbar
+    }
+
+    private func handleToolbarKey(_ key: TerminalKey) {
+        let data = key.ansiSequence
+        if let text = String(data: data, encoding: .utf8) {
+            sendText(text)
+        } else {
+            surface?.sendText(String(decoding: data, as: UTF8.self))
+        }
+    }
+}
+
+// MARK: - Native UIKit Input Accessory View
+
+private class TerminalInputAccessoryView: UIView {
+    private let onKey: (TerminalKey) -> Void
+    private var scrollView: UIScrollView!
+    private var stackView: UIStackView!
+    private var ctrlActive = false
+    private var altActive = false
+    private var ctrlButton: UIButton?
+    private var altButton: UIButton?
+
+    init(onKey: @escaping (TerminalKey) -> Void) {
+        self.onKey = onKey
+        super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
+        setupView()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) not supported")
+    }
+
+    private func setupView() {
+        autoresizingMask = [.flexibleWidth]
+
+        // Glass/blur background
+        let blurEffect = UIBlurEffect(style: .systemMaterial)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(blurView)
+        NSLayoutConstraint.activate([
+            blurView.topAnchor.constraint(equalTo: topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+
+        // Scroll view for horizontal scrolling
+        scrollView = UIScrollView()
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.alwaysBounceHorizontal = true
+        addSubview(scrollView)
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
+        ])
+
+        // Stack view for buttons
+        stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.alignment = .center
+        scrollView.addSubview(stackView)
+        NSLayoutConstraint.activate([
+            stackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+        ])
+
+        // Add buttons
+        addModifierButtons()
+        addDivider()
+        addKeyButtons()
+        addDivider()
+        addArrowButtons()
+        addDivider()
+        addControlButtons()
+        addDivider()
+        addNavigationButtons()
+    }
+
+    private func addModifierButtons() {
+        ctrlButton = createButton(title: "Ctrl", action: #selector(toggleCtrl))
+        altButton = createButton(title: "Alt", action: #selector(toggleAlt))
+        stackView.addArrangedSubview(ctrlButton!)
+        stackView.addArrangedSubview(altButton!)
+    }
+
+    private func addKeyButtons() {
+        stackView.addArrangedSubview(createButton(title: "Esc", action: #selector(tapEsc)))
+        stackView.addArrangedSubview(createButton(icon: "arrow.right.to.line", action: #selector(tapTab)))
+    }
+
+    private func addArrowButtons() {
+        stackView.addArrangedSubview(createButton(icon: "arrow.up", action: #selector(tapUp)))
+        stackView.addArrangedSubview(createButton(icon: "arrow.down", action: #selector(tapDown)))
+        stackView.addArrangedSubview(createButton(icon: "arrow.left", action: #selector(tapLeft)))
+        stackView.addArrangedSubview(createButton(icon: "arrow.right", action: #selector(tapRight)))
+    }
+
+    private func addControlButtons() {
+        stackView.addArrangedSubview(createButton(title: "^C", action: #selector(tapCtrlC)))
+        stackView.addArrangedSubview(createButton(title: "^D", action: #selector(tapCtrlD)))
+        stackView.addArrangedSubview(createButton(title: "^Z", action: #selector(tapCtrlZ)))
+        stackView.addArrangedSubview(createButton(title: "^L", action: #selector(tapCtrlL)))
+    }
+
+    private func addNavigationButtons() {
+        stackView.addArrangedSubview(createButton(title: "Home", action: #selector(tapHome)))
+        stackView.addArrangedSubview(createButton(title: "End", action: #selector(tapEnd)))
+        stackView.addArrangedSubview(createButton(title: "PgUp", action: #selector(tapPgUp)))
+        stackView.addArrangedSubview(createButton(title: "PgDn", action: #selector(tapPgDn)))
+    }
+
+    private func addDivider() {
+        let divider = UIView()
+        divider.backgroundColor = .separator
+        divider.translatesAutoresizingMaskIntoConstraints = false
+        divider.widthAnchor.constraint(equalToConstant: 1).isActive = true
+        divider.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        stackView.addArrangedSubview(divider)
+    }
+
+    private func createButton(title: String? = nil, icon: String? = nil, action: Selector) -> UIButton {
+        var config = UIButton.Configuration.plain()
+        config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8)
+        config.background.backgroundColor = .quaternarySystemFill
+        config.background.cornerRadius = 6
+        config.baseForegroundColor = .label
+
+        if let icon = icon {
+            let symbolConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
+            config.image = UIImage(systemName: icon, withConfiguration: symbolConfig)
+        } else if let title = title {
+            config.title = title
+            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+                var outgoing = incoming
+                outgoing.font = .monospacedSystemFont(ofSize: 13, weight: .medium)
+                return outgoing
+            }
+        }
+
+        let button = UIButton(configuration: config)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: action, for: .touchUpInside)
+
+        let minWidth: CGFloat = title != nil ? 40 : 36
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: minWidth).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+
+        return button
+    }
+
+    private func sendKey(_ key: TerminalKey) {
+        var modifiedKey = key
+        if ctrlActive {
+            modifiedKey = key.withCtrl()
+            ctrlActive = false
+            updateModifierButton(ctrlButton, active: false)
+        }
+        if altActive {
+            modifiedKey = key.withAlt()
+            altActive = false
+            updateModifierButton(altButton, active: false)
+        }
+        onKey(modifiedKey)
+    }
+
+    private func updateModifierButton(_ button: UIButton?, active: Bool) {
+        guard var config = button?.configuration else { return }
+        UIView.animate(withDuration: 0.15) {
+            config.background.backgroundColor = active ? .systemBlue : .quaternarySystemFill
+            config.baseForegroundColor = active ? .white : .label
+            button?.configuration = config
+        }
+    }
+
+    // MARK: - Button Actions
+
+    @objc private func toggleCtrl() {
+        ctrlActive.toggle()
+        updateModifierButton(ctrlButton, active: ctrlActive)
+    }
+
+    @objc private func toggleAlt() {
+        altActive.toggle()
+        updateModifierButton(altButton, active: altActive)
+    }
+
+    @objc private func tapEsc() { sendKey(.escape) }
+    @objc private func tapTab() { sendKey(.tab) }
+    @objc private func tapUp() { sendKey(.arrowUp) }
+    @objc private func tapDown() { sendKey(.arrowDown) }
+    @objc private func tapLeft() { sendKey(.arrowLeft) }
+    @objc private func tapRight() { sendKey(.arrowRight) }
+    @objc private func tapCtrlC() { sendKey(.ctrlC) }
+    @objc private func tapCtrlD() { sendKey(.ctrlD) }
+    @objc private func tapCtrlZ() { sendKey(.ctrlZ) }
+    @objc private func tapCtrlL() { sendKey(.ctrlL) }
+    @objc private func tapHome() { sendKey(.home) }
+    @objc private func tapEnd() { sendKey(.end) }
+    @objc private func tapPgUp() { sendKey(.pageUp) }
+    @objc private func tapPgDn() { sendKey(.pageDown) }
 }
 
 // MARK: - Software Keyboard (UIKeyInput)

@@ -40,6 +40,8 @@ final class CloudKitManager: ObservableObject {
         }
     }
 
+    private var accountStatusChecked = false
+
     private init() {
         container = CKContainer(identifier: "iCloud.com.vivy.vivyterm")
         database = container.privateCloudDatabase
@@ -47,6 +49,12 @@ final class CloudKitManager: ObservableObject {
     }
 
     // MARK: - Account Status
+
+    /// Ensures account status is checked before performing operations
+    private func ensureAccountStatusChecked() async {
+        guard !accountStatusChecked else { return }
+        await checkAccountStatus()
+    }
 
     private func checkAccountStatus() async {
         do {
@@ -72,6 +80,7 @@ final class CloudKitManager: ObservableObject {
 
             isAvailable = status == .available
             accountStatusDetail = statusDescription
+            accountStatusChecked = true
             if !isAvailable {
                 syncStatus = .offline
                 logger.warning("CloudKit not available. Status: \(statusDescription)")
@@ -81,12 +90,14 @@ final class CloudKitManager: ObservableObject {
             isAvailable = false
             accountStatusDetail = "Error: \(error.localizedDescription)"
             syncStatus = .error(error.localizedDescription)
+            accountStatusChecked = true
         }
     }
 
     // MARK: - Server Operations
 
     func fetchServers() async throws -> [Server] {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
@@ -164,6 +175,7 @@ final class CloudKitManager: ObservableObject {
     // MARK: - Workspace Operations
 
     func fetchWorkspaces() async throws -> [Workspace] {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
