@@ -124,7 +124,7 @@ actor SSHClient {
 
 /// Thread-safe storage for keyboard-interactive password (needed for C callback)
 private final class KeyboardInteractivePassword: @unchecked Sendable {
-    static nonisolated(unsafe) let shared = KeyboardInteractivePassword()
+    static let shared = KeyboardInteractivePassword()
     private nonisolated(unsafe) var _password: String?
     private let lock = NSLock()
 

@@ -84,6 +84,8 @@ class GhosttyTerminalView: UIView {
         return recognizer
     }()
 
+    private var editMenuInteraction: UIEditMenuInteraction?
+
     /// Observer for config reload notifications
     private var configReloadObserver: NSObjectProtocol?
 
@@ -177,6 +179,11 @@ class GhosttyTerminalView: UIView {
         addGestureRecognizer(selectionRecognizer)
         addGestureRecognizer(scrollRecognizer)
         isUserInteractionEnabled = true
+
+        // Setup edit menu interaction for copy/paste
+        let interaction = UIEditMenuInteraction(delegate: self)
+        addInteraction(interaction)
+        editMenuInteraction = interaction
 
         setupConfigReloadObservation()
         registerColorSchemeObserver()
@@ -560,8 +567,8 @@ class GhosttyTerminalView: UIView {
     private func showEditMenu(at location: CGPoint) {
         guard let cSurface = surface?.unsafeCValue else { return }
         guard ghostty_surface_has_selection(cSurface) else { return }
-        let targetRect = CGRect(x: location.x, y: location.y, width: 1, height: 1)
-        UIMenuController.shared.showMenu(from: self, rect: targetRect)
+        let config = UIEditMenuConfiguration(identifier: nil, sourcePoint: location)
+        editMenuInteraction?.presentEditMenu(with: config)
     }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
@@ -797,6 +804,30 @@ extension GhosttyTerminalView: UIGestureRecognizerDelegate {
             return otherGestureRecognizer.state == .began
         }
         return false
+    }
+}
+
+// MARK: - Edit Menu Interaction Delegate
+
+extension GhosttyTerminalView: UIEditMenuInteractionDelegate {
+    func editMenuInteraction(
+        _ interaction: UIEditMenuInteraction,
+        menuFor configuration: UIEditMenuConfiguration,
+        suggestedActions: [UIMenuElement]
+    ) -> UIMenu? {
+        var actions: [UIMenuElement] = []
+
+        if let cSurface = surface?.unsafeCValue, ghostty_surface_has_selection(cSurface) {
+            actions.append(UIAction(title: "Copy", image: UIImage(systemName: "doc.on.doc")) { [weak self] _ in
+                self?.copy(nil)
+            })
+        }
+
+        actions.append(UIAction(title: "Paste", image: UIImage(systemName: "doc.on.clipboard")) { [weak self] _ in
+            self?.paste(nil)
+        })
+
+        return UIMenu(children: actions)
     }
 }
 
