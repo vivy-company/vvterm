@@ -71,10 +71,11 @@ build_openssl_ios() {
     IOS_SDK=$(xcrun --sdk iphoneos --show-sdk-path)
     export CROSS_TOP="$(xcrun --sdk iphoneos --show-sdk-platform-path)/Developer"
     export CROSS_SDK="iPhoneOS.sdk"
-    export CC="$(xcrun --sdk iphoneos -f clang) -isysroot $IOS_SDK"
+    export CC="$(xcrun --sdk iphoneos -f clang) -isysroot $IOS_SDK -miphoneos-version-min=16.0"
 
     ./Configure ios64-xcrun \
         --prefix="$BUILD_DIR/openssl-ios" \
+        -miphoneos-version-min=16.0 \
         no-shared \
         no-tests \
         no-apps
@@ -98,10 +99,11 @@ build_openssl_simulator() {
     # Build arm64
     log_info "Building OpenSSL Simulator arm64..."
     make clean 2>/dev/null || true
-    export CC="$(xcrun --sdk iphonesimulator -f clang) -isysroot $SIM_SDK -arch arm64"
+    export CC="$(xcrun --sdk iphonesimulator -f clang) -isysroot $SIM_SDK -arch arm64 -mios-simulator-version-min=16.0"
 
     ./Configure iossimulator-xcrun \
         --prefix="$BUILD_DIR/openssl-simulator-arm64" \
+        -mios-simulator-version-min=16.0 \
         no-shared \
         no-tests \
         no-apps
@@ -112,10 +114,11 @@ build_openssl_simulator() {
     # Build x86_64
     log_info "Building OpenSSL Simulator x86_64..."
     make clean 2>/dev/null || true
-    export CC="$(xcrun --sdk iphonesimulator -f clang) -isysroot $SIM_SDK -arch x86_64"
+    export CC="$(xcrun --sdk iphonesimulator -f clang) -isysroot $SIM_SDK -arch x86_64 -mios-simulator-version-min=16.0"
 
     ./Configure iossimulator-xcrun \
         --prefix="$BUILD_DIR/openssl-simulator-x86_64" \
+        -mios-simulator-version-min=16.0 \
         no-shared \
         no-tests \
         no-apps
@@ -184,6 +187,7 @@ build_libssh2_ios() {
         -DCMAKE_SYSTEM_NAME=iOS \
         -DCMAKE_OSX_SYSROOT="$IOS_SDK" \
         -DCMAKE_OSX_ARCHITECTURES=arm64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
         -DCMAKE_INSTALL_PREFIX="$VENDOR_DIR/ios" \
         -DOPENSSL_ROOT_DIR="$BUILD_DIR/openssl-ios" \
         -DOPENSSL_INCLUDE_DIR="$BUILD_DIR/openssl-ios/include" \
@@ -220,6 +224,7 @@ build_libssh2_simulator() {
         -DCMAKE_SYSTEM_NAME=iOS \
         -DCMAKE_OSX_SYSROOT="$SIM_SDK" \
         -DCMAKE_OSX_ARCHITECTURES=arm64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
         -DCMAKE_INSTALL_PREFIX="$BUILD_DIR/libssh2-simulator-arm64" \
         -DOPENSSL_ROOT_DIR="$BUILD_DIR/openssl-simulator" \
         -DOPENSSL_INCLUDE_DIR="$BUILD_DIR/openssl-simulator/include" \
@@ -243,6 +248,7 @@ build_libssh2_simulator() {
         -DCMAKE_SYSTEM_NAME=iOS \
         -DCMAKE_OSX_SYSROOT="$SIM_SDK" \
         -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=16.0 \
         -DCMAKE_INSTALL_PREFIX="$BUILD_DIR/libssh2-simulator-x86_64" \
         -DOPENSSL_ROOT_DIR="$BUILD_DIR/openssl-simulator" \
         -DOPENSSL_INCLUDE_DIR="$BUILD_DIR/openssl-simulator/include" \

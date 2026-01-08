@@ -124,11 +124,11 @@ actor SSHClient {
 
 /// Thread-safe storage for keyboard-interactive password (needed for C callback)
 private final class KeyboardInteractivePassword: @unchecked Sendable {
-    nonisolated(unsafe) static let shared = KeyboardInteractivePassword()
-    private var _password: String?
+    static let shared = KeyboardInteractivePassword()
+    private nonisolated(unsafe) var _password: String?
     private let lock = NSLock()
 
-    nonisolated var password: String? {
+    var password: String? {
         get {
             lock.lock()
             defer { lock.unlock() }
@@ -544,7 +544,7 @@ actor SSHSession {
         let bulkThreshold = 1000                   // bytes - above this is bulk
         var recentBytesPerRead: Int = 0            // exponential moving average
 
-        while !Task.isCancelled, let channel = channel, let session = libssh2Session {
+        while !Task.isCancelled, let channel = channel, libssh2Session != nil {
             // Use _ex variant since macros not available in Swift (stream_id 0 = stdout)
             let bytesRead = libssh2_channel_read_ex(channel, 0, &buffer, buffer.count)
 
@@ -815,8 +815,10 @@ private func fdSet(_ fd: Int32, _ set: inout fd_set) {
 
 /// Thread-safe socket storage that allows closing from any thread
 final class AtomicSocket: @unchecked Sendable {
-    private var _socket: Int32 = -1
+    private nonisolated(unsafe) var _socket: Int32 = -1
     private let lock = NSLock()
+
+    nonisolated init() {}
 
     var socket: Int32 {
         get {
