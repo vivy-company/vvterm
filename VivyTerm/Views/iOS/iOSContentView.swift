@@ -26,7 +26,7 @@ struct iOSContentView: View {
                 onServerSelected: { server in
                     selectedServer = server
                     Task {
-                        try? await sessionManager.openConnection(to: server)
+                        _ = try? await sessionManager.openConnection(to: server)
                         showingTerminal = true
                     }
                 }
@@ -275,7 +275,7 @@ struct iOSTerminalView: View {
 
             // Stats view
             if let server = server {
-                ServerStatsView(server: server, session: session)
+                ServerStatsView(server: server, isVisible: selectedView == "stats")
                     .opacity(selectedView == "stats" ? 1 : 0)
                     .allowsHitTesting(selectedView == "stats")
             }

@@ -53,7 +53,8 @@ extension Ghostty {
 
             // Fallback: schedule free on main actor
             // This is a safety net - prefer calling free() explicitly
-            Task { @MainActor in
+            // MainActor.run used to avoid Sendable warning on raw pointer
+            DispatchQueue.main.async {
                 ghostty_surface_free(surf)
             }
         }

@@ -306,7 +306,7 @@ final class ConnectionSessionManager: ObservableObject {
 
     func reconnect(session: ConnectionSession) async throws {
         guard let serverManager = ServerManager.shared as ServerManager?,
-              let server = serverManager.servers.first(where: { $0.id == session.serverId }) else {
+              serverManager.servers.contains(where: { $0.id == session.serverId }) else {
             throw SSHError.connectionFailed("Server not found")
         }
 

@@ -61,15 +61,17 @@ extension SSHTerminalCoordinator {
     }
 
     func startSSHConnection(terminal: GhosttyTerminalView) {
+        // Capture all values needed in the detached task before creating it
+        // to avoid accessing main actor-isolated properties from detached context
+        let sshClient = self.sshClient
+        let server = self.server
+        let credentials = self.credentials
+        let sessionId = self.sessionId
+        let onProcessExit = self.onProcessExit
+        let logger = self.logger
+
         shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
             guard let self = self, let terminal = terminal else { return }
-
-            let sshClient = self.sshClient
-            let server = self.server
-            let credentials = self.credentials
-            let sessionId = self.sessionId
-            let onProcessExit = self.onProcessExit
-            let logger = self.logger
 
             do {
                 logger.info("Connecting to \(server.host)...")
@@ -468,7 +470,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             }
         } else {
             if terminalView.isFirstResponder {
-                terminalView.resignFirstResponder()
+                _ = terminalView.resignFirstResponder()
             }
         }
     }
@@ -487,7 +489,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         if let terminalView = uiView as? GhosttyTerminalView {
             // Pause rendering immediately so the back gesture animation can complete.
             terminalView.pauseRendering()
-            terminalView.resignFirstResponder()
+            _ = terminalView.resignFirstResponder()
 
             // Cleanup is now called synchronously in cancelShell() which calls terminal.cleanup()
             // The asyncAfter cleanup is kept as a safety net for edge cases

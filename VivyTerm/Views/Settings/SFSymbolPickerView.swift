@@ -211,10 +211,10 @@ struct SFSymbolPickerView: View {
         }
         .frame(width: 540, height: 480)
         .background(Color.systemBackground)
-        .onChange(of: searchText) { _ in
+        .onChange(of: searchText) {
             displayLimit = pageSize
         }
-        .onChange(of: selectedCategory) { _ in
+        .onChange(of: selectedCategory) {
             displayLimit = pageSize
         }
     }

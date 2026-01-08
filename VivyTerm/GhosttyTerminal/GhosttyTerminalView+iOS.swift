@@ -94,7 +94,7 @@ class GhosttyTerminalView: UIView {
     private func requestRender() {
         guard !isShuttingDown else { return }
         guard !isPaused else { return }
-        guard let surface = surface?.unsafeCValue else { return }
+        guard surface?.unsafeCValue != nil else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
 
         lastActivityTime = CFAbsoluteTimeGetCurrent()
@@ -179,6 +179,7 @@ class GhosttyTerminalView: UIView {
         isUserInteractionEnabled = true
 
         setupConfigReloadObservation()
+        registerColorSchemeObserver()
     }
 
     required init?(coder: NSCoder) {
@@ -273,7 +274,8 @@ class GhosttyTerminalView: UIView {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in
+            guard let self = self else { return }
+            Task { @MainActor [weak self] in
                 self?.needsRender = true
             }
         }
@@ -445,10 +447,16 @@ class GhosttyTerminalView: UIView {
         }
     }
 
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
+    // Use trait change registration API (iOS 17+) with fallback
+    private func registerColorSchemeObserver() {
+        if #available(iOS 17.0, *) {
+            registerForTraitChanges([UITraitUserInterfaceStyle.self]) { [weak self] (view: GhosttyTerminalView, _: UITraitCollection) in
+                self?.updateColorScheme()
+            }
+        }
+    }
 
-        // Update color scheme when appearance changes
+    private func updateColorScheme() {
         guard let surface = surface?.unsafeCValue else { return }
         let scheme: ghostty_color_scheme_e = traitCollection.userInterfaceStyle == .dark
             ? GHOSTTY_COLOR_SCHEME_DARK
@@ -461,7 +469,7 @@ class GhosttyTerminalView: UIView {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
         // Tap just focuses keyboard - no mouse events (avoids accidental selection)
-        becomeFirstResponder()
+        _ = becomeFirstResponder()
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -531,7 +539,7 @@ class GhosttyTerminalView: UIView {
         switch recognizer.state {
         case .began:
             isSelecting = true
-            becomeFirstResponder()
+            _ = becomeFirstResponder()
             surface.sendMouseButton(.init(action: .press, button: .left, mods: mods))
             surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: mods))
             requestRender()

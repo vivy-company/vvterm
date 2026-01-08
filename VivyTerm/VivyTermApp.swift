@@ -147,7 +147,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Close all connections synchronously to ensure cleanup before exit
         let semaphore = DispatchSemaphore(value: 0)
         Task {
-            await ConnectionSessionManager.shared.disconnectAll()
+            ConnectionSessionManager.shared.disconnectAll()
             semaphore.signal()
         }
         // Wait up to 2 seconds for cleanup
@@ -157,7 +157,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     // Handle app going to background - close connections to save resources
     func applicationDidEnterBackground(_ application: UIApplication) {
         Task {
-            await ConnectionSessionManager.shared.disconnectAll()
+            ConnectionSessionManager.shared.disconnectAll()
         }
     }
 }
