@@ -124,11 +124,11 @@ actor SSHClient {
 
 /// Thread-safe storage for keyboard-interactive password (needed for C callback)
 private final class KeyboardInteractivePassword: @unchecked Sendable {
-    static let shared = KeyboardInteractivePassword()
+    static nonisolated(unsafe) let shared = KeyboardInteractivePassword()
     private nonisolated(unsafe) var _password: String?
     private let lock = NSLock()
 
-    var password: String? {
+    nonisolated var password: String? {
         get {
             lock.lock()
             defer { lock.unlock() }
@@ -820,7 +820,7 @@ final class AtomicSocket: @unchecked Sendable {
 
     nonisolated init() {}
 
-    var socket: Int32 {
+    nonisolated var socket: Int32 {
         get {
             lock.lock()
             defer { lock.unlock() }
@@ -834,7 +834,7 @@ final class AtomicSocket: @unchecked Sendable {
     }
 
     /// Close the socket immediately from any thread
-    func closeImmediately() {
+    nonisolated func closeImmediately() {
         lock.lock()
         let sock = _socket
         _socket = -1
