@@ -47,7 +47,7 @@ export function ThanksPage() {
         {/* Actions */}
         <div className="flex gap-4 mb-8">
           <a
-            href="https://discord.gg/eKW7GNesuS"
+            href="https://discord.gg/zemMZtrkSb"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 text-[17px] font-normal border border-white/20 text-white rounded-full hover:bg-white/5 transition-all duration-200"

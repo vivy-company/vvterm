@@ -322,7 +322,7 @@ function AppContent() {
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center md:items-center gap-6">
           <p className="text-sm text-[#86868b] text-center md:text-left">{t("footer.copyright")}</p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
-            <a href="https://discord.gg/eKW7GNesuS" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
+            <a href="https://discord.gg/zemMZtrkSb" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.discord")}
             </a>
             <a href="https://github.com/vivy-company/vvterm" onClick={() => trackEvent("footer_github_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
