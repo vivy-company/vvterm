@@ -4,7 +4,7 @@ Cross-platform (iOS/macOS) SSH terminal app with iCloud sync and Keychain creden
 
 ## Target Versions
 
-- **macOS**: 13.0+ (Ventura), arm64 only
+- **macOS**: 13.3+ (Ventura), arm64 only
 - **iOS**: 16.0+, arm64 only
 - **Xcode**: 16.0+
 
