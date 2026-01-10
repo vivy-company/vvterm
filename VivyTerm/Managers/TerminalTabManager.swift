@@ -190,6 +190,17 @@ final class TerminalTabManager: ObservableObject {
             return
         }
 
+        let paneExists: Bool
+        if let layout = currentTab.layout {
+            paneExists = layout.findPane(paneId)
+        } else {
+            paneExists = currentTab.rootPaneId == paneId
+        }
+        guard paneExists else {
+            logger.warning("closePane: pane not found \(paneId)")
+            return
+        }
+
         // If this is the only pane, close the tab
         if currentTab.paneCount <= 1 {
             closeTab(currentTab)
