@@ -26,8 +26,7 @@ declare global {
   }
 }
 
-// TODO: Update with actual App Store URL when available
-const APP_STORE_URL = "https://apps.apple.com/app/vvterm/id0000000000";
+const APP_STORE_URL = "https://apps.apple.com/app/vvterm/id6757482822";
 
 const FAQSection = lazy(() => import("./components/FAQSection"));
 

@@ -95,7 +95,6 @@ struct ConnectionTerminalContainer: View {
                 }
             }
             #else
-            // iOS - TODO: implement with TerminalTabManager
             if selectedView == "terminal" && serverTabs.isEmpty {
                 TerminalEmptyStateView(server: server) {
                     openNewTab()
