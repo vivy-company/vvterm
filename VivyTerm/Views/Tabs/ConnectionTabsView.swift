@@ -37,7 +37,11 @@ struct ConnectionTerminalContainer: View {
     private var selectedViewBinding: Binding<String> {
         Binding(
             get: { tabManager.selectedViewByServer[server.id] ?? "stats" },
-            set: { tabManager.selectedViewByServer[server.id] = $0 }
+            set: { newValue in
+                DispatchQueue.main.async {
+                    tabManager.selectedViewByServer[server.id] = newValue
+                }
+            }
         )
     }
 
@@ -54,7 +58,11 @@ struct ConnectionTerminalContainer: View {
     private var selectedTabIdBinding: Binding<UUID?> {
         Binding(
             get: { tabManager.selectedTabByServer[server.id] },
-            set: { tabManager.selectedTabByServer[server.id] = $0 }
+            set: { newValue in
+                DispatchQueue.main.async {
+                    tabManager.selectedTabByServer[server.id] = newValue
+                }
+            }
         )
     }
 
@@ -111,10 +119,10 @@ struct ConnectionTerminalContainer: View {
                 selectedTabIdBinding.wrappedValue = serverTabs.first?.id
             }
         }
-        .onChange(of: terminalThemeName) { _, _ in
+        .onChange(of: terminalThemeName) { _ in
             terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName)
         }
-        .onChange(of: serverTabs.count) { _, _ in
+        .onChange(of: serverTabs.count) { _ in
             // Auto-select if current selection is invalid
             if let currentId = selectedTabId, !serverTabs.contains(where: { $0.id == currentId }) {
                 selectedTabIdBinding.wrappedValue = serverTabs.first?.id

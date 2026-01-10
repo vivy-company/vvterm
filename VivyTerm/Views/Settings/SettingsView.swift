@@ -6,18 +6,18 @@
 import SwiftUI
 #if os(macOS)
 import AppKit
-#endif
 
 private extension View {
     @ViewBuilder
     func removingSidebarToggle() -> some View {
         if #available(macOS 14.0, *) {
-            self.toolbar(removing: .sidebarToggle)
+            toolbar(removing: .sidebarToggle)
         } else {
             self
         }
     }
 }
+#endif
 
 // MARK: - Settings Selection
 

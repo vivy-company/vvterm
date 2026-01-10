@@ -106,7 +106,7 @@ struct ProSettingsView: View {
             ProUpgradeSheet()
         }
         #if os(iOS)
-        .manageSubscriptionsSheet(
+        .manageSubscriptionsSheetCompat(
             isPresented: $showingManageSubscription,
             subscriptionGroupID: VivyTermProducts.subscriptionGroupId
         )
@@ -211,6 +211,25 @@ struct ProSettingsView: View {
         .buttonStyle(.plain)
     }
 }
+
+#if os(iOS)
+private extension View {
+    @ViewBuilder
+    func manageSubscriptionsSheetCompat(
+        isPresented: Binding<Bool>,
+        subscriptionGroupID: String
+    ) -> some View {
+        if #available(iOS 17.0, *) {
+            manageSubscriptionsSheet(
+                isPresented: isPresented,
+                subscriptionGroupID: subscriptionGroupID
+            )
+        } else {
+            self
+        }
+    }
+}
+#endif
 
 // MARK: - Preview
 

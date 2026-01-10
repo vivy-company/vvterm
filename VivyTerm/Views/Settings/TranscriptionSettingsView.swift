@@ -128,7 +128,7 @@ struct TranscriptionSettingsView: View {
                     .tag(id)
                 }
             }
-            .onChange(of: modelBinding.wrappedValue) { _, newValue in
+            .onChange(of: modelBinding.wrappedValue) { newValue in
                 manager.modelId = newValue
                 manager.refreshStatus()
             }

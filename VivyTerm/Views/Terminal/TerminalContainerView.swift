@@ -199,7 +199,7 @@ struct TerminalContainerView: View {
         .onAppear {
             terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
         }
-        .onChange(of: terminalThemeName) { _, _ in
+        .onChange(of: terminalThemeName) { _ in
             terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
         }
         #if os(macOS)
