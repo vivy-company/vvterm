@@ -80,7 +80,7 @@ struct VivyTermApp: App {
             .onAppear {
                 AppLanguage.applySelection(appLanguage)
             }
-            .onChange(of: appLanguage) { _, newValue in
+            .onChange(of: appLanguage) { newValue in
                 AppLanguage.applySelection(newValue)
             }
         }
