@@ -82,12 +82,12 @@ struct ContentView: View {
                 selectedWorkspace = serverManager.workspaces.first
             }
         }
-        .onChange(of: serverManager.workspaces) { _, workspaces in
+        .onChange(of: serverManager.workspaces) { workspaces in
             if selectedWorkspace == nil {
                 selectedWorkspace = workspaces.first
             }
         }
-        .onChange(of: selectedServer) { _, server in
+        .onChange(of: selectedServer) { _ in
             // Auto-connect on selection (optional)
         }
         #if os(macOS)
