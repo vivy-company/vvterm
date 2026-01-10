@@ -35,6 +35,10 @@
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>VVTerm uses speech recognition to convert voice to terminal commands.</string>
 
+    <!-- Local network usage -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>VVTerm uses your local network to connect to SSH servers on your LAN.</string>
+
     <!-- App category -->
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.developer-tools</string>

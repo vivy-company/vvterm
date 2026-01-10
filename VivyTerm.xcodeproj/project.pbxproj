@@ -313,10 +313,13 @@
 /* Begin XCBuildConfiguration section */
 		CC8312A62F0CD84E006804BF /* Debug */ = {
 			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				buildSettings = {
+					APS_ENVIRONMENT = development;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = VivyTerm/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = VivyTerm-iOS/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = VivyTerm-iOS/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = VivyTerm-macOS/VivyTerm.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
@@ -335,7 +338,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				"EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(SRCROOT)/Vendor/libghostty/ios/include",
 					"$(SRCROOT)/Vendor/libssh2/include",
@@ -348,7 +351,9 @@
 					"$(SRCROOT)/Vendor/libghostty/include",
 					"$(SRCROOT)/Vendor/libssh2/include",
 				);
-				INFOPLIST_FILE = VivyTerm/Info.plist;
+				"INFOPLIST_FILE[sdk=iphoneos*]" = VivyTerm-iOS/Info.plist;
+				"INFOPLIST_FILE[sdk=iphonesimulator*]" = VivyTerm-iOS/Info.plist;
+				"INFOPLIST_FILE[sdk=macosx*]" = VivyTerm-macOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
 				INFOPLIST_KEY_CFBundleName = VVTerm;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
@@ -364,8 +369,8 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
-				ITSAppUsesNonExemptEncryption = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
@@ -380,7 +385,7 @@
 					"$(SRCROOT)/Vendor/libghostty/lib",
 					"$(SRCROOT)/Vendor/libssh2/macos/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
@@ -446,10 +451,13 @@
 		};
 		CC8312A72F0CD84E006804BF /* Release */ = {
 			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				buildSettings = {
+					APS_ENVIRONMENT = production;
+					ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = VivyTerm/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = VivyTerm-iOS/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = VivyTerm-iOS/VivyTerm.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = VivyTerm-macOS/VivyTerm.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
@@ -468,7 +476,7 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				"EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
 				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
 					"$(SRCROOT)/Vendor/libghostty/ios/include",
 					"$(SRCROOT)/Vendor/libssh2/include",
@@ -481,7 +489,9 @@
 					"$(SRCROOT)/Vendor/libghostty/include",
 					"$(SRCROOT)/Vendor/libssh2/include",
 				);
-				INFOPLIST_FILE = VivyTerm/Info.plist;
+				"INFOPLIST_FILE[sdk=iphoneos*]" = VivyTerm-iOS/Info.plist;
+				"INFOPLIST_FILE[sdk=iphonesimulator*]" = VivyTerm-iOS/Info.plist;
+				"INFOPLIST_FILE[sdk=macosx*]" = VivyTerm-macOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
 				INFOPLIST_KEY_CFBundleName = VVTerm;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
@@ -497,8 +507,8 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
-				ITSAppUsesNonExemptEncryption = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
@@ -513,7 +523,7 @@
 					"$(SRCROOT)/Vendor/libghostty/lib",
 					"$(SRCROOT)/Vendor/libssh2/macos/lib",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
@@ -701,8 +711,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -727,8 +737,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -752,8 +762,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -777,8 +787,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
