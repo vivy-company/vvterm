@@ -59,7 +59,7 @@ struct OfflineBanner: View {
 
 private struct OfflineFeatureRow: View {
     let icon: String
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(spacing: 6) {
@@ -108,7 +108,7 @@ struct NetworkStatusIndicator: View {
                 .frame(width: 8, height: 8)
 
             if showLabel {
-                Text(networkMonitor.isConnected ? networkMonitor.connectionType.rawValue : "Offline")
+                Text(networkMonitor.isConnected ? networkMonitor.connectionType.displayName : String(localized: "Offline"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

@@ -11,9 +11,9 @@ enum MLXModelKind: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .whisper:
-            return "MLX Whisper"
+            return String(localized: "MLX Whisper")
         case .parakeetTDT:
-            return "MLX Parakeet"
+            return String(localized: "MLX Parakeet")
         }
     }
 
@@ -29,9 +29,16 @@ enum MLXModelKind: String, CaseIterable, Identifiable {
 
 @MainActor
 final class MLXModelManager: NSObject, ObservableObject {
+    struct DownloadProgress: Equatable {
+        var fraction: Double
+        var bytesDownloaded: Int64
+        var totalBytes: Int64
+        var estimatedSecondsRemaining: Int?
+    }
+
     enum DownloadState: Equatable {
         case idle
-        case downloading(progress: Double)
+        case downloading(DownloadProgress)
         case ready
         case failed(String)
     }
@@ -53,8 +60,10 @@ final class MLXModelManager: NSObject, ObservableObject {
     private var activeTask: URLSessionDownloadTask?
     private var activeItem: DownloadItem?
     private var activeContinuation: CheckedContinuation<URL, Error>?
-    private var completedCount = 0
-    private var totalCount = 0
+    private var completedBytes: Int64 = 0
+    private var currentFileBytes: Int64 = 0
+    private var expectedTotalBytes: Int64 = 0
+    private var downloadStartTime: Date?
     private var storageTask: Task<Void, Never>?
     private var repoSizeTask: Task<Void, Never>?
     private var lastRepoSizeModelId: String?
@@ -132,8 +141,14 @@ final class MLXModelManager: NSObject, ObservableObject {
             refreshStorageUsage()
         } catch {
             logger.error("Failed to remove MLX model: \(error.localizedDescription)")
-            state = .failed("Failed to remove model")
+            state = .failed(String(localized: "Failed to remove model"))
         }
+    }
+
+    static func clearAllStorage() {
+        let root = modelsRoot
+        guard FileManager.default.fileExists(atPath: root.path) else { return }
+        try? FileManager.default.removeItem(at: root)
     }
 
     func downloadModel() async {
@@ -141,7 +156,7 @@ final class MLXModelManager: NSObject, ObservableObject {
 
         let modelId = normalizedModelId
         guard !modelId.isEmpty else {
-            state = .failed("Model ID is required")
+            state = .failed(String(localized: "Model ID is required"))
             return
         }
 
@@ -150,14 +165,16 @@ final class MLXModelManager: NSObject, ObservableObject {
 
             let items = try await resolveDownloadItems()
 
-            completedCount = 0
-            totalCount = items.count
-            state = .downloading(progress: 0)
+            completedBytes = 0
+            currentFileBytes = 0
+            expectedTotalBytes = repoSizeBytes ?? 0
+            downloadStartTime = Date()
+            state = .downloading(DownloadProgress(fraction: 0, bytesDownloaded: 0, totalBytes: expectedTotalBytes, estimatedSecondsRemaining: nil))
 
             for item in items {
+                currentFileBytes = 0
                 try await download(item)
-                completedCount += 1
-                updateProgress(currentFraction: 0)
+                completedBytes += currentFileBytes
             }
 
             state = .ready
@@ -343,11 +360,39 @@ final class MLXModelManager: NSObject, ObservableObject {
         }
     }
 
-    private func updateProgress(currentFraction: Double) {
-        guard totalCount > 0 else { return }
-        let completed = Double(completedCount)
-        let progress = (completed + currentFraction) / Double(totalCount)
-        state = .downloading(progress: min(max(progress, 0), 1))
+    private func updateProgress(currentBytes: Int64, currentTotalBytes: Int64) {
+        currentFileBytes = currentBytes
+        let totalDownloaded = completedBytes + currentBytes
+
+        let fraction: Double
+        let totalBytes: Int64
+        if expectedTotalBytes > 0 {
+            fraction = Double(totalDownloaded) / Double(expectedTotalBytes)
+            totalBytes = expectedTotalBytes
+        } else if currentTotalBytes > 0 {
+            fraction = Double(currentBytes) / Double(currentTotalBytes)
+            totalBytes = currentTotalBytes
+        } else {
+            fraction = 0
+            totalBytes = 0
+        }
+
+        var eta: Int?
+        if let startTime = downloadStartTime, totalDownloaded > 0 {
+            let elapsed = Date().timeIntervalSince(startTime)
+            let bytesPerSecond = Double(totalDownloaded) / elapsed
+            if bytesPerSecond > 0 {
+                let remainingBytes = totalBytes - totalDownloaded
+                eta = Int(Double(remainingBytes) / bytesPerSecond)
+            }
+        }
+
+        state = .downloading(DownloadProgress(
+            fraction: min(max(fraction, 0), 1),
+            bytesDownloaded: totalDownloaded,
+            totalBytes: totalBytes,
+            estimatedSecondsRemaining: eta
+        ))
     }
 }
 
@@ -394,10 +439,8 @@ extension MLXModelManager: @preconcurrency URLSessionDownloadDelegate {
         totalBytesWritten: Int64,
         totalBytesExpectedToWrite: Int64
     ) {
-        guard totalBytesExpectedToWrite > 0 else { return }
-        let fraction = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
         Task { @MainActor in
-            self.updateProgress(currentFraction: fraction)
+            self.updateProgress(currentBytes: totalBytesWritten, currentTotalBytes: totalBytesExpectedToWrite)
         }
     }
 

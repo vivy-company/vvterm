@@ -84,6 +84,34 @@ struct ServerEnvironment: Identifiable, Codable, Hashable {
         Color.fromHex(colorHex)
     }
 
+    var displayName: String {
+        guard isBuiltIn else { return name }
+        switch id {
+        case ServerEnvironment.production.id:
+            return String(localized: "Production")
+        case ServerEnvironment.staging.id:
+            return String(localized: "Staging")
+        case ServerEnvironment.development.id:
+            return String(localized: "Development")
+        default:
+            return name
+        }
+    }
+
+    var displayShortName: String {
+        guard isBuiltIn else { return shortName }
+        switch id {
+        case ServerEnvironment.production.id:
+            return String(localized: "Prod")
+        case ServerEnvironment.staging.id:
+            return String(localized: "Stag")
+        case ServerEnvironment.development.id:
+            return String(localized: "Dev")
+        default:
+            return shortName
+        }
+    }
+
     // MARK: - Built-in Environments
 
     static let production = ServerEnvironment(

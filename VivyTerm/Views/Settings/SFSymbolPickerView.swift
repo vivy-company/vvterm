@@ -90,44 +90,44 @@ class SFSymbolsProvider {
             "person", "person.2", "person.3", "folder", "doc.text"
         ]
         categories = [
-            (key: "all", icon: "square.grid.2x2", name: "All")
+            (key: "all", icon: "square.grid.2x2", name: String(localized: "All"))
         ]
     }
 
     private func displayName(for key: String) -> String {
         switch key {
-        case "all": return "All"
-        case "whatsnew": return "What's New"
-        case "draw": return "Draw"
-        case "variable": return "Variable"
-        case "multicolor": return "Multicolor"
-        case "communication": return "Communication"
-        case "weather": return "Weather"
-        case "maps": return "Maps"
-        case "objectsandtools": return "Objects & Tools"
-        case "devices": return "Devices"
-        case "cameraandphotos": return "Camera & Photos"
-        case "gaming": return "Gaming"
-        case "connectivity": return "Connectivity"
-        case "transportation": return "Transportation"
-        case "automotive": return "Automotive"
-        case "accessibility": return "Accessibility"
-        case "privacyandsecurity": return "Privacy & Security"
-        case "human": return "Human"
-        case "home": return "Home"
-        case "fitness": return "Fitness"
-        case "nature": return "Nature"
-        case "editing": return "Editing"
-        case "textformatting": return "Text Formatting"
-        case "media": return "Media"
-        case "keyboard": return "Keyboard"
-        case "commerce": return "Commerce"
-        case "time": return "Time"
-        case "health": return "Health"
-        case "shapes": return "Shapes"
-        case "arrows": return "Arrows"
-        case "indices": return "Indices"
-        case "math": return "Math"
+        case "all": return String(localized: "All")
+        case "whatsnew": return String(localized: "What's New")
+        case "draw": return String(localized: "Draw")
+        case "variable": return String(localized: "Variable")
+        case "multicolor": return String(localized: "Multicolor")
+        case "communication": return String(localized: "Communication")
+        case "weather": return String(localized: "Weather")
+        case "maps": return String(localized: "Maps")
+        case "objectsandtools": return String(localized: "Objects & Tools")
+        case "devices": return String(localized: "Devices")
+        case "cameraandphotos": return String(localized: "Camera & Photos")
+        case "gaming": return String(localized: "Gaming")
+        case "connectivity": return String(localized: "Connectivity")
+        case "transportation": return String(localized: "Transportation")
+        case "automotive": return String(localized: "Automotive")
+        case "accessibility": return String(localized: "Accessibility")
+        case "privacyandsecurity": return String(localized: "Privacy & Security")
+        case "human": return String(localized: "Human")
+        case "home": return String(localized: "Home")
+        case "fitness": return String(localized: "Fitness")
+        case "nature": return String(localized: "Nature")
+        case "editing": return String(localized: "Editing")
+        case "textformatting": return String(localized: "Text Formatting")
+        case "media": return String(localized: "Media")
+        case "keyboard": return String(localized: "Keyboard")
+        case "commerce": return String(localized: "Commerce")
+        case "time": return String(localized: "Time")
+        case "health": return String(localized: "Health")
+        case "shapes": return String(localized: "Shapes")
+        case "arrows": return String(localized: "Arrows")
+        case "indices": return String(localized: "Indices")
+        case "math": return String(localized: "Math")
         default: return key.capitalized
         }
     }
@@ -256,7 +256,7 @@ struct SFSymbolPickerView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 4) {
                 if !recentManager.recentSymbols.isEmpty && searchText.isEmpty {
-                    categoryTab(key: "recent", icon: "clock", name: "Recent")
+                    categoryTab(key: "recent", icon: "clock", name: String(localized: "Recent"))
                 }
 
                 ForEach(provider.categories, id: \.key) { category in

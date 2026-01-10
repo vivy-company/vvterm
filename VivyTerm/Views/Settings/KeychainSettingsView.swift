@@ -128,7 +128,7 @@ struct KeychainSettingsView: View {
             loadKeys()
             error = nil
         } catch {
-            self.error = "Failed to delete key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to delete key: \(error.localizedDescription)")
         }
     }
 }
@@ -182,7 +182,7 @@ private struct SSHKeyRow: View {
                         .foregroundStyle(.blue)
                 }
                 .buttonStyle(.plain)
-                .help("Copy public key")
+                .help(Text("Copy public key"))
             }
 
             Button(role: .destructive) {
@@ -326,7 +326,7 @@ struct AddSSHKeySheet: View {
         case .success(let urls):
             guard let url = urls.first else { return }
             guard url.startAccessingSecurityScopedResource() else {
-                self.error = "Cannot access the selected file"
+                self.error = String(localized: "Cannot access the selected file")
                 return
             }
             defer { url.stopAccessingSecurityScopedResource() }
@@ -341,10 +341,10 @@ struct AddSSHKeySheet: View {
                     name = filename.replacingOccurrences(of: "id_", with: "").capitalized + " Key"
                 }
             } catch {
-                self.error = "Failed to read key file: \(error.localizedDescription)"
+                self.error = String(localized: "Failed to read key file: \(error.localizedDescription)")
             }
         case .failure(let error):
-            self.error = "Failed to import key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to import key: \(error.localizedDescription)")
         }
     }
 
@@ -353,7 +353,7 @@ struct AddSSHKeySheet: View {
         error = nil
 
         guard let keyData = keyContent.data(using: .utf8) else {
-            error = "Failed to encode key data"
+            error = String(localized: "Failed to encode key data")
             isSaving = false
             return
         }
@@ -367,7 +367,7 @@ struct AddSSHKeySheet: View {
             onSave(entry)
             dismiss()
         } catch {
-            self.error = "Failed to save key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to save key: \(error.localizedDescription)")
             isSaving = false
         }
     }
@@ -502,7 +502,7 @@ struct GenerateSSHKeySheet: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.error = "Failed to generate key: \(error.localizedDescription)"
+                    self.error = String(localized: "Failed to generate key: \(error.localizedDescription)")
                     self.isGenerating = false
                 }
             }
@@ -523,7 +523,7 @@ struct GenerateSSHKeySheet: View {
             onSave(entry)
             dismiss()
         } catch {
-            self.error = "Failed to save key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to save key: \(error.localizedDescription)")
         }
     }
 }
@@ -560,7 +560,10 @@ struct PublicKeySheet: View {
                     Button {
                         copyToClipboard(publicKey)
                     } label: {
-                        Label(copied ? "Copied" : "Copy to Clipboard", systemImage: copied ? "checkmark" : "doc.on.doc")
+                        Label(
+                            copied ? String(localized: "Copied") : String(localized: "Copy to Clipboard"),
+                            systemImage: copied ? "checkmark" : "doc.on.doc"
+                        )
                     }
                     .buttonStyle(.borderedProminent)
                 } else {
@@ -637,7 +640,10 @@ struct PublicKeyDisplaySheet: View {
                 Button {
                     copyToClipboard(publicKey)
                 } label: {
-                    Label(copied ? "Copied" : "Copy to Clipboard", systemImage: copied ? "checkmark" : "doc.on.doc")
+                    Label(
+                        copied ? String(localized: "Copied") : String(localized: "Copy to Clipboard"),
+                        systemImage: copied ? "checkmark" : "doc.on.doc"
+                    )
                 }
                 .buttonStyle(.borderedProminent)
             }

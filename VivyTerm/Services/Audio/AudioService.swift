@@ -154,13 +154,13 @@ class AudioService: NSObject, ObservableObject {
         var errorDescription: String? {
             switch self {
             case .permissionDenied:
-                return "Microphone permission is required. The microphone will be automatically requested when recording starts."
+                return String(localized: "Microphone permission is required. The microphone will be automatically requested when recording starts.")
             case .speechRecognitionUnavailable:
-                return "Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight."
+                return String(localized: "Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight.")
             case .recordingFailed:
-                return "Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone."
+                return String(localized: "Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone.")
             case .mlxUnavailable:
-                return "MLX transcription is not available on this Mac. Switching to Apple Speech."
+                return String(localized: "MLX transcription is not available on this Mac. Switching to Apple Speech.")
             }
         }
     }

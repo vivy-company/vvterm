@@ -13,11 +13,11 @@ struct ProUpgradeSheet: View {
 
     private var features: [(icon: String, title: String, description: String, color: Color)] {
         [
-            ("server.rack", "Unlimited Servers", "Add as many servers as you need (free: 3)", .pink),
-            ("folder", "Unlimited Workspaces", "Organize servers into multiple workspaces (free: 1)", .pink),
-            ("square.on.square", "Multiple Connections", "Open multiple terminal tabs at once (free: 1)", .orange),
-            ("tag", "Custom Environments", "Create custom environment labels beyond Prod/Staging/Dev", .orange),
-            ("star", "All Future Features", "Get access to every new Pro feature", .yellow)
+            ("server.rack", String(localized: "Unlimited Servers"), String(localized: "Add as many servers as you need (free: 3)"), .pink),
+            ("folder", String(localized: "Unlimited Workspaces"), String(localized: "Organize servers into multiple workspaces (free: 1)"), .pink),
+            ("square.on.square", String(localized: "Multiple Connections"), String(localized: "Open multiple terminal tabs at once (free: 1)"), .orange),
+            ("tag", String(localized: "Custom Environments"), String(localized: "Create custom environment labels beyond Prod/Staging/Dev"), .orange),
+            ("star", String(localized: "All Future Features"), String(localized: "Get access to every new Pro feature"), .yellow)
         ]
     }
 
@@ -68,8 +68,8 @@ struct ProUpgradeSheet: View {
                 if let monthly = storeManager.monthlyProduct {
                     PlanOptionRow(
                         product: monthly,
-                        title: "Monthly",
-                        subtitle: "Billed monthly",
+                        title: String(localized: "Monthly"),
+                        subtitle: String(localized: "Billed monthly"),
                         badge: nil,
                         isSelected: selectedProduct?.id == monthly.id
                     ) {
@@ -80,9 +80,9 @@ struct ProUpgradeSheet: View {
                 if let yearly = storeManager.yearlyProduct {
                     PlanOptionRow(
                         product: yearly,
-                        title: "Yearly",
-                        subtitle: "Best value - billed yearly",
-                        badge: "SAVE 74%",
+                        title: String(localized: "Yearly"),
+                        subtitle: String(localized: "Best value - billed yearly"),
+                        badge: String(localized: "SAVE 74%"),
                         isSelected: selectedProduct?.id == yearly.id
                     ) {
                         selectedProduct = yearly
@@ -92,9 +92,9 @@ struct ProUpgradeSheet: View {
                 if let lifetime = storeManager.lifetimeProduct {
                     PlanOptionRow(
                         product: lifetime,
-                        title: "Lifetime",
-                        subtitle: "One-time purchase, forever",
-                        badge: "FOREVER",
+                        title: String(localized: "Lifetime"),
+                        subtitle: String(localized: "One-time purchase, forever"),
+                        badge: String(localized: "FOREVER"),
                         isSelected: selectedProduct?.id == lifetime.id
                     ) {
                         selectedProduct = lifetime
@@ -117,7 +117,7 @@ struct ProUpgradeSheet: View {
                             .scaleEffect(0.8)
                             .tint(.white)
                     }
-                    Text(storeManager.purchaseState == .purchasing ? "Processing..." : subscribeButtonTitle)
+                    Text(storeManager.purchaseState == .purchasing ? String(localized: "Processing...") : subscribeButtonTitle)
                         .fontWeight(.semibold)
                 }
                 .frame(maxWidth: .infinity)
@@ -188,7 +188,7 @@ struct ProUpgradeSheet: View {
         )) {
             Button("OK") { errorMessage = nil }
         } message: {
-            Text(errorMessage ?? "Unknown error")
+            Text(errorMessage ?? String(localized: "Unknown error"))
         }
     }
 
@@ -309,11 +309,11 @@ struct ProUpgradeSheet: View {
     // MARK: - Subscribe Button Title
 
     private var subscribeButtonTitle: String {
-        guard let product = selectedProduct else { return "Select a Plan" }
+        guard let product = selectedProduct else { return String(localized: "Select a Plan") }
         if product.id == VivyTermProducts.proLifetime {
-            return "Buy - \(product.displayPrice)"
+            return String(localized: "Buy - \(product.displayPrice)")
         }
-        return "Subscribe - \(product.displayPrice)"
+        return String(localized: "Subscribe - \(product.displayPrice)")
     }
 }
 

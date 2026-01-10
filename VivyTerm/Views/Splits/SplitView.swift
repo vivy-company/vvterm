@@ -158,27 +158,27 @@ struct SplitView<L: View, R: View>: View {
     private var splitViewLabel: String {
         switch direction {
         case .horizontal:
-            return "Horizontal split view"
+            return String(localized: "Horizontal split view")
         case .vertical:
-            return "Vertical split view"
+            return String(localized: "Vertical split view")
         }
     }
 
     private var leftPaneLabel: String {
         switch direction {
         case .horizontal:
-            return "Left pane"
+            return String(localized: "Left pane")
         case .vertical:
-            return "Top pane"
+            return String(localized: "Top pane")
         }
     }
 
     private var rightPaneLabel: String {
         switch direction {
         case .horizontal:
-            return "Right pane"
+            return String(localized: "Right pane")
         case .vertical:
-            return "Bottom pane"
+            return String(localized: "Bottom pane")
         }
     }
 }
@@ -272,18 +272,18 @@ extension SplitView {
         private var axLabel: String {
             switch direction {
             case .horizontal:
-                return "Horizontal split divider"
+                return String(localized: "Horizontal split divider")
             case .vertical:
-                return "Vertical split divider"
+                return String(localized: "Vertical split divider")
             }
         }
 
         private var axHint: String {
             switch direction {
             case .horizontal:
-                return "Drag to resize the left and right panes"
+                return String(localized: "Drag to resize the left and right panes")
             case .vertical:
-                return "Drag to resize the top and bottom panes"
+                return String(localized: "Drag to resize the top and bottom panes")
             }
         }
     }

@@ -80,20 +80,20 @@ struct LimitReachedAlert: ViewModifier {
 
         var title: String {
             switch self {
-            case .servers: return "Server Limit Reached"
-            case .workspaces: return "Workspace Limit Reached"
-            case .tabs: return "Tab Limit Reached"
+            case .servers: return String(localized: "Server Limit Reached")
+            case .workspaces: return String(localized: "Workspace Limit Reached")
+            case .tabs: return String(localized: "Tab Limit Reached")
             }
         }
 
         var message: String {
             switch self {
             case .servers:
-                return "You've reached the limit of \(FreeTierLimits.maxServers) servers on the free plan. Upgrade to Pro for unlimited servers."
+                return String(localized: "You've reached the limit of \(FreeTierLimits.maxServers) servers on the free plan. Upgrade to Pro for unlimited servers.")
             case .workspaces:
-                return "You've reached the limit of \(FreeTierLimits.maxWorkspaces) workspace on the free plan. Upgrade to Pro for unlimited workspaces."
+                return String(localized: "You've reached the limit of \(FreeTierLimits.maxWorkspaces) workspace on the free plan. Upgrade to Pro for unlimited workspaces.")
             case .tabs:
-                return "You can only have \(FreeTierLimits.maxTabs) connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections."
+                return String(localized: "You can only have \(FreeTierLimits.maxTabs) connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections.")
             }
         }
     }
@@ -216,17 +216,17 @@ struct LockedItemAlert: ViewModifier {
 
         var title: String {
             switch self {
-            case .server: return "Server Locked"
-            case .workspace: return "Workspace Locked"
+            case .server: return String(localized: "Server Locked")
+            case .workspace: return String(localized: "Workspace Locked")
             }
         }
 
         var message: String {
             switch self {
             case .server:
-                return "This server exceeds your free plan limit of \(FreeTierLimits.maxServers) servers. Renew your Pro subscription to access all your servers."
+                return String(localized: "This server exceeds your free plan limit of \(FreeTierLimits.maxServers) servers. Renew your Pro subscription to access all your servers.")
             case .workspace:
-                return "This workspace exceeds your free plan limit of \(FreeTierLimits.maxWorkspaces) workspace. Renew your Pro subscription to access all your workspaces."
+                return String(localized: "This workspace exceeds your free plan limit of \(FreeTierLimits.maxWorkspaces) workspace. Renew your Pro subscription to access all your workspaces.")
             }
         }
     }
@@ -278,12 +278,20 @@ struct DowngradeBanner: View {
     private var message: String {
         var parts: [String] = []
         if lockedServers > 0 {
-            parts.append("\(lockedServers) server\(lockedServers == 1 ? "" : "s")")
+            let serverText = lockedServers == 1
+                ? String(format: String(localized: "%lld server"), lockedServers)
+                : String(format: String(localized: "%lld servers"), lockedServers)
+            parts.append(serverText)
         }
         if lockedWorkspaces > 0 {
-            parts.append("\(lockedWorkspaces) workspace\(lockedWorkspaces == 1 ? "" : "s")")
+            let workspaceText = lockedWorkspaces == 1
+                ? String(format: String(localized: "%lld workspace"), lockedWorkspaces)
+                : String(format: String(localized: "%lld workspaces"), lockedWorkspaces)
+            parts.append(workspaceText)
         }
-        return parts.joined(separator: " and ") + " locked"
+        let conjunction = String(localized: " and ")
+        let joined = parts.joined(separator: conjunction)
+        return String(format: String(localized: "%@ locked"), joined)
     }
 
     var body: some View {

@@ -16,9 +16,9 @@ enum AppearanceMode: String, CaseIterable {
 
     var label: String {
         switch self {
-        case .system: return "System"
-        case .light: return "Light"
-        case .dark: return "Dark"
+        case .system: return String(localized: "System")
+        case .light: return String(localized: "Light")
+        case .dark: return String(localized: "Dark")
         }
     }
 
@@ -159,15 +159,34 @@ struct AppearancePreviewCard: View {
 
 struct GeneralSettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
+    @AppStorage("appLanguage") private var appLanguage = AppLanguage.system.rawValue
 
     var body: some View {
         Form {
+            Section {
+                Picker("Language", selection: $appLanguage) {
+                    ForEach(AppLanguage.allCases) { language in
+                        Text(language.displayName)
+                            .tag(language.rawValue)
+                    }
+                }
+            } header: {
+                Text("Language")
+            } footer: {
+                Text("Some changes may require restarting the app.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Appearance") {
                 AppearancePickerView(selection: $appearanceMode)
                     .frame(maxWidth: .infinity)
             }
         }
         .formStyle(.grouped)
+        .onChange(of: appLanguage) { _, newValue in
+            AppLanguage.applySelection(newValue)
+        }
     }
 }
 

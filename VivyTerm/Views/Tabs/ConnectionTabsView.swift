@@ -189,7 +189,7 @@ struct ConnectionTerminalContainer: View {
                 Circle()
                     .fill(serverTabs.isEmpty ? Color.secondary : Color.green)
                     .frame(width: 8, height: 8)
-                Text(serverTabs.isEmpty ? "No terminals" : "\(serverTabs.count) tab\(serverTabs.count == 1 ? "" : "s")")
+                Text(tabsStatusText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -203,9 +203,9 @@ struct ConnectionTerminalContainer: View {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.red)
             }
-            .help("Disconnect from server")
+            .help(Text("Disconnect from server"))
             .confirmationDialog(
-                "Disconnect from \(server.name)?",
+                String(localized: "Disconnect from \(server.name)?"),
                 isPresented: $showingDisconnectConfirmation,
                 titleVisibility: .visible
             ) {
@@ -214,7 +214,7 @@ struct ConnectionTerminalContainer: View {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text(serverTabs.isEmpty ? "This will return to the server list." : "All terminal tabs for this server will be closed.")
+                Text(disconnectMessage)
             }
         }
     }
@@ -225,6 +225,26 @@ struct ConnectionTerminalContainer: View {
     }
     #endif
 }
+
+#if os(macOS)
+private extension ConnectionTerminalContainer {
+    var tabsStatusText: String {
+        if serverTabs.isEmpty {
+            return String(localized: "No terminals")
+        }
+        let count = serverTabs.count
+        return count == 1
+            ? String(format: String(localized: "%lld tab"), count)
+            : String(format: String(localized: "%lld tabs"), count)
+    }
+
+    var disconnectMessage: String {
+        serverTabs.isEmpty
+            ? String(localized: "This will return to the server list.")
+            : String(localized: "All terminal tabs for this server will be closed.")
+    }
+}
+#endif
 
 // MARK: - Terminal Tabs Scroll View
 
@@ -245,14 +265,14 @@ struct TerminalTabsScrollView: View {
                 NavigationArrowButton(
                     icon: "chevron.left",
                     action: { selectPrevious() },
-                    help: "Previous tab"
+                    help: String(localized: "Previous tab")
                 )
                 .disabled(tabs.count <= 1)
 
                 NavigationArrowButton(
                     icon: "chevron.right",
                     action: { selectNext() },
-                    help: "Next tab"
+                    help: String(localized: "Next tab")
                 )
                 .disabled(tabs.count <= 1)
             }
@@ -287,7 +307,7 @@ struct TerminalTabsScrollView: View {
             }
             .buttonStyle(.plain)
             .onHover { isNewTabHovering = $0 }
-            .help("New terminal tab")
+            .help(Text("New terminal tab"))
             .padding(.trailing, 8)
         }
     }

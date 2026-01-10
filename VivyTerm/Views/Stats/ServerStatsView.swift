@@ -135,12 +135,12 @@ private struct CPUStatsCard: View, Equatable {
                 // Breakdown grid
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 16) {
-                        StatLabel(color: .pink, label: "SYS", value: "\(Int(system)) %")
-                        StatLabel(color: .green, label: "USER", value: "\(Int(user)) %")
+                        StatLabel(color: .pink, label: String(localized: "SYS"), value: "\(Int(system)) %")
+                        StatLabel(color: .green, label: String(localized: "USER"), value: "\(Int(user)) %")
                     }
                     HStack(spacing: 16) {
-                        StatLabel(color: .yellow, label: "IOWAIT", value: "\(Int(iowait)) %")
-                        StatLabel(color: .purple, label: "STEAL", value: "\(Int(steal)) %")
+                        StatLabel(color: .yellow, label: String(localized: "IOWAIT"), value: "\(Int(iowait)) %")
+                        StatLabel(color: .purple, label: String(localized: "STEAL"), value: "\(Int(steal)) %")
                     }
                 }
 
@@ -160,10 +160,10 @@ private struct CPUStatsCard: View, Equatable {
 
             // Bottom row: cores, idle, uptime, load
             HStack(spacing: 0) {
-                StatColumn(label: "CORES", value: "\(cores)")
-                StatColumn(label: "IDLE", value: "\(Int(idle)) %")
-                StatColumn(label: "UPTIME", value: formatUptime(uptime))
-                StatColumn(label: "LOAD", value: String(format: "%.1f,%.1f,%.1f", loadAverage.0, loadAverage.1, loadAverage.2))
+                StatColumn(label: String(localized: "CORES"), value: "\(cores)")
+                StatColumn(label: String(localized: "IDLE"), value: "\(Int(idle)) %")
+                StatColumn(label: String(localized: "UPTIME"), value: formatUptime(uptime))
+                StatColumn(label: String(localized: "LOAD"), value: String(format: "%.1f,%.1f,%.1f", loadAverage.0, loadAverage.1, loadAverage.2))
             }
         }
         .padding()
@@ -179,8 +179,8 @@ private struct CPUStatsCard: View, Equatable {
     private func formatUptime(_ seconds: TimeInterval) -> String {
         let days = Int(seconds) / 86400
         let hours = (Int(seconds) % 86400) / 3600
-        if days > 0 { return "\(days) D" }
-        return "\(hours) H"
+        if days > 0 { return String(format: String(localized: "%lld D"), days) }
+        return String(format: String(localized: "%lld H"), hours)
     }
 }
 
@@ -198,12 +198,12 @@ private struct MemoryStatsCard: View, Equatable {
             // Labels
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 16) {
-                    StatLabel(color: .secondary, label: "FREE", value: formatBytes(free))
-                    StatLabel(color: .green, label: "USED", value: formatBytes(used))
+                    StatLabel(color: .secondary, label: String(localized: "FREE"), value: formatBytes(free))
+                    StatLabel(color: .green, label: String(localized: "USED"), value: formatBytes(used))
                 }
                 HStack(spacing: 16) {
-                    StatLabel(color: .blue, label: "CACHED", value: formatBytes(cached))
-                    StatLabel(color: .secondary, label: "TOTAL", value: formatBytes(total))
+                    StatLabel(color: .blue, label: String(localized: "CACHED"), value: formatBytes(cached))
+                    StatLabel(color: .secondary, label: String(localized: "TOTAL"), value: formatBytes(total))
                 }
             }
 
@@ -249,12 +249,12 @@ private struct NetworkStatsCard: View, Equatable {
             // Speed labels
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 16) {
-                    StatLabel(color: .green, label: "↑/S", value: formatSpeed(txSpeed))
-                    StatLabel(color: .orange, label: "↓/S", value: formatSpeed(rxSpeed))
+                    StatLabel(color: .green, label: String(localized: "↑/S"), value: formatSpeed(txSpeed))
+                    StatLabel(color: .orange, label: String(localized: "↓/S"), value: formatSpeed(rxSpeed))
                 }
                 HStack(spacing: 16) {
-                    StatLabel(color: .green, label: "↑ TOTAL", value: formatBytes(txTotal))
-                    StatLabel(color: .orange, label: "↓ TOTAL", value: formatBytes(rxTotal))
+                    StatLabel(color: .green, label: String(localized: "↑ TOTAL"), value: formatBytes(txTotal))
+                    StatLabel(color: .orange, label: String(localized: "↓ TOTAL"), value: formatBytes(rxTotal))
                 }
             }
 

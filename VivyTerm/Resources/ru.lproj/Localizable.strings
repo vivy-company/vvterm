@@ -1,0 +1,642 @@
+/* General */
+"OK" = "ОК";
+"Cancel" = "Отмена";
+"Save" = "Сохранить";
+"Add" = "Добавить";
+"Create" = "Создать";
+"Delete" = "Удалить";
+"Done" = "Готово";
+"Edit" = "Редактировать";
+"Remove" = "Удалить";
+"Connect" = "Подключить";
+"Disconnect" = "Отключить";
+"Reconnect" = "Переподключить";
+"Retry" = "Повторить";
+"Upgrade" = "Обновить";
+"Upgrade to Pro" = "Обновить до Pro";
+"Upgrade to VVTerm Pro" = "Обновить до VVTerm Pro";
+"View Plans" = "Посмотреть планы";
+"Manage Subscription" = "Управление подпиской";
+"Manage subscription" = "Управление подпиской";
+"Manage your subscription" = "Управляйте подпиской";
+"Restore Purchases" = "Восстановить покупки";
+"Renew" = "Продлить";
+"Renew Pro" = "Продлить Pro";
+"Close" = "Закрыть";
+"Close Terminal" = "Закрыть терминал";
+"Close All to the Left" = "Закрыть все слева";
+"Close All to the Right" = "Закрыть все справа";
+"Close Other Tabs" = "Закрыть другие вкладки";
+"Duplicate Tab" = "Дублировать вкладку";
+"New Terminal" = "Новый терминал";
+"New terminal tab" = "Новая вкладка терминала";
+"New connection" = "Новое подключение";
+"Previous tab" = "Предыдущая вкладка";
+"Next tab" = "Следующая вкладка";
+"No terminals" = "Нет терминалов";
+"%lld tab" = "%lld вкладка";
+"%lld tabs" = "%lld вкладок";
+"No terminals open" = "Нет открытых терминалов";
+"Search servers" = "Поиск серверов";
+"Search servers..." = "Поиск серверов...";
+"Search symbols..." = "Поиск символов...";
+"Select Workspace" = "Выбрать рабочее пространство";
+"Select a Server" = "Выбрать сервер";
+"Choose a server from the sidebar to connect" = "Выберите сервер на боковой панели для подключения";
+"Multiple connections require Pro" = "Несколько подключений требуют Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Обновите до Pro, чтобы подключаться к нескольким серверам одновременно";
+"Disconnected" = "Отключено";
+"Connecting..." = "Подключение...";
+"Connecting to %@..." = "Подключение к %@...";
+"Reconnecting (attempt %lld)..." = "Переподключение (попытка %lld)...";
+"Connection Failed" = "Не удалось подключиться";
+"Connection failed: %@" = "Не удалось подключиться: %@";
+"Connection timed out" = "Время ожидания подключения истекло";
+"Authentication failed" = "Ошибка аутентификации";
+"Failed to load credentials" = "Не удалось загрузить учетные данные";
+"Failed to load credentials: %@" = "Не удалось загрузить учетные данные: %@";
+"Failed to load key: %@" = "Не удалось загрузить ключ: %@";
+"Failed to read key file: %@" = "Не удалось прочитать файл ключа: %@";
+"Failed to import key: %@" = "Не удалось импортировать ключ: %@";
+"Failed to delete key: %@" = "Не удалось удалить ключ: %@";
+"Failed to save key: %@" = "Не удалось сохранить ключ: %@";
+"Failed to generate key: %@" = "Не удалось создать ключ: %@";
+"Failed to generate SSH key" = "Не удалось создать SSH‑ключ";
+"Failed to encode key data" = "Не удалось закодировать данные ключа";
+"Failed to export RSA key" = "Не удалось экспортировать RSA‑ключ";
+"Invalid key data" = "Недействительные данные ключа";
+"Cannot access the selected file" = "Нет доступа к выбранному файлу";
+"Copy to Clipboard" = "Копировать в буфер обмена";
+"Copied" = "Скопировано";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "О VVTerm";
+"Version %@ (%@)" = "Версия %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Профессиональный SSH‑клиент\nдля macOS и iOS";
+"Visit Website" = "Посетить сайт";
+"Report an Issue" = "Сообщить о проблеме";
+"Privacy Policy" = "Политика конфиденциальности";
+"Get in Touch" = "Связаться с нами";
+"Questions, feedback, or issues? Reach out anytime." = "Есть вопросы, отзывы или проблемы? Пишите в любое время.";
+"Questions, feedback, or issues?\nReach out anytime." = "Есть вопросы, отзывы или проблемы?\nПишите в любое время.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Добро пожаловать в VVTerm";
+"Your secure SSH terminal" = "Ваш безопасный SSH‑терминал";
+"Continue" = "Продолжить";
+"SSH Terminal" = "SSH‑терминал";
+"Connect to servers with GPU-accelerated terminal emulation." = "Подключайтесь к серверам с GPU‑ускоренной эмуляцией терминала.";
+"iCloud Sync" = "Синхронизация iCloud";
+"Servers and credentials sync across all your devices." = "Серверы и учетные данные синхронизируются на всех ваших устройствах.";
+"Secure Storage" = "Безопасное хранилище";
+"Passwords and SSH keys protected by Keychain." = "Пароли и SSH‑ключи защищены Связкой ключей.";
+"Voice Commands" = "Голосовые команды";
+"Speak commands with on-device speech recognition." = "Диктуйте команды с распознаванием речи на устройстве.";
+
+/* Settings Navigation */
+"Settings" = "Настройки";
+"General" = "Общие";
+"Terminal" = "Терминал";
+"Transcription" = "Транскрибация";
+"SSH Keys" = "SSH‑ключи";
+"Sync" = "Синхронизация";
+"About" = "О программе";
+"Premium" = "Премиум";
+"Appearance and preferences" = "Внешний вид и предпочтения";
+"Font, theme, and connection settings" = "Шрифт, тема и настройки подключения";
+"Speech-to-text engine and models" = "Движок и модели распознавания речи";
+"Manage stored SSH keys" = "Управление сохранёнными SSH‑ключами";
+"iCloud sync and data management" = "Синхронизация iCloud и управление данными";
+"Version and links" = "Версия и ссылки";
+
+/* Appearance */
+"Appearance" = "Внешний вид";
+"System" = "Система";
+"Light" = "Светлая";
+"Dark" = "Тёмная";
+
+/* Terminal Settings */
+"Font" = "Шрифт";
+"Font Family" = "Семейство шрифтов";
+"Size: %lldpt" = "Размер: %lld пт";
+"Theme" = "Тема";
+"Use different themes for Light/Dark mode" = "Использовать разные темы для светлого/тёмного режима";
+"Dark Mode Theme" = "Тема тёмного режима";
+"Light Mode Theme" = "Тема светлого режима";
+"Terminal Behavior" = "Поведение терминала";
+"Enable terminal notifications" = "Включить уведомления терминала";
+"Show progress overlays" = "Показывать оверлеи прогресса";
+"Show voice input button" = "Показывать кнопку голосового ввода";
+"Copy Text Processing" = "Обработка текста при копировании";
+"Transformations applied when copying text from terminal" = "Преобразования при копировании текста из терминала";
+"Trim trailing whitespace" = "Удалять пробелы в конце";
+"Collapse multiple blank lines" = "Схлопывать пустые строки";
+"Strip shell prompts ($ #)" = "Удалять приглашения shell ($ #)";
+"Flatten multi-line commands" = "Объединять многострочные команды";
+"Remove box-drawing characters" = "Удалять символы рамок";
+"Strip ANSI escape codes" = "Удалять ANSI‑коды";
+"SSH Connection" = "SSH‑подключение";
+"Auto-reconnect on disconnect" = "Автопереподключение при разрыве";
+"Send keep-alive packets" = "Отправлять keep‑alive пакеты";
+"Interval: %llds" = "Интервал: %lld с";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Обновите до Pro для безлимитных функций";
+"Unlimited Servers" = "Безлимитные серверы";
+"Add as many servers as you need (free: 3)" = "Добавляйте сколько нужно серверов (бесплатно: 3)";
+"Unlimited Workspaces" = "Безлимитные рабочие пространства";
+"Organize servers into multiple workspaces (free: 1)" = "Организуйте серверы в несколько рабочих пространств (бесплатно: 1)";
+"Multiple Connections" = "Несколько подключений";
+"Open multiple terminal tabs at once (free: 1)" = "Открывайте несколько вкладок терминала одновременно (бесплатно: 1)";
+"Custom Environments" = "Пользовательские окружения";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Создавайте пользовательские метки окружения сверх Prod/Staging/Dev";
+"All Future Features" = "Все будущие функции";
+"Get access to every new Pro feature" = "Доступ ко всем новым функциям Pro";
+"Monthly" = "Ежемесячно";
+"Billed monthly" = "Оплата ежемесячно";
+"Yearly" = "Ежегодно";
+"Best value - billed yearly" = "Лучшая цена — оплата ежегодно";
+"SAVE 74%" = "ЭКОНОМИЯ 74%";
+"Lifetime" = "Навсегда";
+"One-time purchase, forever" = "Один раз и навсегда";
+"FOREVER" = "НАВСЕГДА";
+"Processing..." = "Обработка...";
+"Purchase Failed" = "Покупка не удалась";
+"Unknown error" = "Неизвестная ошибка";
+"Welcome to Pro!" = "Добро пожаловать в Pro!";
+"You now have unlimited access" = "Теперь у вас безлимитный доступ";
+"Cancel anytime. Subscription auto-renews." = "Отменить можно в любой момент. Подписка продлевается автоматически.";
+"Terms of Service" = "Условия использования";
+"Refund Policy" = "Политика возврата";
+"Select a Plan" = "Выберите план";
+"Buy - %@" = "Купить — %@";
+"Subscribe - %@" = "Подписаться — %@";
+"Purchase verification failed" = "Проверка покупки не удалась";
+"Product not found" = "Продукт не найден";
+"Purchase failed: %@" = "Покупка не удалась: %@";
+
+/* Pro Settings */
+"Status" = "Статус";
+"Subscription" = "Подписка";
+"Plan" = "План";
+"Purchased" = "Куплено";
+"Renews" = "Продлевается";
+"Servers" = "Серверы";
+"%lld of %lld used" = "Использовано %lld из %lld";
+"Workspaces" = "Рабочие пространства";
+"Simultaneous Connections" = "Одновременные подключения";
+"%lld max" = "макс. %lld";
+"Features" = "Функции";
+"Billing" = "Оплата";
+"Active" = "Активно";
+"Free Tier" = "Бесплатный план";
+"Pro Lifetime" = "Pro навсегда";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro ежемесячно";
+"Pro Yearly" = "Pro ежегодно";
+"PRO" = "PRO";
+"FREE" = "БЕСПЛАТНО";
+"Unlimited servers & workspaces" = "Безлимитные серверы и рабочие пространства";
+"View Plans" = "Посмотреть планы";
+
+/* Pro Limits */
+"Server Limit Reached" = "Достигнут лимит серверов";
+"Workspace Limit Reached" = "Достигнут лимит рабочих пространств";
+"Tab Limit Reached" = "Достигнут лимит вкладок";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Вы достигли лимита %lld серверов в бесплатном плане. Обновите до Pro для безлимитных серверов.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Вы достигли лимита %lld рабочего пространства в бесплатном плане. Обновите до Pro для безлимитных рабочих пространств.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "В бесплатном плане можно иметь только %lld подключение одновременно. Обновите до Pro для нескольких одновременных подключений.";
+"Server Locked" = "Сервер заблокирован";
+"Workspace Locked" = "Рабочее пространство заблокировано";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Этот сервер превышает лимит %lld серверов бесплатного плана. Продлите подписку Pro, чтобы получить доступ ко всем серверам.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Это рабочее пространство превышает лимит %lld рабочего пространства бесплатного плана. Продлите подписку Pro, чтобы получить доступ ко всем рабочим пространствам.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Подписка истекла";
+"%lld server" = "%lld сервер";
+"%lld servers" = "%lld серверов";
+"%lld workspace" = "%lld рабочее пространство";
+"%lld workspaces" = "%lld рабочих пространств";
+" and " = " и ";
+"%@ locked" = "%@ заблокировано";
+
+/* Server & Workspace */
+"Server Info" = "Информация о сервере";
+"Name" = "Имя";
+"Host" = "Хост";
+"Port" = "Порт";
+"Username" = "Имя пользователя";
+"Authentication" = "Аутентификация";
+"Method" = "Метод";
+"Password" = "Пароль";
+"Key loaded" = "Ключ загружен";
+"Key Passphrase" = "Пароль ключа";
+"Server Environment" = "Окружение сервера";
+"Environment" = "Окружение";
+"Notes" = "Заметки";
+"Edit Server" = "Редактировать сервер";
+"Add Server" = "Добавить сервер";
+"Use Stored Key" = "Использовать сохранённый ключ";
+"Select a key..." = "Выберите ключ...";
+"Import File" = "Импорт файла";
+"Paste" = "Вставить";
+"Add to Keychain" = "Добавить в связку ключей";
+"Select a stored key or import/paste a new one" = "Выберите сохранённый ключ или импортируйте/вставьте новый";
+"Using stored key: %@" = "Используется сохранённый ключ: %@";
+"Workspace" = "Рабочее пространство";
+"Workspaces" = "Рабочие пространства";
+"Workspace name" = "Имя рабочего пространства";
+"Color" = "Цвет";
+"Delete Workspace" = "Удалить рабочее пространство";
+"Edit Workspace" = "Редактировать рабочее пространство";
+"New Workspace" = "Новое рабочее пространство";
+"Workspaces" = "Рабочие пространства";
+"My Servers" = "Мои серверы";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "РАБОЧЕЕ ПРОСТРАНСТВО";
+"SERVERS" = "СЕРВЕРЫ";
+"Support VVTerm" = "Поддержать VVTerm";
+"Upgrade to Pro" = "Обновить до Pro";
+"All" = "Все";
+"Custom..." = "Пользовательские...";
+"New Workspace" = "Новое рабочее пространство";
+"Unlock with Pro" = "Разблокировать с Pro";
+"Switch to Workspace" = "Переключиться на рабочее пространство";
+"Delete Workspace" = "Удалить рабочее пространство";
+
+/* iOS Lists */
+"%lld servers" = "%lld серверов";
+"Servers" = "Серверы";
+"Active Connections" = "Активные подключения";
+"Add Workspace" = "Добавить рабочее пространство";
+"Workspaces" = "Рабочие пространства";
+"Done" = "Готово";
+
+/* Empty States */
+"No Servers" = "Нет серверов";
+"Add a server to get started" = "Добавьте сервер, чтобы начать";
+"Multiple connections require Pro" = "Несколько подключений требуют Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Обновите до Pro, чтобы подключаться к нескольким серверам одновременно";
+"Upgrade to Pro" = "Обновить до Pro";
+"Connect" = "Подключить";
+
+/* Offline */
+"No network connection" = "Нет сети";
+"You're currently offline. Some features may not work:" = "Вы сейчас офлайн. Некоторые функции могут не работать:";
+"Cannot connect to servers" = "Не удаётся подключиться к серверам";
+"iCloud sync paused" = "Синхронизация iCloud приостановлена";
+"Saved servers still accessible" = "Сохранённые серверы по‑прежнему доступны";
+"Offline" = "Офлайн";
+
+/* Terminal */
+"Initializing terminal..." = "Инициализация терминала...";
+"Terminal initialization failed" = "Не удалось инициализировать терминал";
+"Connecting..." = "Подключение...";
+"Reconnecting (attempt %lld)..." = "Переподключение (попытка %lld)...";
+"Disconnected" = "Отключено";
+"Connection Failed" = "Не удалось подключиться";
+"Reconnect" = "Переподключить";
+"Retry" = "Повторить";
+"Voice Input Unavailable" = "Голосовой ввод недоступен";
+"Voice input (Command+Shift+M)" = "Голосовой ввод (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Включите микрофон и распознавание речи в настройках системы.";
+"Terminal" = "Терминал";
+"No terminals open" = "Нет открытых терминалов";
+"New Terminal" = "Новый терминал";
+"Close this terminal?" = "Закрыть этот терминал?";
+"The SSH connection will be terminated." = "SSH‑подключение будет завершено.";
+
+/* Keychain */
+"No Keys Stored" = "Нет сохранённых ключей";
+"Add keys to quickly use them when creating new servers" = "Добавьте ключи для быстрого использования при создании новых серверов";
+"Generate New Key" = "Создать новый ключ";
+"Import Key" = "Импортировать ключ";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Ключи надёжно хранятся в Связке ключей устройства. Пароли хранятся отдельно.";
+"Delete SSH Key" = "Удалить SSH‑ключ";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Вы уверены, что хотите удалить «%@»? Это нельзя отменить.";
+"Protected" = "Защищено";
+"Added %@ ago" = "Добавлено %@ назад";
+"Copy public key" = "Копировать публичный ключ";
+"Key Name" = "Имя ключа";
+"e.g., Personal MacBook, Work Key" = "например: Личный MacBook, Рабочий ключ";
+"Private Key" = "Приватный ключ";
+"Import Key File" = "Импорт файла ключа";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Импортируйте файл приватного ключа (id_rsa, id_ed25519 и т. д.) или вставьте содержимое";
+"Key loaded (%lld characters)" = "Ключ загружен (%lld символов)";
+"Key passphrase" = "Пароль ключа";
+"Passphrase (Optional)" = "Пароль (необязательно)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "Если ключ зашифрован паролем, введите его здесь. Оставьте пустым для ключей без пароля.";
+"Add SSH Key" = "Добавить SSH‑ключ";
+"Algorithm" = "Алгоритм";
+"Key Type" = "Тип ключа";
+"Confirm passphrase" = "Подтвердите пароль";
+"Protect your key with a passphrase. Leave empty for no protection." = "Защитите ключ паролем. Оставьте пустым для отсутствия защиты.";
+"Generated Key" = "Ключ создан";
+"Key generated successfully" = "Ключ успешно создан";
+"Fingerprint:" = "Отпечаток:";
+"View Public Key" = "Просмотреть публичный ключ";
+"Generate SSH Key" = "Создать SSH‑ключ";
+"Generate" = "Создать";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Добавьте это в файл ~/.ssh/authorized_keys на сервере:";
+"No Public Key" = "Нет публичного ключа";
+"This key was imported without a public key." = "Этот ключ был импортирован без публичного ключа.";
+"Public Key" = "Публичный ключ";
+
+/* Transcription */
+"Engine" = "Движок";
+"System (Apple)" = "Система (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Провайдер";
+"Language" = "Язык";
+"Model" = "Модель";
+"Downloading..." = "Загрузка...";
+"Delete Model" = "Удалить модель";
+"Download size: %@" = "Размер загрузки: %@";
+"Status" = "Статус";
+"Download" = "Скачать";
+"Ready" = "Готово";
+"Failed" = "Не удалось";
+"Storage" = "Хранилище";
+"Model Storage" = "Хранилище моделей";
+"Total MLX Models" = "Всего моделей MLX";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Использует встроенное распознавание речи Apple. Для лучших результатов требуется сеть.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper работает локально через MLX. Работает офлайн после загрузки.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet работает локально через MLX. Оптимизировано для транскрибации в реальном времени.";
+"English" = "Английский";
+"Spanish" = "Испанский";
+"French" = "Французский";
+"German" = "Немецкий";
+"Japanese" = "Японский";
+"Chinese" = "Китайский";
+"Korean" = "Корейский";
+"Portuguese" = "Португальский";
+"Russian" = "Русский";
+"Auto-detect" = "Автоопределение";
+
+/* MLX Models */
+"Tiny" = "Крошечная";
+"Fastest, smallest" = "Самая быстрая, самая маленькая";
+"Full precision" = "Полная точность";
+"Tiny (EN)" = "Крошечная (EN)";
+"English-only, smaller" = "Только английский, меньше";
+"English-only" = "Только английский";
+"Base" = "Базовая";
+"Balanced speed/quality" = "Баланс скорость/качество";
+"Small" = "Маленькая";
+"Better accuracy" = "Лучшая точность";
+"Medium" = "Средняя";
+"Higher accuracy, heavier" = "Выше точность, тяжелее";
+"Large v3" = "Большая v3";
+"Latest large model" = "Последняя большая модель";
+"Large" = "Большая";
+"Large v3 4-bit" = "Большая v3 4‑бит";
+"Smaller download" = "Меньший размер загрузки";
+"4-bit quantized" = "Квантование 4‑бит";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Большая высокоточная модель";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "Сотовая";
+"Ethernet" = "Ethernet";
+"Unknown" = "Неизвестно";
+"No Connection" = "Нет подключения";
+" (Metered)" = " (С тарифом)";
+" (Low Data)" = " (Экономия трафика)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Включить синхронизацию iCloud";
+"iCloud Account" = "Учётная запись iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Синхронизируйте серверы и рабочие пространства на всех устройствах Apple.";
+"Sync Status" = "Статус синхронизации";
+"Last Synced" = "Последняя синхронизация";
+"Error" = "Ошибка";
+"Data" = "Данные";
+"Force Sync Now" = "Принудительная синхронизация";
+"Clear Local Data & Re-sync" = "Удалить локальные данные и синхронизировать заново";
+"Reset iCloud (Delete All & Re-upload)" = "Сбросить iCloud (удалить всё и загрузить снова)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Принудительная синхронизация получает последние данные из iCloud. Очистка и повторная синхронизация удаляет локальные данные и загружает заново. Сброс iCloud удаляет ВСЕ данные в облаке и загружает локальные данные заново (исправляет дубликаты).";
+"Account Status" = "Статус аккаунта";
+"Container" = "Контейнер";
+"Re-check iCloud Status" = "Проверить статус iCloud";
+"Troubleshooting" = "Устранение неполадок";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Убедитесь, что вы вошли в iCloud в настройках и включили iCloud Drive. Для подробностей откройте Console.app и журналы «CloudKit».";
+"Force Sync" = "Принудительная синхронизация";
+"Sync Now" = "Синхронизировать сейчас";
+"This will fetch the latest data from iCloud and may take a moment." = "Это получит последние данные из iCloud и может занять некоторое время.";
+"Clear Local Data" = "Удалить локальные данные";
+"Clear & Re-sync" = "Удалить и синхронизировать заново";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Это удалит все локальные данные и скачает заново из iCloud. Несинхронизированные изменения будут потеряны.";
+"Reset iCloud Data" = "Сбросить данные iCloud";
+"Delete All & Re-upload" = "Удалить всё и загрузить снова";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "Это УДАЛИТ ВСЕ данные из iCloud и загрузит ваши текущие локальные данные. Используйте для исправления дубликатов.";
+"Connected" = "Подключено";
+"Not Available" = "Недоступно";
+"Synced" = "Синхронизировано";
+"Syncing..." = "Синхронизация...";
+"available" = "доступно";
+"noAccount - User not signed into iCloud" = "noAccount - Пользователь не вошёл в iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - Доступ к iCloud ограничен (родительский контроль, MDM и т. д.)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Не удалось определить статус iCloud";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud временно недоступен";
+"unknown status: %@" = "неизвестный статус: %@";
+"Error: %@" = "Ошибка: %@";
+"Checking..." = "Проверка...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Горизонтально разделённый вид";
+"Vertical split view" = "Вертикально разделённый вид";
+"Left pane" = "Левая панель";
+"Top pane" = "Верхняя панель";
+"Right pane" = "Правая панель";
+"Bottom pane" = "Нижняя панель";
+"Horizontal split divider" = "Горизонтальный разделитель";
+"Vertical split divider" = "Вертикальный разделитель";
+"Drag to resize the left and right panes" = "Потяните, чтобы изменить размер левой и правой панелей";
+"Drag to resize the top and bottom panes" = "Потяните, чтобы изменить размер верхней и нижней панелей";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "ОЖИД. ВВОД";
+"STEAL" = "STEAL";
+"CORES" = "ЯДРА";
+"IDLE" = "ПРОСТОЙ";
+"UPTIME" = "ВРЕМЯ РАБОТЫ";
+"LOAD" = "НАГРУЗКА";
+"FREE" = "СВОБОДНО";
+"USED" = "ИСП.";
+"CACHED" = "КЭШ";
+"TOTAL" = "ИТОГО";
+"Volumes" = "Тома";
+"Top Processes" = "Топ процессов";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ ИТОГО";
+"↓ TOTAL" = "↓ ИТОГО";
+"%lld D" = "%lld д";
+"%lld H" = "%lld ч";
+
+/* SFSymbol Picker */
+"Recent" = "Недавние";
+"Load more (%lld remaining)" = "Загрузить ещё (%lld осталось)";
+"%lld symbols" = "%lld символов";
+"What's New" = "Новинки";
+"Draw" = "Рисование";
+"Variable" = "Переменная";
+"Multicolor" = "Многоцветный";
+"Communication" = "Связь";
+"Weather" = "Погода";
+"Maps" = "Карты";
+"Objects & Tools" = "Объекты и инструменты";
+"Devices" = "Устройства";
+"Camera & Photos" = "Камера и фото";
+"Gaming" = "Игры";
+"Connectivity" = "Подключение";
+"Transportation" = "Транспорт";
+"Automotive" = "Автомобили";
+"Accessibility" = "Доступность";
+"Privacy & Security" = "Конфиденциальность и безопасность";
+"Human" = "Человек";
+"Home" = "Дом";
+"Fitness" = "Фитнес";
+"Nature" = "Природа";
+"Editing" = "Редактирование";
+"Text Formatting" = "Форматирование текста";
+"Media" = "Медиа";
+"Keyboard" = "Клавиатура";
+"Commerce" = "Коммерция";
+"Time" = "Время";
+"Health" = "Здоровье";
+"Shapes" = "Фигуры";
+"Arrows" = "Стрелки";
+"Indices" = "Индексы";
+"Math" = "Математика";
+
+/* Auth Methods */
+"SSH Key" = "SSH‑ключ";
+"SSH Key + Passphrase" = "SSH‑ключ + пароль";
+
+/* Environments */
+"Production" = "Продакшн";
+"Staging" = "Стейджинг";
+"Development" = "Разработка";
+"Prod" = "Прод";
+"Stag" = "Стейдж";
+"Dev" = "Дев";
+"New Environment" = "Новое окружение";
+"Edit Environment" = "Редактировать окружение";
+"Environment name" = "Название окружения";
+"An environment with this name already exists." = "Окружение с таким именем уже существует.";
+"Delete Environment?" = "Удалить окружение?";
+"Servers in '%@' will be moved to Production." = "Серверы в «%@» будут перемещены в Продакшн.";
+"Edit \"%@\"..." = "Редактировать «%@»...";
+"Delete \"%@\"..." = "Удалить «%@»...";
+"Custom" = "Пользовательские";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Требуется разрешение на микрофон. Оно будет запрошено автоматически при начале записи.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Распознавание речи недоступно. Включите Siri в Настройках системы > Siri и Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Не удалось начать запись. Проверьте разрешения микрофона в Настройках системы > Конфиденциальность и безопасность > Микрофон.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "Транскрибация MLX недоступна на этом Mac. Переключение на Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Обновите до Pro для безлимитных серверов";
+"Upgrade to Pro for unlimited workspaces" = "Обновите до Pro для безлимитных рабочих пространств";
+"Upgrade to Pro for multiple connections" = "Обновите до Pro для нескольких подключений";
+"Upgrade to Pro for custom environments" = "Обновите до Pro для пользовательских окружений";
+
+/* Misc */
+"Terminal initialization failed" = "Не удалось инициализировать терминал";
+"Voice Input Unavailable" = "Голосовой ввод недоступен";
+"Disconnect from server" = "Отключиться от сервера";
+"Disconnect from %@?" = "Отключиться от %@?";
+"This will return to the server list." = "Это вернёт к списку серверов.";
+"All terminal tabs for this server will be closed." = "Все вкладки терминала для этого сервера будут закрыты.";
+"Add Terminal Preset" = "Добавить пресет терминала";
+"Edit Preset" = "Редактировать пресет";
+"Basic Information" = "Основная информация";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Отображаемое имя пресета (например, Claude, Helix, Vim)";
+"Command" = "Команда";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Команда для запуска при выборе пресета (например, claude, hx, nvim)";
+"Icon" = "Иконка";
+"Choose Symbol..." = "Выбрать символ...";
+
+/* Contact Labels */
+"Developer" = "Разработчик";
+"Discord" = "Discord";
+"Join Community" = "Присоединиться к сообществу";
+"Email" = "Эл. почта";
+"GitHub" = "GitHub";
+"Report Issue" = "Сообщить о проблеме";
+"Support VVTerm" = "Поддержать VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "Система (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Не удалось удалить модель";
+"Model ID is required" = "Требуется ID модели";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Сервер «%@» заблокирован";
+"Workspace '%@' is locked" = "Рабочее пространство «%@» заблокировано";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "Вы достигли лимита %lld серверов. Обновите до Pro для безлимитных серверов.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Современно, быстро и безопасно. Рекомендуется для большинства случаев.";
+"Wide compatibility with older systems." = "Широкая совместимость со старыми системами.";
+
+
+/* Split Commands */
+"Split Right" = "Разделить вправо";
+"Split Down" = "Разделить вниз";
+"Close Pane" = "Закрыть панель";
+
+/* Tabs */
+"View" = "Вид";
+"Stats" = "Статистика";
+
+/* Help */
+"Support & Feedback" = "Поддержка и обратная связь";
+
+"Upgrade to Pro for unlimited workspaces." = "Обновите до Pro для безлимитных рабочих пространств.";
+
+"Fingerprint" = "Отпечаток";
+
+"Links" = "Ссылки";
+
+"Passphrase" = "Пароль";
+
+"%@ is a Pro feature" = "%@ — функция Pro";
+
+"System (Default)" = "Система (по умолчанию)";
+
+"Some changes may require restarting the app." = "Некоторые изменения могут потребовать перезапуска приложения.";
+
+/* Download Progress */
+"%llds remaining" = "осталось %lldс";
+"%lldm remaining" = "осталось %lldм";
+"%lldh %lldm remaining" = "осталось %lldч %lldм";
+"Clear All Storage" = "Очистить всё хранилище";
+
+/* Preview */
+"Server 1" = "Сервер 1";
+"Server 2" = "Сервер 2";
+"Server 3" = "Сервер 3";

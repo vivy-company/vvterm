@@ -24,14 +24,14 @@ struct ConnectionTabsScrollView: View {
                 NavigationArrowButton(
                     icon: "chevron.left",
                     action: { sessionManager.selectPreviousSession() },
-                    help: "Previous tab"
+                    help: String(localized: "Previous tab")
                 )
                 .disabled(sessionManager.sessions.count <= 1)
 
                 NavigationArrowButton(
                     icon: "chevron.right",
                     action: { sessionManager.selectNextSession() },
-                    help: "Next tab"
+                    help: String(localized: "Next tab")
                 )
                 .disabled(sessionManager.sessions.count <= 1)
             }
@@ -75,7 +75,7 @@ struct ConnectionTabsScrollView: View {
             #if os(macOS)
             .onHover { isNewTabHovering = $0 }
             #endif
-            .help("New connection")
+            .help(Text("New connection"))
             .padding(.trailing, 8)
         }
         .sheet(isPresented: $showingProUpgrade) {

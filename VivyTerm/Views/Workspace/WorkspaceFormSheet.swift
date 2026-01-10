@@ -48,8 +48,8 @@ struct WorkspaceFormSheet: View {
                 if isAtLimit {
                     Section {
                         ProLimitBanner(
-                            title: "Workspace Limit Reached",
-                            message: "Upgrade to Pro for unlimited workspaces."
+                            title: String(localized: "Workspace Limit Reached"),
+                            message: String(localized: "Upgrade to Pro for unlimited workspaces.")
                         ) {
                             showingProUpgrade = true
                         }
@@ -114,7 +114,7 @@ struct WorkspaceFormSheet: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(isEditing ? "Edit Workspace" : "New Workspace")
+            .navigationTitle(isEditing ? String(localized: "Edit Workspace") : String(localized: "New Workspace"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -123,7 +123,7 @@ struct WorkspaceFormSheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? "Save" : "Create") {
+                    Button(isEditing ? String(localized: "Save") : String(localized: "Create")) {
                         saveWorkspace()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)

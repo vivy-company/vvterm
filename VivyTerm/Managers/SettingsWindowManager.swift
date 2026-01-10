@@ -11,6 +11,19 @@ import AppKit
 #endif
 
 #if os(macOS)
+
+/// Wrapper view that observes language changes and applies locale environment
+private struct LocalizedSettingsView: View {
+    @AppStorage("appLanguage") private var appLanguage = AppLanguage.system.rawValue
+
+    var body: some View {
+        let locale = AppLanguage(rawValue: appLanguage)?.locale ?? Locale.current
+        SettingsView()
+            .modifier(AppearanceModifier())
+            .environment(\.locale, locale)
+    }
+}
+
 @MainActor
 final class SettingsWindowManager {
     static let shared = SettingsWindowManager()
@@ -25,8 +38,7 @@ final class SettingsWindowManager {
             return
         }
 
-        let settingsView = SettingsView()
-            .modifier(AppearanceModifier())
+        let settingsView = LocalizedSettingsView()
         let hostingController = NSHostingController(rootView: settingsView)
 
         let window = NSWindow(contentViewController: hostingController)

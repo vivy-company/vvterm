@@ -193,7 +193,7 @@ struct TerminalContainerView: View {
             do {
                 credentials = try KeychainManager.shared.getCredentials(for: server)
             } catch {
-                errorMessage = "Failed to load credentials: \(error.localizedDescription)"
+                errorMessage = String(localized: "Failed to load credentials: \(error.localizedDescription)")
             }
         }
         .onAppear {
@@ -255,7 +255,7 @@ struct TerminalContainerView: View {
                 .background(.ultraThinMaterial, in: Circle())
         }
         .buttonStyle(.plain)
-        .help("Voice input (Command+Shift+M)")
+        .help(Text("Voice input (Command+Shift+M)"))
         .padding(14)
     }
 
@@ -326,7 +326,9 @@ struct TerminalContainerView: View {
                     showingVoiceRecording = false
                 }
                 if let recordingError = error as? AudioService.RecordingError {
-                    permissionErrorMessage = recordingError.localizedDescription + "\n\nEnable Microphone and Speech Recognition in System Settings."
+                    permissionErrorMessage = recordingError.localizedDescription
+                        + "\n\n"
+                        + String(localized: "Enable Microphone and Speech Recognition in System Settings.")
                 } else {
                     permissionErrorMessage = error.localizedDescription
                 }
@@ -359,7 +361,7 @@ struct TerminalEmptyStateView: View {
                     .foregroundStyle(.secondary)
 
                 VStack(spacing: 8) {
-                    Text(server?.name ?? "Terminal")
+                    Text(server?.name ?? String(localized: "Terminal"))
                         .font(.title2)
                         .fontWeight(.semibold)
 

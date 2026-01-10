@@ -1,0 +1,642 @@
+/* General */
+"OK" = "Đồng ý";
+"Cancel" = "Hủy";
+"Save" = "Lưu";
+"Add" = "Thêm";
+"Create" = "Tạo";
+"Delete" = "Xóa";
+"Done" = "Xong";
+"Edit" = "Sửa";
+"Remove" = "Gỡ";
+"Connect" = "Kết nối";
+"Disconnect" = "Ngắt kết nối";
+"Reconnect" = "Kết nối lại";
+"Retry" = "Thử lại";
+"Upgrade" = "Nâng cấp";
+"Upgrade to Pro" = "Nâng cấp lên Pro";
+"Upgrade to VVTerm Pro" = "Nâng cấp lên VVTerm Pro";
+"View Plans" = "Xem gói";
+"Manage Subscription" = "Quản lý đăng ký";
+"Manage subscription" = "Quản lý đăng ký";
+"Manage your subscription" = "Quản lý đăng ký của bạn";
+"Restore Purchases" = "Khôi phục mua hàng";
+"Renew" = "Gia hạn";
+"Renew Pro" = "Gia hạn Pro";
+"Close" = "Đóng";
+"Close Terminal" = "Đóng terminal";
+"Close All to the Left" = "Đóng tất cả bên trái";
+"Close All to the Right" = "Đóng tất cả bên phải";
+"Close Other Tabs" = "Đóng các tab khác";
+"Duplicate Tab" = "Nhân bản tab";
+"New Terminal" = "Terminal mới";
+"New terminal tab" = "Tab terminal mới";
+"New connection" = "Kết nối mới";
+"Previous tab" = "Tab trước";
+"Next tab" = "Tab sau";
+"No terminals" = "Không có terminal";
+"%lld tab" = "%lld tab";
+"%lld tabs" = "%lld tab";
+"No terminals open" = "Không có terminal đang mở";
+"Search servers" = "Tìm máy chủ";
+"Search servers..." = "Tìm máy chủ...";
+"Search symbols..." = "Tìm biểu tượng...";
+"Select Workspace" = "Chọn workspace";
+"Select a Server" = "Chọn máy chủ";
+"Choose a server from the sidebar to connect" = "Chọn máy chủ từ thanh bên để kết nối";
+"Multiple connections require Pro" = "Nhiều kết nối yêu cầu Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Nâng cấp để kết nối nhiều máy chủ cùng lúc";
+"Disconnected" = "Đã ngắt kết nối";
+"Connecting..." = "Đang kết nối...";
+"Connecting to %@..." = "Đang kết nối tới %@...";
+"Reconnecting (attempt %lld)..." = "Đang kết nối lại (lần %lld)...";
+"Connection Failed" = "Kết nối thất bại";
+"Connection failed: %@" = "Kết nối thất bại: %@";
+"Connection timed out" = "Kết nối bị quá thời gian";
+"Authentication failed" = "Xác thực thất bại";
+"Failed to load credentials" = "Không thể tải thông tin xác thực";
+"Failed to load credentials: %@" = "Không thể tải thông tin xác thực: %@";
+"Failed to load key: %@" = "Không thể tải khóa: %@";
+"Failed to read key file: %@" = "Không thể đọc tệp khóa: %@";
+"Failed to import key: %@" = "Không thể nhập khóa: %@";
+"Failed to delete key: %@" = "Không thể xóa khóa: %@";
+"Failed to save key: %@" = "Không thể lưu khóa: %@";
+"Failed to generate key: %@" = "Không thể tạo khóa: %@";
+"Failed to generate SSH key" = "Không thể tạo khóa SSH";
+"Failed to encode key data" = "Không thể mã hóa dữ liệu khóa";
+"Failed to export RSA key" = "Không thể xuất khóa RSA";
+"Invalid key data" = "Dữ liệu khóa không hợp lệ";
+"Cannot access the selected file" = "Không thể truy cập tệp đã chọn";
+"Copy to Clipboard" = "Sao chép vào clipboard";
+"Copied" = "Đã sao chép";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "Giới thiệu VVTerm";
+"Version %@ (%@)" = "Phiên bản %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Trình khách SSH chuyên nghiệp\ncho macOS & iOS";
+"Visit Website" = "Truy cập website";
+"Report an Issue" = "Báo lỗi";
+"Privacy Policy" = "Chính sách quyền riêng tư";
+"Get in Touch" = "Liên hệ";
+"Questions, feedback, or issues? Reach out anytime." = "Có câu hỏi, phản hồi hay vấn đề? Hãy liên hệ bất cứ lúc nào.";
+"Questions, feedback, or issues?\nReach out anytime." = "Có câu hỏi, phản hồi hay vấn đề?\nHãy liên hệ bất cứ lúc nào.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Chào mừng đến với VVTerm";
+"Your secure SSH terminal" = "Terminal SSH an toàn của bạn";
+"Continue" = "Tiếp tục";
+"SSH Terminal" = "Terminal SSH";
+"Connect to servers with GPU-accelerated terminal emulation." = "Kết nối máy chủ với mô phỏng terminal tăng tốc GPU.";
+"iCloud Sync" = "Đồng bộ iCloud";
+"Servers and credentials sync across all your devices." = "Máy chủ và thông tin xác thực được đồng bộ trên tất cả thiết bị.";
+"Secure Storage" = "Lưu trữ an toàn";
+"Passwords and SSH keys protected by Keychain." = "Mật khẩu và khóa SSH được bảo vệ bởi Keychain.";
+"Voice Commands" = "Lệnh giọng nói";
+"Speak commands with on-device speech recognition." = "Nói lệnh bằng nhận dạng giọng nói trên thiết bị.";
+
+/* Settings Navigation */
+"Settings" = "Cài đặt";
+"General" = "Chung";
+"Terminal" = "Terminal";
+"Transcription" = "Phiên âm";
+"SSH Keys" = "Khóa SSH";
+"Sync" = "Đồng bộ";
+"About" = "Giới thiệu";
+"Premium" = "Premium";
+"Appearance and preferences" = "Giao diện và tùy chọn";
+"Font, theme, and connection settings" = "Phông chữ, chủ đề và cài đặt kết nối";
+"Speech-to-text engine and models" = "Bộ máy và mô hình chuyển giọng nói thành văn bản";
+"Manage stored SSH keys" = "Quản lý khóa SSH đã lưu";
+"iCloud sync and data management" = "Đồng bộ iCloud và quản lý dữ liệu";
+"Version and links" = "Phiên bản và liên kết";
+
+/* Appearance */
+"Appearance" = "Giao diện";
+"System" = "Hệ thống";
+"Light" = "Sáng";
+"Dark" = "Tối";
+
+/* Terminal Settings */
+"Font" = "Phông chữ";
+"Font Family" = "Họ phông chữ";
+"Size: %lldpt" = "Kích thước: %lldpt";
+"Theme" = "Chủ đề";
+"Use different themes for Light/Dark mode" = "Dùng chủ đề khác nhau cho chế độ Sáng/Tối";
+"Dark Mode Theme" = "Chủ đề chế độ tối";
+"Light Mode Theme" = "Chủ đề chế độ sáng";
+"Terminal Behavior" = "Hành vi terminal";
+"Enable terminal notifications" = "Bật thông báo terminal";
+"Show progress overlays" = "Hiển thị lớp phủ tiến trình";
+"Show voice input button" = "Hiển thị nút nhập giọng nói";
+"Copy Text Processing" = "Xử lý văn bản khi sao chép";
+"Transformations applied when copying text from terminal" = "Các chuyển đổi được áp dụng khi sao chép văn bản từ terminal";
+"Trim trailing whitespace" = "Cắt bỏ khoảng trắng cuối dòng";
+"Collapse multiple blank lines" = "Gộp nhiều dòng trống";
+"Strip shell prompts ($ #)" = "Loại bỏ prompt shell ($ #)";
+"Flatten multi-line commands" = "Gộp lệnh nhiều dòng";
+"Remove box-drawing characters" = "Loại bỏ ký tự vẽ khung";
+"Strip ANSI escape codes" = "Loại bỏ mã ANSI";
+"SSH Connection" = "Kết nối SSH";
+"Auto-reconnect on disconnect" = "Tự động kết nối lại khi ngắt";
+"Send keep-alive packets" = "Gửi gói keep‑alive";
+"Interval: %llds" = "Khoảng thời gian: %lld giây";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Nâng cấp để dùng tính năng không giới hạn";
+"Unlimited Servers" = "Máy chủ không giới hạn";
+"Add as many servers as you need (free: 3)" = "Thêm bao nhiêu máy chủ tùy ý (miễn phí: 3)";
+"Unlimited Workspaces" = "Workspace không giới hạn";
+"Organize servers into multiple workspaces (free: 1)" = "Sắp xếp máy chủ vào nhiều workspace (miễn phí: 1)";
+"Multiple Connections" = "Nhiều kết nối";
+"Open multiple terminal tabs at once (free: 1)" = "Mở nhiều tab terminal cùng lúc (miễn phí: 1)";
+"Custom Environments" = "Môi trường tùy chỉnh";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Tạo nhãn môi trường tùy chỉnh ngoài Prod/Staging/Dev";
+"All Future Features" = "Tất cả tính năng tương lai";
+"Get access to every new Pro feature" = "Truy cập mọi tính năng Pro mới";
+"Monthly" = "Hàng tháng";
+"Billed monthly" = "Thanh toán hàng tháng";
+"Yearly" = "Hàng năm";
+"Best value - billed yearly" = "Giá tốt nhất - thanh toán hàng năm";
+"SAVE 74%" = "TIẾT KIỆM 74%";
+"Lifetime" = "Trọn đời";
+"One-time purchase, forever" = "Mua một lần, dùng mãi mãi";
+"FOREVER" = "MÃI MÃI";
+"Processing..." = "Đang xử lý...";
+"Purchase Failed" = "Mua hàng thất bại";
+"Unknown error" = "Lỗi không xác định";
+"Welcome to Pro!" = "Chào mừng đến với Pro!";
+"You now have unlimited access" = "Bạn đã có quyền truy cập không giới hạn";
+"Cancel anytime. Subscription auto-renews." = "Hủy bất cứ lúc nào. Đăng ký tự động gia hạn.";
+"Terms of Service" = "Điều khoản dịch vụ";
+"Refund Policy" = "Chính sách hoàn tiền";
+"Select a Plan" = "Chọn gói";
+"Buy - %@" = "Mua - %@";
+"Subscribe - %@" = "Đăng ký - %@";
+"Purchase verification failed" = "Xác minh mua hàng thất bại";
+"Product not found" = "Không tìm thấy sản phẩm";
+"Purchase failed: %@" = "Mua hàng thất bại: %@";
+
+/* Pro Settings */
+"Status" = "Trạng thái";
+"Subscription" = "Đăng ký";
+"Plan" = "Gói";
+"Purchased" = "Đã mua";
+"Renews" = "Gia hạn";
+"Servers" = "Máy chủ";
+"%lld of %lld used" = "Đã dùng %lld / %lld";
+"Workspaces" = "Workspace";
+"Simultaneous Connections" = "Kết nối đồng thời";
+"%lld max" = "tối đa %lld";
+"Features" = "Tính năng";
+"Billing" = "Thanh toán";
+"Active" = "Đang hoạt động";
+"Free Tier" = "Gói miễn phí";
+"Pro Lifetime" = "Pro trọn đời";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro hàng tháng";
+"Pro Yearly" = "Pro hàng năm";
+"PRO" = "PRO";
+"FREE" = "MIỄN PHÍ";
+"Unlimited servers & workspaces" = "Máy chủ & workspace không giới hạn";
+"View Plans" = "Xem gói";
+
+/* Pro Limits */
+"Server Limit Reached" = "Đã đạt giới hạn máy chủ";
+"Workspace Limit Reached" = "Đã đạt giới hạn workspace";
+"Tab Limit Reached" = "Đã đạt giới hạn tab";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Bạn đã đạt giới hạn %lld máy chủ của gói miễn phí. Nâng cấp Pro để dùng máy chủ không giới hạn.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Bạn đã đạt giới hạn %lld workspace của gói miễn phí. Nâng cấp Pro để dùng workspace không giới hạn.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "Gói miễn phí chỉ cho phép %lld kết nối cùng lúc. Nâng cấp Pro để có nhiều kết nối đồng thời.";
+"Server Locked" = "Máy chủ bị khóa";
+"Workspace Locked" = "Workspace bị khóa";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Máy chủ này vượt quá giới hạn %lld máy chủ của gói miễn phí. Gia hạn Pro để truy cập tất cả máy chủ.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Workspace này vượt quá giới hạn %lld workspace của gói miễn phí. Gia hạn Pro để truy cập tất cả workspace.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Đăng ký đã hết hạn";
+"%lld server" = "%lld máy chủ";
+"%lld servers" = "%lld máy chủ";
+"%lld workspace" = "%lld workspace";
+"%lld workspaces" = "%lld workspace";
+" and " = " và ";
+"%@ locked" = "%@ bị khóa";
+
+/* Server & Workspace */
+"Server Info" = "Thông tin máy chủ";
+"Name" = "Tên";
+"Host" = "Host";
+"Port" = "Cổng";
+"Username" = "Tên người dùng";
+"Authentication" = "Xác thực";
+"Method" = "Phương thức";
+"Password" = "Mật khẩu";
+"Key loaded" = "Đã tải khóa";
+"Key Passphrase" = "Mật khẩu khóa";
+"Server Environment" = "Môi trường máy chủ";
+"Environment" = "Môi trường";
+"Notes" = "Ghi chú";
+"Edit Server" = "Sửa máy chủ";
+"Add Server" = "Thêm máy chủ";
+"Use Stored Key" = "Dùng khóa đã lưu";
+"Select a key..." = "Chọn khóa...";
+"Import File" = "Nhập tệp";
+"Paste" = "Dán";
+"Add to Keychain" = "Thêm vào Keychain";
+"Select a stored key or import/paste a new one" = "Chọn khóa đã lưu hoặc nhập/dán khóa mới";
+"Using stored key: %@" = "Đang dùng khóa đã lưu: %@";
+"Workspace" = "Workspace";
+"Workspaces" = "Workspace";
+"Workspace name" = "Tên workspace";
+"Color" = "Màu";
+"Delete Workspace" = "Xóa workspace";
+"Edit Workspace" = "Sửa workspace";
+"New Workspace" = "Workspace mới";
+"Workspaces" = "Workspace";
+"My Servers" = "Máy chủ của tôi";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "WORKSPACE";
+"SERVERS" = "MÁY CHỦ";
+"Support VVTerm" = "Ủng hộ VVTerm";
+"Upgrade to Pro" = "Nâng cấp lên Pro";
+"All" = "Tất cả";
+"Custom..." = "Tùy chỉnh...";
+"New Workspace" = "Workspace mới";
+"Unlock with Pro" = "Mở khóa bằng Pro";
+"Switch to Workspace" = "Chuyển sang workspace";
+"Delete Workspace" = "Xóa workspace";
+
+/* iOS Lists */
+"%lld servers" = "%lld máy chủ";
+"Servers" = "Máy chủ";
+"Active Connections" = "Kết nối đang hoạt động";
+"Add Workspace" = "Thêm workspace";
+"Workspaces" = "Workspace";
+"Done" = "Xong";
+
+/* Empty States */
+"No Servers" = "Không có máy chủ";
+"Add a server to get started" = "Thêm máy chủ để bắt đầu";
+"Multiple connections require Pro" = "Nhiều kết nối yêu cầu Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Nâng cấp để kết nối nhiều máy chủ cùng lúc";
+"Upgrade to Pro" = "Nâng cấp lên Pro";
+"Connect" = "Kết nối";
+
+/* Offline */
+"No network connection" = "Không có kết nối mạng";
+"You're currently offline. Some features may not work:" = "Bạn đang ngoại tuyến. Một số tính năng có thể không hoạt động:";
+"Cannot connect to servers" = "Không thể kết nối tới máy chủ";
+"iCloud sync paused" = "Đồng bộ iCloud đã tạm dừng";
+"Saved servers still accessible" = "Máy chủ đã lưu vẫn truy cập được";
+"Offline" = "Ngoại tuyến";
+
+/* Terminal */
+"Initializing terminal..." = "Đang khởi tạo terminal...";
+"Terminal initialization failed" = "Khởi tạo terminal thất bại";
+"Connecting..." = "Đang kết nối...";
+"Reconnecting (attempt %lld)..." = "Đang kết nối lại (lần %lld)...";
+"Disconnected" = "Đã ngắt kết nối";
+"Connection Failed" = "Kết nối thất bại";
+"Reconnect" = "Kết nối lại";
+"Retry" = "Thử lại";
+"Voice Input Unavailable" = "Không thể nhập giọng nói";
+"Voice input (Command+Shift+M)" = "Nhập giọng nói (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Bật Microphone và Speech Recognition trong System Settings.";
+"Terminal" = "Terminal";
+"No terminals open" = "Không có terminal đang mở";
+"New Terminal" = "Terminal mới";
+"Close this terminal?" = "Đóng terminal này?";
+"The SSH connection will be terminated." = "Kết nối SSH sẽ bị chấm dứt.";
+
+/* Keychain */
+"No Keys Stored" = "Không có khóa đã lưu";
+"Add keys to quickly use them when creating new servers" = "Thêm khóa để dùng nhanh khi tạo máy chủ mới";
+"Generate New Key" = "Tạo khóa mới";
+"Import Key" = "Nhập khóa";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Khóa được lưu an toàn trong Keychain của thiết bị. Mật khẩu được lưu riêng.";
+"Delete SSH Key" = "Xóa khóa SSH";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Bạn có chắc muốn xóa '%@'? Không thể hoàn tác.";
+"Protected" = "Được bảo vệ";
+"Added %@ ago" = "Đã thêm %@ trước";
+"Copy public key" = "Sao chép khóa công khai";
+"Key Name" = "Tên khóa";
+"e.g., Personal MacBook, Work Key" = "ví dụ: MacBook cá nhân, Khóa công việc";
+"Private Key" = "Khóa riêng";
+"Import Key File" = "Nhập tệp khóa";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Nhập tệp khóa riêng (id_rsa, id_ed25519, v.v.) hoặc dán nội dung";
+"Key loaded (%lld characters)" = "Đã tải khóa (%lld ký tự)";
+"Key passphrase" = "Mật khẩu khóa";
+"Passphrase (Optional)" = "Mật khẩu (tùy chọn)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "Nếu khóa được mã hóa bằng mật khẩu, hãy nhập tại đây. Để trống nếu không có mật khẩu.";
+"Add SSH Key" = "Thêm khóa SSH";
+"Algorithm" = "Thuật toán";
+"Key Type" = "Loại khóa";
+"Confirm passphrase" = "Xác nhận mật khẩu";
+"Protect your key with a passphrase. Leave empty for no protection." = "Bảo vệ khóa bằng mật khẩu. Để trống nếu không muốn bảo vệ.";
+"Generated Key" = "Khóa đã tạo";
+"Key generated successfully" = "Tạo khóa thành công";
+"Fingerprint:" = "Vân tay:";
+"View Public Key" = "Xem khóa công khai";
+"Generate SSH Key" = "Tạo khóa SSH";
+"Generate" = "Tạo";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Thêm mục này vào tệp ~/.ssh/authorized_keys của máy chủ:";
+"No Public Key" = "Không có khóa công khai";
+"This key was imported without a public key." = "Khóa này được nhập không kèm khóa công khai.";
+"Public Key" = "Khóa công khai";
+
+/* Transcription */
+"Engine" = "Bộ máy";
+"System (Apple)" = "Hệ thống (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Nhà cung cấp";
+"Language" = "Ngôn ngữ";
+"Model" = "Mô hình";
+"Downloading..." = "Đang tải xuống...";
+"Delete Model" = "Xóa mô hình";
+"Download size: %@" = "Kích thước tải xuống: %@";
+"Status" = "Trạng thái";
+"Download" = "Tải xuống";
+"Ready" = "Sẵn sàng";
+"Failed" = "Thất bại";
+"Storage" = "Lưu trữ";
+"Model Storage" = "Lưu trữ mô hình";
+"Total MLX Models" = "Tổng mô hình MLX";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Dùng nhận dạng giọng nói tích hợp của Apple. Cần mạng để có kết quả tốt nhất.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper chạy cục bộ bằng MLX. Hoạt động ngoại tuyến sau khi tải xuống.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet chạy cục bộ bằng MLX. Tối ưu cho phiên âm thời gian thực.";
+"English" = "Tiếng Anh";
+"Spanish" = "Tiếng Tây Ban Nha";
+"French" = "Tiếng Pháp";
+"German" = "Tiếng Đức";
+"Japanese" = "Tiếng Nhật";
+"Chinese" = "Tiếng Trung";
+"Korean" = "Tiếng Hàn";
+"Portuguese" = "Tiếng Bồ Đào Nha";
+"Russian" = "Tiếng Nga";
+"Auto-detect" = "Tự động phát hiện";
+
+/* MLX Models */
+"Tiny" = "Rất nhỏ";
+"Fastest, smallest" = "Nhanh nhất, nhỏ nhất";
+"Full precision" = "Độ chính xác đầy đủ";
+"Tiny (EN)" = "Rất nhỏ (EN)";
+"English-only, smaller" = "Chỉ tiếng Anh, nhỏ hơn";
+"English-only" = "Chỉ tiếng Anh";
+"Base" = "Cơ bản";
+"Balanced speed/quality" = "Cân bằng tốc độ/chất lượng";
+"Small" = "Nhỏ";
+"Better accuracy" = "Chính xác hơn";
+"Medium" = "Trung bình";
+"Higher accuracy, heavier" = "Chính xác hơn, nặng hơn";
+"Large v3" = "Lớn v3";
+"Latest large model" = "Mô hình lớn mới nhất";
+"Large" = "Lớn";
+"Large v3 4-bit" = "Lớn v3 4-bit";
+"Smaller download" = "Tải xuống nhỏ hơn";
+"4-bit quantized" = "Lượng tử 4-bit";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Mô hình lớn, độ chính xác cao";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "Di động";
+"Ethernet" = "Ethernet";
+"Unknown" = "Không rõ";
+"No Connection" = "Không có kết nối";
+" (Metered)" = " (Theo dung lượng)";
+" (Low Data)" = " (Tiết kiệm dữ liệu)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Bật đồng bộ iCloud";
+"iCloud Account" = "Tài khoản iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Đồng bộ máy chủ và workspace trên tất cả thiết bị Apple của bạn.";
+"Sync Status" = "Trạng thái đồng bộ";
+"Last Synced" = "Lần đồng bộ gần nhất";
+"Error" = "Lỗi";
+"Data" = "Dữ liệu";
+"Force Sync Now" = "Buộc đồng bộ ngay";
+"Clear Local Data & Re-sync" = "Xóa dữ liệu cục bộ & đồng bộ lại";
+"Reset iCloud (Delete All & Re-upload)" = "Đặt lại iCloud (xóa tất cả & tải lên lại)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Đồng bộ bắt buộc sẽ lấy dữ liệu mới nhất từ iCloud. Xóa & đồng bộ lại sẽ xóa dữ liệu cục bộ và tải lại. Đặt lại iCloud sẽ xóa TOÀN BỘ dữ liệu trên đám mây và tải dữ liệu cục bộ lên lại (sửa trùng lặp).";
+"Account Status" = "Trạng thái tài khoản";
+"Container" = "Container";
+"Re-check iCloud Status" = "Kiểm tra lại trạng thái iCloud";
+"Troubleshooting" = "Khắc phục sự cố";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Hãy đảm bảo bạn đã đăng nhập iCloud trong Cài đặt và bật iCloud Drive. Kiểm tra Console.app để xem log 'CloudKit' chi tiết.";
+"Force Sync" = "Buộc đồng bộ";
+"Sync Now" = "Đồng bộ ngay";
+"This will fetch the latest data from iCloud and may take a moment." = "Thao tác này sẽ lấy dữ liệu mới nhất từ iCloud và có thể mất một chút thời gian.";
+"Clear Local Data" = "Xóa dữ liệu cục bộ";
+"Clear & Re-sync" = "Xóa & đồng bộ lại";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Thao tác này sẽ xóa toàn bộ dữ liệu cục bộ và tải lại từ iCloud. Mọi thay đổi cục bộ chưa đồng bộ sẽ bị mất.";
+"Reset iCloud Data" = "Đặt lại dữ liệu iCloud";
+"Delete All & Re-upload" = "Xóa tất cả & tải lên lại";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "Thao tác này sẽ XÓA TOÀN BỘ dữ liệu khỏi iCloud và tải dữ liệu cục bộ hiện tại lên. Dùng để sửa bản ghi trùng lặp.";
+"Connected" = "Đã kết nối";
+"Not Available" = "Không khả dụng";
+"Synced" = "Đã đồng bộ";
+"Syncing..." = "Đang đồng bộ...";
+"available" = "khả dụng";
+"noAccount - User not signed into iCloud" = "noAccount - Người dùng chưa đăng nhập iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - Quyền truy cập iCloud bị hạn chế (kiểm soát của phụ huynh, MDM, v.v.)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Không thể xác định trạng thái iCloud";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud tạm thời không khả dụng";
+"unknown status: %@" = "trạng thái không rõ: %@";
+"Error: %@" = "Lỗi: %@";
+"Checking..." = "Đang kiểm tra...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Chế độ chia ngang";
+"Vertical split view" = "Chế độ chia dọc";
+"Left pane" = "Ngăn trái";
+"Top pane" = "Ngăn trên";
+"Right pane" = "Ngăn phải";
+"Bottom pane" = "Ngăn dưới";
+"Horizontal split divider" = "Thanh chia ngang";
+"Vertical split divider" = "Thanh chia dọc";
+"Drag to resize the left and right panes" = "Kéo để đổi kích thước ngăn trái và phải";
+"Drag to resize the top and bottom panes" = "Kéo để đổi kích thước ngăn trên và dưới";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "CORES";
+"IDLE" = "IDLE";
+"UPTIME" = "UPTIME";
+"LOAD" = "LOAD";
+"FREE" = "FREE";
+"USED" = "USED";
+"CACHED" = "CACHED";
+"TOTAL" = "TOTAL";
+"Volumes" = "Ổ đĩa";
+"Top Processes" = "Tiến trình hàng đầu";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ TOTAL";
+"↓ TOTAL" = "↓ TOTAL";
+"%lld D" = "%lld N";
+"%lld H" = "%lld G";
+
+/* SFSymbol Picker */
+"Recent" = "Gần đây";
+"Load more (%lld remaining)" = "Tải thêm (%lld còn lại)";
+"%lld symbols" = "%lld biểu tượng";
+"What's New" = "Mới";
+"Draw" = "Vẽ";
+"Variable" = "Biến";
+"Multicolor" = "Đa màu";
+"Communication" = "Giao tiếp";
+"Weather" = "Thời tiết";
+"Maps" = "Bản đồ";
+"Objects & Tools" = "Đồ vật & công cụ";
+"Devices" = "Thiết bị";
+"Camera & Photos" = "Máy ảnh & Ảnh";
+"Gaming" = "Trò chơi";
+"Connectivity" = "Kết nối";
+"Transportation" = "Giao thông";
+"Automotive" = "Ô tô";
+"Accessibility" = "Trợ năng";
+"Privacy & Security" = "Quyền riêng tư & bảo mật";
+"Human" = "Con người";
+"Home" = "Nhà";
+"Fitness" = "Thể dục";
+"Nature" = "Thiên nhiên";
+"Editing" = "Chỉnh sửa";
+"Text Formatting" = "Định dạng văn bản";
+"Media" = "Media";
+"Keyboard" = "Bàn phím";
+"Commerce" = "Thương mại";
+"Time" = "Thời gian";
+"Health" = "Sức khỏe";
+"Shapes" = "Hình dạng";
+"Arrows" = "Mũi tên";
+"Indices" = "Chỉ số";
+"Math" = "Toán";
+
+/* Auth Methods */
+"SSH Key" = "Khóa SSH";
+"SSH Key + Passphrase" = "Khóa SSH + Mật khẩu";
+
+/* Environments */
+"Production" = "Production";
+"Staging" = "Staging";
+"Development" = "Development";
+"Prod" = "Prod";
+"Stag" = "Stag";
+"Dev" = "Dev";
+"New Environment" = "Môi trường mới";
+"Edit Environment" = "Chỉnh sửa môi trường";
+"Environment name" = "Tên môi trường";
+"An environment with this name already exists." = "Đã tồn tại môi trường có tên này.";
+"Delete Environment?" = "Xóa môi trường?";
+"Servers in '%@' will be moved to Production." = "Các máy chủ trong \"%@\" sẽ được chuyển sang Production.";
+"Edit \"%@\"..." = "Chỉnh sửa \"%@\"...";
+"Delete \"%@\"..." = "Xóa \"%@\"...";
+"Custom" = "Tùy chỉnh";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Cần quyền dùng micro. Quyền sẽ được yêu cầu tự động khi bắt đầu ghi.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Nhận dạng giọng nói không khả dụng. Vui lòng bật Siri trong System Settings > Siri & Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Không thể bắt đầu ghi. Vui lòng kiểm tra quyền micro trong System Settings > Privacy & Security > Microphone.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "Phiên âm MLX không khả dụng trên Mac này. Chuyển sang Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Nâng cấp Pro để dùng máy chủ không giới hạn";
+"Upgrade to Pro for unlimited workspaces" = "Nâng cấp Pro để dùng workspace không giới hạn";
+"Upgrade to Pro for multiple connections" = "Nâng cấp Pro để có nhiều kết nối";
+"Upgrade to Pro for custom environments" = "Nâng cấp Pro để dùng môi trường tùy chỉnh";
+
+/* Misc */
+"Terminal initialization failed" = "Khởi tạo terminal thất bại";
+"Voice Input Unavailable" = "Không thể nhập giọng nói";
+"Disconnect from server" = "Ngắt kết nối khỏi máy chủ";
+"Disconnect from %@?" = "Ngắt kết nối khỏi %@?";
+"This will return to the server list." = "Thao tác này sẽ quay lại danh sách máy chủ.";
+"All terminal tabs for this server will be closed." = "Tất cả tab terminal của máy chủ này sẽ bị đóng.";
+"Add Terminal Preset" = "Thêm preset terminal";
+"Edit Preset" = "Sửa preset";
+"Basic Information" = "Thông tin cơ bản";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Tên hiển thị cho preset (vd: Claude, Helix, Vim)";
+"Command" = "Lệnh";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Lệnh chạy khi chọn preset (vd: claude, hx, nvim)";
+"Icon" = "Biểu tượng";
+"Choose Symbol..." = "Chọn biểu tượng...";
+
+/* Contact Labels */
+"Developer" = "Nhà phát triển";
+"Discord" = "Discord";
+"Join Community" = "Tham gia cộng đồng";
+"Email" = "Email";
+"GitHub" = "GitHub";
+"Report Issue" = "Báo lỗi";
+"Support VVTerm" = "Ủng hộ VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "Hệ thống (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Không thể xóa mô hình";
+"Model ID is required" = "Cần ID mô hình";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Máy chủ '%@' bị khóa";
+"Workspace '%@' is locked" = "Workspace '%@' bị khóa";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "Bạn đã đạt giới hạn %lld máy chủ. Nâng cấp Pro để dùng máy chủ không giới hạn.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Hiện đại, nhanh và an toàn. Khuyến nghị cho hầu hết nhu cầu.";
+"Wide compatibility with older systems." = "Tương thích rộng với hệ thống cũ.";
+
+
+/* Split Commands */
+"Split Right" = "Chia sang phải";
+"Split Down" = "Chia xuống";
+"Close Pane" = "Đóng ngăn";
+
+/* Tabs */
+"View" = "Xem";
+"Stats" = "Thống kê";
+
+/* Help */
+"Support & Feedback" = "Hỗ trợ & phản hồi";
+
+"Upgrade to Pro for unlimited workspaces." = "Nâng cấp Pro để dùng workspace không giới hạn.";
+
+"Fingerprint" = "Vân tay";
+
+"Links" = "Liên kết";
+
+"Passphrase" = "Mật khẩu";
+
+"%@ is a Pro feature" = "%@ là tính năng Pro";
+
+"System (Default)" = "Hệ thống (mặc định)";
+
+"Some changes may require restarting the app." = "Một số thay đổi có thể cần khởi động lại ứng dụng.";
+
+/* Download Progress */
+"%llds remaining" = "còn %lld giây";
+"%lldm remaining" = "còn %lld phút";
+"%lldh %lldm remaining" = "còn %lld giờ %lld phút";
+"Clear All Storage" = "Xóa tất cả bộ nhớ";
+
+/* Preview */
+"Server 1" = "Máy chủ 1";
+"Server 2" = "Máy chủ 2";
+"Server 3" = "Máy chủ 3";

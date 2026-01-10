@@ -29,6 +29,9 @@ struct VivyTermApp: App {
     // Welcome screen flag
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
 
+    // App language
+    @AppStorage("appLanguage") private var appLanguage = AppLanguage.system.rawValue
+
     // Terminal settings to watch for changes
     @AppStorage("terminalFontName") private var terminalFontName = "Menlo"
     @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
@@ -38,32 +41,45 @@ struct VivyTermApp: App {
 
     var body: some Scene {
         WindowGroup {
-            #if os(iOS)
-            iOSContentView()
-                .environmentObject(ghosttyApp)
-                .modifier(AppearanceModifier())
-                .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
-                    ghosttyApp.reloadConfig()
-                }
-                .sheet(isPresented: .init(
-                    get: { !hasSeenWelcome },
-                    set: { if !$0 { hasSeenWelcome = true } }
-                )) {
-                    WelcomeView(hasSeenWelcome: $hasSeenWelcome)
-                        .interactiveDismissDisabled()
-                }
-            #else
-            if !hasSeenWelcome {
-                WelcomeView(hasSeenWelcome: $hasSeenWelcome)
-            } else {
+            let appLocale = AppLanguage(rawValue: appLanguage)?.locale ?? Locale.current
+            Group {
+                #if os(iOS)
+                iOSContentView()
+                    .environmentObject(ghosttyApp)
+                    .modifier(AppearanceModifier())
+                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
+                        ghosttyApp.reloadConfig()
+                    }
+                    .sheet(isPresented: .init(
+                        get: { !hasSeenWelcome },
+                        set: { if !$0 { hasSeenWelcome = true } }
+                    )) {
+                        WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+                            .interactiveDismissDisabled()
+                    }
+                #else
                 ContentView()
                     .environmentObject(ghosttyApp)
                     .modifier(AppearanceModifier())
                     .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
                         ghosttyApp.reloadConfig()
                     }
+                    .sheet(isPresented: .init(
+                        get: { !hasSeenWelcome },
+                        set: { if !$0 { hasSeenWelcome = true } }
+                    )) {
+                        WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+                            .interactiveDismissDisabled()
+                    }
+                #endif
             }
-            #endif
+            .environment(\.locale, appLocale)
+            .onAppear {
+                AppLanguage.applySelection(appLanguage)
+            }
+            .onChange(of: appLanguage) { _, newValue in
+                AppLanguage.applySelection(newValue)
+            }
         }
         #if os(macOS)
         .windowStyle(.hiddenTitleBar)

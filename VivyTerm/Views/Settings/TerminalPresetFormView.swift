@@ -43,7 +43,7 @@ struct TerminalPresetFormView: View {
         VStack(spacing: 0) {
             // Header
             HStack {
-                Text(existingPreset == nil ? "Add Terminal Preset" : "Edit Preset")
+                Text(existingPreset == nil ? String(localized: "Add Terminal Preset") : String(localized: "Edit Preset"))
                     .font(.headline)
                 Spacer()
             }
@@ -58,11 +58,11 @@ struct TerminalPresetFormView: View {
             Form {
                 Section("Basic Information") {
                     TextField("Name", text: $name)
-                        .help("Display name for the preset (e.g., Claude, Helix, Vim)")
+                        .help(Text("Display name for the preset (e.g., Claude, Helix, Vim)"))
 
                     TextField("Command", text: $command, axis: .vertical)
                         .lineLimit(2...4)
-                        .help("Command to run when preset is selected (e.g., claude, hx, nvim)")
+                        .help(Text("Command to run when preset is selected (e.g., claude, hx, nvim)"))
                 }
 
                 Section("Icon") {
@@ -100,7 +100,7 @@ struct TerminalPresetFormView: View {
                 }
                 .keyboardShortcut(.cancelAction)
 
-                Button(existingPreset == nil ? "Add" : "Save") {
+                Button(existingPreset == nil ? String(localized: "Add") : String(localized: "Save")) {
                     savePreset()
                 }
                 .keyboardShortcut(.defaultAction)

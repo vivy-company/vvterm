@@ -33,7 +33,7 @@ final class AboutWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "About VVTerm"
+        window.title = String(localized: "About VVTerm")
         window.contentView = hostingView
         window.center()
         window.isReleasedWhenClosed = false
@@ -83,21 +83,21 @@ struct AboutView: View {
             // Links
             VStack(spacing: 12) {
                 LinkButton(
-                    title: "Visit Website",
+                    title: String(localized: "Visit Website"),
                     icon: "globe",
                     isSystemImage: true,
                     url: "https://vivy.dev"
                 )
 
                 LinkButton(
-                    title: "Report an Issue",
+                    title: String(localized: "Report an Issue"),
                     icon: "exclamationmark.bubble",
                     isSystemImage: true,
-                    url: "https://github.com/vivy-company/vivyterm/issues"
+                    url: "https://github.com/vivy-company/vvterm/issues"
                 )
 
                 LinkButton(
-                    title: "Privacy Policy",
+                    title: String(localized: "Privacy Policy"),
                     icon: "hand.raised",
                     isSystemImage: true,
                     url: "https://vivy.dev/privacy"
@@ -110,7 +110,7 @@ struct AboutView: View {
                 .padding(.horizontal, 32)
 
             // Copyright
-            Text("© 2025 Vivy Technologies Co., Limited")
+            Text("© \(Calendar.current.component(.year, from: Date())) Vivy Technologies Co., Limited")
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
                 .padding(.vertical, 16)

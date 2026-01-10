@@ -12,7 +12,7 @@ final class CloudKitManager: ObservableObject {
     @Published var syncStatus: SyncStatus = .idle
     @Published var lastSyncDate: Date?
     @Published var isAvailable: Bool = false
-    @Published var accountStatusDetail: String = "Checking..."
+    @Published var accountStatusDetail: String = String(localized: "Checking...")
 
     private let container: CKContainer
     private let database: CKDatabase
@@ -32,10 +32,10 @@ final class CloudKitManager: ObservableObject {
 
         var description: String {
             switch self {
-            case .idle: return "Synced"
-            case .syncing: return "Syncing..."
-            case .error(let message): return "Error: \(message)"
-            case .offline: return "Offline"
+            case .idle: return String(localized: "Synced")
+            case .syncing: return String(localized: "Syncing...")
+            case .error(let message): return String(localized: "Error: \(message)")
+            case .offline: return String(localized: "Offline")
             }
         }
     }
@@ -62,17 +62,17 @@ final class CloudKitManager: ObservableObject {
             let statusDescription: String
             switch status {
             case .available:
-                statusDescription = "available"
+                statusDescription = String(localized: "available")
             case .noAccount:
-                statusDescription = "noAccount - User not signed into iCloud"
+                statusDescription = String(localized: "noAccount - User not signed into iCloud")
             case .restricted:
-                statusDescription = "restricted - iCloud access restricted (parental controls, MDM, etc.)"
+                statusDescription = String(localized: "restricted - iCloud access restricted (parental controls, MDM, etc.)")
             case .couldNotDetermine:
-                statusDescription = "couldNotDetermine - Unable to determine iCloud status"
+                statusDescription = String(localized: "couldNotDetermine - Unable to determine iCloud status")
             case .temporarilyUnavailable:
-                statusDescription = "temporarilyUnavailable - iCloud temporarily unavailable"
+                statusDescription = String(localized: "temporarilyUnavailable - iCloud temporarily unavailable")
             @unknown default:
-                statusDescription = "unknown status: \(status.rawValue)"
+                statusDescription = String(localized: "unknown status: \(status.rawValue)")
             }
 
             logger.info("CloudKit account status: \(statusDescription)")
@@ -88,7 +88,7 @@ final class CloudKitManager: ObservableObject {
         } catch {
             logger.error("CloudKit account status check failed: \(error.localizedDescription)")
             isAvailable = false
-            accountStatusDetail = "Error: \(error.localizedDescription)"
+            accountStatusDetail = String(localized: "Error: \(error.localizedDescription)")
             syncStatus = .error(error.localizedDescription)
             accountStatusChecked = true
         }

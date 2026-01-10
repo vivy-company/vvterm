@@ -1,0 +1,642 @@
+/* General */
+"OK" = "OK";
+"Cancel" = "Anuluj";
+"Save" = "Zapisz";
+"Add" = "Dodaj";
+"Create" = "Utwórz";
+"Delete" = "Usuń";
+"Done" = "Gotowe";
+"Edit" = "Edytuj";
+"Remove" = "Usuń";
+"Connect" = "Połącz";
+"Disconnect" = "Rozłącz";
+"Reconnect" = "Połącz ponownie";
+"Retry" = "Ponów";
+"Upgrade" = "Ulepsz";
+"Upgrade to Pro" = "Ulepsz do Pro";
+"Upgrade to VVTerm Pro" = "Ulepsz do VVTerm Pro";
+"View Plans" = "Zobacz plany";
+"Manage Subscription" = "Zarządzaj subskrypcją";
+"Manage subscription" = "Zarządzaj subskrypcją";
+"Manage your subscription" = "Zarządzaj swoją subskrypcją";
+"Restore Purchases" = "Przywróć zakupy";
+"Renew" = "Odnów";
+"Renew Pro" = "Odnów Pro";
+"Close" = "Zamknij";
+"Close Terminal" = "Zamknij terminal";
+"Close All to the Left" = "Zamknij wszystkie po lewej";
+"Close All to the Right" = "Zamknij wszystkie po prawej";
+"Close Other Tabs" = "Zamknij inne karty";
+"Duplicate Tab" = "Duplikuj kartę";
+"New Terminal" = "Nowy terminal";
+"New terminal tab" = "Nowa karta terminala";
+"New connection" = "Nowe połączenie";
+"Previous tab" = "Poprzednia karta";
+"Next tab" = "Następna karta";
+"No terminals" = "Brak terminali";
+"%lld tab" = "%lld karta";
+"%lld tabs" = "%lld kart";
+"No terminals open" = "Brak otwartych terminali";
+"Search servers" = "Szukaj serwerów";
+"Search servers..." = "Szukaj serwerów...";
+"Search symbols..." = "Szukaj symboli...";
+"Select Workspace" = "Wybierz przestrzeń roboczą";
+"Select a Server" = "Wybierz serwer";
+"Choose a server from the sidebar to connect" = "Wybierz serwer z paska bocznego, aby się połączyć";
+"Multiple connections require Pro" = "Wiele połączeń wymaga Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Ulepsz, aby łączyć się z wieloma serwerami jednocześnie";
+"Disconnected" = "Rozłączono";
+"Connecting..." = "Łączenie...";
+"Connecting to %@..." = "Łączenie z %@...";
+"Reconnecting (attempt %lld)..." = "Ponowne łączenie (próba %lld)...";
+"Connection Failed" = "Połączenie nieudane";
+"Connection failed: %@" = "Połączenie nieudane: %@";
+"Connection timed out" = "Przekroczono czas połączenia";
+"Authentication failed" = "Uwierzytelnianie nie powiodło się";
+"Failed to load credentials" = "Nie udało się wczytać poświadczeń";
+"Failed to load credentials: %@" = "Nie udało się wczytać poświadczeń: %@";
+"Failed to load key: %@" = "Nie udało się wczytać klucza: %@";
+"Failed to read key file: %@" = "Nie udało się odczytać pliku klucza: %@";
+"Failed to import key: %@" = "Nie udało się zaimportować klucza: %@";
+"Failed to delete key: %@" = "Nie udało się usunąć klucza: %@";
+"Failed to save key: %@" = "Nie udało się zapisać klucza: %@";
+"Failed to generate key: %@" = "Nie udało się wygenerować klucza: %@";
+"Failed to generate SSH key" = "Nie udało się wygenerować klucza SSH";
+"Failed to encode key data" = "Nie udało się zakodować danych klucza";
+"Failed to export RSA key" = "Nie udało się wyeksportować klucza RSA";
+"Invalid key data" = "Nieprawidłowe dane klucza";
+"Cannot access the selected file" = "Nie można uzyskać dostępu do wybranego pliku";
+"Copy to Clipboard" = "Kopiuj do schowka";
+"Copied" = "Skopiowano";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "O VVTerm";
+"Version %@ (%@)" = "Wersja %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Profesjonalny klient SSH\ndla macOS i iOS";
+"Visit Website" = "Odwiedź stronę";
+"Report an Issue" = "Zgłoś problem";
+"Privacy Policy" = "Polityka prywatności";
+"Get in Touch" = "Skontaktuj się";
+"Questions, feedback, or issues? Reach out anytime." = "Masz pytania, uwagi lub problemy? Skontaktuj się w każdej chwili.";
+"Questions, feedback, or issues?\nReach out anytime." = "Masz pytania, uwagi lub problemy?\nSkontaktuj się w każdej chwili.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Witamy w VVTerm";
+"Your secure SSH terminal" = "Twój bezpieczny terminal SSH";
+"Continue" = "Kontynuuj";
+"SSH Terminal" = "Terminal SSH";
+"Connect to servers with GPU-accelerated terminal emulation." = "Łącz się z serwerami dzięki akcelerowanej GPU emulacji terminala.";
+"iCloud Sync" = "Synchronizacja iCloud";
+"Servers and credentials sync across all your devices." = "Serwery i poświadczenia synchronizują się na wszystkich urządzeniach.";
+"Secure Storage" = "Bezpieczne przechowywanie";
+"Passwords and SSH keys protected by Keychain." = "Hasła i klucze SSH chronione przez Pęk kluczy.";
+"Voice Commands" = "Polecenia głosowe";
+"Speak commands with on-device speech recognition." = "Wydawaj polecenia dzięki rozpoznawaniu mowy na urządzeniu.";
+
+/* Settings Navigation */
+"Settings" = "Ustawienia";
+"General" = "Ogólne";
+"Terminal" = "Terminal";
+"Transcription" = "Transkrypcja";
+"SSH Keys" = "Klucze SSH";
+"Sync" = "Synchronizacja";
+"About" = "Informacje";
+"Premium" = "Premium";
+"Appearance and preferences" = "Wygląd i preferencje";
+"Font, theme, and connection settings" = "Czcionka, motyw i ustawienia połączeń";
+"Speech-to-text engine and models" = "Silnik i modele zamiany mowy na tekst";
+"Manage stored SSH keys" = "Zarządzaj zapisanymi kluczami SSH";
+"iCloud sync and data management" = "Synchronizacja iCloud i zarządzanie danymi";
+"Version and links" = "Wersja i linki";
+
+/* Appearance */
+"Appearance" = "Wygląd";
+"System" = "System";
+"Light" = "Jasny";
+"Dark" = "Ciemny";
+
+/* Terminal Settings */
+"Font" = "Czcionka";
+"Font Family" = "Rodzina czcionek";
+"Size: %lldpt" = "Rozmiar: %lld pt";
+"Theme" = "Motyw";
+"Use different themes for Light/Dark mode" = "Użyj różnych motywów dla trybu jasnego/ciemnego";
+"Dark Mode Theme" = "Motyw trybu ciemnego";
+"Light Mode Theme" = "Motyw trybu jasnego";
+"Terminal Behavior" = "Zachowanie terminala";
+"Enable terminal notifications" = "Włącz powiadomienia terminala";
+"Show progress overlays" = "Pokaż nakładki postępu";
+"Show voice input button" = "Pokaż przycisk wprowadzania głosem";
+"Copy Text Processing" = "Przetwarzanie tekstu przy kopiowaniu";
+"Transformations applied when copying text from terminal" = "Transformacje stosowane podczas kopiowania tekstu z terminala";
+"Trim trailing whitespace" = "Usuń końcowe białe znaki";
+"Collapse multiple blank lines" = "Zwijaj wiele pustych linii";
+"Strip shell prompts ($ #)" = "Usuń prompty powłoki ($ #)";
+"Flatten multi-line commands" = "Spłaszcz polecenia wielolinijkowe";
+"Remove box-drawing characters" = "Usuń znaki rysowania ramek";
+"Strip ANSI escape codes" = "Usuń kody ANSI";
+"SSH Connection" = "Połączenie SSH";
+"Auto-reconnect on disconnect" = "Automatycznie łącz ponownie po rozłączeniu";
+"Send keep-alive packets" = "Wysyłaj pakiety keep‑alive";
+"Interval: %llds" = "Interwał: %lld s";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Ulepsz, aby uzyskać nielimitowane funkcje";
+"Unlimited Servers" = "Nielimitowane serwery";
+"Add as many servers as you need (free: 3)" = "Dodaj tyle serwerów, ile potrzebujesz (darmowe: 3)";
+"Unlimited Workspaces" = "Nielimitowane przestrzenie robocze";
+"Organize servers into multiple workspaces (free: 1)" = "Organizuj serwery w wielu przestrzeniach roboczych (darmowe: 1)";
+"Multiple Connections" = "Wiele połączeń";
+"Open multiple terminal tabs at once (free: 1)" = "Otwórz wiele kart terminala naraz (darmowe: 1)";
+"Custom Environments" = "Własne środowiska";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Twórz własne etykiety środowiska poza Prod/Staging/Dev";
+"All Future Features" = "Wszystkie przyszłe funkcje";
+"Get access to every new Pro feature" = "Dostęp do każdej nowej funkcji Pro";
+"Monthly" = "Miesięcznie";
+"Billed monthly" = "Rozliczane miesięcznie";
+"Yearly" = "Rocznie";
+"Best value - billed yearly" = "Najlepsza cena — rozliczane rocznie";
+"SAVE 74%" = "OSZCZĘDŹ 74%";
+"Lifetime" = "Dożywotnio";
+"One-time purchase, forever" = "Jednorazowy zakup, na zawsze";
+"FOREVER" = "NA ZAWSZE";
+"Processing..." = "Przetwarzanie...";
+"Purchase Failed" = "Zakup nieudany";
+"Unknown error" = "Nieznany błąd";
+"Welcome to Pro!" = "Witamy w Pro!";
+"You now have unlimited access" = "Masz teraz nielimitowany dostęp";
+"Cancel anytime. Subscription auto-renews." = "Anuluj w dowolnej chwili. Subskrypcja odnawia się automatycznie.";
+"Terms of Service" = "Warunki korzystania";
+"Refund Policy" = "Polityka zwrotów";
+"Select a Plan" = "Wybierz plan";
+"Buy - %@" = "Kup - %@";
+"Subscribe - %@" = "Subskrybuj - %@";
+"Purchase verification failed" = "Weryfikacja zakupu nieudana";
+"Product not found" = "Nie znaleziono produktu";
+"Purchase failed: %@" = "Zakup nieudany: %@";
+
+/* Pro Settings */
+"Status" = "Status";
+"Subscription" = "Subskrypcja";
+"Plan" = "Plan";
+"Purchased" = "Zakupiono";
+"Renews" = "Odnawia się";
+"Servers" = "Serwery";
+"%lld of %lld used" = "Wykorzystano %lld z %lld";
+"Workspaces" = "Przestrzenie robocze";
+"Simultaneous Connections" = "Jednoczesne połączenia";
+"%lld max" = "maks. %lld";
+"Features" = "Funkcje";
+"Billing" = "Rozliczenia";
+"Active" = "Aktywne";
+"Free Tier" = "Darmowy plan";
+"Pro Lifetime" = "Pro dożywotnio";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro miesięcznie";
+"Pro Yearly" = "Pro rocznie";
+"PRO" = "PRO";
+"FREE" = "DARMOWY";
+"Unlimited servers & workspaces" = "Nielimitowane serwery i przestrzenie robocze";
+"View Plans" = "Zobacz plany";
+
+/* Pro Limits */
+"Server Limit Reached" = "Osiągnięto limit serwerów";
+"Workspace Limit Reached" = "Osiągnięto limit przestrzeni roboczych";
+"Tab Limit Reached" = "Osiągnięto limit kart";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Osiągnięto limit %lld serwerów w darmowym planie. Ulepsz do Pro, aby mieć nielimitowane serwery.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Osiągnięto limit %lld przestrzeni roboczej w darmowym planie. Ulepsz do Pro, aby mieć nielimitowane przestrzenie robocze.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "W darmowym planie możesz mieć tylko %lld połączenie jednocześnie. Ulepsz do Pro, aby mieć wiele jednoczesnych połączeń.";
+"Server Locked" = "Serwer zablokowany";
+"Workspace Locked" = "Przestrzeń robocza zablokowana";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Ten serwer przekracza limit %lld serwerów w darmowym planie. Odnów subskrypcję Pro, aby uzyskać dostęp do wszystkich serwerów.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Ta przestrzeń robocza przekracza limit %lld w darmowym planie. Odnów subskrypcję Pro, aby uzyskać dostęp do wszystkich przestrzeni roboczych.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Subskrypcja wygasła";
+"%lld server" = "%lld serwer";
+"%lld servers" = "%lld serwerów";
+"%lld workspace" = "%lld przestrzeń robocza";
+"%lld workspaces" = "%lld przestrzeni roboczych";
+" and " = " i ";
+"%@ locked" = "%@ zablokowane";
+
+/* Server & Workspace */
+"Server Info" = "Informacje o serwerze";
+"Name" = "Nazwa";
+"Host" = "Host";
+"Port" = "Port";
+"Username" = "Nazwa użytkownika";
+"Authentication" = "Uwierzytelnianie";
+"Method" = "Metoda";
+"Password" = "Hasło";
+"Key loaded" = "Klucz wczytany";
+"Key Passphrase" = "Hasło klucza";
+"Server Environment" = "Środowisko serwera";
+"Environment" = "Środowisko";
+"Notes" = "Notatki";
+"Edit Server" = "Edytuj serwer";
+"Add Server" = "Dodaj serwer";
+"Use Stored Key" = "Użyj zapisanego klucza";
+"Select a key..." = "Wybierz klucz...";
+"Import File" = "Importuj plik";
+"Paste" = "Wklej";
+"Add to Keychain" = "Dodaj do Pęku kluczy";
+"Select a stored key or import/paste a new one" = "Wybierz zapisany klucz lub zaimportuj/wklej nowy";
+"Using stored key: %@" = "Używany zapisany klucz: %@";
+"Workspace" = "Przestrzeń robocza";
+"Workspaces" = "Przestrzenie robocze";
+"Workspace name" = "Nazwa przestrzeni roboczej";
+"Color" = "Kolor";
+"Delete Workspace" = "Usuń przestrzeń roboczą";
+"Edit Workspace" = "Edytuj przestrzeń roboczą";
+"New Workspace" = "Nowa przestrzeń robocza";
+"Workspaces" = "Przestrzenie robocze";
+"My Servers" = "Moje serwery";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "PRZESTRZEŃ ROBOCZA";
+"SERVERS" = "SERWERY";
+"Support VVTerm" = "Wesprzyj VVTerm";
+"Upgrade to Pro" = "Ulepsz do Pro";
+"All" = "Wszystkie";
+"Custom..." = "Niestandardowe...";
+"New Workspace" = "Nowa przestrzeń robocza";
+"Unlock with Pro" = "Odblokuj z Pro";
+"Switch to Workspace" = "Przełącz na przestrzeń roboczą";
+"Delete Workspace" = "Usuń przestrzeń roboczą";
+
+/* iOS Lists */
+"%lld servers" = "%lld serwerów";
+"Servers" = "Serwery";
+"Active Connections" = "Aktywne połączenia";
+"Add Workspace" = "Dodaj przestrzeń roboczą";
+"Workspaces" = "Przestrzenie robocze";
+"Done" = "Gotowe";
+
+/* Empty States */
+"No Servers" = "Brak serwerów";
+"Add a server to get started" = "Dodaj serwer, aby rozpocząć";
+"Multiple connections require Pro" = "Wiele połączeń wymaga Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Ulepsz, aby łączyć się z wieloma serwerami jednocześnie";
+"Upgrade to Pro" = "Ulepsz do Pro";
+"Connect" = "Połącz";
+
+/* Offline */
+"No network connection" = "Brak połączenia sieciowego";
+"You're currently offline. Some features may not work:" = "Jesteś offline. Niektóre funkcje mogą nie działać:";
+"Cannot connect to servers" = "Nie można połączyć się z serwerami";
+"iCloud sync paused" = "Synchronizacja iCloud wstrzymana";
+"Saved servers still accessible" = "Zapisane serwery nadal dostępne";
+"Offline" = "Offline";
+
+/* Terminal */
+"Initializing terminal..." = "Inicjowanie terminala...";
+"Terminal initialization failed" = "Nie udało się zainicjować terminala";
+"Connecting..." = "Łączenie...";
+"Reconnecting (attempt %lld)..." = "Ponowne łączenie (próba %lld)...";
+"Disconnected" = "Rozłączono";
+"Connection Failed" = "Połączenie nieudane";
+"Reconnect" = "Połącz ponownie";
+"Retry" = "Ponów";
+"Voice Input Unavailable" = "Wejście głosowe niedostępne";
+"Voice input (Command+Shift+M)" = "Wejście głosowe (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Włącz mikrofon i rozpoznawanie mowy w Ustawieniach systemowych.";
+"Terminal" = "Terminal";
+"No terminals open" = "Brak otwartych terminali";
+"New Terminal" = "Nowy terminal";
+"Close this terminal?" = "Zamknąć ten terminal?";
+"The SSH connection will be terminated." = "Połączenie SSH zostanie zakończone.";
+
+/* Keychain */
+"No Keys Stored" = "Brak zapisanych kluczy";
+"Add keys to quickly use them when creating new servers" = "Dodaj klucze, aby szybko używać ich przy tworzeniu nowych serwerów";
+"Generate New Key" = "Wygeneruj nowy klucz";
+"Import Key" = "Importuj klucz";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Klucze są bezpiecznie przechowywane w Pęku kluczy urządzenia. Hasła są przechowywane osobno.";
+"Delete SSH Key" = "Usuń klucz SSH";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Czy na pewno chcesz usunąć „%@”? Tego nie można cofnąć.";
+"Protected" = "Chronione";
+"Added %@ ago" = "Dodano %@ temu";
+"Copy public key" = "Skopiuj klucz publiczny";
+"Key Name" = "Nazwa klucza";
+"e.g., Personal MacBook, Work Key" = "np. Prywatny MacBook, Klucz pracy";
+"Private Key" = "Klucz prywatny";
+"Import Key File" = "Importuj plik klucza";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Importuj plik klucza prywatnego (id_rsa, id_ed25519 itp.) lub wklej zawartość";
+"Key loaded (%lld characters)" = "Klucz wczytany (%lld znaków)";
+"Key passphrase" = "Hasło klucza";
+"Passphrase (Optional)" = "Hasło (opcjonalnie)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "Jeśli klucz jest zaszyfrowany hasłem, wpisz je tutaj. Pozostaw puste dla kluczy bez hasła.";
+"Add SSH Key" = "Dodaj klucz SSH";
+"Algorithm" = "Algorytm";
+"Key Type" = "Typ klucza";
+"Confirm passphrase" = "Potwierdź hasło";
+"Protect your key with a passphrase. Leave empty for no protection." = "Chroń klucz hasłem. Pozostaw puste, aby nie chronić.";
+"Generated Key" = "Wygenerowany klucz";
+"Key generated successfully" = "Klucz wygenerowany pomyślnie";
+"Fingerprint:" = "Odcisk:";
+"View Public Key" = "Pokaż klucz publiczny";
+"Generate SSH Key" = "Wygeneruj klucz SSH";
+"Generate" = "Generuj";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Dodaj to do pliku ~/.ssh/authorized_keys na serwerze:";
+"No Public Key" = "Brak klucza publicznego";
+"This key was imported without a public key." = "Klucz został zaimportowany bez klucza publicznego.";
+"Public Key" = "Klucz publiczny";
+
+/* Transcription */
+"Engine" = "Silnik";
+"System (Apple)" = "System (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Dostawca";
+"Language" = "Język";
+"Model" = "Model";
+"Downloading..." = "Pobieranie...";
+"Delete Model" = "Usuń model";
+"Download size: %@" = "Rozmiar pobierania: %@";
+"Status" = "Status";
+"Download" = "Pobierz";
+"Ready" = "Gotowe";
+"Failed" = "Nieudane";
+"Storage" = "Pamięć";
+"Model Storage" = "Pamięć modeli";
+"Total MLX Models" = "Łącznie modele MLX";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Używa wbudowanego rozpoznawania mowy Apple. Wymaga sieci dla najlepszych wyników.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper działa lokalnie z MLX. Działa offline po pobraniu.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet działa lokalnie z MLX. Zoptymalizowany do transkrypcji w czasie rzeczywistym.";
+"English" = "Angielski";
+"Spanish" = "Hiszpański";
+"French" = "Francuski";
+"German" = "Niemiecki";
+"Japanese" = "Japoński";
+"Chinese" = "Chiński";
+"Korean" = "Koreański";
+"Portuguese" = "Portugalski";
+"Russian" = "Rosyjski";
+"Auto-detect" = "Automatyczne wykrywanie";
+
+/* MLX Models */
+"Tiny" = "Malutki";
+"Fastest, smallest" = "Najszybszy, najmniejszy";
+"Full precision" = "Pełna precyzja";
+"Tiny (EN)" = "Malutki (EN)";
+"English-only, smaller" = "Tylko angielski, mniejszy";
+"English-only" = "Tylko angielski";
+"Base" = "Podstawowy";
+"Balanced speed/quality" = "Zbalansowana szybkość/jakość";
+"Small" = "Mały";
+"Better accuracy" = "Lepsza dokładność";
+"Medium" = "Średni";
+"Higher accuracy, heavier" = "Wyższa dokładność, większy";
+"Large v3" = "Duży v3";
+"Latest large model" = "Najnowszy duży model";
+"Large" = "Duży";
+"Large v3 4-bit" = "Duży v3 4‑bit";
+"Smaller download" = "Mniejszy rozmiar pobierania";
+"4-bit quantized" = "Kwantyzowany 4‑bit";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Duży model o wysokiej dokładności";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "Komórkowa";
+"Ethernet" = "Ethernet";
+"Unknown" = "Nieznane";
+"No Connection" = "Brak połączenia";
+" (Metered)" = " (Limitowane)";
+" (Low Data)" = " (Oszczędzanie danych)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Włącz synchronizację iCloud";
+"iCloud Account" = "Konto iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Synchronizuj serwery i przestrzenie robocze na wszystkich urządzeniach Apple.";
+"Sync Status" = "Status synchronizacji";
+"Last Synced" = "Ostatnia synchronizacja";
+"Error" = "Błąd";
+"Data" = "Dane";
+"Force Sync Now" = "Wymuś synchronizację teraz";
+"Clear Local Data & Re-sync" = "Wyczyść dane lokalne i zsynchronizuj ponownie";
+"Reset iCloud (Delete All & Re-upload)" = "Zresetuj iCloud (usuń wszystko i prześlij ponownie)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Wymuszona synchronizacja pobiera najnowsze dane z iCloud. Wyczyść i zsynchronizuj ponownie usuwa dane lokalne i pobiera świeże. Reset iCloud usuwa WSZYSTKIE dane w chmurze i przesyła dane lokalne ponownie (naprawia duplikaty).";
+"Account Status" = "Status konta";
+"Container" = "Kontener";
+"Re-check iCloud Status" = "Sprawdź ponownie status iCloud";
+"Troubleshooting" = "Rozwiązywanie problemów";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Upewnij się, że jesteś zalogowany do iCloud w Ustawieniach i masz włączony iCloud Drive. Sprawdź Console.app dla logów „CloudKit”.";
+"Force Sync" = "Wymuś synchronizację";
+"Sync Now" = "Synchronizuj teraz";
+"This will fetch the latest data from iCloud and may take a moment." = "Pobierze to najnowsze dane z iCloud i może chwilę potrwać.";
+"Clear Local Data" = "Wyczyść dane lokalne";
+"Clear & Re-sync" = "Wyczyść i zsynchronizuj ponownie";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "To usunie wszystkie dane lokalne i pobierze je ponownie z iCloud. Niezsynchronizowane zmiany lokalne zostaną utracone.";
+"Reset iCloud Data" = "Zresetuj dane iCloud";
+"Delete All & Re-upload" = "Usuń wszystko i prześlij ponownie";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "To USUNIE WSZYSTKIE dane z iCloud i prześle Twoje bieżące dane lokalne. Użyj tego, aby naprawić duplikaty.";
+"Connected" = "Połączono";
+"Not Available" = "Niedostępne";
+"Synced" = "Zsynchronizowano";
+"Syncing..." = "Synchronizowanie...";
+"available" = "dostępne";
+"noAccount - User not signed into iCloud" = "noAccount - Użytkownik nie jest zalogowany do iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - Dostęp do iCloud ograniczony (kontrola rodzicielska, MDM itp.)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Nie można określić statusu iCloud";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud chwilowo niedostępne";
+"unknown status: %@" = "nieznany status: %@";
+"Error: %@" = "Błąd: %@";
+"Checking..." = "Sprawdzanie...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Widok podziału poziomego";
+"Vertical split view" = "Widok podziału pionowego";
+"Left pane" = "Lewy panel";
+"Top pane" = "Górny panel";
+"Right pane" = "Prawy panel";
+"Bottom pane" = "Dolny panel";
+"Horizontal split divider" = "Poziomy separator";
+"Vertical split divider" = "Pionowy separator";
+"Drag to resize the left and right panes" = "Przeciągnij, aby zmienić rozmiar lewego i prawego panelu";
+"Drag to resize the top and bottom panes" = "Przeciągnij, aby zmienić rozmiar górnego i dolnego panelu";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "RDZENIE";
+"IDLE" = "BEZCZYNNY";
+"UPTIME" = "CZAS PRACY";
+"LOAD" = "OBCIĄŻENIE";
+"FREE" = "WOLNE";
+"USED" = "UŻYTE";
+"CACHED" = "CACHE";
+"TOTAL" = "SUMA";
+"Volumes" = "Woluminy";
+"Top Processes" = "Najlepsze procesy";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ SUMA";
+"↓ TOTAL" = "↓ SUMA";
+"%lld D" = "%lld d";
+"%lld H" = "%lld h";
+
+/* SFSymbol Picker */
+"Recent" = "Ostatnie";
+"Load more (%lld remaining)" = "Załaduj więcej (pozostało %lld)";
+"%lld symbols" = "%lld symboli";
+"What's New" = "Nowości";
+"Draw" = "Rysowanie";
+"Variable" = "Zmienna";
+"Multicolor" = "Wielokolorowy";
+"Communication" = "Komunikacja";
+"Weather" = "Pogoda";
+"Maps" = "Mapy";
+"Objects & Tools" = "Obiekty i narzędzia";
+"Devices" = "Urządzenia";
+"Camera & Photos" = "Aparat i zdjęcia";
+"Gaming" = "Gry";
+"Connectivity" = "Łączność";
+"Transportation" = "Transport";
+"Automotive" = "Motoryzacja";
+"Accessibility" = "Dostępność";
+"Privacy & Security" = "Prywatność i bezpieczeństwo";
+"Human" = "Człowiek";
+"Home" = "Dom";
+"Fitness" = "Fitness";
+"Nature" = "Natura";
+"Editing" = "Edycja";
+"Text Formatting" = "Formatowanie tekstu";
+"Media" = "Media";
+"Keyboard" = "Klawiatura";
+"Commerce" = "Handel";
+"Time" = "Czas";
+"Health" = "Zdrowie";
+"Shapes" = "Kształty";
+"Arrows" = "Strzałki";
+"Indices" = "Indeksy";
+"Math" = "Matematyka";
+
+/* Auth Methods */
+"SSH Key" = "Klucz SSH";
+"SSH Key + Passphrase" = "Klucz SSH + hasło";
+
+/* Environments */
+"Production" = "Produkcja";
+"Staging" = "Staging";
+"Development" = "Rozwój";
+"Prod" = "Prod";
+"Stag" = "Stag";
+"Dev" = "Dev";
+"New Environment" = "Nowe środowisko";
+"Edit Environment" = "Edytuj środowisko";
+"Environment name" = "Nazwa środowiska";
+"An environment with this name already exists." = "Środowisko o tej nazwie już istnieje.";
+"Delete Environment?" = "Usunąć środowisko?";
+"Servers in '%@' will be moved to Production." = "Serwery w „%@” zostaną przeniesione do Produkcji.";
+"Edit \"%@\"..." = "Edytuj „%@”...";
+"Delete \"%@\"..." = "Usuń „%@”...";
+"Custom" = "Niestandardowe";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Wymagana jest zgoda na mikrofon. Zostanie ona automatycznie poproszona przy rozpoczęciu nagrywania.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Rozpoznawanie mowy nie jest dostępne. Włącz Siri w Ustawieniach systemowych > Siri i Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Nie udało się rozpocząć nagrywania. Sprawdź uprawnienia mikrofonu w Ustawieniach systemowych > Prywatność i bezpieczeństwo > Mikrofon.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "Transkrypcja MLX nie jest dostępna na tym Macu. Przełączanie na Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Ulepsz do Pro, aby mieć nielimitowane serwery";
+"Upgrade to Pro for unlimited workspaces" = "Ulepsz do Pro, aby mieć nielimitowane przestrzenie robocze";
+"Upgrade to Pro for multiple connections" = "Ulepsz do Pro, aby mieć wiele połączeń";
+"Upgrade to Pro for custom environments" = "Ulepsz do Pro, aby mieć własne środowiska";
+
+/* Misc */
+"Terminal initialization failed" = "Inicjalizacja terminala nieudana";
+"Voice Input Unavailable" = "Wejście głosowe niedostępne";
+"Disconnect from server" = "Rozłącz z serwerem";
+"Disconnect from %@?" = "Rozłączyć z %@?";
+"This will return to the server list." = "To powróci do listy serwerów.";
+"All terminal tabs for this server will be closed." = "Wszystkie karty terminala dla tego serwera zostaną zamknięte.";
+"Add Terminal Preset" = "Dodaj preset terminala";
+"Edit Preset" = "Edytuj preset";
+"Basic Information" = "Informacje podstawowe";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Nazwa wyświetlana presetu (np. Claude, Helix, Vim)";
+"Command" = "Polecenie";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Polecenie uruchamiane po wybraniu presetu (np. claude, hx, nvim)";
+"Icon" = "Ikona";
+"Choose Symbol..." = "Wybierz symbol...";
+
+/* Contact Labels */
+"Developer" = "Deweloper";
+"Discord" = "Discord";
+"Join Community" = "Dołącz do społeczności";
+"Email" = "Email";
+"GitHub" = "GitHub";
+"Report Issue" = "Zgłoś problem";
+"Support VVTerm" = "Wesprzyj VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "System (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Nie udało się usunąć modelu";
+"Model ID is required" = "Wymagany jest identyfikator modelu";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Serwer '%@' jest zablokowany";
+"Workspace '%@' is locked" = "Przestrzeń robocza '%@' jest zablokowana";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "Osiągnięto limit %lld serwerów. Ulepsz do Pro, aby mieć nielimitowane serwery.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Nowoczesny, szybki i bezpieczny. Zalecany w większości zastosowań.";
+"Wide compatibility with older systems." = "Szeroka kompatybilność ze starszymi systemami.";
+
+
+/* Split Commands */
+"Split Right" = "Podziel w prawo";
+"Split Down" = "Podziel w dół";
+"Close Pane" = "Zamknij panel";
+
+/* Tabs */
+"View" = "Widok";
+"Stats" = "Statystyki";
+
+/* Help */
+"Support & Feedback" = "Wsparcie i opinie";
+
+"Upgrade to Pro for unlimited workspaces." = "Ulepsz do Pro, aby mieć nielimitowane przestrzenie robocze.";
+
+"Fingerprint" = "Odcisk palca";
+
+"Links" = "Linki";
+
+"Passphrase" = "Hasło";
+
+"%@ is a Pro feature" = "%@ to funkcja Pro";
+
+"System (Default)" = "System (domyślny)";
+
+"Some changes may require restarting the app." = "Niektóre zmiany mogą wymagać ponownego uruchomienia aplikacji.";
+
+/* Download Progress */
+"%llds remaining" = "pozostało %llds";
+"%lldm remaining" = "pozostało %lldm";
+"%lldh %lldm remaining" = "pozostało %lldh %lldm";
+"Clear All Storage" = "Wyczyść całą pamięć";
+
+/* Preview */
+"Server 1" = "Serwer 1";
+"Server 2" = "Serwer 2";
+"Server 3" = "Serwer 3";

@@ -245,7 +245,7 @@ struct TerminalPaneView: View {
             do {
                 credentials = try KeychainManager.shared.getCredentials(for: server)
             } catch {
-                connectionError = "Failed to load credentials"
+                connectionError = String(localized: "Failed to load credentials")
             }
         }
     }

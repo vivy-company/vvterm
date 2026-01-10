@@ -1,0 +1,642 @@
+/* General */
+"OK" = "OK";
+"Cancel" = "Zrušit";
+"Save" = "Uložit";
+"Add" = "Přidat";
+"Create" = "Vytvořit";
+"Delete" = "Smazat";
+"Done" = "Hotovo";
+"Edit" = "Upravit";
+"Remove" = "Odebrat";
+"Connect" = "Připojit";
+"Disconnect" = "Odpojit";
+"Reconnect" = "Znovu připojit";
+"Retry" = "Zkusit znovu";
+"Upgrade" = "Upgradovat";
+"Upgrade to Pro" = "Upgradovat na Pro";
+"Upgrade to VVTerm Pro" = "Upgradovat na VVTerm Pro";
+"View Plans" = "Zobrazit plány";
+"Manage Subscription" = "Spravovat předplatné";
+"Manage subscription" = "Spravovat předplatné";
+"Manage your subscription" = "Spravujte své předplatné";
+"Restore Purchases" = "Obnovit nákupy";
+"Renew" = "Obnovit";
+"Renew Pro" = "Obnovit Pro";
+"Close" = "Zavřít";
+"Close Terminal" = "Zavřít terminál";
+"Close All to the Left" = "Zavřít vše vlevo";
+"Close All to the Right" = "Zavřít vše vpravo";
+"Close Other Tabs" = "Zavřít ostatní karty";
+"Duplicate Tab" = "Duplikovat kartu";
+"New Terminal" = "Nový terminál";
+"New terminal tab" = "Nová karta terminálu";
+"New connection" = "Nové připojení";
+"Previous tab" = "Předchozí karta";
+"Next tab" = "Další karta";
+"No terminals" = "Žádné terminály";
+"%lld tab" = "%lld karta";
+"%lld tabs" = "%lld karet";
+"No terminals open" = "Žádné otevřené terminály";
+"Search servers" = "Hledat servery";
+"Search servers..." = "Hledat servery...";
+"Search symbols..." = "Hledat symboly...";
+"Select Workspace" = "Vybrat pracovní prostor";
+"Select a Server" = "Vybrat server";
+"Choose a server from the sidebar to connect" = "Vyberte server v postranním panelu pro připojení";
+"Multiple connections require Pro" = "Více připojení vyžaduje Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Upgradujte pro současné připojení k více serverům";
+"Disconnected" = "Odpojeno";
+"Connecting..." = "Připojování...";
+"Connecting to %@..." = "Připojování k %@...";
+"Reconnecting (attempt %lld)..." = "Znovu připojování (pokus %lld)...";
+"Connection Failed" = "Připojení selhalo";
+"Connection failed: %@" = "Připojení selhalo: %@";
+"Connection timed out" = "Časový limit připojení vypršel";
+"Authentication failed" = "Ověření selhalo";
+"Failed to load credentials" = "Nepodařilo se načíst přihlašovací údaje";
+"Failed to load credentials: %@" = "Nepodařilo se načíst přihlašovací údaje: %@";
+"Failed to load key: %@" = "Nepodařilo se načíst klíč: %@";
+"Failed to read key file: %@" = "Nepodařilo se načíst soubor klíče: %@";
+"Failed to import key: %@" = "Nepodařilo se importovat klíč: %@";
+"Failed to delete key: %@" = "Nepodařilo se smazat klíč: %@";
+"Failed to save key: %@" = "Nepodařilo se uložit klíč: %@";
+"Failed to generate key: %@" = "Nepodařilo se vygenerovat klíč: %@";
+"Failed to generate SSH key" = "Nepodařilo se vygenerovat SSH klíč";
+"Failed to encode key data" = "Nepodařilo se zakódovat data klíče";
+"Failed to export RSA key" = "Nepodařilo se exportovat RSA klíč";
+"Invalid key data" = "Neplatná data klíče";
+"Cannot access the selected file" = "Nelze získat přístup k vybranému souboru";
+"Copy to Clipboard" = "Kopírovat do schránky";
+"Copied" = "Zkopírováno";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "O VVTerm";
+"Version %@ (%@)" = "Verze %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Profesionální SSH klient\npro macOS a iOS";
+"Visit Website" = "Navštívit web";
+"Report an Issue" = "Nahlásit problém";
+"Privacy Policy" = "Zásady ochrany soukromí";
+"Get in Touch" = "Kontaktujte nás";
+"Questions, feedback, or issues? Reach out anytime." = "Dotazy, zpětná vazba nebo problémy? Kontaktujte nás kdykoli.";
+"Questions, feedback, or issues?\nReach out anytime." = "Dotazy, zpětná vazba nebo problémy?\nKontaktujte nás kdykoli.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Vítejte ve VVTerm";
+"Your secure SSH terminal" = "Váš bezpečný SSH terminál";
+"Continue" = "Pokračovat";
+"SSH Terminal" = "SSH terminál";
+"Connect to servers with GPU-accelerated terminal emulation." = "Připojte se k serverům s GPU‑akcelerovanou emulací terminálu.";
+"iCloud Sync" = "Synchronizace iCloud";
+"Servers and credentials sync across all your devices." = "Servery a přihlašovací údaje se synchronizují na všech vašich zařízeních.";
+"Secure Storage" = "Bezpečné úložiště";
+"Passwords and SSH keys protected by Keychain." = "Hesla a SSH klíče chráněny Klíčenkou.";
+"Voice Commands" = "Hlasové příkazy";
+"Speak commands with on-device speech recognition." = "Vydávejte příkazy pomocí rozpoznávání řeči na zařízení.";
+
+/* Settings Navigation */
+"Settings" = "Nastavení";
+"General" = "Obecné";
+"Terminal" = "Terminál";
+"Transcription" = "Přepis";
+"SSH Keys" = "SSH klíče";
+"Sync" = "Synchronizace";
+"About" = "O aplikaci";
+"Premium" = "Premium";
+"Appearance and preferences" = "Vzhled a předvolby";
+"Font, theme, and connection settings" = "Písmo, motiv a nastavení připojení";
+"Speech-to-text engine and models" = "Motor a modely převodu řeči na text";
+"Manage stored SSH keys" = "Spravovat uložené SSH klíče";
+"iCloud sync and data management" = "Synchronizace iCloud a správa dat";
+"Version and links" = "Verze a odkazy";
+
+/* Appearance */
+"Appearance" = "Vzhled";
+"System" = "Systém";
+"Light" = "Světlý";
+"Dark" = "Tmavý";
+
+/* Terminal Settings */
+"Font" = "Písmo";
+"Font Family" = "Rodina písem";
+"Size: %lldpt" = "Velikost: %lld pt";
+"Theme" = "Motiv";
+"Use different themes for Light/Dark mode" = "Používat různé motivy pro světlý/tmavý režim";
+"Dark Mode Theme" = "Motiv tmavého režimu";
+"Light Mode Theme" = "Motiv světlého režimu";
+"Terminal Behavior" = "Chování terminálu";
+"Enable terminal notifications" = "Povolit oznámení terminálu";
+"Show progress overlays" = "Zobrazit překryvy průběhu";
+"Show voice input button" = "Zobrazit tlačítko hlasového vstupu";
+"Copy Text Processing" = "Zpracování textu při kopírování";
+"Transformations applied when copying text from terminal" = "Transformace při kopírování textu z terminálu";
+"Trim trailing whitespace" = "Odstranit koncové mezery";
+"Collapse multiple blank lines" = "Slučovat více prázdných řádků";
+"Strip shell prompts ($ #)" = "Odstranit výzvy shellu ($ #)";
+"Flatten multi-line commands" = "Sloučit vícerádkové příkazy";
+"Remove box-drawing characters" = "Odstranit znaky rámečků";
+"Strip ANSI escape codes" = "Odstranit ANSI kódy";
+"SSH Connection" = "SSH připojení";
+"Auto-reconnect on disconnect" = "Automaticky znovu připojit po odpojení";
+"Send keep-alive packets" = "Odesílat keep‑alive pakety";
+"Interval: %llds" = "Interval: %lld s";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Upgradujte pro neomezené funkce";
+"Unlimited Servers" = "Neomezené servery";
+"Add as many servers as you need (free: 3)" = "Přidejte tolik serverů, kolik potřebujete (zdarma: 3)";
+"Unlimited Workspaces" = "Neomezené pracovní prostory";
+"Organize servers into multiple workspaces (free: 1)" = "Organizujte servery do více pracovních prostorů (zdarma: 1)";
+"Multiple Connections" = "Více připojení";
+"Open multiple terminal tabs at once (free: 1)" = "Otevřete více karet terminálu najednou (zdarma: 1)";
+"Custom Environments" = "Vlastní prostředí";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Vytvořte vlastní štítky prostředí mimo Prod/Staging/Dev";
+"All Future Features" = "Všechny budoucí funkce";
+"Get access to every new Pro feature" = "Získáte přístup ke všem novým funkcím Pro";
+"Monthly" = "Měsíčně";
+"Billed monthly" = "Účtováno měsíčně";
+"Yearly" = "Ročně";
+"Best value - billed yearly" = "Nejlepší cena – účtováno ročně";
+"SAVE 74%" = "UŠETŘETE 74 %";
+"Lifetime" = "Doživotně";
+"One-time purchase, forever" = "Jednorázový nákup, navždy";
+"FOREVER" = "NAVŽDY";
+"Processing..." = "Zpracování...";
+"Purchase Failed" = "Nákup se nezdařil";
+"Unknown error" = "Neznámá chyba";
+"Welcome to Pro!" = "Vítejte v Pro!";
+"You now have unlimited access" = "Nyní máte neomezený přístup";
+"Cancel anytime. Subscription auto-renews." = "Zrušit kdykoli. Předplatné se automaticky obnovuje.";
+"Terms of Service" = "Podmínky služby";
+"Refund Policy" = "Zásady vrácení peněz";
+"Select a Plan" = "Vyberte plán";
+"Buy - %@" = "Koupit - %@";
+"Subscribe - %@" = "Předplatit - %@";
+"Purchase verification failed" = "Ověření nákupu selhalo";
+"Product not found" = "Produkt nenalezen";
+"Purchase failed: %@" = "Nákup se nezdařil: %@";
+
+/* Pro Settings */
+"Status" = "Stav";
+"Subscription" = "Předplatné";
+"Plan" = "Plán";
+"Purchased" = "Zakoupeno";
+"Renews" = "Obnovuje se";
+"Servers" = "Servery";
+"%lld of %lld used" = "Využito %lld z %lld";
+"Workspaces" = "Pracovní prostory";
+"Simultaneous Connections" = "Současná připojení";
+"%lld max" = "max. %lld";
+"Features" = "Funkce";
+"Billing" = "Fakturace";
+"Active" = "Aktivní";
+"Free Tier" = "Zdarma";
+"Pro Lifetime" = "Pro doživotně";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro měsíčně";
+"Pro Yearly" = "Pro ročně";
+"PRO" = "PRO";
+"FREE" = "ZDARMA";
+"Unlimited servers & workspaces" = "Neomezené servery a pracovní prostory";
+"View Plans" = "Zobrazit plány";
+
+/* Pro Limits */
+"Server Limit Reached" = "Dosažen limit serverů";
+"Workspace Limit Reached" = "Dosažen limit pracovních prostorů";
+"Tab Limit Reached" = "Dosažen limit karet";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Dosáhli jste limitu %lld serverů v bezplatném plánu. Upgradujte na Pro pro neomezené servery.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Dosáhli jste limitu %lld pracovního prostoru v bezplatném plánu. Upgradujte na Pro pro neomezené pracovní prostory.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "V bezplatném plánu můžete mít pouze %lld připojení najednou. Upgradujte na Pro pro více současných připojení.";
+"Server Locked" = "Server uzamčen";
+"Workspace Locked" = "Pracovní prostor uzamčen";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Tento server přesahuje limit %lld serverů v bezplatném plánu. Obnovte předplatné Pro pro přístup ke všem serverům.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Tento pracovní prostor přesahuje limit %lld v bezplatném plánu. Obnovte předplatné Pro pro přístup ke všem pracovním prostorům.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Předplatné vypršelo";
+"%lld server" = "%lld server";
+"%lld servers" = "%lld serverů";
+"%lld workspace" = "%lld pracovní prostor";
+"%lld workspaces" = "%lld pracovních prostorů";
+" and " = " a ";
+"%@ locked" = "%@ uzamčeno";
+
+/* Server & Workspace */
+"Server Info" = "Informace o serveru";
+"Name" = "Název";
+"Host" = "Host";
+"Port" = "Port";
+"Username" = "Uživatelské jméno";
+"Authentication" = "Ověření";
+"Method" = "Metoda";
+"Password" = "Heslo";
+"Key loaded" = "Klíč načten";
+"Key Passphrase" = "Heslo klíče";
+"Server Environment" = "Prostředí serveru";
+"Environment" = "Prostředí";
+"Notes" = "Poznámky";
+"Edit Server" = "Upravit server";
+"Add Server" = "Přidat server";
+"Use Stored Key" = "Použít uložený klíč";
+"Select a key..." = "Vyberte klíč...";
+"Import File" = "Importovat soubor";
+"Paste" = "Vložit";
+"Add to Keychain" = "Přidat do Klíčenky";
+"Select a stored key or import/paste a new one" = "Vyberte uložený klíč nebo importujte/vložte nový";
+"Using stored key: %@" = "Používá se uložený klíč: %@";
+"Workspace" = "Pracovní prostor";
+"Workspaces" = "Pracovní prostory";
+"Workspace name" = "Název pracovního prostoru";
+"Color" = "Barva";
+"Delete Workspace" = "Smazat pracovní prostor";
+"Edit Workspace" = "Upravit pracovní prostor";
+"New Workspace" = "Nový pracovní prostor";
+"Workspaces" = "Pracovní prostory";
+"My Servers" = "Moje servery";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "PRACOVNÍ PROSTOR";
+"SERVERS" = "SERVERY";
+"Support VVTerm" = "Podpořit VVTerm";
+"Upgrade to Pro" = "Upgradovat na Pro";
+"All" = "Vše";
+"Custom..." = "Vlastní...";
+"New Workspace" = "Nový pracovní prostor";
+"Unlock with Pro" = "Odemknout s Pro";
+"Switch to Workspace" = "Přepnout na pracovní prostor";
+"Delete Workspace" = "Smazat pracovní prostor";
+
+/* iOS Lists */
+"%lld servers" = "%lld serverů";
+"Servers" = "Servery";
+"Active Connections" = "Aktivní připojení";
+"Add Workspace" = "Přidat pracovní prostor";
+"Workspaces" = "Pracovní prostory";
+"Done" = "Hotovo";
+
+/* Empty States */
+"No Servers" = "Žádné servery";
+"Add a server to get started" = "Přidejte server a začněte";
+"Multiple connections require Pro" = "Více připojení vyžaduje Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Upgradujte pro současné připojení k více serverům";
+"Upgrade to Pro" = "Upgradovat na Pro";
+"Connect" = "Připojit";
+
+/* Offline */
+"No network connection" = "Žádné síťové připojení";
+"You're currently offline. Some features may not work:" = "Jste offline. Některé funkce nemusí fungovat:";
+"Cannot connect to servers" = "Nelze se připojit k serverům";
+"iCloud sync paused" = "Synchronizace iCloud pozastavena";
+"Saved servers still accessible" = "Uložené servery jsou stále dostupné";
+"Offline" = "Offline";
+
+/* Terminal */
+"Initializing terminal..." = "Inicializace terminálu...";
+"Terminal initialization failed" = "Inicializace terminálu selhala";
+"Connecting..." = "Připojování...";
+"Reconnecting (attempt %lld)..." = "Znovu připojování (pokus %lld)...";
+"Disconnected" = "Odpojeno";
+"Connection Failed" = "Připojení selhalo";
+"Reconnect" = "Znovu připojit";
+"Retry" = "Zkusit znovu";
+"Voice Input Unavailable" = "Hlasový vstup není k dispozici";
+"Voice input (Command+Shift+M)" = "Hlasový vstup (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Povolte mikrofon a rozpoznávání řeči v Nastavení systému.";
+"Terminal" = "Terminál";
+"No terminals open" = "Žádné otevřené terminály";
+"New Terminal" = "Nový terminál";
+"Close this terminal?" = "Zavřít tento terminál?";
+"The SSH connection will be terminated." = "SSH připojení bude ukončeno.";
+
+/* Keychain */
+"No Keys Stored" = "Žádné uložené klíče";
+"Add keys to quickly use them when creating new servers" = "Přidejte klíče pro rychlé použití při vytváření nových serverů";
+"Generate New Key" = "Vygenerovat nový klíč";
+"Import Key" = "Importovat klíč";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Klíče jsou bezpečně uloženy v Klíčence zařízení. Hesla jsou uložena zvlášť.";
+"Delete SSH Key" = "Smazat SSH klíč";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Opravdu chcete smazat '%@'? Tento krok nelze vrátit.";
+"Protected" = "Chráněno";
+"Added %@ ago" = "Přidáno před %@";
+"Copy public key" = "Kopírovat veřejný klíč";
+"Key Name" = "Název klíče";
+"e.g., Personal MacBook, Work Key" = "např. Osobní MacBook, Pracovní klíč";
+"Private Key" = "Soukromý klíč";
+"Import Key File" = "Importovat soubor klíče";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Importujte soubor soukromého klíče (id_rsa, id_ed25519 atd.) nebo vložte obsah";
+"Key loaded (%lld characters)" = "Klíč načten (%lld znaků)";
+"Key passphrase" = "Heslo klíče";
+"Passphrase (Optional)" = "Heslo (volitelné)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "Pokud je klíč zašifrován heslem, zadejte jej zde. Pro klíče bez hesla ponechte prázdné.";
+"Add SSH Key" = "Přidat SSH klíč";
+"Algorithm" = "Algoritmus";
+"Key Type" = "Typ klíče";
+"Confirm passphrase" = "Potvrdit heslo";
+"Protect your key with a passphrase. Leave empty for no protection." = "Chraňte klíč heslem. Nechte prázdné pro žádnou ochranu.";
+"Generated Key" = "Vygenerovaný klíč";
+"Key generated successfully" = "Klíč byl úspěšně vygenerován";
+"Fingerprint:" = "Otisk:";
+"View Public Key" = "Zobrazit veřejný klíč";
+"Generate SSH Key" = "Vygenerovat SSH klíč";
+"Generate" = "Vygenerovat";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Přidejte do souboru ~/.ssh/authorized_keys na serveru:";
+"No Public Key" = "Žádný veřejný klíč";
+"This key was imported without a public key." = "Tento klíč byl importován bez veřejného klíče.";
+"Public Key" = "Veřejný klíč";
+
+/* Transcription */
+"Engine" = "Motor";
+"System (Apple)" = "Systém (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Poskytovatel";
+"Language" = "Jazyk";
+"Model" = "Model";
+"Downloading..." = "Stahování...";
+"Delete Model" = "Smazat model";
+"Download size: %@" = "Velikost stahování: %@";
+"Status" = "Stav";
+"Download" = "Stáhnout";
+"Ready" = "Připraveno";
+"Failed" = "Neúspěšné";
+"Storage" = "Úložiště";
+"Model Storage" = "Úložiště modelů";
+"Total MLX Models" = "Celkem modelů MLX";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Používá vestavěné rozpoznávání řeči Apple. Pro nejlepší výsledky je vyžadována síť.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper běží lokálně pomocí MLX. Po stažení funguje offline.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet běží lokálně pomocí MLX. Optimalizováno pro přepis v reálném čase.";
+"English" = "Angličtina";
+"Spanish" = "Španělština";
+"French" = "Francouzština";
+"German" = "Němčina";
+"Japanese" = "Japonština";
+"Chinese" = "Čínština";
+"Korean" = "Korejština";
+"Portuguese" = "Portugalština";
+"Russian" = "Ruština";
+"Auto-detect" = "Automaticky detekovat";
+
+/* MLX Models */
+"Tiny" = "Velmi malý";
+"Fastest, smallest" = "Nejrychlejší, nejmenší";
+"Full precision" = "Plná přesnost";
+"Tiny (EN)" = "Velmi malý (EN)";
+"English-only, smaller" = "Pouze angličtina, menší";
+"English-only" = "Pouze angličtina";
+"Base" = "Základní";
+"Balanced speed/quality" = "Vyvážená rychlost/kvalita";
+"Small" = "Malý";
+"Better accuracy" = "Lepší přesnost";
+"Medium" = "Střední";
+"Higher accuracy, heavier" = "Vyšší přesnost, větší";
+"Large v3" = "Velký v3";
+"Latest large model" = "Nejnovější velký model";
+"Large" = "Velký";
+"Large v3 4-bit" = "Velký v3 4‑bit";
+"Smaller download" = "Menší stažení";
+"4-bit quantized" = "Kvantizovaný 4‑bit";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Velký model s vysokou přesností";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "Mobilní";
+"Ethernet" = "Ethernet";
+"Unknown" = "Neznámé";
+"No Connection" = "Bez připojení";
+" (Metered)" = " (Měřené)";
+" (Low Data)" = " (Úspora dat)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Povolit synchronizaci iCloud";
+"iCloud Account" = "Účet iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Synchronizujte servery a pracovní prostory na všech zařízeních Apple.";
+"Sync Status" = "Stav synchronizace";
+"Last Synced" = "Poslední synchronizace";
+"Error" = "Chyba";
+"Data" = "Data";
+"Force Sync Now" = "Vynutit synchronizaci nyní";
+"Clear Local Data & Re-sync" = "Vymazat lokální data a znovu synchronizovat";
+"Reset iCloud (Delete All & Re-upload)" = "Resetovat iCloud (smazat vše a znovu nahrát)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Vynucená synchronizace načte nejnovější data z iCloud. Vymazat a znovu synchronizovat odstraní lokální data a stáhne je znovu. Reset iCloud smaže VŠECHNA cloudová data a znovu nahraje lokální data (opraví duplicity).";
+"Account Status" = "Stav účtu";
+"Container" = "Kontejner";
+"Re-check iCloud Status" = "Znovu zkontrolovat stav iCloud";
+"Troubleshooting" = "Řešení problémů";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Ujistěte se, že jste přihlášeni do iCloud v Nastavení a iCloud Drive je povoleno. Více informací najdete v Console.app v logu „CloudKit“.";
+"Force Sync" = "Vynutit synchronizaci";
+"Sync Now" = "Synchronizovat nyní";
+"This will fetch the latest data from iCloud and may take a moment." = "Načte nejnovější data z iCloud a může to chvíli trvat.";
+"Clear Local Data" = "Vymazat lokální data";
+"Clear & Re-sync" = "Vymazat a znovu synchronizovat";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Tím se smažou všechna lokální data a stáhnou se znovu z iCloud. Nezsynchronizované lokální změny budou ztraceny.";
+"Reset iCloud Data" = "Resetovat data iCloud";
+"Delete All & Re-upload" = "Smazat vše a znovu nahrát";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "Tím se SMAŽOU VŠECHNA data z iCloud a nahrají se aktuální lokální data. Použijte pro opravu duplicit.";
+"Connected" = "Připojeno";
+"Not Available" = "Není k dispozici";
+"Synced" = "Synchronizováno";
+"Syncing..." = "Synchronizace...";
+"available" = "k dispozici";
+"noAccount - User not signed into iCloud" = "noAccount - Uživatel není přihlášen do iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - Přístup k iCloud omezen (rodičovská kontrola, MDM apod.)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Nelze určit stav iCloud";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud dočasně nedostupné";
+"unknown status: %@" = "neznámý stav: %@";
+"Error: %@" = "Chyba: %@";
+"Checking..." = "Kontrola...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Vodorovné rozdělení";
+"Vertical split view" = "Svislé rozdělení";
+"Left pane" = "Levý panel";
+"Top pane" = "Horní panel";
+"Right pane" = "Pravý panel";
+"Bottom pane" = "Dolní panel";
+"Horizontal split divider" = "Vodorovný oddělovač";
+"Vertical split divider" = "Svislý oddělovač";
+"Drag to resize the left and right panes" = "Přetáhněte pro změnu velikosti levého a pravého panelu";
+"Drag to resize the top and bottom panes" = "Přetáhněte pro změnu velikosti horního a dolního panelu";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "JÁDRA";
+"IDLE" = "NEČINNÝ";
+"UPTIME" = "DOBA BĚHU";
+"LOAD" = "ZÁTĚŽ";
+"FREE" = "VOLNÉ";
+"USED" = "POUŽITO";
+"CACHED" = "CACHE";
+"TOTAL" = "CELKEM";
+"Volumes" = "Svazky";
+"Top Processes" = "Nej procesy";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ CELKEM";
+"↓ TOTAL" = "↓ CELKEM";
+"%lld D" = "%lld d";
+"%lld H" = "%lld h";
+
+/* SFSymbol Picker */
+"Recent" = "Nedávné";
+"Load more (%lld remaining)" = "Načíst více (zbývá %lld)";
+"%lld symbols" = "%lld symbolů";
+"What's New" = "Novinky";
+"Draw" = "Kreslení";
+"Variable" = "Proměnná";
+"Multicolor" = "Vícebarevný";
+"Communication" = "Komunikace";
+"Weather" = "Počasí";
+"Maps" = "Mapy";
+"Objects & Tools" = "Objekty a nástroje";
+"Devices" = "Zařízení";
+"Camera & Photos" = "Fotoaparát a fotky";
+"Gaming" = "Hry";
+"Connectivity" = "Konektivita";
+"Transportation" = "Doprava";
+"Automotive" = "Automotive";
+"Accessibility" = "Zpřístupnění";
+"Privacy & Security" = "Soukromí a zabezpečení";
+"Human" = "Člověk";
+"Home" = "Domov";
+"Fitness" = "Fitness";
+"Nature" = "Příroda";
+"Editing" = "Úpravy";
+"Text Formatting" = "Formátování textu";
+"Media" = "Média";
+"Keyboard" = "Klávesnice";
+"Commerce" = "Obchod";
+"Time" = "Čas";
+"Health" = "Zdraví";
+"Shapes" = "Tvary";
+"Arrows" = "Šipky";
+"Indices" = "Indexy";
+"Math" = "Matematika";
+
+/* Auth Methods */
+"SSH Key" = "SSH klíč";
+"SSH Key + Passphrase" = "SSH klíč + heslo";
+
+/* Environments */
+"Production" = "Produkce";
+"Staging" = "Staging";
+"Development" = "Vývoj";
+"Prod" = "Prod";
+"Stag" = "Stag";
+"Dev" = "Dev";
+"New Environment" = "Nové prostředí";
+"Edit Environment" = "Upravit prostředí";
+"Environment name" = "Název prostředí";
+"An environment with this name already exists." = "Prostředí s tímto názvem již existuje.";
+"Delete Environment?" = "Smazat prostředí?";
+"Servers in '%@' will be moved to Production." = "Servery v „%@“ budou přesunuty do Produkce.";
+"Edit \"%@\"..." = "Upravit „%@“...";
+"Delete \"%@\"..." = "Smazat „%@“...";
+"Custom" = "Vlastní";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Je vyžadováno oprávnění k mikrofonu. Bude automaticky vyžádáno při začátku nahrávání.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Rozpoznávání řeči není k dispozici. Povolte Siri v Nastavení systému > Siri a Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Nepodařilo se spustit nahrávání. Zkontrolujte oprávnění mikrofonu v Nastavení systému > Soukromí a zabezpečení > Mikrofon.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "Přepis MLX není na tomto Macu k dispozici. Přepínám na Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Upgradujte na Pro pro neomezené servery";
+"Upgrade to Pro for unlimited workspaces" = "Upgradujte na Pro pro neomezené pracovní prostory";
+"Upgrade to Pro for multiple connections" = "Upgradujte na Pro pro více připojení";
+"Upgrade to Pro for custom environments" = "Upgradujte na Pro pro vlastní prostředí";
+
+/* Misc */
+"Terminal initialization failed" = "Inicializace terminálu selhala";
+"Voice Input Unavailable" = "Hlasový vstup není k dispozici";
+"Disconnect from server" = "Odpojit od serveru";
+"Disconnect from %@?" = "Odpojit od %@?";
+"This will return to the server list." = "Tím se vrátíte na seznam serverů.";
+"All terminal tabs for this server will be closed." = "Všechny karty terminálu pro tento server budou zavřeny.";
+"Add Terminal Preset" = "Přidat preset terminálu";
+"Edit Preset" = "Upravit preset";
+"Basic Information" = "Základní informace";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Zobrazovaný název presetu (např. Claude, Helix, Vim)";
+"Command" = "Příkaz";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Příkaz spuštěný při výběru presetu (např. claude, hx, nvim)";
+"Icon" = "Ikona";
+"Choose Symbol..." = "Vybrat symbol...";
+
+/* Contact Labels */
+"Developer" = "Vývojář";
+"Discord" = "Discord";
+"Join Community" = "Přidat se ke komunitě";
+"Email" = "Email";
+"GitHub" = "GitHub";
+"Report Issue" = "Nahlásit problém";
+"Support VVTerm" = "Podpořit VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "Systém (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Nepodařilo se odstranit model";
+"Model ID is required" = "Je vyžadováno ID modelu";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Server '%@' je uzamčen";
+"Workspace '%@' is locked" = "Pracovní prostor '%@' je uzamčen";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "Dosáhli jste limitu %lld serverů. Upgradujte na Pro pro neomezené servery.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Moderní, rychlé a bezpečné. Doporučeno pro většinu použití.";
+"Wide compatibility with older systems." = "Široká kompatibilita se staršími systémy.";
+
+
+/* Split Commands */
+"Split Right" = "Rozdělit vpravo";
+"Split Down" = "Rozdělit dolů";
+"Close Pane" = "Zavřít panel";
+
+/* Tabs */
+"View" = "Zobrazení";
+"Stats" = "Statistiky";
+
+/* Help */
+"Support & Feedback" = "Podpora a zpětná vazba";
+
+"Upgrade to Pro for unlimited workspaces." = "Upgradujte na Pro pro neomezené pracovní prostory.";
+
+"Fingerprint" = "Otisk";
+
+"Links" = "Odkazy";
+
+"Passphrase" = "Heslo";
+
+"%@ is a Pro feature" = "%@ je funkce Pro";
+
+"System (Default)" = "Systém (výchozí)";
+
+"Some changes may require restarting the app." = "Některé změny mohou vyžadovat restart aplikace.";
+
+/* Download Progress */
+"%llds remaining" = "zbývá %llds";
+"%lldm remaining" = "zbývá %lldm";
+"%lldh %lldm remaining" = "zbývá %lldh %lldm";
+"Clear All Storage" = "Vymazat veškeré úložiště";
+
+/* Preview */
+"Server 1" = "Server 1";
+"Server 2" = "Server 2";
+"Server 3" = "Server 3";
