@@ -63,18 +63,18 @@ struct iOSContentView: View {
                 selectedWorkspace = serverManager.workspaces.first
             }
         }
-        .onChange(of: serverManager.workspaces) { _, workspaces in
+        .onChange(of: serverManager.workspaces) { workspaces in
             if selectedWorkspace == nil {
                 selectedWorkspace = workspaces.first
             }
         }
         // Sync navigation state with session state - dismiss terminal if session is gone
-        .onChange(of: sessionManager.sessions) { _, sessions in
+        .onChange(of: sessionManager.sessions) { _ in
             if showingTerminal && sessionManager.selectedSession == nil {
                 showingTerminal = false
             }
         }
-        .onChange(of: sessionManager.selectedSessionId) { _, selectedId in
+        .onChange(of: sessionManager.selectedSessionId) { selectedId in
             if showingTerminal && selectedId == nil {
                 showingTerminal = false
             }
@@ -557,7 +557,7 @@ struct iOSTerminalView: View {
                     .scaleEffect(1.2)
             }
         }
-        .onChange(of: selectedView) { _, newValue in
+        .onChange(of: selectedView) { newValue in
             if newValue == "terminal" {
                 if !shouldShowTerminal && !terminalAlreadyExists {
                     // Delay terminal creation to allow tab animation to complete

@@ -162,7 +162,7 @@ struct ProUpgradeSheet: View {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
         }
-        .onChange(of: storeManager.purchaseState) { _, newState in
+        .onChange(of: storeManager.purchaseState) { newState in
             switch newState {
             case .purchased:
                 withAnimation(.easeInOut(duration: 0.3)) {

@@ -16,23 +16,7 @@ struct KeychainSettingsView: View {
     var body: some View {
         Group {
             if storedKeys.isEmpty {
-                ContentUnavailableView {
-                    Label("No Keys Stored", systemImage: "key")
-                } description: {
-                    Text("Add keys to quickly use them when creating new servers")
-                } actions: {
-                    HStack(spacing: 12) {
-                        Button("Generate New Key") {
-                            showingGenerateKey = true
-                        }
-                        .buttonStyle(.borderedProminent)
-
-                        Button("Import Key") {
-                            showingAddKey = true
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                }
+                emptyKeysView
             } else {
                 Form {
                     Section {
@@ -115,6 +99,42 @@ struct KeychainSettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: { key in
             Text("Are you sure you want to delete '\(key.name)'? This cannot be undone.")
+        }
+    }
+
+    @ViewBuilder
+    private var emptyKeysView: some View {
+        let actions = HStack(spacing: 12) {
+            Button("Generate New Key") {
+                showingGenerateKey = true
+            }
+            .buttonStyle(.borderedProminent)
+
+            Button("Import Key") {
+                showingAddKey = true
+            }
+            .buttonStyle(.bordered)
+        }
+
+        if #available(iOS 17.0, macOS 14.0, *) {
+            ContentUnavailableView {
+                Label("No Keys Stored", systemImage: "key")
+            } description: {
+                Text("Add keys to quickly use them when creating new servers")
+            } actions: {
+                actions
+            }
+        } else {
+            VStack(spacing: 12) {
+                Label("No Keys Stored", systemImage: "key")
+                    .font(.headline)
+                Text("Add keys to quickly use them when creating new servers")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                actions
+            }
+            .padding()
         }
     }
 
@@ -567,11 +587,7 @@ struct PublicKeySheet: View {
                     }
                     .buttonStyle(.borderedProminent)
                 } else {
-                    ContentUnavailableView {
-                        Label("No Public Key", systemImage: "key.slash")
-                    } description: {
-                        Text("This key was imported without a public key.")
-                    }
+                    noPublicKeyView
                 }
             }
             .padding(.vertical)
@@ -584,6 +600,27 @@ struct PublicKeySheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var noPublicKeyView: some View {
+        if #available(iOS 17.0, macOS 14.0, *) {
+            ContentUnavailableView {
+                Label("No Public Key", systemImage: "key.slash")
+            } description: {
+                Text("This key was imported without a public key.")
+            }
+        } else {
+            VStack(spacing: 8) {
+                Label("No Public Key", systemImage: "key.slash")
+                    .font(.headline)
+                Text("This key was imported without a public key.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding()
         }
     }
 
