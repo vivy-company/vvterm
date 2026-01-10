@@ -42,21 +42,11 @@ struct WorkspaceFormSheet: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Header
-            DetailHeaderBar(showsBackground: false) {
-                Text(isEditing ? "Edit Workspace" : "New Workspace")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-            }
-
-            Divider()
-
-            // Content
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Limit Banner
-                    if isAtLimit {
+        NavigationStack {
+            Form {
+                // Limit Banner
+                if isAtLimit {
+                    Section {
                         ProLimitBanner(
                             title: "Workspace Limit Reached",
                             message: "Upgrade to Pro for unlimited workspaces."
@@ -64,92 +54,84 @@ struct WorkspaceFormSheet: View {
                             showingProUpgrade = true
                         }
                     }
+                }
 
-                    // Name field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Name")
-                            .font(.headline)
-
-                        TextField("Workspace name", text: $name)
-                            .textFieldStyle(.roundedBorder)
-                            .onSubmit {
-                                if !name.isEmpty && !isAtLimit {
-                                    saveWorkspace()
-                                }
+                // Name field
+                Section("Name") {
+                    TextField("Workspace name", text: $name)
+                        .onSubmit {
+                            if !name.isEmpty && !isAtLimit {
+                                saveWorkspace()
                             }
+                        }
+                }
+
+                // Color picker
+                Section("Color") {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 12) {
+                        ForEach(availableColors, id: \.self) { color in
+                            Circle()
+                                .fill(color)
+                                .frame(width: 36, height: 36)
+                                .overlay {
+                                    if selectedColor == color {
+                                        Circle()
+                                            .strokeBorder(.white, lineWidth: 3)
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.white)
+                                            .font(.caption.bold())
+                                    }
+                                }
+                                .onTapGesture {
+                                    selectedColor = color
+                                }
+                        }
                     }
+                    .padding(.vertical, 4)
+                }
 
-                    // Color picker
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Color")
-                            .font(.headline)
+                // Error message
+                if let error = error {
+                    Section {
+                        Text(error)
+                            .foregroundStyle(.red)
+                    }
+                }
 
-                        HStack(spacing: 12) {
-                            ForEach(availableColors, id: \.self) { color in
-                                Circle()
-                                    .fill(color)
-                                    .frame(width: 30, height: 30)
-                                    .overlay {
-                                        if selectedColor == color {
-                                            Circle()
-                                                .strokeBorder(.white, lineWidth: 3)
-                                            Image(systemName: "checkmark")
-                                                .foregroundStyle(.white)
-                                                .font(.caption)
-                                        }
-                                    }
-                                    .onTapGesture {
-                                        selectedColor = color
-                                    }
+                // Delete button for editing
+                if isEditing {
+                    Section {
+                        Button(role: .destructive) {
+                            deleteWorkspace()
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("Delete Workspace")
+                                Spacer()
                             }
                         }
                     }
-
-                    // Error message
-                    if let error = error {
-                        Text(error)
-                            .font(.callout)
-                            .foregroundStyle(.red)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
-                    }
                 }
-                .padding()
             }
-
-            Divider()
-
-            // Footer
-            HStack {
-                if isEditing {
-                    Button(role: .destructive) {
-                        deleteWorkspace()
-                    } label: {
-                        Text("Delete")
+            .formStyle(.grouped)
+            .navigationTitle(isEditing ? "Edit Workspace" : "New Workspace")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isEditing ? "Save" : "Create") {
+                        saveWorkspace()
                     }
+                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)
                 }
-
-                Spacer()
-
-                Button("Cancel") {
-                    dismiss()
-                }
-                .keyboardShortcut(.cancelAction)
-
-                Button(isEditing ? "Save" : "Create") {
-                    saveWorkspace()
-                }
-                .keyboardShortcut(.defaultAction)
-                .buttonStyle(.borderedProminent)
-                .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)
             }
-            .padding()
-        }
-        .frame(width: 450)
-        .frame(minHeight: 280, maxHeight: 400)
-        .sheet(isPresented: $showingProUpgrade) {
-            ProUpgradeSheet()
+            .sheet(isPresented: $showingProUpgrade) {
+                ProUpgradeSheet()
+            }
         }
     }
 

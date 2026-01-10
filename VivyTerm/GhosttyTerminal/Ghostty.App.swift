@@ -366,6 +366,9 @@ extension Ghostty {
                 # 10000 lines is plenty for most use cases (~5-10MB)
                 scrollback-limit = 10000
 
+                # Faster scroll speed (especially for iOS touch)
+                mouse-scroll-multiplier = 3
+
                 # Custom keybinds
                 keybind = shift+enter=text:\\n
 

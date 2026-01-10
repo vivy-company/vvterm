@@ -11,7 +11,7 @@ struct ProLimitBanner: View {
         HStack(spacing: 12) {
             Image(systemName: "star.fill")
                 .foregroundStyle(.orange)
-                .font(.title2)
+                .font(.title3)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
@@ -30,8 +30,6 @@ struct ProLimitBanner: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.small)
         }
-        .padding()
-        .background(.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -200,6 +198,116 @@ struct UsageIndicator: View {
                     .buttonStyle(.plain)
                 }
             }
+        }
+    }
+}
+
+// MARK: - Locked Item Alert (for downgraded users)
+
+struct LockedItemAlert: ViewModifier {
+    let itemType: ItemType
+    let itemName: String
+    @Binding var isPresented: Bool
+    @State private var showUpgrade = false
+
+    enum ItemType {
+        case server
+        case workspace
+
+        var title: String {
+            switch self {
+            case .server: return "Server Locked"
+            case .workspace: return "Workspace Locked"
+            }
+        }
+
+        var message: String {
+            switch self {
+            case .server:
+                return "This server exceeds your free plan limit of \(FreeTierLimits.maxServers) servers. Renew your Pro subscription to access all your servers."
+            case .workspace:
+                return "This workspace exceeds your free plan limit of \(FreeTierLimits.maxWorkspaces) workspace. Renew your Pro subscription to access all your workspaces."
+            }
+        }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .alert(itemType.title, isPresented: $isPresented) {
+                Button("Renew Pro") {
+                    showUpgrade = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("\"\(itemName)\" \(itemType.message)")
+            }
+            .sheet(isPresented: $showUpgrade) {
+                ProUpgradeSheet()
+            }
+    }
+}
+
+extension View {
+    func lockedItemAlert(_ itemType: LockedItemAlert.ItemType, itemName: String, isPresented: Binding<Bool>) -> some View {
+        modifier(LockedItemAlert(itemType: itemType, itemName: itemName, isPresented: isPresented))
+    }
+}
+
+// MARK: - Locked Overlay Badge
+
+struct LockedBadge: View {
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "lock.fill")
+                .font(.caption2)
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 6)
+        .padding(.vertical, 3)
+        .background(.secondary.opacity(0.8), in: Capsule())
+    }
+}
+
+// MARK: - Downgrade Banner (shown when user has locked items)
+
+struct DowngradeBanner: View {
+    let lockedServers: Int
+    let lockedWorkspaces: Int
+    let action: () -> Void
+
+    private var message: String {
+        var parts: [String] = []
+        if lockedServers > 0 {
+            parts.append("\(lockedServers) server\(lockedServers == 1 ? "" : "s")")
+        }
+        if lockedWorkspaces > 0 {
+            parts.append("\(lockedWorkspaces) workspace\(lockedWorkspaces == 1 ? "" : "s")")
+        }
+        return parts.joined(separator: " and ") + " locked"
+    }
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "lock.fill")
+                .foregroundStyle(.orange)
+                .font(.title3)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Subscription Expired")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button("Renew") {
+                action()
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
         }
     }
 }

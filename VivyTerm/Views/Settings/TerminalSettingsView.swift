@@ -49,9 +49,12 @@ struct TerminalSettingsView: View {
 
                 HStack {
                     Text("Size: \(Int(fontSize))pt")
-                        .frame(width: 100, alignment: .leading)
-                    Slider(value: $fontSize, in: 8...24, step: 1)
-                    Stepper("", value: $fontSize, in: 8...24, step: 1)
+                        .frame(width: 80, alignment: .leading)
+                    Slider(value: Binding(
+                        get: { fontSize },
+                        set: { fontSize = $0.rounded() }
+                    ), in: 4...32, step: 1)
+                    Stepper("", value: $fontSize, in: 4...32, step: 1)
                         .labelsHidden()
                 }
             }
@@ -134,7 +137,24 @@ struct TerminalSettingsView: View {
     }
     #else
     private func loadSystemFonts() -> [String] {
-        ["Menlo", "Monaco", "SF Mono", "Courier New"]
+        // System fonts + bundled Nerd Fonts
+        var fonts = ["Menlo", "SF Mono", "Courier New"]
+
+        // Add bundled Nerd Fonts if available
+        let nerdFonts = [
+            "JetBrainsMono Nerd Font",
+            "Hack Nerd Font",
+            "FiraCode Nerd Font",
+            "MesloLGS Nerd Font"
+        ]
+
+        for fontFamily in nerdFonts {
+            if UIFont(name: fontFamily, size: 12) != nil {
+                fonts.append(fontFamily)
+            }
+        }
+
+        return fonts.sorted()
     }
     #endif
 

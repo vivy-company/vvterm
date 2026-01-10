@@ -103,8 +103,11 @@ extension SSHTerminalCoordinator {
                     guard !Task.isCancelled else { break }
 
                     // Feed data to terminal - display link batches rendering
-                    let shouldContinue = await MainActor.run { [weak self] () -> Bool in
-                        guard self?.terminalView != nil else { return false }
+                    // Check session manager instead of coordinator to survive view dismantling on iOS
+                    let shouldContinue = await MainActor.run { () -> Bool in
+                        // Session still exists = keep running (even if coordinator was deallocated)
+                        let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
+                        guard sessionExists else { return false }
                         terminal.feedData(data)
                         return true
                     }
@@ -333,6 +336,23 @@ struct SSHTerminalWrapper: NSViewRepresentable {
 import UIKit
 import SwiftUI
 
+// MARK: - Terminal Container View
+
+/// Lightweight container that holds the terminal view after deferred creation
+/// This allows navigation animations to complete smoothly before heavy Metal/GPU setup
+final class TerminalContainerUIView: UIView {
+    weak var terminalView: GhosttyTerminalView?
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        backgroundColor = .black
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 /// SwiftUI wrapper that uses GeometryReader to get proper size (matches official Ghostty pattern)
 struct SSHTerminalWrapper: View {
     let session: ConnectionSession
@@ -374,97 +394,139 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> UIView {
-        // Ensure Ghostty app is ready
-        guard let app = ghosttyApp.app else {
-            // App not ready yet - show loading indicator
-            let placeholder = UIView(frame: CGRect(x: 0, y: 0, width: 400, height: 400))
-            placeholder.backgroundColor = .black
-
-            let label = UILabel()
-            label.text = "Loading terminal..."
-            label.textColor = .white
-            label.textAlignment = .center
-            label.translatesAutoresizingMaskIntoConstraints = false
-            placeholder.addSubview(label)
-            NSLayoutConstraint.activate([
-                label.centerXAnchor.constraint(equalTo: placeholder.centerXAnchor),
-                label.centerYAnchor.constraint(equalTo: placeholder.centerYAnchor)
-            ])
-
-            return placeholder
-        }
-
         let coordinator = context.coordinator
 
         // Check if terminal already exists for this session (reuse to save memory)
-        // Each Ghostty surface uses ~50-100MB (font atlas, Metal textures, scrollback)
         if let existingTerminal = ConnectionSessionManager.shared.getTerminal(for: session.id) {
             coordinator.terminalView = existingTerminal
+            coordinator.isTerminalReady = true
+            // Mark as reusing so we don't cleanup on deinit
+            coordinator.preserveSession = true
 
-            // Re-register handlers in case coordinator changed
+            // Update write callback to use this coordinator (which will use session manager's SSH client)
+            existingTerminal.writeCallback = { data in
+                // Use SSH client from session manager, not coordinator's client
+                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session) {
+                    Task.detached(priority: .userInitiated) {
+                        try? await sshClient.write(data)
+                    }
+                }
+            }
+
+            // Resume rendering since it was paused when navigating away
+            existingTerminal.resumeRendering()
+
+            // Force refresh after a brief delay to ensure view is in window hierarchy
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak existingTerminal, session] in
+                guard let terminal = existingTerminal else { return }
+                terminal.forceRefresh()
+
+                // Also trigger SSH resize to force server to redraw prompt
+                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session) {
+                    Task {
+                        if let size = await terminal.terminalSize() {
+                            try? await sshClient.resize(cols: Int(size.columns), rows: Int(size.rows))
+                        }
+                    }
+                }
+            }
+
+            onReady()
+            return existingTerminal
+        }
+
+        // Create a container view that will hold the terminal once it's ready
+        // This allows the navigation animation to complete smoothly
+        let container = TerminalContainerUIView()
+        container.backgroundColor = .black
+
+        // Defer heavy terminal creation to after animation completes (150ms for iOS navigation)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak coordinator, weak container] in
+            guard let coordinator = coordinator, let container = container else { return }
+            guard let app = ghosttyApp.app else { return }
+
+            // Create terminal on main thread but after navigation animation
+            let terminalView = GhosttyTerminalView(
+                frame: container.bounds,
+                worktreePath: NSHomeDirectory(),
+                ghosttyApp: app,
+                appWrapper: ghosttyApp,
+                paneId: session.id.uuidString,
+                useCustomIO: true
+            )
+
+            terminalView.onReady = { [weak coordinator, weak terminalView] in
+                coordinator?.isTerminalReady = true
+                onReady()
+                if let terminalView = terminalView {
+                    coordinator?.startSSHConnection(terminal: terminalView)
+                }
+            }
+            terminalView.onProcessExit = onProcessExit
+
+            // Store terminal reference
+            coordinator.terminalView = terminalView
+            ConnectionSessionManager.shared.registerTerminal(terminalView, for: session.id)
+
+            // Register shell cancel handler
             ConnectionSessionManager.shared.registerShellCancelHandler({ [weak coordinator] in
                 coordinator?.cancelShell()
             }, for: session.id)
 
-            return existingTerminal
-        }
+            // Setup write callback
+            terminalView.writeCallback = { [weak coordinator] data in
+                coordinator?.sendToSSH(data)
+            }
+            terminalView.setupWriteCallback()
 
-        // Create Ghostty terminal with custom I/O for SSH
-        let terminalView = GhosttyTerminalView(
-            frame: CGRect(origin: .zero, size: size),
-            worktreePath: NSHomeDirectory(),
-            ghosttyApp: app,
-            appWrapper: ghosttyApp,
-            paneId: session.id.uuidString,
-            useCustomIO: true
-        )
+            // Add terminal to container with fade-in animation
+            terminalView.frame = container.bounds
+            terminalView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            terminalView.alpha = 0
+            container.addSubview(terminalView)
+            container.terminalView = terminalView
 
-        terminalView.onReady = { [weak coordinator, weak terminalView] in
-            onReady()
-            if let terminalView = terminalView {
-                coordinator?.startSSHConnection(terminal: terminalView)
+            UIView.animate(withDuration: 0.15) {
+                terminalView.alpha = 1
+            } completion: { [weak terminalView] _ in
+                // Force refresh after fade-in completes to ensure content is visible
+                terminalView?.forceRefresh()
             }
         }
-        terminalView.onProcessExit = onProcessExit
 
-        // Store terminal reference
-        coordinator.terminalView = terminalView
-        ConnectionSessionManager.shared.registerTerminal(terminalView, for: session.id)
-
-        // Register shell cancel handler so closeSession can cancel the shell task
-        ConnectionSessionManager.shared.registerShellCancelHandler({ [weak coordinator] in
-            coordinator?.cancelShell()
-        }, for: session.id)
-
-        // Setup write callback to send keyboard input to SSH
-        terminalView.writeCallback = { [weak coordinator] data in
-            coordinator?.sendToSSH(data)
-        }
-        terminalView.setupWriteCallback()
-
-        return terminalView
+        return container
     }
 
     func updateUIView(_ uiView: UIView, context: Context) {
-        guard let terminalView = uiView as? GhosttyTerminalView else { return }
+        // Get terminal view - either directly or from container
+        let terminalView: GhosttyTerminalView?
+        if let direct = uiView as? GhosttyTerminalView {
+            terminalView = direct
+        } else if let container = uiView as? TerminalContainerUIView {
+            terminalView = container.terminalView
+        } else {
+            return
+        }
 
         // Check if session still exists - if not, cleanup and return
         let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == session.id }
         if !sessionExists {
             // Session was closed externally, cleanup terminal
             context.coordinator.cancelShell()
-            terminalView.writeCallback = nil
-            terminalView.onReady = nil
-            terminalView.onProcessExit = nil
+            terminalView?.writeCallback = nil
+            terminalView?.onReady = nil
+            terminalView?.onProcessExit = nil
             return
         }
+
+        guard let terminalView = terminalView else { return }
 
         // Pass size from SwiftUI GeometryReader to terminal (matches official Ghostty pattern)
         // This is critical - SwiftUI determines the size, we pass it to Ghostty
         terminalView.sizeDidChange(size)
 
         // Only capture keyboard focus when terminal is active (not hidden behind stats view)
-        if isActive {
+        if isActive && context.coordinator.isTerminalReady {
             if terminalView.window != nil && !terminalView.isFirstResponder {
                 _ = terminalView.becomeFirstResponder()
             }
@@ -476,26 +538,47 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     }
 
     static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
-        // Unregister cancel handler since we're handling cleanup here
+        // Check if session still exists - if it does, user just navigated away
+        // Keep terminal alive for when they come back
+        let sessionStillExists = ConnectionSessionManager.shared.sessions.contains { $0.id == coordinator.sessionId }
+
+        // Get terminal view - either directly or from container
+        let terminalView: GhosttyTerminalView?
+        if let direct = uiView as? GhosttyTerminalView {
+            terminalView = direct
+        } else if let container = uiView as? TerminalContainerUIView {
+            terminalView = container.terminalView
+        } else {
+            terminalView = nil
+        }
+
+        if sessionStillExists {
+            // Session still active - user just navigated away
+            // Pause rendering but keep everything alive
+            terminalView?.pauseRendering()
+            _ = terminalView?.resignFirstResponder()
+
+            // Mark coordinator to not cleanup in deinit
+            // IMPORTANT: Do NOT set terminalView = nil here!
+            // The SSH output loop checks terminalView != nil to continue running.
+            // Setting it to nil would break the loop and close the connection.
+            coordinator.preserveSession = true
+            return
+        }
+
+        // Session was closed - full cleanup
         ConnectionSessionManager.shared.unregisterShellCancelHandler(for: coordinator.sessionId)
-
-        // CRITICAL: Unregister terminal from session manager to release strong reference
         ConnectionSessionManager.shared.unregisterTerminal(for: coordinator.sessionId)
-
-        // Critical: Cancel SSH shell task immediately to prevent blocking
         coordinator.cancelShell()
 
         // Remove terminal from view hierarchy
-        if let terminalView = uiView as? GhosttyTerminalView {
-            // Pause rendering immediately so the back gesture animation can complete.
+        if let terminalView = terminalView {
             terminalView.pauseRendering()
             _ = terminalView.resignFirstResponder()
 
-            // Cleanup is now called synchronously in cancelShell() which calls terminal.cleanup()
-            // The asyncAfter cleanup is kept as a safety net for edge cases
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak terminalView] in
                 guard let terminalView = terminalView else { return }
-                terminalView.cleanup()  // Safe to call multiple times
+                terminalView.cleanup()
                 terminalView.removeFromSuperview()
             }
         }
@@ -514,6 +597,12 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         var shellTask: Task<Void, Never>?
         let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
 
+        /// Tracks whether the terminal surface has been created and is ready for interaction
+        var isTerminalReady = false
+
+        /// If true, session is still active and we shouldn't cleanup on deinit (user just navigated away)
+        var preserveSession = false
+
         init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void) {
             self.server = server
             self.credentials = credentials
@@ -525,12 +614,29 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
         func onShellStarted(terminal: GhosttyTerminalView) async {
             // Force refresh after shell starts (must be on main thread)
-            await MainActor.run {
+            await MainActor.run { [weak self] in
                 terminal.forceRefresh()
+
+                // Additional delayed refresh to catch prompt after it arrives from server
+                // Also send resize to force server to redraw prompt
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak terminal, weak self] in
+                    terminal?.forceRefresh()
+
+                    // Trigger resize to force server to redraw prompt
+                    if let self = self {
+                        Task {
+                            if let size = await terminal?.terminalSize() {
+                                try? await self.sshClient.resize(cols: Int(size.columns), rows: Int(size.rows))
+                            }
+                        }
+                    }
+                }
             }
         }
 
         deinit {
+            // Don't cleanup if session is still active (user just navigated away)
+            guard !preserveSession else { return }
             cancelShell()
         }
     }

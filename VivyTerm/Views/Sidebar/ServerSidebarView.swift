@@ -17,6 +17,7 @@ struct ServerSidebarView: View {
     @State private var showingProUpgrade = false
     @State private var searchText = ""
     @State private var serverToEdit: Server?
+    @State private var lockedServerAlert: Server?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -153,7 +154,8 @@ struct ServerSidebarView: View {
                         server: server,
                         isSelected: selectedServer?.id == server.id,
                         onEdit: { serverToEdit = $0 },
-                        onSelect: { selectedServer = server }
+                        onSelect: { selectedServer = server },
+                        onLockedTap: { lockedServerAlert = server }
                     )
                     .listRowSeparator(.hidden)
                     .listRowBackground(Color.clear)
@@ -163,6 +165,14 @@ struct ServerSidebarView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
         }
+        .lockedItemAlert(
+            .server,
+            itemName: lockedServerAlert?.name ?? "",
+            isPresented: Binding(
+                get: { lockedServerAlert != nil },
+                set: { if !$0 { lockedServerAlert = nil } }
+            )
+        )
     }
 
     // MARK: - Support Banner

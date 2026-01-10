@@ -26,6 +26,9 @@ struct VivyTermApp: App {
     @StateObject private var ghosttyApp = Ghostty.App()
     #endif
 
+    // Welcome screen flag
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
+
     // Terminal settings to watch for changes
     @AppStorage("terminalFontName") private var terminalFontName = "Menlo"
     @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
@@ -42,13 +45,24 @@ struct VivyTermApp: App {
                 .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
                     ghosttyApp.reloadConfig()
                 }
-            #else
-            ContentView()
-                .environmentObject(ghosttyApp)
-                .modifier(AppearanceModifier())
-                .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
-                    ghosttyApp.reloadConfig()
+                .sheet(isPresented: .init(
+                    get: { !hasSeenWelcome },
+                    set: { if !$0 { hasSeenWelcome = true } }
+                )) {
+                    WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+                        .interactiveDismissDisabled()
                 }
+            #else
+            if !hasSeenWelcome {
+                WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+            } else {
+                ContentView()
+                    .environmentObject(ghosttyApp)
+                    .modifier(AppearanceModifier())
+                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
+                        ghosttyApp.reloadConfig()
+                    }
+            }
             #endif
         }
         #if os(macOS)

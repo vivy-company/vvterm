@@ -14,6 +14,8 @@ struct iOSContentView: View {
     @State private var selectedServer: Server?
     @State private var selectedEnvironment: ServerEnvironment?
     @State private var showingTerminal = false
+    @State private var showingProUpgrade = false
+    @State private var lockedServerName: String?
 
     var body: some View {
         NavigationStack {
@@ -26,8 +28,21 @@ struct iOSContentView: View {
                 onServerSelected: { server in
                     selectedServer = server
                     Task {
-                        _ = try? await sessionManager.openConnection(to: server)
-                        showingTerminal = true
+                        do {
+                            _ = try await sessionManager.openConnection(to: server)
+                            showingTerminal = true
+                        } catch let error as VivyTermError {
+                            switch error {
+                            case .proRequired:
+                                showingProUpgrade = true
+                            case .serverLocked(let name):
+                                lockedServerName = name
+                            default:
+                                break
+                            }
+                        } catch {
+                            // Handle other errors if needed
+                        }
                     }
                 }
             )
@@ -63,6 +78,17 @@ struct iOSContentView: View {
                 showingTerminal = false
             }
         }
+        .sheet(isPresented: $showingProUpgrade) {
+            ProUpgradeSheet()
+        }
+        .lockedItemAlert(
+            .server,
+            itemName: lockedServerName ?? "",
+            isPresented: Binding(
+                get: { lockedServerName != nil },
+                set: { if !$0 { lockedServerName = nil } }
+            )
+        )
     }
 }
 
@@ -80,6 +106,7 @@ struct iOSServerListView: View {
     @State private var showingWorkspacePicker = false
     @State private var searchText = ""
     @State private var serverToEdit: Server?
+    @State private var lockedServerAlert: Server?
 
     var body: some View {
         List {
@@ -123,14 +150,9 @@ struct iOSServerListView: View {
                         iOSServerRow(
                             server: server,
                             onTap: { onServerSelected(server) },
-                            onEdit: { serverToEdit = server }
+                            onEdit: { serverToEdit = server },
+                            onLockedTap: { lockedServerAlert = server }
                         )
-                    }
-                    .onDelete { indexSet in
-                        for index in indexSet {
-                            let server = filteredServers[index]
-                            Task { try? await serverManager.deleteServer(server) }
-                        }
                     }
                 }
             } header: {
@@ -229,6 +251,14 @@ struct iOSServerListView: View {
                 )
             }
         }
+        .lockedItemAlert(
+            .server,
+            itemName: lockedServerAlert?.name ?? "",
+            isPresented: Binding(
+                get: { lockedServerAlert != nil },
+                set: { if !$0 { lockedServerAlert = nil } }
+            )
+        )
     }
 
     private var filteredServers: [Server] {
@@ -265,19 +295,48 @@ struct iOSTerminalView: View {
     let onBack: () -> Void
 
     @State private var selectedView: String = "stats"
+    /// Delayed flag to allow tab animation to complete before creating terminal
+    @State private var shouldShowTerminal = false
+
+    /// Check if terminal already exists (was previously created)
+    private var terminalAlreadyExists: Bool {
+        ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
+    }
 
     var body: some View {
         ZStack {
-            // Terminal view
-            TerminalContainerView(session: session, server: server, isActive: selectedView == "terminal")
-                .opacity(selectedView == "terminal" ? 1 : 0)
-                .allowsHitTesting(selectedView == "terminal")
+            // Terminal view - only create after delay to not block tab animation
+            if shouldShowTerminal || terminalAlreadyExists {
+                TerminalContainerView(session: session, server: server, isActive: selectedView == "terminal")
+                    .opacity(selectedView == "terminal" ? 1 : 0)
+                    .allowsHitTesting(selectedView == "terminal")
+            }
 
             // Stats view
             if let server = server {
                 ServerStatsView(server: server, isVisible: selectedView == "stats")
                     .opacity(selectedView == "stats" ? 1 : 0)
                     .allowsHitTesting(selectedView == "stats")
+            }
+
+            // Loading indicator when switching to terminal for the first time
+            if selectedView == "terminal" && !shouldShowTerminal && !terminalAlreadyExists {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(1.2)
+            }
+        }
+        .onChange(of: selectedView) { _, newValue in
+            if newValue == "terminal" {
+                if !shouldShowTerminal && !terminalAlreadyExists {
+                    // Delay terminal creation to allow tab animation to complete
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        shouldShowTerminal = true
+                    }
+                } else {
+                    // Terminal already exists - refresh it when switching back
+                    refreshTerminal()
+                }
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -311,6 +370,28 @@ struct iOSTerminalView: View {
             }
         }
         .toolbarBackground(.visible, for: .navigationBar)
+    }
+
+    /// Refresh terminal display and trigger server redraw
+    private func refreshTerminal() {
+        guard let terminal = ConnectionSessionManager.shared.getTerminal(for: session.id) else { return }
+
+        // Resume rendering if paused
+        terminal.resumeRendering()
+
+        // Force refresh display
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            terminal.forceRefresh()
+
+            // Send resize to force server to redraw prompt
+            if let sshClient = ConnectionSessionManager.shared.sshClient(for: session) {
+                Task {
+                    if let size = await terminal.terminalSize() {
+                        try? await sshClient.resize(cols: Int(size.columns), rows: Int(size.rows))
+                    }
+                }
+            }
+        }
     }
 }
 #endif
