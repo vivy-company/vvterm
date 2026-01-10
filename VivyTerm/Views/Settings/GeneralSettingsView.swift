@@ -184,7 +184,7 @@ struct GeneralSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: appLanguage) { _, newValue in
+        .onChange(of: appLanguage) { newValue in
             AppLanguage.applySelection(newValue)
         }
     }

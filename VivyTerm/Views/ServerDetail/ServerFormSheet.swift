@@ -92,10 +92,14 @@ struct ServerFormSheet: View {
                 // Basic Info
                 Section("Server Info") {
                     TextField("Name", text: $name)
+                        #if os(iOS)
                         .textContentType(.name)
+                        #endif
 
                     TextField("Host", text: $host)
+                        #if os(iOS)
                         .textContentType(.URL)
+                        #endif
                         .autocorrectionDisabled()
                         #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -108,7 +112,9 @@ struct ServerFormSheet: View {
                         #endif
 
                     TextField("Username", text: $username)
+                        #if os(iOS)
                         .textContentType(.username)
+                        #endif
                         .autocorrectionDisabled()
                         #if os(iOS)
                         .textInputAutocapitalization(.never)
@@ -127,7 +133,9 @@ struct ServerFormSheet: View {
                     switch authMethod {
                     case .password:
                         SecureField("Password", text: $password)
+                            #if os(iOS)
                             .textContentType(.password)
+                            #endif
 
                     case .sshKey:
                         keyInputView
@@ -264,7 +272,7 @@ struct ServerFormSheet: View {
                     .tag(key as SSHKeyEntry?)
                 }
             }
-            .onChange(of: selectedStoredKey) { _, newKey in
+            .onChange(of: selectedStoredKey) { newKey in
                 if let key = newKey {
                     loadStoredKey(key)
                 }
