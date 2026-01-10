@@ -69,9 +69,27 @@ class GhosttyTerminalView: UIView {
             target: self,
             action: #selector(handleSelectionPress(_:))
         )
-        recognizer.minimumPressDuration = 0.35
-        recognizer.allowableMovement = 12
+        recognizer.minimumPressDuration = 0.2
+        recognizer.allowableMovement = 8
         recognizer.cancelsTouchesInView = true
+        return recognizer
+    }()
+
+    private lazy var doubleTapRecognizer: UITapGestureRecognizer = {
+        let recognizer = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleDoubleTap(_:))
+        )
+        recognizer.numberOfTapsRequired = 2
+        return recognizer
+    }()
+
+    private lazy var tripleTapRecognizer: UITapGestureRecognizer = {
+        let recognizer = UITapGestureRecognizer(
+            target: self,
+            action: #selector(handleTripleTap(_:))
+        )
+        recognizer.numberOfTapsRequired = 3
         return recognizer
     }()
 
@@ -176,8 +194,16 @@ class GhosttyTerminalView: UIView {
         // Setup gesture recognizers with delegate for simultaneous recognition
         selectionRecognizer.delegate = self
         scrollRecognizer.delegate = self
+        doubleTapRecognizer.delegate = self
+        tripleTapRecognizer.delegate = self
+
+        // Triple tap should require double tap to fail first
+        doubleTapRecognizer.require(toFail: tripleTapRecognizer)
+
         addGestureRecognizer(selectionRecognizer)
         addGestureRecognizer(scrollRecognizer)
+        addGestureRecognizer(doubleTapRecognizer)
+        addGestureRecognizer(tripleTapRecognizer)
         isUserInteractionEnabled = true
 
         // Setup edit menu interaction for copy/paste
@@ -209,6 +235,7 @@ class GhosttyTerminalView: UIView {
         isShuttingDown = true
         isPaused = true
         stopDisplayLink()
+        stopMomentumScrolling()
 
         // Remove config reload observer
         if let observer = configReloadObserver {
@@ -499,6 +526,19 @@ class GhosttyTerminalView: UIView {
 
     // MARK: - Scroll Gesture
 
+    /// Scroll speed multiplier for iOS touch scrolling
+    private static let scrollMultiplier: Double = 1.5
+
+    /// Momentum deceleration rate (0.0-1.0, higher = slower deceleration)
+    private static let momentumDeceleration: Double = 0.92
+
+    /// Minimum velocity to trigger momentum scrolling
+    private static let minimumMomentumVelocity: Double = 50.0
+
+    /// Display link for momentum animation
+    private var momentumDisplayLink: CADisplayLink?
+    private var momentumVelocity: CGPoint = .zero
+
     @objc private func handlePanGesture(_ recognizer: UIPanGestureRecognizer) {
         guard let surface = surface else { return }
         if isSelecting { return }
@@ -508,12 +548,12 @@ class GhosttyTerminalView: UIView {
         switch recognizer.state {
         case .began:
             isScrolling = true
+            stopMomentumScrolling()
         case .changed:
-            // Send scroll delta directly (like macOS trackpad)
-            // Multiply by 2 for better scroll speed (matches macOS precision multiplier)
+            // Send scroll delta directly with increased multiplier for snappy feel
             let scrollEvent = Ghostty.Input.MouseScrollEvent(
-                x: Double(translation.x) * 2,
-                y: Double(translation.y) * 2,
+                x: Double(translation.x) * Self.scrollMultiplier,
+                y: Double(translation.y) * Self.scrollMultiplier,
                 mods: Ghostty.Input.ScrollMods(precision: true, momentum: .changed)
             )
             surface.sendMouseScroll(scrollEvent)
@@ -523,39 +563,145 @@ class GhosttyTerminalView: UIView {
             recognizer.setTranslation(.zero, in: self)
         case .ended:
             isScrolling = false
-            // Send momentum end
-            let endEvent = Ghostty.Input.MouseScrollEvent(
-                x: 0,
-                y: 0,
-                mods: Ghostty.Input.ScrollMods(precision: true, momentum: .ended)
-            )
-            surface.sendMouseScroll(endEvent)
+            // Get velocity for momentum scrolling
+            let velocity = recognizer.velocity(in: self)
+            startMomentumScrolling(velocity: velocity)
         case .cancelled, .failed:
             isScrolling = false
+            stopMomentumScrolling()
         default:
             break
         }
     }
 
+    private func startMomentumScrolling(velocity: CGPoint) {
+        // Only start momentum if velocity is significant
+        guard abs(velocity.y) > Self.minimumMomentumVelocity || abs(velocity.x) > Self.minimumMomentumVelocity else {
+            sendMomentumEnd()
+            return
+        }
+
+        // Scale velocity for momentum (divide by 60 for per-frame amount at 60fps)
+        momentumVelocity = CGPoint(
+            x: velocity.x / 60.0 * Self.scrollMultiplier * 0.5,
+            y: velocity.y / 60.0 * Self.scrollMultiplier * 0.5
+        )
+
+        // Create display link for smooth animation
+        momentumDisplayLink = CADisplayLink(target: self, selector: #selector(momentumScrollTick))
+        momentumDisplayLink?.add(to: .main, forMode: .common)
+    }
+
+    @objc private func momentumScrollTick() {
+        guard let surface = surface else {
+            stopMomentumScrolling()
+            return
+        }
+
+        // Apply deceleration
+        momentumVelocity.x *= Self.momentumDeceleration
+        momentumVelocity.y *= Self.momentumDeceleration
+
+        // Stop if velocity is very low
+        if abs(momentumVelocity.x) < 0.5 && abs(momentumVelocity.y) < 0.5 {
+            stopMomentumScrolling()
+            sendMomentumEnd()
+            return
+        }
+
+        // Send momentum scroll event
+        let scrollEvent = Ghostty.Input.MouseScrollEvent(
+            x: Double(momentumVelocity.x),
+            y: Double(momentumVelocity.y),
+            mods: Ghostty.Input.ScrollMods(precision: true, momentum: .changed)
+        )
+        surface.sendMouseScroll(scrollEvent)
+        requestRender()
+    }
+
+    private func stopMomentumScrolling() {
+        momentumDisplayLink?.invalidate()
+        momentumDisplayLink = nil
+        momentumVelocity = .zero
+    }
+
+    private func sendMomentumEnd() {
+        guard let surface = surface else { return }
+        let endEvent = Ghostty.Input.MouseScrollEvent(
+            x: 0,
+            y: 0,
+            mods: Ghostty.Input.ScrollMods(precision: true, momentum: .ended)
+        )
+        surface.sendMouseScroll(endEvent)
+    }
+
+    // MARK: - Selection Gestures
+
+    /// Double-tap to select word
+    @objc private func handleDoubleTap(_ recognizer: UITapGestureRecognizer) {
+        guard let surface = surface else { return }
+        let location = recognizer.location(in: self)
+        let pos = ghosttyPoint(location)
+
+        _ = becomeFirstResponder()
+
+        // Double-click to select word (no modifiers)
+        surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
+        surface.sendMouseButton(.init(action: .press, button: .left, mods: []))
+        surface.sendMouseButton(.init(action: .release, button: .left, mods: []))
+        surface.sendMouseButton(.init(action: .press, button: .left, mods: []))
+        surface.sendMouseButton(.init(action: .release, button: .left, mods: []))
+        requestRender()
+
+        // Show edit menu after short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.showEditMenu(at: location)
+        }
+    }
+
+    /// Triple-tap to select line
+    @objc private func handleTripleTap(_ recognizer: UITapGestureRecognizer) {
+        guard let surface = surface else { return }
+        let location = recognizer.location(in: self)
+        let pos = ghosttyPoint(location)
+
+        _ = becomeFirstResponder()
+
+        // Triple-click to select line
+        surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
+        for _ in 0..<3 {
+            surface.sendMouseButton(.init(action: .press, button: .left, mods: []))
+            surface.sendMouseButton(.init(action: .release, button: .left, mods: []))
+        }
+        requestRender()
+
+        // Show edit menu after short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+            self?.showEditMenu(at: location)
+        }
+    }
+
+    /// Long press + drag for custom selection
     @objc private func handleSelectionPress(_ recognizer: UILongPressGestureRecognizer) {
         guard let surface = surface else { return }
         let location = recognizer.location(in: self)
         let pos = ghosttyPoint(location)
-        let mods: Ghostty.Input.Mods = .shift
 
         switch recognizer.state {
         case .began:
             isSelecting = true
             _ = becomeFirstResponder()
-            surface.sendMouseButton(.init(action: .press, button: .left, mods: mods))
-            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: mods))
+            // Start selection with click (no shift for initial position)
+            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
+            surface.sendMouseButton(.init(action: .press, button: .left, mods: []))
             requestRender()
         case .changed:
-            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: mods))
+            // Drag to extend selection
+            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
             requestRender()
         case .ended, .cancelled, .failed:
-            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: mods))
-            surface.sendMouseButton(.init(action: .release, button: .left, mods: mods))
+            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
+            surface.sendMouseButton(.init(action: .release, button: .left, mods: []))
             isSelecting = false
             requestRender()
             showEditMenu(at: location)
@@ -831,6 +977,80 @@ extension GhosttyTerminalView: UIEditMenuInteractionDelegate {
     }
 }
 
+// MARK: - Terminal Key Enum
+
+indirect enum TerminalKey {
+    case escape, tab, enter, backspace, delete, insert
+    case arrowUp, arrowDown, arrowLeft, arrowRight
+    case home, end, pageUp, pageDown
+    case f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12
+    case ctrlC, ctrlD, ctrlZ, ctrlL, ctrlA, ctrlE, ctrlK, ctrlU
+    case ctrl(TerminalKey), alt(TerminalKey), ctrlAlt(TerminalKey)
+
+    func withCtrl() -> TerminalKey {
+        switch self {
+        case .ctrl, .alt, .ctrlAlt: return self
+        default: return .ctrl(self)
+        }
+    }
+
+    func withAlt() -> TerminalKey {
+        switch self {
+        case .ctrl(let key): return .ctrlAlt(key)
+        case .alt, .ctrlAlt: return self
+        default: return .alt(self)
+        }
+    }
+
+    var ansiSequence: Data {
+        switch self {
+        case .escape: return Data([0x1B])
+        case .tab: return Data([0x09])
+        case .enter: return Data([0x0D])
+        case .backspace: return Data([0x7F])
+        case .delete: return "\u{1B}[3~".data(using: .utf8)!
+        case .insert: return "\u{1B}[2~".data(using: .utf8)!
+        case .arrowUp: return "\u{1B}[A".data(using: .utf8)!
+        case .arrowDown: return "\u{1B}[B".data(using: .utf8)!
+        case .arrowRight: return "\u{1B}[C".data(using: .utf8)!
+        case .arrowLeft: return "\u{1B}[D".data(using: .utf8)!
+        case .home: return "\u{1B}[H".data(using: .utf8)!
+        case .end: return "\u{1B}[F".data(using: .utf8)!
+        case .pageUp: return "\u{1B}[5~".data(using: .utf8)!
+        case .pageDown: return "\u{1B}[6~".data(using: .utf8)!
+        case .f1: return "\u{1B}OP".data(using: .utf8)!
+        case .f2: return "\u{1B}OQ".data(using: .utf8)!
+        case .f3: return "\u{1B}OR".data(using: .utf8)!
+        case .f4: return "\u{1B}OS".data(using: .utf8)!
+        case .f5: return "\u{1B}[15~".data(using: .utf8)!
+        case .f6: return "\u{1B}[17~".data(using: .utf8)!
+        case .f7: return "\u{1B}[18~".data(using: .utf8)!
+        case .f8: return "\u{1B}[19~".data(using: .utf8)!
+        case .f9: return "\u{1B}[20~".data(using: .utf8)!
+        case .f10: return "\u{1B}[21~".data(using: .utf8)!
+        case .f11: return "\u{1B}[23~".data(using: .utf8)!
+        case .f12: return "\u{1B}[24~".data(using: .utf8)!
+        case .ctrlC: return Data([0x03])
+        case .ctrlD: return Data([0x04])
+        case .ctrlZ: return Data([0x1A])
+        case .ctrlL: return Data([0x0C])
+        case .ctrlA: return Data([0x01])
+        case .ctrlE: return Data([0x05])
+        case .ctrlK: return Data([0x0B])
+        case .ctrlU: return Data([0x15])
+        case .ctrl(let key): return key.ansiSequence
+        case .alt(let key):
+            var data = Data([0x1B])
+            data.append(key.ansiSequence)
+            return data
+        case .ctrlAlt(let key):
+            var data = Data([0x1B])
+            data.append(key.ansiSequence)
+            return data
+        }
+    }
+}
+
 // MARK: - Keyboard Accessory View
 
 extension GhosttyTerminalView {
@@ -852,29 +1072,88 @@ extension GhosttyTerminalView {
     }
 
     private func handleToolbarKey(_ key: TerminalKey) {
-        let data = key.ansiSequence
-        if let text = String(data: data, encoding: .utf8) {
-            sendText(text)
-        } else {
-            surface?.sendText(String(decoding: data, as: UTF8.self))
+        // Use Ghostty key events for navigation keys (proper terminal escape sequences)
+        switch key {
+        case .escape:
+            sendKeyPress(.escape)
+        case .tab:
+            sendKeyPress(.tab)
+        case .enter:
+            sendKeyPress(.enter)
+        case .backspace:
+            sendKeyPress(.backspace)
+        case .delete:
+            sendKeyPress(.delete)
+        case .insert:
+            sendKeyPress(.insert)
+        case .arrowUp:
+            sendKeyPress(.arrowUp)
+        case .arrowDown:
+            sendKeyPress(.arrowDown)
+        case .arrowLeft:
+            sendKeyPress(.arrowLeft)
+        case .arrowRight:
+            sendKeyPress(.arrowRight)
+        case .home:
+            sendKeyPress(.home)
+        case .end:
+            sendKeyPress(.end)
+        case .pageUp:
+            sendKeyPress(.pageUp)
+        case .pageDown:
+            sendKeyPress(.pageDown)
+        case .f1:
+            sendKeyPress(.f1)
+        case .f2:
+            sendKeyPress(.f2)
+        case .f3:
+            sendKeyPress(.f3)
+        case .f4:
+            sendKeyPress(.f4)
+        case .f5:
+            sendKeyPress(.f5)
+        case .f6:
+            sendKeyPress(.f6)
+        case .f7:
+            sendKeyPress(.f7)
+        case .f8:
+            sendKeyPress(.f8)
+        case .f9:
+            sendKeyPress(.f9)
+        case .f10:
+            sendKeyPress(.f10)
+        case .f11:
+            sendKeyPress(.f11)
+        case .f12:
+            sendKeyPress(.f12)
+        case .ctrlC, .ctrlD, .ctrlZ, .ctrlL, .ctrlA, .ctrlE, .ctrlK, .ctrlU:
+            // Control characters - send as raw bytes
+            let data = key.ansiSequence
+            if let text = String(data: data, encoding: .utf8) {
+                sendText(text)
+            }
+        case .ctrl, .alt, .ctrlAlt:
+            // Modified keys - use ANSI sequence
+            let data = key.ansiSequence
+            if let text = String(data: data, encoding: .utf8) {
+                sendText(text)
+            }
         }
     }
 }
 
-// MARK: - Native UIKit Input Accessory View
+// MARK: - Native UIKit Input Accessory View with Glass Effect
 
-private class TerminalInputAccessoryView: UIView {
+private class TerminalInputAccessoryView: UIInputView {
     private let onKey: (TerminalKey) -> Void
-    private var scrollView: UIScrollView!
-    private var stackView: UIStackView!
     private var ctrlActive = false
     private var altActive = false
-    private var ctrlButton: UIButton?
-    private var altButton: UIButton?
+    private weak var ctrlButton: UIButton?
+    private weak var altButton: UIButton?
 
     init(onKey: @escaping (TerminalKey) -> Void) {
         self.onKey = onKey
-        super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 44))
+        super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 48), inputViewStyle: .keyboard)
         setupView()
     }
 
@@ -883,166 +1162,207 @@ private class TerminalInputAccessoryView: UIView {
     }
 
     private func setupView() {
-        autoresizingMask = [.flexibleWidth]
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
-        // Glass/blur background
-        let blurEffect = UIBlurEffect(style: .systemMaterial)
-        let blurView = UIVisualEffectView(effect: blurEffect)
-        blurView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(blurView)
-        NSLayoutConstraint.activate([
-            blurView.topAnchor.constraint(equalTo: topAnchor),
-            blurView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            blurView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            blurView.trailingAnchor.constraint(equalTo: trailingAnchor)
-        ])
-
-        // Scroll view for horizontal scrolling
-        scrollView = UIScrollView()
+        let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.alwaysBounceHorizontal = true
         addSubview(scrollView)
         NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8)
+            scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
 
-        // Stack view for buttons
-        stackView = UIStackView()
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        stackView.alignment = .center
-        scrollView.addSubview(stackView)
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
+        stack.isLayoutMarginsRelativeArrangement = true
+        scrollView.addSubview(stack)
         NSLayoutConstraint.activate([
-            stackView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            stackView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            stackView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            stackView.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+            stack.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            stack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            stack.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
         ])
 
-        // Add buttons
-        addModifierButtons()
-        addDivider()
-        addKeyButtons()
-        addDivider()
-        addArrowButtons()
-        addDivider()
-        addControlButtons()
-        addDivider()
-        addNavigationButtons()
+        // Modifier buttons (toggle style)
+        let ctrl = makeModifierButton(title: "Ctrl", action: #selector(toggleCtrl))
+        let alt = makeModifierButton(title: "Alt", action: #selector(toggleAlt))
+        ctrlButton = ctrl
+        altButton = alt
+        stack.addArrangedSubview(ctrl)
+        stack.addArrangedSubview(alt)
+        stack.addArrangedSubview(makeSeparator())
+
+        // Control sequences
+        stack.addArrangedSubview(makePillButton(title: "^C", action: #selector(tapCtrlC)))
+        stack.addArrangedSubview(makePillButton(title: "^D", action: #selector(tapCtrlD)))
+        stack.addArrangedSubview(makePillButton(title: "^Z", action: #selector(tapCtrlZ)))
+        stack.addArrangedSubview(makePillButton(title: "^L", action: #selector(tapCtrlL)))
+        stack.addArrangedSubview(makeSeparator())
+
+        // Common keys
+        stack.addArrangedSubview(makePillButton(title: "Esc", action: #selector(tapEsc)))
+        stack.addArrangedSubview(makePillButton(title: "Tab", action: #selector(tapTab)))
+        stack.addArrangedSubview(makeSeparator())
+
+        // Arrow keys
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.up", action: #selector(tapUp)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.down", action: #selector(tapDown)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.left", action: #selector(tapLeft)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.right", action: #selector(tapRight)))
+        stack.addArrangedSubview(makeSeparator())
+
+        // Navigation
+        stack.addArrangedSubview(makePillButton(title: "Home", action: #selector(tapHome)))
+        stack.addArrangedSubview(makePillButton(title: "End", action: #selector(tapEnd)))
+        stack.addArrangedSubview(makePillButton(title: "PgUp", action: #selector(tapPgUp)))
+        stack.addArrangedSubview(makePillButton(title: "PgDn", action: #selector(tapPgDn)))
     }
 
-    private func addModifierButtons() {
-        ctrlButton = createButton(title: "Ctrl", action: #selector(toggleCtrl))
-        altButton = createButton(title: "Alt", action: #selector(toggleAlt))
-        stackView.addArrangedSubview(ctrlButton!)
-        stackView.addArrangedSubview(altButton!)
-    }
-
-    private func addKeyButtons() {
-        stackView.addArrangedSubview(createButton(title: "Esc", action: #selector(tapEsc)))
-        stackView.addArrangedSubview(createButton(icon: "arrow.right.to.line", action: #selector(tapTab)))
-    }
-
-    private func addArrowButtons() {
-        stackView.addArrangedSubview(createButton(icon: "arrow.up", action: #selector(tapUp)))
-        stackView.addArrangedSubview(createButton(icon: "arrow.down", action: #selector(tapDown)))
-        stackView.addArrangedSubview(createButton(icon: "arrow.left", action: #selector(tapLeft)))
-        stackView.addArrangedSubview(createButton(icon: "arrow.right", action: #selector(tapRight)))
-    }
-
-    private func addControlButtons() {
-        stackView.addArrangedSubview(createButton(title: "^C", action: #selector(tapCtrlC)))
-        stackView.addArrangedSubview(createButton(title: "^D", action: #selector(tapCtrlD)))
-        stackView.addArrangedSubview(createButton(title: "^Z", action: #selector(tapCtrlZ)))
-        stackView.addArrangedSubview(createButton(title: "^L", action: #selector(tapCtrlL)))
-    }
-
-    private func addNavigationButtons() {
-        stackView.addArrangedSubview(createButton(title: "Home", action: #selector(tapHome)))
-        stackView.addArrangedSubview(createButton(title: "End", action: #selector(tapEnd)))
-        stackView.addArrangedSubview(createButton(title: "PgUp", action: #selector(tapPgUp)))
-        stackView.addArrangedSubview(createButton(title: "PgDn", action: #selector(tapPgDn)))
-    }
-
-    private func addDivider() {
-        let divider = UIView()
-        divider.backgroundColor = .separator
-        divider.translatesAutoresizingMaskIntoConstraints = false
-        divider.widthAnchor.constraint(equalToConstant: 1).isActive = true
-        divider.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        stackView.addArrangedSubview(divider)
-    }
-
-    private func createButton(title: String? = nil, icon: String? = nil, action: Selector) -> UIButton {
-        var config = UIButton.Configuration.plain()
-        config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 8, bottom: 0, trailing: 8)
-        config.background.backgroundColor = .quaternarySystemFill
-        config.background.cornerRadius = 6
-        config.baseForegroundColor = .label
-
-        if let icon = icon {
-            let symbolConfig = UIImage.SymbolConfiguration(pointSize: 14, weight: .medium)
-            config.image = UIImage(systemName: icon, withConfiguration: symbolConfig)
-        } else if let title = title {
-            config.title = title
-            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                var outgoing = incoming
-                outgoing.font = .monospacedSystemFont(ofSize: 13, weight: .medium)
-                return outgoing
-            }
-        }
-
-        let button = UIButton(configuration: config)
+    private func makePillButton(title: String, action: Selector) -> UIButton {
+        let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle(title, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+        button.setTitleColor(.label, for: .normal)
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.12)
+                : UIColor.black.withAlphaComponent(0.06)
+        }
+        button.layer.cornerRadius = 16
+        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         button.addTarget(self, action: action, for: .touchUpInside)
 
-        let minWidth: CGFloat = title != nil ? 40 : 36
-        button.widthAnchor.constraint(greaterThanOrEqualToConstant: minWidth).isActive = true
-        button.heightAnchor.constraint(equalToConstant: 32).isActive = true
+        NSLayoutConstraint.activate([
+            button.heightAnchor.constraint(equalToConstant: 32)
+        ])
 
         return button
+    }
+
+    private func makeIconButton(icon: String, action: Selector) -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        button.setImage(UIImage(systemName: icon, withConfiguration: config), for: .normal)
+        button.tintColor = .label
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.12)
+                : UIColor.black.withAlphaComponent(0.06)
+        }
+        button.layer.cornerRadius = 16
+        button.addTarget(self, action: action, for: .touchUpInside)
+
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 36),
+            button.heightAnchor.constraint(equalToConstant: 32)
+        ])
+
+        return button
+    }
+
+    private func makeModifierButton(title: String, action: Selector) -> UIButton {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle(title, for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+        button.setTitleColor(.secondaryLabel, for: .normal)
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.08)
+                : UIColor.black.withAlphaComponent(0.04)
+        }
+        button.layer.cornerRadius = 14
+        button.layer.borderWidth = 1
+        button.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
+        button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 10, bottom: 4, right: 10)
+        button.addTarget(self, action: action, for: .touchUpInside)
+
+        NSLayoutConstraint.activate([
+            button.heightAnchor.constraint(equalToConstant: 28)
+        ])
+
+        return button
+    }
+
+    private func makeSeparator() -> UIView {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .separator.withAlphaComponent(0.4)
+        NSLayoutConstraint.activate([
+            view.widthAnchor.constraint(equalToConstant: 1),
+            view.heightAnchor.constraint(equalToConstant: 18)
+        ])
+        return view
     }
 
     private func sendKey(_ key: TerminalKey) {
         var modifiedKey = key
         if ctrlActive {
-            modifiedKey = key.withCtrl()
+            modifiedKey = modifiedKey.withCtrl()
             ctrlActive = false
-            updateModifierButton(ctrlButton, active: false)
+            updateModifierState()
         }
         if altActive {
-            modifiedKey = key.withAlt()
+            modifiedKey = modifiedKey.withAlt()
             altActive = false
-            updateModifierButton(altButton, active: false)
+            updateModifierState()
         }
         onKey(modifiedKey)
     }
 
-    private func updateModifierButton(_ button: UIButton?, active: Bool) {
-        guard var config = button?.configuration else { return }
-        UIView.animate(withDuration: 0.15) {
-            config.background.backgroundColor = active ? .systemBlue : .quaternarySystemFill
-            config.baseForegroundColor = active ? .white : .label
-            button?.configuration = config
+    private func updateModifierState() {
+        UIView.animate(withDuration: 0.2) {
+            // Ctrl button
+            if self.ctrlActive {
+                self.ctrlButton?.backgroundColor = .systemBlue
+                self.ctrlButton?.setTitleColor(.white, for: .normal)
+                self.ctrlButton?.layer.borderColor = UIColor.clear.cgColor
+            } else {
+                self.ctrlButton?.backgroundColor = UIColor { traits in
+                    traits.userInterfaceStyle == .dark
+                        ? UIColor.white.withAlphaComponent(0.08)
+                        : UIColor.black.withAlphaComponent(0.04)
+                }
+                self.ctrlButton?.setTitleColor(.secondaryLabel, for: .normal)
+                self.ctrlButton?.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
+            }
+
+            // Alt button
+            if self.altActive {
+                self.altButton?.backgroundColor = .systemBlue
+                self.altButton?.setTitleColor(.white, for: .normal)
+                self.altButton?.layer.borderColor = UIColor.clear.cgColor
+            } else {
+                self.altButton?.backgroundColor = UIColor { traits in
+                    traits.userInterfaceStyle == .dark
+                        ? UIColor.white.withAlphaComponent(0.08)
+                        : UIColor.black.withAlphaComponent(0.04)
+                }
+                self.altButton?.setTitleColor(.secondaryLabel, for: .normal)
+                self.altButton?.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
+            }
         }
     }
 
-    // MARK: - Button Actions
-
     @objc private func toggleCtrl() {
         ctrlActive.toggle()
-        updateModifierButton(ctrlButton, active: ctrlActive)
+        updateModifierState()
     }
 
     @objc private func toggleAlt() {
         altActive.toggle()
-        updateModifierButton(altButton, active: altActive)
+        updateModifierState()
     }
 
     @objc private func tapEsc() { sendKey(.escape) }

@@ -496,6 +496,62 @@ final class ServerManager: ObservableObject {
         StoreManager.shared.isPro
     }
 
+    // MARK: - Downgrade Locking
+    // When user downgrades from Pro, excess servers/workspaces are locked
+
+    /// Returns sorted servers with oldest (by createdAt) first - these get priority access
+    private var serversSortedByCreation: [Server] {
+        servers.sorted { $0.createdAt < $1.createdAt }
+    }
+
+    /// Returns sorted workspaces with oldest (by order, then createdAt) first
+    private var workspacesSortedByOrder: [Workspace] {
+        workspaces.sorted { $0.order < $1.order }
+    }
+
+    /// Set of server IDs that are accessible on free tier (oldest N servers)
+    var unlockedServerIds: Set<UUID> {
+        if StoreManager.shared.isPro { return Set(servers.map(\.id)) }
+        let unlocked = serversSortedByCreation.prefix(FreeTierLimits.maxServers)
+        return Set(unlocked.map(\.id))
+    }
+
+    /// Set of workspace IDs that are accessible on free tier (first N workspaces by order)
+    var unlockedWorkspaceIds: Set<UUID> {
+        if StoreManager.shared.isPro { return Set(workspaces.map(\.id)) }
+        let unlocked = workspacesSortedByOrder.prefix(FreeTierLimits.maxWorkspaces)
+        return Set(unlocked.map(\.id))
+    }
+
+    /// Check if a specific server is locked (over free tier limit)
+    func isServerLocked(_ server: Server) -> Bool {
+        if StoreManager.shared.isPro { return false }
+        return !unlockedServerIds.contains(server.id)
+    }
+
+    /// Check if a specific workspace is locked (over free tier limit)
+    func isWorkspaceLocked(_ workspace: Workspace) -> Bool {
+        if StoreManager.shared.isPro { return false }
+        return !unlockedWorkspaceIds.contains(workspace.id)
+    }
+
+    /// Number of servers that are locked due to downgrade
+    var lockedServersCount: Int {
+        if StoreManager.shared.isPro { return 0 }
+        return max(0, servers.count - FreeTierLimits.maxServers)
+    }
+
+    /// Number of workspaces that are locked due to downgrade
+    var lockedWorkspacesCount: Int {
+        if StoreManager.shared.isPro { return 0 }
+        return max(0, workspaces.count - FreeTierLimits.maxWorkspaces)
+    }
+
+    /// Whether user has any locked items after downgrade
+    var hasLockedItems: Bool {
+        lockedServersCount > 0 || lockedWorkspacesCount > 0
+    }
+
     func createCustomEnvironment(name: String, color: String) throws -> ServerEnvironment {
         guard canCreateCustomEnvironment else {
             throw VivyTermError.proRequired("Upgrade to Pro for custom environments")
@@ -522,6 +578,8 @@ enum FreeTierLimits {
 
 enum VivyTermError: LocalizedError {
     case proRequired(String)
+    case serverLocked(String)
+    case workspaceLocked(String)
     case connectionFailed(String)
     case authenticationFailed
     case timeout
@@ -529,9 +587,18 @@ enum VivyTermError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .proRequired(let message): return message
+        case .serverLocked(let serverName): return "Server '\(serverName)' is locked"
+        case .workspaceLocked(let workspaceName): return "Workspace '\(workspaceName)' is locked"
         case .connectionFailed(let message): return "Connection failed: \(message)"
         case .authenticationFailed: return "Authentication failed"
         case .timeout: return "Connection timed out"
+        }
+    }
+
+    var isLockedError: Bool {
+        switch self {
+        case .serverLocked, .workspaceLocked: return true
+        default: return false
         }
     }
 }

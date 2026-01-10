@@ -82,6 +82,11 @@ final class ConnectionSessionManager: ObservableObject {
     ///   - server: The server to connect to
     ///   - forceNew: If true, always creates a new tab even if one exists for this server
     func openConnection(to server: Server, forceNew: Bool = false) async throws -> ConnectionSession {
+        // Check if server is locked due to downgrade
+        if ServerManager.shared.isServerLocked(server) {
+            throw VivyTermError.serverLocked(server.name)
+        }
+
         guard canOpenNewTab else {
             throw VivyTermError.proRequired("Upgrade to Pro for multiple connections")
         }

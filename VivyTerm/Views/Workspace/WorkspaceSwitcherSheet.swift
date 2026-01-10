@@ -10,6 +10,7 @@ struct WorkspaceSwitcherSheet: View {
     @State private var hoveredWorkspace: Workspace?
     @State private var showingCreateWorkspace = false
     @State private var workspaceToEdit: Workspace?
+    @State private var lockedWorkspaceAlert: Workspace?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,6 +36,7 @@ struct WorkspaceSwitcherSheet: View {
                             workspace: workspace,
                             isSelected: selectedWorkspace?.id == workspace.id,
                             isHovered: hoveredWorkspace?.id == workspace.id,
+                            isLocked: serverManager.isWorkspaceLocked(workspace),
                             serverCount: serverCount(for: workspace),
                             onSelect: {
                                 selectedWorkspace = workspace
@@ -42,6 +44,9 @@ struct WorkspaceSwitcherSheet: View {
                             },
                             onEdit: {
                                 workspaceToEdit = workspace
+                            },
+                            onLockedTap: {
+                                lockedWorkspaceAlert = workspace
                             }
                         )
                         .onHover { hovering in
@@ -88,6 +93,14 @@ struct WorkspaceSwitcherSheet: View {
                 }
             )
         }
+        .lockedItemAlert(
+            .workspace,
+            itemName: lockedWorkspaceAlert?.name ?? "",
+            isPresented: Binding(
+                get: { lockedWorkspaceAlert != nil },
+                set: { if !$0 { lockedWorkspaceAlert = nil } }
+            )
+        )
     }
 
     private func serverCount(for workspace: Workspace) -> Int {
@@ -101,66 +114,92 @@ struct WorkspaceSwitcherRow: View {
     let workspace: Workspace
     let isSelected: Bool
     let isHovered: Bool
+    var isLocked: Bool = false
     let serverCount: Int
     let onSelect: () -> Void
     let onEdit: () -> Void
+    var onLockedTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 12) {
             // Icon or color indicator
-            Circle()
-                .fill(Color.fromHex(workspace.colorHex))
-                .frame(width: 8, height: 8)
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 8)
+            } else {
+                Circle()
+                    .fill(Color.fromHex(workspace.colorHex))
+                    .frame(width: 8, height: 8)
+            }
 
             Text(workspace.name)
                 .font(.body)
                 .fontWeight(isSelected ? .semibold : .regular)
-                .foregroundStyle(isSelected ? Color.accentColor : .primary)
+                .foregroundStyle(isLocked ? .secondary : (isSelected ? Color.accentColor : .primary))
                 .lineLimit(1)
 
             Spacer(minLength: 8)
 
-            PillBadge(text: "\(serverCount)", color: .secondary)
+            if isLocked {
+                LockedBadge()
+            } else {
+                PillBadge(text: "\(serverCount)", color: .secondary)
 
-            if isHovered || isSelected {
-                Button {
-                    onEdit()
-                } label: {
-                    Image(systemName: "pencil.circle.fill")
-                        .foregroundStyle(.secondary)
-                        .imageScale(.medium)
+                if isHovered || isSelected {
+                    Button {
+                        onEdit()
+                    } label: {
+                        Image(systemName: "pencil.circle.fill")
+                            .foregroundStyle(.secondary)
+                            .imageScale(.medium)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(isSelected ? Color.primary.opacity(0.08) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
         .contentShape(Rectangle())
+        .opacity(isLocked ? 0.7 : 1.0)
         .onTapGesture {
-            onSelect()
+            if isLocked {
+                onLockedTap?()
+            } else {
+                onSelect()
+            }
         }
         .contextMenu {
-            Button {
-                onSelect()
-            } label: {
-                Label("Switch to Workspace", systemImage: "arrow.right.circle")
-            }
-
-            Divider()
-
-            Button {
-                onEdit()
-            } label: {
-                Label("Edit Workspace", systemImage: "pencil")
-            }
-
-            Button(role: .destructive) {
-                Task {
-                    try? await ServerManager.shared.deleteWorkspace(workspace)
+            if isLocked {
+                Button {
+                    onLockedTap?()
+                } label: {
+                    Label("Unlock with Pro", systemImage: "lock.open.fill")
                 }
-            } label: {
-                Label("Delete Workspace", systemImage: "trash")
+            } else {
+                Button {
+                    onSelect()
+                } label: {
+                    Label("Switch to Workspace", systemImage: "arrow.right.circle")
+                }
+
+                Divider()
+
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Edit Workspace", systemImage: "pencil")
+                }
+
+                Button(role: .destructive) {
+                    Task {
+                        try? await ServerManager.shared.deleteWorkspace(workspace)
+                    }
+                } label: {
+                    Label("Delete Workspace", systemImage: "trash")
+                }
             }
         }
     }

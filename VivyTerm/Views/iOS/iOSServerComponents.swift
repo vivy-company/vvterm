@@ -12,21 +12,42 @@ struct iOSServerRow: View {
     let server: Server
     let onTap: () -> Void
     let onEdit: () -> Void
+    var onLockedTap: (() -> Void)? = nil
+
+    @ObservedObject private var serverManager = ServerManager.shared
+
+    private var isLocked: Bool {
+        serverManager.isServerLocked(server)
+    }
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: {
+            if isLocked {
+                onLockedTap?()
+            } else {
+                onTap()
+            }
+        }) {
             HStack(spacing: 12) {
-                // Server icon
-                Image(systemName: "server.rack")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 32)
+                // Server icon or lock icon
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 32)
+                } else {
+                    Image(systemName: "server.rack")
+                        .font(.title2)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 32)
+                }
 
                 // Server info
                 VStack(alignment: .leading, spacing: 2) {
                     Text(server.name)
                         .font(.body)
                         .fontWeight(.medium)
+                        .foregroundStyle(isLocked ? .secondary : .primary)
 
                     Text("\(server.username)@\(server.host):\(server.port)")
                         .font(.caption)
@@ -35,32 +56,53 @@ struct iOSServerRow: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                if isLocked {
+                    LockedBadge()
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
             .contentShape(Rectangle())
+            .opacity(isLocked ? 0.7 : 1.0)
         }
         .buttonStyle(.plain)
-        .swipeActions(edge: .leading, allowsFullSwipe: false) {
-            Button {
-                onEdit()
-            } label: {
-                Label("Edit", systemImage: "pencil")
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            if !isLocked {
+                Button(role: .destructive) {
+                    Task { try? await ServerManager.shared.deleteServer(server) }
+                } label: {
+                    Label("Remove", systemImage: "trash")
+                }
+
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+                .tint(.orange)
             }
-            .tint(.orange)
         }
         .contextMenu {
-            Button {
-                onTap()
-            } label: {
-                Label("Connect", systemImage: "play.fill")
-            }
+            if isLocked {
+                Button {
+                    onLockedTap?()
+                } label: {
+                    Label("Unlock with Pro", systemImage: "lock.open.fill")
+                }
+            } else {
+                Button {
+                    onTap()
+                } label: {
+                    Label("Connect", systemImage: "play.fill")
+                }
 
-            Button {
-                onEdit()
-            } label: {
-                Label("Edit", systemImage: "pencil")
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
             }
         }
     }
@@ -126,32 +168,52 @@ struct iOSWorkspacePickerView: View {
     @Binding var selectedWorkspace: Workspace?
     let onDismiss: () -> Void
 
+    @State private var lockedWorkspaceAlert: Workspace?
+
     var body: some View {
         List {
             ForEach(serverManager.workspaces) { workspace in
+                let isLocked = serverManager.isWorkspaceLocked(workspace)
+
                 Button {
-                    selectedWorkspace = workspace
-                    onDismiss()
+                    if isLocked {
+                        lockedWorkspaceAlert = workspace
+                    } else {
+                        selectedWorkspace = workspace
+                        onDismiss()
+                    }
                 } label: {
                     HStack {
-                        Circle()
-                            .fill(Color.fromHex(workspace.colorHex))
-                            .frame(width: 12, height: 12)
+                        if isLocked {
+                            Image(systemName: "lock.fill")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .frame(width: 12)
+                        } else {
+                            Circle()
+                                .fill(Color.fromHex(workspace.colorHex))
+                                .frame(width: 12, height: 12)
+                        }
 
                         Text(workspace.name)
-                            .foregroundStyle(.primary)
+                            .foregroundStyle(isLocked ? .secondary : .primary)
 
                         Spacer()
 
-                        if selectedWorkspace?.id == workspace.id {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.blue)
-                        }
+                        if isLocked {
+                            LockedBadge()
+                        } else {
+                            if selectedWorkspace?.id == workspace.id {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.blue)
+                            }
 
-                        Text("\(serverManager.servers(in: workspace, environment: nil).count)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            Text("\(serverManager.servers(in: workspace, environment: nil).count)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
+                    .opacity(isLocked ? 0.7 : 1.0)
                 }
             }
         }
@@ -162,6 +224,14 @@ struct iOSWorkspacePickerView: View {
                 Button("Done") { onDismiss() }
             }
         }
+        .lockedItemAlert(
+            .workspace,
+            itemName: lockedWorkspaceAlert?.name ?? "",
+            isPresented: Binding(
+                get: { lockedWorkspaceAlert != nil },
+                set: { if !$0 { lockedWorkspaceAlert = nil } }
+            )
+        )
     }
 }
 #endif

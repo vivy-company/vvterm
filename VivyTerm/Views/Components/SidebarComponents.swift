@@ -7,21 +7,35 @@ struct ServerRow: View {
     let isSelected: Bool
     let onEdit: (Server) -> Void
     let onSelect: () -> Void
+    var onLockedTap: (() -> Void)? = nil
 
     @ObservedObject private var tabManager = TerminalTabManager.shared
+    @ObservedObject private var serverManager = ServerManager.shared
+
+    private var isLocked: Bool {
+        serverManager.isServerLocked(server)
+    }
 
     var body: some View {
         HStack(spacing: 12) {
-            // Status indicator
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
+            // Status indicator or lock icon
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 8)
+            } else {
+                Circle()
+                    .fill(statusColor)
+                    .frame(width: 8, height: 8)
+            }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(server.name)
                     .font(.body)
                     .fontWeight(isSelected ? .semibold : .regular)
                     .lineLimit(1)
+                    .foregroundStyle(isLocked ? .secondary : .primary)
 
                 Text(server.host)
                     .font(.caption)
@@ -31,32 +45,49 @@ struct ServerRow: View {
 
             Spacer()
 
-            // Environment badge
-            Text(server.environment.shortName)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundStyle(server.environment.color)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(server.environment.color.opacity(0.15), in: Capsule())
+            if isLocked {
+                LockedBadge()
+            } else {
+                // Environment badge
+                Text(server.environment.shortName)
+                    .font(.caption2)
+                    .fontWeight(.medium)
+                    .foregroundStyle(server.environment.color)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(server.environment.color.opacity(0.15), in: Capsule())
+            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .background(selectionBackground)
         .contentShape(Rectangle())
+        .opacity(isLocked ? 0.7 : 1.0)
         .onTapGesture {
-            onSelect()
+            if isLocked {
+                onLockedTap?()
+            } else {
+                onSelect()
+            }
         }
         .contextMenu {
-            Button("Connect") {
-                tabManager.connectedServerIds.insert(server.id)
-            }
-            Button("Edit") {
-                onEdit(server)
-            }
-            Divider()
-            Button("Remove", role: .destructive) {
-                Task { try? await ServerManager.shared.deleteServer(server) }
+            if isLocked {
+                Button {
+                    onLockedTap?()
+                } label: {
+                    Label("Unlock with Pro", systemImage: "lock.open.fill")
+                }
+            } else {
+                Button("Connect") {
+                    tabManager.connectedServerIds.insert(server.id)
+                }
+                Button("Edit") {
+                    onEdit(server)
+                }
+                Divider()
+                Button("Remove", role: .destructive) {
+                    Task { try? await ServerManager.shared.deleteServer(server) }
+                }
             }
         }
     }

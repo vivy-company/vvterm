@@ -13,96 +13,95 @@ struct ProSettingsView: View {
     @State private var showingManageSubscription = false
 
     var body: some View {
-        VStack(spacing: 0) {
+        Form {
             // Upgrade banner (only when not Pro)
             if !storeManager.isPro {
-                upgradeBanner
-                    .padding(.horizontal, 18)
-                    .padding(.top, 10)
-                    .padding(.bottom, 4)
+                Section {
+                    upgradeBanner
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
             }
 
-            Form {
-                Section("Status") {
-                    HStack {
-                        Text("Subscription")
-                        Spacer()
-                        statusBadge
-                    }
-
-                    if storeManager.isPro {
-                        HStack {
-                            Text("Plan")
-                            Spacer()
-                            Text(planName)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        if let renewalDate = storeManager.subscriptionExpirationDate {
-                            HStack {
-                                Text(storeManager.isLifetime ? "Purchased" : "Renews")
-                                Spacer()
-                                Text(renewalDate, style: .date)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    } else {
-                        // Show usage for free tier
-                        HStack {
-                            Text("Servers")
-                            Spacer()
-                            Text("\(serverManager.servers.count) of \(FreeTierLimits.maxServers) used")
-                                .foregroundStyle(.secondary)
-                        }
-
-                        HStack {
-                            Text("Workspaces")
-                            Spacer()
-                            Text("\(serverManager.workspaces.count) of \(FreeTierLimits.maxWorkspaces) used")
-                                .foregroundStyle(.secondary)
-                        }
-
-                        HStack {
-                            Text("Simultaneous Connections")
-                            Spacer()
-                            Text("\(FreeTierLimits.maxTabs) max")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+            Section("Status") {
+                HStack {
+                    Text("Subscription")
+                    Spacer()
+                    statusBadge
                 }
 
                 if storeManager.isPro {
-                    Section("Features") {
-                        featureRow(icon: "server.rack", title: "Unlimited Servers", enabled: true)
-                        featureRow(icon: "folder", title: "Unlimited Workspaces", enabled: true)
-                        featureRow(icon: "rectangle.stack", title: "Multiple Connections", enabled: true)
-                        featureRow(icon: "paintbrush", title: "Custom Environments", enabled: true)
-                        featureRow(icon: "icloud", title: "iCloud Sync", enabled: true)
+                    HStack {
+                        Text("Plan")
+                        Spacer()
+                        Text(planName)
+                            .foregroundStyle(.secondary)
                     }
-                }
 
-                if storeManager.isPro && !storeManager.isLifetime {
-                    Section("Billing") {
-                        Button("Manage Subscription") {
-                            #if os(iOS)
-                            showingManageSubscription = true
-                            #else
-                            if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                                NSWorkspace.shared.open(url)
-                            }
-                            #endif
+                    if let renewalDate = storeManager.subscriptionExpirationDate {
+                        HStack {
+                            Text(storeManager.isLifetime ? "Purchased" : "Renews")
+                            Spacer()
+                            Text(renewalDate, style: .date)
+                                .foregroundStyle(.secondary)
                         }
                     }
-                }
+                } else {
+                    // Show usage for free tier
+                    HStack {
+                        Text("Servers")
+                        Spacer()
+                        Text("\(serverManager.servers.count) of \(FreeTierLimits.maxServers) used")
+                            .foregroundStyle(.secondary)
+                    }
 
-                Section {
-                    Button("Restore Purchases") {
-                        Task { await storeManager.restorePurchases() }
+                    HStack {
+                        Text("Workspaces")
+                        Spacer()
+                        Text("\(serverManager.workspaces.count) of \(FreeTierLimits.maxWorkspaces) used")
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Text("Simultaneous Connections")
+                        Spacer()
+                        Text("\(FreeTierLimits.maxTabs) max")
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
-            .formStyle(.grouped)
+
+            if storeManager.isPro {
+                Section("Features") {
+                    featureRow(icon: "server.rack", title: "Unlimited Servers", enabled: true)
+                    featureRow(icon: "folder", title: "Unlimited Workspaces", enabled: true)
+                    featureRow(icon: "rectangle.stack", title: "Multiple Connections", enabled: true)
+                    featureRow(icon: "paintbrush", title: "Custom Environments", enabled: true)
+                    featureRow(icon: "icloud", title: "iCloud Sync", enabled: true)
+                }
+            }
+
+            if storeManager.isPro && !storeManager.isLifetime {
+                Section("Billing") {
+                    Button("Manage Subscription") {
+                        #if os(iOS)
+                        showingManageSubscription = true
+                        #else
+                        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                            NSWorkspace.shared.open(url)
+                        }
+                        #endif
+                    }
+                }
+            }
+
+            Section {
+                Button("Restore Purchases") {
+                    Task { await storeManager.restorePurchases() }
+                }
+            }
         }
+        .formStyle(.grouped)
         .sheet(isPresented: $showingPlans) {
             ProUpgradeSheet()
         }

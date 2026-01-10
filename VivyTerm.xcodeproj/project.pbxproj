@@ -339,7 +339,6 @@
 				INFOPLIST_FILE = VivyTerm/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
 				INFOPLIST_KEY_CFBundleName = VVTerm;
-				ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VVTerm needs microphone access to transcribe voice commands to terminal input.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VVTerm uses speech recognition to convert voice to terminal commands.";
@@ -354,6 +353,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
@@ -472,7 +472,6 @@
 				INFOPLIST_FILE = VivyTerm/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = VVTerm;
 				INFOPLIST_KEY_CFBundleName = VVTerm;
-				ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "VVTerm needs microphone access to transcribe voice commands to terminal input.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "VVTerm uses speech recognition to convert voice to terminal commands.";
@@ -487,6 +486,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				ITSAppUsesNonExemptEncryption = NO;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (

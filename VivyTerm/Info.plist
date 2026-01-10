@@ -6,5 +6,12 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>JetBrainsMonoNerdFont-Regular.ttf</string>
+		<string>HackNerdFont-Regular.ttf</string>
+		<string>FiraCodeNerdFont-Regular.ttf</string>
+		<string>MesloLGSNerdFont-Regular.ttf</string>
+	</array>
 </dict>
 </plist>

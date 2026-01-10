@@ -13,19 +13,50 @@ struct ProUpgradeSheet: View {
 
     private var features: [(icon: String, title: String, description: String, color: Color)] {
         [
-            ("server.rack", "Unlimited Servers & Workspaces", "Connect to as many servers as you need", .pink),
-            ("icloud", "iCloud Sync", "Sync servers across all your Apple devices", .pink),
-            ("star", "All Future Features", "Get access to all new features", .orange)
+            ("server.rack", "Unlimited Servers", "Add as many servers as you need (free: 3)", .pink),
+            ("folder", "Unlimited Workspaces", "Organize servers into multiple workspaces (free: 1)", .pink),
+            ("square.on.square", "Multiple Connections", "Open multiple terminal tabs at once (free: 1)", .orange),
+            ("tag", "Custom Environments", "Create custom environment labels beyond Prod/Staging/Dev", .orange),
+            ("star", "All Future Features", "Get access to every new Pro feature", .yellow)
         ]
     }
 
     var body: some View {
+        #if os(iOS)
+        NavigationStack {
+            sheetContent
+                .navigationTitle("VVTerm Pro")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title2)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+        }
+        #else
+        sheetContent
+        #endif
+    }
+
+    private var sheetContent: some View {
         VStack(spacing: 0) {
-            // Header with close button
+            #if os(macOS)
+            // Header with close button (macOS only)
             header
                 .padding(.horizontal, 20)
                 .padding(.top, 20)
                 .padding(.bottom, 16)
+            #else
+            // iOS: Add some top padding since NavigationStack provides the header
+            Spacer().frame(height: 8)
+            #endif
 
             // Features
             featuresSection
@@ -118,9 +149,15 @@ struct ProUpgradeSheet: View {
             legalFooter
                 .padding(.horizontal, 20)
                 .padding(.bottom, 20)
+
+            #if os(iOS)
+            Spacer()
+            #endif
         }
+        #if os(macOS)
         .frame(width: 420)
         .fixedSize(horizontal: false, vertical: true)
+        #endif
         .task {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
@@ -214,33 +251,35 @@ struct ProUpgradeSheet: View {
     // MARK: - Features Section
 
     private var featuresSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 20) {
             ForEach(features, id: \.title) { feature in
-                HStack(spacing: 12) {
+                HStack(spacing: 16) {
                     Image(systemName: feature.icon)
-                        .font(.system(size: 16))
+                        .font(.system(size: 22, weight: .medium))
                         .foregroundStyle(feature.color)
-                        .frame(width: 22, height: 22)
+                        .frame(width: 32, height: 32)
 
-                    VStack(alignment: .leading, spacing: 1) {
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(feature.title)
-                            .font(.subheadline)
-                            .fontWeight(.medium)
+                            .font(.body)
+                            .fontWeight(.semibold)
                         Text(feature.description)
-                            .font(.caption)
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
+
+                    Spacer()
                 }
             }
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .frame(maxWidth: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .fill(Color.primary.opacity(0.04))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
                 .stroke(Color.primary.opacity(0.08), lineWidth: 1)
         )
     }
