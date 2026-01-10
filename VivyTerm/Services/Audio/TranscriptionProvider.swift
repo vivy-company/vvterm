@@ -10,11 +10,11 @@ enum TranscriptionProvider: String, CaseIterable, Identifiable {
     var displayName: String {
         switch self {
         case .system:
-            return "System (Apple Speech)"
+            return String(localized: "System (Apple Speech)")
         case .mlxWhisper:
-            return "MLX Whisper"
+            return String(localized: "MLX Whisper")
         case .mlxParakeet:
-            return "MLX Parakeet"
+            return String(localized: "MLX Parakeet")
         }
     }
 }

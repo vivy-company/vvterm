@@ -145,7 +145,7 @@ final class ServerManager: ObservableObject {
 
     private func createDefaultWorkspace() -> Workspace {
         Workspace(
-            name: "My Servers",
+            name: String(localized: "My Servers"),
             colorHex: "#007AFF",
             order: 0
         )
@@ -229,7 +229,7 @@ final class ServerManager: ObservableObject {
 
     func addServer(_ server: Server, credentials: ServerCredentials) async throws {
         guard canAddServer else {
-            throw VivyTermError.proRequired("Upgrade to Pro for unlimited servers")
+            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for unlimited servers"))
         }
 
         var newServer = server
@@ -341,7 +341,7 @@ final class ServerManager: ObservableObject {
 
     func addWorkspace(_ workspace: Workspace) async throws {
         guard canAddWorkspace else {
-            throw VivyTermError.proRequired("Upgrade to Pro for unlimited workspaces")
+            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for unlimited workspaces"))
         }
 
         var newWorkspace = workspace
@@ -554,7 +554,7 @@ final class ServerManager: ObservableObject {
 
     func createCustomEnvironment(name: String, color: String) throws -> ServerEnvironment {
         guard canCreateCustomEnvironment else {
-            throw VivyTermError.proRequired("Upgrade to Pro for custom environments")
+            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for custom environments"))
         }
         return ServerEnvironment(
             id: UUID(),
@@ -563,6 +563,49 @@ final class ServerManager: ObservableObject {
             colorHex: color,
             isBuiltIn: false
         )
+    }
+
+    func updateEnvironment(_ environment: ServerEnvironment, in workspace: Workspace) async throws -> Workspace {
+        var updatedWorkspace = workspace
+        if let envIndex = updatedWorkspace.environments.firstIndex(where: { $0.id == environment.id }) {
+            updatedWorkspace.environments[envIndex] = environment
+        } else {
+            return updatedWorkspace
+        }
+
+        try await updateWorkspace(updatedWorkspace)
+
+        let serversToUpdate = servers.filter { $0.workspaceId == workspace.id && $0.environment.id == environment.id }
+        for server in serversToUpdate {
+            var updatedServer = server
+            updatedServer.environment = environment
+            try await updateServer(updatedServer)
+        }
+
+        return updatedWorkspace
+    }
+
+    func deleteEnvironment(
+        _ environment: ServerEnvironment,
+        in workspace: Workspace,
+        fallback: ServerEnvironment = .production
+    ) async throws -> Workspace {
+        var updatedWorkspace = workspace
+        updatedWorkspace.environments.removeAll { $0.id == environment.id }
+        if updatedWorkspace.lastSelectedEnvironmentId == environment.id {
+            updatedWorkspace.lastSelectedEnvironmentId = fallback.id
+        }
+
+        try await updateWorkspace(updatedWorkspace)
+
+        let serversToUpdate = servers.filter { $0.workspaceId == workspace.id && $0.environment.id == environment.id }
+        for server in serversToUpdate {
+            var updatedServer = server
+            updatedServer.environment = fallback
+            try await updateServer(updatedServer)
+        }
+
+        return updatedWorkspace
     }
 }
 
@@ -587,11 +630,16 @@ enum VivyTermError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .proRequired(let message): return message
-        case .serverLocked(let serverName): return "Server '\(serverName)' is locked"
-        case .workspaceLocked(let workspaceName): return "Workspace '\(workspaceName)' is locked"
-        case .connectionFailed(let message): return "Connection failed: \(message)"
-        case .authenticationFailed: return "Authentication failed"
-        case .timeout: return "Connection timed out"
+        case .serverLocked(let serverName):
+            return String(localized: "Server '\(serverName)' is locked")
+        case .workspaceLocked(let workspaceName):
+            return String(localized: "Workspace '\(workspaceName)' is locked")
+        case .connectionFailed(let message):
+            return String(localized: "Connection failed: \(message)")
+        case .authenticationFailed:
+            return String(localized: "Authentication failed")
+        case .timeout:
+            return String(localized: "Connection timed out")
         }
     }
 

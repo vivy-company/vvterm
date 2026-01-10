@@ -1,0 +1,642 @@
+/* General */
+"OK" = "OK";
+"Cancel" = "キャンセル";
+"Save" = "保存";
+"Add" = "追加";
+"Create" = "作成";
+"Delete" = "削除";
+"Done" = "完了";
+"Edit" = "編集";
+"Remove" = "削除";
+"Connect" = "接続";
+"Disconnect" = "切断";
+"Reconnect" = "再接続";
+"Retry" = "再試行";
+"Upgrade" = "アップグレード";
+"Upgrade to Pro" = "Proにアップグレード";
+"Upgrade to VVTerm Pro" = "VVTerm Proにアップグレード";
+"View Plans" = "プランを見る";
+"Manage Subscription" = "サブスクリプション管理";
+"Manage subscription" = "サブスクリプション管理";
+"Manage your subscription" = "サブスクリプションを管理";
+"Restore Purchases" = "購入を復元";
+"Renew" = "更新";
+"Renew Pro" = "Proを更新";
+"Close" = "閉じる";
+"Close Terminal" = "ターミナルを閉じる";
+"Close All to the Left" = "左側をすべて閉じる";
+"Close All to the Right" = "右側をすべて閉じる";
+"Close Other Tabs" = "他のタブを閉じる";
+"Duplicate Tab" = "タブを複製";
+"New Terminal" = "新規ターミナル";
+"New terminal tab" = "新しいターミナルタブ";
+"New connection" = "新規接続";
+"Previous tab" = "前のタブ";
+"Next tab" = "次のタブ";
+"No terminals" = "ターミナルなし";
+"%lld tab" = "%lld タブ";
+"%lld tabs" = "%lld タブ";
+"No terminals open" = "開いているターミナルはありません";
+"Search servers" = "サーバーを検索";
+"Search servers..." = "サーバーを検索...";
+"Search symbols..." = "シンボルを検索...";
+"Select Workspace" = "ワークスペースを選択";
+"Select a Server" = "サーバーを選択";
+"Choose a server from the sidebar to connect" = "サイドバーから接続するサーバーを選択";
+"Multiple connections require Pro" = "複数接続にはProが必要";
+"Upgrade to connect to multiple servers simultaneously" = "複数サーバー同時接続にはProへアップグレード";
+"Disconnected" = "切断済み";
+"Connecting..." = "接続中...";
+"Connecting to %@..." = "%@ に接続中...";
+"Reconnecting (attempt %lld)..." = "再接続中（%lld回目）...";
+"Connection Failed" = "接続失敗";
+"Connection failed: %@" = "接続失敗：%@";
+"Connection timed out" = "接続がタイムアウトしました";
+"Authentication failed" = "認証に失敗しました";
+"Failed to load credentials" = "資格情報の読み込みに失敗しました";
+"Failed to load credentials: %@" = "資格情報の読み込みに失敗しました：%@";
+"Failed to load key: %@" = "キーの読み込みに失敗しました：%@";
+"Failed to read key file: %@" = "キーファイルの読み込みに失敗しました：%@";
+"Failed to import key: %@" = "キーのインポートに失敗しました：%@";
+"Failed to delete key: %@" = "キーの削除に失敗しました：%@";
+"Failed to save key: %@" = "キーの保存に失敗しました：%@";
+"Failed to generate key: %@" = "キーの生成に失敗しました：%@";
+"Failed to generate SSH key" = "SSHキーの生成に失敗しました";
+"Failed to encode key data" = "キーのデータをエンコードできませんでした";
+"Failed to export RSA key" = "RSAキーのエクスポートに失敗しました";
+"Invalid key data" = "無効なキー データ";
+"Cannot access the selected file" = "選択したファイルにアクセスできません";
+"Copy to Clipboard" = "クリップボードにコピー";
+"Copied" = "コピーしました";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "VVTermについて";
+"Version %@ (%@)" = "バージョン %@（%@）";
+"Professional SSH client\nfor macOS & iOS" = "macOSとiOS向けの\nプロフェッショナルSSHクライアント";
+"Visit Website" = "Webサイトを見る";
+"Report an Issue" = "問題を報告";
+"Privacy Policy" = "プライバシーポリシー";
+"Get in Touch" = "お問い合わせ";
+"Questions, feedback, or issues? Reach out anytime." = "ご質問・ご意見・問題があればいつでもご連絡ください。";
+"Questions, feedback, or issues?\nReach out anytime." = "ご質問・ご意見・問題があれば\nいつでもご連絡ください。";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "VVTermへようこそ";
+"Your secure SSH terminal" = "安全なSSHターミナル";
+"Continue" = "続ける";
+"SSH Terminal" = "SSHターミナル";
+"Connect to servers with GPU-accelerated terminal emulation." = "GPUアクセラレーションの端末エミュレーションでサーバーに接続。";
+"iCloud Sync" = "iCloud同期";
+"Servers and credentials sync across all your devices." = "サーバーと資格情報をすべてのデバイスで同期。";
+"Secure Storage" = "安全なストレージ";
+"Passwords and SSH keys protected by Keychain." = "パスワードとSSHキーはキーチェーンで保護されます。";
+"Voice Commands" = "音声コマンド";
+"Speak commands with on-device speech recognition." = "デバイス上の音声認識でコマンドを話して入力。";
+
+/* Settings Navigation */
+"Settings" = "設定";
+"General" = "一般";
+"Terminal" = "ターミナル";
+"Transcription" = "文字起こし";
+"SSH Keys" = "SSHキー";
+"Sync" = "同期";
+"About" = "このアプリについて";
+"Premium" = "プレミアム";
+"Appearance and preferences" = "外観と設定";
+"Font, theme, and connection settings" = "フォント、テーマ、接続設定";
+"Speech-to-text engine and models" = "音声認識エンジンとモデル";
+"Manage stored SSH keys" = "保存済みSSHキーを管理";
+"iCloud sync and data management" = "iCloud同期とデータ管理";
+"Version and links" = "バージョンとリンク";
+
+/* Appearance */
+"Appearance" = "外観";
+"System" = "システム";
+"Light" = "ライト";
+"Dark" = "ダーク";
+
+/* Terminal Settings */
+"Font" = "フォント";
+"Font Family" = "フォントファミリー";
+"Size: %lldpt" = "サイズ：%lld pt";
+"Theme" = "テーマ";
+"Use different themes for Light/Dark mode" = "ライト/ダークで別のテーマを使用";
+"Dark Mode Theme" = "ダークモードのテーマ";
+"Light Mode Theme" = "ライトモードのテーマ";
+"Terminal Behavior" = "ターミナルの動作";
+"Enable terminal notifications" = "ターミナル通知を有効化";
+"Show progress overlays" = "進行状況オーバーレイを表示";
+"Show voice input button" = "音声入力ボタンを表示";
+"Copy Text Processing" = "コピー時のテキスト処理";
+"Transformations applied when copying text from terminal" = "ターミナルからコピーする際の変換";
+"Trim trailing whitespace" = "行末の空白を削除";
+"Collapse multiple blank lines" = "連続する空行をまとめる";
+"Strip shell prompts ($ #)" = "シェルプロンプト（$ #）を除去";
+"Flatten multi-line commands" = "複数行コマンドを1行にまとめる";
+"Remove box-drawing characters" = "罫線文字を削除";
+"Strip ANSI escape codes" = "ANSIエスケープコードを除去";
+"SSH Connection" = "SSH接続";
+"Auto-reconnect on disconnect" = "切断時に自動再接続";
+"Send keep-alive packets" = "キープアライブパケットを送信";
+"Interval: %llds" = "間隔：%lld 秒";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "無制限の機能のためにアップグレード";
+"Unlimited Servers" = "無制限のサーバー";
+"Add as many servers as you need (free: 3)" = "必要な数のサーバーを追加（無料：3）";
+"Unlimited Workspaces" = "無制限のワークスペース";
+"Organize servers into multiple workspaces (free: 1)" = "複数ワークスペースに整理（無料：1）";
+"Multiple Connections" = "複数接続";
+"Open multiple terminal tabs at once (free: 1)" = "複数ターミナルタブを同時に開く（無料：1）";
+"Custom Environments" = "カスタム環境";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Prod/Staging/Dev以外のカスタムラベルを作成";
+"All Future Features" = "今後のすべての機能";
+"Get access to every new Pro feature" = "新しいPro機能をすべて利用可能";
+"Monthly" = "月額";
+"Billed monthly" = "月ごとに請求";
+"Yearly" = "年額";
+"Best value - billed yearly" = "最もお得 - 年ごとに請求";
+"SAVE 74%" = "74%お得";
+"Lifetime" = "買い切り";
+"One-time purchase, forever" = "一度の購入で永久利用";
+"FOREVER" = "永久";
+"Processing..." = "処理中...";
+"Purchase Failed" = "購入に失敗しました";
+"Unknown error" = "不明なエラー";
+"Welcome to Pro!" = "Proへようこそ！";
+"You now have unlimited access" = "無制限アクセスを利用できます";
+"Cancel anytime. Subscription auto-renews." = "いつでもキャンセル可能。自動更新されます。";
+"Terms of Service" = "利用規約";
+"Refund Policy" = "返金ポリシー";
+"Select a Plan" = "プランを選択";
+"Buy - %@" = "購入 - %@";
+"Subscribe - %@" = "購読 - %@";
+"Purchase verification failed" = "購入の検証に失敗しました";
+"Product not found" = "商品が見つかりません";
+"Purchase failed: %@" = "購入に失敗しました：%@";
+
+/* Pro Settings */
+"Status" = "ステータス";
+"Subscription" = "サブスクリプション";
+"Plan" = "プラン";
+"Purchased" = "購入済み";
+"Renews" = "更新";
+"Servers" = "サーバー";
+"%lld of %lld used" = "%lld / %lld 使用";
+"Workspaces" = "ワークスペース";
+"Simultaneous Connections" = "同時接続";
+"%lld max" = "最大 %lld";
+"Features" = "機能";
+"Billing" = "請求";
+"Active" = "有効";
+"Free Tier" = "無料プラン";
+"Pro Lifetime" = "Pro買い切り";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro月額";
+"Pro Yearly" = "Pro年額";
+"PRO" = "PRO";
+"FREE" = "無料";
+"Unlimited servers & workspaces" = "無制限のサーバーとワークスペース";
+"View Plans" = "プランを見る";
+
+/* Pro Limits */
+"Server Limit Reached" = "サーバー上限に達しました";
+"Workspace Limit Reached" = "ワークスペース上限に達しました";
+"Tab Limit Reached" = "タブ上限に達しました";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "無料プランの上限 %lld 台に達しました。無制限のサーバーにはProへアップグレードしてください。";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "無料プランの上限 %lld ワークスペースに達しました。無制限にするにはProへアップグレードしてください。";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "無料プランでは同時に %lld 接続までです。複数同時接続にはProへアップグレードしてください。";
+"Server Locked" = "サーバーがロックされています";
+"Workspace Locked" = "ワークスペースがロックされています";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "このサーバーは無料プランの上限 %lld 台を超えています。Proサブスクリプションを更新してすべてのサーバーにアクセスしてください。";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "このワークスペースは無料プランの上限 %lld を超えています。Proサブスクリプションを更新してすべてのワークスペースにアクセスしてください。";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "サブスクリプション期限切れ";
+"%lld server" = "%lld サーバー";
+"%lld servers" = "%lld サーバー";
+"%lld workspace" = "%lld ワークスペース";
+"%lld workspaces" = "%lld ワークスペース";
+" and " = " と ";
+"%@ locked" = "%@ がロックされています";
+
+/* Server & Workspace */
+"Server Info" = "サーバー情報";
+"Name" = "名前";
+"Host" = "ホスト";
+"Port" = "ポート";
+"Username" = "ユーザー名";
+"Authentication" = "認証";
+"Method" = "方法";
+"Password" = "パスワード";
+"Key loaded" = "キー読み込み済み";
+"Key Passphrase" = "キーパスフレーズ";
+"Server Environment" = "サーバー環境";
+"Environment" = "環境";
+"Notes" = "メモ";
+"Edit Server" = "サーバーを編集";
+"Add Server" = "サーバーを追加";
+"Use Stored Key" = "保存済みキーを使用";
+"Select a key..." = "キーを選択...";
+"Import File" = "ファイルをインポート";
+"Paste" = "貼り付け";
+"Add to Keychain" = "キーチェーンに追加";
+"Select a stored key or import/paste a new one" = "保存済みキーを選択するか、新規にインポート／貼り付けしてください";
+"Using stored key: %@" = "保存済みキーを使用中：%@";
+"Workspace" = "ワークスペース";
+"Workspaces" = "ワークスペース";
+"Workspace name" = "ワークスペース名";
+"Color" = "色";
+"Delete Workspace" = "ワークスペースを削除";
+"Edit Workspace" = "ワークスペースを編集";
+"New Workspace" = "新しいワークスペース";
+"Workspaces" = "ワークスペース";
+"My Servers" = "自分のサーバー";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "ワークスペース";
+"SERVERS" = "サーバー";
+"Support VVTerm" = "VVTermを支援";
+"Upgrade to Pro" = "Proにアップグレード";
+"All" = "すべて";
+"Custom..." = "カスタム...";
+"New Workspace" = "新しいワークスペース";
+"Unlock with Pro" = "Proで解除";
+"Switch to Workspace" = "ワークスペースに切り替え";
+"Delete Workspace" = "ワークスペースを削除";
+
+/* iOS Lists */
+"%lld servers" = "%lld サーバー";
+"Servers" = "サーバー";
+"Active Connections" = "アクティブな接続";
+"Add Workspace" = "ワークスペースを追加";
+"Workspaces" = "ワークスペース";
+"Done" = "完了";
+
+/* Empty States */
+"No Servers" = "サーバーがありません";
+"Add a server to get started" = "サーバーを追加して開始";
+"Multiple connections require Pro" = "複数接続にはProが必要";
+"Upgrade to connect to multiple servers simultaneously" = "複数サーバー同時接続にはProへアップグレード";
+"Upgrade to Pro" = "Proにアップグレード";
+"Connect" = "接続";
+
+/* Offline */
+"No network connection" = "ネットワーク接続なし";
+"You're currently offline. Some features may not work:" = "現在オフラインです。一部の機能は動作しない場合があります：";
+"Cannot connect to servers" = "サーバーに接続できません";
+"iCloud sync paused" = "iCloud同期が一時停止中";
+"Saved servers still accessible" = "保存済みサーバーは利用可能";
+"Offline" = "オフライン";
+
+/* Terminal */
+"Initializing terminal..." = "ターミナルを初期化中...";
+"Terminal initialization failed" = "ターミナルの初期化に失敗しました";
+"Connecting..." = "接続中...";
+"Reconnecting (attempt %lld)..." = "再接続中（%lld回目）...";
+"Disconnected" = "切断済み";
+"Connection Failed" = "接続失敗";
+"Reconnect" = "再接続";
+"Retry" = "再試行";
+"Voice Input Unavailable" = "音声入力が利用できません";
+"Voice input (Command+Shift+M)" = "音声入力（Command+Shift+M）";
+"Enable Microphone and Speech Recognition in System Settings." = "システム設定でマイクと音声認識を有効にしてください。";
+"Terminal" = "ターミナル";
+"No terminals open" = "開いているターミナルはありません";
+"New Terminal" = "新規ターミナル";
+"Close this terminal?" = "このターミナルを閉じますか？";
+"The SSH connection will be terminated." = "SSH接続は終了します。";
+
+/* Keychain */
+"No Keys Stored" = "保存されたキーがありません";
+"Add keys to quickly use them when creating new servers" = "新しいサーバー作成時に素早く使えるようキーを追加";
+"Generate New Key" = "新しいキーを生成";
+"Import Key" = "キーをインポート";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "キーはデバイスのキーチェーンに安全に保存されます。パスフレーズは別に保存されます。";
+"Delete SSH Key" = "SSHキーを削除";
+"Are you sure you want to delete '%@'? This cannot be undone." = "「%@」を削除しますか？この操作は取り消せません。";
+"Protected" = "保護済み";
+"Added %@ ago" = "%@ 前に追加";
+"Copy public key" = "公開鍵をコピー";
+"Key Name" = "キー名";
+"e.g., Personal MacBook, Work Key" = "例：個人用MacBook、仕事用キー";
+"Private Key" = "秘密鍵";
+"Import Key File" = "キーファイルをインポート";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "秘密鍵ファイル（id_rsa、id_ed25519 など）をインポートするか内容を貼り付け";
+"Key loaded (%lld characters)" = "キー読み込み済み（%lld 文字）";
+"Key passphrase" = "キーパスフレーズ";
+"Passphrase (Optional)" = "パスフレーズ（任意）";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "キーがパスフレーズで暗号化されている場合はここに入力してください。パスフレーズなしの場合は空のまま。";
+"Add SSH Key" = "SSHキーを追加";
+"Algorithm" = "アルゴリズム";
+"Key Type" = "キータイプ";
+"Confirm passphrase" = "パスフレーズ確認";
+"Protect your key with a passphrase. Leave empty for no protection." = "パスフレーズでキーを保護します。保護しない場合は空欄にしてください。";
+"Generated Key" = "生成されたキー";
+"Key generated successfully" = "キーが正常に生成されました";
+"Fingerprint:" = "フィンガープリント：";
+"View Public Key" = "公開鍵を表示";
+"Generate SSH Key" = "SSHキーを生成";
+"Generate" = "生成";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "サーバーの ~/.ssh/authorized_keys に以下を追加してください：";
+"No Public Key" = "公開鍵がありません";
+"This key was imported without a public key." = "このキーは公開鍵なしでインポートされました。";
+"Public Key" = "公開鍵";
+
+/* Transcription */
+"Engine" = "エンジン";
+"System (Apple)" = "システム（Apple）";
+"Whisper (MLX)" = "Whisper（MLX）";
+"Parakeet (MLX)" = "Parakeet（MLX）";
+"Provider" = "プロバイダー";
+"Language" = "言語";
+"Model" = "モデル";
+"Downloading..." = "ダウンロード中...";
+"Delete Model" = "モデルを削除";
+"Download size: %@" = "ダウンロードサイズ：%@";
+"Status" = "ステータス";
+"Download" = "ダウンロード";
+"Ready" = "準備完了";
+"Failed" = "失敗";
+"Storage" = "ストレージ";
+"Model Storage" = "モデルのストレージ";
+"Total MLX Models" = "MLXモデル合計";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Appleの内蔵音声認識を使用します。最良の結果にはネットワークが必要です。";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI WhisperはMLXでローカル実行されます。ダウンロード後はオフラインで動作します。";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA ParakeetはMLXでローカル実行されます。リアルタイム文字起こしに最適化されています。";
+"English" = "英語";
+"Spanish" = "スペイン語";
+"French" = "フランス語";
+"German" = "ドイツ語";
+"Japanese" = "日本語";
+"Chinese" = "中国語";
+"Korean" = "韓国語";
+"Portuguese" = "ポルトガル語";
+"Russian" = "ロシア語";
+"Auto-detect" = "自動検出";
+
+/* MLX Models */
+"Tiny" = "超小";
+"Fastest, smallest" = "最速・最小";
+"Full precision" = "フル精度";
+"Tiny (EN)" = "超小（EN）";
+"English-only, smaller" = "英語のみ、より小さい";
+"English-only" = "英語のみ";
+"Base" = "ベース";
+"Balanced speed/quality" = "速度と品質のバランス";
+"Small" = "小";
+"Better accuracy" = "より高精度";
+"Medium" = "中";
+"Higher accuracy, heavier" = "高精度・重め";
+"Large v3" = "大 v3";
+"Latest large model" = "最新の大型モデル";
+"Large" = "大";
+"Large v3 4-bit" = "大 v3 4ビット";
+"Smaller download" = "ダウンロードが小さい";
+"4-bit quantized" = "4ビット量子化";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "大型・高精度モデル";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "携帯通信";
+"Ethernet" = "Ethernet";
+"Unknown" = "不明";
+"No Connection" = "接続なし";
+" (Metered)" = "（従量）";
+" (Low Data)" = "（低データ）";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "iCloud同期を有効化";
+"iCloud Account" = "iCloudアカウント";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "すべてのAppleデバイスでサーバーとワークスペースを同期します。";
+"Sync Status" = "同期ステータス";
+"Last Synced" = "最終同期";
+"Error" = "エラー";
+"Data" = "データ";
+"Force Sync Now" = "今すぐ強制同期";
+"Clear Local Data & Re-sync" = "ローカルデータを削除して再同期";
+"Reset iCloud (Delete All & Re-upload)" = "iCloudをリセット（すべて削除して再アップロード）";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "強制同期はiCloudから最新データを取得します。削除して再同期はローカルデータを削除し、再ダウンロードします。iCloudリセットはクラウドの全データを削除し、ローカルデータを再アップロードします（重複修正）。";
+"Account Status" = "アカウント状態";
+"Container" = "コンテナ";
+"Re-check iCloud Status" = "iCloud状態を再確認";
+"Troubleshooting" = "トラブルシューティング";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "設定でiCloudにサインインし、iCloud Driveが有効になっていることを確認してください。詳細はConsole.appの「CloudKit」ログを確認してください。";
+"Force Sync" = "強制同期";
+"Sync Now" = "今すぐ同期";
+"This will fetch the latest data from iCloud and may take a moment." = "iCloudから最新データを取得します。少し時間がかかる場合があります。";
+"Clear Local Data" = "ローカルデータを削除";
+"Clear & Re-sync" = "削除して再同期";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "すべてのローカルデータを削除し、iCloudから再ダウンロードします。未同期のローカル変更は失われます。";
+"Reset iCloud Data" = "iCloudデータをリセット";
+"Delete All & Re-upload" = "すべて削除して再アップロード";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "iCloudの全データを削除し、現在のローカルデータをアップロードします。重複修正に使用してください。";
+"Connected" = "接続済み";
+"Not Available" = "利用不可";
+"Synced" = "同期済み";
+"Syncing..." = "同期中...";
+"available" = "利用可能";
+"noAccount - User not signed into iCloud" = "noAccount - iCloudにサインインしていません";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - iCloudアクセスが制限されています（ペアレンタルコントロール、MDMなど）";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - iCloudの状態を判定できません";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloudが一時的に利用できません";
+"unknown status: %@" = "不明な状態：%@";
+"Error: %@" = "エラー：%@";
+"Checking..." = "確認中...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "水平分割ビュー";
+"Vertical split view" = "垂直分割ビュー";
+"Left pane" = "左ペイン";
+"Top pane" = "上ペイン";
+"Right pane" = "右ペイン";
+"Bottom pane" = "下ペイン";
+"Horizontal split divider" = "水平分割バー";
+"Vertical split divider" = "垂直分割バー";
+"Drag to resize the left and right panes" = "ドラッグして左右ペインのサイズを変更";
+"Drag to resize the top and bottom panes" = "ドラッグして上下ペインのサイズを変更";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "コア";
+"IDLE" = "アイドル";
+"UPTIME" = "稼働時間";
+"LOAD" = "負荷";
+"FREE" = "空き";
+"USED" = "使用中";
+"CACHED" = "キャッシュ";
+"TOTAL" = "合計";
+"Volumes" = "ボリューム";
+"Top Processes" = "上位プロセス";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ 合計";
+"↓ TOTAL" = "↓ 合計";
+"%lld D" = "%lld 日";
+"%lld H" = "%lld 時間";
+
+/* SFSymbol Picker */
+"Recent" = "最近";
+"Load more (%lld remaining)" = "さらに読み込む（残り %lld）";
+"%lld symbols" = "%lld シンボル";
+"What's New" = "新着";
+"Draw" = "描画";
+"Variable" = "可変";
+"Multicolor" = "マルチカラー";
+"Communication" = "通信";
+"Weather" = "天気";
+"Maps" = "マップ";
+"Objects & Tools" = "オブジェクトとツール";
+"Devices" = "デバイス";
+"Camera & Photos" = "カメラと写真";
+"Gaming" = "ゲーム";
+"Connectivity" = "接続";
+"Transportation" = "交通";
+"Automotive" = "自動車";
+"Accessibility" = "アクセシビリティ";
+"Privacy & Security" = "プライバシーとセキュリティ";
+"Human" = "人物";
+"Home" = "ホーム";
+"Fitness" = "フィットネス";
+"Nature" = "自然";
+"Editing" = "編集";
+"Text Formatting" = "テキスト書式";
+"Media" = "メディア";
+"Keyboard" = "キーボード";
+"Commerce" = "コマース";
+"Time" = "時間";
+"Health" = "ヘルス";
+"Shapes" = "図形";
+"Arrows" = "矢印";
+"Indices" = "インデックス";
+"Math" = "数学";
+
+/* Auth Methods */
+"SSH Key" = "SSHキー";
+"SSH Key + Passphrase" = "SSHキー + パスフレーズ";
+
+/* Environments */
+"Production" = "本番";
+"Staging" = "ステージング";
+"Development" = "開発";
+"Prod" = "本番";
+"Stag" = "ステージ";
+"Dev" = "開発";
+"New Environment" = "新しい環境";
+"Edit Environment" = "環境を編集";
+"Environment name" = "環境名";
+"An environment with this name already exists." = "同じ名前の環境が既に存在します。";
+"Delete Environment?" = "環境を削除しますか？";
+"Servers in '%@' will be moved to Production." = "「%@」のサーバーは本番に移動します。";
+"Edit \"%@\"..." = "「%@」を編集...";
+"Delete \"%@\"..." = "「%@」を削除...";
+"Custom" = "カスタム";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "マイクの許可が必要です。録音開始時に自動で要求されます。";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "音声認識が利用できません。システム設定 > SiriとSpotlight でSiriを有効にしてください。";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "録音の開始に失敗しました。システム設定 > プライバシーとセキュリティ > マイク で権限を確認してください。";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "このMacではMLX文字起こしが利用できません。Apple Speechに切り替えます。";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "無制限のサーバーにはProへアップグレード";
+"Upgrade to Pro for unlimited workspaces" = "無制限のワークスペースにはProへアップグレード";
+"Upgrade to Pro for multiple connections" = "複数接続にはProへアップグレード";
+"Upgrade to Pro for custom environments" = "カスタム環境にはProへアップグレード";
+
+/* Misc */
+"Terminal initialization failed" = "ターミナルの初期化に失敗しました";
+"Voice Input Unavailable" = "音声入力が利用できません";
+"Disconnect from server" = "サーバーから切断";
+"Disconnect from %@?" = "%@ から切断しますか？";
+"This will return to the server list." = "サーバー一覧に戻ります。";
+"All terminal tabs for this server will be closed." = "このサーバーのすべてのターミナルタブが閉じられます。";
+"Add Terminal Preset" = "ターミナルプリセットを追加";
+"Edit Preset" = "プリセットを編集";
+"Basic Information" = "基本情報";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "プリセットの表示名（例：Claude、Helix、Vim）";
+"Command" = "コマンド";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "プリセット選択時に実行するコマンド（例：claude、hx、nvim）";
+"Icon" = "アイコン";
+"Choose Symbol..." = "シンボルを選択...";
+
+/* Contact Labels */
+"Developer" = "開発者";
+"Discord" = "Discord";
+"Join Community" = "コミュニティに参加";
+"Email" = "メール";
+"GitHub" = "GitHub";
+"Report Issue" = "問題を報告";
+"Support VVTerm" = "VVTermを支援";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "システム（Apple Speech）";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "モデルの削除に失敗しました";
+"Model ID is required" = "モデルIDが必要です";
+
+/* Lock Errors */
+"Server '%@' is locked" = "サーバー「%@」はロックされています";
+"Workspace '%@' is locked" = "ワークスペース「%@」はロックされています";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "サーバーの上限 %lld 台に達しました。無制限のサーバーにはProへアップグレードしてください。";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "現代的で高速かつ安全。ほとんどの用途におすすめです。";
+"Wide compatibility with older systems." = "古いシステムとの互換性が高い。";
+
+
+/* Split Commands */
+"Split Right" = "右に分割";
+"Split Down" = "下に分割";
+"Close Pane" = "ペインを閉じる";
+
+/* Tabs */
+"View" = "表示";
+"Stats" = "統計";
+
+/* Help */
+"Support & Feedback" = "サポートとフィードバック";
+
+"Upgrade to Pro for unlimited workspaces." = "無制限のワークスペースにはProへアップグレード。";
+
+"Fingerprint" = "フィンガープリント";
+
+"Links" = "リンク";
+
+"Passphrase" = "パスフレーズ";
+
+"%@ is a Pro feature" = "%@ はPro機能です";
+
+"System (Default)" = "システム（デフォルト）";
+
+"Some changes may require restarting the app." = "一部の変更はアプリの再起動が必要な場合があります。";
+
+/* Download Progress */
+"%llds remaining" = "残り%lld秒";
+"%lldm remaining" = "残り%lld分";
+"%lldh %lldm remaining" = "残り%lld時間%lld分";
+"Clear All Storage" = "すべてのストレージを消去";
+
+/* Preview */
+"Server 1" = "サーバー 1";
+"Server 2" = "サーバー 2";
+"Server 3" = "サーバー 3";

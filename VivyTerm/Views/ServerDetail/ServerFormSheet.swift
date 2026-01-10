@@ -71,8 +71,8 @@ struct ServerFormSheet: View {
                 if isAtLimit {
                     Section {
                         ProLimitBanner(
-                            title: "Server Limit Reached",
-                            message: "You've reached the limit of \(FreeTierLimits.maxServers) servers. Upgrade to Pro for unlimited servers."
+                            title: String(localized: "Server Limit Reached"),
+                            message: String(localized: "You've reached the limit of \(FreeTierLimits.maxServers) servers. Upgrade to Pro for unlimited servers.")
                         ) {
                             showingProUpgrade = true
                         }
@@ -83,7 +83,7 @@ struct ServerFormSheet: View {
                         UsageIndicator(
                             current: serverCount,
                             limit: FreeTierLimits.maxServers,
-                            label: "Servers",
+                            label: String(localized: "Servers"),
                             showUpgrade: $showingProUpgrade
                         )
                     }
@@ -156,7 +156,7 @@ struct ServerFormSheet: View {
                                 Circle()
                                     .fill(env.color)
                                     .frame(width: 8, height: 8)
-                                Text(env.name)
+                                Text(env.displayName)
                             }
                             .tag(env)
                         }
@@ -178,7 +178,7 @@ struct ServerFormSheet: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(isEditing ? "Edit Server" : "Add Server")
+            .navigationTitle(isEditing ? String(localized: "Edit Server") : String(localized: "Add Server"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -211,7 +211,7 @@ struct ServerFormSheet: View {
                         }
                     }
                 } catch {
-                    self.error = "Failed to load credentials: \(error.localizedDescription)"
+                    self.error = String(localized: "Failed to load credentials: \(error.localizedDescription)")
                 }
             }
             .toolbar {
@@ -219,7 +219,7 @@ struct ServerFormSheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? "Save" : "Add") {
+                    Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
                         saveServer()
                     }
                     .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials)
@@ -325,7 +325,7 @@ struct ServerFormSheet: View {
                 }
             }
         } catch {
-            self.error = "Failed to load key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to load key: \(error.localizedDescription)")
         }
     }
 
@@ -360,10 +360,10 @@ struct ServerFormSheet: View {
                 let keyContent = try String(contentsOf: url, encoding: .utf8)
                 sshKey = keyContent
             } catch {
-                self.error = "Failed to read key file: \(error.localizedDescription)"
+                self.error = String(localized: "Failed to read key file: \(error.localizedDescription)")
             }
         case .failure(let error):
-            self.error = "Failed to import key: \(error.localizedDescription)"
+            self.error = String(localized: "Failed to import key: \(error.localizedDescription)")
         }
     }
 

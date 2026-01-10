@@ -1,0 +1,642 @@
+/* General */
+"OK" = "ОК";
+"Cancel" = "Скасувати";
+"Save" = "Зберегти";
+"Add" = "Додати";
+"Create" = "Створити";
+"Delete" = "Видалити";
+"Done" = "Готово";
+"Edit" = "Редагувати";
+"Remove" = "Вилучити";
+"Connect" = "Підключити";
+"Disconnect" = "Від’єднати";
+"Reconnect" = "Підключити знову";
+"Retry" = "Повторити";
+"Upgrade" = "Оновити";
+"Upgrade to Pro" = "Оновити до Pro";
+"Upgrade to VVTerm Pro" = "Оновити до VVTerm Pro";
+"View Plans" = "Переглянути плани";
+"Manage Subscription" = "Керування підпискою";
+"Manage subscription" = "Керування підпискою";
+"Manage your subscription" = "Керуйте підпискою";
+"Restore Purchases" = "Відновити покупки";
+"Renew" = "Поновити";
+"Renew Pro" = "Поновити Pro";
+"Close" = "Закрити";
+"Close Terminal" = "Закрити термінал";
+"Close All to the Left" = "Закрити все ліворуч";
+"Close All to the Right" = "Закрити все праворуч";
+"Close Other Tabs" = "Закрити інші вкладки";
+"Duplicate Tab" = "Дублювати вкладку";
+"New Terminal" = "Новий термінал";
+"New terminal tab" = "Нова вкладка термінала";
+"New connection" = "Нове підключення";
+"Previous tab" = "Попередня вкладка";
+"Next tab" = "Наступна вкладка";
+"No terminals" = "Немає терміналів";
+"%lld tab" = "%lld вкладка";
+"%lld tabs" = "%lld вкладок";
+"No terminals open" = "Немає відкритих терміналів";
+"Search servers" = "Пошук серверів";
+"Search servers..." = "Пошук серверів...";
+"Search symbols..." = "Пошук символів...";
+"Select Workspace" = "Вибрати робочий простір";
+"Select a Server" = "Вибрати сервер";
+"Choose a server from the sidebar to connect" = "Виберіть сервер на бічній панелі для підключення";
+"Multiple connections require Pro" = "Кілька підключень потребують Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Оновіть до Pro, щоб підключатися до кількох серверів одночасно";
+"Disconnected" = "Від’єднано";
+"Connecting..." = "Підключення...";
+"Connecting to %@..." = "Підключення до %@...";
+"Reconnecting (attempt %lld)..." = "Повторне підключення (спроба %lld)...";
+"Connection Failed" = "Підключення не вдалося";
+"Connection failed: %@" = "Підключення не вдалося: %@";
+"Connection timed out" = "Час очікування підключення вичерпано";
+"Authentication failed" = "Автентифікація не вдалася";
+"Failed to load credentials" = "Не вдалося завантажити облікові дані";
+"Failed to load credentials: %@" = "Не вдалося завантажити облікові дані: %@";
+"Failed to load key: %@" = "Не вдалося завантажити ключ: %@";
+"Failed to read key file: %@" = "Не вдалося прочитати файл ключа: %@";
+"Failed to import key: %@" = "Не вдалося імпортувати ключ: %@";
+"Failed to delete key: %@" = "Не вдалося видалити ключ: %@";
+"Failed to save key: %@" = "Не вдалося зберегти ключ: %@";
+"Failed to generate key: %@" = "Не вдалося згенерувати ключ: %@";
+"Failed to generate SSH key" = "Не вдалося згенерувати SSH‑ключ";
+"Failed to encode key data" = "Не вдалося закодувати дані ключа";
+"Failed to export RSA key" = "Не вдалося експортувати RSA‑ключ";
+"Invalid key data" = "Недійсні дані ключа";
+"Cannot access the selected file" = "Неможливо отримати доступ до вибраного файла";
+"Copy to Clipboard" = "Копіювати до буфера обміну";
+"Copied" = "Скопійовано";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "Про VVTerm";
+"Version %@ (%@)" = "Версія %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Професійний SSH‑клієнт\nдля macOS та iOS";
+"Visit Website" = "Відвідати сайт";
+"Report an Issue" = "Повідомити про проблему";
+"Privacy Policy" = "Політика конфіденційності";
+"Get in Touch" = "Зв’язатися з нами";
+"Questions, feedback, or issues? Reach out anytime." = "Є питання, відгуки чи проблеми? Пишіть у будь‑який час.";
+"Questions, feedback, or issues?\nReach out anytime." = "Є питання, відгуки чи проблеми?\nПишіть у будь‑який час.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Ласкаво просимо до VVTerm";
+"Your secure SSH terminal" = "Ваш безпечний SSH‑термінал";
+"Continue" = "Продовжити";
+"SSH Terminal" = "SSH‑термінал";
+"Connect to servers with GPU-accelerated terminal emulation." = "Підключайтеся до серверів із GPU‑прискореною емуляцією термінала.";
+"iCloud Sync" = "Синхронізація iCloud";
+"Servers and credentials sync across all your devices." = "Сервери та облікові дані синхронізуються на всіх ваших пристроях.";
+"Secure Storage" = "Безпечне сховище";
+"Passwords and SSH keys protected by Keychain." = "Паролі та SSH‑ключі захищені Зв’язкою ключів.";
+"Voice Commands" = "Голосові команди";
+"Speak commands with on-device speech recognition." = "Вимовляйте команди з розпізнаванням мовлення на пристрої.";
+
+/* Settings Navigation */
+"Settings" = "Налаштування";
+"General" = "Загальні";
+"Terminal" = "Термінал";
+"Transcription" = "Транскрипція";
+"SSH Keys" = "SSH‑ключі";
+"Sync" = "Синхронізація";
+"About" = "Про програму";
+"Premium" = "Преміум";
+"Appearance and preferences" = "Вигляд і налаштування";
+"Font, theme, and connection settings" = "Шрифт, тема та налаштування підключення";
+"Speech-to-text engine and models" = "Рушій і моделі перетворення мови на текст";
+"Manage stored SSH keys" = "Керування збереженими SSH‑ключами";
+"iCloud sync and data management" = "Синхронізація iCloud та керування даними";
+"Version and links" = "Версія та посилання";
+
+/* Appearance */
+"Appearance" = "Вигляд";
+"System" = "Система";
+"Light" = "Світла";
+"Dark" = "Темна";
+
+/* Terminal Settings */
+"Font" = "Шрифт";
+"Font Family" = "Сімейство шрифтів";
+"Size: %lldpt" = "Розмір: %lld пт";
+"Theme" = "Тема";
+"Use different themes for Light/Dark mode" = "Використовувати різні теми для світлого/темного режиму";
+"Dark Mode Theme" = "Тема темного режиму";
+"Light Mode Theme" = "Тема світлого режиму";
+"Terminal Behavior" = "Поведінка термінала";
+"Enable terminal notifications" = "Увімкнути сповіщення термінала";
+"Show progress overlays" = "Показувати накладки прогресу";
+"Show voice input button" = "Показувати кнопку голосового вводу";
+"Copy Text Processing" = "Обробка тексту під час копіювання";
+"Transformations applied when copying text from terminal" = "Перетворення при копіюванні тексту з термінала";
+"Trim trailing whitespace" = "Обрізати пробіли в кінці";
+"Collapse multiple blank lines" = "Згортати кілька порожніх рядків";
+"Strip shell prompts ($ #)" = "Видаляти підказки оболонки ($ #)";
+"Flatten multi-line commands" = "Об’єднувати багаторядкові команди";
+"Remove box-drawing characters" = "Видаляти символи рамок";
+"Strip ANSI escape codes" = "Видаляти ANSI‑коди";
+"SSH Connection" = "SSH‑підключення";
+"Auto-reconnect on disconnect" = "Автоповторне підключення при розриві";
+"Send keep-alive packets" = "Надсилати keep‑alive пакети";
+"Interval: %llds" = "Інтервал: %lld с";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Оновіть до Pro для безлімітних функцій";
+"Unlimited Servers" = "Безлімітні сервери";
+"Add as many servers as you need (free: 3)" = "Додавайте скільки потрібно серверів (безкоштовно: 3)";
+"Unlimited Workspaces" = "Безлімітні робочі простори";
+"Organize servers into multiple workspaces (free: 1)" = "Організовуйте сервери у кілька робочих просторів (безкоштовно: 1)";
+"Multiple Connections" = "Кілька підключень";
+"Open multiple terminal tabs at once (free: 1)" = "Відкривайте кілька вкладок термінала одночасно (безкоштовно: 1)";
+"Custom Environments" = "Користувацькі середовища";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Створюйте власні мітки середовищ понад Prod/Staging/Dev";
+"All Future Features" = "Усі майбутні функції";
+"Get access to every new Pro feature" = "Доступ до всіх нових функцій Pro";
+"Monthly" = "Щомісяця";
+"Billed monthly" = "Оплата щомісяця";
+"Yearly" = "Щороку";
+"Best value - billed yearly" = "Найкраща ціна — оплата щороку";
+"SAVE 74%" = "ЗАОЩАДЖУЙТЕ 74%";
+"Lifetime" = "Назавжди";
+"One-time purchase, forever" = "Разова покупка, назавжди";
+"FOREVER" = "НАЗАВЖДИ";
+"Processing..." = "Обробка...";
+"Purchase Failed" = "Покупка не вдалася";
+"Unknown error" = "Невідома помилка";
+"Welcome to Pro!" = "Ласкаво просимо до Pro!";
+"You now have unlimited access" = "Тепер у вас необмежений доступ";
+"Cancel anytime. Subscription auto-renews." = "Скасування в будь‑який час. Підписка автоматично поновлюється.";
+"Terms of Service" = "Умови використання";
+"Refund Policy" = "Політика повернення";
+"Select a Plan" = "Виберіть план";
+"Buy - %@" = "Купити - %@";
+"Subscribe - %@" = "Підписатися - %@";
+"Purchase verification failed" = "Перевірка покупки не вдалася";
+"Product not found" = "Продукт не знайдено";
+"Purchase failed: %@" = "Покупка не вдалася: %@";
+
+/* Pro Settings */
+"Status" = "Статус";
+"Subscription" = "Підписка";
+"Plan" = "План";
+"Purchased" = "Куплено";
+"Renews" = "Поновлюється";
+"Servers" = "Сервери";
+"%lld of %lld used" = "Використано %lld з %lld";
+"Workspaces" = "Робочі простори";
+"Simultaneous Connections" = "Одночасні підключення";
+"%lld max" = "макс. %lld";
+"Features" = "Функції";
+"Billing" = "Оплата";
+"Active" = "Активна";
+"Free Tier" = "Безкоштовний план";
+"Pro Lifetime" = "Pro назавжди";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro щомісяця";
+"Pro Yearly" = "Pro щороку";
+"PRO" = "PRO";
+"FREE" = "БЕЗКОШТОВНО";
+"Unlimited servers & workspaces" = "Безлімітні сервери та робочі простори";
+"View Plans" = "Переглянути плани";
+
+/* Pro Limits */
+"Server Limit Reached" = "Досягнуто ліміту серверів";
+"Workspace Limit Reached" = "Досягнуто ліміту робочих просторів";
+"Tab Limit Reached" = "Досягнуто ліміту вкладок";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Ви досягли ліміту %lld серверів у безкоштовному плані. Оновіть до Pro для безлімітних серверів.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Ви досягли ліміту %lld робочого простору у безкоштовному плані. Оновіть до Pro для безлімітних робочих просторів.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "У безкоштовному плані можна мати лише %lld підключення одночасно. Оновіть до Pro для кількох одночасних підключень.";
+"Server Locked" = "Сервер заблоковано";
+"Workspace Locked" = "Робочий простір заблоковано";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Цей сервер перевищує ліміт %lld серверів у безкоштовному плані. Поновіть підписку Pro, щоб отримати доступ до всіх серверів.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Цей робочий простір перевищує ліміт %lld у безкоштовному плані. Поновіть підписку Pro, щоб отримати доступ до всіх робочих просторів.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Підписка закінчилась";
+"%lld server" = "%lld сервер";
+"%lld servers" = "%lld серверів";
+"%lld workspace" = "%lld робочий простір";
+"%lld workspaces" = "%lld робочих просторів";
+" and " = " і ";
+"%@ locked" = "%@ заблоковано";
+
+/* Server & Workspace */
+"Server Info" = "Інформація про сервер";
+"Name" = "Назва";
+"Host" = "Хост";
+"Port" = "Порт";
+"Username" = "Ім’я користувача";
+"Authentication" = "Автентифікація";
+"Method" = "Метод";
+"Password" = "Пароль";
+"Key loaded" = "Ключ завантажено";
+"Key Passphrase" = "Пароль ключа";
+"Server Environment" = "Середовище сервера";
+"Environment" = "Середовище";
+"Notes" = "Нотатки";
+"Edit Server" = "Редагувати сервер";
+"Add Server" = "Додати сервер";
+"Use Stored Key" = "Використати збережений ключ";
+"Select a key..." = "Виберіть ключ...";
+"Import File" = "Імпортувати файл";
+"Paste" = "Вставити";
+"Add to Keychain" = "Додати до Зв’язки ключів";
+"Select a stored key or import/paste a new one" = "Виберіть збережений ключ або імпортуйте/вставте новий";
+"Using stored key: %@" = "Використовується збережений ключ: %@";
+"Workspace" = "Робочий простір";
+"Workspaces" = "Робочі простори";
+"Workspace name" = "Назва робочого простору";
+"Color" = "Колір";
+"Delete Workspace" = "Видалити робочий простір";
+"Edit Workspace" = "Редагувати робочий простір";
+"New Workspace" = "Новий робочий простір";
+"Workspaces" = "Робочі простори";
+"My Servers" = "Мої сервери";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "РОБОЧИЙ ПРОСТІР";
+"SERVERS" = "СЕРВЕРИ";
+"Support VVTerm" = "Підтримати VVTerm";
+"Upgrade to Pro" = "Оновити до Pro";
+"All" = "Усі";
+"Custom..." = "Власні...";
+"New Workspace" = "Новий робочий простір";
+"Unlock with Pro" = "Розблокувати з Pro";
+"Switch to Workspace" = "Перемкнутися на робочий простір";
+"Delete Workspace" = "Видалити робочий простір";
+
+/* iOS Lists */
+"%lld servers" = "%lld серверів";
+"Servers" = "Сервери";
+"Active Connections" = "Активні підключення";
+"Add Workspace" = "Додати робочий простір";
+"Workspaces" = "Робочі простори";
+"Done" = "Готово";
+
+/* Empty States */
+"No Servers" = "Немає серверів";
+"Add a server to get started" = "Додайте сервер, щоб почати";
+"Multiple connections require Pro" = "Кілька підключень потребують Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Оновіть до Pro для одночасного підключення до кількох серверів";
+"Upgrade to Pro" = "Оновити до Pro";
+"Connect" = "Підключити";
+
+/* Offline */
+"No network connection" = "Немає мережевого з’єднання";
+"You're currently offline. Some features may not work:" = "Зараз ви офлайн. Деякі функції можуть не працювати:";
+"Cannot connect to servers" = "Не вдається підключитися до серверів";
+"iCloud sync paused" = "Синхронізацію iCloud призупинено";
+"Saved servers still accessible" = "Збережені сервери все ще доступні";
+"Offline" = "Офлайн";
+
+/* Terminal */
+"Initializing terminal..." = "Ініціалізація термінала...";
+"Terminal initialization failed" = "Ініціалізація термінала не вдалася";
+"Connecting..." = "Підключення...";
+"Reconnecting (attempt %lld)..." = "Повторне підключення (спроба %lld)...";
+"Disconnected" = "Від’єднано";
+"Connection Failed" = "Підключення не вдалося";
+"Reconnect" = "Підключити знову";
+"Retry" = "Повторити";
+"Voice Input Unavailable" = "Голосовий ввід недоступний";
+"Voice input (Command+Shift+M)" = "Голосовий ввід (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Увімкніть мікрофон і розпізнавання мовлення в налаштуваннях системи.";
+"Terminal" = "Термінал";
+"No terminals open" = "Немає відкритих терміналів";
+"New Terminal" = "Новий термінал";
+"Close this terminal?" = "Закрити цей термінал?";
+"The SSH connection will be terminated." = "SSH‑підключення буде завершено.";
+
+/* Keychain */
+"No Keys Stored" = "Немає збережених ключів";
+"Add keys to quickly use them when creating new servers" = "Додайте ключі для швидкого використання під час створення нових серверів";
+"Generate New Key" = "Згенерувати новий ключ";
+"Import Key" = "Імпортувати ключ";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Ключі надійно зберігаються у Зв’язці ключів пристрою. Паролі зберігаються окремо.";
+"Delete SSH Key" = "Видалити SSH‑ключ";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Ви впевнені, що хочете видалити «%@»? Це неможливо скасувати.";
+"Protected" = "Захищено";
+"Added %@ ago" = "Додано %@ тому";
+"Copy public key" = "Копіювати публічний ключ";
+"Key Name" = "Назва ключа";
+"e.g., Personal MacBook, Work Key" = "наприклад, Особистий MacBook, Робочий ключ";
+"Private Key" = "Приватний ключ";
+"Import Key File" = "Імпортувати файл ключа";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Імпортуйте файл приватного ключа (id_rsa, id_ed25519 тощо) або вставте вміст";
+"Key loaded (%lld characters)" = "Ключ завантажено (%lld символів)";
+"Key passphrase" = "Пароль ключа";
+"Passphrase (Optional)" = "Пароль (необов’язково)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "Якщо ключ зашифровано паролем, введіть його тут. Залиште порожнім для ключів без пароля.";
+"Add SSH Key" = "Додати SSH‑ключ";
+"Algorithm" = "Алгоритм";
+"Key Type" = "Тип ключа";
+"Confirm passphrase" = "Підтвердьте пароль";
+"Protect your key with a passphrase. Leave empty for no protection." = "Захистіть ключ паролем. Залиште порожнім, щоб не захищати.";
+"Generated Key" = "Ключ згенеровано";
+"Key generated successfully" = "Ключ успішно згенеровано";
+"Fingerprint:" = "Відбиток:";
+"View Public Key" = "Переглянути публічний ключ";
+"Generate SSH Key" = "Згенерувати SSH‑ключ";
+"Generate" = "Згенерувати";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Додайте це до файлу ~/.ssh/authorized_keys на сервері:";
+"No Public Key" = "Немає публічного ключа";
+"This key was imported without a public key." = "Цей ключ імпортовано без публічного ключа.";
+"Public Key" = "Публічний ключ";
+
+/* Transcription */
+"Engine" = "Рушій";
+"System (Apple)" = "Система (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Постачальник";
+"Language" = "Мова";
+"Model" = "Модель";
+"Downloading..." = "Завантаження...";
+"Delete Model" = "Видалити модель";
+"Download size: %@" = "Розмір завантаження: %@";
+"Status" = "Статус";
+"Download" = "Завантажити";
+"Ready" = "Готово";
+"Failed" = "Не вдалося";
+"Storage" = "Сховище";
+"Model Storage" = "Сховище моделей";
+"Total MLX Models" = "Усього моделей MLX";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Використовує вбудоване розпізнавання мовлення Apple. Для найкращих результатів потрібна мережа.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper працює локально через MLX. Після завантаження працює офлайн.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet працює локально через MLX. Оптимізовано для транскрипції в реальному часі.";
+"English" = "Англійська";
+"Spanish" = "Іспанська";
+"French" = "Французька";
+"German" = "Німецька";
+"Japanese" = "Японська";
+"Chinese" = "Китайська";
+"Korean" = "Корейська";
+"Portuguese" = "Португальська";
+"Russian" = "Російська";
+"Auto-detect" = "Автовизначення";
+
+/* MLX Models */
+"Tiny" = "Дуже маленька";
+"Fastest, smallest" = "Найшвидша, найменша";
+"Full precision" = "Повна точність";
+"Tiny (EN)" = "Дуже маленька (EN)";
+"English-only, smaller" = "Лише англійська, менша";
+"English-only" = "Лише англійська";
+"Base" = "Базова";
+"Balanced speed/quality" = "Збалансована швидкість/якість";
+"Small" = "Мала";
+"Better accuracy" = "Краща точність";
+"Medium" = "Середня";
+"Higher accuracy, heavier" = "Вища точність, більша";
+"Large v3" = "Велика v3";
+"Latest large model" = "Остання велика модель";
+"Large" = "Велика";
+"Large v3 4-bit" = "Велика v3 4‑біт";
+"Smaller download" = "Менше завантаження";
+"4-bit quantized" = "Квантизована 4‑біт";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Велика високоточна модель";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "Стільниковий";
+"Ethernet" = "Ethernet";
+"Unknown" = "Невідомо";
+"No Connection" = "Немає з’єднання";
+" (Metered)" = " (Лімітований)";
+" (Low Data)" = " (Економія даних)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Увімкнути синхронізацію iCloud";
+"iCloud Account" = "Обліковий запис iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Синхронізуйте сервери й робочі простори на всіх пристроях Apple.";
+"Sync Status" = "Статус синхронізації";
+"Last Synced" = "Остання синхронізація";
+"Error" = "Помилка";
+"Data" = "Дані";
+"Force Sync Now" = "Примусова синхронізація";
+"Clear Local Data & Re-sync" = "Очистити локальні дані та синхронізувати знову";
+"Reset iCloud (Delete All & Re-upload)" = "Скинути iCloud (видалити все і завантажити знову)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Примусова синхронізація отримує останні дані з iCloud. Очистити та синхронізувати знову видаляє локальні дані й завантажує заново. Скидання iCloud видаляє ВСІ дані у хмарі та знову завантажує локальні (виправляє дублікати).";
+"Account Status" = "Статус облікового запису";
+"Container" = "Контейнер";
+"Re-check iCloud Status" = "Перевірити статус iCloud";
+"Troubleshooting" = "Вирішення проблем";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Переконайтеся, що ви увійшли в iCloud у Налаштуваннях і увімкнено iCloud Drive. Перегляньте Console.app для журналів «CloudKit».";
+"Force Sync" = "Примусово синхронізувати";
+"Sync Now" = "Синхронізувати зараз";
+"This will fetch the latest data from iCloud and may take a moment." = "Це отримає найновіші дані з iCloud і може зайняти деякий час.";
+"Clear Local Data" = "Очистити локальні дані";
+"Clear & Re-sync" = "Очистити та синхронізувати знову";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Це видалить усі локальні дані та завантажить заново з iCloud. Несинхронізовані локальні зміни буде втрачено.";
+"Reset iCloud Data" = "Скинути дані iCloud";
+"Delete All & Re-upload" = "Видалити все та завантажити знову";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "Це ВИДАЛИТЬ УСІ дані з iCloud і завантажить поточні локальні дані. Використовуйте для виправлення дублікатів.";
+"Connected" = "Підключено";
+"Not Available" = "Недоступно";
+"Synced" = "Синхронізовано";
+"Syncing..." = "Синхронізація...";
+"available" = "доступно";
+"noAccount - User not signed into iCloud" = "noAccount - Користувач не увійшов до iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - Доступ до iCloud обмежено (батьківський контроль, MDM тощо)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Неможливо визначити статус iCloud";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud тимчасово недоступний";
+"unknown status: %@" = "невідомий статус: %@";
+"Error: %@" = "Помилка: %@";
+"Checking..." = "Перевірка...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Горизонтальний поділ";
+"Vertical split view" = "Вертикальний поділ";
+"Left pane" = "Ліва панель";
+"Top pane" = "Верхня панель";
+"Right pane" = "Права панель";
+"Bottom pane" = "Нижня панель";
+"Horizontal split divider" = "Горизонтальний розділювач";
+"Vertical split divider" = "Вертикальний розділювач";
+"Drag to resize the left and right panes" = "Перетягніть, щоб змінити розмір лівої та правої панелей";
+"Drag to resize the top and bottom panes" = "Перетягніть, щоб змінити розмір верхньої та нижньої панелей";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "ЯДРА";
+"IDLE" = "ПРОСТІЙ";
+"UPTIME" = "ЧАС РОБОТИ";
+"LOAD" = "НАВАНТАЖЕННЯ";
+"FREE" = "ВІЛЬНО";
+"USED" = "ВИКОРИСТ.";
+"CACHED" = "КЕШ";
+"TOTAL" = "УСЬОГО";
+"Volumes" = "Томи";
+"Top Processes" = "Топ процесів";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ УСЬОГО";
+"↓ TOTAL" = "↓ УСЬОГО";
+"%lld D" = "%lld д";
+"%lld H" = "%lld г";
+
+/* SFSymbol Picker */
+"Recent" = "Нещодавні";
+"Load more (%lld remaining)" = "Завантажити ще (%lld залишилось)";
+"%lld symbols" = "%lld символів";
+"What's New" = "Новинки";
+"Draw" = "Малювання";
+"Variable" = "Змінна";
+"Multicolor" = "Багатоколірний";
+"Communication" = "Комунікація";
+"Weather" = "Погода";
+"Maps" = "Карти";
+"Objects & Tools" = "Об’єкти та інструменти";
+"Devices" = "Пристрої";
+"Camera & Photos" = "Камера та фото";
+"Gaming" = "Ігри";
+"Connectivity" = "Підключення";
+"Transportation" = "Транспорт";
+"Automotive" = "Авто";
+"Accessibility" = "Доступність";
+"Privacy & Security" = "Конфіденційність і безпека";
+"Human" = "Людина";
+"Home" = "Дім";
+"Fitness" = "Фітнес";
+"Nature" = "Природа";
+"Editing" = "Редагування";
+"Text Formatting" = "Форматування тексту";
+"Media" = "Медіа";
+"Keyboard" = "Клавіатура";
+"Commerce" = "Комерція";
+"Time" = "Час";
+"Health" = "Здоров’я";
+"Shapes" = "Фігури";
+"Arrows" = "Стрілки";
+"Indices" = "Індекси";
+"Math" = "Математика";
+
+/* Auth Methods */
+"SSH Key" = "SSH‑ключ";
+"SSH Key + Passphrase" = "SSH‑ключ + пароль";
+
+/* Environments */
+"Production" = "Продакшн";
+"Staging" = "Стейджинг";
+"Development" = "Розробка";
+"Prod" = "Прод";
+"Stag" = "Стейдж";
+"Dev" = "Дев";
+"New Environment" = "Нове середовище";
+"Edit Environment" = "Редагувати середовище";
+"Environment name" = "Назва середовища";
+"An environment with this name already exists." = "Середовище з такою назвою вже існує.";
+"Delete Environment?" = "Видалити середовище?";
+"Servers in '%@' will be moved to Production." = "Сервери в «%@» буде переміщено до Продакшн.";
+"Edit \"%@\"..." = "Редагувати «%@»...";
+"Delete \"%@\"..." = "Видалити «%@»...";
+"Custom" = "Власні";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Потрібен дозвіл на мікрофон. Він буде запитаний автоматично при початку запису.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Розпізнавання мовлення недоступне. Увімкніть Siri в Налаштуваннях системи > Siri та Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Не вдалося почати запис. Перевірте дозволи мікрофона в Налаштуваннях системи > Конфіденційність і безпека > Мікрофон.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "Транскрипція MLX недоступна на цьому Mac. Перемикаємося на Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Оновіть до Pro для безлімітних серверів";
+"Upgrade to Pro for unlimited workspaces" = "Оновіть до Pro для безлімітних робочих просторів";
+"Upgrade to Pro for multiple connections" = "Оновіть до Pro для кількох підключень";
+"Upgrade to Pro for custom environments" = "Оновіть до Pro для користувацьких середовищ";
+
+/* Misc */
+"Terminal initialization failed" = "Ініціалізація термінала не вдалася";
+"Voice Input Unavailable" = "Голосовий ввід недоступний";
+"Disconnect from server" = "Від’єднатися від сервера";
+"Disconnect from %@?" = "Від’єднатися від %@?";
+"This will return to the server list." = "Повернення до списку серверів.";
+"All terminal tabs for this server will be closed." = "Усі вкладки термінала для цього сервера буде закрито.";
+"Add Terminal Preset" = "Додати пресет термінала";
+"Edit Preset" = "Редагувати пресет";
+"Basic Information" = "Основна інформація";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Назва пресета (наприклад, Claude, Helix, Vim)";
+"Command" = "Команда";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Команда для запуску при виборі пресета (наприклад, claude, hx, nvim)";
+"Icon" = "Іконка";
+"Choose Symbol..." = "Вибрати символ...";
+
+/* Contact Labels */
+"Developer" = "Розробник";
+"Discord" = "Discord";
+"Join Community" = "Приєднатися до спільноти";
+"Email" = "Електронна пошта";
+"GitHub" = "GitHub";
+"Report Issue" = "Повідомити про проблему";
+"Support VVTerm" = "Підтримати VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "Система (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Не вдалося видалити модель";
+"Model ID is required" = "Потрібен ID моделі";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Сервер «%@» заблоковано";
+"Workspace '%@' is locked" = "Робочий простір «%@» заблоковано";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "Ви досягли ліміту %lld серверів. Оновіть до Pro для безлімітних серверів.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Сучасно, швидко та безпечно. Рекомендується для більшості випадків.";
+"Wide compatibility with older systems." = "Широка сумісність зі старими системами.";
+
+
+/* Split Commands */
+"Split Right" = "Розділити праворуч";
+"Split Down" = "Розділити вниз";
+"Close Pane" = "Закрити панель";
+
+/* Tabs */
+"View" = "Вигляд";
+"Stats" = "Статистика";
+
+/* Help */
+"Support & Feedback" = "Підтримка та відгуки";
+
+"Upgrade to Pro for unlimited workspaces." = "Оновіть до Pro для безлімітних робочих просторів.";
+
+"Fingerprint" = "Відбиток";
+
+"Links" = "Посилання";
+
+"Passphrase" = "Пароль";
+
+"%@ is a Pro feature" = "%@ — функція Pro";
+
+"System (Default)" = "Система (за замовчуванням)";
+
+"Some changes may require restarting the app." = "Деякі зміни можуть потребувати перезапуску застосунку.";
+
+/* Download Progress */
+"%llds remaining" = "залишилось %lldс";
+"%lldm remaining" = "залишилось %lldхв";
+"%lldh %lldm remaining" = "залишилось %lldг %lldхв";
+"Clear All Storage" = "Очистити все сховище";
+
+/* Preview */
+"Server 1" = "Сервер 1";
+"Server 2" = "Сервер 2";
+"Server 3" = "Сервер 3";

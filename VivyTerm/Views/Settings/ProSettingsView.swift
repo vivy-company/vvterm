@@ -40,7 +40,7 @@ struct ProSettingsView: View {
 
                     if let renewalDate = storeManager.subscriptionExpirationDate {
                         HStack {
-                            Text(storeManager.isLifetime ? "Purchased" : "Renews")
+                            Text(storeManager.isLifetime ? String(localized: "Purchased") : String(localized: "Renews"))
                             Spacer()
                             Text(renewalDate, style: .date)
                                 .foregroundStyle(.secondary)
@@ -117,7 +117,7 @@ struct ProSettingsView: View {
 
     @ViewBuilder
     private var statusBadge: some View {
-        Text(storeManager.isPro ? "Active" : "Free Tier")
+        Text(storeManager.isPro ? String(localized: "Active") : String(localized: "Free Tier"))
             .font(.caption2)
             .fontWeight(.medium)
             .foregroundStyle(storeManager.isPro ? .green : .secondary)
@@ -128,24 +128,24 @@ struct ProSettingsView: View {
 
     private var planName: String {
         if storeManager.isLifetime {
-            return "Pro Lifetime"
+            return String(localized: "Pro Lifetime")
         }
         guard let status = storeManager.subscriptionStatus,
               case .verified(let transaction) = status.transaction else {
-            return "Pro"
+            return String(localized: "Pro")
         }
         switch transaction.productID {
         case VivyTermProducts.proMonthly:
-            return "Pro Monthly"
+            return String(localized: "Pro Monthly")
         case VivyTermProducts.proYearly:
-            return "Pro Yearly"
+            return String(localized: "Pro Yearly")
         default:
-            return "Pro"
+            return String(localized: "Pro")
         }
     }
 
     @ViewBuilder
-    private func featureRow(icon: String, title: String, enabled: Bool) -> some View {
+    private func featureRow(icon: String, title: LocalizedStringKey, enabled: Bool) -> some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)

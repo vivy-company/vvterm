@@ -24,10 +24,10 @@ private struct iOSWelcomeContent: View {
     @Binding var hasSeenWelcome: Bool
 
     private let features: [(icon: String, title: String, description: String, color: Color)] = [
-        ("terminal.fill", "SSH Terminal", "Connect to servers with GPU-accelerated terminal emulation.", .blue),
-        ("icloud.fill", "iCloud Sync", "Servers and credentials sync across all your devices.", .cyan),
-        ("key.fill", "Secure Storage", "Passwords and SSH keys protected by Keychain.", .green),
-        ("waveform", "Voice Commands", "Speak commands with on-device speech recognition.", .orange)
+        ("terminal.fill", String(localized: "SSH Terminal"), String(localized: "Connect to servers with GPU-accelerated terminal emulation."), .blue),
+        ("icloud.fill", String(localized: "iCloud Sync"), String(localized: "Servers and credentials sync across all your devices."), .cyan),
+        ("key.fill", String(localized: "Secure Storage"), String(localized: "Passwords and SSH keys protected by Keychain."), .green),
+        ("waveform", String(localized: "Voice Commands"), String(localized: "Speak commands with on-device speech recognition."), .orange)
     ]
 
     var body: some View {
@@ -112,10 +112,10 @@ private struct macOSWelcomeContent: View {
     @Binding var hasSeenWelcome: Bool
 
     private let features: [(icon: String, title: String, description: String, color: Color)] = [
-        ("terminal.fill", "SSH Terminal", "Connect to servers with GPU-accelerated terminal emulation.", .blue),
-        ("icloud.fill", "iCloud Sync", "Servers and credentials sync across all your devices.", .cyan),
-        ("key.fill", "Secure Storage", "Passwords and SSH keys protected by Keychain.", .green),
-        ("waveform", "Voice Commands", "Speak commands with on-device speech recognition.", .orange)
+        ("terminal.fill", String(localized: "SSH Terminal"), String(localized: "Connect to servers with GPU-accelerated terminal emulation."), .blue),
+        ("icloud.fill", String(localized: "iCloud Sync"), String(localized: "Servers and credentials sync across all your devices."), .cyan),
+        ("key.fill", String(localized: "Secure Storage"), String(localized: "Passwords and SSH keys protected by Keychain."), .green),
+        ("waveform", String(localized: "Voice Commands"), String(localized: "Speak commands with on-device speech recognition."), .orange)
     ]
 
     var body: some View {
@@ -148,65 +148,51 @@ private struct macOSWelcomeContent: View {
                 .foregroundStyle(.secondary)
                 .padding(.bottom, 28)
 
-            // Main card
-            VStack(alignment: .leading, spacing: 0) {
+            // Features
+            VStack(alignment: .leading, spacing: 20) {
+                ForEach(features, id: \.title) { feature in
+                    HStack(alignment: .top, spacing: 14) {
+                        Image(systemName: feature.icon)
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 36, height: 36)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .fill(feature.color)
+                            )
 
-                // Features
-                VStack(alignment: .leading, spacing: 20) {
-                    ForEach(features, id: \.title) { feature in
-                        HStack(alignment: .top, spacing: 14) {
-                            Image(systemName: feature.icon)
-                                .font(.system(size: 18, weight: .medium))
-                                .foregroundStyle(.white)
-                                .frame(width: 36, height: 36)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                        .fill(feature.color)
-                                )
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(feature.title)
+                                .font(.system(size: 13, weight: .semibold))
 
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(feature.title)
-                                    .font(.system(size: 13, weight: .semibold))
-
-                                Text(feature.description)
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-
-                            Spacer(minLength: 0)
+                            Text(feature.description)
+                                .font(.system(size: 12))
+                                .foregroundStyle(.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
                         }
+
+                        Spacer(minLength: 0)
                     }
                 }
-            }
-            .padding(32)
-            .background {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color(nsColor: .controlBackgroundColor))
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
             }
             .frame(maxWidth: 420)
             .padding(.horizontal, 48)
 
             Spacer()
+                .frame(minHeight: 40)
 
-            // Footer
-            HStack {
-                Spacer()
-
-                Button {
-                    hasSeenWelcome = true
-                } label: {
-                    Text("Continue")
-                        .font(.system(size: 13, weight: .semibold))
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color(red: 1.0, green: 0.27, blue: 0.35))
-                .controlSize(.large)
+            // Continue button
+            Button {
+                hasSeenWelcome = true
+            } label: {
+                Text("Continue")
+                    .frame(maxWidth: 420)
+                    .frame(height: 32)
             }
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .tint(Color(red: 1.0, green: 0.27, blue: 0.35))
+            .controlSize(.large)
             .padding(.horizontal, 48)
             .padding(.bottom, 32)
         }

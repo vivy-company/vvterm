@@ -1,0 +1,642 @@
+/* General */
+"OK" = "ตกลง";
+"Cancel" = "ยกเลิก";
+"Save" = "บันทึก";
+"Add" = "เพิ่ม";
+"Create" = "สร้าง";
+"Delete" = "ลบ";
+"Done" = "เสร็จสิ้น";
+"Edit" = "แก้ไข";
+"Remove" = "นำออก";
+"Connect" = "เชื่อมต่อ";
+"Disconnect" = "ตัดการเชื่อมต่อ";
+"Reconnect" = "เชื่อมต่อใหม่";
+"Retry" = "ลองอีกครั้ง";
+"Upgrade" = "อัปเกรด";
+"Upgrade to Pro" = "อัปเกรดเป็น Pro";
+"Upgrade to VVTerm Pro" = "อัปเกรดเป็น VVTerm Pro";
+"View Plans" = "ดูแพ็กเกจ";
+"Manage Subscription" = "จัดการการสมัครสมาชิก";
+"Manage subscription" = "จัดการการสมัครสมาชิก";
+"Manage your subscription" = "จัดการการสมัครสมาชิกของคุณ";
+"Restore Purchases" = "กู้คืนการซื้อ";
+"Renew" = "ต่ออายุ";
+"Renew Pro" = "ต่ออายุ Pro";
+"Close" = "ปิด";
+"Close Terminal" = "ปิดเทอร์มินัล";
+"Close All to the Left" = "ปิดทั้งหมดทางซ้าย";
+"Close All to the Right" = "ปิดทั้งหมดทางขวา";
+"Close Other Tabs" = "ปิดแท็บอื่น";
+"Duplicate Tab" = "ทำซ้ำแท็บ";
+"New Terminal" = "เทอร์มินัลใหม่";
+"New terminal tab" = "แท็บเทอร์มินัลใหม่";
+"New connection" = "การเชื่อมต่อใหม่";
+"Previous tab" = "แท็บก่อนหน้า";
+"Next tab" = "แท็บถัดไป";
+"No terminals" = "ไม่มีเทอร์มินัล";
+"%lld tab" = "%lld แท็บ";
+"%lld tabs" = "%lld แท็บ";
+"No terminals open" = "ไม่มีเทอร์มินัลที่เปิดอยู่";
+"Search servers" = "ค้นหาเซิร์ฟเวอร์";
+"Search servers..." = "ค้นหาเซิร์ฟเวอร์...";
+"Search symbols..." = "ค้นหาสัญลักษณ์...";
+"Select Workspace" = "เลือกเวิร์กสเปซ";
+"Select a Server" = "เลือกเซิร์ฟเวอร์";
+"Choose a server from the sidebar to connect" = "เลือกเซิร์ฟเวอร์จากแถบด้านข้างเพื่อเชื่อมต่อ";
+"Multiple connections require Pro" = "การเชื่อมต่อหลายรายการต้องใช้ Pro";
+"Upgrade to connect to multiple servers simultaneously" = "อัปเกรดเพื่อเชื่อมต่อหลายเซิร์ฟเวอร์พร้อมกัน";
+"Disconnected" = "ตัดการเชื่อมต่อแล้ว";
+"Connecting..." = "กำลังเชื่อมต่อ...";
+"Connecting to %@..." = "กำลังเชื่อมต่อกับ %@...";
+"Reconnecting (attempt %lld)..." = "กำลังเชื่อมต่อใหม่ (ครั้งที่ %lld)...";
+"Connection Failed" = "การเชื่อมต่อล้มเหลว";
+"Connection failed: %@" = "การเชื่อมต่อล้มเหลว: %@";
+"Connection timed out" = "หมดเวลาการเชื่อมต่อ";
+"Authentication failed" = "การยืนยันตัวตนล้มเหลว";
+"Failed to load credentials" = "โหลดข้อมูลรับรองไม่สำเร็จ";
+"Failed to load credentials: %@" = "โหลดข้อมูลรับรองไม่สำเร็จ: %@";
+"Failed to load key: %@" = "โหลดคีย์ไม่สำเร็จ: %@";
+"Failed to read key file: %@" = "อ่านไฟล์คีย์ไม่สำเร็จ: %@";
+"Failed to import key: %@" = "นำเข้าคีย์ไม่สำเร็จ: %@";
+"Failed to delete key: %@" = "ลบคีย์ไม่สำเร็จ: %@";
+"Failed to save key: %@" = "บันทึกคีย์ไม่สำเร็จ: %@";
+"Failed to generate key: %@" = "สร้างคีย์ไม่สำเร็จ: %@";
+"Failed to generate SSH key" = "สร้างคีย์ SSH ไม่สำเร็จ";
+"Failed to encode key data" = "เข้ารหัสข้อมูลคีย์ไม่สำเร็จ";
+"Failed to export RSA key" = "ส่งออกคีย์ RSA ไม่สำเร็จ";
+"Invalid key data" = "ข้อมูลคีย์ไม่ถูกต้อง";
+"Cannot access the selected file" = "ไม่สามารถเข้าถึงไฟล์ที่เลือกได้";
+"Copy to Clipboard" = "คัดลอกไปยังคลิปบอร์ด";
+"Copied" = "คัดลอกแล้ว";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "เกี่ยวกับ VVTerm";
+"Version %@ (%@)" = "เวอร์ชัน %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "ไคลเอนต์ SSH ระดับมืออาชีพ\nสำหรับ macOS และ iOS";
+"Visit Website" = "เยี่ยมชมเว็บไซต์";
+"Report an Issue" = "รายงานปัญหา";
+"Privacy Policy" = "นโยบายความเป็นส่วนตัว";
+"Get in Touch" = "ติดต่อเรา";
+"Questions, feedback, or issues? Reach out anytime." = "มีคำถาม คำติชม หรือปัญหา? ติดต่อเราได้ทุกเมื่อ.";
+"Questions, feedback, or issues?\nReach out anytime." = "มีคำถาม คำติชม หรือปัญหา?\nติดต่อเราได้ทุกเมื่อ.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "ยินดีต้อนรับสู่ VVTerm";
+"Your secure SSH terminal" = "เทอร์มินัล SSH ที่ปลอดภัยของคุณ";
+"Continue" = "ดำเนินการต่อ";
+"SSH Terminal" = "เทอร์มินัล SSH";
+"Connect to servers with GPU-accelerated terminal emulation." = "เชื่อมต่อเซิร์ฟเวอร์ด้วยการจำลองเทอร์มินัลที่เร่งด้วย GPU";
+"iCloud Sync" = "ซิงค์ iCloud";
+"Servers and credentials sync across all your devices." = "ซิงค์เซิร์ฟเวอร์และข้อมูลรับรองบนอุปกรณ์ทั้งหมดของคุณ";
+"Secure Storage" = "ที่เก็บข้อมูลปลอดภัย";
+"Passwords and SSH keys protected by Keychain." = "รหัสผ่านและคีย์ SSH ได้รับการป้องกันโดย Keychain";
+"Voice Commands" = "คำสั่งเสียง";
+"Speak commands with on-device speech recognition." = "สั่งงานด้วยการรู้จำเสียงบนอุปกรณ์";
+
+/* Settings Navigation */
+"Settings" = "การตั้งค่า";
+"General" = "ทั่วไป";
+"Terminal" = "เทอร์มินัล";
+"Transcription" = "ถอดเสียง";
+"SSH Keys" = "คีย์ SSH";
+"Sync" = "ซิงค์";
+"About" = "เกี่ยวกับ";
+"Premium" = "พรีเมียม";
+"Appearance and preferences" = "รูปลักษณ์และการตั้งค่า";
+"Font, theme, and connection settings" = "ฟอนต์ ธีม และการตั้งค่าการเชื่อมต่อ";
+"Speech-to-text engine and models" = "เอนจินและโมเดลแปลงเสียงเป็นข้อความ";
+"Manage stored SSH keys" = "จัดการคีย์ SSH ที่บันทึกไว้";
+"iCloud sync and data management" = "ซิงค์ iCloud และการจัดการข้อมูล";
+"Version and links" = "เวอร์ชันและลิงก์";
+
+/* Appearance */
+"Appearance" = "รูปลักษณ์";
+"System" = "ระบบ";
+"Light" = "สว่าง";
+"Dark" = "มืด";
+
+/* Terminal Settings */
+"Font" = "ฟอนต์";
+"Font Family" = "ตระกูลฟอนต์";
+"Size: %lldpt" = "ขนาด: %lldpt";
+"Theme" = "ธีม";
+"Use different themes for Light/Dark mode" = "ใช้ธีมต่างกันสำหรับโหมดสว่าง/มืด";
+"Dark Mode Theme" = "ธีมโหมดมืด";
+"Light Mode Theme" = "ธีมโหมดสว่าง";
+"Terminal Behavior" = "การทำงานของเทอร์มินัล";
+"Enable terminal notifications" = "เปิดการแจ้งเตือนเทอร์มินัล";
+"Show progress overlays" = "แสดงโอเวอร์เลย์ความคืบหน้า";
+"Show voice input button" = "แสดงปุ่มป้อนเสียง";
+"Copy Text Processing" = "การประมวลผลข้อความเมื่อคัดลอก";
+"Transformations applied when copying text from terminal" = "การแปลงที่ใช้เมื่อคัดลอกข้อความจากเทอร์มินัล";
+"Trim trailing whitespace" = "ตัดช่องว่างท้ายบรรทัด";
+"Collapse multiple blank lines" = "ยุบหลายบรรทัดว่าง";
+"Strip shell prompts ($ #)" = "ลบพรอมต์เชลล์ ($ #)";
+"Flatten multi-line commands" = "รวมคำสั่งหลายบรรทัดเป็นบรรทัดเดียว";
+"Remove box-drawing characters" = "ลบอักขระเส้นกรอบ";
+"Strip ANSI escape codes" = "ลบรหัส ANSI";
+"SSH Connection" = "การเชื่อมต่อ SSH";
+"Auto-reconnect on disconnect" = "เชื่อมต่อใหม่อัตโนมัติเมื่อหลุด";
+"Send keep-alive packets" = "ส่งแพ็กเกจ keep-alive";
+"Interval: %llds" = "ช่วงเวลา: %lld วินาที";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "อัปเกรดเพื่อใช้งานไม่จำกัด";
+"Unlimited Servers" = "เซิร์ฟเวอร์ไม่จำกัด";
+"Add as many servers as you need (free: 3)" = "เพิ่มเซิร์ฟเวอร์ตามต้องการ (ฟรี: 3)";
+"Unlimited Workspaces" = "เวิร์กสเปซไม่จำกัด";
+"Organize servers into multiple workspaces (free: 1)" = "จัดเซิร์ฟเวอร์เป็นหลายเวิร์กสเปซ (ฟรี: 1)";
+"Multiple Connections" = "หลายการเชื่อมต่อ";
+"Open multiple terminal tabs at once (free: 1)" = "เปิดหลายแท็บเทอร์มินัลพร้อมกัน (ฟรี: 1)";
+"Custom Environments" = "สภาพแวดล้อมแบบกำหนดเอง";
+"Create custom environment labels beyond Prod/Staging/Dev" = "สร้างป้ายกำกับสภาพแวดล้อมที่มากกว่า Prod/Staging/Dev";
+"All Future Features" = "ฟีเจอร์ใหม่ทั้งหมดในอนาคต";
+"Get access to every new Pro feature" = "เข้าถึงทุกฟีเจอร์ Pro ใหม่";
+"Monthly" = "รายเดือน";
+"Billed monthly" = "เรียกเก็บรายเดือน";
+"Yearly" = "รายปี";
+"Best value - billed yearly" = "คุ้มค่าที่สุด - เรียกเก็บรายปี";
+"SAVE 74%" = "ประหยัด 74%";
+"Lifetime" = "ตลอดชีพ";
+"One-time purchase, forever" = "ซื้อครั้งเดียวตลอดไป";
+"FOREVER" = "ตลอดไป";
+"Processing..." = "กำลังดำเนินการ...";
+"Purchase Failed" = "การซื้อไม่สำเร็จ";
+"Unknown error" = "ข้อผิดพลาดที่ไม่รู้จัก";
+"Welcome to Pro!" = "ยินดีต้อนรับสู่ Pro!";
+"You now have unlimited access" = "คุณมีสิทธิ์ใช้งานแบบไม่จำกัดแล้ว";
+"Cancel anytime. Subscription auto-renews." = "ยกเลิกได้ทุกเมื่อ ระบบจะต่ออายุอัตโนมัติ";
+"Terms of Service" = "ข้อกำหนดการให้บริการ";
+"Refund Policy" = "นโยบายการคืนเงิน";
+"Select a Plan" = "เลือกแผน";
+"Buy - %@" = "ซื้อ - %@";
+"Subscribe - %@" = "สมัครสมาชิก - %@";
+"Purchase verification failed" = "การยืนยันการซื้อล้มเหลว";
+"Product not found" = "ไม่พบสินค้า";
+"Purchase failed: %@" = "การซื้อไม่สำเร็จ: %@";
+
+/* Pro Settings */
+"Status" = "สถานะ";
+"Subscription" = "การสมัครสมาชิก";
+"Plan" = "แผน";
+"Purchased" = "ซื้อแล้ว";
+"Renews" = "ต่ออายุ";
+"Servers" = "เซิร์ฟเวอร์";
+"%lld of %lld used" = "ใช้ไป %lld จาก %lld";
+"Workspaces" = "เวิร์กสเปซ";
+"Simultaneous Connections" = "การเชื่อมต่อพร้อมกัน";
+"%lld max" = "สูงสุด %lld";
+"Features" = "ฟีเจอร์";
+"Billing" = "การเรียกเก็บเงิน";
+"Active" = "ใช้งานอยู่";
+"Free Tier" = "แผนฟรี";
+"Pro Lifetime" = "Pro ตลอดชีพ";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro รายเดือน";
+"Pro Yearly" = "Pro รายปี";
+"PRO" = "PRO";
+"FREE" = "ฟรี";
+"Unlimited servers & workspaces" = "เซิร์ฟเวอร์และเวิร์กสเปซไม่จำกัด";
+"View Plans" = "ดูแพ็กเกจ";
+
+/* Pro Limits */
+"Server Limit Reached" = "ถึงขีดจำกัดเซิร์ฟเวอร์แล้ว";
+"Workspace Limit Reached" = "ถึงขีดจำกัดเวิร์กสเปซแล้ว";
+"Tab Limit Reached" = "ถึงขีดจำกัดแท็บแล้ว";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "คุณถึงขีดจำกัด %lld เซิร์ฟเวอร์ในแผนฟรีแล้ว อัปเกรดเป็น Pro เพื่อใช้งานเซิร์ฟเวอร์ไม่จำกัด";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "คุณถึงขีดจำกัด %lld เวิร์กสเปซในแผนฟรีแล้ว อัปเกรดเป็น Pro เพื่อใช้งานเวิร์กสเปซไม่จำกัด";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "แผนฟรีเชื่อมต่อพร้อมกันได้ %lld รายการเท่านั้น อัปเกรดเป็น Pro เพื่อเชื่อมต่อพร้อมกันหลายรายการ";
+"Server Locked" = "เซิร์ฟเวอร์ถูกล็อก";
+"Workspace Locked" = "เวิร์กสเปซถูกล็อก";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "เซิร์ฟเวอร์นี้เกินขีดจำกัดแผนฟรีที่ %lld เซิร์ฟเวอร์ ต่ออายุ Pro เพื่อเข้าถึงเซิร์ฟเวอร์ทั้งหมด";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "เวิร์กสเปซนี้เกินขีดจำกัดแผนฟรีที่ %lld เวิร์กสเปซ ต่ออายุ Pro เพื่อเข้าถึงเวิร์กสเปซทั้งหมด";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "การสมัครสมาชิกหมดอายุ";
+"%lld server" = "%lld เซิร์ฟเวอร์";
+"%lld servers" = "%lld เซิร์ฟเวอร์";
+"%lld workspace" = "%lld เวิร์กสเปซ";
+"%lld workspaces" = "%lld เวิร์กสเปซ";
+" and " = " และ ";
+"%@ locked" = "%@ ถูกล็อก";
+
+/* Server & Workspace */
+"Server Info" = "ข้อมูลเซิร์ฟเวอร์";
+"Name" = "ชื่อ";
+"Host" = "โฮสต์";
+"Port" = "พอร์ต";
+"Username" = "ชื่อผู้ใช้";
+"Authentication" = "การยืนยันตัวตน";
+"Method" = "วิธี";
+"Password" = "รหัสผ่าน";
+"Key loaded" = "โหลดคีย์แล้ว";
+"Key Passphrase" = "รหัสผ่านคีย์";
+"Server Environment" = "สภาพแวดล้อมเซิร์ฟเวอร์";
+"Environment" = "สภาพแวดล้อม";
+"Notes" = "หมายเหตุ";
+"Edit Server" = "แก้ไขเซิร์ฟเวอร์";
+"Add Server" = "เพิ่มเซิร์ฟเวอร์";
+"Use Stored Key" = "ใช้คีย์ที่บันทึกไว้";
+"Select a key..." = "เลือกคีย์...";
+"Import File" = "นำเข้าไฟล์";
+"Paste" = "วาง";
+"Add to Keychain" = "เพิ่มไปยัง Keychain";
+"Select a stored key or import/paste a new one" = "เลือกคีย์ที่บันทึกไว้หรือ นำเข้า/วางคีย์ใหม่";
+"Using stored key: %@" = "ใช้คีย์ที่บันทึกไว้: %@";
+"Workspace" = "เวิร์กสเปซ";
+"Workspaces" = "เวิร์กสเปซ";
+"Workspace name" = "ชื่อเวิร์กสเปซ";
+"Color" = "สี";
+"Delete Workspace" = "ลบเวิร์กสเปซ";
+"Edit Workspace" = "แก้ไขเวิร์กสเปซ";
+"New Workspace" = "เวิร์กสเปซใหม่";
+"Workspaces" = "เวิร์กสเปซ";
+"My Servers" = "เซิร์ฟเวอร์ของฉัน";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "เวิร์กสเปซ";
+"SERVERS" = "เซิร์ฟเวอร์";
+"Support VVTerm" = "สนับสนุน VVTerm";
+"Upgrade to Pro" = "อัปเกรดเป็น Pro";
+"All" = "ทั้งหมด";
+"Custom..." = "กำหนดเอง...";
+"New Workspace" = "เวิร์กสเปซใหม่";
+"Unlock with Pro" = "ปลดล็อกด้วย Pro";
+"Switch to Workspace" = "สลับไปยังเวิร์กสเปซ";
+"Delete Workspace" = "ลบเวิร์กสเปซ";
+
+/* iOS Lists */
+"%lld servers" = "%lld เซิร์ฟเวอร์";
+"Servers" = "เซิร์ฟเวอร์";
+"Active Connections" = "การเชื่อมต่อที่ใช้งานอยู่";
+"Add Workspace" = "เพิ่มเวิร์กสเปซ";
+"Workspaces" = "เวิร์กสเปซ";
+"Done" = "เสร็จสิ้น";
+
+/* Empty States */
+"No Servers" = "ไม่มีเซิร์ฟเวอร์";
+"Add a server to get started" = "เพิ่มเซิร์ฟเวอร์เพื่อเริ่มต้น";
+"Multiple connections require Pro" = "การเชื่อมต่อหลายรายการต้องใช้ Pro";
+"Upgrade to connect to multiple servers simultaneously" = "อัปเกรดเพื่อเชื่อมต่อหลายเซิร์ฟเวอร์พร้อมกัน";
+"Upgrade to Pro" = "อัปเกรดเป็น Pro";
+"Connect" = "เชื่อมต่อ";
+
+/* Offline */
+"No network connection" = "ไม่มีการเชื่อมต่อเครือข่าย";
+"You're currently offline. Some features may not work:" = "ขณะนี้ออฟไลน์ ฟีเจอร์บางอย่างอาจใช้งานไม่ได้:";
+"Cannot connect to servers" = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
+"iCloud sync paused" = "ซิงค์ iCloud ถูกหยุดชั่วคราว";
+"Saved servers still accessible" = "เซิร์ฟเวอร์ที่บันทึกไว้ยังใช้งานได้";
+"Offline" = "ออฟไลน์";
+
+/* Terminal */
+"Initializing terminal..." = "กำลังเริ่มต้นเทอร์มินัล...";
+"Terminal initialization failed" = "เริ่มต้นเทอร์มินัลไม่สำเร็จ";
+"Connecting..." = "กำลังเชื่อมต่อ...";
+"Reconnecting (attempt %lld)..." = "กำลังเชื่อมต่อใหม่ (ครั้งที่ %lld)...";
+"Disconnected" = "ตัดการเชื่อมต่อแล้ว";
+"Connection Failed" = "การเชื่อมต่อล้มเหลว";
+"Reconnect" = "เชื่อมต่อใหม่";
+"Retry" = "ลองอีกครั้ง";
+"Voice Input Unavailable" = "การป้อนเสียงไม่พร้อมใช้งาน";
+"Voice input (Command+Shift+M)" = "การป้อนเสียง (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "โปรดเปิดไมโครโฟนและการรู้จำเสียงใน System Settings";
+"Terminal" = "เทอร์มินัล";
+"No terminals open" = "ไม่มีเทอร์มินัลที่เปิดอยู่";
+"New Terminal" = "เทอร์มินัลใหม่";
+"Close this terminal?" = "ปิดเทอร์มินัลนี้หรือไม่?";
+"The SSH connection will be terminated." = "การเชื่อมต่อ SSH จะถูกยุติ";
+
+/* Keychain */
+"No Keys Stored" = "ไม่มีคีย์ที่บันทึกไว้";
+"Add keys to quickly use them when creating new servers" = "เพิ่มคีย์เพื่อใช้งานได้อย่างรวดเร็วเมื่อสร้างเซิร์ฟเวอร์ใหม่";
+"Generate New Key" = "สร้างคีย์ใหม่";
+"Import Key" = "นำเข้าคีย์";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "คีย์ถูกจัดเก็บอย่างปลอดภัยใน Keychain ของอุปกรณ์ รหัสผ่านถูกจัดเก็บแยกต่างหาก";
+"Delete SSH Key" = "ลบคีย์ SSH";
+"Are you sure you want to delete '%@'? This cannot be undone." = "แน่ใจหรือไม่ว่าต้องการลบ '%@'? การดำเนินการนี้ย้อนกลับไม่ได้";
+"Protected" = "ป้องกันแล้ว";
+"Added %@ ago" = "เพิ่มเมื่อ %@ ที่แล้ว";
+"Copy public key" = "คัดลอกคีย์สาธารณะ";
+"Key Name" = "ชื่อคีย์";
+"e.g., Personal MacBook, Work Key" = "เช่น MacBook ส่วนตัว, คีย์งาน";
+"Private Key" = "คีย์ส่วนตัว";
+"Import Key File" = "นำเข้าไฟล์คีย์";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "นำเข้าไฟล์คีย์ส่วนตัว (id_rsa, id_ed25519 เป็นต้น) หรือวางเนื้อหา";
+"Key loaded (%lld characters)" = "โหลดคีย์แล้ว (%lld ตัวอักษร)";
+"Key passphrase" = "รหัสผ่านคีย์";
+"Passphrase (Optional)" = "รหัสผ่าน (ไม่บังคับ)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "หากคีย์ถูกเข้ารหัสด้วยรหัสผ่าน ให้กรอกที่นี่ เว้นว่างไว้สำหรับคีย์ที่ไม่มีรหัสผ่าน";
+"Add SSH Key" = "เพิ่มคีย์ SSH";
+"Algorithm" = "อัลกอริทึม";
+"Key Type" = "ประเภทคีย์";
+"Confirm passphrase" = "ยืนยันรหัสผ่าน";
+"Protect your key with a passphrase. Leave empty for no protection." = "ป้องกันคีย์ด้วยรหัสผ่าน เว้นว่างหากไม่ต้องการป้องกัน";
+"Generated Key" = "คีย์ที่สร้างแล้ว";
+"Key generated successfully" = "สร้างคีย์สำเร็จ";
+"Fingerprint:" = "ลายนิ้วมือ:";
+"View Public Key" = "ดูคีย์สาธารณะ";
+"Generate SSH Key" = "สร้างคีย์ SSH";
+"Generate" = "สร้าง";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "เพิ่มข้อมูลนี้ลงในไฟล์ ~/.ssh/authorized_keys ของเซิร์ฟเวอร์:";
+"No Public Key" = "ไม่มีคีย์สาธารณะ";
+"This key was imported without a public key." = "คีย์นี้ถูกนำเข้าโดยไม่มีคีย์สาธารณะ";
+"Public Key" = "คีย์สาธารณะ";
+
+/* Transcription */
+"Engine" = "เอนจิน";
+"System (Apple)" = "ระบบ (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "ผู้ให้บริการ";
+"Language" = "ภาษา";
+"Model" = "โมเดล";
+"Downloading..." = "กำลังดาวน์โหลด...";
+"Delete Model" = "ลบโมเดล";
+"Download size: %@" = "ขนาดดาวน์โหลด: %@";
+"Status" = "สถานะ";
+"Download" = "ดาวน์โหลด";
+"Ready" = "พร้อมใช้งาน";
+"Failed" = "ล้มเหลว";
+"Storage" = "ที่เก็บข้อมูล";
+"Model Storage" = "ที่เก็บโมเดล";
+"Total MLX Models" = "โมเดล MLX ทั้งหมด";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "ใช้การรู้จำเสียงในตัวของ Apple ต้องใช้เครือข่ายเพื่อผลลัพธ์ที่ดีที่สุด";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper ทำงานแบบโลคัลด้วย MLX ใช้งานออฟไลน์ได้หลังดาวน์โหลด";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet ทำงานแบบโลคัลด้วย MLX ปรับให้เหมาะสำหรับการถอดเสียงแบบเรียลไทม์";
+"English" = "อังกฤษ";
+"Spanish" = "สเปน";
+"French" = "ฝรั่งเศส";
+"German" = "เยอรมัน";
+"Japanese" = "ญี่ปุ่น";
+"Chinese" = "จีน";
+"Korean" = "เกาหลี";
+"Portuguese" = "โปรตุเกส";
+"Russian" = "รัสเซีย";
+"Auto-detect" = "ตรวจจับอัตโนมัติ";
+
+/* MLX Models */
+"Tiny" = "เล็กมาก";
+"Fastest, smallest" = "เร็วที่สุด เล็กที่สุด";
+"Full precision" = "ความละเอียดเต็ม";
+"Tiny (EN)" = "เล็กมาก (EN)";
+"English-only, smaller" = "เฉพาะอังกฤษ เล็กกว่า";
+"English-only" = "เฉพาะอังกฤษ";
+"Base" = "พื้นฐาน";
+"Balanced speed/quality" = "สมดุลความเร็ว/คุณภาพ";
+"Small" = "เล็ก";
+"Better accuracy" = "ความแม่นยำสูงขึ้น";
+"Medium" = "กลาง";
+"Higher accuracy, heavier" = "แม่นยำขึ้น แต่ใหญ่ขึ้น";
+"Large v3" = "ใหญ่ v3";
+"Latest large model" = "โมเดลใหญ่รุ่นล่าสุด";
+"Large" = "ใหญ่";
+"Large v3 4-bit" = "ใหญ่ v3 4 บิต";
+"Smaller download" = "ดาวน์โหลดเล็กลง";
+"4-bit quantized" = "ควอนไทซ์ 4 บิต";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "โมเดลใหญ่ความแม่นยำสูง";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "เครือข่ายมือถือ";
+"Ethernet" = "อีเธอร์เน็ต";
+"Unknown" = "ไม่ทราบ";
+"No Connection" = "ไม่มีการเชื่อมต่อ";
+" (Metered)" = " (คิดตามปริมาณ)";
+" (Low Data)" = " (ประหยัดข้อมูล)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "เปิดซิงค์ iCloud";
+"iCloud Account" = "บัญชี iCloud";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "ซิงค์เซิร์ฟเวอร์และเวิร์กสเปซบนอุปกรณ์ Apple ทุกเครื่องของคุณ";
+"Sync Status" = "สถานะการซิงค์";
+"Last Synced" = "ซิงค์ล่าสุด";
+"Error" = "ข้อผิดพลาด";
+"Data" = "ข้อมูล";
+"Force Sync Now" = "บังคับซิงค์ทันที";
+"Clear Local Data & Re-sync" = "ลบข้อมูลในเครื่องและซิงค์ใหม่";
+"Reset iCloud (Delete All & Re-upload)" = "รีเซ็ต iCloud (ลบทั้งหมดและอัปโหลดใหม่)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "การซิงค์แบบบังคับจะดึงข้อมูลล่าสุดจาก iCloud การลบและซิงค์ใหม่จะลบข้อมูลในเครื่องและดาวน์โหลดใหม่ การรีเซ็ต iCloud จะลบข้อมูลบนคลาวด์ทั้งหมดและอัปโหลดข้อมูลในเครื่องใหม่ (แก้ปัญหาข้อมูลซ้ำ)";
+"Account Status" = "สถานะบัญชี";
+"Container" = "คอนเทนเนอร์";
+"Re-check iCloud Status" = "ตรวจสอบสถานะ iCloud อีกครั้ง";
+"Troubleshooting" = "การแก้ไขปัญหา";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "ตรวจสอบให้แน่ใจว่าเข้าสู่ระบบ iCloud ในการตั้งค่าและเปิดใช้ iCloud Drive แล้ว ดูรายละเอียดเพิ่มเติมได้ใน Console.app ที่บันทึก 'CloudKit'";
+"Force Sync" = "บังคับซิงค์";
+"Sync Now" = "ซิงค์ตอนนี้";
+"This will fetch the latest data from iCloud and may take a moment." = "จะดึงข้อมูลล่าสุดจาก iCloud และอาจใช้เวลาสักครู่";
+"Clear Local Data" = "ลบข้อมูลในเครื่อง";
+"Clear & Re-sync" = "ลบและซิงค์ใหม่";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "จะลบข้อมูลในเครื่องทั้งหมดและดาวน์โหลดใหม่จาก iCloud การเปลี่ยนแปลงที่ยังไม่ซิงค์จะสูญหาย";
+"Reset iCloud Data" = "รีเซ็ตข้อมูล iCloud";
+"Delete All & Re-upload" = "ลบทั้งหมดและอัปโหลดใหม่";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "จะลบข้อมูลทั้งหมดจาก iCloud และอัปโหลดข้อมูลในเครื่องปัจจุบัน ใช้เพื่อแก้ปัญหาข้อมูลซ้ำ";
+"Connected" = "เชื่อมต่อแล้ว";
+"Not Available" = "ไม่พร้อมใช้งาน";
+"Synced" = "ซิงค์แล้ว";
+"Syncing..." = "กำลังซิงค์...";
+"available" = "พร้อมใช้งาน";
+"noAccount - User not signed into iCloud" = "noAccount - ผู้ใช้ไม่ได้ลงชื่อเข้าใช้ iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - การเข้าถึง iCloud ถูกจำกัด (การควบคุมโดยผู้ปกครอง, MDM ฯลฯ)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - ไม่สามารถระบุสถานะ iCloud ได้";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud ไม่พร้อมใช้งานชั่วคราว";
+"unknown status: %@" = "สถานะไม่ทราบ: %@";
+"Error: %@" = "ข้อผิดพลาด: %@";
+"Checking..." = "กำลังตรวจสอบ...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "มุมมองแบ่งแนวนอน";
+"Vertical split view" = "มุมมองแบ่งแนวตั้ง";
+"Left pane" = "แผงซ้าย";
+"Top pane" = "แผงบน";
+"Right pane" = "แผงขวา";
+"Bottom pane" = "แผงล่าง";
+"Horizontal split divider" = "ตัวแบ่งแนวนอน";
+"Vertical split divider" = "ตัวแบ่งแนวตั้ง";
+"Drag to resize the left and right panes" = "ลากเพื่อปรับขนาดแผงซ้ายและขวา";
+"Drag to resize the top and bottom panes" = "ลากเพื่อปรับขนาดแผงบนและล่าง";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "คอร์";
+"IDLE" = "ว่าง";
+"UPTIME" = "เวลาทำงาน";
+"LOAD" = "โหลด";
+"FREE" = "ว่าง";
+"USED" = "ใช้แล้ว";
+"CACHED" = "แคช";
+"TOTAL" = "รวม";
+"Volumes" = "โวลุ่ม";
+"Top Processes" = "โปรเซสยอดนิยม";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ รวม";
+"↓ TOTAL" = "↓ รวม";
+"%lld D" = "%lld วัน";
+"%lld H" = "%lld ชม.";
+
+/* SFSymbol Picker */
+"Recent" = "ล่าสุด";
+"Load more (%lld remaining)" = "โหลดเพิ่ม (%lld เหลืออยู่)";
+"%lld symbols" = "%lld สัญลักษณ์";
+"What's New" = "มีอะไรใหม่";
+"Draw" = "วาด";
+"Variable" = "ตัวแปร";
+"Multicolor" = "หลายสี";
+"Communication" = "การสื่อสาร";
+"Weather" = "สภาพอากาศ";
+"Maps" = "แผนที่";
+"Objects & Tools" = "วัตถุและเครื่องมือ";
+"Devices" = "อุปกรณ์";
+"Camera & Photos" = "กล้องและรูปภาพ";
+"Gaming" = "เกม";
+"Connectivity" = "การเชื่อมต่อ";
+"Transportation" = "การขนส่ง";
+"Automotive" = "ยานยนต์";
+"Accessibility" = "การช่วยการเข้าถึง";
+"Privacy & Security" = "ความเป็นส่วนตัวและความปลอดภัย";
+"Human" = "มนุษย์";
+"Home" = "บ้าน";
+"Fitness" = "ฟิตเนส";
+"Nature" = "ธรรมชาติ";
+"Editing" = "การแก้ไข";
+"Text Formatting" = "การจัดรูปแบบข้อความ";
+"Media" = "สื่อ";
+"Keyboard" = "แป้นพิมพ์";
+"Commerce" = "การค้า";
+"Time" = "เวลา";
+"Health" = "สุขภาพ";
+"Shapes" = "รูปทรง";
+"Arrows" = "ลูกศร";
+"Indices" = "ดัชนี";
+"Math" = "คณิตศาสตร์";
+
+/* Auth Methods */
+"SSH Key" = "คีย์ SSH";
+"SSH Key + Passphrase" = "คีย์ SSH + รหัสผ่าน";
+
+/* Environments */
+"Production" = "โปรดักชัน";
+"Staging" = "สเตจจิง";
+"Development" = "ดีเวลอปเมนต์";
+"Prod" = "โปรด";
+"Stag" = "สเตจ";
+"Dev" = "เดฟ";
+"New Environment" = "สภาพแวดล้อมใหม่";
+"Edit Environment" = "แก้ไขสภาพแวดล้อม";
+"Environment name" = "ชื่อสภาพแวดล้อม";
+"An environment with this name already exists." = "มีสภาพแวดล้อมชื่อนี้อยู่แล้ว";
+"Delete Environment?" = "ลบสภาพแวดล้อมใช่ไหม?";
+"Servers in '%@' will be moved to Production." = "เซิร์ฟเวอร์ใน \"%@\" จะถูกย้ายไปที่ โปรดักชัน";
+"Edit \"%@\"..." = "แก้ไข \"%@\"...";
+"Delete \"%@\"..." = "ลบ \"%@\"...";
+"Custom" = "กำหนดเอง";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "ต้องได้รับอนุญาตให้ใช้ไมโครโฟน ระบบจะขออัตโนมัติเมื่อเริ่มบันทึกเสียง";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "การรู้จำเสียงไม่พร้อมใช้งาน โปรดเปิด Siri ใน System Settings > Siri & Spotlight";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "เริ่มบันทึกเสียงไม่สำเร็จ โปรดตรวจสอบสิทธิ์ไมโครโฟนใน System Settings > Privacy & Security > Microphone";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "การถอดเสียง MLX ไม่พร้อมใช้งานบน Mac นี้ กำลังสลับไปยัง Apple Speech";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "อัปเกรดเป็น Pro เพื่อใช้งานเซิร์ฟเวอร์ไม่จำกัด";
+"Upgrade to Pro for unlimited workspaces" = "อัปเกรดเป็น Pro เพื่อใช้งานเวิร์กสเปซไม่จำกัด";
+"Upgrade to Pro for multiple connections" = "อัปเกรดเป็น Pro เพื่อเชื่อมต่อหลายรายการ";
+"Upgrade to Pro for custom environments" = "อัปเกรดเป็น Pro เพื่อใช้สภาพแวดล้อมแบบกำหนดเอง";
+
+/* Misc */
+"Terminal initialization failed" = "เริ่มต้นเทอร์มินัลไม่สำเร็จ";
+"Voice Input Unavailable" = "การป้อนเสียงไม่พร้อมใช้งาน";
+"Disconnect from server" = "ตัดการเชื่อมต่อจากเซิร์ฟเวอร์";
+"Disconnect from %@?" = "ตัดการเชื่อมต่อจาก %@?";
+"This will return to the server list." = "ระบบจะกลับไปยังรายการเซิร์ฟเวอร์";
+"All terminal tabs for this server will be closed." = "แท็บเทอร์มินัลทั้งหมดสำหรับเซิร์ฟเวอร์นี้จะถูกปิด";
+"Add Terminal Preset" = "เพิ่มพรีเซ็ตเทอร์มินัล";
+"Edit Preset" = "แก้ไขพรีเซ็ต";
+"Basic Information" = "ข้อมูลพื้นฐาน";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "ชื่อที่แสดงสำหรับพรีเซ็ต (เช่น Claude, Helix, Vim)";
+"Command" = "คำสั่ง";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "คำสั่งที่จะรันเมื่อเลือกพรีเซ็ต (เช่น claude, hx, nvim)";
+"Icon" = "ไอคอน";
+"Choose Symbol..." = "เลือกสัญลักษณ์...";
+
+/* Contact Labels */
+"Developer" = "นักพัฒนา";
+"Discord" = "Discord";
+"Join Community" = "เข้าร่วมชุมชน";
+"Email" = "อีเมล";
+"GitHub" = "GitHub";
+"Report Issue" = "รายงานปัญหา";
+"Support VVTerm" = "สนับสนุน VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "ระบบ (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "ลบโมเดลไม่สำเร็จ";
+"Model ID is required" = "ต้องระบุ ID ของโมเดล";
+
+/* Lock Errors */
+"Server '%@' is locked" = "เซิร์ฟเวอร์ '%@' ถูกล็อก";
+"Workspace '%@' is locked" = "เวิร์กสเปซ '%@' ถูกล็อก";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "คุณถึงขีดจำกัด %lld เซิร์ฟเวอร์แล้ว อัปเกรดเป็น Pro เพื่อใช้งานเซิร์ฟเวอร์ไม่จำกัด";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "ทันสมัย รวดเร็ว และปลอดภัย แนะนำสำหรับการใช้งานส่วนใหญ่";
+"Wide compatibility with older systems." = "เข้ากันได้กว้างกับระบบรุ่นเก่า";
+
+
+/* Split Commands */
+"Split Right" = "แบ่งทางขวา";
+"Split Down" = "แบ่งลง";
+"Close Pane" = "ปิดแผง";
+
+/* Tabs */
+"View" = "มุมมอง";
+"Stats" = "สถิติ";
+
+/* Help */
+"Support & Feedback" = "การสนับสนุนและความคิดเห็น";
+
+"Upgrade to Pro for unlimited workspaces." = "อัปเกรดเป็น Pro เพื่อใช้งานเวิร์กสเปซไม่จำกัด";
+
+"Fingerprint" = "ลายนิ้วมือ";
+
+"Links" = "ลิงก์";
+
+"Passphrase" = "รหัสผ่าน";
+
+"%@ is a Pro feature" = "%@ เป็นฟีเจอร์ Pro";
+
+"System (Default)" = "ระบบ (ค่าเริ่มต้น)";
+
+"Some changes may require restarting the app." = "การเปลี่ยนแปลงบางอย่างอาจต้องเริ่มแอปใหม่";
+
+/* Download Progress */
+"%llds remaining" = "เหลือ %lld วินาที";
+"%lldm remaining" = "เหลือ %lld นาที";
+"%lldh %lldm remaining" = "เหลือ %lld ชั่วโมง %lld นาที";
+"Clear All Storage" = "ล้างพื้นที่จัดเก็บทั้งหมด";
+
+/* Preview */
+"Server 1" = "เซิร์ฟเวอร์ 1";
+"Server 2" = "เซิร์ฟเวอร์ 2";
+"Server 3" = "เซิร์ฟเวอร์ 3";

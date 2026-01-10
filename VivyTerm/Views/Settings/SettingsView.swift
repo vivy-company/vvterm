@@ -108,14 +108,14 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("VVTerm Pro")
                                     .font(.headline)
-                                Text(storeManager.isPro ? "Manage subscription" : "Upgrade for unlimited features")
+                                Text(storeManager.isPro ? String(localized: "Manage subscription") : String(localized: "Upgrade for unlimited features"))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
 
                             Spacer()
 
-                            Text(storeManager.isPro ? "PRO" : "FREE")
+                            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE"))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
                                 .padding(.horizontal, 8)
@@ -205,37 +205,43 @@ struct SettingsView: View {
     private var detailView: some View {
         switch selection {
         case .pro:
-            ProSettingsView()
-                .navigationTitle("VVTerm Pro")
-                .navigationSubtitle(storeManager.isPro ? "Manage your subscription" : "Upgrade for unlimited features")
+                            ProSettingsView()
+                                .navigationTitle("VVTerm Pro")
+                                .navigationSubtitle(storeManager.isPro
+                                    ? String(localized: "Manage your subscription")
+                                    : String(localized: "Upgrade for unlimited features")
+                                )
         case .general:
-            GeneralSettingsView()
-                .navigationTitle("General")
-                .navigationSubtitle("Appearance and preferences")
+                            GeneralSettingsView()
+                                .navigationTitle("General")
+                                .navigationSubtitle(String(localized: "Appearance and preferences"))
         case .terminal:
-            TerminalSettingsView(fontName: $terminalFontName, fontSize: $terminalFontSize)
-                .navigationTitle("Terminal")
-                .navigationSubtitle("Font, theme, and connection settings")
+                            TerminalSettingsView(fontName: $terminalFontName, fontSize: $terminalFontSize)
+                                .navigationTitle("Terminal")
+                                .navigationSubtitle(String(localized: "Font, theme, and connection settings"))
         case .transcription:
-            TranscriptionSettingsView()
-                .navigationTitle("Transcription")
-                .navigationSubtitle("Speech-to-text engine and models")
+                            TranscriptionSettingsView()
+                                .navigationTitle("Transcription")
+                                .navigationSubtitle(String(localized: "Speech-to-text engine and models"))
         case .keychain:
-            KeychainSettingsView()
-                .navigationTitle("SSH Keys")
-                .navigationSubtitle("Manage stored SSH keys")
+                            KeychainSettingsView()
+                                .navigationTitle("SSH Keys")
+                                .navigationSubtitle(String(localized: "Manage stored SSH keys"))
         case .sync:
-            SyncSettingsView()
-                .navigationTitle("Sync")
-                .navigationSubtitle("iCloud sync and data management")
+                            SyncSettingsView()
+                                .navigationTitle("Sync")
+                                .navigationSubtitle(String(localized: "iCloud sync and data management"))
         case .about:
-            AboutSettingsView()
-                .navigationTitle("About")
-                .navigationSubtitle("Version and links")
+                            AboutSettingsView()
+                                .navigationTitle("About")
+                                .navigationSubtitle(String(localized: "Version and links"))
         case .none:
-            ProSettingsView()
-                .navigationTitle("VVTerm Pro")
-                .navigationSubtitle(storeManager.isPro ? "Manage your subscription" : "Upgrade for unlimited features")
+                            ProSettingsView()
+                                .navigationTitle("VVTerm Pro")
+                                .navigationSubtitle(storeManager.isPro
+                                    ? String(localized: "Manage your subscription")
+                                    : String(localized: "Upgrade for unlimited features")
+                                )
         }
     }
 
@@ -259,7 +265,7 @@ struct SettingsView: View {
 
             Spacer()
 
-            Text(storeManager.isPro ? "PRO" : "FREE")
+            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE"))
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
                 .padding(.horizontal, 8)
@@ -284,7 +290,7 @@ struct SettingsView: View {
         )
     }
 
-    private func settingsRow(_ title: String, icon: String, tag: SettingsSelection) -> some View {
+    private func settingsRow(_ title: LocalizedStringKey, icon: String, tag: SettingsSelection) -> some View {
         Label(title, systemImage: icon)
             .tag(tag)
     }

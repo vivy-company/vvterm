@@ -25,6 +25,7 @@ struct iOSContentView: View {
                 selectedWorkspace: $selectedWorkspace,
                 selectedEnvironment: $selectedEnvironment,
                 showingTerminal: $showingTerminal,
+                showingProUpgrade: $showingProUpgrade,
                 onServerSelected: { server in
                     selectedServer = server
                     Task {
@@ -98,12 +99,18 @@ struct iOSServerListView: View {
     @Binding var selectedWorkspace: Workspace?
     @Binding var selectedEnvironment: ServerEnvironment?
     @Binding var showingTerminal: Bool
+    @Binding var showingProUpgrade: Bool
     let onServerSelected: (Server) -> Void
+
+    @ObservedObject private var storeManager = StoreManager.shared
 
     @State private var showingAddServer = false
     @State private var showingAddWorkspace = false
     @State private var showingSettings = false
     @State private var showingWorkspacePicker = false
+    @State private var showingCreateEnvironment = false
+    @State private var editingEnvironment: ServerEnvironment?
+    @State private var environmentToDelete: ServerEnvironment?
     @State private var searchText = ""
     @State private var serverToEdit: Server?
     @State private var lockedServerAlert: Server?
@@ -120,7 +127,7 @@ struct iOSServerListView: View {
                             .fill(Color.fromHex(selectedWorkspace?.colorHex ?? "#007AFF"))
                             .frame(width: 10, height: 10)
 
-                        Text(selectedWorkspace?.name ?? "Select Workspace")
+                        Text(selectedWorkspace?.name ?? String(localized: "Select Workspace"))
                             .foregroundStyle(.primary)
 
                         Spacer()
@@ -156,7 +163,40 @@ struct iOSServerListView: View {
                     }
                 }
             } header: {
-                Text("Servers")
+                HStack {
+                    Text("Servers")
+
+                    Spacer()
+
+                    if selectedWorkspace != nil {
+                        iOSEnvironmentFilterMenu(
+                            selected: $selectedEnvironment,
+                            environments: environmentOptions,
+                            serverCounts: serverCountsByEnvironment,
+                            onCreateCustom: {
+                                if storeManager.isPro {
+                                    showingCreateEnvironment = true
+                                } else {
+                                    showingProUpgrade = true
+                                }
+                            },
+                            onEditCustom: { environment in
+                                if storeManager.isPro {
+                                    editingEnvironment = environment
+                                } else {
+                                    showingProUpgrade = true
+                                }
+                            },
+                            onDeleteCustom: { environment in
+                                if storeManager.isPro {
+                                    environmentToDelete = environment
+                                } else {
+                                    showingProUpgrade = true
+                                }
+                            }
+                        )
+                    }
+                }
             }
 
             // Active Connections Section
@@ -251,6 +291,67 @@ struct iOSServerListView: View {
                 )
             }
         }
+        .sheet(isPresented: $showingCreateEnvironment) {
+            if let workspace = selectedWorkspace {
+                EnvironmentFormSheet(
+                    serverManager: serverManager,
+                    workspace: workspace,
+                    onSave: { updatedWorkspace, newEnvironment in
+                        selectedWorkspace = updatedWorkspace
+                        selectedEnvironment = newEnvironment
+                        showingCreateEnvironment = false
+                    }
+                )
+            }
+        }
+        .sheet(item: $editingEnvironment) { environment in
+            if let workspace = selectedWorkspace {
+                EnvironmentFormSheet(
+                    serverManager: serverManager,
+                    workspace: workspace,
+                    environment: environment,
+                    onSave: { updatedWorkspace, updatedEnvironment in
+                        selectedWorkspace = updatedWorkspace
+                        if selectedEnvironment?.id == updatedEnvironment.id {
+                            selectedEnvironment = updatedEnvironment
+                        }
+                        editingEnvironment = nil
+                    }
+                )
+            }
+        }
+        .alert(String(localized: "Delete Environment?"), isPresented: Binding(
+            get: { environmentToDelete != nil },
+            set: { if !$0 { environmentToDelete = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                guard let environment = environmentToDelete,
+                      let workspace = selectedWorkspace else {
+                    environmentToDelete = nil
+                    return
+                }
+                Task {
+                    let updatedWorkspace = try? await serverManager.deleteEnvironment(
+                        environment,
+                        in: workspace,
+                        fallback: .production
+                    )
+                    await MainActor.run {
+                        if let updatedWorkspace {
+                            selectedWorkspace = updatedWorkspace
+                        }
+                        if selectedEnvironment?.id == environment.id {
+                            selectedEnvironment = .production
+                        }
+                        environmentToDelete = nil
+                    }
+                }
+            }
+        } message: {
+            let name = environmentToDelete?.displayName ?? String(localized: "Custom")
+            Text(String(format: String(localized: "Servers in '%@' will be moved to Production."), name))
+        }
         .lockedItemAlert(
             .server,
             itemName: lockedServerAlert?.name ?? "",
@@ -259,6 +360,10 @@ struct iOSServerListView: View {
                 set: { if !$0 { lockedServerAlert = nil } }
             )
         )
+    }
+
+    private var environmentOptions: [ServerEnvironment] {
+        selectedWorkspace?.environments ?? ServerEnvironment.builtInEnvironments
     }
 
     private var filteredServers: [Server] {
@@ -284,6 +389,132 @@ struct iOSServerListView: View {
         }
 
         return servers.sorted { $0.name < $1.name }
+    }
+
+    private var serverCountsByEnvironment: [UUID: Int] {
+        guard let workspace = selectedWorkspace else { return [:] }
+
+        var counts: [UUID: Int] = [:]
+        let workspaceServers = serverManager.servers.filter { $0.workspaceId == workspace.id }
+
+        for env in workspace.environments {
+            counts[env.id] = workspaceServers.filter { $0.environment.id == env.id }.count
+        }
+
+        return counts
+    }
+}
+
+// MARK: - iOS Environment Filter Menu
+
+struct iOSEnvironmentFilterMenu: View {
+    @Binding var selected: ServerEnvironment?
+    let environments: [ServerEnvironment]
+    let serverCounts: [UUID: Int]
+    let onCreateCustom: () -> Void
+    let onEditCustom: (ServerEnvironment) -> Void
+    let onDeleteCustom: (ServerEnvironment) -> Void
+
+    private var totalCount: Int {
+        serverCounts.values.reduce(0, +)
+    }
+
+    var body: some View {
+        Menu {
+            // Built-in environments
+            ForEach(ServerEnvironment.builtInEnvironments) { env in
+                environmentButton(env)
+            }
+
+            // Custom environments
+            let customEnvs = environments.filter { !$0.isBuiltIn }
+            if !customEnvs.isEmpty {
+                Divider()
+                ForEach(customEnvs) { env in
+                    environmentButton(env)
+                }
+            }
+
+            Divider()
+
+            Button {
+                selected = nil
+            } label: {
+                HStack {
+                    Text("All")
+                    Spacer()
+                    Text("(\(totalCount))")
+                        .foregroundStyle(.secondary)
+                    if selected == nil {
+                        Image(systemName: "checkmark")
+                    }
+                }
+            }
+
+            Divider()
+
+            Button {
+                onCreateCustom()
+            } label: {
+                Label(String(localized: "Custom..."), systemImage: "plus")
+            }
+
+            if let selectedEnvironment = selected, !selectedEnvironment.isBuiltIn {
+                Divider()
+
+                Button {
+                    onEditCustom(selectedEnvironment)
+                } label: {
+                    Label(
+                        String(format: String(localized: "Edit \"%@\"..."), selectedEnvironment.displayName),
+                        systemImage: "pencil"
+                    )
+                }
+
+                Button(role: .destructive) {
+                    onDeleteCustom(selectedEnvironment)
+                } label: {
+                    Label(
+                        String(format: String(localized: "Delete \"%@\"..."), selectedEnvironment.displayName),
+                        systemImage: "trash"
+                    )
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(selected?.color ?? .secondary)
+                    .frame(width: 8, height: 8)
+                Text(selected?.displayShortName ?? String(localized: "All"))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                Image(systemName: "chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(Color.primary.opacity(0.06), in: Capsule())
+        }
+    }
+
+    private func environmentButton(_ env: ServerEnvironment) -> some View {
+        Button {
+            selected = env
+        } label: {
+            HStack {
+                Circle()
+                    .fill(env.color)
+                    .frame(width: 8, height: 8)
+                Text(env.displayName)
+                Spacer()
+                Text("(\(serverCounts[env.id] ?? 0))")
+                    .foregroundStyle(.secondary)
+                if selected?.id == env.id {
+                    Image(systemName: "checkmark")
+                }
+            }
+        }
     }
 }
 

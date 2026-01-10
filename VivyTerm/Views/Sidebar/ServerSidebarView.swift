@@ -15,6 +15,9 @@ struct ServerSidebarView: View {
     @State private var showingSettings = false
     @State private var showingSupport = false
     @State private var showingProUpgrade = false
+    @State private var showingCreateEnvironment = false
+    @State private var editingEnvironment: ServerEnvironment?
+    @State private var environmentToDelete: ServerEnvironment?
     @State private var searchText = ""
     @State private var serverToEdit: Server?
     @State private var lockedServerAlert: Server?
@@ -71,6 +74,67 @@ struct ServerSidebarView: View {
         .sheet(isPresented: $showingProUpgrade) {
             ProUpgradeSheet()
         }
+        .sheet(isPresented: $showingCreateEnvironment) {
+            if let workspace = selectedWorkspace {
+                EnvironmentFormSheet(
+                    serverManager: serverManager,
+                    workspace: workspace,
+                    onSave: { updatedWorkspace, newEnvironment in
+                        selectedWorkspace = updatedWorkspace
+                        selectedEnvironment = newEnvironment
+                        showingCreateEnvironment = false
+                    }
+                )
+            }
+        }
+        .sheet(item: $editingEnvironment) { environment in
+            if let workspace = selectedWorkspace {
+                EnvironmentFormSheet(
+                    serverManager: serverManager,
+                    workspace: workspace,
+                    environment: environment,
+                    onSave: { updatedWorkspace, updatedEnvironment in
+                        selectedWorkspace = updatedWorkspace
+                        if selectedEnvironment?.id == updatedEnvironment.id {
+                            selectedEnvironment = updatedEnvironment
+                        }
+                        editingEnvironment = nil
+                    }
+                )
+            }
+        }
+        .alert(String(localized: "Delete Environment?"), isPresented: Binding(
+            get: { environmentToDelete != nil },
+            set: { if !$0 { environmentToDelete = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                guard let environment = environmentToDelete,
+                      let workspace = selectedWorkspace else {
+                    environmentToDelete = nil
+                    return
+                }
+                Task {
+                    let updatedWorkspace = try? await serverManager.deleteEnvironment(
+                        environment,
+                        in: workspace,
+                        fallback: .production
+                    )
+                    await MainActor.run {
+                        if let updatedWorkspace {
+                            selectedWorkspace = updatedWorkspace
+                        }
+                        if selectedEnvironment?.id == environment.id {
+                            selectedEnvironment = .production
+                        }
+                        environmentToDelete = nil
+                    }
+                }
+            }
+        } message: {
+            let name = environmentToDelete?.displayName ?? String(localized: "Custom")
+            Text(String(format: String(localized: "Servers in '%@' will be moved to Production."), name))
+        }
     }
 
     // MARK: - Workspace Section
@@ -92,7 +156,7 @@ struct ServerSidebarView: View {
                         .fill(Color.fromHex(selectedWorkspace?.colorHex ?? "#007AFF"))
                         .frame(width: 8, height: 8)
 
-                    Text(selectedWorkspace?.name ?? "Select Workspace")
+                    Text(selectedWorkspace?.name ?? String(localized: "Select Workspace"))
                         .font(.body)
                         .fontWeight(.semibold)
                         .lineLimit(1)
@@ -141,7 +205,28 @@ struct ServerSidebarView: View {
                 EnvironmentMenu(
                     selected: $selectedEnvironment,
                     environments: selectedWorkspace?.environments ?? ServerEnvironment.builtInEnvironments,
-                    serverCounts: serverCountsByEnvironment
+                    serverCounts: serverCountsByEnvironment,
+                    onCreateCustom: {
+                        if storeManager.isPro {
+                            showingCreateEnvironment = true
+                        } else {
+                            showingProUpgrade = true
+                        }
+                    },
+                    onEditCustom: { environment in
+                        if storeManager.isPro {
+                            editingEnvironment = environment
+                        } else {
+                            showingProUpgrade = true
+                        }
+                    },
+                    onDeleteCustom: { environment in
+                        if storeManager.isPro {
+                            environmentToDelete = environment
+                        } else {
+                            showingProUpgrade = true
+                        }
+                    }
                 )
             }
             .padding(.horizontal, 12)
@@ -225,7 +310,7 @@ struct ServerSidebarView: View {
             }
             .buttonStyle(.plain)
             .padding(.vertical, 8)
-            .help("Support & Feedback")
+            .help(Text("Support & Feedback"))
 
             Button {
                 #if os(macOS)
@@ -240,7 +325,7 @@ struct ServerSidebarView: View {
             .buttonStyle(.plain)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .help("Settings")
+            .help(Text("Settings"))
         }
         .background(Color.primary.opacity(0.04))
     }
@@ -288,9 +373,11 @@ struct EnvironmentMenu: View {
     @Binding var selected: ServerEnvironment?
     let environments: [ServerEnvironment]
     let serverCounts: [UUID: Int]
+    let onCreateCustom: () -> Void
+    let onEditCustom: (ServerEnvironment) -> Void
+    let onDeleteCustom: (ServerEnvironment) -> Void
 
     @ObservedObject private var storeManager = StoreManager.shared
-    @State private var showingProUpgrade = false
 
     private var totalCount: Int {
         serverCounts.values.reduce(0, +)
@@ -333,14 +420,10 @@ struct EnvironmentMenu: View {
 
             // Create custom (Pro only)
             Button {
-                if storeManager.isPro {
-                    // Show create custom environment
-                } else {
-                    showingProUpgrade = true
-                }
+                onCreateCustom()
             } label: {
                 HStack {
-                    Label("Custom...", systemImage: "plus")
+                    Label(String(localized: "Custom..."), systemImage: "plus")
                     Spacer()
                     if !storeManager.isPro {
                         Image(systemName: "star.fill")
@@ -349,21 +432,56 @@ struct EnvironmentMenu: View {
                     }
                 }
             }
+
+            if let selectedEnvironment = selected, !selectedEnvironment.isBuiltIn {
+                Divider()
+
+                Button {
+                    onEditCustom(selectedEnvironment)
+                } label: {
+                    HStack {
+                        Label(
+                            String(format: String(localized: "Edit \"%@\"..."), selectedEnvironment.displayName),
+                            systemImage: "pencil"
+                        )
+                        Spacer()
+                        if !storeManager.isPro {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.orange)
+                                .imageScale(.small)
+                        }
+                    }
+                }
+
+                Button(role: .destructive) {
+                    onDeleteCustom(selectedEnvironment)
+                } label: {
+                    HStack {
+                        Label(
+                            String(format: String(localized: "Delete \"%@\"..."), selectedEnvironment.displayName),
+                            systemImage: "trash"
+                        )
+                        Spacer()
+                        if !storeManager.isPro {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.orange)
+                                .imageScale(.small)
+                        }
+                    }
+                }
+            }
         } label: {
             HStack(spacing: 6) {
                 Circle()
                     .fill(selected?.color ?? .secondary)
                     .frame(width: 8, height: 8)
-                Text(selected?.shortName ?? "All")
+                Text(selected?.displayShortName ?? String(localized: "All"))
                     .font(.subheadline)
                     .fontWeight(.medium)
             }
         }
         .menuStyle(.borderlessButton)
         .fixedSize()
-        .sheet(isPresented: $showingProUpgrade) {
-            ProUpgradeSheet()
-        }
     }
 
     private func environmentButton(_ env: ServerEnvironment) -> some View {
@@ -374,7 +492,7 @@ struct EnvironmentMenu: View {
                 Circle()
                     .fill(env.color)
                     .frame(width: 8, height: 8)
-                Text(env.name)
+                Text(env.displayName)
                 Spacer()
                 Text("(\(serverCounts[env.id] ?? 0))")
                     .foregroundStyle(.secondary)

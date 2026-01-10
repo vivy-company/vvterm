@@ -1,0 +1,642 @@
+/* General */
+"OK" = "OK";
+"Cancel" = "Cancel";
+"Save" = "Save";
+"Add" = "Add";
+"Create" = "Create";
+"Delete" = "Delete";
+"Done" = "Done";
+"Edit" = "Edit";
+"Remove" = "Remove";
+"Connect" = "Connect";
+"Disconnect" = "Disconnect";
+"Reconnect" = "Reconnect";
+"Retry" = "Retry";
+"Upgrade" = "Upgrade";
+"Upgrade to Pro" = "Upgrade to Pro";
+"Upgrade to VVTerm Pro" = "Upgrade to VVTerm Pro";
+"View Plans" = "View Plans";
+"Manage Subscription" = "Manage Subscription";
+"Manage subscription" = "Manage subscription";
+"Manage your subscription" = "Manage your subscription";
+"Restore Purchases" = "Restore Purchases";
+"Renew" = "Renew";
+"Renew Pro" = "Renew Pro";
+"Close" = "Close";
+"Close Terminal" = "Close Terminal";
+"Close All to the Left" = "Close All to the Left";
+"Close All to the Right" = "Close All to the Right";
+"Close Other Tabs" = "Close Other Tabs";
+"Duplicate Tab" = "Duplicate Tab";
+"New Terminal" = "New Terminal";
+"New terminal tab" = "New terminal tab";
+"New connection" = "New connection";
+"Previous tab" = "Previous tab";
+"Next tab" = "Next tab";
+"No terminals" = "No terminals";
+"%lld tab" = "%lld tab";
+"%lld tabs" = "%lld tabs";
+"No terminals open" = "No terminals open";
+"Search servers" = "Search servers";
+"Search servers..." = "Search servers...";
+"Search symbols..." = "Search symbols...";
+"Select Workspace" = "Select Workspace";
+"Select a Server" = "Select a Server";
+"Choose a server from the sidebar to connect" = "Choose a server from the sidebar to connect";
+"Multiple connections require Pro" = "Multiple connections require Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Upgrade to connect to multiple servers simultaneously";
+"Disconnected" = "Disconnected";
+"Connecting..." = "Connecting...";
+"Connecting to %@..." = "Connecting to %@...";
+"Reconnecting (attempt %lld)..." = "Reconnecting (attempt %lld)...";
+"Connection Failed" = "Connection Failed";
+"Connection failed: %@" = "Connection failed: %@";
+"Connection timed out" = "Connection timed out";
+"Authentication failed" = "Authentication failed";
+"Failed to load credentials" = "Failed to load credentials";
+"Failed to load credentials: %@" = "Failed to load credentials: %@";
+"Failed to load key: %@" = "Failed to load key: %@";
+"Failed to read key file: %@" = "Failed to read key file: %@";
+"Failed to import key: %@" = "Failed to import key: %@";
+"Failed to delete key: %@" = "Failed to delete key: %@";
+"Failed to save key: %@" = "Failed to save key: %@";
+"Failed to generate key: %@" = "Failed to generate key: %@";
+"Failed to generate SSH key" = "Failed to generate SSH key";
+"Failed to encode key data" = "Failed to encode key data";
+"Failed to export RSA key" = "Failed to export RSA key";
+"Invalid key data" = "Invalid key data";
+"Cannot access the selected file" = "Cannot access the selected file";
+"Copy to Clipboard" = "Copy to Clipboard";
+"Copied" = "Copied";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "About VVTerm";
+"Version %@ (%@)" = "Version %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "Professional SSH client\nfor macOS & iOS";
+"Visit Website" = "Visit Website";
+"Report an Issue" = "Report an Issue";
+"Privacy Policy" = "Privacy Policy";
+"Get in Touch" = "Get in Touch";
+"Questions, feedback, or issues? Reach out anytime." = "Questions, feedback, or issues? Reach out anytime.";
+"Questions, feedback, or issues?\nReach out anytime." = "Questions, feedback, or issues?\nReach out anytime.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "Welcome to VVTerm";
+"Your secure SSH terminal" = "Your secure SSH terminal";
+"Continue" = "Continue";
+"SSH Terminal" = "SSH Terminal";
+"Connect to servers with GPU-accelerated terminal emulation." = "Connect to servers with GPU-accelerated terminal emulation.";
+"iCloud Sync" = "iCloud Sync";
+"Servers and credentials sync across all your devices." = "Servers and credentials sync across all your devices.";
+"Secure Storage" = "Secure Storage";
+"Passwords and SSH keys protected by Keychain." = "Passwords and SSH keys protected by Keychain.";
+"Voice Commands" = "Voice Commands";
+"Speak commands with on-device speech recognition." = "Speak commands with on-device speech recognition.";
+
+/* Settings Navigation */
+"Settings" = "Settings";
+"General" = "General";
+"Terminal" = "Terminal";
+"Transcription" = "Transcription";
+"SSH Keys" = "SSH Keys";
+"Sync" = "Sync";
+"About" = "About";
+"Premium" = "Premium";
+"Appearance and preferences" = "Appearance and preferences";
+"Font, theme, and connection settings" = "Font, theme, and connection settings";
+"Speech-to-text engine and models" = "Speech-to-text engine and models";
+"Manage stored SSH keys" = "Manage stored SSH keys";
+"iCloud sync and data management" = "iCloud sync and data management";
+"Version and links" = "Version and links";
+
+/* Appearance */
+"Appearance" = "Appearance";
+"System" = "System";
+"Light" = "Light";
+"Dark" = "Dark";
+
+/* Terminal Settings */
+"Font" = "Font";
+"Font Family" = "Font Family";
+"Size: %lldpt" = "Size: %lldpt";
+"Theme" = "Theme";
+"Use different themes for Light/Dark mode" = "Use different themes for Light/Dark mode";
+"Dark Mode Theme" = "Dark Mode Theme";
+"Light Mode Theme" = "Light Mode Theme";
+"Terminal Behavior" = "Terminal Behavior";
+"Enable terminal notifications" = "Enable terminal notifications";
+"Show progress overlays" = "Show progress overlays";
+"Show voice input button" = "Show voice input button";
+"Copy Text Processing" = "Copy Text Processing";
+"Transformations applied when copying text from terminal" = "Transformations applied when copying text from terminal";
+"Trim trailing whitespace" = "Trim trailing whitespace";
+"Collapse multiple blank lines" = "Collapse multiple blank lines";
+"Strip shell prompts ($ #)" = "Strip shell prompts ($ #)";
+"Flatten multi-line commands" = "Flatten multi-line commands";
+"Remove box-drawing characters" = "Remove box-drawing characters";
+"Strip ANSI escape codes" = "Strip ANSI escape codes";
+"SSH Connection" = "SSH Connection";
+"Auto-reconnect on disconnect" = "Auto-reconnect on disconnect";
+"Send keep-alive packets" = "Send keep-alive packets";
+"Interval: %llds" = "Interval: %llds";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "Upgrade for unlimited features";
+"Unlimited Servers" = "Unlimited Servers";
+"Add as many servers as you need (free: 3)" = "Add as many servers as you need (free: 3)";
+"Unlimited Workspaces" = "Unlimited Workspaces";
+"Organize servers into multiple workspaces (free: 1)" = "Organize servers into multiple workspaces (free: 1)";
+"Multiple Connections" = "Multiple Connections";
+"Open multiple terminal tabs at once (free: 1)" = "Open multiple terminal tabs at once (free: 1)";
+"Custom Environments" = "Custom Environments";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Create custom environment labels beyond Prod/Staging/Dev";
+"All Future Features" = "All Future Features";
+"Get access to every new Pro feature" = "Get access to every new Pro feature";
+"Monthly" = "Monthly";
+"Billed monthly" = "Billed monthly";
+"Yearly" = "Yearly";
+"Best value - billed yearly" = "Best value - billed yearly";
+"SAVE 74%" = "SAVE 74%";
+"Lifetime" = "Lifetime";
+"One-time purchase, forever" = "One-time purchase, forever";
+"FOREVER" = "FOREVER";
+"Processing..." = "Processing...";
+"Purchase Failed" = "Purchase Failed";
+"Unknown error" = "Unknown error";
+"Welcome to Pro!" = "Welcome to Pro!";
+"You now have unlimited access" = "You now have unlimited access";
+"Cancel anytime. Subscription auto-renews." = "Cancel anytime. Subscription auto-renews.";
+"Terms of Service" = "Terms of Service";
+"Refund Policy" = "Refund Policy";
+"Select a Plan" = "Select a Plan";
+"Buy - %@" = "Buy - %@";
+"Subscribe - %@" = "Subscribe - %@";
+"Purchase verification failed" = "Purchase verification failed";
+"Product not found" = "Product not found";
+"Purchase failed: %@" = "Purchase failed: %@";
+
+/* Pro Settings */
+"Status" = "Status";
+"Subscription" = "Subscription";
+"Plan" = "Plan";
+"Purchased" = "Purchased";
+"Renews" = "Renews";
+"Servers" = "Servers";
+"%lld of %lld used" = "%lld of %lld used";
+"Workspaces" = "Workspaces";
+"Simultaneous Connections" = "Simultaneous Connections";
+"%lld max" = "%lld max";
+"Features" = "Features";
+"Billing" = "Billing";
+"Active" = "Active";
+"Free Tier" = "Free Tier";
+"Pro Lifetime" = "Pro Lifetime";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro Monthly";
+"Pro Yearly" = "Pro Yearly";
+"PRO" = "PRO";
+"FREE" = "FREE";
+"Unlimited servers & workspaces" = "Unlimited servers & workspaces";
+"View Plans" = "View Plans";
+
+/* Pro Limits */
+"Server Limit Reached" = "Server Limit Reached";
+"Workspace Limit Reached" = "Workspace Limit Reached";
+"Tab Limit Reached" = "Tab Limit Reached";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections.";
+"Server Locked" = "Server Locked";
+"Workspace Locked" = "Workspace Locked";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "Subscription Expired";
+"%lld server" = "%lld server";
+"%lld servers" = "%lld servers";
+"%lld workspace" = "%lld workspace";
+"%lld workspaces" = "%lld workspaces";
+" and " = " and ";
+"%@ locked" = "%@ locked";
+
+/* Server & Workspace */
+"Server Info" = "Server Info";
+"Name" = "Name";
+"Host" = "Host";
+"Port" = "Port";
+"Username" = "Username";
+"Authentication" = "Authentication";
+"Method" = "Method";
+"Password" = "Password";
+"Key loaded" = "Key loaded";
+"Key Passphrase" = "Key Passphrase";
+"Server Environment" = "Server Environment";
+"Environment" = "Environment";
+"Notes" = "Notes";
+"Edit Server" = "Edit Server";
+"Add Server" = "Add Server";
+"Use Stored Key" = "Use Stored Key";
+"Select a key..." = "Select a key...";
+"Import File" = "Import File";
+"Paste" = "Paste";
+"Add to Keychain" = "Add to Keychain";
+"Select a stored key or import/paste a new one" = "Select a stored key or import/paste a new one";
+"Using stored key: %@" = "Using stored key: %@";
+"Workspace" = "Workspace";
+"Workspaces" = "Workspaces";
+"Workspace name" = "Workspace name";
+"Color" = "Color";
+"Delete Workspace" = "Delete Workspace";
+"Edit Workspace" = "Edit Workspace";
+"New Workspace" = "New Workspace";
+"Workspaces" = "Workspaces";
+"My Servers" = "My Servers";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "WORKSPACE";
+"SERVERS" = "SERVERS";
+"Support VVTerm" = "Support VVTerm";
+"Upgrade to Pro" = "Upgrade to Pro";
+"All" = "All";
+"Custom..." = "Custom...";
+"New Workspace" = "New Workspace";
+"Unlock with Pro" = "Unlock with Pro";
+"Switch to Workspace" = "Switch to Workspace";
+"Delete Workspace" = "Delete Workspace";
+
+/* iOS Lists */
+"%lld servers" = "%lld servers";
+"Servers" = "Servers";
+"Active Connections" = "Active Connections";
+"Add Workspace" = "Add Workspace";
+"Workspaces" = "Workspaces";
+"Done" = "Done";
+
+/* Empty States */
+"No Servers" = "No Servers";
+"Add a server to get started" = "Add a server to get started";
+"Multiple connections require Pro" = "Multiple connections require Pro";
+"Upgrade to connect to multiple servers simultaneously" = "Upgrade to connect to multiple servers simultaneously";
+"Upgrade to Pro" = "Upgrade to Pro";
+"Connect" = "Connect";
+
+/* Offline */
+"No network connection" = "No network connection";
+"You're currently offline. Some features may not work:" = "You're currently offline. Some features may not work:";
+"Cannot connect to servers" = "Cannot connect to servers";
+"iCloud sync paused" = "iCloud sync paused";
+"Saved servers still accessible" = "Saved servers still accessible";
+"Offline" = "Offline";
+
+/* Terminal */
+"Initializing terminal..." = "Initializing terminal...";
+"Terminal initialization failed" = "Terminal initialization failed";
+"Connecting..." = "Connecting...";
+"Reconnecting (attempt %lld)..." = "Reconnecting (attempt %lld)...";
+"Disconnected" = "Disconnected";
+"Connection Failed" = "Connection Failed";
+"Reconnect" = "Reconnect";
+"Retry" = "Retry";
+"Voice Input Unavailable" = "Voice Input Unavailable";
+"Voice input (Command+Shift+M)" = "Voice input (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "Enable Microphone and Speech Recognition in System Settings.";
+"Terminal" = "Terminal";
+"No terminals open" = "No terminals open";
+"New Terminal" = "New Terminal";
+"Close this terminal?" = "Close this terminal?";
+"The SSH connection will be terminated." = "The SSH connection will be terminated.";
+
+/* Keychain */
+"No Keys Stored" = "No Keys Stored";
+"Add keys to quickly use them when creating new servers" = "Add keys to quickly use them when creating new servers";
+"Generate New Key" = "Generate New Key";
+"Import Key" = "Import Key";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "Keys are stored securely in your device's Keychain. Passphrases are stored separately.";
+"Delete SSH Key" = "Delete SSH Key";
+"Are you sure you want to delete '%@'? This cannot be undone." = "Are you sure you want to delete '%@'? This cannot be undone.";
+"Protected" = "Protected";
+"Added %@ ago" = "Added %@ ago";
+"Copy public key" = "Copy public key";
+"Key Name" = "Key Name";
+"e.g., Personal MacBook, Work Key" = "e.g., Personal MacBook, Work Key";
+"Private Key" = "Private Key";
+"Import Key File" = "Import Key File";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents";
+"Key loaded (%lld characters)" = "Key loaded (%lld characters)";
+"Key passphrase" = "Key passphrase";
+"Passphrase (Optional)" = "Passphrase (Optional)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase.";
+"Add SSH Key" = "Add SSH Key";
+"Algorithm" = "Algorithm";
+"Key Type" = "Key Type";
+"Confirm passphrase" = "Confirm passphrase";
+"Protect your key with a passphrase. Leave empty for no protection." = "Protect your key with a passphrase. Leave empty for no protection.";
+"Generated Key" = "Generated Key";
+"Key generated successfully" = "Key generated successfully";
+"Fingerprint:" = "Fingerprint:";
+"View Public Key" = "View Public Key";
+"Generate SSH Key" = "Generate SSH Key";
+"Generate" = "Generate";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "Add this to your server's ~/.ssh/authorized_keys file:";
+"No Public Key" = "No Public Key";
+"This key was imported without a public key." = "This key was imported without a public key.";
+"Public Key" = "Public Key";
+
+/* Transcription */
+"Engine" = "Engine";
+"System (Apple)" = "System (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "Provider";
+"Language" = "Language";
+"Model" = "Model";
+"Downloading..." = "Downloading...";
+"Delete Model" = "Delete Model";
+"Download size: %@" = "Download size: %@";
+"Status" = "Status";
+"Download" = "Download";
+"Ready" = "Ready";
+"Failed" = "Failed";
+"Storage" = "Storage";
+"Model Storage" = "Model Storage";
+"Total MLX Models" = "Total MLX Models";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Uses Apple's built-in speech recognition. Requires network for best results.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper runs locally using MLX. Works offline after download.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription.";
+"English" = "English";
+"Spanish" = "Spanish";
+"French" = "French";
+"German" = "German";
+"Japanese" = "Japanese";
+"Chinese" = "Chinese";
+"Korean" = "Korean";
+"Portuguese" = "Portuguese";
+"Russian" = "Russian";
+"Auto-detect" = "Auto-detect";
+
+/* MLX Models */
+"Tiny" = "Tiny";
+"Fastest, smallest" = "Fastest, smallest";
+"Full precision" = "Full precision";
+"Tiny (EN)" = "Tiny (EN)";
+"English-only, smaller" = "English-only, smaller";
+"English-only" = "English-only";
+"Base" = "Base";
+"Balanced speed/quality" = "Balanced speed/quality";
+"Small" = "Small";
+"Better accuracy" = "Better accuracy";
+"Medium" = "Medium";
+"Higher accuracy, heavier" = "Higher accuracy, heavier";
+"Large v3" = "Large v3";
+"Latest large model" = "Latest large model";
+"Large" = "Large";
+"Large v3 4-bit" = "Large v3 4-bit";
+"Smaller download" = "Smaller download";
+"4-bit quantized" = "4-bit quantized";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "Large, high-accuracy model";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "WiFi";
+"Cellular" = "Cellular";
+"Ethernet" = "Ethernet";
+"Unknown" = "Unknown";
+"No Connection" = "No Connection";
+" (Metered)" = " (Metered)";
+" (Low Data)" = " (Low Data)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "Enable iCloud Sync";
+"iCloud Account" = "iCloud Account";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "Sync your servers and workspaces across all your Apple devices.";
+"Sync Status" = "Sync Status";
+"Last Synced" = "Last Synced";
+"Error" = "Error";
+"Data" = "Data";
+"Force Sync Now" = "Force Sync Now";
+"Clear Local Data & Re-sync" = "Clear Local Data & Re-sync";
+"Reset iCloud (Delete All & Re-upload)" = "Reset iCloud (Delete All & Re-upload)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates).";
+"Account Status" = "Account Status";
+"Container" = "Container";
+"Re-check iCloud Status" = "Re-check iCloud Status";
+"Troubleshooting" = "Troubleshooting";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details.";
+"Force Sync" = "Force Sync";
+"Sync Now" = "Sync Now";
+"This will fetch the latest data from iCloud and may take a moment." = "This will fetch the latest data from iCloud and may take a moment.";
+"Clear Local Data" = "Clear Local Data";
+"Clear & Re-sync" = "Clear & Re-sync";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost.";
+"Reset iCloud Data" = "Reset iCloud Data";
+"Delete All & Re-upload" = "Delete All & Re-upload";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records.";
+"Connected" = "Connected";
+"Not Available" = "Not Available";
+"Synced" = "Synced";
+"Syncing..." = "Syncing...";
+"available" = "available";
+"noAccount - User not signed into iCloud" = "noAccount - User not signed into iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - iCloud access restricted (parental controls, MDM, etc.)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - Unable to determine iCloud status";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud temporarily unavailable";
+"unknown status: %@" = "unknown status: %@";
+"Error: %@" = "Error: %@";
+"Checking..." = "Checking...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "Horizontal split view";
+"Vertical split view" = "Vertical split view";
+"Left pane" = "Left pane";
+"Top pane" = "Top pane";
+"Right pane" = "Right pane";
+"Bottom pane" = "Bottom pane";
+"Horizontal split divider" = "Horizontal split divider";
+"Vertical split divider" = "Vertical split divider";
+"Drag to resize the left and right panes" = "Drag to resize the left and right panes";
+"Drag to resize the top and bottom panes" = "Drag to resize the top and bottom panes";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "CORES";
+"IDLE" = "IDLE";
+"UPTIME" = "UPTIME";
+"LOAD" = "LOAD";
+"FREE" = "FREE";
+"USED" = "USED";
+"CACHED" = "CACHED";
+"TOTAL" = "TOTAL";
+"Volumes" = "Volumes";
+"Top Processes" = "Top Processes";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ TOTAL";
+"↓ TOTAL" = "↓ TOTAL";
+"%lld D" = "%lld D";
+"%lld H" = "%lld H";
+
+/* SFSymbol Picker */
+"Recent" = "Recent";
+"Load more (%lld remaining)" = "Load more (%lld remaining)";
+"%lld symbols" = "%lld symbols";
+"What's New" = "What's New";
+"Draw" = "Draw";
+"Variable" = "Variable";
+"Multicolor" = "Multicolor";
+"Communication" = "Communication";
+"Weather" = "Weather";
+"Maps" = "Maps";
+"Objects & Tools" = "Objects & Tools";
+"Devices" = "Devices";
+"Camera & Photos" = "Camera & Photos";
+"Gaming" = "Gaming";
+"Connectivity" = "Connectivity";
+"Transportation" = "Transportation";
+"Automotive" = "Automotive";
+"Accessibility" = "Accessibility";
+"Privacy & Security" = "Privacy & Security";
+"Human" = "Human";
+"Home" = "Home";
+"Fitness" = "Fitness";
+"Nature" = "Nature";
+"Editing" = "Editing";
+"Text Formatting" = "Text Formatting";
+"Media" = "Media";
+"Keyboard" = "Keyboard";
+"Commerce" = "Commerce";
+"Time" = "Time";
+"Health" = "Health";
+"Shapes" = "Shapes";
+"Arrows" = "Arrows";
+"Indices" = "Indices";
+"Math" = "Math";
+
+/* Auth Methods */
+"SSH Key" = "SSH Key";
+"SSH Key + Passphrase" = "SSH Key + Passphrase";
+
+/* Environments */
+"Production" = "Production";
+"Staging" = "Staging";
+"Development" = "Development";
+"Prod" = "Prod";
+"Stag" = "Stag";
+"Dev" = "Dev";
+"New Environment" = "New Environment";
+"Edit Environment" = "Edit Environment";
+"Environment name" = "Environment name";
+"An environment with this name already exists." = "An environment with this name already exists.";
+"Delete Environment?" = "Delete Environment?";
+"Servers in '%@' will be moved to Production." = "Servers in '%@' will be moved to Production.";
+"Edit \"%@\"..." = "Edit \"%@\"...";
+"Delete \"%@\"..." = "Delete \"%@\"...";
+"Custom" = "Custom";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "Microphone permission is required. The microphone will be automatically requested when recording starts.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "MLX transcription is not available on this Mac. Switching to Apple Speech.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "Upgrade to Pro for unlimited servers";
+"Upgrade to Pro for unlimited workspaces" = "Upgrade to Pro for unlimited workspaces";
+"Upgrade to Pro for multiple connections" = "Upgrade to Pro for multiple connections";
+"Upgrade to Pro for custom environments" = "Upgrade to Pro for custom environments";
+
+/* Misc */
+"Terminal initialization failed" = "Terminal initialization failed";
+"Voice Input Unavailable" = "Voice Input Unavailable";
+"Disconnect from server" = "Disconnect from server";
+"Disconnect from %@?" = "Disconnect from %@?";
+"This will return to the server list." = "This will return to the server list.";
+"All terminal tabs for this server will be closed." = "All terminal tabs for this server will be closed.";
+"Add Terminal Preset" = "Add Terminal Preset";
+"Edit Preset" = "Edit Preset";
+"Basic Information" = "Basic Information";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Display name for the preset (e.g., Claude, Helix, Vim)";
+"Command" = "Command";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Command to run when preset is selected (e.g., claude, hx, nvim)";
+"Icon" = "Icon";
+"Choose Symbol..." = "Choose Symbol...";
+
+/* Contact Labels */
+"Developer" = "Developer";
+"Discord" = "Discord";
+"Join Community" = "Join Community";
+"Email" = "Email";
+"GitHub" = "GitHub";
+"Report Issue" = "Report Issue";
+"Support VVTerm" = "Support VVTerm";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "System (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "Failed to remove model";
+"Model ID is required" = "Model ID is required";
+
+/* Lock Errors */
+"Server '%@' is locked" = "Server '%@' is locked";
+"Workspace '%@' is locked" = "Workspace '%@' is locked";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "Modern, fast, and secure. Recommended for most uses.";
+"Wide compatibility with older systems." = "Wide compatibility with older systems.";
+
+
+/* Split Commands */
+"Split Right" = "Split Right";
+"Split Down" = "Split Down";
+"Close Pane" = "Close Pane";
+
+/* Tabs */
+"View" = "View";
+"Stats" = "Stats";
+
+/* Help */
+"Support & Feedback" = "Support & Feedback";
+
+"Upgrade to Pro for unlimited workspaces." = "Upgrade to Pro for unlimited workspaces.";
+
+"Fingerprint" = "Fingerprint";
+
+"Links" = "Links";
+
+"Passphrase" = "Passphrase";
+
+"%@ is a Pro feature" = "%@ is a Pro feature";
+
+"System (Default)" = "System (Default)";
+
+"Some changes may require restarting the app." = "Some changes may require restarting the app.";
+
+/* Download Progress */
+"%llds remaining" = "%llds remaining";
+"%lldm remaining" = "%lldm remaining";
+"%lldh %lldm remaining" = "%lldh %lldm remaining";
+"Clear All Storage" = "Clear All Storage";
+
+/* Preview */
+"Server 1" = "Server 1";
+"Server 2" = "Server 2";
+"Server 3" = "Server 3";

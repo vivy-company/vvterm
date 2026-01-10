@@ -12,15 +12,15 @@ enum SSHKeyType: String, CaseIterable, Identifiable, Codable {
 
     var displayName: String {
         switch self {
-        case .ed25519: return "Ed25519"
-        case .rsa4096: return "RSA 4096"
+        case .ed25519: return String(localized: "Ed25519")
+        case .rsa4096: return String(localized: "RSA 4096")
         }
     }
 
     var description: String {
         switch self {
-        case .ed25519: return "Modern, fast, and secure. Recommended for most uses."
-        case .rsa4096: return "Wide compatibility with older systems."
+        case .ed25519: return String(localized: "Modern, fast, and secure. Recommended for most uses.")
+        case .rsa4096: return String(localized: "Wide compatibility with older systems.")
         }
     }
 
@@ -51,10 +51,10 @@ enum SSHKeyGeneratorError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .keyGenerationFailed: return "Failed to generate SSH key"
-        case .encodingFailed: return "Failed to encode key data"
-        case .rsaExportFailed: return "Failed to export RSA key"
-        case .invalidKeyData: return "Invalid key data"
+        case .keyGenerationFailed: return String(localized: "Failed to generate SSH key")
+        case .encodingFailed: return String(localized: "Failed to encode key data")
+        case .rsaExportFailed: return String(localized: "Failed to export RSA key")
+        case .invalidKeyData: return String(localized: "Invalid key data")
         }
     }
 }

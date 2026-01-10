@@ -24,6 +24,15 @@ final class NetworkMonitor: ObservableObject {
         case ethernet = "Ethernet"
         case unknown = "Unknown"
 
+        var displayName: String {
+            switch self {
+            case .wifi: return String(localized: "WiFi")
+            case .cellular: return String(localized: "Cellular")
+            case .ethernet: return String(localized: "Ethernet")
+            case .unknown: return String(localized: "Unknown")
+            }
+        }
+
         var icon: String {
             switch self {
             case .wifi: return "wifi"
@@ -112,14 +121,14 @@ final class NetworkMonitor: ObservableObject {
 extension NetworkMonitor {
     var statusDescription: String {
         if !isConnected {
-            return "No Connection"
+            return String(localized: "No Connection")
         }
-        var description = connectionType.rawValue
+        var description = connectionType.displayName
         if isExpensive {
-            description += " (Metered)"
+            description += String(localized: " (Metered)")
         }
         if isConstrained {
-            description += " (Low Data)"
+            description += String(localized: " (Low Data)")
         }
         return description
     }

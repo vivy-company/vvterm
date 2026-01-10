@@ -1,0 +1,622 @@
+/* General */
+"OK" = "确定";
+"Cancel" = "取消";
+"Save" = "保存";
+"Add" = "添加";
+"Create" = "创建";
+"Delete" = "删除";
+"Done" = "完成";
+"Edit" = "编辑";
+"Remove" = "移除";
+"Connect" = "连接";
+"Disconnect" = "断开连接";
+"Reconnect" = "重新连接";
+"Retry" = "重试";
+"Upgrade" = "升级";
+"Upgrade to Pro" = "升级到 Pro";
+"Upgrade to VVTerm Pro" = "升级到 VVTerm Pro";
+"View Plans" = "查看方案";
+"Manage Subscription" = "管理订阅";
+"Manage subscription" = "管理订阅";
+"Manage your subscription" = "管理你的订阅";
+"Restore Purchases" = "恢复购买";
+"Renew" = "续订";
+"Renew Pro" = "续订 Pro";
+"Close" = "关闭";
+"Close Terminal" = "关闭终端";
+"Close All to the Left" = "关闭左侧所有标签";
+"Close All to the Right" = "关闭右侧所有标签";
+"Close Other Tabs" = "关闭其他标签";
+"Duplicate Tab" = "复制标签页";
+"New Terminal" = "新建终端";
+"New terminal tab" = "新终端标签页";
+"New connection" = "新连接";
+"Previous tab" = "上一个标签页";
+"Next tab" = "下一个标签页";
+"No terminals" = "没有终端";
+"%lld tab" = "%lld 个标签页";
+"%lld tabs" = "%lld 个标签页";
+"No terminals open" = "没有打开的终端";
+"Search servers" = "搜索服务器";
+"Search servers..." = "搜索服务器...";
+"Search symbols..." = "搜索符号...";
+"Select Workspace" = "选择工作区";
+"Select a Server" = "选择服务器";
+"Choose a server from the sidebar to connect" = "从侧边栏选择服务器以连接";
+"Multiple connections require Pro" = "多连接需要 Pro";
+"Upgrade to connect to multiple servers simultaneously" = "升级以同时连接多个服务器";
+"Disconnected" = "已断开";
+"Connecting..." = "正在连接...";
+"Connecting to %@..." = "正在连接到 %@...";
+"Reconnecting (attempt %lld)..." = "正在重连（第 %lld 次）...";
+"Connection Failed" = "连接失败";
+"Connection failed: %@" = "连接失败：%@";
+"Connection timed out" = "连接超时";
+"Authentication failed" = "认证失败";
+"Failed to load credentials" = "加载凭据失败";
+"Failed to load credentials: %@" = "加载凭据失败：%@";
+"Failed to load key: %@" = "加载密钥失败：%@";
+"Failed to read key file: %@" = "读取密钥文件失败：%@";
+"Failed to import key: %@" = "导入密钥失败：%@";
+"Failed to delete key: %@" = "删除密钥失败：%@";
+"Failed to save key: %@" = "保存密钥失败：%@";
+"Failed to generate key: %@" = "生成密钥失败：%@";
+"Failed to generate SSH key" = "生成 SSH 密钥失败";
+"Failed to encode key data" = "编码密钥数据失败";
+"Failed to export RSA key" = "导出 RSA 密钥失败";
+"Invalid key data" = "无效的密钥数据";
+"Cannot access the selected file" = "无法访问所选文件";
+"Copy to Clipboard" = "复制到剪贴板";
+"Copied" = "已复制";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "关于 VVTerm";
+"Version %@ (%@)" = "版本 %@（%@）";
+"Professional SSH client\nfor macOS & iOS" = "专业 SSH 客户端\n适用于 macOS 和 iOS";
+"Visit Website" = "访问网站";
+"Report an Issue" = "报告问题";
+"Privacy Policy" = "隐私政策";
+"Get in Touch" = "联系我们";
+"Questions, feedback, or issues? Reach out anytime." = "有问题、反馈或建议？欢迎随时联系。";
+"Questions, feedback, or issues?\nReach out anytime." = "有问题、反馈或建议？\n欢迎随时联系。";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "欢迎使用 VVTerm";
+"Your secure SSH terminal" = "你的安全 SSH 终端";
+"Continue" = "继续";
+"SSH Terminal" = "SSH 终端";
+"Connect to servers with GPU-accelerated terminal emulation." = "使用 GPU 加速的终端模拟连接服务器。";
+"iCloud Sync" = "iCloud 同步";
+"Servers and credentials sync across all your devices." = "服务器和凭据在所有设备间同步。";
+"Secure Storage" = "安全存储";
+"Passwords and SSH keys protected by Keychain." = "密码与 SSH 密钥由钥匙串保护。";
+"Voice Commands" = "语音命令";
+"Speak commands with on-device speech recognition." = "通过设备端语音识别输入命令。";
+
+/* Settings Navigation */
+"Settings" = "设置";
+"General" = "通用";
+"Terminal" = "终端";
+"Transcription" = "语音转写";
+"SSH Keys" = "SSH 密钥";
+"Sync" = "同步";
+"About" = "关于";
+"Premium" = "高级";
+"Appearance and preferences" = "外观与偏好";
+"Font, theme, and connection settings" = "字体、主题与连接设置";
+"Speech-to-text engine and models" = "语音转文字引擎与模型";
+"Manage stored SSH keys" = "管理已保存的 SSH 密钥";
+"iCloud sync and data management" = "iCloud 同步与数据管理";
+"Version and links" = "版本与链接";
+
+/* Appearance */
+"Appearance" = "外观";
+"System" = "系统";
+"Light" = "浅色";
+"Dark" = "深色";
+
+/* Terminal Settings */
+"Font" = "字体";
+"Font Family" = "字体族";
+"Size: %lldpt" = "大小：%lldpt";
+"Theme" = "主题";
+"Use different themes for Light/Dark mode" = "为浅色/深色模式使用不同主题";
+"Dark Mode Theme" = "深色模式主题";
+"Light Mode Theme" = "浅色模式主题";
+"Terminal Behavior" = "终端行为";
+"Enable terminal notifications" = "启用终端通知";
+"Show progress overlays" = "显示进度覆盖层";
+"Show voice input button" = "显示语音输入按钮";
+"Copy Text Processing" = "复制文本处理";
+"Transformations applied when copying text from terminal" = "从终端复制文本时应用的转换";
+"Trim trailing whitespace" = "去除行尾空白";
+"Collapse multiple blank lines" = "合并多余空行";
+"Strip shell prompts ($ #)" = "移除 Shell 提示符（$ #）";
+"Flatten multi-line commands" = "合并多行命令";
+"Remove box-drawing characters" = "移除框线字符";
+"Strip ANSI escape codes" = "移除 ANSI 转义码";
+"SSH Connection" = "SSH 连接";
+"Auto-reconnect on disconnect" = "断开后自动重连";
+"Send keep-alive packets" = "发送保活包";
+"Interval: %llds" = "间隔：%lld 秒";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "升级以解锁无限功能";
+"Unlimited Servers" = "无限服务器";
+"Add as many servers as you need (free: 3)" = "添加任意数量服务器（免费：3）";
+"Unlimited Workspaces" = "无限工作区";
+"Organize servers into multiple workspaces (free: 1)" = "将服务器组织到多个工作区（免费：1）";
+"Multiple Connections" = "多连接";
+"Open multiple terminal tabs at once (free: 1)" = "同时打开多个终端标签页（免费：1）";
+"Custom Environments" = "自定义环境";
+"Create custom environment labels beyond Prod/Staging/Dev" = "创建自定义环境标签（超越生产/预发/开发）";
+"All Future Features" = "所有未来功能";
+"Get access to every new Pro feature" = "获取所有新的 Pro 功能";
+"Monthly" = "月度";
+"Billed monthly" = "按月计费";
+"Yearly" = "年度";
+"Best value - billed yearly" = "最划算 - 按年计费";
+"SAVE 74%" = "节省 74%";
+"Lifetime" = "终身";
+"One-time purchase, forever" = "一次购买，永久使用";
+"FOREVER" = "永久";
+"Processing..." = "处理中...";
+"Purchase Failed" = "购买失败";
+"Unknown error" = "未知错误";
+"Welcome to Pro!" = "欢迎使用 Pro！";
+"You now have unlimited access" = "你已获得无限访问";
+"Cancel anytime. Subscription auto-renews." = "可随时取消，订阅将自动续订。";
+"Terms of Service" = "服务条款";
+"Refund Policy" = "退款政策";
+"Select a Plan" = "选择方案";
+"Buy - %@" = "购买 - %@";
+"Subscribe - %@" = "订阅 - %@";
+"Purchase verification failed" = "购买验证失败";
+"Product not found" = "未找到商品";
+"Purchase failed: %@" = "购买失败：%@";
+
+/* Pro Settings */
+"Status" = "状态";
+"Subscription" = "订阅";
+"Plan" = "方案";
+"Purchased" = "已购买";
+"Renews" = "续订";
+"Servers" = "服务器";
+"%lld of %lld used" = "已使用 %lld / %lld";
+"Workspaces" = "工作区";
+"Simultaneous Connections" = "同时连接";
+"%lld max" = "最多 %lld";
+"Features" = "功能";
+"Billing" = "计费";
+"Active" = "已激活";
+"Free Tier" = "免费版";
+"Pro Lifetime" = "Pro 终身";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro 月度";
+"Pro Yearly" = "Pro 年度";
+"PRO" = "PRO";
+"FREE" = "免费";
+"Unlimited servers & workspaces" = "无限服务器与工作区";
+"View Plans" = "查看方案";
+
+/* Pro Limits */
+"Server Limit Reached" = "服务器数量已达上限";
+"Workspace Limit Reached" = "工作区数量已达上限";
+"Tab Limit Reached" = "标签页数量已达上限";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "你已达到免费版 %lld 台服务器的上限。升级到 Pro 可解锁无限服务器。";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "你已达到免费版 %lld 个工作区的上限。升级到 Pro 可解锁无限工作区。";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "免费版一次只能有 %lld 个连接。升级到 Pro 可同时多连接。";
+"Server Locked" = "服务器已锁定";
+"Workspace Locked" = "工作区已锁定";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "该服务器超过免费版 %lld 台服务器限制。续订 Pro 以访问全部服务器。";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "该工作区超过免费版 %lld 个工作区限制。续订 Pro 以访问全部工作区。";
+"\"%@\" %@" = "“%@”%@";
+"Subscription Expired" = "订阅已过期";
+"%lld server" = "%lld 台服务器";
+"%lld servers" = "%lld 台服务器";
+"%lld workspace" = "%lld 个工作区";
+"%lld workspaces" = "%lld 个工作区";
+" and " = "和";
+"%@ locked" = "%@ 已锁定";
+
+/* Server & Workspace */
+"Server Info" = "服务器信息";
+"Name" = "名称";
+"Host" = "主机";
+"Port" = "端口";
+"Username" = "用户名";
+"Authentication" = "认证";
+"Method" = "方式";
+"Password" = "密码";
+"Key loaded" = "密钥已加载";
+"Key Passphrase" = "密钥口令";
+"Server Environment" = "服务器环境";
+"Environment" = "环境";
+"Notes" = "备注";
+"Edit Server" = "编辑服务器";
+"Add Server" = "添加服务器";
+"Use Stored Key" = "使用已保存密钥";
+"Select a key..." = "选择密钥...";
+"Import File" = "导入文件";
+"Paste" = "粘贴";
+"Add to Keychain" = "添加到钥匙串";
+"Select a stored key or import/paste a new one" = "选择已保存的密钥或导入/粘贴新密钥";
+"Using stored key: %@" = "使用已保存的密钥：%@";
+"Workspace" = "工作区";
+"Workspace name" = "工作区名称";
+"Color" = "颜色";
+"Delete Workspace" = "删除工作区";
+"Edit Workspace" = "编辑工作区";
+"New Workspace" = "新建工作区";
+"My Servers" = "我的服务器";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "工作区";
+"SERVERS" = "服务器";
+"Support VVTerm" = "支持 VVTerm";
+"All" = "全部";
+"Custom..." = "自定义...";
+"New Workspace" = "新建工作区";
+"Unlock with Pro" = "使用 Pro 解锁";
+"Switch to Workspace" = "切换到工作区";
+
+/* iOS Lists */
+"%lld servers" = "%lld 台服务器";
+"Servers" = "服务器";
+"Active Connections" = "活动连接";
+"Add Workspace" = "添加工作区";
+"Workspaces" = "工作区";
+"Done" = "完成";
+
+/* Empty States */
+"No Servers" = "没有服务器";
+"Add a server to get started" = "添加服务器开始使用";
+"Upgrade to Pro" = "升级到 Pro";
+
+/* Offline */
+"No network connection" = "无网络连接";
+"You're currently offline. Some features may not work:" = "你当前处于离线状态，部分功能可能不可用：";
+"Cannot connect to servers" = "无法连接到服务器";
+"iCloud sync paused" = "iCloud 同步已暂停";
+"Saved servers still accessible" = "已保存的服务器仍可访问";
+"Offline" = "离线";
+
+/* Terminal */
+"Initializing terminal..." = "正在初始化终端...";
+"Terminal initialization failed" = "终端初始化失败";
+"Voice Input Unavailable" = "语音输入不可用";
+"Voice input (Command+Shift+M)" = "语音输入（Command+Shift+M）";
+"Enable Microphone and Speech Recognition in System Settings." = "请在系统设置中启用麦克风和语音识别。";
+"Terminal" = "终端";
+"Close this terminal?" = "关闭此终端？";
+"The SSH connection will be terminated." = "SSH 连接将被终止。";
+
+/* Keychain */
+"No Keys Stored" = "未存储任何密钥";
+"Add keys to quickly use them when creating new servers" = "添加密钥以便在创建新服务器时快速使用";
+"Generate New Key" = "生成新密钥";
+"Import Key" = "导入密钥";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "密钥安全地存储在设备钥匙串中，口令单独存储。";
+"Delete SSH Key" = "删除 SSH 密钥";
+"Are you sure you want to delete '%@'? This cannot be undone." = "确定要删除“%@”吗？此操作无法撤销。";
+"Protected" = "已保护";
+"Added %@ ago" = "添加于 %@ 前";
+"Copy public key" = "复制公钥";
+"Key Name" = "密钥名称";
+"e.g., Personal MacBook, Work Key" = "例如：个人 MacBook、工作密钥";
+"Private Key" = "私钥";
+"Import Key File" = "导入密钥文件";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "导入你的私钥文件（id_rsa、id_ed25519 等）或粘贴内容";
+"Key loaded (%lld characters)" = "密钥已加载（%lld 个字符）";
+"Key passphrase" = "密钥口令";
+"Passphrase (Optional)" = "口令（可选）";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "如果密钥使用口令加密，请在此输入。无口令的密钥可留空。";
+"Add SSH Key" = "添加 SSH 密钥";
+"Algorithm" = "算法";
+"Key Type" = "密钥类型";
+"Confirm passphrase" = "确认口令";
+"Protect your key with a passphrase. Leave empty for no protection." = "使用口令保护密钥。留空则不保护。";
+"Generated Key" = "已生成密钥";
+"Key generated successfully" = "密钥生成成功";
+"Fingerprint:" = "指纹：";
+"View Public Key" = "查看公钥";
+"Generate SSH Key" = "生成 SSH 密钥";
+"Generate" = "生成";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "将此内容添加到服务器的 ~/.ssh/authorized_keys 文件：";
+"No Public Key" = "无公钥";
+"This key was imported without a public key." = "该密钥导入时不包含公钥。";
+"Public Key" = "公钥";
+
+/* Transcription */
+"Engine" = "引擎";
+"System (Apple)" = "系统（Apple）";
+"Whisper (MLX)" = "Whisper（MLX）";
+"Parakeet (MLX)" = "Parakeet（MLX）";
+"Provider" = "提供方";
+"Language" = "语言";
+"Model" = "模型";
+"Downloading..." = "正在下载...";
+"Delete Model" = "删除模型";
+"Download size: %@" = "下载大小：%@";
+"Status" = "状态";
+"Download" = "下载";
+"Ready" = "就绪";
+"Failed" = "失败";
+"Storage" = "存储";
+"Model Storage" = "模型存储";
+"Total MLX Models" = "MLX 模型总占用";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "使用 Apple 内置语音识别。最佳效果需要联网。";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper 使用 MLX 在本地运行。下载后可离线使用。";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet 使用 MLX 在本地运行，针对实时转写优化。";
+"English" = "英语";
+"Spanish" = "西班牙语";
+"French" = "法语";
+"German" = "德语";
+"Japanese" = "日语";
+"Chinese" = "中文";
+"Korean" = "韩语";
+"Portuguese" = "葡萄牙语";
+"Russian" = "俄语";
+"Auto-detect" = "自动检测";
+
+/* MLX Models */
+"Tiny" = "超小";
+"Fastest, smallest" = "最快、最小";
+"Full precision" = "全精度";
+"Tiny (EN)" = "超小（EN）";
+"English-only, smaller" = "仅英语，更小";
+"English-only" = "仅英语";
+"Base" = "基础";
+"Balanced speed/quality" = "速度/质量平衡";
+"Small" = "小";
+"Better accuracy" = "更高准确率";
+"Medium" = "中";
+"Higher accuracy, heavier" = "更高准确率，更大";
+"Large v3" = "大 v3";
+"Latest large model" = "最新大型模型";
+"Large" = "大";
+"Large v3 4-bit" = "大 v3 4 位";
+"Smaller download" = "下载更小";
+"4-bit quantized" = "4 位量化";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "大型高精度模型";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi‑Fi";
+"Cellular" = "蜂窝网络";
+"Ethernet" = "以太网";
+"Unknown" = "未知";
+"No Connection" = "无连接";
+" (Metered)" = "（计费）";
+" (Low Data)" = "（低流量）";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "启用 iCloud 同步";
+"iCloud Account" = "iCloud 账号";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "在所有 Apple 设备间同步服务器和工作区。";
+"Sync Status" = "同步状态";
+"Last Synced" = "上次同步";
+"Error" = "错误";
+"Data" = "数据";
+"Force Sync Now" = "立即强制同步";
+"Clear Local Data & Re-sync" = "清除本地数据并重新同步";
+"Reset iCloud (Delete All & Re-upload)" = "重置 iCloud（删除全部并重新上传）";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "强制同步会从 iCloud 获取最新数据。清除并重新同步会删除本地数据并重新下载。重置 iCloud 会删除所有云端数据并重新上传本地数据（用于修复重复）。";
+"Account Status" = "账号状态";
+"Container" = "容器";
+"Re-check iCloud Status" = "重新检查 iCloud 状态";
+"Troubleshooting" = "故障排查";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "请确认已在设置中登录 iCloud 并启用 iCloud Drive。更多详情可在 Console.app 查看 “CloudKit” 日志。";
+"Force Sync" = "强制同步";
+"Sync Now" = "立即同步";
+"This will fetch the latest data from iCloud and may take a moment." = "这将从 iCloud 获取最新数据，可能需要一点时间。";
+"Clear Local Data" = "清除本地数据";
+"Clear & Re-sync" = "清除并重新同步";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "这将删除所有本地数据并从 iCloud 重新下载。任何未同步的本地更改将丢失。";
+"Reset iCloud Data" = "重置 iCloud 数据";
+"Delete All & Re-upload" = "删除全部并重新上传";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "这将从 iCloud 删除所有数据并上传当前本地数据。可用于修复重复记录。";
+"Connected" = "已连接";
+"Not Available" = "不可用";
+"Synced" = "已同步";
+"Syncing..." = "同步中...";
+"available" = "可用";
+"noAccount - User not signed into iCloud" = "无账号 - 用户未登录 iCloud";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "受限 - iCloud 访问受限制（家长控制、MDM 等）";
+"couldNotDetermine - Unable to determine iCloud status" = "无法确定 - 无法确定 iCloud 状态";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "暂时不可用 - iCloud 暂时不可用";
+"unknown status: %@" = "未知状态：%@";
+"Error: %@" = "错误：%@";
+"Checking..." = "检查中...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "水平分割视图";
+"Vertical split view" = "垂直分割视图";
+"Left pane" = "左侧窗格";
+"Top pane" = "上方窗格";
+"Right pane" = "右侧窗格";
+"Bottom pane" = "下方窗格";
+"Horizontal split divider" = "水平分割线";
+"Vertical split divider" = "垂直分割线";
+"Drag to resize the left and right panes" = "拖动以调整左右窗格大小";
+"Drag to resize the top and bottom panes" = "拖动以调整上下窗格大小";
+
+/* Stats */
+"SYS" = "系统";
+"USER" = "用户";
+"IOWAIT" = "IO 等待";
+"STEAL" = "抢占";
+"CORES" = "核心";
+"IDLE" = "空闲";
+"UPTIME" = "运行时间";
+"LOAD" = "负载";
+"FREE" = "空闲";
+"USED" = "已用";
+"CACHED" = "缓存";
+"TOTAL" = "总计";
+"Volumes" = "卷";
+"Top Processes" = "进程排行";
+"CPU" = "CPU";
+"MEM" = "内存";
+"↑/S" = "↑/秒";
+"↓/S" = "↓/秒";
+"↑ TOTAL" = "↑ 总计";
+"↓ TOTAL" = "↓ 总计";
+"%lld D" = "%lld 天";
+"%lld H" = "%lld 小时";
+
+/* SFSymbol Picker */
+"Recent" = "最近";
+"Load more (%lld remaining)" = "加载更多（剩余 %lld）";
+"%lld symbols" = "%lld 个符号";
+"What's New" = "新内容";
+"Draw" = "绘图";
+"Variable" = "变量";
+"Multicolor" = "多色";
+"Communication" = "通信";
+"Weather" = "天气";
+"Maps" = "地图";
+"Objects & Tools" = "物体与工具";
+"Devices" = "设备";
+"Camera & Photos" = "相机与照片";
+"Gaming" = "游戏";
+"Connectivity" = "连接";
+"Transportation" = "交通";
+"Automotive" = "汽车";
+"Accessibility" = "辅助功能";
+"Privacy & Security" = "隐私与安全";
+"Human" = "人物";
+"Home" = "家居";
+"Fitness" = "健身";
+"Nature" = "自然";
+"Editing" = "编辑";
+"Text Formatting" = "文本格式";
+"Media" = "媒体";
+"Keyboard" = "键盘";
+"Commerce" = "商务";
+"Time" = "时间";
+"Health" = "健康";
+"Shapes" = "形状";
+"Arrows" = "箭头";
+"Indices" = "索引";
+"Math" = "数学";
+
+/* Auth Methods */
+"SSH Key" = "SSH 密钥";
+"SSH Key + Passphrase" = "SSH 密钥 + 口令";
+
+/* Environments */
+"Production" = "生产";
+"Staging" = "预发";
+"Development" = "开发";
+"Prod" = "生产";
+"Stag" = "预发";
+"Dev" = "开发";
+"New Environment" = "新建环境";
+"Edit Environment" = "编辑环境";
+"Environment name" = "环境名称";
+"An environment with this name already exists." = "已存在同名环境。";
+"Delete Environment?" = "删除环境？";
+"Servers in '%@' will be moved to Production." = "“%@”中的服务器将移至生产。";
+"Edit \"%@\"..." = "编辑“%@”…";
+"Delete \"%@\"..." = "删除“%@”…";
+"Custom" = "自定义";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "需要麦克风权限。录音开始时会自动请求。";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "语音识别不可用。请在系统设置 > Siri 与聚焦中启用 Siri。";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "无法开始录音。请在系统设置 > 隐私与安全 > 麦克风中检查权限。";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "此 Mac 不支持 MLX 转写，已切换到 Apple 语音识别。";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "升级到 Pro 以解锁无限服务器";
+"Upgrade to Pro for unlimited workspaces" = "升级到 Pro 以解锁无限工作区";
+"Upgrade to Pro for multiple connections" = "升级到 Pro 以支持多连接";
+"Upgrade to Pro for custom environments" = "升级到 Pro 以使用自定义环境";
+
+/* Misc */
+"Disconnect from server" = "断开服务器连接";
+"Disconnect from %@?" = "断开与 %@ 的连接？";
+"This will return to the server list." = "这将返回服务器列表。";
+"All terminal tabs for this server will be closed." = "该服务器的所有终端标签页将被关闭。";
+"Add Terminal Preset" = "添加终端预设";
+"Edit Preset" = "编辑预设";
+"Basic Information" = "基本信息";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "预设显示名称（例如 Claude、Helix、Vim）";
+"Command" = "命令";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "选择预设时运行的命令（例如 claude、hx、nvim）";
+"Icon" = "图标";
+"Choose Symbol..." = "选择符号...";
+
+/* Contact Labels */
+"Developer" = "开发者";
+"Discord" = "Discord";
+"Join Community" = "加入社区";
+"Email" = "邮箱";
+"GitHub" = "GitHub";
+"Report Issue" = "报告问题";
+"Support VVTerm" = "支持 VVTerm";
+
+/* Auth Provider */
+"System (Apple Speech)" = "系统（Apple 语音）";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Store errors */
+"Failed to remove model" = "删除模型失败";
+"Model ID is required" = "需要模型 ID";
+"Server '%@' is locked" = "服务器“%@”已锁定";
+"Workspace '%@' is locked" = "工作区“%@”已锁定";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "你已达到 %lld 台服务器的上限。升级到 Pro 可解锁无限服务器。";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "现代、快速且安全。适用于大多数场景。";
+"Wide compatibility with older systems." = "与旧系统兼容性更佳。";
+
+
+/* Split Commands */
+"Split Right" = "向右分割";
+"Split Down" = "向下分割";
+"Close Pane" = "关闭窗格";
+
+/* Tabs */
+"View" = "视图";
+"Stats" = "统计";
+
+/* Help */
+"Support & Feedback" = "支持与反馈";
+
+"Upgrade to Pro for unlimited workspaces." = "升级到 Pro 以解锁无限工作区。";
+
+"Fingerprint" = "指纹";
+
+"Links" = "链接";
+
+"Passphrase" = "口令";
+
+"%@ is a Pro feature" = "%@ 是 Pro 功能";
+
+"System (Default)" = "系统（默认）";
+
+"Some changes may require restarting the app." = "部分更改可能需要重新启动应用。";
+
+/* Download Progress */
+"%llds remaining" = "剩余%lld秒";
+"%lldm remaining" = "剩余%lld分钟";
+"%lldh %lldm remaining" = "剩余%lld小时%lld分钟";
+"Clear All Storage" = "清除所有存储";
+
+/* Preview */
+"Server 1" = "服务器 1";
+"Server 2" = "服务器 2";
+"Server 3" = "服务器 3";

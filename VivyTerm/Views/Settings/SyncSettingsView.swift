@@ -12,12 +12,6 @@ struct SyncSettingsView: View {
     @ObservedObject private var serverManager = ServerManager.shared
     @AppStorage("iCloudSyncEnabled") private var syncEnabled = true
 
-    @State private var isSyncing = false
-    @State private var showingSyncConfirmation = false
-    @State private var showingClearDataConfirmation = false
-    @State private var showingResetCloudKitConfirmation = false
-    @State private var syncError: String?
-
     var body: some View {
         Form {
             Section {
@@ -79,48 +73,6 @@ struct SyncSettingsView: View {
                     }
                 }
 
-                Section {
-                    Button {
-                        showingSyncConfirmation = true
-                    } label: {
-                        HStack {
-                            Label("Force Sync Now", systemImage: "arrow.triangle.2.circlepath")
-                            Spacer()
-                            if isSyncing {
-                                ProgressView()
-                                    .controlSize(.small)
-                            }
-                        }
-                    }
-                    .disabled(isSyncing || !cloudKit.isAvailable)
-
-                    Button(role: .destructive) {
-                        showingClearDataConfirmation = true
-                    } label: {
-                        Label("Clear Local Data & Re-sync", systemImage: "trash")
-                    }
-                    .disabled(isSyncing || !cloudKit.isAvailable)
-
-                    Button(role: .destructive) {
-                        showingResetCloudKitConfirmation = true
-                    } label: {
-                        Label("Reset iCloud (Delete All & Re-upload)", systemImage: "icloud.slash")
-                    }
-                    .disabled(isSyncing || !cloudKit.isAvailable)
-                } footer: {
-                    Text("Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates).")
-                }
-            }
-
-            if let error = syncError {
-                Section {
-                    HStack {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text(error)
-                            .font(.caption)
-                    }
-                }
             }
 
             // Debug section when CloudKit is unavailable
@@ -158,30 +110,6 @@ struct SyncSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .alert("Force Sync", isPresented: $showingSyncConfirmation) {
-            Button("Sync Now") {
-                performForceSync()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will fetch the latest data from iCloud and may take a moment.")
-        }
-        .alert("Clear Local Data", isPresented: $showingClearDataConfirmation) {
-            Button("Clear & Re-sync", role: .destructive) {
-                performClearAndResync()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost.")
-        }
-        .alert("Reset iCloud Data", isPresented: $showingResetCloudKitConfirmation) {
-            Button("Delete All & Re-upload", role: .destructive) {
-                performResetCloudKit()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records.")
-        }
     }
 
     @ViewBuilder
@@ -219,64 +147,4 @@ struct SyncSettingsView: View {
         }
     }
 
-    private func performForceSync() {
-        isSyncing = true
-        syncError = nil
-
-        Task {
-            await cloudKit.forceSync()
-            await serverManager.loadData()
-            await MainActor.run {
-                if let error = serverManager.error {
-                    syncError = error
-                }
-                isSyncing = false
-            }
-        }
-    }
-
-    private func performClearAndResync() {
-        isSyncing = true
-        syncError = nil
-
-        Task {
-            await serverManager.clearLocalDataAndResync()
-            await MainActor.run {
-                if let error = serverManager.error {
-                    syncError = error
-                }
-                isSyncing = false
-            }
-        }
-    }
-
-    private func performResetCloudKit() {
-        isSyncing = true
-        syncError = nil
-
-        Task {
-            do {
-                // 1. Delete all CloudKit records
-                try await cloudKit.deleteAllRecords()
-
-                // 2. Re-upload local data
-                for workspace in serverManager.workspaces {
-                    try await cloudKit.saveWorkspace(workspace)
-                }
-                for server in serverManager.servers {
-                    try await cloudKit.saveServer(server)
-                }
-
-                await MainActor.run {
-                    syncError = nil
-                    isSyncing = false
-                }
-            } catch {
-                await MainActor.run {
-                    syncError = error.localizedDescription
-                    isSyncing = false
-                }
-            }
-        }
-    }
 }

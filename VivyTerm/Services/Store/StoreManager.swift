@@ -215,9 +215,9 @@ enum StoreError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .verificationFailed: return "Purchase verification failed"
-        case .productNotFound: return "Product not found"
-        case .purchaseFailed(let msg): return "Purchase failed: \(msg)"
+        case .verificationFailed: return String(localized: "Purchase verification failed")
+        case .productNotFound: return String(localized: "Product not found")
+        case .purchaseFailed(let msg): return String(localized: "Purchase failed: \(msg)")
         }
     }
 }

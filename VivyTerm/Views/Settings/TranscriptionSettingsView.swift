@@ -17,16 +17,16 @@ struct TranscriptionSettingsView: View {
     @StateObject private var parakeetManager: MLXModelManager
 
     private let languages = [
-        ("en", "English"),
-        ("es", "Spanish"),
-        ("fr", "French"),
-        ("de", "German"),
-        ("ja", "Japanese"),
-        ("zh", "Chinese"),
-        ("ko", "Korean"),
-        ("pt", "Portuguese"),
-        ("ru", "Russian"),
-        ("auto", "Auto-detect")
+        ("en", String(localized: "English")),
+        ("es", String(localized: "Spanish")),
+        ("fr", String(localized: "French")),
+        ("de", String(localized: "German")),
+        ("ja", String(localized: "Japanese")),
+        ("zh", String(localized: "Chinese")),
+        ("ko", String(localized: "Korean")),
+        ("pt", String(localized: "Portuguese")),
+        ("ru", String(localized: "Russian")),
+        ("auto", String(localized: "Auto-detect"))
     ]
 
     init() {
@@ -68,10 +68,10 @@ struct TranscriptionSettingsView: View {
                     manager: whisperManager,
                     modelBinding: $whisperModelId,
                     models: [
-                        ("mlx-community/whisper-tiny", "Tiny", "~39 MB"),
-                        ("mlx-community/whisper-base", "Base", "~74 MB"),
-                        ("mlx-community/whisper-small", "Small", "~244 MB"),
-                        ("mlx-community/whisper-medium", "Medium", "~769 MB")
+                        ("mlx-community/whisper-tiny", String(localized: "Tiny"), "~39 MB"),
+                        ("mlx-community/whisper-base", String(localized: "Base"), "~74 MB"),
+                        ("mlx-community/whisper-small", String(localized: "Small"), "~244 MB"),
+                        ("mlx-community/whisper-medium", String(localized: "Medium"), "~769 MB")
                     ]
                 )
             }
@@ -81,7 +81,7 @@ struct TranscriptionSettingsView: View {
                     manager: parakeetManager,
                     modelBinding: $parakeetModelId,
                     models: [
-                        ("mlx-community/parakeet-tdt-0.6b-v2", "Parakeet TDT 0.6B", "~600 MB")
+                        ("mlx-community/parakeet-tdt-0.6b-v2", String(localized: "Parakeet TDT 0.6B"), "~600 MB")
                     ]
                 )
             }
@@ -99,11 +99,11 @@ struct TranscriptionSettingsView: View {
     private var providerDescription: String {
         switch provider {
         case "system":
-            return "Uses Apple's built-in speech recognition. Requires network for best results."
+            return String(localized: "Uses Apple's built-in speech recognition. Requires network for best results.")
         case "whisper":
-            return "OpenAI Whisper runs locally using MLX. Works offline after download."
+            return String(localized: "OpenAI Whisper runs locally using MLX. Works offline after download.")
         case "parakeet":
-            return "NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription."
+            return String(localized: "NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription.")
         default:
             return ""
         }
@@ -136,9 +136,21 @@ struct TranscriptionSettingsView: View {
             modelStatusRow(manager: manager)
 
             if case .downloading(let progress) = manager.state {
-                ProgressView(value: progress) {
-                    Text("Downloading...")
-                        .font(.caption)
+                VStack(alignment: .leading, spacing: 4) {
+                    ProgressView(value: progress.fraction)
+                    HStack {
+                        if progress.totalBytes > 0 {
+                            Text("\(ByteCountFormatter.string(fromByteCount: progress.bytesDownloaded, countStyle: .file)) / \(ByteCountFormatter.string(fromByteCount: progress.totalBytes, countStyle: .file))")
+                        } else {
+                            Text("Downloading...")
+                        }
+                        Spacer()
+                        if let eta = progress.estimatedSecondsRemaining, eta > 0 {
+                            Text(formatETA(eta))
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                 }
             }
 
@@ -186,6 +198,19 @@ struct TranscriptionSettingsView: View {
         }
     }
 
+    private func formatETA(_ seconds: Int) -> String {
+        if seconds < 60 {
+            return String(format: String(localized: "%llds remaining"), seconds)
+        } else if seconds < 3600 {
+            let minutes = seconds / 60
+            return String(format: String(localized: "%lldm remaining"), minutes)
+        } else {
+            let hours = seconds / 3600
+            let minutes = (seconds % 3600) / 60
+            return String(format: String(localized: "%lldh %lldm remaining"), hours, minutes)
+        }
+    }
+
     @ViewBuilder
     private var storageSection: some View {
         #if arch(arm64)
@@ -203,6 +228,11 @@ struct TranscriptionSettingsView: View {
                     Spacer()
                     Text(ByteCountFormatter.string(fromByteCount: activeManager.totalStorageBytes, countStyle: .file))
                         .foregroundStyle(.secondary)
+                }
+                Button("Clear All Storage", role: .destructive) {
+                    MLXModelManager.clearAllStorage()
+                    whisperManager.refreshStatus()
+                    parakeetManager.refreshStatus()
                 }
             }
         }

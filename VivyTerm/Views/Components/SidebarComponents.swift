@@ -49,7 +49,7 @@ struct ServerRow: View {
                 LockedBadge()
             } else {
                 // Environment badge
-                Text(server.environment.shortName)
+                Text(server.environment.displayShortName)
                     .font(.caption2)
                     .fontWeight(.medium)
                     .foregroundStyle(server.environment.color)
@@ -136,7 +136,7 @@ struct PillBadge: View {
 // MARK: - Search Field
 
 struct SearchField: View {
-    let placeholder: String
+    let placeholder: LocalizedStringKey
     @Binding var text: String
 
     var body: some View {

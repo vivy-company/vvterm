@@ -88,7 +88,7 @@ final class ConnectionSessionManager: ObservableObject {
         }
 
         guard canOpenNewTab else {
-            throw VivyTermError.proRequired("Upgrade to Pro for multiple connections")
+            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for multiple connections"))
         }
 
         // Check if already have a session for this server (unless forcing new)

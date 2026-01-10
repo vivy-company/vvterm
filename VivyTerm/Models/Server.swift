@@ -74,9 +74,9 @@ enum AuthMethod: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .password: return "Password"
-        case .sshKey: return "SSH Key"
-        case .sshKeyWithPassphrase: return "SSH Key + Passphrase"
+        case .password: return String(localized: "Password")
+        case .sshKey: return String(localized: "SSH Key")
+        case .sshKeyWithPassphrase: return String(localized: "SSH Key + Passphrase")
         }
     }
 
