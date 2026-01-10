@@ -190,7 +190,7 @@ private struct macOSWelcomeContent: View {
                     .frame(height: 32)
             }
             .buttonStyle(.borderedProminent)
-            .buttonBorderShape(.capsule)
+            .buttonBorderShapeCompat()
             .tint(Color(red: 1.0, green: 0.27, blue: 0.35))
             .controlSize(.large)
             .padding(.horizontal, 48)
@@ -204,4 +204,15 @@ private struct macOSWelcomeContent: View {
 
 #Preview {
     WelcomeView(hasSeenWelcome: .constant(false))
+}
+
+private extension View {
+    @ViewBuilder
+    func buttonBorderShapeCompat() -> some View {
+        if #available(macOS 14.0, iOS 17.0, *) {
+            buttonBorderShape(.capsule)
+        } else {
+            self
+        }
+    }
 }
