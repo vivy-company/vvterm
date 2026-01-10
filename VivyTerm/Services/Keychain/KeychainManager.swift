@@ -11,6 +11,7 @@ final class KeychainManager {
     private let store: KeychainStore
     private let legacyStore: KeychainStore  // For migrating old credentials
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Keychain")
+    private var isSyncEnabled: Bool { SyncSettings.isEnabled }
 
     private init() {
         store = KeychainStore(service: "app.vivy.VivyTerm")
@@ -24,7 +25,7 @@ final class KeychainManager {
         guard let data = password.data(using: .utf8) else {
             throw KeychainError.encodingFailed
         }
-        try store.set(data, forKey: key, iCloudSync: true)
+        try store.set(data, forKey: key, iCloudSync: isSyncEnabled)
         logger.info("Stored password for server \(serverId.uuidString)")
     }
 
@@ -45,7 +46,7 @@ final class KeychainManager {
                 throw KeychainError.decodingFailed
             }
             // Migrate to new store
-            try? store.set(data, forKey: key, iCloudSync: true)
+            try? store.set(data, forKey: key, iCloudSync: isSyncEnabled)
             logger.info("Migrated password from legacy keychain")
             return password
         }
@@ -57,14 +58,14 @@ final class KeychainManager {
 
     func storeSSHKey(for serverId: UUID, privateKey: Data, passphrase: String?) throws {
         let keyKey = sshKeyKey(for: serverId)
-        try store.set(privateKey, forKey: keyKey, iCloudSync: true)
+        try store.set(privateKey, forKey: keyKey, iCloudSync: isSyncEnabled)
 
         if let passphrase = passphrase {
             let passphraseKey = sshPassphraseKey(for: serverId)
             guard let passphraseData = passphrase.data(using: .utf8) else {
                 throw KeychainError.encodingFailed
             }
-            try store.set(passphraseData, forKey: passphraseKey, iCloudSync: true)
+            try store.set(passphraseData, forKey: passphraseKey, iCloudSync: isSyncEnabled)
         }
 
         logger.info("Stored SSH key for server \(serverId.uuidString)")
@@ -89,10 +90,10 @@ final class KeychainManager {
             if let passphraseData = try legacyStore.get(passphraseKey) {
                 passphrase = String(data: passphraseData, encoding: .utf8)
                 // Migrate passphrase
-                try? store.set(passphraseData, forKey: passphraseKey, iCloudSync: true)
+                try? store.set(passphraseData, forKey: passphraseKey, iCloudSync: isSyncEnabled)
             }
             // Migrate key
-            try? store.set(keyData, forKey: keyKey, iCloudSync: true)
+            try? store.set(keyData, forKey: keyKey, iCloudSync: isSyncEnabled)
             logger.info("Migrated SSH key from legacy keychain")
             return (key: keyData, passphrase: passphrase)
         }
@@ -176,7 +177,7 @@ final class KeychainManager {
     /// Save the SSH key index
     private func saveSSHKeysIndex(_ keys: [SSHKeyEntry]) throws {
         let data = try JSONEncoder().encode(keys)
-        try store.set(data, forKey: sshKeysIndexKey, iCloudSync: false)
+        try store.set(data, forKey: sshKeysIndexKey, iCloudSync: isSyncEnabled)
     }
 
     /// Store a new SSH key in the keychain library
@@ -196,12 +197,12 @@ final class KeychainManager {
         )
 
         // Store the actual key data
-        try store.set(privateKey, forKey: storedKeyDataKey(for: entry.id), iCloudSync: true)
+        try store.set(privateKey, forKey: storedKeyDataKey(for: entry.id), iCloudSync: isSyncEnabled)
 
         // Store passphrase if provided
         if let passphrase = passphrase, !passphrase.isEmpty,
            let passphraseData = passphrase.data(using: .utf8) {
-            try store.set(passphraseData, forKey: storedKeyPassphraseKey(for: entry.id), iCloudSync: true)
+            try store.set(passphraseData, forKey: storedKeyPassphraseKey(for: entry.id), iCloudSync: isSyncEnabled)
         }
 
         // Update index

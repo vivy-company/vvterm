@@ -17,6 +17,7 @@ final class ServerManager: ObservableObject {
     private let cloudKit = CloudKitManager.shared
     private let keychain = KeychainManager.shared
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ServerManager")
+    private var isSyncEnabled: Bool { SyncSettings.isEnabled }
 
     // Local storage keys
     private let serversKey = "com.vivy.vivyterm.servers"
@@ -86,6 +87,11 @@ final class ServerManager: ObservableObject {
         error = nil
         defer { isLoading = false }
 
+        guard isSyncEnabled else {
+            logger.info("iCloud sync disabled; using local data only")
+            return
+        }
+
         do {
             async let fetchedWorkspaces = cloudKit.fetchWorkspaces()
             async let fetchedServers = cloudKit.fetchServers()
@@ -117,7 +123,9 @@ final class ServerManager: ObservableObject {
             // Ensure at least one workspace exists before checking orphans
             if workspaces.isEmpty {
                 workspaces = [createDefaultWorkspace()]
-                try await cloudKit.saveWorkspace(workspaces[0])
+                if isSyncEnabled {
+                    try await cloudKit.saveWorkspace(workspaces[0])
+                }
                 logger.info("Created default workspace: \(self.workspaces[0].name)")
             }
 
@@ -190,7 +198,9 @@ final class ServerManager: ObservableObject {
 
                 // Save updated server to CloudKit
                 do {
-                    try await cloudKit.saveServer(servers[i])
+                    if isSyncEnabled {
+                        try await cloudKit.saveServer(servers[i])
+                    }
                 } catch {
                     logger.warning("Failed to save repaired server to CloudKit: \(error.localizedDescription)")
                 }
@@ -205,7 +215,9 @@ final class ServerManager: ObservableObject {
         // Push workspaces first
         for workspace in workspaces {
             do {
-                try await cloudKit.saveWorkspace(workspace)
+                if isSyncEnabled {
+                    try await cloudKit.saveWorkspace(workspace)
+                }
                 logger.info("Pushed workspace to CloudKit: \(workspace.name)")
             } catch {
                 logger.error("Failed to push workspace \(workspace.name): \(error.localizedDescription)")
@@ -215,7 +227,9 @@ final class ServerManager: ObservableObject {
         // Push servers
         for server in servers {
             do {
-                try await cloudKit.saveServer(server)
+                if isSyncEnabled {
+                    try await cloudKit.saveServer(server)
+                }
                 logger.info("Pushed server to CloudKit: \(server.name)")
             } catch {
                 logger.error("Failed to push server \(server.name): \(error.localizedDescription)")
@@ -258,7 +272,9 @@ final class ServerManager: ObservableObject {
 
         // Save to CloudKit (ignore errors, local is primary)
         do {
-            try await cloudKit.saveServer(newServer)
+            if isSyncEnabled {
+                try await cloudKit.saveServer(newServer)
+            }
         } catch {
             logger.warning("CloudKit save failed, using local storage: \(error.localizedDescription)")
         }
@@ -289,7 +305,9 @@ final class ServerManager: ObservableObject {
 
         // Save to CloudKit (ignore errors, local is primary)
         do {
-            try await cloudKit.saveServer(updatedServer)
+            if isSyncEnabled {
+                try await cloudKit.saveServer(updatedServer)
+            }
         } catch {
             logger.warning("CloudKit save failed, using local storage: \(error.localizedDescription)")
         }
@@ -304,7 +322,9 @@ final class ServerManager: ObservableObject {
     func deleteServer(_ server: Server) async throws {
         // Delete from CloudKit (ignore errors)
         do {
-            try await cloudKit.deleteServer(server)
+            if isSyncEnabled {
+                try await cloudKit.deleteServer(server)
+            }
         } catch {
             logger.warning("CloudKit delete failed: \(error.localizedDescription)")
         }
@@ -357,7 +377,9 @@ final class ServerManager: ObservableObject {
 
         // Save to CloudKit (ignore errors, local is primary)
         do {
-            try await cloudKit.saveWorkspace(newWorkspace)
+            if isSyncEnabled {
+                try await cloudKit.saveWorkspace(newWorkspace)
+            }
         } catch {
             logger.warning("CloudKit save failed, using local storage: \(error.localizedDescription)")
         }
@@ -384,7 +406,9 @@ final class ServerManager: ObservableObject {
 
         // Save to CloudKit (ignore errors, local is primary)
         do {
-            try await cloudKit.saveWorkspace(updatedWorkspace)
+            if isSyncEnabled {
+                try await cloudKit.saveWorkspace(updatedWorkspace)
+            }
         } catch {
             logger.warning("CloudKit save failed, using local storage: \(error.localizedDescription)")
         }
@@ -405,7 +429,9 @@ final class ServerManager: ObservableObject {
 
         // Delete from CloudKit (ignore errors)
         do {
-            try await cloudKit.deleteWorkspace(workspace)
+            if isSyncEnabled {
+                try await cloudKit.deleteWorkspace(workspace)
+            }
         } catch {
             logger.warning("CloudKit delete failed: \(error.localizedDescription)")
         }
@@ -436,7 +462,9 @@ final class ServerManager: ObservableObject {
             workspaces[index] = updated
             // Save to CloudKit (ignore errors)
             do {
-                try await cloudKit.saveWorkspace(updated)
+                if isSyncEnabled {
+                    try await cloudKit.saveWorkspace(updated)
+                }
             } catch {
                 logger.warning("CloudKit save failed: \(error.localizedDescription)")
             }

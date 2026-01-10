@@ -10,7 +10,7 @@ import SwiftUI
 struct SyncSettingsView: View {
     @ObservedObject private var cloudKit = CloudKitManager.shared
     @ObservedObject private var serverManager = ServerManager.shared
-    @AppStorage("iCloudSyncEnabled") private var syncEnabled = true
+    @AppStorage(SyncSettings.enabledKey) private var syncEnabled = true
 
     var body: some View {
         Form {
@@ -76,7 +76,7 @@ struct SyncSettingsView: View {
             }
 
             // Debug section when CloudKit is unavailable
-            if !cloudKit.isAvailable {
+            if syncEnabled && !cloudKit.isAvailable {
                 Section {
                     HStack {
                         Text("Account Status")
@@ -90,7 +90,7 @@ struct SyncSettingsView: View {
                     HStack {
                         Text("Container")
                         Spacer()
-                        Text("iCloud.com.vivy.vivyterm")
+                        Text("iCloud.app.vivy.VivyTerm")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -110,11 +110,21 @@ struct SyncSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .onChange(of: syncEnabled) { _, enabled in
+            cloudKit.handleSyncToggle(enabled)
+            if enabled {
+                Task { await serverManager.loadData() }
+            }
+        }
     }
 
     @ViewBuilder
     private var statusBadge: some View {
-        if cloudKit.isAvailable {
+        if !syncEnabled {
+            Label("Disabled", systemImage: "pause.circle")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else if cloudKit.isAvailable {
             Label("Connected", systemImage: "checkmark.circle.fill")
                 .font(.caption)
                 .foregroundStyle(.green)
@@ -143,6 +153,9 @@ struct SyncSettingsView: View {
                 .foregroundStyle(.red)
         case .offline:
             Label("Offline", systemImage: "wifi.slash")
+                .foregroundStyle(.secondary)
+        case .disabled:
+            Label("Disabled", systemImage: "pause.circle")
                 .foregroundStyle(.secondary)
         }
     }

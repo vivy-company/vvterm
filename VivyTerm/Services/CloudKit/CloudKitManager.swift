@@ -29,6 +29,7 @@ final class CloudKitManager: ObservableObject {
         case syncing
         case error(String)
         case offline
+        case disabled
 
         var description: String {
             switch self {
@@ -36,14 +37,16 @@ final class CloudKitManager: ObservableObject {
             case .syncing: return String(localized: "Syncing...")
             case .error(let message): return String(localized: "Error: \(message)")
             case .offline: return String(localized: "Offline")
+            case .disabled: return String(localized: "Disabled")
             }
         }
     }
 
     private var accountStatusChecked = false
+    private var isSyncEnabled: Bool { SyncSettings.isEnabled }
 
     private init() {
-        container = CKContainer(identifier: "iCloud.com.vivy.vivyterm")
+        container = CKContainer(identifier: "iCloud.app.vivy.VivyTerm")
         database = container.privateCloudDatabase
         Task { await checkAccountStatus() }
     }
@@ -52,11 +55,22 @@ final class CloudKitManager: ObservableObject {
 
     /// Ensures account status is checked before performing operations
     private func ensureAccountStatusChecked() async {
+        guard isSyncEnabled else {
+            applySyncDisabledState()
+            accountStatusChecked = true
+            return
+        }
         guard !accountStatusChecked else { return }
         await checkAccountStatus()
     }
 
     private func checkAccountStatus() async {
+        guard isSyncEnabled else {
+            applySyncDisabledState()
+            accountStatusChecked = true
+            return
+        }
+
         do {
             let status = try await container.accountStatus()
             let statusDescription: String
@@ -91,6 +105,24 @@ final class CloudKitManager: ObservableObject {
             accountStatusDetail = String(localized: "Error: \(error.localizedDescription)")
             syncStatus = .error(error.localizedDescription)
             accountStatusChecked = true
+        }
+    }
+
+    private func applySyncDisabledState() {
+        isAvailable = false
+        syncStatus = .disabled
+        accountStatusDetail = String(localized: "Disabled")
+    }
+
+    func handleSyncToggle(_ enabled: Bool) {
+        if enabled {
+            accountStatusChecked = false
+            Task {
+                await checkAccountStatus()
+                await subscribeToChanges()
+            }
+        } else {
+            applySyncDisabledState()
         }
     }
 
@@ -253,7 +285,7 @@ final class CloudKitManager: ObservableObject {
     // MARK: - Subscriptions
 
     func subscribeToChanges() async {
-        guard isAvailable else { return }
+        guard isSyncEnabled, isAvailable else { return }
 
         // Server subscription
         let serverSubscription = CKQuerySubscription(
@@ -318,6 +350,7 @@ final class CloudKitManager: ObservableObject {
 
     func forceSync() async {
         lastSyncDate = nil
+        accountStatusChecked = false
         await checkAccountStatus()
     }
 

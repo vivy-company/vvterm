@@ -4,6 +4,9 @@
 //
 
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 // MARK: - Notification Names
 
@@ -140,6 +143,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             await CloudKitManager.shared.subscribeToChanges()
         }
+        NSApplication.shared.registerForRemoteNotifications()
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -156,6 +160,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false // Keep running in menu bar
     }
+
+    func application(_ application: NSApplication, didReceiveRemoteNotification userInfo: [String: Any]) {
+        guard SyncSettings.isEnabled else { return }
+        Task {
+            await ServerManager.shared.loadData()
+        }
+    }
 }
 #else
 // MARK: - iOS App Delegate
@@ -169,8 +180,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         Task {
             await CloudKitManager.shared.subscribeToChanges()
         }
+        application.registerForRemoteNotifications()
 
         return true
+    }
+
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        guard SyncSettings.isEnabled else {
+            completionHandler(.noData)
+            return
+        }
+
+        Task {
+            await ServerManager.shared.loadData()
+            completionHandler(.newData)
+        }
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

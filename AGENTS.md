@@ -48,7 +48,7 @@ VivyTerm/
 
 ### Data Sync
 - **CloudKit** for server/workspace sync across devices
-- Container: `iCloud.com.vivy.vivyterm`
+- Container: `iCloud.app.vivy.VivyTerm`
 - Local fallback via UserDefaults
 
 ### Pro Tier (StoreKit 2)
