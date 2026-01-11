@@ -33,7 +33,7 @@ struct ProUpgradeSheet: View {
                             dismiss()
                         } label: {
                             Image(systemName: "xmark")
-                                .font(.title2)
+                                .font(.system(size: 16, weight: .semibold))
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundStyle(.secondary)
                         }
@@ -241,7 +241,7 @@ struct ProUpgradeSheet: View {
                 dismiss()
             } label: {
                 Image(systemName: "xmark")
-                    .font(.title2)
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
