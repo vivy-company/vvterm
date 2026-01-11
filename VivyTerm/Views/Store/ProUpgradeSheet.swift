@@ -251,8 +251,8 @@ struct ProUpgradeSheet: View {
     // MARK: - Features Section
 
     private var featuresSection: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            ForEach(features, id: \.title) { feature in
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(Array(features.enumerated()), id: \.element.title) { index, feature in
                 HStack(spacing: 16) {
                     Image(systemName: feature.icon)
                         .font(.system(size: 22, weight: .medium))
@@ -270,15 +270,16 @@ struct ProUpgradeSheet: View {
 
                     Spacer()
                 }
+                .padding(.vertical, 4)
+
+                if index < features.count - 1 {
+                    Divider()
+                        .overlay(Color.primary.opacity(0.08))
+                }
             }
         }
-        .padding(20)
-        .frame(maxWidth: .infinity)
-        .adaptiveGlassRect(cornerRadius: 14)
-        .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
-        )
+        .padding(.horizontal, 4)
+        .padding(.vertical, 6)
     }
 
     // MARK: - Legal Footer
