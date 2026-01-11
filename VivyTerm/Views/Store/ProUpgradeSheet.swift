@@ -263,9 +263,11 @@ struct ProUpgradeSheet: View {
                         Text(feature.title)
                             .font(.body)
                             .fontWeight(.semibold)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(feature.description)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                     Spacer()
