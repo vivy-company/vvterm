@@ -19,7 +19,8 @@
 "Manage Subscription" = "Керування підпискою";
 "Manage subscription" = "Керування підпискою";
 "Manage your subscription" = "Керуйте підпискою";
-"Restore Purchases" = "Відновити покупки";
+"Restore Purchases" = "Відновити купівлі";
+
 "Renew" = "Поновити";
 "Renew Pro" = "Поновити Pro";
 "Close" = "Закрити";
@@ -45,6 +46,7 @@
 "Choose a server from the sidebar to connect" = "Виберіть сервер на бічній панелі для підключення";
 "Multiple connections require Pro" = "Кілька підключень потребують Pro";
 "Upgrade to connect to multiple servers simultaneously" = "Оновіть до Pro, щоб підключатися до кількох серверів одночасно";
+
 "Disconnected" = "Від’єднано";
 "Connecting..." = "Підключення...";
 "Connecting to %@..." = "Підключення до %@...";
@@ -164,7 +166,8 @@
 "One-time purchase, forever" = "Разова покупка, назавжди";
 "FOREVER" = "НАЗАВЖДИ";
 "Processing..." = "Обробка...";
-"Purchase Failed" = "Покупка не вдалася";
+"Purchase Failed" = "Купівля не вдалася";
+
 "Unknown error" = "Невідома помилка";
 "Welcome to Pro!" = "Ласкаво просимо до Pro!";
 "You now have unlimited access" = "Тепер у вас необмежений доступ";
@@ -174,9 +177,11 @@
 "Select a Plan" = "Виберіть план";
 "Buy - %@" = "Купити - %@";
 "Subscribe - %@" = "Підписатися - %@";
-"Purchase verification failed" = "Перевірка покупки не вдалася";
+"Purchase verification failed" = "Перевірка купівлі не вдалася";
+
 "Product not found" = "Продукт не знайдено";
-"Purchase failed: %@" = "Покупка не вдалася: %@";
+"Purchase failed: %@" = "Купівля не вдалася: %@";
+
 
 /* Pro Settings */
 "Status" = "Статус";
@@ -198,7 +203,8 @@
 "Pro Monthly" = "Pro щомісяця";
 "Pro Yearly" = "Pro щороку";
 "PRO" = "PRO";
-"FREE" = "БЕЗКОШТОВНО";
+"FREE_PLAN" = "БЕЗКОШТОВНО";
+
 "Unlimited servers & workspaces" = "Безлімітні сервери та робочі простори";
 "View Plans" = "Переглянути плани";
 
@@ -214,7 +220,8 @@
 "This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Цей сервер перевищує ліміт %lld серверів у безкоштовному плані. Поновіть підписку Pro, щоб отримати доступ до всіх серверів.";
 "This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Цей робочий простір перевищує ліміт %lld у безкоштовному плані. Поновіть підписку Pro, щоб отримати доступ до всіх робочих просторів.";
 "\"%@\" %@" = "\"%@\" %@";
-"Subscription Expired" = "Підписка закінчилась";
+"Subscription Expired" = "Підписка закінчилася";
+
 "%lld server" = "%lld сервер";
 "%lld servers" = "%lld серверів";
 "%lld workspace" = "%lld робочий простір";
@@ -279,7 +286,8 @@
 "No Servers" = "Немає серверів";
 "Add a server to get started" = "Додайте сервер, щоб почати";
 "Multiple connections require Pro" = "Кілька підключень потребують Pro";
-"Upgrade to connect to multiple servers simultaneously" = "Оновіть до Pro для одночасного підключення до кількох серверів";
+"Upgrade to connect to multiple servers simultaneously" = "Оновіть до Pro, щоб підключатися до кількох серверів одночасно";
+
 "Upgrade to Pro" = "Оновити до Pro";
 "Connect" = "Підключити";
 
@@ -470,7 +478,8 @@
 "IDLE" = "ПРОСТІЙ";
 "UPTIME" = "ЧАС РОБОТИ";
 "LOAD" = "НАВАНТАЖЕННЯ";
-"FREE" = "ВІЛЬНО";
+"FREE_MEMORY" = "ВІЛЬНО";
+
 "USED" = "ВИКОРИСТ.";
 "CACHED" = "КЕШ";
 "TOTAL" = "УСЬОГО";
@@ -631,12 +640,16 @@
 "Some changes may require restarting the app." = "Деякі зміни можуть потребувати перезапуску застосунку.";
 
 /* Download Progress */
-"%llds remaining" = "залишилось %lldс";
-"%lldm remaining" = "залишилось %lldхв";
-"%lldh %lldm remaining" = "залишилось %lldг %lldхв";
+"%llds remaining" = "залишилось %lld с";
+"%lldm remaining" = "залишилось %lld хв";
+"%lldh %lldm remaining" = "залишилось %lld г %lld хв";
 "Clear All Storage" = "Очистити все сховище";
 
 /* Preview */
 "Server 1" = "Сервер 1";
 "Server 2" = "Сервер 2";
 "Server 3" = "Сервер 3";
+
+"Added" = "Додано";
+
+"Details" = "Деталі";

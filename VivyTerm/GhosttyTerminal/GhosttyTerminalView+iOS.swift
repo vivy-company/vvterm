@@ -49,10 +49,12 @@ class GhosttyTerminalView: UIView {
     private var isPaused = false
     private var displayLink: CADisplayLink?
     private var needsRender = false
+    private var blinkTimer: DispatchSourceTimer?
 
     /// Idle detection for display link - stops after timeout to save CPU
     private var lastActivityTime: CFAbsoluteTime = 0
     private static let idleTimeout: CFTimeInterval = 0.1  // 100ms idle before stopping display link
+    private static let blinkInterval: TimeInterval = 0.5  // Cursor blink cadence when idle
 
     /// Cell size in points for row-to-pixel conversion
     var cellSize: CGSize = .zero
@@ -112,8 +114,8 @@ class GhosttyTerminalView: UIView {
     private let renderingSetup = GhosttyRenderingSetup()
 
     private func requestRender() {
-        guard !isShuttingDown else { return }
-        guard !isPaused else { return }
+        if isShuttingDown { return }
+        if isPaused { return }
         guard surface?.unsafeCValue != nil else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
 
@@ -131,12 +133,31 @@ class GhosttyTerminalView: UIView {
         let link = CADisplayLink(target: self, selector: #selector(displayLinkTick))
         link.add(to: .main, forMode: .common)
         displayLink = link
-        Self.logger.debug("Display link started (activity)")
     }
 
     private func stopDisplayLink() {
         displayLink?.invalidate()
         displayLink = nil
+    }
+
+    private func startBlinkTimerIfNeeded() {
+        guard blinkTimer == nil else { return }
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + Self.blinkInterval, repeating: Self.blinkInterval)
+        timer.setEventHandler { [weak self] in
+            guard let self = self else { return }
+            guard !self.isShuttingDown, !self.isPaused, self.window != nil else { return }
+            // Tick Ghostty to advance cursor blink state, then render a frame.
+            self.ghosttyAppWrapper?.appTick()
+            self.requestRender()
+        }
+        timer.resume()
+        blinkTimer = timer
+    }
+
+    private func stopBlinkTimer() {
+        blinkTimer?.cancel()
+        blinkTimer = nil
     }
 
     @objc private func displayLinkTick() {
@@ -146,7 +167,6 @@ class GhosttyTerminalView: UIView {
         let now = CFAbsoluteTimeGetCurrent()
         if now - lastActivityTime > Self.idleTimeout && !needsRender {
             stopDisplayLink()
-            Self.logger.debug("Display link stopped (idle)")
             return
         }
 
@@ -235,6 +255,7 @@ class GhosttyTerminalView: UIView {
         isShuttingDown = true
         isPaused = true
         stopDisplayLink()
+        stopBlinkTimer()
         stopMomentumScrolling()
 
         // Remove config reload observer
@@ -274,6 +295,7 @@ class GhosttyTerminalView: UIView {
         guard !isShuttingDown else { return }
         isPaused = true
         stopDisplayLink()
+        stopBlinkTimer()
 
         if let surface = surface?.unsafeCValue {
             ghostty_surface_set_focus(surface, false)
@@ -292,6 +314,9 @@ class GhosttyTerminalView: UIView {
 
         // Request a render to restart display link if needed
         requestRender()
+        if window != nil {
+            startBlinkTimerIfNeeded()
+        }
     }
 
     // MARK: - Layer Type
@@ -368,8 +393,8 @@ class GhosttyTerminalView: UIView {
     /// and didMoveToWindow because Ghostty adds it as a sublayer that doesn't auto-resize.
     /// Without proper sublayer configuration, Ghostty's setSurfaceCallback will discard all frames.
     func sizeDidChange(_ size: CGSize) {
-        guard !isShuttingDown else { return }
-        guard !isPaused else { return }
+        if isShuttingDown { return }
+        if isPaused { return }
         guard window != nil else { return }
         guard let surface = surface?.unsafeCValue else { return }
         guard size.width > 0 && size.height > 0 else { return }
@@ -388,7 +413,6 @@ class GhosttyTerminalView: UIView {
 
         if !didSignalReady {
             didSignalReady = true
-
             DispatchQueue.main.async { [weak self] in
                 self?.onReady?()
             }
@@ -476,8 +500,10 @@ class GhosttyTerminalView: UIView {
             // based on isActive flag to avoid keyboard showing when terminal is hidden
             // Request render to start display link if needed (event-driven)
             requestRender()
+            startBlinkTimerIfNeeded()
         } else {
             stopDisplayLink()
+            stopBlinkTimer()
         }
     }
 
@@ -876,8 +902,8 @@ class GhosttyTerminalView: UIView {
 
     /// Force the terminal surface to refresh/redraw
     func forceRefresh() {
-        guard !isShuttingDown else { return }
-        guard !isPaused else { return }
+        if isShuttingDown { return }
+        if isPaused { return }
         guard window != nil else { return }
         guard let surface = surface?.unsafeCValue else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
@@ -1181,15 +1207,14 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.axis = .horizontal
         stack.spacing = 8
         stack.alignment = .center
-        stack.layoutMargins = UIEdgeInsets(top: 8, left: 12, bottom: 8, right: 12)
-        stack.isLayoutMarginsRelativeArrangement = true
+        stack.isLayoutMarginsRelativeArrangement = false
         scrollView.addSubview(stack)
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            stack.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
-            stack.heightAnchor.constraint(equalTo: scrollView.heightAnchor)
+            stack.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor, constant: 8),
+            stack.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor, constant: -8),
+            stack.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 12),
+            stack.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -12),
+            stack.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor, constant: -16)
         ])
 
         // Modifier buttons (toggle style)

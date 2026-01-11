@@ -115,7 +115,7 @@ struct SettingsView: View {
 
                             Spacer()
 
-                            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE"))
+                            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE_PLAN"))
                                 .font(.system(size: 10, weight: .bold))
                                 .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
                                 .padding(.horizontal, 8)
@@ -265,7 +265,7 @@ struct SettingsView: View {
 
             Spacer()
 
-            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE"))
+            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE_PLAN"))
                 .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
                 .padding(.horizontal, 8)

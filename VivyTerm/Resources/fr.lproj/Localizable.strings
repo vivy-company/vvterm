@@ -45,6 +45,7 @@
 "Choose a server from the sidebar to connect" = "Choisissez un serveur dans la barre latérale pour vous connecter";
 "Multiple connections require Pro" = "Les connexions multiples nécessitent Pro";
 "Upgrade to connect to multiple servers simultaneously" = "Passez à Pro pour vous connecter à plusieurs serveurs simultanément";
+
 "Disconnected" = "Déconnecté";
 "Connecting..." = "Connexion...";
 "Connecting to %@..." = "Connexion à %@...";
@@ -198,7 +199,8 @@
 "Pro Monthly" = "Pro mensuel";
 "Pro Yearly" = "Pro annuel";
 "PRO" = "PRO";
-"FREE" = "GRATUIT";
+"FREE_PLAN" = "GRATUIT";
+
 "Unlimited servers & workspaces" = "Serveurs et espaces de travail illimités";
 "View Plans" = "Voir les offres";
 
@@ -279,7 +281,8 @@
 "No Servers" = "Aucun serveur";
 "Add a server to get started" = "Ajoutez un serveur pour commencer";
 "Multiple connections require Pro" = "Les connexions multiples nécessitent Pro";
-"Upgrade to connect to multiple servers simultaneously" = "Passez à Pro pour connecter plusieurs serveurs simultanément";
+"Upgrade to connect to multiple servers simultaneously" = "Passez à Pro pour vous connecter à plusieurs serveurs simultanément";
+
 "Upgrade to Pro" = "Passer à Pro";
 "Connect" = "Connecter";
 
@@ -470,7 +473,8 @@
 "IDLE" = "INACTIF";
 "UPTIME" = "TEMPS ACTIF";
 "LOAD" = "CHARGE";
-"FREE" = "LIBRE";
+"FREE_MEMORY" = "LIBRE";
+
 "USED" = "UTILISÉ";
 "CACHED" = "EN CACHE";
 "TOTAL" = "TOTAL";
@@ -640,3 +644,7 @@
 "Server 1" = "Serveur 1";
 "Server 2" = "Serveur 2";
 "Server 3" = "Serveur 3";
+
+"Added" = "Ajouté";
+
+"Details" = "Détails";

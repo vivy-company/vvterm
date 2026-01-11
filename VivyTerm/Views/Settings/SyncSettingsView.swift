@@ -110,7 +110,7 @@ struct SyncSettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: syncEnabled) { enabled in
+        .onChangeCompat(of: syncEnabled) { enabled in
             cloudKit.handleSyncToggle(enabled)
             if enabled {
                 Task { await serverManager.loadData() }

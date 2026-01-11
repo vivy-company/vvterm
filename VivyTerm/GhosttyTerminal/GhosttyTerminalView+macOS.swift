@@ -321,7 +321,6 @@ class GhosttyTerminalView: NSView {
             // Stop display link to save CPU when idle
             if let link = displayLink, CVDisplayLinkIsRunning(link) {
                 CVDisplayLinkStop(link)
-                Self.logger.debug("Display link stopped (idle)")
             }
             return
         }
@@ -356,7 +355,6 @@ class GhosttyTerminalView: NSView {
         let now = CFAbsoluteTimeGetCurrent()
         if now - lastActivityTime > Self.idleTimeout && !needsRender {
             CVDisplayLinkStop(link)
-            Self.logger.debug("Display link stopped by idle timer")
         }
     }
 
@@ -369,7 +367,6 @@ class GhosttyTerminalView: NSView {
         // Start display link if not running
         if let link = displayLink, !CVDisplayLinkIsRunning(link) {
             CVDisplayLinkStart(link)
-            Self.logger.debug("Display link started (activity)")
         }
     }
 

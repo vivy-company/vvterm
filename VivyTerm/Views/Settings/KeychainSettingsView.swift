@@ -1,5 +1,10 @@
 import SwiftUI
 import UniformTypeIdentifiers
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 // MARK: - Keychain Settings View
 
@@ -8,9 +13,8 @@ struct KeychainSettingsView: View {
     @State private var showingAddKey = false
     @State private var showingGenerateKey = false
     @State private var showingDeleteConfirmation = false
-    @State private var showingPublicKey = false
     @State private var keyToDelete: SSHKeyEntry?
-    @State private var keyToShowPublic: SSHKeyEntry?
+    @State private var keyToShowDetails: SSHKeyEntry?
     @State private var error: String?
 
     var body: some View {
@@ -21,36 +25,37 @@ struct KeychainSettingsView: View {
                 Form {
                     Section {
                         ForEach(storedKeys) { key in
-                            SSHKeyRow(
-                                key: key,
-                                onDelete: {
-                                    keyToDelete = key
-                                    showingDeleteConfirmation = true
-                                },
-                                onShowPublicKey: key.publicKey != nil ? {
-                                    keyToShowPublic = key
-                                    showingPublicKey = true
-                                } : nil
-                            )
-                        }
-                    } header: {
-                        HStack {
-                            Spacer()
-                            Menu {
-                                Button {
-                                    showingGenerateKey = true
-                                } label: {
-                                    Label("Generate New Key", systemImage: "wand.and.stars")
-                                }
-                                Button {
-                                    showingAddKey = true
-                                } label: {
-                                    Label("Import Key", systemImage: "square.and.arrow.down")
-                                }
+                            Button {
+                                keyToShowDetails = key
                             } label: {
-                                Image(systemName: "plus")
+                                SSHKeyRow(key: key)
                             }
                             .buttonStyle(.plain)
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    keyToDelete = key
+                                    showingDeleteConfirmation = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+
+                                Button {
+                                    keyToShowDetails = key
+                                } label: {
+                                    Label(String(localized: "Details"), systemImage: "info.circle")
+                                }
+                                .tint(.gray)
+
+                                Button {
+                                    if let publicKey = key.publicKey {
+                                        copyToClipboard(publicKey)
+                                    }
+                                } label: {
+                                    Label(String(localized: "Copy to Clipboard"), systemImage: "doc.on.doc")
+                                }
+                                .tint(.blue)
+                                .disabled(key.publicKey == nil)
+                            }
                         }
                     } footer: {
                         Text("Keys are stored securely in your device's Keychain. Passphrases are stored separately.")
@@ -70,6 +75,24 @@ struct KeychainSettingsView: View {
                 .formStyle(.grouped)
             }
         }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        showingGenerateKey = true
+                    } label: {
+                        Label("Generate New Key", systemImage: "wand.and.stars")
+                    }
+                    Button {
+                        showingAddKey = true
+                    } label: {
+                        Label("Import Key", systemImage: "square.and.arrow.down")
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
         .onAppear {
             loadKeys()
         }
@@ -79,14 +102,13 @@ struct KeychainSettingsView: View {
             })
         }
         .sheet(isPresented: $showingGenerateKey) {
-            GenerateSSHKeySheet(onSave: { _ in
+            GenerateSSHKeySheet(onSave: { entry in
                 loadKeys()
+                keyToShowDetails = entry
             })
         }
-        .sheet(isPresented: $showingPublicKey) {
-            if let key = keyToShowPublic {
-                PublicKeySheet(keyEntry: key)
-            }
+        .sheet(item: $keyToShowDetails) { key in
+            KeyDetailsSheet(keyEntry: key)
         }
         .confirmationDialog(
             "Delete SSH Key",
@@ -151,14 +173,21 @@ struct KeychainSettingsView: View {
             self.error = String(localized: "Failed to delete key: \(error.localizedDescription)")
         }
     }
+
+    private func copyToClipboard(_ text: String) {
+        #if os(iOS)
+        UIPasteboard.general.string = text
+        #elseif os(macOS)
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(text, forType: .string)
+        #endif
+    }
 }
 
 // MARK: - SSH Key Row
 
 private struct SSHKeyRow: View {
     let key: SSHKeyEntry
-    let onDelete: () -> Void
-    let onShowPublicKey: (() -> Void)?
 
     var body: some View {
         HStack(spacing: 12) {
@@ -193,25 +222,6 @@ private struct SSHKeyRow: View {
             }
 
             Spacer()
-
-            if onShowPublicKey != nil {
-                Button {
-                    onShowPublicKey?()
-                } label: {
-                    Image(systemName: "doc.on.doc")
-                        .foregroundStyle(.blue)
-                }
-                .buttonStyle(.plain)
-                .help(Text("Copy public key"))
-            }
-
-            Button(role: .destructive) {
-                onDelete()
-            } label: {
-                Image(systemName: "trash")
-                    .foregroundStyle(.red)
-            }
-            .buttonStyle(.plain)
         }
         .padding(.vertical, 4)
     }
@@ -405,9 +415,7 @@ struct GenerateSSHKeySheet: View {
     @State private var passphrase: String = ""
     @State private var confirmPassphrase: String = ""
     @State private var isGenerating = false
-    @State private var generatedKey: GeneratedSSHKey?
     @State private var error: String?
-    @State private var showingPublicKey = false
 
     var body: some View {
         NavigationStack {
@@ -450,29 +458,6 @@ struct GenerateSSHKeySheet: View {
                     }
                 }
 
-                if let key = generatedKey {
-                    Section("Generated Key") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            HStack {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
-                                Text("Key generated successfully")
-                                    .foregroundStyle(.green)
-                            }
-
-                            Text("Fingerprint:")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(key.fingerprint)
-                                .font(.caption.monospaced())
-
-                            Button("View Public Key") {
-                                showingPublicKey = true
-                            }
-                            .buttonStyle(.borderedProminent)
-                        }
-                    }
-                }
             }
             .formStyle(.grouped)
             .navigationTitle("Generate SSH Key")
@@ -484,21 +469,10 @@ struct GenerateSSHKeySheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if generatedKey != nil {
-                        Button("Save") {
-                            saveKey()
-                        }
-                    } else {
-                        Button("Generate") {
-                            generateKey()
-                        }
-                        .disabled(!isValidForGeneration || isGenerating)
+                    Button("Generate") {
+                        generateKey()
                     }
-                }
-            }
-            .sheet(isPresented: $showingPublicKey) {
-                if let key = generatedKey {
-                    PublicKeyDisplaySheet(publicKey: key.publicKey, fingerprint: key.fingerprint)
+                    .disabled(!isValidForGeneration || isGenerating)
                 }
             }
         }
@@ -516,9 +490,17 @@ struct GenerateSSHKeySheet: View {
             do {
                 let comment = name.replacingOccurrences(of: " ", with: "_")
                 let key = try SSHKeyGenerator.generate(type: keyType, comment: comment)
+                let entry = try KeychainManager.shared.storeSSHKeyEntry(
+                    name: name,
+                    privateKey: key.privateKey,
+                    passphrase: passphrase.isEmpty ? nil : passphrase,
+                    keyType: key.keyType,
+                    publicKey: key.publicKey
+                )
                 await MainActor.run {
-                    self.generatedKey = key
                     self.isGenerating = false
+                    onSave(entry)
+                    dismiss()
                 }
             } catch {
                 await MainActor.run {
@@ -528,29 +510,11 @@ struct GenerateSSHKeySheet: View {
             }
         }
     }
-
-    private func saveKey() {
-        guard let key = generatedKey else { return }
-
-        do {
-            let entry = try KeychainManager.shared.storeSSHKeyEntry(
-                name: name,
-                privateKey: key.privateKey,
-                passphrase: passphrase.isEmpty ? nil : passphrase,
-                keyType: key.keyType,
-                publicKey: key.publicKey
-            )
-            onSave(entry)
-            dismiss()
-        } catch {
-            self.error = String(localized: "Failed to save key: \(error.localizedDescription)")
-        }
-    }
 }
 
-// MARK: - Public Key Sheet (for existing keys)
+// MARK: - Key Details Sheet
 
-struct PublicKeySheet: View {
+struct KeyDetailsSheet: View {
     let keyEntry: SSHKeyEntry
 
     @Environment(\.dismiss) private var dismiss
@@ -558,40 +522,57 @@ struct PublicKeySheet: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 16) {
-                if let publicKey = keyEntry.publicKey {
-                    Text("Add this to your server's ~/.ssh/authorized_keys file:")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
+            Form {
+                Section {
+                    LabeledContent(String(localized: "Key Name"), value: keyEntry.name)
+                    if let keyType = keyEntry.keyType {
+                        LabeledContent(String(localized: "Key Type"), value: keyType.displayName)
+                    }
+                    LabeledContent(String(localized: "Added")) {
+                        Text(keyEntry.createdAt, style: .date)
+                    }
+                    LabeledContent(String(localized: "Passphrase")) {
+                        Text(keyEntry.hasPassphrase ? String(localized: "Protected") : "-")
+                    }
+                }
 
-                    ScrollView {
+                Section {
+                    if let publicKey = keyEntry.publicKey {
                         Text(publicKey)
                             .font(.system(.caption, design: .monospaced))
                             .textSelection(.enabled)
-                            .padding()
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.quaternary)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                    .padding(.horizontal)
 
-                    Button {
-                        copyToClipboard(publicKey)
-                    } label: {
-                        Label(
-                            copied ? String(localized: "Copied") : String(localized: "Copy to Clipboard"),
-                            systemImage: copied ? "checkmark" : "doc.on.doc"
-                        )
+                        HStack {
+                            Button {
+                                copyToClipboard(publicKey)
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: copied ? "checkmark" : "doc.on.doc")
+                                    Text(copied ? String(localized: "Copied") : String(localized: "Copy to Clipboard"))
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+
+                            Spacer()
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(String(localized: "No Public Key"))
+                                .foregroundStyle(.secondary)
+                            Text(String(localized: "This key was imported without a public key."))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
                     }
-                    .buttonStyle(.borderedProminent)
-                } else {
-                    noPublicKeyView
+                } header: {
+                    Text(String(localized: "Public Key"))
+                } footer: {
+                    Text("Add this to your server's ~/.ssh/authorized_keys file.")
                 }
             }
-            .padding(.vertical)
-            .navigationTitle("Public Key")
+            .formStyle(.grouped)
+            .navigationTitle(String(localized: "SSH Key"))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -600,27 +581,6 @@ struct PublicKeySheet: View {
                     Button("Done") { dismiss() }
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private var noPublicKeyView: some View {
-        if #available(iOS 17.0, macOS 14.0, *) {
-            ContentUnavailableView {
-                Label("No Public Key", systemImage: "key.slash")
-            } description: {
-                Text("This key was imported without a public key.")
-            }
-        } else {
-            VStack(spacing: 8) {
-                Label("No Public Key", systemImage: "key.slash")
-                    .font(.headline)
-                Text("This key was imported without a public key.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding()
         }
     }
 

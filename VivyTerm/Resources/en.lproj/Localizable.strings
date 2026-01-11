@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro Monthly";
 "Pro Yearly" = "Pro Yearly";
 "PRO" = "PRO";
-"FREE" = "FREE";
+"FREE_PLAN" = "FREE";
+
 "Unlimited servers & workspaces" = "Unlimited servers & workspaces";
 "View Plans" = "View Plans";
 
@@ -470,7 +471,8 @@
 "IDLE" = "IDLE";
 "UPTIME" = "UPTIME";
 "LOAD" = "LOAD";
-"FREE" = "FREE";
+"FREE_MEMORY" = "FREE";
+
 "USED" = "USED";
 "CACHED" = "CACHED";
 "TOTAL" = "TOTAL";
@@ -640,3 +642,7 @@
 "Server 1" = "Server 1";
 "Server 2" = "Server 2";
 "Server 3" = "Server 3";
+
+"Added" = "Added";
+
+"Details" = "Details";

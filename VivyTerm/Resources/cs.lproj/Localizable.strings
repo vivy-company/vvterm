@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro měsíčně";
 "Pro Yearly" = "Pro ročně";
 "PRO" = "PRO";
-"FREE" = "ZDARMA";
+"FREE_PLAN" = "ZDARMA";
+
 "Unlimited servers & workspaces" = "Neomezené servery a pracovní prostory";
 "View Plans" = "Zobrazit plány";
 
@@ -470,7 +471,8 @@
 "IDLE" = "NEČINNÝ";
 "UPTIME" = "DOBA BĚHU";
 "LOAD" = "ZÁTĚŽ";
-"FREE" = "VOLNÉ";
+"FREE_MEMORY" = "VOLNÉ";
+
 "USED" = "POUŽITO";
 "CACHED" = "CACHE";
 "TOTAL" = "CELKEM";
@@ -502,7 +504,8 @@
 "Gaming" = "Hry";
 "Connectivity" = "Konektivita";
 "Transportation" = "Doprava";
-"Automotive" = "Automotive";
+"Automotive" = "Automobily";
+
 "Accessibility" = "Zpřístupnění";
 "Privacy & Security" = "Soukromí a zabezpečení";
 "Human" = "Člověk";
@@ -640,3 +643,7 @@
 "Server 1" = "Server 1";
 "Server 2" = "Server 2";
 "Server 3" = "Server 3";
+
+"Added" = "Přidáno";
+
+"Details" = "Podrobnosti";

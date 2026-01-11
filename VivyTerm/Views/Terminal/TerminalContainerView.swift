@@ -68,11 +68,15 @@ struct TerminalContainerView: View {
                             if terminalAlreadyExists {
                                 isReady = true
                             }
+                            #if os(macOS)
                             ConnectionSessionManager.shared.getTerminal(for: session.id)?.resumeRendering()
+                            #endif
                         }
+                        #if os(macOS)
                         .onDisappear {
                             ConnectionSessionManager.shared.getTerminal(for: session.id)?.pauseRendering()
                         }
+                        #endif
                     }
 
                     if !isReady && !terminalAlreadyExists && ghosttyApp.readiness == .ready {

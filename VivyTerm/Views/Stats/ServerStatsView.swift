@@ -198,7 +198,7 @@ private struct MemoryStatsCard: View, Equatable {
             // Labels
             VStack(alignment: .leading, spacing: 8) {
                 HStack(spacing: 16) {
-                    StatLabel(color: .secondary, label: String(localized: "FREE"), value: formatBytes(free))
+                    StatLabel(color: .secondary, label: String(localized: "FREE_MEMORY"), value: formatBytes(free))
                     StatLabel(color: .green, label: String(localized: "USED"), value: formatBytes(used))
                 }
                 HStack(spacing: 16) {
