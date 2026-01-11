@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro 月度";
 "Pro Yearly" = "Pro 年度";
 "PRO" = "PRO";
-"FREE" = "免费";
+"FREE_PLAN" = "免费";
+
 "Unlimited servers & workspaces" = "无限服务器与工作区";
 "View Plans" = "查看方案";
 
@@ -455,7 +456,8 @@
 "IDLE" = "空闲";
 "UPTIME" = "运行时间";
 "LOAD" = "负载";
-"FREE" = "空闲";
+"FREE_MEMORY" = "空闲";
+
 "USED" = "已用";
 "CACHED" = "缓存";
 "TOTAL" = "总计";
@@ -620,3 +622,7 @@
 "Server 1" = "服务器 1";
 "Server 2" = "服务器 2";
 "Server 3" = "服务器 3";
+
+"Added" = "添加";
+
+"Details" = "详情";

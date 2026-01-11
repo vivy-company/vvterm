@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro รายเดือน";
 "Pro Yearly" = "Pro รายปี";
 "PRO" = "PRO";
-"FREE" = "ฟรี";
+"FREE_PLAN" = "ฟรี";
+
 "Unlimited servers & workspaces" = "เซิร์ฟเวอร์และเวิร์กสเปซไม่จำกัด";
 "View Plans" = "ดูแพ็กเกจ";
 
@@ -470,7 +471,8 @@
 "IDLE" = "ว่าง";
 "UPTIME" = "เวลาทำงาน";
 "LOAD" = "โหลด";
-"FREE" = "ว่าง";
+"FREE_MEMORY" = "ว่าง";
+
 "USED" = "ใช้แล้ว";
 "CACHED" = "แคช";
 "TOTAL" = "รวม";
@@ -640,3 +642,7 @@
 "Server 1" = "เซิร์ฟเวอร์ 1";
 "Server 2" = "เซิร์ฟเวอร์ 2";
 "Server 3" = "เซิร์ฟเวอร์ 3";
+
+"Added" = "เพิ่มแล้ว";
+
+"Details" = "รายละเอียด";

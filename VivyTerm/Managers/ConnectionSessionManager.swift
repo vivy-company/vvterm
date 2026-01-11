@@ -4,6 +4,9 @@ import os.log
 #if os(macOS)
 import AppKit
 #endif
+#if os(iOS)
+import UIKit
+#endif
 
 // MARK: - Connection Session Manager
 
@@ -134,8 +137,13 @@ final class ConnectionSessionManager: ObservableObject {
             selectedSessionId = sessions.last?.id
         }
 
-        // Unregister terminal view
-        unregisterTerminal(for: sessionId)
+        // Unregister terminal view (defer cleanup if still attached to a window)
+        if let terminal = terminalViews[sessionId], terminal.window != nil {
+            terminal.pauseRendering()
+            _ = terminal.resignFirstResponder()
+        } else {
+            unregisterTerminal(for: sessionId)
+        }
 
         // Disconnect SSH client in background
         Task.detached(priority: .high) { [weak self] in
@@ -155,6 +163,19 @@ final class ConnectionSessionManager: ObservableObject {
         }
         connectedServerId = nil
         logger.info("Disconnected all sessions")
+    }
+
+    /// Disconnect all sessions for a specific server
+    func disconnectServer(_ serverId: UUID) {
+        let sessionsToClose = sessions.filter { $0.serverId == serverId }
+        for session in sessionsToClose {
+            closeSession(session)
+        }
+        connectedServerIds.remove(serverId)
+        if connectedServerIds.isEmpty {
+            connectedServerId = nil
+        }
+        logger.info("Disconnected all sessions for server \(serverId)")
     }
 
     // MARK: - Tab Navigation

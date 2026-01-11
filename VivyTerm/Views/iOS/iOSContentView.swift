@@ -4,6 +4,9 @@
 //
 
 import SwiftUI
+#if os(iOS)
+import UIKit
+#endif
 
 #if os(iOS)
 struct iOSContentView: View {
@@ -48,13 +51,11 @@ struct iOSContentView: View {
                 }
             )
             .navigationDestination(isPresented: $showingTerminal) {
-                if let session = sessionManager.selectedSession {
-                    iOSTerminalView(
-                        session: session,
-                        server: serverManager.servers.first { $0.id == session.serverId },
-                        onBack: { showingTerminal = false }
-                    )
-                }
+                iOSTerminalView(
+                    sessionManager: sessionManager,
+                    serverManager: serverManager,
+                    onBack: { showingTerminal = false }
+                )
             }
         }
         .onAppear {
@@ -69,7 +70,7 @@ struct iOSContentView: View {
             }
         }
         // Sync navigation state with session state - dismiss terminal if session is gone
-        .onChange(of: sessionManager.sessions) { _ in
+        .onChangeCompat(of: sessionManager.sessions) { _ in
             if showingTerminal && sessionManager.selectedSession == nil {
                 showingTerminal = false
             }
@@ -148,10 +149,10 @@ struct iOSServerListView: View {
             // Servers Section
             Section {
                 if filteredServers.isEmpty {
-                    NoServersEmptyState {
-                        showingAddServer = true
-                    }
-                    .listRowBackground(Color.clear)
+                    Color.clear
+                        .frame(height: 1)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                 } else {
                     ForEach(filteredServers) { server in
                         iOSServerRow(
@@ -200,22 +201,30 @@ struct iOSServerListView: View {
             }
 
             // Active Connections Section
-            if !sessionManager.sessions.isEmpty {
+            if !activeConnections.isEmpty && !filteredServers.isEmpty {
                 Section {
-                    ForEach(sessionManager.sessions, id: \.id) { session in
+                    ForEach(activeConnections) { connection in
                         iOSActiveConnectionRow(
-                            session: session,
+                            session: connection.session,
+                            tabCount: connection.tabCount,
                             onOpen: {
-                                sessionManager.selectSession(session)
+                                sessionManager.selectSession(connection.session)
                                 showingTerminal = true
                             },
                             onDisconnect: {
-                                sessionManager.closeSession(session)
+                                sessionManager.disconnectServer(connection.id)
                             }
                         )
                     }
                 } header: {
                     Text("Active Connections")
+                }
+            }
+        }
+        .overlay(alignment: .center) {
+            if filteredServers.isEmpty {
+                NoServersEmptyState {
+                    showingAddServer = true
                 }
             }
         }
@@ -364,6 +373,31 @@ struct iOSServerListView: View {
 
     private var environmentOptions: [ServerEnvironment] {
         selectedWorkspace?.environments ?? ServerEnvironment.builtInEnvironments
+    }
+
+    private struct ActiveConnection: Identifiable {
+        let id: UUID
+        let session: ConnectionSession
+        let tabCount: Int
+    }
+
+    private var activeConnections: [ActiveConnection] {
+        let grouped = Dictionary(grouping: sessionManager.sessions, by: { $0.serverId })
+        return grouped.compactMap { serverId, sessions in
+            guard let session = representativeSession(for: sessions) else { return nil }
+            return ActiveConnection(id: serverId, session: session, tabCount: sessions.count)
+        }
+        .sorted { lhs, rhs in
+            lhs.session.title.localizedCaseInsensitiveCompare(rhs.session.title) == .orderedAscending
+        }
+    }
+
+    private func representativeSession(for sessions: [ConnectionSession]) -> ConnectionSession? {
+        if let selectedId = sessionManager.selectedSessionId,
+           let match = sessions.first(where: { $0.id == selectedId }) {
+            return match
+        }
+        return sessions.first
     }
 
     private var filteredServers: [Server] {
@@ -521,55 +555,100 @@ struct iOSEnvironmentFilterMenu: View {
 // MARK: - iOS Terminal View
 
 struct iOSTerminalView: View {
-    let session: ConnectionSession
-    let server: Server?
+    @ObservedObject var sessionManager: ConnectionSessionManager
+    @ObservedObject var serverManager: ServerManager
     let onBack: () -> Void
 
-    @State private var selectedView: String = "stats"
     /// Delayed flag to allow tab animation to complete before creating terminal
-    @State private var shouldShowTerminal = false
+    @State private var shouldShowTerminalBySession: [UUID: Bool] = [:]
+    @State private var showingProUpgrade = false
+    @State private var serverToEdit: Server?
+    @State private var terminalBackgroundColor: Color = .black
+    @State private var currentServerId: UUID?
 
-    /// Check if terminal already exists (was previously created)
-    private var terminalAlreadyExists: Bool {
-        ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
+    @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+
+    private var serverSessions: [ConnectionSession] {
+        guard let currentServerId else { return [] }
+        return sessionManager.sessions.filter { $0.serverId == currentServerId }
+    }
+
+    private var selectedSession: ConnectionSession? {
+        if let selected = sessionManager.selectedSession,
+           selected.serverId == currentServerId {
+            return selected
+        }
+        return serverSessions.first
+    }
+
+    private var selectedServer: Server? {
+        guard let currentServerId else { return nil }
+        return serverManager.servers.first { $0.id == currentServerId }
+    }
+
+    private var selectedSessionIdBinding: Binding<UUID?> {
+        Binding(
+            get: { sessionManager.selectedSessionId },
+            set: { sessionManager.selectedSessionId = $0 }
+        )
+    }
+
+    private var selectedView: String {
+        guard let serverId = currentServerId ?? selectedSession?.serverId else { return "stats" }
+        return sessionManager.selectedViewByServer[serverId] ?? "stats"
+    }
+
+    private func selectedViewBinding(for serverId: UUID) -> Binding<String> {
+        Binding(
+            get: { sessionManager.selectedViewByServer[serverId] ?? "stats" },
+            set: { newValue in
+                DispatchQueue.main.async {
+                    sessionManager.selectedViewByServer[serverId] = newValue
+                }
+            }
+        )
     }
 
     var body: some View {
-        ZStack {
-            // Terminal view - only create after delay to not block tab animation
-            if shouldShowTerminal || terminalAlreadyExists {
-                TerminalContainerView(session: session, server: server, isActive: selectedView == "terminal")
-                    .opacity(selectedView == "terminal" ? 1 : 0)
-                    .allowsHitTesting(selectedView == "terminal")
+        VStack(spacing: 0) {
+            if selectedView == "terminal" && serverSessions.count > 1 {
+                iOSTerminalTabsBar(
+                    sessions: serverSessions,
+                    selectedSessionId: selectedSessionIdBinding,
+                    onClose: { sessionManager.closeSession($0) }
+                )
             }
 
-            // Stats view
-            if let server = server {
-                ServerStatsView(server: server, isVisible: selectedView == "stats")
-                    .opacity(selectedView == "stats" ? 1 : 0)
-                    .allowsHitTesting(selectedView == "stats")
-            }
-
-            // Loading indicator when switching to terminal for the first time
-            if selectedView == "terminal" && !shouldShowTerminal && !terminalAlreadyExists {
-                ProgressView()
-                    .progressViewStyle(.circular)
-                    .scaleEffect(1.2)
-            }
-        }
-        .onChange(of: selectedView) { newValue in
-            if newValue == "terminal" {
-                if !shouldShowTerminal && !terminalAlreadyExists {
-                    // Delay terminal creation to allow tab animation to complete
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                        shouldShowTerminal = true
+            if serverSessions.isEmpty {
+                if selectedView == "terminal" {
+                    TerminalEmptyStateView(server: selectedServer) {
+                        openNewTab()
                     }
-                } else {
-                    // Terminal already exists - refresh it when switching back
-                    refreshTerminal()
+                } else if let server = selectedServer {
+                    ServerStatsView(server: server, isVisible: true)
+                }
+            } else {
+                ZStack {
+                    ForEach(serverSessions) { session in
+                        sessionPage(session)
+                    }
+                }
+                .transaction { transaction in
+                    transaction.animation = nil
                 }
             }
         }
+        .background(
+            Group {
+                if selectedView == "terminal" {
+                    terminalBackgroundColor
+                        .ignoresSafeArea(.all)
+                } else {
+                    Color(UIColor.systemBackground)
+                        .ignoresSafeArea(.all)
+                }
+            }
+        )
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -581,30 +660,178 @@ struct iOSTerminalView: View {
             }
 
             ToolbarItem(placement: .principal) {
-                Picker("View", selection: $selectedView) {
-                    Image(systemName: "chart.bar.xaxis")
-                        .tag("stats")
-                    Image(systemName: "terminal")
-                        .tag("terminal")
+                if let serverId = selectedSession?.serverId {
+                    Picker("View", selection: selectedViewBinding(for: serverId)) {
+                        Image(systemName: "chart.bar.xaxis")
+                            .tag("stats")
+                        Image(systemName: "terminal")
+                            .tag("terminal")
+                    }
+                    .pickerStyle(.segmented)
+                    .fixedSize()
                 }
-                .pickerStyle(.segmented)
-                .fixedSize()
             }
 
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button(role: .destructive) {
-                    ConnectionSessionManager.shared.disconnectAll()
-                    onBack()
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                if selectedView == "terminal" {
+                    Button {
+                        openNewTab()
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+
+                Menu {
+                    if let server = selectedServer {
+                        Button {
+                            serverToEdit = server
+                        } label: {
+                            Label("Edit Server", systemImage: "pencil")
+                        }
+                    }
+
+                    Button(role: .destructive) {
+                        disconnectAllSessions()
+                    } label: {
+                        Label("Disconnect", systemImage: "xmark.circle")
+                    }
                 } label: {
-                    Label("Disconnect", systemImage: "xmark")
+                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
-        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(selectedView == "terminal" ? .visible : .hidden, for: .navigationBar)
+        .toolbarBackground(
+            selectedView == "terminal" ? terminalBackgroundColor : Color(UIColor.systemBackground),
+            for: .navigationBar
+        )
+        .sheet(isPresented: $showingProUpgrade) {
+            ProUpgradeSheet()
+        }
+        .sheet(item: $serverToEdit) { server in
+            NavigationStack {
+                ServerFormSheet(
+                    serverManager: serverManager,
+                    workspace: serverManager.workspaces.first { $0.id == server.workspaceId },
+                    server: server,
+                    onSave: { _ in serverToEdit = nil }
+                )
+            }
+        }
+        .onAppear {
+            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+            if currentServerId == nil, let session = sessionManager.selectedSession {
+                currentServerId = session.serverId
+            }
+            if currentServerId != nil,
+               let selectedId = sessionManager.selectedSessionId,
+               !serverSessions.contains(where: { $0.id == selectedId }) {
+                sessionManager.selectedSessionId = serverSessions.first?.id
+            }
+        }
+        .onChange(of: terminalThemeName) { _ in
+            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+        }
+        .onChange(of: sessionManager.sessions) { _ in
+            if currentServerId == nil, let selected = sessionManager.selectedSession {
+                currentServerId = selected.serverId
+            }
+            let activeIds = Set(serverSessions.map { $0.id })
+            shouldShowTerminalBySession = shouldShowTerminalBySession.filter { activeIds.contains($0.key) }
+            if let currentServerId,
+               let selectedId = sessionManager.selectedSessionId,
+               !serverSessions.contains(where: { $0.id == selectedId }) {
+                sessionManager.selectedSessionId = serverSessions.first?.id
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func sessionPage(_ session: ConnectionSession) -> some View {
+        let server = serverManager.servers.first { $0.id == session.serverId }
+        let viewSelection = sessionManager.selectedViewByServer[session.serverId] ?? "stats"
+        let isSelected = sessionManager.selectedSessionId == session.id
+        let terminalAlreadyExists = ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
+        let shouldShowTerminal = shouldShowTerminalBySession[session.id] ?? false
+
+        ZStack {
+            if shouldShowTerminal || terminalAlreadyExists {
+                TerminalContainerView(
+                    session: session,
+                    server: server,
+                    isActive: isSelected && viewSelection == "terminal"
+                )
+                .opacity(viewSelection == "terminal" ? 1 : 0)
+                .allowsHitTesting(viewSelection == "terminal")
+            }
+
+            if let server = server {
+                ServerStatsView(server: server, isVisible: viewSelection == "stats")
+                    .opacity(viewSelection == "stats" ? 1 : 0)
+                    .allowsHitTesting(viewSelection == "stats")
+            }
+
+            if viewSelection == "terminal" && !shouldShowTerminal && !terminalAlreadyExists {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(1.2)
+            }
+        }
+        .onAppear {
+            guard isSelected else { return }
+            prepareTerminal(session: session, viewSelection: viewSelection, terminalAlreadyExists: terminalAlreadyExists)
+            if viewSelection == "terminal" {
+                focusTerminal(for: session)
+            }
+        }
+        .onChange(of: viewSelection) { newValue in
+            guard isSelected else { return }
+            if newValue == "terminal" {
+                prepareTerminal(session: session, viewSelection: newValue, terminalAlreadyExists: terminalAlreadyExists)
+                focusTerminal(for: session)
+            }
+        }
+        .onChange(of: isSelected) { newValue in
+            guard newValue else { return }
+            prepareTerminal(session: session, viewSelection: viewSelection, terminalAlreadyExists: terminalAlreadyExists)
+            if viewSelection == "terminal" {
+                focusTerminal(for: session)
+            }
+        }
+        .opacity(isSelected ? 1 : 0)
+        .allowsHitTesting(isSelected)
+        .accessibilityHidden(!isSelected)
+        .overlay(terminalSwipeOverlay(isEnabled: isSelected && viewSelection == "terminal"))
+    }
+
+    private func prepareTerminal(session: ConnectionSession, viewSelection: String, terminalAlreadyExists: Bool) {
+        guard viewSelection == "terminal" else { return }
+        if terminalAlreadyExists {
+            refreshTerminal(for: session)
+            return
+        }
+        if shouldShowTerminalBySession[session.id] == true { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            shouldShowTerminalBySession[session.id] = true
+        }
+    }
+
+    private func openNewTab() {
+        guard let server = selectedServer else { return }
+        guard sessionManager.canOpenNewTab else {
+            showingProUpgrade = true
+            return
+        }
+        Task { try? await sessionManager.openConnection(to: server, forceNew: true) }
+    }
+
+    private func disconnectAllSessions() {
+        sessionManager.disconnectAll()
+        onBack()
     }
 
     /// Refresh terminal display and trigger server redraw
-    private func refreshTerminal() {
+    private func refreshTerminal(for session: ConnectionSession) {
         guard let terminal = ConnectionSessionManager.shared.getTerminal(for: session.id) else { return }
 
         // Resume rendering if paused
@@ -622,6 +849,176 @@ struct iOSTerminalView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func focusTerminal(for session: ConnectionSession) {
+        guard let terminal = ConnectionSessionManager.shared.getTerminal(for: session.id) else { return }
+
+        let attemptFocus = { [weak terminal] in
+            guard let terminal = terminal else { return }
+            if terminal.window != nil {
+                _ = terminal.becomeFirstResponder()
+            }
+        }
+
+        DispatchQueue.main.async {
+            attemptFocus()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                attemptFocus()
+            }
+        }
+    }
+
+
+    @ViewBuilder
+    private func terminalSwipeOverlay(isEnabled: Bool) -> some View {
+        if isEnabled && serverSessions.count > 1 {
+            GeometryReader { proxy in
+                let edgeWidth: CGFloat = 32
+                HStack(spacing: 0) {
+                    Color.clear
+                        .frame(width: edgeWidth)
+                        .contentShape(Rectangle())
+                        .gesture(tabSwipeGesture())
+
+                    Color.clear
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .allowsHitTesting(false)
+
+                    Color.clear
+                        .frame(width: edgeWidth)
+                        .contentShape(Rectangle())
+                        .gesture(tabSwipeGesture())
+                }
+            }
+        }
+    }
+
+    private func tabSwipeGesture() -> some Gesture {
+        DragGesture(minimumDistance: 24, coordinateSpace: .local)
+            .onEnded { value in
+                let horizontal = value.translation.width
+                let vertical = value.translation.height
+                guard abs(horizontal) > abs(vertical),
+                      abs(horizontal) > 60 else { return }
+                if horizontal < 0 {
+                    selectNextServerSession()
+                } else {
+                    selectPreviousServerSession()
+                }
+            }
+    }
+
+    private func selectNextServerSession() {
+        guard let currentId = sessionManager.selectedSessionId,
+              let index = serverSessions.firstIndex(where: { $0.id == currentId }),
+              index < serverSessions.count - 1 else { return }
+        sessionManager.selectedSessionId = serverSessions[index + 1].id
+        triggerTabSwitchFeedback()
+    }
+
+    private func selectPreviousServerSession() {
+        guard let currentId = sessionManager.selectedSessionId,
+              let index = serverSessions.firstIndex(where: { $0.id == currentId }),
+              index > 0 else { return }
+        sessionManager.selectedSessionId = serverSessions[index - 1].id
+        triggerTabSwitchFeedback()
+    }
+
+    private func triggerTabSwitchFeedback() {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.prepare()
+        generator.impactOccurred()
+    }
+}
+
+// MARK: - iOS Terminal Tabs
+
+struct iOSTerminalTabsBar: View {
+    let sessions: [ConnectionSession]
+    @Binding var selectedSessionId: UUID?
+    let onClose: (ConnectionSession) -> Void
+
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 8) {
+                ForEach(sessions) { session in
+                    iOSTerminalTabButton(
+                        session: session,
+                        isSelected: selectedSessionId == session.id,
+                        onSelect: { selectedSessionId = session.id },
+                        onClose: { onClose(session) }
+                    )
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .animation(.easeInOut(duration: 0.12), value: selectedSessionId)
+        }
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color.primary.opacity(0.08))
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+    }
+}
+
+private struct iOSTerminalTabButton: View {
+    let session: ConnectionSession
+    let isSelected: Bool
+    let onSelect: () -> Void
+    let onClose: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 6, height: 6)
+            Text(session.title)
+                .font(.callout)
+                .lineLimit(1)
+        }
+        .padding(.leading, 14)
+        .padding(.trailing, 36)
+        .padding(.vertical, 7)
+        .foregroundStyle(.primary)
+        .background(
+            isSelected ? Color.primary.opacity(0.18) : Color.clear,
+            in: Capsule(style: .continuous)
+        )
+        .overlay(alignment: .trailing) {
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 20, height: 20)
+                    .background(
+                        Circle()
+                            .fill(Color.primary.opacity(isSelected ? 0.12 : 0.08))
+                    )
+            }
+            .buttonStyle(.plain)
+            .padding(.trailing, 8)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onSelect()
+        }
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var statusColor: Color {
+        switch session.connectionState {
+        case .connected: return .green
+        case .connecting, .reconnecting: return .orange
+        case .disconnected, .idle: return .secondary
+        case .failed: return .red
         }
     }
 }

@@ -26,21 +26,29 @@
 "Close Terminal" = "Đóng terminal";
 "Close All to the Left" = "Đóng tất cả bên trái";
 "Close All to the Right" = "Đóng tất cả bên phải";
-"Close Other Tabs" = "Đóng các tab khác";
-"Duplicate Tab" = "Nhân bản tab";
+"Close Other Tabs" = "Đóng các thẻ khác";
+
+"Duplicate Tab" = "Nhân bản thẻ";
+
 "New Terminal" = "Terminal mới";
-"New terminal tab" = "Tab terminal mới";
+"New terminal tab" = "Thẻ terminal mới";
+
 "New connection" = "Kết nối mới";
-"Previous tab" = "Tab trước";
-"Next tab" = "Tab sau";
+"Previous tab" = "Thẻ trước";
+
+"Next tab" = "Thẻ sau";
+
 "No terminals" = "Không có terminal";
-"%lld tab" = "%lld tab";
-"%lld tabs" = "%lld tab";
+"%lld tab" = "%lld thẻ";
+
+"%lld tabs" = "%lld thẻ";
+
 "No terminals open" = "Không có terminal đang mở";
 "Search servers" = "Tìm máy chủ";
 "Search servers..." = "Tìm máy chủ...";
 "Search symbols..." = "Tìm biểu tượng...";
-"Select Workspace" = "Chọn workspace";
+"Select Workspace" = "Chọn không gian làm việc";
+
 "Select a Server" = "Chọn máy chủ";
 "Choose a server from the sidebar to connect" = "Chọn máy chủ từ thanh bên để kết nối";
 "Multiple connections require Pro" = "Nhiều kết nối yêu cầu Pro";
@@ -66,7 +74,8 @@
 "Failed to export RSA key" = "Không thể xuất khóa RSA";
 "Invalid key data" = "Dữ liệu khóa không hợp lệ";
 "Cannot access the selected file" = "Không thể truy cập tệp đã chọn";
-"Copy to Clipboard" = "Sao chép vào clipboard";
+"Copy to Clipboard" = "Sao chép vào bộ nhớ tạm";
+
 "Copied" = "Đã sao chép";
 
 /* App & About */
@@ -147,10 +156,13 @@
 "Upgrade for unlimited features" = "Nâng cấp để dùng tính năng không giới hạn";
 "Unlimited Servers" = "Máy chủ không giới hạn";
 "Add as many servers as you need (free: 3)" = "Thêm bao nhiêu máy chủ tùy ý (miễn phí: 3)";
-"Unlimited Workspaces" = "Workspace không giới hạn";
-"Organize servers into multiple workspaces (free: 1)" = "Sắp xếp máy chủ vào nhiều workspace (miễn phí: 1)";
+"Unlimited Workspaces" = "Không gian làm việc không giới hạn";
+
+"Organize servers into multiple workspaces (free: 1)" = "Sắp xếp máy chủ vào nhiều không gian làm việc (miễn phí: 1)";
+
 "Multiple Connections" = "Nhiều kết nối";
-"Open multiple terminal tabs at once (free: 1)" = "Mở nhiều tab terminal cùng lúc (miễn phí: 1)";
+"Open multiple terminal tabs at once (free: 1)" = "Mở nhiều thẻ terminal cùng lúc (miễn phí: 1)";
+
 "Custom Environments" = "Môi trường tùy chỉnh";
 "Create custom environment labels beyond Prod/Staging/Dev" = "Tạo nhãn môi trường tùy chỉnh ngoài Prod/Staging/Dev";
 "All Future Features" = "Tất cả tính năng tương lai";
@@ -186,7 +198,8 @@
 "Renews" = "Gia hạn";
 "Servers" = "Máy chủ";
 "%lld of %lld used" = "Đã dùng %lld / %lld";
-"Workspaces" = "Workspace";
+"Workspaces" = "Không gian làm việc";
+
 "Simultaneous Connections" = "Kết nối đồng thời";
 "%lld max" = "tối đa %lld";
 "Features" = "Tính năng";
@@ -198,27 +211,38 @@
 "Pro Monthly" = "Pro hàng tháng";
 "Pro Yearly" = "Pro hàng năm";
 "PRO" = "PRO";
-"FREE" = "MIỄN PHÍ";
-"Unlimited servers & workspaces" = "Máy chủ & workspace không giới hạn";
+"FREE_PLAN" = "MIỄN PHÍ";
+
+
+
+"Unlimited servers & workspaces" = "Máy chủ & không gian làm việc không giới hạn";
+
 "View Plans" = "Xem gói";
 
 /* Pro Limits */
 "Server Limit Reached" = "Đã đạt giới hạn máy chủ";
-"Workspace Limit Reached" = "Đã đạt giới hạn workspace";
-"Tab Limit Reached" = "Đã đạt giới hạn tab";
+"Workspace Limit Reached" = "Đã đạt giới hạn không gian làm việc";
+
+"Tab Limit Reached" = "Đã đạt giới hạn thẻ";
+
 "You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Bạn đã đạt giới hạn %lld máy chủ của gói miễn phí. Nâng cấp Pro để dùng máy chủ không giới hạn.";
-"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Bạn đã đạt giới hạn %lld workspace của gói miễn phí. Nâng cấp Pro để dùng workspace không giới hạn.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Bạn đã đạt giới hạn %lld không gian làm việc của gói miễn phí. Nâng cấp Pro để dùng không gian làm việc không giới hạn.";
+
 "You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "Gói miễn phí chỉ cho phép %lld kết nối cùng lúc. Nâng cấp Pro để có nhiều kết nối đồng thời.";
 "Server Locked" = "Máy chủ bị khóa";
-"Workspace Locked" = "Workspace bị khóa";
+"Workspace Locked" = "Không gian làm việc bị khóa";
+
 "This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Máy chủ này vượt quá giới hạn %lld máy chủ của gói miễn phí. Gia hạn Pro để truy cập tất cả máy chủ.";
-"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Workspace này vượt quá giới hạn %lld workspace của gói miễn phí. Gia hạn Pro để truy cập tất cả workspace.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Không gian làm việc này vượt quá giới hạn %lld không gian làm việc của gói miễn phí. Gia hạn Pro để truy cập tất cả không gian làm việc.";
+
 "\"%@\" %@" = "\"%@\" %@";
 "Subscription Expired" = "Đăng ký đã hết hạn";
 "%lld server" = "%lld máy chủ";
 "%lld servers" = "%lld máy chủ";
-"%lld workspace" = "%lld workspace";
-"%lld workspaces" = "%lld workspace";
+"%lld workspace" = "%lld không gian làm việc";
+
+"%lld workspaces" = "%lld không gian làm việc";
+
 " and " = " và ";
 "%@ locked" = "%@ bị khóa";
 
@@ -245,34 +269,47 @@
 "Add to Keychain" = "Thêm vào Keychain";
 "Select a stored key or import/paste a new one" = "Chọn khóa đã lưu hoặc nhập/dán khóa mới";
 "Using stored key: %@" = "Đang dùng khóa đã lưu: %@";
-"Workspace" = "Workspace";
-"Workspaces" = "Workspace";
-"Workspace name" = "Tên workspace";
+"Workspace" = "Không gian làm việc";
+
+"Workspaces" = "Không gian làm việc";
+
+"Workspace name" = "Tên không gian làm việc";
+
 "Color" = "Màu";
-"Delete Workspace" = "Xóa workspace";
-"Edit Workspace" = "Sửa workspace";
-"New Workspace" = "Workspace mới";
-"Workspaces" = "Workspace";
+"Delete Workspace" = "Xóa không gian làm việc";
+
+"Edit Workspace" = "Sửa không gian làm việc";
+
+"New Workspace" = "Không gian làm việc mới";
+
+"Workspaces" = "Không gian làm việc";
+
 "My Servers" = "Máy chủ của tôi";
 
 /* Sidebar / Lists */
-"WORKSPACE" = "WORKSPACE";
+"WORKSPACE" = "KHÔNG GIAN LÀM VIỆC";
+
 "SERVERS" = "MÁY CHỦ";
 "Support VVTerm" = "Ủng hộ VVTerm";
 "Upgrade to Pro" = "Nâng cấp lên Pro";
 "All" = "Tất cả";
 "Custom..." = "Tùy chỉnh...";
-"New Workspace" = "Workspace mới";
+"New Workspace" = "Không gian làm việc mới";
+
 "Unlock with Pro" = "Mở khóa bằng Pro";
-"Switch to Workspace" = "Chuyển sang workspace";
-"Delete Workspace" = "Xóa workspace";
+"Switch to Workspace" = "Chuyển sang không gian làm việc";
+
+"Delete Workspace" = "Xóa không gian làm việc";
+
 
 /* iOS Lists */
 "%lld servers" = "%lld máy chủ";
 "Servers" = "Máy chủ";
 "Active Connections" = "Kết nối đang hoạt động";
-"Add Workspace" = "Thêm workspace";
-"Workspaces" = "Workspace";
+"Add Workspace" = "Thêm không gian làm việc";
+
+"Workspaces" = "Không gian làm việc";
+
 "Done" = "Xong";
 
 /* Empty States */
@@ -413,7 +450,8 @@
 "Enable iCloud Sync" = "Bật đồng bộ iCloud";
 "iCloud Account" = "Tài khoản iCloud";
 "iCloud" = "iCloud";
-"Sync your servers and workspaces across all your Apple devices." = "Đồng bộ máy chủ và workspace trên tất cả thiết bị Apple của bạn.";
+"Sync your servers and workspaces across all your Apple devices." = "Đồng bộ máy chủ và không gian làm việc trên tất cả thiết bị Apple của bạn.";
+
 "Sync Status" = "Trạng thái đồng bộ";
 "Last Synced" = "Lần đồng bộ gần nhất";
 "Error" = "Lỗi";
@@ -423,7 +461,8 @@
 "Reset iCloud (Delete All & Re-upload)" = "Đặt lại iCloud (xóa tất cả & tải lên lại)";
 "Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "Đồng bộ bắt buộc sẽ lấy dữ liệu mới nhất từ iCloud. Xóa & đồng bộ lại sẽ xóa dữ liệu cục bộ và tải lại. Đặt lại iCloud sẽ xóa TOÀN BỘ dữ liệu trên đám mây và tải dữ liệu cục bộ lên lại (sửa trùng lặp).";
 "Account Status" = "Trạng thái tài khoản";
-"Container" = "Container";
+"Container" = "Vùng chứa";
+
 "Re-check iCloud Status" = "Kiểm tra lại trạng thái iCloud";
 "Troubleshooting" = "Khắc phục sự cố";
 "Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "Hãy đảm bảo bạn đã đăng nhập iCloud trong Cài đặt và bật iCloud Drive. Kiểm tra Console.app để xem log 'CloudKit' chi tiết.";
@@ -466,22 +505,22 @@
 "USER" = "USER";
 "IOWAIT" = "IOWAIT";
 "STEAL" = "STEAL";
-"CORES" = "CORES";
-"IDLE" = "IDLE";
-"UPTIME" = "UPTIME";
-"LOAD" = "LOAD";
-"FREE" = "FREE";
-"USED" = "USED";
-"CACHED" = "CACHED";
-"TOTAL" = "TOTAL";
+"CORES" = "NHÂN";
+"IDLE" = "NHÀN RỖI";
+"UPTIME" = "THỜI GIAN CHẠY";
+"LOAD" = "TẢI";
+"FREE_MEMORY" = "TRỐNG";
+"USED" = "ĐÃ DÙNG";
+"CACHED" = "BỘ ĐỆM";
+"TOTAL" = "TỔNG";
 "Volumes" = "Ổ đĩa";
 "Top Processes" = "Tiến trình hàng đầu";
 "CPU" = "CPU";
 "MEM" = "MEM";
 "↑/S" = "↑/S";
 "↓/S" = "↓/S";
-"↑ TOTAL" = "↑ TOTAL";
-"↓ TOTAL" = "↓ TOTAL";
+"↑ TOTAL" = "↑ TỔNG";
+"↓ TOTAL" = "↓ TỔNG";
 "%lld D" = "%lld N";
 "%lld H" = "%lld G";
 
@@ -550,7 +589,8 @@
 
 /* Pro Required Errors */
 "Upgrade to Pro for unlimited servers" = "Nâng cấp Pro để dùng máy chủ không giới hạn";
-"Upgrade to Pro for unlimited workspaces" = "Nâng cấp Pro để dùng workspace không giới hạn";
+"Upgrade to Pro for unlimited workspaces" = "Nâng cấp Pro để dùng không gian làm việc không giới hạn";
+
 "Upgrade to Pro for multiple connections" = "Nâng cấp Pro để có nhiều kết nối";
 "Upgrade to Pro for custom environments" = "Nâng cấp Pro để dùng môi trường tùy chỉnh";
 
@@ -560,13 +600,18 @@
 "Disconnect from server" = "Ngắt kết nối khỏi máy chủ";
 "Disconnect from %@?" = "Ngắt kết nối khỏi %@?";
 "This will return to the server list." = "Thao tác này sẽ quay lại danh sách máy chủ.";
-"All terminal tabs for this server will be closed." = "Tất cả tab terminal của máy chủ này sẽ bị đóng.";
-"Add Terminal Preset" = "Thêm preset terminal";
-"Edit Preset" = "Sửa preset";
+"All terminal tabs for this server will be closed." = "Tất cả thẻ terminal của máy chủ này sẽ bị đóng.";
+
+"Add Terminal Preset" = "Thêm cấu hình terminal";
+
+"Edit Preset" = "Sửa cấu hình";
+
 "Basic Information" = "Thông tin cơ bản";
-"Display name for the preset (e.g., Claude, Helix, Vim)" = "Tên hiển thị cho preset (vd: Claude, Helix, Vim)";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "Tên hiển thị cho cấu hình (vd: Claude, Helix, Vim)";
+
 "Command" = "Lệnh";
-"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Lệnh chạy khi chọn preset (vd: claude, hx, nvim)";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "Lệnh chạy khi chọn cấu hình (vd: claude, hx, nvim)";
+
 "Icon" = "Biểu tượng";
 "Choose Symbol..." = "Chọn biểu tượng...";
 
@@ -591,7 +636,8 @@
 
 /* Lock Errors */
 "Server '%@' is locked" = "Máy chủ '%@' bị khóa";
-"Workspace '%@' is locked" = "Workspace '%@' bị khóa";
+"Workspace '%@' is locked" = "Không gian làm việc '%@' bị khóa";
+
 
 
 /* Additional */
@@ -616,7 +662,8 @@
 /* Help */
 "Support & Feedback" = "Hỗ trợ & phản hồi";
 
-"Upgrade to Pro for unlimited workspaces." = "Nâng cấp Pro để dùng workspace không giới hạn.";
+"Upgrade to Pro for unlimited workspaces." = "Nâng cấp Pro để dùng không gian làm việc không giới hạn.";
+
 
 "Fingerprint" = "Vân tay";
 
@@ -640,3 +687,7 @@
 "Server 1" = "Máy chủ 1";
 "Server 2" = "Máy chủ 2";
 "Server 3" = "Máy chủ 3";
+
+"Added" = "Đã thêm";
+
+"Details" = "Chi tiết";

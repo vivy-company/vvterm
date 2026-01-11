@@ -342,6 +342,17 @@ import SwiftUI
 /// This allows navigation animations to complete smoothly before heavy Metal/GPU setup
 final class TerminalContainerUIView: UIView {
     weak var terminalView: GhosttyTerminalView?
+    var isActive = false {
+        didSet {
+            if isActive != oldValue {
+                needsSizeUpdate = true
+                pendingRefresh = true
+            }
+        }
+    }
+    private var lastLayoutSize: CGSize = .zero
+    private var needsSizeUpdate = false
+    private var pendingRefresh = false
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -350,6 +361,36 @@ final class TerminalContainerUIView: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+
+        guard let terminalView = terminalView else { return }
+        if terminalView.frame != bounds {
+            terminalView.frame = bounds
+        }
+
+        let size = bounds.size
+        guard size.width > 0 && size.height > 0 else { return }
+        if isActive {
+            if size != lastLayoutSize || needsSizeUpdate || pendingRefresh {
+                lastLayoutSize = size
+                needsSizeUpdate = false
+                terminalView.sizeDidChange(size)
+                if pendingRefresh {
+                    terminalView.forceRefresh()
+                    pendingRefresh = false
+                }
+            }
+        } else {
+            lastLayoutSize = size
+        }
+    }
+
+    func requestRefresh() {
+        pendingRefresh = true
+        setNeedsLayout()
     }
 }
 
@@ -413,6 +454,18 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                 }
             }
 
+            // Rewrap in a fresh container so layout/safe-area changes apply correctly.
+            let container = TerminalContainerUIView()
+            container.backgroundColor = .black
+
+            if existingTerminal.superview != nil {
+                existingTerminal.removeFromSuperview()
+            }
+            existingTerminal.frame = container.bounds
+            existingTerminal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            container.addSubview(existingTerminal)
+            container.terminalView = existingTerminal
+
             // Resume rendering since it was paused when navigating away
             existingTerminal.resumeRendering()
 
@@ -432,7 +485,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             }
 
             onReady()
-            return existingTerminal
+            return container
         }
 
         // Create a container view that will hold the terminal once it's ready
@@ -521,18 +574,24 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
         guard let terminalView = terminalView else { return }
 
-        // Pass size from SwiftUI GeometryReader to terminal (matches official Ghostty pattern)
-        // This is critical - SwiftUI determines the size, we pass it to Ghostty
-        terminalView.sizeDidChange(size)
+        if context.coordinator.isTerminalReady {
+            // Keep rendering even when inactive so tab switching doesn't stall frames.
+            terminalView.resumeRendering()
+        }
+
+        if let container = uiView as? TerminalContainerUIView {
+            container.isActive = isActive
+            if isActive {
+                container.requestRefresh()
+            } else {
+                container.setNeedsLayout()
+            }
+        }
 
         // Only capture keyboard focus when terminal is active (not hidden behind stats view)
         if isActive && context.coordinator.isTerminalReady {
             if terminalView.window != nil && !terminalView.isFirstResponder {
                 _ = terminalView.becomeFirstResponder()
-            }
-        } else {
-            if terminalView.isFirstResponder {
-                _ = terminalView.resignFirstResponder()
             }
         }
     }

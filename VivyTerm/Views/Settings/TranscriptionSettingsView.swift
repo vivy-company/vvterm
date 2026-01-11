@@ -128,7 +128,7 @@ struct TranscriptionSettingsView: View {
                     .tag(id)
                 }
             }
-            .onChange(of: modelBinding.wrappedValue) { newValue in
+            .onChangeCompat(of: modelBinding.wrappedValue) { newValue in
                 manager.modelId = newValue
                 manager.refreshStatus()
             }
@@ -155,6 +155,7 @@ struct TranscriptionSettingsView: View {
             }
 
             if manager.isModelAvailable {
+                Divider()
                 Button("Delete Model", role: .destructive) {
                     manager.removeModel()
                 }

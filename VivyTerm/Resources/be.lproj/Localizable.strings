@@ -18,7 +18,7 @@
 "View Plans" = "Паглядзець планы";
 "Manage Subscription" = "Кіраванне падпіскай";
 "Manage subscription" = "Кіраванне падпіскай";
-"Manage your subscription" = "Кіруйце падпіскай";
+"Manage your subscription" = "Кіруйце сваёй падпіскай";
 "Restore Purchases" = "Аднавіць пакупкі";
 "Renew" = "Падоўжыць";
 "Renew Pro" = "Падоўжыць Pro";
@@ -40,7 +40,7 @@
 "Search servers" = "Пошук сервераў";
 "Search servers..." = "Пошук сервераў...";
 "Search symbols..." = "Пошук сімвалаў...";
-"Select Workspace" = "Выбраць рабочую прастору";
+"Select Workspace" = "Выбраць працоўную прастору";
 "Select a Server" = "Выбраць сервер";
 "Choose a server from the sidebar to connect" = "Выберыце сервер на бакавой панэлі для падключэння";
 "Multiple connections require Pro" = "Некалькі падключэнняў патрабуюць Pro";
@@ -103,7 +103,7 @@
 "SSH Keys" = "SSH‑ключы";
 "Sync" = "Сінхранізацыя";
 "About" = "Пра праграму";
-"Premium" = "Преміум";
+"Premium" = "Прэміум";
 "Appearance and preferences" = "Выгляд і перавагі";
 "Font, theme, and connection settings" = "Шрыфт, тэма і налады падключэння";
 "Speech-to-text engine and models" = "Рухавік і мадэлі пераўтварэння маўлення ў тэкст";
@@ -139,7 +139,7 @@
 "Strip ANSI escape codes" = "Выдаляць ANSI‑коды";
 "SSH Connection" = "SSH‑падключэнне";
 "Auto-reconnect on disconnect" = "Аўтапаўторнае падключэнне пры разрыве";
-"Send keep-alive packets" = "Адпраўляць keep‑alive пакеты";
+"Send keep-alive packets" = "Адпраўляць пакеты keep‑alive";
 "Interval: %llds" = "Інтэрвал: %lld с";
 
 /* Pro / Store */
@@ -147,7 +147,7 @@
 "Upgrade for unlimited features" = "Абнавіце да Pro для неабмежаваных функцый";
 "Unlimited Servers" = "Неабмежаваныя серверы";
 "Add as many servers as you need (free: 3)" = "Дадавайце столькі сервераў, колькі трэба (бясплатна: 3)";
-"Unlimited Workspaces" = "Неабмежаваныя рабочыя прасторы";
+"Unlimited Workspaces" = "Неабмежаваныя працоўныя прасторы";
 "Organize servers into multiple workspaces (free: 1)" = "Арганізуйце серверы ў некалькі працоўных прастор (бясплатна: 1)";
 "Multiple Connections" = "Некалькі падключэнняў";
 "Open multiple terminal tabs at once (free: 1)" = "Адкрывайце некалькі ўкладак тэрмінала адначасова (бясплатна: 1)";
@@ -164,7 +164,7 @@
 "One-time purchase, forever" = "Аднаразовая купля, назаўжды";
 "FOREVER" = "НАЗАЎЖДЫ";
 "Processing..." = "Апрацоўка...";
-"Purchase Failed" = "Покупка не ўдалася";
+"Purchase Failed" = "Пакупка не ўдалася";
 "Unknown error" = "Невядомая памылка";
 "Welcome to Pro!" = "Сардэчна запрашаем у Pro!";
 "You now have unlimited access" = "Цяпер у вас неабмежаваны доступ";
@@ -172,11 +172,11 @@
 "Terms of Service" = "Умовы выкарыстання";
 "Refund Policy" = "Палітыка вяртання";
 "Select a Plan" = "Выберыце план";
-"Buy - %@" = "Купіць - %@";
-"Subscribe - %@" = "Падпісацца - %@";
+"Buy - %@" = "Купіць — %@";
+"Subscribe - %@" = "Падпісацца — %@";
 "Purchase verification failed" = "Праверка пакупкі не ўдалася";
 "Product not found" = "Прадукт не знойдзены";
-"Purchase failed: %@" = "Покупка не ўдалася: %@";
+"Purchase failed: %@" = "Пакупка не ўдалася: %@";
 
 /* Pro Settings */
 "Status" = "Статус";
@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro штомесяц";
 "Pro Yearly" = "Pro штогод";
 "PRO" = "PRO";
-"FREE" = "БЯСПЛАТНА";
+"FREE_PLAN" = "БЯСПЛАТНА";
+
 "Unlimited servers & workspaces" = "Неабмежаваныя серверы і працоўныя прасторы";
 "View Plans" = "Паглядзець планы";
 
@@ -207,12 +208,12 @@
 "Workspace Limit Reached" = "Дасягнуты ліміт працоўных прастор";
 "Tab Limit Reached" = "Дасягнуты ліміт укладак";
 "You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "Вы дасягнулі ліміту %lld сервераў у бясплатным плане. Абнавіце да Pro для неабмежаваных сервераў.";
-"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Вы дасягнулі ліміту %lld працоўнай прасторы ў бясплатным плане. Абнавіце да Pro для неабмежаваных прастор.";
-"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "У бясплатным плане можна мець толькі %lld падключэнне адначасова. Абнавіце да Pro для некалькіх адначасовых падключэнняў.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "Вы дасягнулі ліміту %lld працоўных прастор у бясплатным плане. Абнавіце да Pro для неабмежаваных прастор.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "У бясплатным плане можна мець не больш за %lld адначасовых падключэнняў. Абнавіце да Pro для некалькіх адначасовых падключэнняў.";
 "Server Locked" = "Сервер заблакаваны";
 "Workspace Locked" = "Працоўная прастора заблакаваная";
 "This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "Гэты сервер перавышае ліміт %lld сервераў у бясплатным плане. Падоўжыце падпіску Pro, каб атрымаць доступ да ўсіх сервераў.";
-"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Гэта працоўная прастора перавышае ліміт %lld у бясплатным плане. Падоўжыце падпіску Pro, каб атрымаць доступ да ўсіх прастор.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "Гэта працоўная прастора перавышае ліміт %lld працоўных прастор у бясплатным плане. Падоўжыце падпіску Pro, каб атрымаць доступ да ўсіх прастор.";
 "\"%@\" %@" = "\"%@\" %@";
 "Subscription Expired" = "Падпіска скончылася";
 "%lld server" = "%lld сервер";
@@ -220,7 +221,7 @@
 "%lld workspace" = "%lld працоўная прастора";
 "%lld workspaces" = "%lld працоўных прастор";
 " and " = " і ";
-"%@ locked" = "%@ заблакавана";
+"%@ locked" = "Заблакавана: %@";
 
 /* Server & Workspace */
 "Server Info" = "Інфармацыя пра сервер";
@@ -261,9 +262,9 @@
 "Support VVTerm" = "Падтрымаць VVTerm";
 "Upgrade to Pro" = "Абнавіць да Pro";
 "All" = "Усе";
-"Custom..." = "Карыстальніцкія...";
+"Custom..." = "Карыстальніцкае...";
 "New Workspace" = "Новая працоўная прастора";
-"Unlock with Pro" = "Разблакаваць з Pro";
+"Unlock with Pro" = "Разблакаваць у Pro";
 "Switch to Workspace" = "Пераключыцца на працоўную прастору";
 "Delete Workspace" = "Выдаліць працоўную прастору";
 
@@ -321,7 +322,7 @@
 "Added %@ ago" = "Дададзена %@ таму";
 "Copy public key" = "Скапіраваць публічны ключ";
 "Key Name" = "Назва ключа";
-"e.g., Personal MacBook, Work Key" = "напрыклад: Асабісты MacBook, Працоўны ключ";
+"e.g., Personal MacBook, Work Key" = "Напрыклад: асабісты MacBook, працоўны ключ";
 "Private Key" = "Прыватны ключ";
 "Import Key File" = "Імпартаваць файл ключа";
 "Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "Імпартуйце файл прыватнага ключа (id_rsa, id_ed25519 і інш.) або ўстаўце змесціва";
@@ -432,7 +433,8 @@
 "This will fetch the latest data from iCloud and may take a moment." = "Гэта атрымае апошнія даныя з iCloud і можа заняць некаторы час.";
 "Clear Local Data" = "Ачысціць лакальныя даныя";
 "Clear & Re-sync" = "Ачысціць і сінхранізаваць нанова";
-"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Гэта выдаліць усе лакальныя даныя і спампуе нанова з iCloud. Несінхранізаваныя лакальныя змены будуць страчаныя.";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "Гэта выдаліць усе лакальныя даныя і спампоўвае нанова з iCloud. Несінхранізаваныя лакальныя змены будуць страчаныя.";
+
 "Reset iCloud Data" = "Скінуць даныя iCloud";
 "Delete All & Re-upload" = "Выдаліць усё і загрузіць зноў";
 "This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "Гэта ВЫДАЛІЦЬ УСЕ даныя з iCloud і загрузіць бягучыя лакальныя даныя. Выкарыстоўвайце для выпраўлення дублікатаў.";
@@ -470,7 +472,8 @@
 "IDLE" = "ПРАСТОЙ";
 "UPTIME" = "ЧАС РАБОТЫ";
 "LOAD" = "НАГРУЗКА";
-"FREE" = "ВОЛЬНА";
+"FREE_MEMORY" = "ВОЛЬНА";
+
 "USED" = "ВЫКАР.";
 "CACHED" = "КЭШ";
 "TOTAL" = "УСЁ";
@@ -540,7 +543,7 @@
 "Servers in '%@' will be moved to Production." = "Серверы ў «%@» будуць перанесены ў Прадакшн.";
 "Edit \"%@\"..." = "Рэдагаваць «%@»...";
 "Delete \"%@\"..." = "Выдаліць «%@»...";
-"Custom" = "Карыстальніцкія";
+"Custom" = "Карыстальніцкае";
 
 /* Errors (Voice) */
 "Microphone permission is required. The microphone will be automatically requested when recording starts." = "Патрэбны дазвол на мікрафон. Ён будзе запытаны аўтаматычна пры пачатку запісу.";
@@ -567,7 +570,7 @@
 "Display name for the preset (e.g., Claude, Helix, Vim)" = "Адлюстроўваемая назва прэсета (напрыклад, Claude, Helix, Vim)";
 "Command" = "Каманда";
 "Command to run when preset is selected (e.g., claude, hx, nvim)" = "Каманда для запуску пры выбары прэсета (напрыклад, claude, hx, nvim)";
-"Icon" = "Іконка";
+"Icon" = "Значок";
 "Choose Symbol..." = "Выбраць сімвал...";
 
 /* Contact Labels */
@@ -610,7 +613,7 @@
 "Close Pane" = "Закрыць панэль";
 
 /* Tabs */
-"View" = "Від";
+"View" = "Выгляд";
 "Stats" = "Статыстыка";
 
 /* Help */
@@ -631,12 +634,16 @@
 "Some changes may require restarting the app." = "Некаторыя змены могуць патрабаваць перазапуску праграмы.";
 
 /* Download Progress */
-"%llds remaining" = "засталося %lldс";
-"%lldm remaining" = "засталося %lldхв";
-"%lldh %lldm remaining" = "засталося %lldг %lldхв";
+"%llds remaining" = "засталося %lld с";
+"%lldm remaining" = "засталося %lld хв";
+"%lldh %lldm remaining" = "засталося %lld г %lld хв";
 "Clear All Storage" = "Ачысціць усю памяць";
 
 /* Preview */
 "Server 1" = "Сервер 1";
 "Server 2" = "Сервер 2";
 "Server 3" = "Сервер 3";
+
+"Added" = "Дададзена";
+
+"Details" = "Падрабязнасці";

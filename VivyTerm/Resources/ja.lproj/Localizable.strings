@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro月額";
 "Pro Yearly" = "Pro年額";
 "PRO" = "PRO";
-"FREE" = "無料";
+"FREE_PLAN" = "無料";
+
 "Unlimited servers & workspaces" = "無制限のサーバーとワークスペース";
 "View Plans" = "プランを見る";
 
@@ -470,7 +471,8 @@
 "IDLE" = "アイドル";
 "UPTIME" = "稼働時間";
 "LOAD" = "負荷";
-"FREE" = "空き";
+"FREE_MEMORY" = "空き";
+
 "USED" = "使用中";
 "CACHED" = "キャッシュ";
 "TOTAL" = "合計";
@@ -640,3 +642,7 @@
 "Server 1" = "サーバー 1";
 "Server 2" = "サーバー 2";
 "Server 3" = "サーバー 3";
+
+"Added" = "追加";
+
+"Details" = "詳細";

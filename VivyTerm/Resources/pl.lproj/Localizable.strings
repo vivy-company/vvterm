@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro miesięcznie";
 "Pro Yearly" = "Pro rocznie";
 "PRO" = "PRO";
-"FREE" = "DARMOWY";
+"FREE_PLAN" = "DARMOWY";
+
 "Unlimited servers & workspaces" = "Nielimitowane serwery i przestrzenie robocze";
 "View Plans" = "Zobacz plany";
 
@@ -294,6 +295,7 @@
 /* Terminal */
 "Initializing terminal..." = "Inicjowanie terminala...";
 "Terminal initialization failed" = "Nie udało się zainicjować terminala";
+
 "Connecting..." = "Łączenie...";
 "Reconnecting (attempt %lld)..." = "Ponowne łączenie (próba %lld)...";
 "Disconnected" = "Rozłączono";
@@ -470,7 +472,8 @@
 "IDLE" = "BEZCZYNNY";
 "UPTIME" = "CZAS PRACY";
 "LOAD" = "OBCIĄŻENIE";
-"FREE" = "WOLNE";
+"FREE_MEMORY" = "WOLNE";
+
 "USED" = "UŻYTE";
 "CACHED" = "CACHE";
 "TOTAL" = "SUMA";
@@ -555,7 +558,8 @@
 "Upgrade to Pro for custom environments" = "Ulepsz do Pro, aby mieć własne środowiska";
 
 /* Misc */
-"Terminal initialization failed" = "Inicjalizacja terminala nieudana";
+"Terminal initialization failed" = "Nie udało się zainicjować terminala";
+
 "Voice Input Unavailable" = "Wejście głosowe niedostępne";
 "Disconnect from server" = "Rozłącz z serwerem";
 "Disconnect from %@?" = "Rozłączyć z %@?";
@@ -640,3 +644,7 @@
 "Server 1" = "Serwer 1";
 "Server 2" = "Serwer 2";
 "Server 3" = "Serwer 3";
+
+"Added" = "Dodano";
+
+"Details" = "Szczegóły";

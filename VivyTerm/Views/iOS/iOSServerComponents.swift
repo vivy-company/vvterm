@@ -112,6 +112,7 @@ struct iOSServerRow: View {
 
 struct iOSActiveConnectionRow: View {
     let session: ConnectionSession
+    let tabCount: Int
     let onOpen: () -> Void
     let onDisconnect: () -> Void
 
@@ -137,6 +138,13 @@ struct iOSActiveConnectionRow: View {
                 }
 
                 Spacer()
+
+                Text(tabCountText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial, in: Capsule())
             }
             .contentShape(Rectangle())
         }
@@ -158,6 +166,13 @@ struct iOSActiveConnectionRow: View {
         case .failed: return .red
         case .idle: return .gray
         }
+    }
+
+    private var tabCountText: String {
+        let count = tabCount
+        return count == 1
+            ? String(format: String(localized: "%lld tab"), count)
+            : String(format: String(localized: "%lld tabs"), count)
     }
 }
 

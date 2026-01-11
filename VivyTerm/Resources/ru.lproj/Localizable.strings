@@ -198,7 +198,8 @@
 "Pro Monthly" = "Pro ежемесячно";
 "Pro Yearly" = "Pro ежегодно";
 "PRO" = "PRO";
-"FREE" = "БЕСПЛАТНО";
+"FREE_PLAN" = "БЕСПЛАТНО";
+
 "Unlimited servers & workspaces" = "Безлимитные серверы и рабочие пространства";
 "View Plans" = "Посмотреть планы";
 
@@ -470,7 +471,8 @@
 "IDLE" = "ПРОСТОЙ";
 "UPTIME" = "ВРЕМЯ РАБОТЫ";
 "LOAD" = "НАГРУЗКА";
-"FREE" = "СВОБОДНО";
+"FREE_MEMORY" = "СВОБОДНО";
+
 "USED" = "ИСП.";
 "CACHED" = "КЭШ";
 "TOTAL" = "ИТОГО";
@@ -631,12 +633,16 @@
 "Some changes may require restarting the app." = "Некоторые изменения могут потребовать перезапуска приложения.";
 
 /* Download Progress */
-"%llds remaining" = "осталось %lldс";
-"%lldm remaining" = "осталось %lldм";
-"%lldh %lldm remaining" = "осталось %lldч %lldм";
+"%llds remaining" = "осталось %lld с";
+"%lldm remaining" = "осталось %lld м";
+"%lldh %lldm remaining" = "осталось %lld ч %lld м";
 "Clear All Storage" = "Очистить всё хранилище";
 
 /* Preview */
 "Server 1" = "Сервер 1";
 "Server 2" = "Сервер 2";
 "Server 3" = "Сервер 3";
+
+"Added" = "Добавлено";
+
+"Details" = "Детали";
