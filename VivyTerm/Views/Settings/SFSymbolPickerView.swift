@@ -232,7 +232,7 @@ struct SFSymbolPickerView: View {
                     Button {
                         searchText = ""
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: "xmark")
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)

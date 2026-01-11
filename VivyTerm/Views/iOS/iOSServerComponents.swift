@@ -145,7 +145,7 @@ struct iOSActiveConnectionRow: View {
             Button(role: .destructive) {
                 onDisconnect()
             } label: {
-                Label("Disconnect", systemImage: "xmark.circle")
+                Label("Disconnect", systemImage: "xmark")
             }
         }
     }
