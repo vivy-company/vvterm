@@ -1321,6 +1321,17 @@ private class TerminalInputAccessoryView: UIInputView {
         onKey(modifiedKey)
     }
 
+    func consumeModifiers() -> (ctrl: Bool, alt: Bool) {
+        let ctrl = ctrlActive
+        let alt = altActive
+        if ctrl || alt {
+            ctrlActive = false
+            altActive = false
+            updateModifierState()
+        }
+        return (ctrl, alt)
+    }
+
     private func updateModifierState() {
         UIView.animate(withDuration: 0.2) {
             // Ctrl button
@@ -1387,6 +1398,33 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
     var hasText: Bool { true }
 
     func insertText(_ text: String) {
+        if let toolbar = keyboardToolbar {
+            let mods = toolbar.consumeModifiers()
+            if mods.ctrl || mods.alt {
+                if let firstChar = text.first {
+                    var data = Data()
+                    if mods.alt {
+                        data.append(0x1B)
+                    }
+                    if mods.ctrl, let controlChar = TerminalControlKey.controlCharacter(for: firstChar) {
+                        data.append(contentsOf: String(controlChar).utf8)
+                    } else {
+                        data.append(contentsOf: String(firstChar).utf8)
+                    }
+                    if let modifiedText = String(data: data, encoding: .utf8) {
+                        sendText(modifiedText)
+                    } else {
+                        sendText(String(firstChar))
+                    }
+
+                    if text.count > 1 {
+                        sendText(String(text.dropFirst()))
+                    }
+                    return
+                }
+            }
+        }
+
         if text == "\n" || text == "\r" {
             sendKeyPress(.enter)
             return
