@@ -274,34 +274,31 @@ struct ProUpgradeSheet: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-        )
+        .adaptiveGlassRect(cornerRadius: 14)
         .overlay(
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
         )
     }
 
     // MARK: - Legal Footer
 
     private var legalFooter: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 8) {
             Text("Cancel anytime. Subscription auto-renews.")
-                .font(.caption)
+                .font(.callout)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 8) {
-                Link("Terms of Service", destination: URL(string: "https://vvterm.com/terms")!)
+            HStack(spacing: 10) {
+                legalLink(title: "Terms of Service", url: "https://vvterm.com/terms")
                 Text("•")
                     .foregroundStyle(.tertiary)
-                Link("Privacy Policy", destination: URL(string: "https://vvterm.com/privacy")!)
+                legalLink(title: "Privacy Policy", url: "https://vvterm.com/privacy")
                 Text("•")
                     .foregroundStyle(.tertiary)
-                Link("Refund Policy", destination: URL(string: "https://vvterm.com/refund")!)
+                legalLink(title: "Refund Policy", url: "https://vvterm.com/refund")
             }
-            .font(.caption)
+            .font(.callout)
             .foregroundStyle(.secondary)
         }
     }
@@ -373,16 +370,25 @@ private struct PlanOptionRow: View {
                     .foregroundStyle(.primary)
             }
             .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(isSelected ? Color.pink.opacity(0.08) : Color.primary.opacity(0.04))
-            )
+            .adaptiveGlassRect(cornerRadius: 10)
             .overlay(
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(isSelected ? Color.pink : Color.primary.opacity(0.08), lineWidth: isSelected ? 2 : 1)
+                    .stroke(isSelected ? Color.pink : Color.primary.opacity(0.12), lineWidth: isSelected ? 2 : 1)
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+private extension ProUpgradeSheet {
+    func legalLink(title: String, url: String) -> some View {
+        Link(destination: URL(string: url)!) {
+            Text(title)
+                .underline()
+                .padding(.vertical, 6)
+                .padding(.horizontal, 4)
+                .contentShape(Rectangle())
+        }
     }
 }
 
