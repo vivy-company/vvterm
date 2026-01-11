@@ -57,7 +57,7 @@ struct DetailHeaderBar<Leading: View, Trailing: View>: View {
 
 struct DetailCloseButton: View {
     let action: () -> Void
-    var size: CGFloat = 20
+    var size: CGFloat = 16
     var color: Color = .secondary
 
     var body: some View {
