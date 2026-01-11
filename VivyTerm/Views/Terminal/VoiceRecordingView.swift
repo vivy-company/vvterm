@@ -32,7 +32,7 @@ struct VoiceRecordingView: View {
                     audioService.cancelRecording()
                     onCancel()
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: "xmark")
                         .font(.system(size: 20))
                         .foregroundStyle(.secondary)
                 }

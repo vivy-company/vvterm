@@ -207,7 +207,7 @@ struct ConnectionTerminalContainer: View {
             Button {
                 showingDisconnectConfirmation = true
             } label: {
-                Image(systemName: "xmark.circle.fill")
+                Image(systemName: "xmark")
                     .foregroundStyle(.red)
             }
             .help(Text("Disconnect from server"))

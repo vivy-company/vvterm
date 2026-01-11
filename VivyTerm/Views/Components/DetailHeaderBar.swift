@@ -62,7 +62,7 @@ struct DetailCloseButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: "xmark.circle.fill")
+            Image(systemName: "xmark")
                 .font(.system(size: size))
                 .foregroundStyle(color)
         }

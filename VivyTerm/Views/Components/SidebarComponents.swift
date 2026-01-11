@@ -153,7 +153,7 @@ struct SearchField: View {
                 Button {
                     text = ""
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
+                    Image(systemName: "xmark")
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }

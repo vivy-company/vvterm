@@ -596,7 +596,7 @@ struct iOSTerminalView: View {
                     ConnectionSessionManager.shared.disconnectAll()
                     onBack()
                 } label: {
-                    Label("Disconnect", systemImage: "xmark.circle")
+                    Label("Disconnect", systemImage: "xmark")
                 }
             }
         }
