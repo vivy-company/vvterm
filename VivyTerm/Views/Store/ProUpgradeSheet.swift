@@ -64,78 +64,51 @@ struct ProUpgradeSheet: View {
                 .padding(.bottom, 16)
 
             // Plan Options
-            VStack(spacing: 8) {
-                if let monthly = storeManager.monthlyProduct {
-                    PlanOptionRow(
-                        product: monthly,
-                        title: String(localized: "Monthly"),
-                        subtitle: String(localized: "Billed monthly"),
-                        badge: nil,
-                        isSelected: selectedProduct?.id == monthly.id
-                    ) {
-                        selectedProduct = monthly
+            glassContainer {
+                VStack(spacing: 8) {
+                    if let monthly = storeManager.monthlyProduct {
+                        PlanOptionRow(
+                            product: monthly,
+                            title: String(localized: "Monthly"),
+                            subtitle: String(localized: "Billed monthly"),
+                            badge: nil,
+                            isSelected: selectedProduct?.id == monthly.id
+                        ) {
+                            selectedProduct = monthly
+                        }
                     }
-                }
 
-                if let yearly = storeManager.yearlyProduct {
-                    PlanOptionRow(
-                        product: yearly,
-                        title: String(localized: "Yearly"),
-                        subtitle: String(localized: "Best value - billed yearly"),
-                        badge: PlanBadge(title: String(localized: "SAVE 74%"), style: .save),
-                        isSelected: selectedProduct?.id == yearly.id
-                    ) {
-                        selectedProduct = yearly
+                    if let yearly = storeManager.yearlyProduct {
+                        PlanOptionRow(
+                            product: yearly,
+                            title: String(localized: "Yearly"),
+                            subtitle: String(localized: "Best value - billed yearly"),
+                            badge: PlanBadge(title: String(localized: "SAVE 74%"), style: .save),
+                            isSelected: selectedProduct?.id == yearly.id
+                        ) {
+                            selectedProduct = yearly
+                        }
                     }
-                }
 
-                if let lifetime = storeManager.lifetimeProduct {
-                    PlanOptionRow(
-                        product: lifetime,
-                        title: String(localized: "Lifetime"),
-                        subtitle: String(localized: "One-time purchase, forever"),
-                        badge: PlanBadge(title: String(localized: "FOREVER"), style: .forever),
-                        isSelected: selectedProduct?.id == lifetime.id
-                    ) {
-                        selectedProduct = lifetime
+                    if let lifetime = storeManager.lifetimeProduct {
+                        PlanOptionRow(
+                            product: lifetime,
+                            title: String(localized: "Lifetime"),
+                            subtitle: String(localized: "One-time purchase, forever"),
+                            badge: PlanBadge(title: String(localized: "FOREVER"), style: .forever),
+                            isSelected: selectedProduct?.id == lifetime.id
+                        ) {
+                            selectedProduct = lifetime
+                        }
                     }
                 }
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
 
-            // Subscribe Button
-            Button {
-                if let product = selectedProduct {
-                    Task { await storeManager.purchase(product) }
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    if storeManager.purchaseState == .purchasing {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                            .scaleEffect(0.8)
-                            .tint(.white)
-                    }
-                    Text(storeManager.purchaseState == .purchasing ? String(localized: "Processing...") : subscribeButtonTitle)
-                        .fontWeight(.semibold)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 44)
-                .background(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(LinearGradient(
-                            colors: [Color.pink, Color.orange.opacity(0.8)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        ))
-                )
-                .foregroundStyle(.white)
-            }
-            .buttonStyle(.plain)
-            .disabled(selectedProduct == nil || storeManager.purchaseState == .purchasing)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 20)
+            subscribeButton
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
 
             // Restore Purchases
             Button("Restore Purchases") {
@@ -329,53 +302,53 @@ private struct PlanOptionRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 12) {
-                // Radio circle
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? Color.pink : .secondary.opacity(0.5))
-
-                VStack(alignment: .leading, spacing: 1) {
-                    HStack(spacing: 8) {
-                        Text(title)
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.primary)
-
-                        if let badge = badge {
-                            Text(badge.title)
-                                .font(.caption2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(
-                                    Capsule()
-                                        .fill(badgeBackground(for: badge.style))
-                                )
-                        }
-                    }
-
-                    Text(subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Text(product.displayPrice)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.primary)
-            }
-            .padding(12)
-            .adaptiveGlassRect(cornerRadius: 10)
-            .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(isSelected ? Color.pink : Color.primary.opacity(0.12), lineWidth: isSelected ? 2 : 1)
-            )
+            content
+                .padding(12)
+                .modifier(PlanOptionGlassStyle(isSelected: isSelected))
         }
         .buttonStyle(.plain)
+    }
+
+    private var content: some View {
+        HStack(spacing: 12) {
+            // Radio circle
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundStyle(isSelected ? Color.pink : .secondary.opacity(0.5))
+
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 8) {
+                    Text(title)
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.primary)
+
+                    if let badge = badge {
+                        Text(badge.title)
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(
+                                Capsule()
+                                    .fill(badgeBackground(for: badge.style))
+                            )
+                    }
+                }
+
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text(product.displayPrice)
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundStyle(.primary)
+        }
     }
 }
 
@@ -393,16 +366,123 @@ private func badgeBackground(for style: PlanBadgeStyle) -> LinearGradient {
     switch style {
     case .save:
         return LinearGradient(
-            colors: [Color.orange, Color.pink],
+            colors: [Color.blue, Color.cyan],
             startPoint: .leading,
             endPoint: .trailing
         )
     case .forever:
         return LinearGradient(
-            colors: [Color.blue, Color.cyan],
+            colors: [Color.orange, Color.pink],
             startPoint: .leading,
             endPoint: .trailing
         )
+    }
+}
+
+private struct PlanOptionGlassStyle: ViewModifier {
+    let isSelected: Bool
+
+    func body(content: Content) -> some View {
+        #if swift(>=6.1)
+        if #available(iOS 26, macOS 26, *) {
+            if isSelected {
+                content
+                    .adaptiveGlassTintRect(Color.pink.opacity(0.35), cornerRadius: 10)
+            } else {
+                content
+                    .adaptiveGlassRect(cornerRadius: 10)
+            }
+        } else {
+            fallback(content)
+        }
+        #else
+        fallback(content)
+        #endif
+    }
+
+    private func fallback(_ content: Content) -> some View {
+        content
+            .adaptiveGlassRect(cornerRadius: 10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .stroke(isSelected ? Color.pink : Color.primary.opacity(0.12), lineWidth: isSelected ? 2 : 1)
+            )
+    }
+}
+
+private extension ProUpgradeSheet {
+    @ViewBuilder
+    var subscribeButton: some View {
+        #if swift(>=6.1)
+        if #available(iOS 26, macOS 26, *) {
+            Button {
+                if let product = selectedProduct {
+                    Task { await storeManager.purchase(product) }
+                }
+            } label: {
+                subscribeButtonLabel
+            }
+            .buttonStyle(.glassProminent)
+            .tint(.pink)
+            .controlSize(.large)
+            .disabled(selectedProduct == nil || storeManager.purchaseState == .purchasing)
+        } else {
+            legacySubscribeButton
+        }
+        #else
+        legacySubscribeButton
+        #endif
+    }
+
+    var subscribeButtonLabel: some View {
+        HStack(spacing: 8) {
+            if storeManager.purchaseState == .purchasing {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .scaleEffect(0.8)
+                    .tint(.white)
+            }
+            Text(storeManager.purchaseState == .purchasing ? String(localized: "Processing...") : subscribeButtonTitle)
+                .fontWeight(.semibold)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 44)
+    }
+
+    var legacySubscribeButton: some View {
+        Button {
+            if let product = selectedProduct {
+                Task { await storeManager.purchase(product) }
+            }
+        } label: {
+            subscribeButtonLabel
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(LinearGradient(
+                            colors: [Color.pink, Color.orange.opacity(0.8)],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
+                )
+                .foregroundStyle(.white)
+        }
+        .buttonStyle(.plain)
+        .disabled(selectedProduct == nil || storeManager.purchaseState == .purchasing)
+    }
+
+    @ViewBuilder
+    func glassContainer<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        #if swift(>=6.1)
+        if #available(iOS 26, macOS 26, *) {
+            GlassEffectContainer {
+                content()
+            }
+        } else {
+            content()
+        }
+        #else
+        content()
+        #endif
     }
 }
 
