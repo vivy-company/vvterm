@@ -102,7 +102,7 @@ struct ProUpgradeSheet: View {
                 }
             }
             .padding(.horizontal, 20)
-            .padding(.bottom, 16)
+            .padding(.bottom, 24)
 
             // Subscribe Button
             Button {
@@ -135,7 +135,7 @@ struct ProUpgradeSheet: View {
             .buttonStyle(.plain)
             .disabled(selectedProduct == nil || storeManager.purchaseState == .purchasing)
             .padding(.horizontal, 20)
-            .padding(.bottom, 12)
+            .padding(.bottom, 20)
 
             // Restore Purchases
             Button("Restore Purchases") {
