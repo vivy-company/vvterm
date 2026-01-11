@@ -82,7 +82,7 @@ struct ProUpgradeSheet: View {
                         product: yearly,
                         title: String(localized: "Yearly"),
                         subtitle: String(localized: "Best value - billed yearly"),
-                        badge: String(localized: "SAVE 74%"),
+                        badge: PlanBadge(title: String(localized: "SAVE 74%"), style: .save),
                         isSelected: selectedProduct?.id == yearly.id
                     ) {
                         selectedProduct = yearly
@@ -94,7 +94,7 @@ struct ProUpgradeSheet: View {
                         product: lifetime,
                         title: String(localized: "Lifetime"),
                         subtitle: String(localized: "One-time purchase, forever"),
-                        badge: String(localized: "FOREVER"),
+                        badge: PlanBadge(title: String(localized: "FOREVER"), style: .forever),
                         isSelected: selectedProduct?.id == lifetime.id
                     ) {
                         selectedProduct = lifetime
@@ -323,7 +323,7 @@ private struct PlanOptionRow: View {
     let product: Product
     let title: String
     let subtitle: String
-    let badge: String?
+    let badge: PlanBadge?
     let isSelected: Bool
     let onSelect: () -> Void
 
@@ -343,7 +343,7 @@ private struct PlanOptionRow: View {
                             .foregroundStyle(.primary)
 
                         if let badge = badge {
-                            Text(badge)
+                            Text(badge.title)
                                 .font(.caption2)
                                 .fontWeight(.bold)
                                 .foregroundStyle(.white)
@@ -351,11 +351,7 @@ private struct PlanOptionRow: View {
                                 .padding(.vertical, 2)
                                 .background(
                                     Capsule()
-                                        .fill(LinearGradient(
-                                            colors: [Color.orange, Color.pink],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        ))
+                                        .fill(badgeBackground(for: badge.style))
                                 )
                         }
                     }
@@ -380,6 +376,33 @@ private struct PlanOptionRow: View {
             )
         }
         .buttonStyle(.plain)
+    }
+}
+
+private struct PlanBadge {
+    let title: String
+    let style: PlanBadgeStyle
+}
+
+private enum PlanBadgeStyle {
+    case save
+    case forever
+}
+
+private func badgeBackground(for style: PlanBadgeStyle) -> LinearGradient {
+    switch style {
+    case .save:
+        return LinearGradient(
+            colors: [Color.orange, Color.pink],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+    case .forever:
+        return LinearGradient(
+            colors: [Color.blue, Color.cyan],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
     }
 }
 
