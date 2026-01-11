@@ -169,6 +169,7 @@ struct iOSWorkspacePickerView: View {
     let onDismiss: () -> Void
 
     @State private var lockedWorkspaceAlert: Workspace?
+    @State private var showingCreateWorkspace = false
 
     var body: some View {
         List {
@@ -220,9 +221,29 @@ struct iOSWorkspacePickerView: View {
         .navigationTitle("Workspaces")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .confirmationAction) {
-                Button("Done") { onDismiss() }
+            ToolbarItem(placement: .cancellationAction) {
+                Button {
+                    onDismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                }
             }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showingCreateWorkspace = true
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+        }
+        .sheet(isPresented: $showingCreateWorkspace) {
+            WorkspaceFormSheet(
+                serverManager: serverManager,
+                onSave: { newWorkspace in
+                    selectedWorkspace = newWorkspace
+                }
+            )
         }
         .lockedItemAlert(
             .workspace,
