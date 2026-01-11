@@ -52,8 +52,12 @@ fi
 log_info "iOS SDK: $IOS_SDK"
 log_info "Simulator SDK: $SIM_SDK"
 
-# Setup temp dir
-WORKDIR="$(mktemp -d)"
+# Setup temp dir (short path to avoid "File name too long")
+WORKDIR="$(mktemp -d "/tmp/ghostty-ios.XXXXXX")"
+# Use very short cache paths to avoid long archive member names.
+export ZIG_GLOBAL_CACHE_DIR="/tmp/zig-global-cache"
+export ZIG_LOCAL_CACHE_DIR="/tmp/zig-local-cache"
+mkdir -p "${ZIG_GLOBAL_CACHE_DIR}" "${ZIG_LOCAL_CACHE_DIR}"
 trap 'rm -rf "${WORKDIR}"' EXIT
 
 # Clone ghostty fork
@@ -111,6 +115,13 @@ build_ios() {
     if [ -n "${IOS_SDK}" ]; then
         sysroot_flag=(--sysroot="${IOS_SDK}")
         export SDKROOT="${IOS_SDK}"
+        export ZIG_SYSROOT="${IOS_SDK}"
+        export CFLAGS="-isysroot ${IOS_SDK}"
+        export CXXFLAGS="-isysroot ${IOS_SDK}"
+        export LDFLAGS="-isysroot ${IOS_SDK}"
+        export CPATH="${IOS_SDK}/usr/include"
+        export CPLUS_INCLUDE_PATH="${IOS_SDK}/usr/include/c++/v1"
+        export LIBRARY_PATH="${IOS_SDK}/usr/lib"
     fi
 
     (cd "${WORKDIR}/ghostty" && zig build "${ZIG_FLAGS[@]}" -Dtarget=aarch64-ios "${sysroot_flag[@]}" -p "${outdir}" 2>&1) || {
@@ -118,7 +129,7 @@ build_ios() {
         unset SDKROOT
         (cd "${WORKDIR}/ghostty" && zig build "${ZIG_FLAGS[@]}" -Dtarget=aarch64-ios -p "${outdir}")
     }
-    unset SDKROOT
+    unset SDKROOT ZIG_SYSROOT CFLAGS CXXFLAGS LDFLAGS CPATH CPLUS_INCLUDE_PATH LIBRARY_PATH
 
     if [ ! -f "${outdir}/lib/libghostty.a" ]; then
         log_error "iOS build failed - ${outdir}/lib/libghostty.a not found"
@@ -135,6 +146,13 @@ build_simulator() {
     if [ -n "${SIM_SDK}" ]; then
         sysroot_flag=(--sysroot="${SIM_SDK}")
         export SDKROOT="${SIM_SDK}"
+        export ZIG_SYSROOT="${SIM_SDK}"
+        export CFLAGS="-isysroot ${SIM_SDK}"
+        export CXXFLAGS="-isysroot ${SIM_SDK}"
+        export LDFLAGS="-isysroot ${SIM_SDK}"
+        export CPATH="${SIM_SDK}/usr/include"
+        export CPLUS_INCLUDE_PATH="${SIM_SDK}/usr/include/c++/v1"
+        export LIBRARY_PATH="${SIM_SDK}/usr/lib"
     fi
 
     # Use the simulator target (not device) to ensure correct ABI.
@@ -144,7 +162,7 @@ build_simulator() {
         unset SDKROOT
         (cd "${WORKDIR}/ghostty" && zig build "${ZIG_FLAGS[@]}" -Dtarget=aarch64-ios-simulator -Dcpu=apple_a17 -p "${outdir}")
     }
-    unset SDKROOT
+    unset SDKROOT ZIG_SYSROOT CFLAGS CXXFLAGS LDFLAGS CPATH CPLUS_INCLUDE_PATH LIBRARY_PATH
 
     if [ ! -f "${outdir}/lib/libghostty.a" ]; then
         log_error "Simulator build failed - ${outdir}/lib/libghostty.a not found"

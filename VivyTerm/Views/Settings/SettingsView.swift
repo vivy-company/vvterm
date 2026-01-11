@@ -34,8 +34,8 @@ enum SettingsSelection: Hashable {
 // MARK: - Settings View
 
 struct SettingsView: View {
-    @AppStorage("terminalFontName") private var terminalFontName = "Menlo"
-    @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
+    @AppStorage("terminalFontName") private var terminalFontName = "JetBrainsMono Nerd Font"
+    @AppStorage("terminalFontSize") private var terminalFontSize = 8.0
 
     @State private var selection: SettingsSelection? = .pro
     @StateObject private var storeManager = StoreManager.shared

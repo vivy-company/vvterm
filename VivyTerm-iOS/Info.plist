@@ -49,6 +49,10 @@
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>VVTerm uses speech recognition to convert voice to terminal commands.</string>
 
+    <!-- Live Activities -->
+    <key>NSSupportsLiveActivities</key>
+    <true/>
+
     <!-- Background modes -->
     <key>UIBackgroundModes</key>
     <array>

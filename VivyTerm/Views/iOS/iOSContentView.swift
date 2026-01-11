@@ -115,6 +115,7 @@ struct iOSServerListView: View {
     @State private var searchText = ""
     @State private var serverToEdit: Server?
     @State private var lockedServerAlert: Server?
+    @State private var navigationBarAppearanceToken = UUID()
 
     var body: some View {
         List {
@@ -231,6 +232,8 @@ struct iOSServerListView: View {
         .searchable(text: $searchText, prompt: "Search servers")
         .navigationTitle("Servers")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarAppearance(backgroundColor: .clear, isTranslucent: true, shadowColor: .clear)
+        .id(navigationBarAppearanceToken)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
@@ -257,6 +260,9 @@ struct iOSServerListView: View {
                     Image(systemName: "gear")
                 }
             }
+        }
+        .onAppear {
+            navigationBarAppearanceToken = UUID()
         }
         .sheet(isPresented: $showingAddServer) {
             NavigationStack {
@@ -559,6 +565,8 @@ struct iOSTerminalView: View {
     @ObservedObject var serverManager: ServerManager
     let onBack: () -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     /// Delayed flag to allow tab animation to complete before creating terminal
     @State private var shouldShowTerminalBySession: [UUID: Bool] = [:]
     @State private var showingProUpgrade = false
@@ -567,6 +575,13 @@ struct iOSTerminalView: View {
     @State private var currentServerId: UUID?
 
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
+
+    private var effectiveThemeName: String {
+        guard usePerAppearanceTheme else { return terminalThemeName }
+        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    }
 
     private var serverSessions: [ConnectionSession] {
         guard let currentServerId else { return [] }
@@ -574,11 +589,8 @@ struct iOSTerminalView: View {
     }
 
     private var selectedSession: ConnectionSession? {
-        if let selected = sessionManager.selectedSession,
-           selected.serverId == currentServerId {
-            return selected
-        }
-        return serverSessions.first
+        guard let resolvedId = effectiveSelectedSessionId else { return nil }
+        return serverSessions.first { $0.id == resolvedId }
     }
 
     private var selectedServer: Server? {
@@ -588,9 +600,17 @@ struct iOSTerminalView: View {
 
     private var selectedSessionIdBinding: Binding<UUID?> {
         Binding(
-            get: { sessionManager.selectedSessionId },
+            get: { effectiveSelectedSessionId },
             set: { sessionManager.selectedSessionId = $0 }
         )
+    }
+
+    private var effectiveSelectedSessionId: UUID? {
+        if let selectedId = sessionManager.selectedSessionId,
+           serverSessions.contains(where: { $0.id == selectedId }) {
+            return selectedId
+        }
+        return serverSessions.first?.id
     }
 
     private var selectedView: String {
@@ -607,6 +627,11 @@ struct iOSTerminalView: View {
                 }
             }
         )
+    }
+
+    private func updateTerminalBackgroundColor() {
+        let fallback = colorScheme == .dark ? Color.black : Color(UIColor.systemBackground)
+        terminalBackgroundColor = ThemeColorParser.backgroundColor(for: effectiveThemeName) ?? fallback
     }
 
     var body: some View {
@@ -653,6 +678,7 @@ struct iOSTerminalView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
+                    dismissKeyboardForCurrentSession()
                     onBack()
                 } label: {
                     Image(systemName: "chevron.left")
@@ -661,14 +687,8 @@ struct iOSTerminalView: View {
 
             ToolbarItem(placement: .principal) {
                 if let serverId = selectedSession?.serverId {
-                    Picker("View", selection: selectedViewBinding(for: serverId)) {
-                        Image(systemName: "chart.bar.xaxis")
-                            .tag("stats")
-                        Image(systemName: "terminal")
-                            .tag("terminal")
-                    }
-                    .pickerStyle(.segmented)
-                    .fixedSize()
+                    iOSNativeSegmentedPicker(selection: selectedViewBinding(for: serverId))
+                        .fixedSize()
                 }
             }
 
@@ -700,10 +720,12 @@ struct iOSTerminalView: View {
                 }
             }
         }
-        .toolbarBackground(selectedView == "terminal" ? .visible : .hidden, for: .navigationBar)
-        .toolbarBackground(
-            selectedView == "terminal" ? terminalBackgroundColor : Color(UIColor.systemBackground),
-            for: .navigationBar
+        .navigationBarAppearance(
+            backgroundColor: selectedView == "terminal"
+                ? UIColor(terminalBackgroundColor)
+                : .clear,
+            isTranslucent: selectedView != "terminal",
+            shadowColor: selectedView == "terminal" ? nil : .clear
         )
         .sheet(isPresented: $showingProUpgrade) {
             ProUpgradeSheet()
@@ -719,7 +741,7 @@ struct iOSTerminalView: View {
             }
         }
         .onAppear {
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+            updateTerminalBackgroundColor()
             if currentServerId == nil, let session = sessionManager.selectedSession {
                 currentServerId = session.serverId
             }
@@ -729,8 +751,14 @@ struct iOSTerminalView: View {
                 sessionManager.selectedSessionId = serverSessions.first?.id
             }
         }
-        .onChange(of: terminalThemeName) { _ in
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+        .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: selectedView) { newValue in
+            if newValue != "terminal" {
+                dismissKeyboardForCurrentSession()
+            }
         }
         .onChange(of: sessionManager.sessions) { _ in
             if currentServerId == nil, let selected = sessionManager.selectedSession {
@@ -743,14 +771,28 @@ struct iOSTerminalView: View {
                !serverSessions.contains(where: { $0.id == selectedId }) {
                 sessionManager.selectedSessionId = serverSessions.first?.id
             }
+            if selectedView == "terminal",
+               let selectedId = effectiveSelectedSessionId,
+               let session = serverSessions.first(where: { $0.id == selectedId }) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                    refreshTerminal(for: session)
+                    focusTerminal(for: session)
+                }
+            }
         }
+    }
+
+    private func dismissKeyboardForCurrentSession() {
+        guard let selectedId = effectiveSelectedSessionId,
+              let terminal = ConnectionSessionManager.shared.getTerminal(for: selectedId) else { return }
+        _ = terminal.resignFirstResponder()
     }
 
     @ViewBuilder
     private func sessionPage(_ session: ConnectionSession) -> some View {
         let server = serverManager.servers.first { $0.id == session.serverId }
         let viewSelection = sessionManager.selectedViewByServer[session.serverId] ?? "stats"
-        let isSelected = sessionManager.selectedSessionId == session.id
+        let isSelected = effectiveSelectedSessionId == session.id
         let terminalAlreadyExists = ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
         let shouldShowTerminal = shouldShowTerminalBySession[session.id] ?? false
 
@@ -933,29 +975,123 @@ struct iOSTerminalView: View {
     }
 }
 
+#if os(iOS)
+private struct iOSNativeSegmentedPicker: UIViewRepresentable {
+    @Binding var selection: String
+
+    private let tags = ["stats", "terminal"]
+    private let images = ["chart.bar.xaxis", "terminal"]
+
+    func makeUIView(context: Context) -> UISegmentedControl {
+        let control = UISegmentedControl(items: images.compactMap { UIImage(systemName: $0) })
+        control.addTarget(context.coordinator, action: #selector(Coordinator.valueChanged(_:)), for: .valueChanged)
+        control.selectedSegmentIndex = selectedIndex
+        control.apportionsSegmentWidthsByContent = true
+        control.setContentHuggingPriority(.required, for: .horizontal)
+        control.setContentHuggingPriority(.required, for: .vertical)
+        return control
+    }
+
+    func updateUIView(_ uiView: UISegmentedControl, context: Context) {
+        let targetIndex = selectedIndex
+        guard uiView.selectedSegmentIndex != targetIndex else { return }
+        UIView.performWithoutAnimation {
+            uiView.selectedSegmentIndex = targetIndex
+            uiView.layoutIfNeeded()
+        }
+    }
+
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UISegmentedControl, context: Context) -> CGSize? {
+        uiView.sizeToFit()
+        return uiView.intrinsicContentSize
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(selection: $selection, tags: tags)
+    }
+
+    private var selectedIndex: Int {
+        tags.firstIndex(of: selection) ?? 0
+    }
+
+    final class Coordinator: NSObject {
+        private var selection: Binding<String>
+        private let tags: [String]
+
+        init(selection: Binding<String>, tags: [String]) {
+            self.selection = selection
+            self.tags = tags
+        }
+
+        @objc func valueChanged(_ sender: UISegmentedControl) {
+            let index = sender.selectedSegmentIndex
+            guard tags.indices.contains(index) else { return }
+            selection.wrappedValue = tags[index]
+        }
+    }
+}
+#endif
+
 // MARK: - iOS Terminal Tabs
 
 struct iOSTerminalTabsBar: View {
     let sessions: [ConnectionSession]
     @Binding var selectedSessionId: UUID?
     let onClose: (ConnectionSession) -> Void
+    private let minTabWidth: CGFloat = 120
+    private let tabSpacing: CGFloat = 8
+    private let horizontalPadding: CGFloat = 8
+    private let verticalPadding: CGFloat = 6
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(sessions) { session in
-                    iOSTerminalTabButton(
-                        session: session,
-                        isSelected: selectedSessionId == session.id,
-                        onSelect: { selectedSessionId = session.id },
-                        onClose: { onClose(session) }
-                    )
+        GeometryReader { proxy in
+            let count = max(sessions.count, 1)
+            let availableWidth = max(proxy.size.width - horizontalPadding * 2, 0)
+            let totalSpacing = tabSpacing * CGFloat(max(count - 1, 0))
+            let itemWidth = count > 0 ? (availableWidth - totalSpacing) / CGFloat(count) : 0
+            let useEqualWidth = itemWidth >= minTabWidth
+
+            Group {
+                if useEqualWidth {
+                    HStack(spacing: tabSpacing) {
+                        ForEach(sessions) { session in
+                            iOSTerminalTabButton(
+                                session: session,
+                                isSelected: selectedSessionId == session.id,
+                                fixedWidth: itemWidth,
+                                onSelect: { selectedSessionId = session.id },
+                                onClose: { onClose(session) }
+                            )
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, horizontalPadding)
+                    .padding(.vertical, verticalPadding)
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: tabSpacing) {
+                            ForEach(sessions) { session in
+                                iOSTerminalTabButton(
+                                    session: session,
+                                    isSelected: selectedSessionId == session.id,
+                                    fixedWidth: nil,
+                                    onSelect: { selectedSessionId = session.id },
+                                    onClose: { onClose(session) }
+                                )
+                                .frame(minWidth: minTabWidth)
+                            }
+                        }
+                        .padding(.horizontal, horizontalPadding)
+                        .padding(.vertical, verticalPadding)
+                        .animation(nil, value: sessions.map(\.id))
+                    }
                 }
             }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-            .animation(.easeInOut(duration: 0.12), value: selectedSessionId)
+            .transaction { transaction in
+                transaction.animation = nil
+            }
         }
+        .frame(height: 44)
         .background(
             Capsule(style: .continuous)
                 .fill(Color.primary.opacity(0.08))
@@ -972,6 +1108,7 @@ struct iOSTerminalTabsBar: View {
 private struct iOSTerminalTabButton: View {
     let session: ConnectionSession
     let isSelected: Bool
+    let fixedWidth: CGFloat?
     let onSelect: () -> Void
     let onClose: () -> Void
 
@@ -987,6 +1124,7 @@ private struct iOSTerminalTabButton: View {
         .padding(.leading, 14)
         .padding(.trailing, 36)
         .padding(.vertical, 7)
+        .frame(width: fixedWidth, alignment: .leading)
         .foregroundStyle(.primary)
         .background(
             isSelected ? Color.primary.opacity(0.18) : Color.clear,
@@ -1011,6 +1149,7 @@ private struct iOSTerminalTabButton: View {
             onSelect()
         }
         .accessibilityAddTraits(.isButton)
+        .animation(.easeInOut(duration: 0.12), value: isSelected)
     }
 
     private var statusColor: Color {

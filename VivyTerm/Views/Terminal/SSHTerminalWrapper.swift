@@ -149,6 +149,7 @@ struct SSHTerminalWrapper: NSViewRepresentable {
     var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
+    var onVoiceTrigger: (() -> Void)? = nil
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
@@ -402,6 +403,7 @@ struct SSHTerminalWrapper: View {
     var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
+    var onVoiceTrigger: (() -> Void)? = nil
 
     var body: some View {
         GeometryReader { geo in
@@ -412,7 +414,8 @@ struct SSHTerminalWrapper: View {
                 size: geo.size,
                 isActive: isActive,
                 onProcessExit: onProcessExit,
-                onReady: onReady
+                onReady: onReady,
+                onVoiceTrigger: onVoiceTrigger
             )
         }
     }
@@ -427,6 +430,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     var isActive: Bool = true
     let onProcessExit: () -> Void
     let onReady: () -> Void
+    var onVoiceTrigger: (() -> Void)? = nil
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
@@ -443,6 +447,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             coordinator.isTerminalReady = true
             // Mark as reusing so we don't cleanup on deinit
             coordinator.preserveSession = true
+            existingTerminal.onVoiceButtonTapped = onVoiceTrigger
 
             // Update write callback to use this coordinator (which will use session manager's SSH client)
             existingTerminal.writeCallback = { data in
@@ -516,6 +521,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                 }
             }
             terminalView.onProcessExit = onProcessExit
+            terminalView.onVoiceButtonTapped = onVoiceTrigger
 
             // Store terminal reference
             coordinator.terminalView = terminalView
@@ -573,6 +579,8 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         }
 
         guard let terminalView = terminalView else { return }
+
+        terminalView.onVoiceButtonTapped = onVoiceTrigger
 
         if context.coordinator.isTerminalReady {
             // Keep rendering even when inactive so tab switching doesn't stall frames.

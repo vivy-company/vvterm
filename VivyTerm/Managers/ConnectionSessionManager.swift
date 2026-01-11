@@ -14,7 +14,11 @@ import UIKit
 final class ConnectionSessionManager: ObservableObject {
     static let shared = ConnectionSessionManager()
 
-    @Published var sessions: [ConnectionSession] = []
+    @Published var sessions: [ConnectionSession] = [] {
+        didSet {
+            LiveActivityManager.shared.refresh(with: sessions)
+        }
+    }
     @Published var selectedSessionId: UUID?
 
     /// Servers we're currently connected to (persists even when all terminals closed)
@@ -124,6 +128,24 @@ final class ConnectionSessionManager: ObservableObject {
     func closeSession(_ session: ConnectionSession) {
         let sessionId = session.id
         let title = session.title
+        let wasSelected = selectedSessionId == sessionId
+        var replacementSessionId: UUID?
+
+        if wasSelected {
+            let serverSessions = sessions.filter { $0.serverId == session.serverId }
+            if let index = serverSessions.firstIndex(where: { $0.id == sessionId }) {
+                if index + 1 < serverSessions.count {
+                    replacementSessionId = serverSessions[index + 1].id
+                } else if index > 0 {
+                    replacementSessionId = serverSessions[index - 1].id
+                }
+            }
+
+            if replacementSessionId == nil,
+               let fallback = sessions.first(where: { $0.id != sessionId }) {
+                replacementSessionId = fallback.id
+            }
+        }
 
         // Cancel shell task first to stop async work
         shellCancelHandlers[sessionId]?()
@@ -132,17 +154,27 @@ final class ConnectionSessionManager: ObservableObject {
         // Remove from UI immediately
         sessions.removeAll { $0.id == sessionId }
 
-        // Select another session if this was selected
-        if selectedSessionId == sessionId {
-            selectedSessionId = sessions.last?.id
+        // Select another session if this was selected (prefer same server)
+        if wasSelected {
+            selectedSessionId = replacementSessionId
         }
 
         // Unregister terminal view (defer cleanup if still attached to a window)
         if let terminal = terminalViews[sessionId], terminal.window != nil {
             terminal.pauseRendering()
-            _ = terminal.resignFirstResponder()
+            if !wasSelected {
+                _ = terminal.resignFirstResponder()
+            }
         } else {
             unregisterTerminal(for: sessionId)
+        }
+
+        if let replacementSessionId,
+           let replacementTerminal = terminalViews[replacementSessionId],
+           replacementTerminal.window != nil {
+            DispatchQueue.main.async {
+                _ = replacementTerminal.becomeFirstResponder()
+            }
         }
 
         // Disconnect SSH client in background
@@ -150,7 +182,36 @@ final class ConnectionSessionManager: ObservableObject {
             await self?.unregisterSSHClient(for: sessionId)
         }
 
+        if let selectedId = replacementSessionId ?? selectedSessionId,
+           let selectedSession = sessions.first(where: { $0.id == selectedId }) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+                self?.redrawSessionAfterClose(selectedSession)
+            }
+        }
+
         logger.info("Closed terminal session \(title)")
+    }
+
+    private func redrawSessionAfterClose(_ session: ConnectionSession) {
+        guard let terminal = terminalViews[session.id] else { return }
+        terminal.resumeRendering()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self, weak terminal] in
+            guard let terminal = terminal else { return }
+            terminal.forceRefresh()
+
+            if let size = terminal.terminalSize(),
+               let client = self?.sshClient(for: session) {
+                Task {
+                    try? await client.resize(cols: Int(size.columns), rows: Int(size.rows))
+                }
+            }
+
+            // Nudge the shell to redraw the prompt after layout changes without adding a new line.
+            #if os(iOS)
+            terminal.sendText("\u{0C}")
+            #endif
+        }
     }
 
     // MARK: - Disconnect All

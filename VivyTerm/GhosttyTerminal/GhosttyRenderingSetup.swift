@@ -22,8 +22,8 @@ class GhosttyRenderingSetup {
 
     // MARK: - Terminal Settings from AppStorage
 
-    @AppStorage("terminalFontName") private var terminalFontName = "Menlo"
-    @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
+    @AppStorage("terminalFontName") private var terminalFontName = "JetBrainsMono Nerd Font"
+    @AppStorage("terminalFontSize") private var terminalFontSize = 8.0
     @AppStorage("terminalBackgroundColor") private var terminalBackgroundColor = "#1e1e2e"
     @AppStorage("terminalForegroundColor") private var terminalForegroundColor = "#cdd6f4"
     @AppStorage("terminalCursorColor") private var terminalCursorColor = "#f5e0dc"

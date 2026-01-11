@@ -42,6 +42,13 @@ class GhosttyTerminalView: UIView {
 
     /// Callback for OSC 9;4 progress reports
     var onProgressReport: ((GhosttyProgressState, Int?) -> Void)?
+
+    /// Callback invoked when the voice input button is tapped
+    var onVoiceButtonTapped: (() -> Void)? {
+        didSet {
+            keyboardToolbar?.onVoice = onVoiceButtonTapped
+        }
+    }
     private var didSignalReady = false
 
     /// Prevent rendering when the view is offscreen or being torn down.
@@ -313,6 +320,8 @@ class GhosttyTerminalView: UIView {
         }
 
         // Request a render to restart display link if needed
+        configureIOSurfaceLayers()
+        sizeDidChange(bounds.size)
         requestRender()
         if window != nil {
             startBlinkTimerIfNeeded()
@@ -394,8 +403,6 @@ class GhosttyTerminalView: UIView {
     /// Without proper sublayer configuration, Ghostty's setSurfaceCallback will discard all frames.
     func sizeDidChange(_ size: CGSize) {
         if isShuttingDown { return }
-        if isPaused { return }
-        guard window != nil else { return }
         guard let surface = surface?.unsafeCValue else { return }
         guard size.width > 0 && size.height > 0 else { return }
 
@@ -407,9 +414,11 @@ class GhosttyTerminalView: UIView {
             UInt32(size.height * scale)
         )
 
-        // CRITICAL: iOS has no CADisplayLink - explicitly trigger rendering
-        ghostty_surface_refresh(surface)
-        ghostty_surface_draw(surface)
+        if !isPaused {
+            // CRITICAL: iOS has no CADisplayLink - explicitly trigger rendering
+            ghostty_surface_refresh(surface)
+            ghostty_surface_draw(surface)
+        }
 
         if !didSignalReady {
             didSignalReady = true
@@ -445,27 +454,7 @@ class GhosttyTerminalView: UIView {
         super.layoutSubviews()
 
         guard !isShuttingDown else { return }
-        guard !isPaused else { return }
-        guard window != nil else { return }
-
-        let scale = self.contentScaleFactor
-
-        // CRITICAL: On iOS, Ghostty adds IOSurfaceLayer as a SUBLAYER (not replacing the view's layer).
-        // Sublayers do NOT auto-resize with the parent - we MUST set their frame AND contentsScale.
-        // Ghostty's setSurfaceCallback validates: layer.bounds * contentsScale == surface.dimensions
-        // If bounds or scale are wrong, frames are silently discarded.
-        if let sublayers = layer.sublayers {
-            let ioLayers = sublayers.filter { String(describing: type(of: $0)) == "IOSurfaceLayer" }
-            for sublayer in ioLayers {
-                // Set frame AND contentsScale BEFORE calling sizeDidChange so bounds are correct when Ghostty renders
-                // Use CATransaction to ensure immediate effect
-                CATransaction.begin()
-                CATransaction.setDisableActions(true)
-                sublayer.frame = bounds
-                sublayer.contentsScale = scale  // CRITICAL: Must match view's contentScaleFactor
-                CATransaction.commit()
-            }
-        }
+        configureIOSurfaceLayers()
 
         // Now tell Ghostty the new size - it will render to the correctly-sized layer
         sizeDidChange(bounds.size)
@@ -484,17 +473,7 @@ class GhosttyTerminalView: UIView {
         if isVisible {
             // Ensure sublayer is configured before calling sizeDidChange
             // This handles the case where window assignment happens after init
-            let scale = self.contentScaleFactor
-            if let sublayers = layer.sublayers {
-                let ioLayers = sublayers.filter { String(describing: type(of: $0)) == "IOSurfaceLayer" }
-                CATransaction.begin()
-                CATransaction.setDisableActions(true)
-                for sublayer in ioLayers {
-                    sublayer.frame = bounds
-                    sublayer.contentsScale = scale
-                }
-                CATransaction.commit()
-            }
+            configureIOSurfaceLayers()
             sizeDidChange(frame.size)
             // Note: becomeFirstResponder is now handled by SSHTerminalWrapper.updateUIView
             // based on isActive flag to avoid keyboard showing when terminal is hidden
@@ -826,6 +805,48 @@ class GhosttyTerminalView: UIView {
         sendText(String(Character(scalar)))
     }
 
+    private func sendAnsiSequence(_ data: Data) {
+        let text = String(decoding: data, as: UTF8.self)
+        sendText(text)
+    }
+
+    private func sendModifiedKey(_ key: Ghostty.Input.Key, mods: Ghostty.Input.Mods, text: String? = nil, unshiftedCodepoint: UInt32 = 0) {
+        guard let surface = surface else { return }
+        let press = Ghostty.Input.KeyEvent(
+            key: key,
+            action: .press,
+            text: text,
+            composing: false,
+            mods: mods,
+            consumedMods: [],
+            unshiftedCodepoint: unshiftedCodepoint
+        )
+        surface.sendKeyEvent(press)
+        let release = Ghostty.Input.KeyEvent(
+            key: key,
+            action: .release,
+            text: nil,
+            composing: false,
+            mods: mods,
+            consumedMods: [],
+            unshiftedCodepoint: unshiftedCodepoint
+        )
+        surface.sendKeyEvent(release)
+        requestRender()
+    }
+
+    private func sendControlShortcut(_ char: Character) {
+        let lower = String(char).lowercased()
+        if let key = Ghostty.Input.Key(rawValue: lower) {
+            let codepoint = lower.unicodeScalars.first?.value ?? 0
+            sendModifiedKey(key, mods: [.ctrl], text: lower, unshiftedCodepoint: codepoint)
+            return
+        }
+        if let controlChar = TerminalControlKey.controlCharacter(for: char) {
+            sendText(String(controlChar))
+        }
+    }
+
     private func sendTextKeyEvent(_ text: String) {
         guard let surface = surface else { return }
         let codepoint = text.unicodeScalars.first?.value ?? 0
@@ -903,19 +924,40 @@ class GhosttyTerminalView: UIView {
     /// Force the terminal surface to refresh/redraw
     func forceRefresh() {
         if isShuttingDown { return }
-        if isPaused { return }
-        guard window != nil else { return }
         guard let surface = surface?.unsafeCValue else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
+
+        configureIOSurfaceLayers()
 
         // Set scale and size
         let scale = self.contentScaleFactor
         ghostty_surface_set_content_scale(surface, scale, scale)
         ghostty_surface_set_size(surface, UInt32(bounds.width * scale), UInt32(bounds.height * scale))
+        if window != nil {
+            ghostty_surface_set_occlusion(surface, false)
+        }
 
         // CRITICAL: iOS has no CADisplayLink - explicitly trigger rendering
         ghostty_surface_refresh(surface)
         ghostty_surface_draw(surface)
+        requestRender()
+        if window != nil {
+            startBlinkTimerIfNeeded()
+        }
+    }
+
+    private func configureIOSurfaceLayers() {
+        let scale = self.contentScaleFactor
+        guard let sublayers = layer.sublayers else { return }
+        let ioLayers = sublayers.filter { String(describing: type(of: $0)) == "IOSurfaceLayer" }
+        guard !ioLayers.isEmpty else { return }
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        for sublayer in ioLayers {
+            sublayer.frame = bounds
+            sublayer.contentsScale = scale
+        }
+        CATransaction.commit()
     }
 
     // MARK: - Custom I/O API (for SSH clients)
@@ -1089,10 +1131,12 @@ extension GhosttyTerminalView {
 
     override var inputAccessoryView: UIView? {
         if keyboardToolbar == nil {
-            let toolbar = TerminalInputAccessoryView { [weak self] key in
+            let toolbar = TerminalInputAccessoryView(onKey: { [weak self] key in
                 self?.handleToolbarKey(key)
-            }
+            }, onVoice: onVoiceButtonTapped)
             keyboardToolbar = toolbar
+        } else {
+            keyboardToolbar?.onVoice = onVoiceButtonTapped
         }
         return keyboardToolbar
     }
@@ -1153,17 +1197,21 @@ extension GhosttyTerminalView {
         case .f12:
             sendKeyPress(.f12)
         case .ctrlC, .ctrlD, .ctrlZ, .ctrlL, .ctrlA, .ctrlE, .ctrlK, .ctrlU:
-            // Control characters - send as raw bytes
-            let data = key.ansiSequence
-            if let text = String(data: data, encoding: .utf8) {
-                sendText(text)
+            switch key {
+            case .ctrlC: sendControlShortcut("c")
+            case .ctrlD: sendControlShortcut("d")
+            case .ctrlZ: sendControlShortcut("z")
+            case .ctrlL: sendControlShortcut("l")
+            case .ctrlA: sendControlShortcut("a")
+            case .ctrlE: sendControlShortcut("e")
+            case .ctrlK: sendControlShortcut("k")
+            case .ctrlU: sendControlShortcut("u")
+            default:
+                sendAnsiSequence(key.ansiSequence)
             }
         case .ctrl, .alt, .ctrlAlt:
             // Modified keys - use ANSI sequence
-            let data = key.ansiSequence
-            if let text = String(data: data, encoding: .utf8) {
-                sendText(text)
-            }
+            sendAnsiSequence(key.ansiSequence)
         }
     }
 }
@@ -1172,13 +1220,20 @@ extension GhosttyTerminalView {
 
 private class TerminalInputAccessoryView: UIInputView {
     private let onKey: (TerminalKey) -> Void
+    var onVoice: (() -> Void)? {
+        didSet {
+            updateVoiceButtonState()
+        }
+    }
     private var ctrlActive = false
     private var altActive = false
     private weak var ctrlButton: UIButton?
     private weak var altButton: UIButton?
+    private weak var voiceButton: UIButton?
 
-    init(onKey: @escaping (TerminalKey) -> Void) {
+    init(onKey: @escaping (TerminalKey) -> Void, onVoice: (() -> Void)? = nil) {
         self.onKey = onKey
+        self.onVoice = onVoice
         super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 48), inputViewStyle: .keyboard)
         setupView()
     }
@@ -1195,10 +1250,26 @@ private class TerminalInputAccessoryView: UIInputView {
         scrollView.showsHorizontalScrollIndicator = false
         scrollView.alwaysBounceHorizontal = true
         addSubview(scrollView)
+
+        let voice = makeIconButton(icon: "mic.fill", action: #selector(tapVoice))
+        voice.accessibilityLabel = "Voice input"
+        voiceButton = voice
+        voice.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(voice)
+
+        let voiceSeparator = makeSeparator()
+        addSubview(voiceSeparator)
+
         NSLayoutConstraint.activate([
+            voice.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            voice.centerYAnchor.constraint(equalTo: centerYAnchor),
+
+            voiceSeparator.leadingAnchor.constraint(equalTo: voice.trailingAnchor, constant: 10),
+            voiceSeparator.centerYAnchor.constraint(equalTo: centerYAnchor),
+
             scrollView.topAnchor.constraint(equalTo: topAnchor),
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: voiceSeparator.trailingAnchor, constant: 10),
             scrollView.trailingAnchor.constraint(equalTo: trailingAnchor)
         ])
 
@@ -1250,6 +1321,8 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makePillButton(title: "End", action: #selector(tapEnd)))
         stack.addArrangedSubview(makePillButton(title: "PgUp", action: #selector(tapPgUp)))
         stack.addArrangedSubview(makePillButton(title: "PgDn", action: #selector(tapPgDn)))
+
+        updateVoiceButtonState()
     }
 
     private func makePillButton(title: String, action: Selector) -> UIButton {
@@ -1391,6 +1464,12 @@ private class TerminalInputAccessoryView: UIInputView {
         }
     }
 
+    private func updateVoiceButtonState() {
+        let enabled = onVoice != nil
+        voiceButton?.isEnabled = enabled
+        voiceButton?.alpha = enabled ? 1.0 : 0.35
+    }
+
     @objc private func toggleCtrl() {
         ctrlActive.toggle()
         updateModifierState()
@@ -1415,6 +1494,7 @@ private class TerminalInputAccessoryView: UIInputView {
     @objc private func tapEnd() { sendKey(.end) }
     @objc private func tapPgUp() { sendKey(.pageUp) }
     @objc private func tapPgDn() { sendKey(.pageDown) }
+    @objc private func tapVoice() { onVoice?() }
 }
 
 // MARK: - Software Keyboard (UIKeyInput)
@@ -1427,19 +1507,24 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
             let mods = toolbar.consumeModifiers()
             if mods.ctrl || mods.alt {
                 if let firstChar = text.first {
-                    var data = Data()
-                    if mods.alt {
-                        data.append(0x1B)
-                    }
-                    if mods.ctrl, let controlChar = TerminalControlKey.controlCharacter(for: firstChar) {
-                        data.append(contentsOf: String(controlChar).utf8)
+                    let lower = String(firstChar).lowercased()
+                    if let key = Ghostty.Input.Key(rawValue: lower) {
+                        var ghostMods: Ghostty.Input.Mods = []
+                        if mods.ctrl { ghostMods.insert(.ctrl) }
+                        if mods.alt { ghostMods.insert(.alt) }
+                        let codepoint = lower.unicodeScalars.first?.value ?? 0
+                        sendModifiedKey(key, mods: ghostMods, text: lower, unshiftedCodepoint: codepoint)
                     } else {
-                        data.append(contentsOf: String(firstChar).utf8)
-                    }
-                    if let modifiedText = String(data: data, encoding: .utf8) {
-                        sendText(modifiedText)
-                    } else {
-                        sendText(String(firstChar))
+                        var data = Data()
+                        if mods.alt {
+                            data.append(0x1B)
+                        }
+                        if mods.ctrl, let controlChar = TerminalControlKey.controlCharacter(for: firstChar) {
+                            data.append(contentsOf: String(controlChar).utf8)
+                        } else {
+                            data.append(contentsOf: String(firstChar).utf8)
+                        }
+                        sendAnsiSequence(data)
                     }
 
                     if text.count > 1 {
