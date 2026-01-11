@@ -32,7 +32,7 @@ struct ProUpgradeSheet: View {
                         Button {
                             dismiss()
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
+                            Image(systemName: "xmark")
                                 .font(.title2)
                                 .symbolRenderingMode(.hierarchical)
                                 .foregroundStyle(.secondary)
@@ -240,7 +240,7 @@ struct ProUpgradeSheet: View {
             Button {
                 dismiss()
             } label: {
-                Image(systemName: "xmark.circle.fill")
+                Image(systemName: "xmark")
                     .font(.title2)
                     .foregroundStyle(.secondary)
             }
