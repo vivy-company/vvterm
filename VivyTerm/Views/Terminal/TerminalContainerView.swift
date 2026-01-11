@@ -4,6 +4,11 @@
 //
 
 import SwiftUI
+#if os(iOS)
+import UIKit
+#elseif os(macOS)
+import AppKit
+#endif
 
 // MARK: - Terminal Container View
 
@@ -12,6 +17,7 @@ struct TerminalContainerView: View {
     let server: Server?
     var isActive: Bool = true
     @EnvironmentObject var ghosttyApp: Ghostty.App
+    @Environment(\.colorScheme) private var colorScheme
     @State private var isReady = false
     @State private var errorMessage: String?
     @State private var credentials: ServerCredentials?
@@ -22,13 +28,16 @@ struct TerminalContainerView: View {
     }
 
     // Voice input state
-    #if os(macOS)
+    #if os(macOS) || os(iOS)
     @StateObject private var audioService = AudioService()
     @State private var showingVoiceRecording = false
     @State private var showingPermissionError = false
     @State private var permissionErrorMessage = ""
-    @State private var keyMonitor: Any?
     @AppStorage("terminalVoiceButtonEnabled") private var voiceButtonEnabled = true
+    #endif
+
+    #if os(macOS)
+    @State private var keyMonitor: Any?
     #endif
 
     /// Terminal background color from theme
@@ -36,10 +45,27 @@ struct TerminalContainerView: View {
 
     /// Theme name from settings
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
+
+    private var effectiveThemeName: String {
+        guard usePerAppearanceTheme else { return terminalThemeName }
+        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    }
+
+    #if os(macOS) || os(iOS)
+    private var voiceTriggerHandler: (() -> Void)? {
+        voiceButtonEnabled ? { handleVoiceTrigger() } : nil
+    }
+    #endif
 
     var body: some View {
         ZStack {
+            #if os(iOS)
+            terminalBackgroundColor
+            #else
             terminalBackgroundColor.ignoresSafeArea()
+            #endif
 
             switch session.connectionState {
             case .connected:
@@ -60,7 +86,8 @@ struct TerminalContainerView: View {
                             },
                             onReady: {
                                 isReady = true
-                            }
+                            },
+                            onVoiceTrigger: voiceTriggerHandler
                         )
                         .opacity(isReady || terminalAlreadyExists ? 1 : 0)
                         .onAppear {
@@ -190,6 +217,15 @@ struct TerminalContainerView: View {
                 }
             }
             #endif
+            #if os(iOS)
+            if session.connectionState.isConnected && isReady && showingVoiceRecording {
+                voiceOverlay
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .padding(.horizontal, 16)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .zIndex(1)
+            }
+            #endif
         }
         .task {
             // Load credentials from keychain when view appears
@@ -201,11 +237,19 @@ struct TerminalContainerView: View {
             }
         }
         .onAppear {
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+            updateTerminalBackgroundColor()
         }
-        .onChange(of: terminalThemeName) { _ in
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName) ?? .black
+        .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
+        #if os(macOS) || os(iOS)
+        .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(permissionErrorMessage)
         }
+        #endif
         #if os(macOS)
         .onAppear {
             setupKeyMonitor()
@@ -217,17 +261,34 @@ struct TerminalContainerView: View {
                 showingVoiceRecording = false
             }
         }
-        .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text(permissionErrorMessage)
+        #endif
+        #if os(iOS)
+        .onDisappear {
+            if showingVoiceRecording {
+                audioService.cancelRecording()
+                showingVoiceRecording = false
+            }
         }
         #endif
     }
 
-    // MARK: - Voice Input (macOS)
+    private func updateTerminalBackgroundColor() {
+        if let color = ThemeColorParser.backgroundColor(for: effectiveThemeName) {
+            terminalBackgroundColor = color
+        } else {
+            #if os(iOS)
+            terminalBackgroundColor = Color(UIColor.systemBackground)
+            #elseif os(macOS)
+            terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
+            #else
+            terminalBackgroundColor = .black
+            #endif
+        }
+    }
 
-    #if os(macOS)
+    // MARK: - Voice Input (macOS / iOS)
+
+    #if os(macOS) || os(iOS)
     private var voiceOverlay: some View {
         VoiceRecordingView(
             audioService: audioService,
@@ -248,7 +309,9 @@ struct TerminalContainerView: View {
         )
         .padding(16)
     }
+    #endif
 
+    #if os(macOS)
     private var voiceTriggerButton: some View {
         Button {
             startVoiceRecording()
@@ -262,7 +325,9 @@ struct TerminalContainerView: View {
         .help(Text("Voice input (Command+Shift+M)"))
         .padding(14)
     }
+    #endif
 
+    #if os(macOS)
     private func setupKeyMonitor() {
         guard keyMonitor == nil else { return }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
@@ -302,7 +367,9 @@ struct TerminalContainerView: View {
         toggleVoiceRecording()
         return nil
     }
+    #endif
 
+    #if os(macOS) || os(iOS)
     private func toggleVoiceRecording() {
         if showingVoiceRecording {
             Task {
@@ -317,7 +384,9 @@ struct TerminalContainerView: View {
             startVoiceRecording()
         }
     }
+    #endif
 
+    #if os(macOS) || os(iOS)
     private func startVoiceRecording() {
         Task {
             do {
@@ -340,13 +409,22 @@ struct TerminalContainerView: View {
             }
         }
     }
+    #endif
+
+    #if os(macOS) || os(iOS)
+    private func handleVoiceTrigger() {
+        guard session.connectionState.isConnected, isReady else { return }
+        guard !showingVoiceRecording else { return }
+        startVoiceRecording()
+    }
+    #endif
 
     private func sendTranscriptionToTerminal(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         ConnectionSessionManager.shared.sendText(trimmed, to: session.id)
     }
-    #endif
+
 }
 
 // MARK: - Terminal Empty State View

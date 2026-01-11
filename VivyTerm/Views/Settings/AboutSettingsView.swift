@@ -59,6 +59,27 @@ struct AboutSettingsView: View {
         #endif
     }
 
+    private var subtitleColor: Color {
+        #if os(macOS)
+        return Color(nsColor: .secondaryLabelColor)
+        #else
+        return Color(uiColor: .secondaryLabel)
+        #endif
+    }
+
+    private var footerColor: Color {
+        #if os(macOS)
+        return Color(nsColor: .secondaryLabelColor)
+        #else
+        return Color(uiColor: .secondaryLabel)
+        #endif
+    }
+
+    private var copyrightLine: String {
+        let year = Calendar.current.component(.year, from: Date())
+        return "© \(year) Vivy Technologies Co., Limited"
+    }
+
     var body: some View {
         Form {
             Section {
@@ -74,13 +95,13 @@ struct AboutSettingsView: View {
                         .font(.title)
                         .fontWeight(.bold)
 
-                    Text("Version \(appVersion) (\(buildNumber))")
-                        .font(.subheadline)
+                    Text(verbatim: "Version \(appVersion) (\(buildNumber))")
+                        .font(.callout)
                         .foregroundStyle(.secondary)
 
                     Text("Professional SSH client\nfor macOS & iOS")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        .font(.footnote)
+                        .foregroundStyle(subtitleColor)
                         .multilineTextAlignment(.center)
                 }
                 .frame(maxWidth: .infinity)
@@ -152,9 +173,9 @@ struct AboutSettingsView: View {
                     openURL("https://x.com/vivytech")
                 } label: {
                     HStack {
-                        Text("© \(Calendar.current.component(.year, from: Date())) Vivy Technologies Co., Limited")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text(verbatim: copyrightLine)
+                            .font(.footnote)
+                            .foregroundStyle(footerColor)
                         Spacer()
                         Image(systemName: "arrow.up.right")
                             .font(.system(size: 9))
@@ -162,10 +183,11 @@ struct AboutSettingsView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.plain)
                 #else
-                Text("© \(Calendar.current.component(.year, from: Date())) Vivy Technologies Co., Limited")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text(verbatim: copyrightLine)
+                    .font(.footnote)
+                    .foregroundStyle(footerColor)
                     .frame(maxWidth: .infinity)
                 #endif
             }

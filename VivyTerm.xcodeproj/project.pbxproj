@@ -7,12 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4FB0ED9B3F04FE89CE2BD32E /* VivyTermLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
 		CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B22F0CD851006804BF /* MLXNN */; };
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		2D63FACF96A1577111D37C0C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CC8312762F0CD84D006804BF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0EA2F32A1035EAEEB6704E32;
+			remoteInfo = VivyTermLiveActivity;
+		};
 		CC8312932F0CD84E006804BF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CC8312762F0CD84D006804BF /* Project object */;
@@ -29,14 +37,36 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		8804B4B960F685A60CCAEA62 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4FB0ED9B3F04FE89CE2BD32E /* VivyTermLiveActivity.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		CC83127E2F0CD84D006804BF /* VivyTerm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VivyTerm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC8312922F0CD84E006804BF /* VivyTermTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VivyTermTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC83129C2F0CD84E006804BF /* VivyTermUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VivyTermUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC837B372F0E62F2006804BF /* VivyTermStoreKit.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = VivyTermStoreKit.storekit; sourceTree = "<group>"; };
+		F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VivyTermLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		840DBF6DBCF20C8988B3A244 /* Exceptions for "VivyTermLiveActivity" folder in "VivyTermLiveActivity" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0EA2F32A1035EAEEB6704E32 /* VivyTermLiveActivity */;
+		};
 		CC8312A42F0CD84E006804BF /* Exceptions for "VivyTerm" folder in "VivyTerm" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -47,6 +77,19 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		07A189989926A7D4F3FAE363 /* VivyTermShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = VivyTermShared;
+			sourceTree = "<group>";
+		};
+		7448DABBC8B1AB31C2800F73 /* VivyTermLiveActivity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				840DBF6DBCF20C8988B3A244 /* Exceptions for "VivyTermLiveActivity" folder in "VivyTermLiveActivity" target */,
+			);
+			path = VivyTermLiveActivity;
+			sourceTree = "<group>";
+		};
 		CC8312802F0CD84D006804BF /* VivyTerm */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -68,6 +111,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		9B8489730D0FB1A8CACED7F5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CC83127B2F0CD84D006804BF /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -100,6 +150,8 @@
 			children = (
 				CC837B372F0E62F2006804BF /* VivyTermStoreKit.storekit */,
 				CC8312802F0CD84D006804BF /* VivyTerm */,
+				07A189989926A7D4F3FAE363 /* VivyTermShared */,
+				7448DABBC8B1AB31C2800F73 /* VivyTermLiveActivity */,
 				CC8312952F0CD84E006804BF /* VivyTermTests */,
 				CC83129F2F0CD84E006804BF /* VivyTermUITests */,
 				CC83127F2F0CD84D006804BF /* Products */,
@@ -112,6 +164,7 @@
 				CC83127E2F0CD84D006804BF /* VivyTerm.app */,
 				CC8312922F0CD84E006804BF /* VivyTermTests.xctest */,
 				CC83129C2F0CD84E006804BF /* VivyTermUITests.xctest */,
+				F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,6 +172,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0EA2F32A1035EAEEB6704E32 /* VivyTermLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6DF0AE22460ECE4ED896C8F8 /* Build configuration list for PBXNativeTarget "VivyTermLiveActivity" */;
+			buildPhases = (
+				85AB10648A860B3FA83EF85C /* Sources */,
+				9B8489730D0FB1A8CACED7F5 /* Frameworks */,
+				2836C9EFC09F4AE19597F52E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				07A189989926A7D4F3FAE363 /* VivyTermShared */,
+				7448DABBC8B1AB31C2800F73 /* VivyTermLiveActivity */,
+			);
+			name = VivyTermLiveActivity;
+			productName = VivyTermLiveActivity;
+			productReference = F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		CC83127D2F0CD84D006804BF /* VivyTerm */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = CC8312A52F0CD84E006804BF /* Build configuration list for PBXNativeTarget "VivyTerm" */;
@@ -126,12 +200,15 @@
 				CC83127A2F0CD84D006804BF /* Sources */,
 				CC83127B2F0CD84D006804BF /* Frameworks */,
 				CC83127C2F0CD84D006804BF /* Resources */,
+				8804B4B960F685A60CCAEA62 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8C20D610C36384746BDB0653 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				07A189989926A7D4F3FAE363 /* VivyTermShared */,
 				CC8312802F0CD84D006804BF /* VivyTerm */,
 			);
 			name = VivyTerm;
@@ -200,6 +277,9 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					0EA2F32A1035EAEEB6704E32 = {
+						CreatedOnToolsVersion = 26.2;
+					};
 					CC83127D2F0CD84D006804BF = {
 						CreatedOnToolsVersion = 26.2;
 					};
@@ -243,6 +323,7 @@
 			projectRoot = "";
 			targets = (
 				CC83127D2F0CD84D006804BF /* VivyTerm */,
+				0EA2F32A1035EAEEB6704E32 /* VivyTermLiveActivity */,
 				CC8312912F0CD84E006804BF /* VivyTermTests */,
 				CC83129B2F0CD84E006804BF /* VivyTermUITests */,
 			);
@@ -250,6 +331,13 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		2836C9EFC09F4AE19597F52E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CC83127C2F0CD84D006804BF /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -274,6 +362,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		85AB10648A860B3FA83EF85C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		CC83127A2F0CD84D006804BF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -298,6 +393,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8C20D610C36384746BDB0653 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0EA2F32A1035EAEEB6704E32 /* VivyTermLiveActivity */;
+			targetProxy = 2D63FACF96A1577111D37C0C /* PBXContainerItemProxy */;
+		};
 		CC8312942F0CD84E006804BF /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = CC83127D2F0CD84D006804BF /* VivyTerm */;
@@ -311,6 +411,40 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		537AC15AFBCABBBF98C1A867 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QW4U57CXJX;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VivyTermLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		BE426D52CBCDBEDF46FBD0BB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QW4U57CXJX;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = VivyTermLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		CC8312A62F0CD84E006804BF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -369,7 +503,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -507,7 +641,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -711,7 +845,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
@@ -737,7 +871,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
@@ -762,7 +896,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
@@ -787,7 +921,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
@@ -808,6 +942,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		6DF0AE22460ECE4ED896C8F8 /* Build configuration list for PBXNativeTarget "VivyTermLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE426D52CBCDBEDF46FBD0BB /* Debug */,
+				537AC15AFBCABBBF98C1A867 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		CC8312792F0CD84D006804BF /* Build configuration list for PBXProject "VivyTerm" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

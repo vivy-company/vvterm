@@ -74,8 +74,8 @@ extension Ghostty {
 
         // MARK: - Terminal Settings from AppStorage
 
-        @AppStorage("terminalFontName") private var terminalFontName = "Menlo"
-        @AppStorage("terminalFontSize") private var terminalFontSize = 12.0
+        @AppStorage("terminalFontName") private var terminalFontName = "JetBrainsMono Nerd Font"
+        @AppStorage("terminalFontSize") private var terminalFontSize = 8.0
         @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
         @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
         @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
