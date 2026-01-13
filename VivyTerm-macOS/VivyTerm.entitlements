@@ -14,10 +14,6 @@
     <key>com.apple.security.network.client</key>
     <true/>
 
-    <!-- Keychain: Credential storage -->
-    <key>com.apple.security.keychain</key>
-    <true/>
-
     <!-- iCloud/CloudKit -->
     <key>com.apple.developer.icloud-container-identifiers</key>
     <array>
