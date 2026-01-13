@@ -18,6 +18,7 @@ struct TerminalContainerView: View {
     var isActive: Bool = true
     @EnvironmentObject var ghosttyApp: Ghostty.App
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isReady = false
     @State private var errorMessage: String?
     @State private var credentials: ServerCredentials?
@@ -244,6 +245,11 @@ struct TerminalContainerView: View {
         .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
         .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
         .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                updateTerminalBackgroundColor()
+            }
+        }
         #if os(macOS) || os(iOS)
         .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {
             Button("OK", role: .cancel) { }
