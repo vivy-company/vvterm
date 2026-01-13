@@ -586,6 +586,7 @@ struct iOSTerminalView: View {
     let onBack: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     /// Delayed flag to allow tab animation to complete before creating terminal
     @State private var shouldShowTerminalBySession: [UUID: Bool] = [:]
@@ -697,6 +698,16 @@ struct iOSTerminalView: View {
             .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
             .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
             .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
+            .onChange(of: scenePhase) { newPhase in
+                if newPhase == .active {
+                    updateTerminalBackgroundColor()
+                    // Refresh active terminal when returning from background
+                    if selectedView == "terminal",
+                       let session = selectedSession {
+                        refreshTerminal(for: session)
+                    }
+                }
+            }
             .onChange(of: connectingServer?.id) { newValue in
                 if currentServerId == nil {
                     currentServerId = newValue
