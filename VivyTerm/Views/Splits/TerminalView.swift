@@ -9,6 +9,7 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
+import Foundation
 import os.log
 
 // MARK: - Terminal Tab View
@@ -372,6 +373,19 @@ struct TerminalPaneView: View {
     @State private var isReady = false
     @State private var credentials: ServerCredentials?
     @State private var connectionError: String?
+    @State private var reconnectToken = UUID()
+
+    private var paneState: TerminalPaneState? {
+        TerminalTabManager.shared.paneStates[paneId]
+    }
+
+    private var paneConnectionError: String? {
+        guard let state = paneState?.connectionState else { return nil }
+        if case .failed(let message) = state {
+            return message
+        }
+        return nil
+    }
 
     /// Should this pane actually have focus (both tab selected AND pane focused)
     private var shouldFocus: Bool {
@@ -398,30 +412,33 @@ struct TerminalPaneView: View {
                     onProcessExit: onProcessExit,
                     onReady: { isReady = true }
                 )
+                .id(reconnectToken)
                 .contentShape(Rectangle())
                 .onTapGesture { onFocus() }
             }
 
-            // Loading overlay while connecting (hidden once ready or terminal exists)
-            if !isReady && !terminalExists {
-                if let error = connectionError {
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundStyle(.red)
-                        Text("Connection Failed")
-                            .font(.headline)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            let displayError = connectionError ?? paneConnectionError
+            if let error = displayError {
+                VStack(spacing: 16) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.red)
+                    Text("Connection Failed")
+                        .font(.headline)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button("Retry") {
+                        retryConnection()
                     }
-                } else {
-                    VStack(spacing: 12) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text("Connecting to \(server.name)...")
-                            .foregroundStyle(.secondary)
-                    }
+                    .buttonStyle(.bordered)
+                }
+            } else if !isReady && !terminalExists {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Connecting to \(server.name)...")
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -442,6 +459,16 @@ struct TerminalPaneView: View {
             } catch {
                 connectionError = String(localized: "Failed to load credentials")
             }
+        }
+    }
+
+    private func retryConnection() {
+        connectionError = nil
+        isReady = false
+        TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
+        reconnectToken = UUID()
+        Task {
+            await TerminalTabManager.shared.unregisterSSHClient(for: paneId)
         }
     }
 
@@ -514,6 +541,9 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
 
             DispatchQueue.main.async {
                 onReady()
+                if TerminalTabManager.shared.shellId(for: paneId) == nil {
+                    coordinator.startSSHConnection(terminal: existingTerminal)
+                }
             }
 
             return scrollView
@@ -658,57 +688,93 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, paneId, onProcessExit, logger] in
                 guard let self = self, let terminal = terminal else { return }
 
-                do {
-                    logger.info("Connecting to \(server.host)...")
-                    _ = try await sshClient.connect(to: server, credentials: credentials)
+                let maxAttempts = 3
+                var lastError: Error?
 
+                for attempt in 1...maxAttempts {
                     guard !Task.isCancelled else { return }
-
-                    let size = await terminal.terminalSize()
-                    let cols = Int(size?.columns ?? 80)
-                    let rows = Int(size?.rows ?? 24)
-
-                    // Store initial size
-                    await MainActor.run {
-                        self.lastSize = (cols, rows)
-                    }
-
-                    let shell = try await sshClient.startShell(cols: cols, rows: rows)
 
                     if let paneId = paneId {
-                        await TerminalTabManager.shared.registerSSHClient(sshClient, shellId: shell.id, for: paneId, serverId: server.id)
-                    }
-
-                    await MainActor.run {
-                        self.shellId = shell.id
-                    }
-
-                    guard !Task.isCancelled else { return }
-
-                    // Read data in background, feed to terminal
-                    for await data in shell.stream {
-                        guard !Task.isCancelled else { break }
-
-                        let shouldContinue = await MainActor.run { [weak self] () -> Bool in
-                            guard self?.terminal != nil else { return false }
-                            terminal.feedData(data)
-                            return true
+                        await MainActor.run {
+                            if attempt == 1 {
+                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
+                            } else {
+                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .reconnecting(attempt: attempt))
+                            }
                         }
-                        if !shouldContinue { break }
                     }
 
-                    guard !Task.isCancelled else { return }
-                    logger.info("SSH shell ended")
-                    await MainActor.run {
-                        onProcessExit()
+                    do {
+                        logger.info("Connecting to \(server.host)... (attempt \(attempt))")
+                        _ = try await sshClient.connect(to: server, credentials: credentials)
+
+                        guard !Task.isCancelled else { return }
+
+                        let size = await terminal.terminalSize()
+                        let cols = Int(size?.columns ?? 80)
+                        let rows = Int(size?.rows ?? 24)
+
+                        // Store initial size
+                        await MainActor.run {
+                            self.lastSize = (cols, rows)
+                        }
+
+                        let shell = try await sshClient.startShell(cols: cols, rows: rows)
+
+                        if let paneId = paneId {
+                            await TerminalTabManager.shared.registerSSHClient(sshClient, shellId: shell.id, for: paneId, serverId: server.id)
+                            await MainActor.run {
+                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
+                            }
+                        }
+
+                        await MainActor.run {
+                            self.shellId = shell.id
+                        }
+
+                        guard !Task.isCancelled else { return }
+
+                        // Read data in background, feed to terminal
+                        for await data in shell.stream {
+                            guard !Task.isCancelled else { break }
+
+                            let shouldContinue = await MainActor.run { [weak self] () -> Bool in
+                                guard self?.terminal != nil else { return false }
+                                terminal.feedData(data)
+                                return true
+                            }
+                            if !shouldContinue { break }
+                        }
+
+                        guard !Task.isCancelled else { return }
+                        logger.info("SSH shell ended")
+                        await MainActor.run {
+                            onProcessExit()
+                        }
+                        return
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        lastError = error
+                        logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
+
+                        if attempt < maxAttempts {
+                            let delay = pow(2.0, Double(attempt - 1))
+                            try? await Task.sleep(for: .seconds(delay))
+                            continue
+                        }
                     }
-                } catch {
-                    guard !Task.isCancelled else { return }
-                    logger.error("SSH connection failed: \(error.localizedDescription)")
-                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
+                }
+
+                if let lastError {
+                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(lastError.localizedDescription)\u{001B}[0m\r\n"
                     if let data = errorMsg.data(using: .utf8) {
                         await MainActor.run {
                             terminal.feedData(data)
+                        }
+                    }
+                    if let paneId = paneId {
+                        await MainActor.run {
+                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .failed(lastError.localizedDescription))
                         }
                     }
                 }

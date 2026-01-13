@@ -86,7 +86,7 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     var activeSessions: [ConnectionSession] {
-        sessions.filter { $0.connectionState.isConnected }
+        sessions.filter { $0.connectionState.isConnected || $0.connectionState.isConnecting }
     }
 
     var canOpenNewTab: Bool {
@@ -120,7 +120,7 @@ final class ConnectionSessionManager: ObservableObject {
         let session = ConnectionSession(
             serverId: server.id,
             title: server.name,
-            connectionState: .connected  // Will connect when terminal view appears
+            connectionState: .connecting  // Will connect when terminal view appears
         )
 
         sessions.append(session)
@@ -135,6 +135,33 @@ final class ConnectionSessionManager: ObservableObject {
 
         logger.info("Created session for \(server.name)")
         return session
+    }
+
+    // MARK: - Connection State Updates
+
+    func updateSessionState(_ sessionId: UUID, to state: ConnectionState) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else { return }
+
+        sessions[index].connectionState = state
+        let serverId = sessions[index].serverId
+
+        switch state {
+        case .connected:
+            connectedServerIds.insert(serverId)
+        case .disconnected, .failed:
+            let hasOtherConnections = sessions.contains {
+                $0.serverId == serverId && $0.connectionState.isConnected
+            }
+            if !hasOtherConnections {
+                connectedServerIds.remove(serverId)
+            }
+        case .connecting, .reconnecting, .idle:
+            break
+        }
+    }
+
+    func sessionState(for sessionId: UUID) -> ConnectionState? {
+        sessions.first(where: { $0.id == sessionId })?.connectionState
     }
 
     // MARK: - Close Terminal
@@ -467,11 +494,6 @@ final class ConnectionSessionManager: ObservableObject {
 
         // Disconnect existing SSH client
         await unregisterSSHClient(for: session.id)
-
-        // Reconnect by updating state (terminal view will reconnect)
-        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-            sessions[index].connectionState = .connected
-        }
     }
 
 }
@@ -480,7 +502,7 @@ final class ConnectionSessionManager: ObservableObject {
 
 actor ConnectionReliabilityManager {
     private var reconnectAttempts = 0
-    private let maxAttempts = 5
+    private let maxAttempts = 3
     private let baseDelay: TimeInterval = 1.0
 
     func handleDisconnect(session: ConnectionSession) async {

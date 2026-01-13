@@ -22,6 +22,7 @@ struct TerminalContainerView: View {
     @State private var isReady = false
     @State private var errorMessage: String?
     @State private var credentials: ServerCredentials?
+    @State private var reconnectToken = UUID()
 
     /// Check if terminal already exists (was previously created)
     private var terminalAlreadyExists: Bool {
@@ -69,8 +70,10 @@ struct TerminalContainerView: View {
             terminalBackgroundColor.ignoresSafeArea()
             #endif
 
-            switch session.connectionState {
-            case .connected:
+            let state = session.connectionState
+            let shouldAttemptConnection = terminalAlreadyExists || state.isConnected || state.isConnecting
+
+            if shouldAttemptConnection {
                 Color.clear
                     .onAppear {
                         ghosttyApp.startIfNeeded()
@@ -91,6 +94,7 @@ struct TerminalContainerView: View {
                             },
                             onVoiceTrigger: voiceTriggerHandler
                         )
+                        .id(reconnectToken)
                         .opacity(isReady || terminalAlreadyExists ? 1 : 0)
                         .onAppear {
                             // If terminal already exists, mark as ready immediately
@@ -135,7 +139,9 @@ struct TerminalContainerView: View {
                         }
                     }
                 }
+            }
 
+            switch state {
             case .connecting:
                 VStack(spacing: 16) {
                     ProgressView()
@@ -143,7 +149,6 @@ struct TerminalContainerView: View {
                     Text("Connecting...")
                         .foregroundStyle(.secondary)
                 }
-
             case .reconnecting(let attempt):
                 VStack(spacing: 16) {
                     ProgressView()
@@ -151,7 +156,6 @@ struct TerminalContainerView: View {
                     Text("Reconnecting (attempt \(attempt))...")
                         .foregroundStyle(.orange)
                 }
-
             case .disconnected:
                 VStack(spacing: 16) {
                     Image(systemName: "bolt.slash")
@@ -160,11 +164,10 @@ struct TerminalContainerView: View {
                     Text("Disconnected")
                         .foregroundStyle(.secondary)
                     Button("Reconnect") {
-                        Task { try? await ConnectionSessionManager.shared.reconnect(session: session) }
+                        Task { await retryConnection() }
                     }
                     .buttonStyle(.bordered)
                 }
-
             case .failed(let error):
                 VStack(spacing: 16) {
                     Image(systemName: "exclamationmark.triangle")
@@ -178,14 +181,11 @@ struct TerminalContainerView: View {
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     Button("Retry") {
-                        Task { try? await ConnectionSessionManager.shared.reconnect(session: session) }
+                        Task { await retryConnection() }
                     }
                     .buttonStyle(.bordered)
                 }
-
-            case .idle:
-                // Idle state should not be reached in normal flow
-                // but included for switch exhaustiveness
+            case .connected, .idle:
                 EmptyView()
             }
 
@@ -299,6 +299,13 @@ struct TerminalContainerView: View {
                 }
             }
         }
+    }
+
+    @MainActor
+    private func retryConnection() async {
+        isReady = false
+        try? await ConnectionSessionManager.shared.reconnect(session: session)
+        reconnectToken = UUID()
     }
 
     // MARK: - Voice Input (macOS / iOS)

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Foundation
 import os.log
 
 // MARK: - SSH Terminal Coordinator Protocol
@@ -73,64 +74,94 @@ extension SSHTerminalCoordinator {
         shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
             guard let self = self, let terminal = terminal else { return }
 
-            do {
-                logger.info("Connecting to \(server.host)...")
-                _ = try await sshClient.connect(to: server, credentials: credentials)
+            let maxAttempts = 3
+            var lastError: Error?
 
+            for attempt in 1...maxAttempts {
                 guard !Task.isCancelled else { return }
-
-                let size = await terminal.terminalSize()
-                let cols = Int(size?.columns ?? 80)
-                let rows = Int(size?.rows ?? 24)
-
-                // Platform-specific hook before shell start
-                await self.onBeforeShellStart(cols: cols, rows: rows)
-
-                let shell = try await sshClient.startShell(cols: cols, rows: rows)
-
-                await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id] in
-                    ConnectionSessionManager.shared.registerSSHClient(sshClient, shellId: shellId, for: sessionId, serverId: serverId)
-                }
 
                 await MainActor.run {
-                    self.shellId = shell.id
-                }
-
-                guard !Task.isCancelled else { return }
-
-                // Platform-specific hook after shell starts
-                await self.onShellStarted(terminal: terminal)
-
-                // Read data in background, feed to terminal on main thread
-                // CVDisplayLink in GhosttyTerminalView handles frame-rate batching
-                for await data in shell.stream {
-                    guard !Task.isCancelled else { break }
-
-                    // Feed data to terminal - display link batches rendering
-                    // Check session manager instead of coordinator to survive view dismantling on iOS
-                    let shouldContinue = await MainActor.run { () -> Bool in
-                        // Session still exists = keep running (even if coordinator was deallocated)
-                        let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
-                        guard sessionExists else { return false }
-                        terminal.feedData(data)
-                        return true
+                    if attempt == 1 {
+                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connecting)
+                    } else {
+                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .reconnecting(attempt: attempt))
                     }
-                    if !shouldContinue { break }
                 }
 
-                guard !Task.isCancelled else { return }
-                logger.info("SSH shell ended")
-                await MainActor.run {
-                    onProcessExit()
+                do {
+                    logger.info("Connecting to \(server.host)... (attempt \(attempt))")
+                    _ = try await sshClient.connect(to: server, credentials: credentials)
+
+                    guard !Task.isCancelled else { return }
+
+                    let size = await terminal.terminalSize()
+                    let cols = Int(size?.columns ?? 80)
+                    let rows = Int(size?.rows ?? 24)
+
+                    // Platform-specific hook before shell start
+                    await self.onBeforeShellStart(cols: cols, rows: rows)
+
+                    let shell = try await sshClient.startShell(cols: cols, rows: rows)
+
+                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id] in
+                        ConnectionSessionManager.shared.registerSSHClient(sshClient, shellId: shellId, for: sessionId, serverId: serverId)
+                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
+                    }
+
+                    await MainActor.run {
+                        self.shellId = shell.id
+                    }
+
+                    guard !Task.isCancelled else { return }
+
+                    // Platform-specific hook after shell starts
+                    await self.onShellStarted(terminal: terminal)
+
+                    // Read data in background, feed to terminal on main thread
+                    // CVDisplayLink in GhosttyTerminalView handles frame-rate batching
+                    for await data in shell.stream {
+                        guard !Task.isCancelled else { break }
+
+                        // Feed data to terminal - display link batches rendering
+                        // Check session manager instead of coordinator to survive view dismantling on iOS
+                        let shouldContinue = await MainActor.run { () -> Bool in
+                            // Session still exists = keep running (even if coordinator was deallocated)
+                            let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
+                            guard sessionExists else { return false }
+                            terminal.feedData(data)
+                            return true
+                        }
+                        if !shouldContinue { break }
+                    }
+
+                    guard !Task.isCancelled else { return }
+                    logger.info("SSH shell ended")
+                    await MainActor.run {
+                        onProcessExit()
+                    }
+                    return
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    lastError = error
+                    logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
+
+                    if attempt < maxAttempts {
+                        let delay = pow(2.0, Double(attempt - 1))
+                        try? await Task.sleep(for: .seconds(delay))
+                        continue
+                    }
                 }
-            } catch {
-                guard !Task.isCancelled else { return }
-                logger.error("SSH connection failed: \(error.localizedDescription)")
-                let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
+            }
+
+            if let lastError {
+                let errorMsg = "\r\n\u{001B}[31mSSH Error: \(lastError.localizedDescription)\u{001B}[0m\r\n"
                 if let data = errorMsg.data(using: .utf8) {
                     await MainActor.run {
                         terminal.feedData(data)
                     }
+                }
+                await MainActor.run {
+                    ConnectionSessionManager.shared.updateSessionState(sessionId, to: .failed(lastError.localizedDescription))
                 }
             }
         }
@@ -207,6 +238,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             // Use async to avoid calling during view construction
             DispatchQueue.main.async {
                 onReady()
+                if ConnectionSessionManager.shared.shellId(for: session) == nil {
+                    coordinator.startSSHConnection(terminal: existingTerminal)
+                }
             }
 
             return scrollView
@@ -510,6 +544,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             }
 
             onReady()
+            if ConnectionSessionManager.shared.shellId(for: session) == nil {
+                coordinator.startSSHConnection(terminal: existingTerminal)
+            }
             return container
         }
 
