@@ -25,11 +25,17 @@ nonisolated final class WhisperTokenizer {
     let task: String?
     let numLanguages: Int
 
-    init(multilingual: Bool, numLanguages: Int = 99, language: String? = "en", task: String? = "transcribe") throws {
+    init(
+        multilingual: Bool,
+        numLanguages: Int = 99,
+        language: String? = "en",
+        task: String? = "transcribe",
+        modelId: String? = nil
+    ) throws {
         self.numLanguages = numLanguages
 
         let encodingName = multilingual ? "multilingual" : "gpt2"
-        self.encoding = try Self.loadEncoding(name: encodingName, numLanguages: numLanguages)
+        self.encoding = try Self.loadEncoding(name: encodingName, numLanguages: numLanguages, modelId: modelId)
 
         if multilingual {
             self.language = language
@@ -89,12 +95,12 @@ nonisolated final class WhisperTokenizer {
         encoding.specialTokens[name] ?? 0
     }
 
-    private static func loadEncoding(name: String, numLanguages: Int) throws -> WhisperEncoding {
+    private static func loadEncoding(name: String, numLanguages: Int, modelId: String?) throws -> WhisperEncoding {
         if let cached = cachedEncodings[name] {
             return cached
         }
 
-        guard let url = resourceURL(name: name, fileExtension: "tiktoken") else {
+        guard let url = resourceURL(name: name, fileExtension: "tiktoken", modelId: modelId) else {
             throw NSError(domain: "WhisperTokenizer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing tokenizer resource: \(name).tiktoken"])
         }
 
@@ -149,7 +155,7 @@ nonisolated final class WhisperTokenizer {
         return encoding
     }
 
-    private static func resourceURL(name: String, fileExtension: String) -> URL? {
+    private static func resourceURL(name: String, fileExtension: String, modelId: String?) -> URL? {
         if let url = Bundle.main.url(forResource: name, withExtension: fileExtension, subdirectory: "Whisper") {
             return url
         }
@@ -159,13 +165,13 @@ nonisolated final class WhisperTokenizer {
         if let url = Bundle.main.url(forResource: name, withExtension: fileExtension) {
             return url
         }
-        return modelResourceURL(name: name, fileExtension: fileExtension)
+        return modelResourceURL(name: name, fileExtension: fileExtension, modelId: modelId)
     }
 
-    private static func modelResourceURL(name: String, fileExtension: String) -> URL? {
+    private static func modelResourceURL(name: String, fileExtension: String, modelId: String?) -> URL? {
         guard fileExtension == "tiktoken" else { return nil }
+        guard let modelId, !modelId.isEmpty else { return nil }
 
-        let modelId = TranscriptionSettingsStore.currentWhisperModelId()
         let modelDir = MLXModelManager.modelDirectory(for: .whisper, modelId: modelId)
         let url = modelDir.appendingPathComponent("\(name).\(fileExtension)")
         if FileManager.default.fileExists(atPath: url.path) {

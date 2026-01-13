@@ -161,6 +161,10 @@ final class ServerStatsCollector: ObservableObject {
 
         } catch {
             logger.error("Failed to collect stats: \(error.localizedDescription)")
+            await MainActor.run {
+                self.connectionError = error.localizedDescription
+                self.isCollecting = false
+            }
         }
     }
 }

@@ -22,52 +22,78 @@ struct ServerStatsView: View {
     @StateObject private var statsCollector = ServerStatsCollector()
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                // Header with server name and OS
-                ServerHeaderCard(
-                    serverName: server.name,
-                    osInfo: statsCollector.stats.osInfo
-                )
+        ZStack {
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    // Header with server name and OS
+                    ServerHeaderCard(
+                        serverName: server.name,
+                        osInfo: statsCollector.stats.osInfo
+                    )
 
-                // CPU Card
-                CPUStatsCard(
-                    usage: statsCollector.stats.cpuUsage,
-                    user: statsCollector.stats.cpuUser,
-                    system: statsCollector.stats.cpuSystem,
-                    iowait: statsCollector.stats.cpuIowait,
-                    steal: statsCollector.stats.cpuSteal,
-                    idle: statsCollector.stats.cpuIdle,
-                    cores: statsCollector.stats.cpuCores,
-                    uptime: statsCollector.stats.uptime,
-                    loadAverage: statsCollector.stats.loadAverage
-                )
+                    // CPU Card
+                    CPUStatsCard(
+                        usage: statsCollector.stats.cpuUsage,
+                        user: statsCollector.stats.cpuUser,
+                        system: statsCollector.stats.cpuSystem,
+                        iowait: statsCollector.stats.cpuIowait,
+                        steal: statsCollector.stats.cpuSteal,
+                        idle: statsCollector.stats.cpuIdle,
+                        cores: statsCollector.stats.cpuCores,
+                        uptime: statsCollector.stats.uptime,
+                        loadAverage: statsCollector.stats.loadAverage
+                    )
 
-                // Memory Card
-                MemoryStatsCard(
-                    used: statsCollector.stats.memoryUsed,
-                    free: statsCollector.stats.memoryFree,
-                    cached: statsCollector.stats.memoryCached,
-                    total: statsCollector.stats.memoryTotal,
-                    percent: statsCollector.stats.memoryPercent
-                )
+                    // Memory Card
+                    MemoryStatsCard(
+                        used: statsCollector.stats.memoryUsed,
+                        free: statsCollector.stats.memoryFree,
+                        cached: statsCollector.stats.memoryCached,
+                        total: statsCollector.stats.memoryTotal,
+                        percent: statsCollector.stats.memoryPercent
+                    )
 
-                // Network Card
-                NetworkStatsCard(
-                    txSpeed: statsCollector.stats.networkTxSpeed,
-                    rxSpeed: statsCollector.stats.networkRxSpeed,
-                    txTotal: statsCollector.stats.networkTxTotal,
-                    rxTotal: statsCollector.stats.networkRxTotal
-                )
+                    // Network Card
+                    NetworkStatsCard(
+                        txSpeed: statsCollector.stats.networkTxSpeed,
+                        rxSpeed: statsCollector.stats.networkRxSpeed,
+                        txTotal: statsCollector.stats.networkTxTotal,
+                        rxTotal: statsCollector.stats.networkRxTotal
+                    )
 
-                // Volumes - always show, empty state handled inside
-                VolumesCard(volumes: statsCollector.stats.volumes)
+                    // Volumes - always show, empty state handled inside
+                    VolumesCard(volumes: statsCollector.stats.volumes)
 
-                // Top Processes - always show, empty state handled inside
-                ProcessesCard(processes: statsCollector.stats.topProcesses)
+                    // Top Processes - always show, empty state handled inside
+                    ProcessesCard(processes: statsCollector.stats.topProcesses)
+                }
+                .padding()
+                .drawingGroup()
             }
-            .padding()
-            .drawingGroup()
+
+            if isVisible, let error = statsCollector.connectionError {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.red)
+                    Text("Connection Failed")
+                        .font(.headline)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Button("Retry") {
+                        Task {
+                            await statsCollector.startCollecting(for: server, using: sharedClientProvider())
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(16)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .padding()
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(screenBackground)

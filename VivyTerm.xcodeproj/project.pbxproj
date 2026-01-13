@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		4FB0ED9B3F04FE89CE2BD32E /* VivyTermLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A089872E7F6345088D2FA637 /* AppIntents.framework */; };
 		82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1853ABB6CF8195DF93B55895 /* ZIPFoundation */; };
+		8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A089872E7F6345088D2FA637 /* AppIntents.framework */; };
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
 		CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B22F0CD851006804BF /* MLXNN */; };
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
@@ -538,6 +538,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
+				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -676,6 +677,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
+				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -1007,20 +1009,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ml-explore/mlx-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.21.0;
-			};
-		};
 		8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.9.9;
+			};
+		};
+		CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.21.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

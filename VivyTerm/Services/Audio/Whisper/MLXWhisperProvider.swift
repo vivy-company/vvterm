@@ -19,7 +19,12 @@ final class MLXWhisperProvider {
             guard !samples.isEmpty else { return "" }
 
             let model = try WhisperModelLoader.shared.loadModel(at: modelDirectory)
-            let tokenizer = try WhisperTokenizer(multilingual: model.isMultilingual, language: "en", task: "transcribe")
+            let tokenizer = try WhisperTokenizer(
+                multilingual: model.isMultilingual,
+                language: "en",
+                task: "transcribe",
+                modelId: modelId
+            )
 
             let mel = try WhisperAudioProcessor.logMelSpectrogram(samples, nMels: model.dims.n_mels, padding: WhisperAudioConstants.nSamples)
             let melSegment = WhisperAudioProcessor.padOrTrim(mel, length: WhisperAudioConstants.nFrames, axis: 0).asType(.float16)

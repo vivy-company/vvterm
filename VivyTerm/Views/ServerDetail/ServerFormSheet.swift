@@ -31,6 +31,11 @@ struct ServerFormSheet: View {
     @State private var error: String?
     @State private var storedKeys: [SSHKeyEntry] = []
     @State private var selectedStoredKey: SSHKeyEntry?
+    @State private var isTestingConnection = false
+    @State private var connectionTestError: String?
+    @State private var connectionTestSucceeded = false
+    @State private var lastTestSnapshot: ConnectionTestSnapshot?
+    @State private var initialConnectionSnapshot: ConnectionTestSnapshot?
 
     private var isEditing: Bool { server != nil }
 
@@ -62,6 +67,41 @@ struct ServerFormSheet: View {
 
     private var isAtLimit: Bool {
         !isEditing && !serverManager.canAddServer
+    }
+
+    private struct ConnectionTestSnapshot: Equatable {
+        let host: String
+        let port: String
+        let username: String
+        let authMethod: AuthMethod
+        let password: String
+        let sshKey: String
+        let sshPassphrase: String
+    }
+
+    private var connectionSnapshot: ConnectionTestSnapshot {
+        ConnectionTestSnapshot(
+            host: host,
+            port: port,
+            username: username,
+            authMethod: authMethod,
+            password: password,
+            sshKey: sshKey,
+            sshPassphrase: sshPassphrase
+        )
+    }
+
+    private var shouldRequireConnectionTest: Bool {
+        guard isValid else { return false }
+        guard isEditing else { return true }
+        if let initialConnectionSnapshot {
+            return initialConnectionSnapshot != connectionSnapshot
+        }
+        return true
+    }
+
+    private var hasValidConnectionTest: Bool {
+        connectionTestSucceeded && lastTestSnapshot == connectionSnapshot
     }
 
     var body: some View {
@@ -156,6 +196,40 @@ struct ServerFormSheet: View {
                     }
                 }
 
+                // Connection Test
+                Section("Connection") {
+                    Button {
+                        Task {
+                            await runConnectionTest(force: true)
+                        }
+                    } label: {
+                        if isTestingConnection {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text("Testing connection...")
+                            }
+                        } else {
+                            Text("Test Connection")
+                        }
+                    }
+                    .disabled(!isValid || isTestingConnection)
+
+                    if connectionTestSucceeded && hasValidConnectionTest {
+                        Label("Connection successful", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .font(.caption)
+                    } else if let connectionTestError {
+                        Text(connectionTestError)
+                            .foregroundStyle(.red)
+                            .font(.caption)
+                    } else if shouldRequireConnectionTest {
+                        Text("Connection will be verified before saving.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 // Environment
                 Section("Server Environment") {
                     Picker("Environment", selection: $selectedEnvironment) {
@@ -221,6 +295,10 @@ struct ServerFormSheet: View {
                 } catch {
                     self.error = String(localized: "Failed to load credentials: \(error.localizedDescription)")
                 }
+
+                if initialConnectionSnapshot == nil {
+                    initialConnectionSnapshot = connectionSnapshot
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -230,7 +308,7 @@ struct ServerFormSheet: View {
                     Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
                         saveServer()
                     }
-                    .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials)
+                    .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
                 }
             }
             .sheet(isPresented: $showingProUpgrade) {
@@ -252,7 +330,17 @@ struct ServerFormSheet: View {
             }
             .onAppear {
                 storedKeys = KeychainManager.shared.getStoredSSHKeys()
+                if !isEditing && initialConnectionSnapshot == nil {
+                    initialConnectionSnapshot = connectionSnapshot
+                }
             }
+            .onChange(of: host) { _ in resetConnectionTestState() }
+            .onChange(of: port) { _ in resetConnectionTestState() }
+            .onChange(of: username) { _ in resetConnectionTestState() }
+            .onChange(of: authMethod) { _ in resetConnectionTestState() }
+            .onChange(of: password) { _ in resetConnectionTestState() }
+            .onChange(of: sshKey) { _ in resetConnectionTestState() }
+            .onChange(of: sshPassphrase) { _ in resetConnectionTestState() }
         }
     }
 
@@ -358,6 +446,92 @@ struct ServerFormSheet: View {
         }
     }
 
+    // MARK: - Connection Test
+
+    private func resetConnectionTestState() {
+        connectionTestError = nil
+        connectionTestSucceeded = false
+        lastTestSnapshot = nil
+    }
+
+    private func buildServer(id: UUID, createdAt: Date) -> Server {
+        let portNum = Int(port) ?? 22
+        return Server(
+            id: id,
+            workspaceId: workspace?.id ?? serverManager.workspaces.first?.id ?? UUID(),
+            environment: selectedEnvironment,
+            name: name,
+            host: host,
+            port: portNum,
+            username: username,
+            authMethod: authMethod,
+            notes: notes.isEmpty ? nil : notes,
+            createdAt: createdAt
+        )
+    }
+
+    private func buildCredentials(for serverId: UUID) -> ServerCredentials {
+        var credentials = ServerCredentials(serverId: serverId)
+        switch authMethod {
+        case .password:
+            credentials.password = password
+        case .sshKey:
+            credentials.sshKey = sshKey.data(using: .utf8)
+        case .sshKeyWithPassphrase:
+            credentials.sshKey = sshKey.data(using: .utf8)
+            credentials.sshPassphrase = sshPassphrase
+        }
+        return credentials
+    }
+
+    private func runConnectionTest(force: Bool) async -> Bool {
+        let snapshot = await MainActor.run { connectionSnapshot }
+        let shouldSkip = await MainActor.run { !force && hasValidConnectionTest }
+        if shouldSkip {
+            return true
+        }
+
+        let (testServer, credentials) = await MainActor.run { () -> (Server, ServerCredentials) in
+            isTestingConnection = true
+            connectionTestError = nil
+            connectionTestSucceeded = false
+
+            let serverId = server?.id ?? UUID()
+            let server = buildServer(id: serverId, createdAt: server?.createdAt ?? Date())
+            let credentials = buildCredentials(for: serverId)
+            return (server, credentials)
+        }
+
+        let result = await Task.detached(priority: .userInitiated) { () -> Result<Void, Error> in
+            let client = SSHClient()
+            do {
+                _ = try await client.connect(to: testServer, credentials: credentials)
+                await client.disconnect()
+                return .success(())
+            } catch {
+                return .failure(error)
+            }
+        }.value
+
+        var success = false
+        await MainActor.run {
+            isTestingConnection = false
+            lastTestSnapshot = snapshot
+
+            switch result {
+            case .success:
+                connectionTestSucceeded = true
+                success = true
+            case .failure(let error):
+                connectionTestError = error.localizedDescription
+                connectionTestSucceeded = false
+                success = false
+            }
+        }
+
+        return success
+    }
+
     // MARK: - Actions
 
     private func handleKeyImport(_ result: Result<[URL], Error>) {
@@ -381,30 +555,23 @@ struct ServerFormSheet: View {
 
         Task {
             do {
-                let portNum = Int(port) ?? 22
+                let (newServer, credentials) = await MainActor.run { () -> (Server, ServerCredentials) in
+                    let serverId = server?.id ?? UUID()
+                    let server = buildServer(id: serverId, createdAt: server?.createdAt ?? Date())
+                    let credentials = buildCredentials(for: serverId)
+                    return (server, credentials)
+                }
 
-                let newServer = Server(
-                    id: server?.id ?? UUID(),
-                    workspaceId: workspace?.id ?? serverManager.workspaces.first?.id ?? UUID(),
-                    environment: selectedEnvironment,
-                    name: name,
-                    host: host,
-                    port: portNum,
-                    username: username,
-                    authMethod: authMethod,
-                    notes: notes.isEmpty ? nil : notes,
-                    createdAt: server?.createdAt ?? Date()
-                )
-
-                var credentials = ServerCredentials(serverId: newServer.id)
-                switch authMethod {
-                case .password:
-                    credentials.password = password
-                case .sshKey:
-                    credentials.sshKey = sshKey.data(using: .utf8)
-                case .sshKeyWithPassphrase:
-                    credentials.sshKey = sshKey.data(using: .utf8)
-                    credentials.sshPassphrase = sshPassphrase
+                let needsConnectionTest = await MainActor.run { shouldRequireConnectionTest && !hasValidConnectionTest }
+                if needsConnectionTest {
+                    let success = await runConnectionTest(force: false)
+                    guard success else {
+                        await MainActor.run {
+                            error = connectionTestError ?? String(localized: "Connection test failed")
+                            isSaving = false
+                        }
+                        return
+                    }
                 }
 
                 if isEditing {

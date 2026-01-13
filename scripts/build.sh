@@ -111,7 +111,8 @@ build_ghosttykit() {
     sed -i '' "s/com\\.mitchellh\\.ghostty/${BUNDLE_ID}/g" "${workdir}/ghostty/src/build_config.zig"
 
     # Lower iOS minimum to match app deployment target
-    perl -0pi -e 's/\\.ios => \\.\\{ \\.semver = \\.\\{\\n\\s*\\.major = \\d+,\\n\\s*\\.minor = \\d+,\\n\\s*\\.patch = \\d+,\\n\\s*\\} \\},/\\.ios => .{ .semver = .{\\n            .major = 16,\\n            .minor = 0,\\n            .patch = 0,\\n        } },/s' "${workdir}/ghostty/src/build/Config.zig"
+    perl -0pi -e 's@// iOS [0-9]+ picked arbitrarily@// iOS 16 matches app deployment target@' "${workdir}/ghostty/src/build/Config.zig"
+    perl -0pi -e 's/\\.ios => \\.\\{ \\.semver = \\.\\{\\n\\s*\\.major = [0-9]+,\\n\\s*\\.minor = [0-9]+,\\n\\s*\\.patch = [0-9]+,\\n\\s*\\} \\},/\\.ios => .{ .semver = .{\\n            .major = 16,\\n            .minor = 0,\\n            .patch = 0,\\n        } },/s' "${workdir}/ghostty/src/build/Config.zig"
 
     log_info "Building GhosttyKit.xcframework..."
 
