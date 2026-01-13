@@ -3,10 +3,17 @@ import os.log
 
 // MARK: - SSH Client using libssh2
 
+struct ShellHandle {
+    let id: UUID
+    let stream: AsyncStream<Data>
+}
+
 actor SSHClient {
     private var session: SSHSession?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSH")
     private var keepAliveTask: Task<Void, Never>?
+    private var connectTask: Task<SSHSession, Error>?
+    private var connectionKey: String?
 
     /// Stored session reference for nonisolated abort access
     private nonisolated(unsafe) var _sessionForAbort: SSHSession?
@@ -28,6 +35,20 @@ actor SSHClient {
     // MARK: - Connection
 
     func connect(to server: Server, credentials: ServerCredentials) async throws -> SSHSession {
+        let key = "\(server.host):\(server.port):\(server.username):\(server.authMethod)"
+
+        if let session = session, await session.isConnected, connectionKey == key {
+            return session
+        }
+
+        if let task = connectTask, connectionKey == key {
+            return try await task.value
+        }
+
+        if let session = session, await session.isConnected, connectionKey != key {
+            throw SSHError.connectionFailed("SSH client already connected")
+        }
+
         logger.info("Connecting to \(server.host):\(server.port)")
         logger.info("Auth method: \(String(describing: server.authMethod)), password present: \(credentials.password != nil)")
 
@@ -39,20 +60,38 @@ actor SSHClient {
             credentials: credentials
         )
 
-        let session = SSHSession(config: config)
-        try await session.connect()
+        let task = Task { () -> SSHSession in
+            let session = SSHSession(config: config)
+            try await session.connect()
+            return session
+        }
 
-        self.session = session
-        self._sessionForAbort = session
-        startKeepAlive()
+        connectTask = task
+        connectionKey = key
 
-        logger.info("Connected to \(server.host)")
-        return session
+        do {
+            let session = try await task.value
+            self.session = session
+            self._sessionForAbort = session
+            startKeepAlive()
+            connectTask = nil
+            logger.info("Connected to \(server.host)")
+            return session
+        } catch {
+            connectTask = nil
+            connectionKey = nil
+            self.session = nil
+            self._sessionForAbort = nil
+            throw error
+        }
     }
 
     func disconnect() async {
         keepAliveTask?.cancel()
         keepAliveTask = nil
+        connectTask?.cancel()
+        connectTask = nil
+        connectionKey = nil
 
         await session?.disconnect()
         session = nil
@@ -75,28 +114,33 @@ actor SSHClient {
 
     // MARK: - Shell
 
-    func startShell(cols: Int = 80, rows: Int = 24) async throws -> AsyncStream<Data> {
+    func startShell(cols: Int = 80, rows: Int = 24) async throws -> ShellHandle {
         guard let session = session else {
             throw SSHError.notConnected
         }
         return try await session.startShell(cols: cols, rows: rows)
     }
 
-    func write(_ data: Data) async throws {
+    func write(_ data: Data, to shellId: UUID) async throws {
         guard !_isAborted else {
             throw SSHError.notConnected
         }
         guard let session = session else {
             throw SSHError.notConnected
         }
-        try await session.write(data)
+        try await session.write(data, to: shellId)
     }
 
-    func resize(cols: Int, rows: Int) async throws {
+    func resize(cols: Int, rows: Int, for shellId: UUID) async throws {
         guard let session = session else {
             throw SSHError.notConnected
         }
-        try await session.resize(cols: cols, rows: rows)
+        try await session.resize(cols: cols, rows: rows, for: shellId)
+    }
+
+    func closeShell(_ shellId: UUID) async {
+        guard let session = session else { return }
+        await session.closeShell(shellId)
     }
 
     // MARK: - Keep Alive
@@ -124,7 +168,7 @@ actor SSHClient {
 
 /// Thread-safe storage for keyboard-interactive password (needed for C callback)
 private final class KeyboardInteractivePassword: @unchecked Sendable {
-    static let shared = KeyboardInteractivePassword()
+    nonisolated static let shared = KeyboardInteractivePassword()
     private nonisolated(unsafe) var _password: String?
     private let lock = NSLock()
 
@@ -176,13 +220,43 @@ nonisolated(unsafe) private let kbdintCallback: @convention(c) (
 // MARK: - SSH Session using libssh2
 
 actor SSHSession {
+    private final class ExecRequest {
+        let id: UUID
+        let command: String
+        let continuation: CheckedContinuation<String, Error>
+        var channel: OpaquePointer?
+        var output = Data()
+        var isStarted = false
+
+        init(id: UUID, command: String, continuation: CheckedContinuation<String, Error>) {
+            self.id = id
+            self.command = command
+            self.continuation = continuation
+        }
+    }
+
+    private final class ShellChannelState {
+        let id: UUID
+        var channel: OpaquePointer
+        let continuation: AsyncStream<Data>.Continuation
+        var batchBuffer = Data()
+        var lastYieldTime: UInt64 = DispatchTime.now().uptimeNanoseconds
+        var recentBytesPerRead: Int = 0
+
+        init(id: UUID, channel: OpaquePointer, continuation: AsyncStream<Data>.Continuation) {
+            self.id = id
+            self.channel = channel
+            self.continuation = continuation
+        }
+    }
+
     let config: SSHSessionConfig
     private var libssh2Session: OpaquePointer?
-    private var channel: OpaquePointer?
+    private var shellChannels: [UUID: ShellChannelState] = [:]
     private var socket: Int32 = -1
     private var isActive = false
-    private var shellContinuation: AsyncStream<Data>.Continuation?
-    private var readTask: Task<Void, Never>?
+    private var ioTask: Task<Void, Never>?
+    private var execRequests: [UUID: ExecRequest] = [:]
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHSession")
 
     /// Atomic socket storage for emergency abort from any thread
@@ -401,13 +475,15 @@ actor SSHSession {
         // Mark as inactive first to stop any pending operations
         isActive = false
 
-        // Finish the stream continuation first to unblock any waiting consumers
-        shellContinuation?.finish()
-        shellContinuation = nil
+        // Finish shell streams first to unblock any waiting consumers
+        closeAllShellChannels()
 
-        // Cancel read task
-        readTask?.cancel()
-        readTask = nil
+        // Cancel IO task
+        ioTask?.cancel()
+        ioTask = nil
+
+        // Fail any pending exec requests
+        failAllExecRequests(error: SSHError.notConnected)
 
         // Close socket first to abort any blocking I/O in libssh2
         atomicSocket.closeImmediately()
@@ -424,11 +500,9 @@ actor SSHSession {
         guard !hasBeenCleaned else { return }
         hasBeenCleaned = true
 
-        if let channel = channel {
-            libssh2_channel_close(channel)
-            libssh2_channel_free(channel)
-            self.channel = nil
-        }
+        closeAllShellChannels()
+        closeAllExecChannels()
+
         if let session = libssh2Session {
             libssh2_session_disconnect_ex(session, 11, "Normal shutdown", "")
             libssh2_session_free(session)
@@ -451,17 +525,18 @@ actor SSHSession {
 
     // MARK: - Shell
 
-    func startShell(cols: Int, rows: Int) async throws -> AsyncStream<Data> {
+    func startShell(cols: Int, rows: Int) async throws -> ShellHandle {
         guard let session = libssh2Session else {
             throw SSHError.notConnected
         }
 
         // Set blocking for channel setup
         libssh2_session_set_blocking(session, 1)
+        defer { libssh2_session_set_blocking(session, 0) }
 
         // Open channel (use _ex variant since macros not available in Swift)
         // LIBSSH2_CHANNEL_WINDOW_DEFAULT = 2*1024*1024, LIBSSH2_CHANNEL_PACKET_DEFAULT = 32768
-        channel = libssh2_channel_open_ex(
+        guard let channel = libssh2_channel_open_ex(
             session,
             "session",
             UInt32("session".utf8.count),
@@ -469,8 +544,7 @@ actor SSHSession {
             32768,             // packet size
             nil,
             0
-        )
-        guard let channel = channel else {
+        ) else {
             throw SSHError.channelOpenFailed
         }
 
@@ -487,53 +561,54 @@ actor SSHSession {
             0
         )
         guard ptyResult == 0 else {
+            libssh2_channel_close(channel)
+            libssh2_channel_free(channel)
             throw SSHError.shellRequestFailed
         }
 
         // Start shell (use process_startup since shell macro not available in Swift)
         let shellResult = libssh2_channel_process_startup(channel, "shell", 5, nil, 0)
         guard shellResult == 0 else {
+            libssh2_channel_close(channel)
+            libssh2_channel_free(channel)
             throw SSHError.shellRequestFailed
         }
 
-        // Set non-blocking for I/O
-        libssh2_session_set_blocking(session, 0)
-
         logger.info("Shell started (\(cols)x\(rows))")
 
-        // Create output stream
+        let shellId = UUID()
         let stream = AsyncStream<Data> { continuation in
-            self.shellContinuation = continuation
+            let state = ShellChannelState(id: shellId, channel: channel, continuation: continuation)
+            self.shellChannels[shellId] = state
 
             continuation.onTermination = { [weak self] _ in
                 Task { [weak self] in
-                    await self?.stopReading()
+                    await self?.closeShell(shellId)
                 }
             }
         }
 
-        // Start reading in background
-        startReading()
+        // Start IO loop
+        startIOLoop()
 
-        return stream
+        return ShellHandle(id: shellId, stream: stream)
     }
 
-    private func startReading() {
-        readTask = Task { [weak self] in
-            await self?.readLoop()
+    private func startIOLoop() {
+        guard ioTask == nil else { return }
+        ioTask = Task { [weak self] in
+            await self?.ioLoop()
         }
     }
 
-    private func stopReading() {
-        readTask?.cancel()
-        readTask = nil
+    private func stopIOLoop() {
+        ioTask?.cancel()
+        ioTask = nil
     }
 
-    private func readLoop() async {
+    private func ioLoop() async {
         var buffer = [CChar](repeating: 0, count: 32768)
-        var batchBuffer = Data()
         let batchThreshold = 65536  // 64KB batch threshold
-        var lastYieldTime = DispatchTime.now().uptimeNanoseconds
 
         // Adaptive batch delay: track data rate to switch between interactive and bulk modes
         // Interactive mode (keystrokes): 1ms delay for minimum latency
@@ -542,68 +617,108 @@ actor SSHSession {
         let bulkDelay: UInt64 = 5_000_000          // 5ms
         let interactiveThreshold = 100             // bytes - below this is interactive
         let bulkThreshold = 1000                   // bytes - above this is bulk
-        var recentBytesPerRead: Int = 0            // exponential moving average
 
-        while !Task.isCancelled, let channel = channel, libssh2Session != nil {
-            // Use _ex variant since macros not available in Swift (stream_id 0 = stdout)
-            let bytesRead = libssh2_channel_read_ex(channel, 0, &buffer, buffer.count)
+        while !Task.isCancelled, libssh2Session != nil {
+            var didWork = false
 
-            if bytesRead > 0 {
-                let readCount = Int(bytesRead)
-                batchBuffer.append(Data(bytes: buffer, count: readCount))
+            if !shellChannels.isEmpty {
+                let states = Array(shellChannels.values)
+                for state in states {
+                    // Use _ex variant since macros not available in Swift (stream_id 0 = stdout)
+                    let bytesRead = libssh2_channel_read_ex(state.channel, 0, &buffer, buffer.count)
 
-                // Update exponential moving average (alpha = 0.3 for quick adaptation)
-                recentBytesPerRead = (recentBytesPerRead * 7 + readCount * 3) / 10
+                    if bytesRead > 0 {
+                        let readCount = Int(bytesRead)
+                        state.batchBuffer.append(Data(bytes: buffer, count: readCount))
+                        didWork = true
 
-                // Adaptive delay based on data rate
-                let maxBatchDelay: UInt64
-                if recentBytesPerRead < interactiveThreshold {
-                    maxBatchDelay = interactiveDelay  // Fast for keystrokes
-                } else if recentBytesPerRead > bulkThreshold {
-                    maxBatchDelay = bulkDelay         // Slower for bulk data
-                } else {
-                    // Linear interpolation between modes
-                    let ratio = UInt64(recentBytesPerRead - interactiveThreshold) * 100 / UInt64(bulkThreshold - interactiveThreshold)
-                    maxBatchDelay = interactiveDelay + (bulkDelay - interactiveDelay) * ratio / 100
+                        // Update exponential moving average (alpha = 0.3 for quick adaptation)
+                        state.recentBytesPerRead = (state.recentBytesPerRead * 7 + readCount * 3) / 10
+
+                        // Adaptive delay based on data rate
+                        let maxBatchDelay: UInt64
+                        if state.recentBytesPerRead < interactiveThreshold {
+                            maxBatchDelay = interactiveDelay  // Fast for keystrokes
+                        } else if state.recentBytesPerRead > bulkThreshold {
+                            maxBatchDelay = bulkDelay         // Slower for bulk data
+                        } else {
+                            // Linear interpolation between modes
+                            let ratio = UInt64(state.recentBytesPerRead - interactiveThreshold) * 100 / UInt64(bulkThreshold - interactiveThreshold)
+                            maxBatchDelay = interactiveDelay + (bulkDelay - interactiveDelay) * ratio / 100
+                        }
+
+                        // Yield batch when threshold reached or enough time passed
+                        let now = DispatchTime.now().uptimeNanoseconds
+                        let timeSinceYield = now - state.lastYieldTime
+
+                        if state.batchBuffer.count >= batchThreshold || timeSinceYield >= maxBatchDelay {
+                            state.continuation.yield(state.batchBuffer)
+                            state.batchBuffer = Data()
+                            state.lastYieldTime = now
+                        }
+                    } else if bytesRead == Int(LIBSSH2_ERROR_EAGAIN) {
+                        // Flush any pending data before waiting
+                        if !state.batchBuffer.isEmpty {
+                            state.continuation.yield(state.batchBuffer)
+                            state.batchBuffer = Data()
+                            state.lastYieldTime = DispatchTime.now().uptimeNanoseconds
+                        }
+                        // Reset to interactive mode when idle (waiting for input)
+                        state.recentBytesPerRead = 0
+                    } else if bytesRead < 0 {
+                        // Error - flush remaining data first
+                        if !state.batchBuffer.isEmpty {
+                            state.continuation.yield(state.batchBuffer)
+                        }
+                        logger.error("Read error: \(bytesRead)")
+                        closeShellInternal(state.id)
+                        continue
+                    }
+
+                    // Check for EOF
+                    if libssh2_channel_eof(state.channel) != 0 {
+                        if !state.batchBuffer.isEmpty {
+                            state.continuation.yield(state.batchBuffer)
+                        }
+                        logger.info("Channel EOF")
+                        closeShellInternal(state.id)
+                        didWork = true
+                    }
                 }
+            }
 
-                // Yield batch when threshold reached or enough time passed
-                let now = DispatchTime.now().uptimeNanoseconds
-                let timeSinceYield = now - lastYieldTime
+            if !execRequests.isEmpty {
+                let requestIds = Array(execRequests.keys)
+                for requestId in requestIds {
+                    guard let request = execRequests[requestId] else { continue }
+                    guard ensureExecChannelReady(request) else { continue }
 
-                if batchBuffer.count >= batchThreshold || timeSinceYield >= maxBatchDelay {
-                    shellContinuation?.yield(batchBuffer)
-                    batchBuffer = Data()
-                    lastYieldTime = now
+                    guard let execChannel = request.channel else { continue }
+
+                    let bytesRead = libssh2_channel_read_ex(execChannel, 0, &buffer, buffer.count)
+                    if bytesRead > 0 {
+                        request.output.append(Data(bytes: buffer, count: Int(bytesRead)))
+                        didWork = true
+                    } else if bytesRead == Int(LIBSSH2_ERROR_EAGAIN) {
+                        // No data yet
+                    } else if bytesRead < 0 {
+                        finishExecRequest(requestId, error: SSHError.socketError("Exec read failed: \(bytesRead)"))
+                        continue
+                    }
+
+                    if let currentChannel = request.channel, libssh2_channel_eof(currentChannel) != 0 {
+                        finishExecRequest(requestId, error: nil)
+                        didWork = true
+                    }
                 }
-            } else if bytesRead == Int(LIBSSH2_ERROR_EAGAIN) {
-                // Flush any pending data before waiting
-                if !batchBuffer.isEmpty {
-                    shellContinuation?.yield(batchBuffer)
-                    batchBuffer = Data()
-                    lastYieldTime = DispatchTime.now().uptimeNanoseconds
-                }
-                // Reset to interactive mode when idle (waiting for input)
-                recentBytesPerRead = 0
-                // Would block, wait for socket with efficient poll
-                await waitForSocket()
-            } else if bytesRead < 0 {
-                // Error - flush remaining data first
-                if !batchBuffer.isEmpty {
-                    shellContinuation?.yield(batchBuffer)
-                }
-                logger.error("Read error: \(bytesRead)")
+            }
+
+            if shellChannels.isEmpty, execRequests.isEmpty {
                 break
             }
 
-            // Check for EOF
-            if libssh2_channel_eof(channel) != 0 {
-                // Flush remaining data
-                if !batchBuffer.isEmpty {
-                    shellContinuation?.yield(batchBuffer)
-                }
-                logger.info("Channel EOF")
-                break
+            if !didWork {
+                await waitForSocket()
             }
 
             // Always yield to prevent starving other tasks (especially important during rapid typing)
@@ -611,7 +726,125 @@ actor SSHSession {
             await Task.yield()
         }
 
-        shellContinuation?.finish()
+        closeAllShellChannels()
+        stopIOLoop()
+    }
+
+    func closeShell(_ shellId: UUID) async {
+        closeShellInternal(shellId)
+    }
+
+    private func closeShellInternal(_ shellId: UUID) {
+        guard let state = shellChannels.removeValue(forKey: shellId) else { return }
+        if !state.batchBuffer.isEmpty {
+            state.continuation.yield(state.batchBuffer)
+        }
+        libssh2_channel_close(state.channel)
+        libssh2_channel_free(state.channel)
+        state.continuation.finish()
+    }
+
+    private func closeAllShellChannels() {
+        let states = shellChannels
+        shellChannels.removeAll()
+        for state in states.values {
+            if !state.batchBuffer.isEmpty {
+                state.continuation.yield(state.batchBuffer)
+            }
+            libssh2_channel_close(state.channel)
+            libssh2_channel_free(state.channel)
+            state.continuation.finish()
+        }
+    }
+
+    private func closeAllExecChannels() {
+        for request in execRequests.values {
+            if let channel = request.channel {
+                libssh2_channel_close(channel)
+                libssh2_channel_free(channel)
+                request.channel = nil
+            }
+        }
+        execRequests.removeAll()
+    }
+
+    private func failAllExecRequests(error: Error) {
+        let requests = execRequests
+        execRequests.removeAll()
+        for request in requests.values {
+            if let channel = request.channel {
+                libssh2_channel_close(channel)
+                libssh2_channel_free(channel)
+                request.channel = nil
+            }
+            request.continuation.resume(throwing: error)
+        }
+    }
+
+    private func ensureExecChannelReady(_ request: ExecRequest) -> Bool {
+        guard let session = libssh2Session else {
+            finishExecRequest(request.id, error: SSHError.notConnected)
+            return false
+        }
+
+        if request.channel == nil {
+            let newChannel = libssh2_channel_open_ex(
+                session,
+                "session",
+                UInt32("session".utf8.count),
+                2 * 1024 * 1024,
+                32768,
+                nil,
+                0
+            )
+            if let newChannel = newChannel {
+                request.channel = newChannel
+            } else {
+                let lastError = libssh2_session_last_errno(session)
+                if lastError == LIBSSH2_ERROR_EAGAIN {
+                    return false
+                }
+                finishExecRequest(request.id, error: SSHError.channelOpenFailed)
+                return false
+            }
+        }
+
+        if !request.isStarted, let execChannel = request.channel {
+            let execResult = libssh2_channel_process_startup(
+                execChannel,
+                "exec",
+                4,
+                request.command,
+                UInt32(request.command.utf8.count)
+            )
+            if execResult == Int32(LIBSSH2_ERROR_EAGAIN) {
+                return false
+            }
+            if execResult != 0 {
+                finishExecRequest(request.id, error: SSHError.unknown("Exec failed: \(execResult)"))
+                return false
+            }
+            request.isStarted = true
+        }
+
+        return true
+    }
+
+    private func finishExecRequest(_ requestId: UUID, error: Error?) {
+        guard let request = execRequests.removeValue(forKey: requestId) else { return }
+
+        if let channel = request.channel {
+            libssh2_channel_close(channel)
+            libssh2_channel_free(channel)
+            request.channel = nil
+        }
+
+        if let error = error {
+            request.continuation.resume(throwing: error)
+        } else {
+            let output = String(data: request.output, encoding: .utf8) ?? ""
+            request.continuation.resume(returning: output)
+        }
     }
 
     private func waitForSocket() async {
@@ -639,8 +872,8 @@ actor SSHSession {
 
     // MARK: - Write
 
-    func write(_ data: Data) async throws {
-        guard let channel = channel else {
+    func write(_ data: Data, to shellId: UUID) async throws {
+        guard let state = shellChannels[shellId] else {
             throw SSHError.notConnected
         }
 
@@ -654,7 +887,7 @@ actor SSHSession {
             let written = bytes.withUnsafeMutableBufferPointer { buffer -> Int in
                 guard let ptr = buffer.baseAddress else { return -1 }
                 return Int(libssh2_channel_write_ex(
-                    channel, 0,
+                    state.channel, 0,
                     UnsafeRawPointer(ptr.advanced(by: offset)).assumingMemoryBound(to: CChar.self),
                     remaining
                 ))
@@ -674,13 +907,13 @@ actor SSHSession {
 
     // MARK: - Resize
 
-    func resize(cols: Int, rows: Int) async throws {
-        guard let channel = channel else {
+    func resize(cols: Int, rows: Int, for shellId: UUID) async throws {
+        guard let state = shellChannels[shellId] else {
             throw SSHError.notConnected
         }
 
         // Use _ex variant since macros not available in Swift
-        let result = libssh2_channel_request_pty_size_ex(channel, Int32(cols), Int32(rows), 0, 0)
+        let result = libssh2_channel_request_pty_size_ex(state.channel, Int32(cols), Int32(rows), 0, 0)
         if result != 0 && result != Int32(LIBSSH2_ERROR_EAGAIN) {
             logger.warning("PTY resize failed: \(result)")
         }
@@ -689,58 +922,15 @@ actor SSHSession {
     // MARK: - Execute Command
 
     func execute(_ command: String) async throws -> String {
-        guard let session = libssh2Session else {
+        guard libssh2Session != nil else {
             throw SSHError.notConnected
         }
+        startIOLoop()
 
-        // Set blocking for exec
-        libssh2_session_set_blocking(session, 1)
-        defer { libssh2_session_set_blocking(session, 0) }
-
-        // Open exec channel (use _ex variant since macros not available in Swift)
-        guard let execChannel = libssh2_channel_open_ex(
-            session,
-            "session",
-            UInt32("session".utf8.count),
-            2 * 1024 * 1024,
-            32768,
-            nil,
-            0
-        ) else {
-            throw SSHError.channelOpenFailed
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = ExecRequest(id: UUID(), command: command, continuation: continuation)
+            execRequests[request.id] = request
         }
-        defer {
-            libssh2_channel_close(execChannel)
-            libssh2_channel_free(execChannel)
-        }
-
-        // Execute command (use process_startup since exec macro not available in Swift)
-        let execResult = libssh2_channel_process_startup(
-            execChannel,
-            "exec",
-            4,
-            command,
-            UInt32(command.utf8.count)
-        )
-        guard execResult == 0 else {
-            throw SSHError.unknown("Exec failed: \(execResult)")
-        }
-
-        // Read output
-        var output = Data()
-        var buffer = [CChar](repeating: 0, count: 4096)
-
-        while true {
-            // Use _ex variant since macros not available in Swift (stream_id 0 = stdout)
-            let bytesRead = libssh2_channel_read_ex(execChannel, 0, &buffer, buffer.count)
-            if bytesRead > 0 {
-                output.append(Data(bytes: buffer, count: Int(bytesRead)))
-            } else {
-                break
-            }
-        }
-
-        return String(data: output, encoding: .utf8) ?? ""
     }
 
     // MARK: - Keep Alive
@@ -845,4 +1035,3 @@ final class AtomicSocket: @unchecked Sendable {
         }
     }
 }
-

@@ -31,6 +31,7 @@ struct TerminalContainerView: View {
     #if os(macOS) || os(iOS)
     @StateObject private var audioService = AudioService()
     @State private var showingVoiceRecording = false
+    @State private var voiceProcessing = false
     @State private var showingPermissionError = false
     @State private var permissionErrorMessage = ""
     @AppStorage("terminalVoiceButtonEnabled") private var voiceButtonEnabled = true
@@ -259,6 +260,7 @@ struct TerminalContainerView: View {
             if showingVoiceRecording {
                 audioService.cancelRecording()
                 showingVoiceRecording = false
+                voiceProcessing = false
             }
         }
         #endif
@@ -267,22 +269,29 @@ struct TerminalContainerView: View {
             if showingVoiceRecording {
                 audioService.cancelRecording()
                 showingVoiceRecording = false
+                voiceProcessing = false
             }
         }
         #endif
     }
 
     private func updateTerminalBackgroundColor() {
-        if let color = ThemeColorParser.backgroundColor(for: effectiveThemeName) {
-            terminalBackgroundColor = color
-        } else {
-            #if os(iOS)
-            terminalBackgroundColor = Color(UIColor.systemBackground)
-            #elseif os(macOS)
-            terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
-            #else
-            terminalBackgroundColor = .black
-            #endif
+        let themeName = effectiveThemeName
+        Task.detached(priority: .utility) {
+            let resolved = ThemeColorParser.backgroundColor(for: themeName)
+            await MainActor.run {
+                if let color = resolved {
+                    terminalBackgroundColor = color
+                } else {
+                    #if os(iOS)
+                    terminalBackgroundColor = Color(UIColor.systemBackground)
+                    #elseif os(macOS)
+                    terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
+                    #else
+                    terminalBackgroundColor = .black
+                    #endif
+                }
+            }
         }
     }
 
@@ -295,17 +304,20 @@ struct TerminalContainerView: View {
             onSend: { transcribedText in
                 sendTranscriptionToTerminal(transcribedText)
                 showingVoiceRecording = false
+                voiceProcessing = false
             },
             onCancel: {
                 showingVoiceRecording = false
-            }
+                voiceProcessing = false
+            },
+            isProcessing: $voiceProcessing
         )
         .padding(12)
         .frame(maxWidth: 520)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .adaptiveGlass()
         .overlay(
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+            Capsule()
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
         )
         .padding(16)
     }
@@ -350,6 +362,7 @@ struct TerminalContainerView: View {
             if event.keyCode == keyCodeEscape {
                 audioService.cancelRecording()
                 showingVoiceRecording = false
+                voiceProcessing = false
                 return nil
             }
             if event.keyCode == keyCodeReturn {
@@ -378,6 +391,7 @@ struct TerminalContainerView: View {
                     let fallback = text.isEmpty ? audioService.partialTranscription : text
                     sendTranscriptionToTerminal(fallback)
                     showingVoiceRecording = false
+                    voiceProcessing = false
                 }
             }
         } else {
@@ -398,6 +412,7 @@ struct TerminalContainerView: View {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     showingVoiceRecording = false
                 }
+                voiceProcessing = false
                 if let recordingError = error as? AudioService.RecordingError {
                     permissionErrorMessage = recordingError.localizedDescription
                         + "\n\n"

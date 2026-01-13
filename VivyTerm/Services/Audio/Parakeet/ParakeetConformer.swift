@@ -51,7 +51,7 @@ import MLX
             outputChannels: config.dModel,
             kernelSize: config.convKernelSize,
             stride: 1,
-            padding: 0,
+            padding: padding,
             groups: config.dModel,
             bias: config.useBias
         )
@@ -75,19 +75,6 @@ import MLX
 
         x = self.pointwiseConv1(x)
         x = MLXNN.glu(x, axis: 2)
-
-        // Handle caching for convolution if provided
-        if let cache = cache {
-            x = cache.updateAndFetchConv(x, padding: padding)
-        } else {
-            // Match Python exactly: mx.pad(x, ((0, 0), (self.padding, self.padding), (0, 0)))
-            x = MLX.padded(
-                x,
-                widths: [(0, 0), (padding, padding), (0, 0)].map { IntOrPair($0) },
-                mode: .constant,
-                value: MLXArray(0.0)
-            )
-        }
 
         x = depthwiseConv(x)
         x = batchNorm(x)

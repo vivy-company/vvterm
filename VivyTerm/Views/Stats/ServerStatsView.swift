@@ -17,6 +17,7 @@ private let screenBackground = Color(NSColor.windowBackgroundColor)
 struct ServerStatsView: View {
     let server: Server
     let isVisible: Bool
+    var sharedClientProvider: () -> SSHClient? = { nil }
 
     @StateObject private var statsCollector = ServerStatsCollector()
 
@@ -70,10 +71,10 @@ struct ServerStatsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(screenBackground)
-        .task(id: isVisible) {
+        .task(id: makeTaskKey()) {
             // Start/stop collection based on visibility
             if isVisible {
-                await statsCollector.startCollecting(for: server)
+                await statsCollector.startCollecting(for: server, using: sharedClientProvider())
             } else {
                 statsCollector.stopCollecting()
             }
@@ -81,6 +82,11 @@ struct ServerStatsView: View {
         .onDisappear {
             statsCollector.stopCollecting()
         }
+    }
+
+    private func makeTaskKey() -> String {
+        let clientId = sharedClientProvider().map { ObjectIdentifier($0).hashValue } ?? 0
+        return "\(server.id.uuidString)-\(isVisible)-\(clientId)"
     }
 }
 

@@ -40,11 +40,26 @@ final class TerminalTabManager: ObservableObject {
     /// Terminal views keyed by pane ID
     private var terminalViews: [UUID: GhosttyTerminalView] = [:]
 
-    /// SSH clients keyed by pane ID
-    private var sshClients: [UUID: SSHClient] = [:]
+    private struct SSHShellRegistration {
+        let serverId: UUID
+        let client: SSHClient
+        let shellId: UUID
+    }
+
+    /// Shell handles keyed by pane ID
+    private var sshShells: [UUID: SSHShellRegistration] = [:]
+
+    /// Shared SSH clients per server
+    private var sharedSSHClients: [UUID: SSHClient] = [:]
+
+    /// Shell counts per server for shared client lifecycle
+    private var serverShellCounts: [UUID: Int] = [:]
 
     /// Pane state keyed by pane ID
     @Published var paneStates: [UUID: TerminalPaneState] = [:]
+
+    /// Bumps when a terminal view is registered/unregistered so views refresh.
+    @Published private(set) var terminalRegistryVersion: Int = 0
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "TerminalTabManager")
 
@@ -242,6 +257,7 @@ final class TerminalTabManager: ObservableObject {
     /// Register a terminal view for a pane
     func registerTerminal(_ terminal: GhosttyTerminalView, for paneId: UUID) {
         terminalViews[paneId] = terminal
+        terminalRegistryVersion &+= 1
     }
 
     /// Unregister a terminal view
@@ -249,6 +265,7 @@ final class TerminalTabManager: ObservableObject {
         if let terminal = terminalViews.removeValue(forKey: paneId) {
             terminal.cleanup()
         }
+        terminalRegistryVersion &+= 1
     }
 
     /// Get terminal for a pane
@@ -257,20 +274,77 @@ final class TerminalTabManager: ObservableObject {
     }
 
     /// Register SSH client for a pane
-    func registerSSHClient(_ client: SSHClient, for paneId: UUID) {
-        sshClients[paneId] = client
+    func sharedSSHClient(for server: Server) -> SSHClient {
+        if let client = sharedSSHClients[server.id] {
+            return client
+        }
+        let client = SSHClient()
+        sharedSSHClients[server.id] = client
+        return client
     }
 
-    /// Unregister SSH client
+    /// Register SSH shell for a pane
+    func registerSSHClient(_ client: SSHClient, shellId: UUID, for paneId: UUID, serverId: UUID) {
+        if let existing = sshShells[paneId] {
+            Task.detached { [client = existing.client, shellId = existing.shellId] in
+                await client.closeShell(shellId)
+            }
+            serverShellCounts[existing.serverId] = max((serverShellCounts[existing.serverId] ?? 1) - 1, 0)
+        }
+
+        sshShells[paneId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
+        serverShellCounts[serverId, default: 0] += 1
+        sharedSSHClients[serverId] = client
+    }
+
+    /// Unregister SSH shell
     func unregisterSSHClient(for paneId: UUID) async {
-        if let client = sshClients.removeValue(forKey: paneId) {
+        guard let registration = sshShells.removeValue(forKey: paneId) else { return }
+
+        await registration.client.closeShell(registration.shellId)
+
+        let serverId = registration.serverId
+        let newCount = max((serverShellCounts[serverId] ?? 1) - 1, 0)
+        serverShellCounts[serverId] = newCount
+
+        if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
             await client.disconnect()
         }
     }
 
     /// Get SSH client for a pane
     func getSSHClient(for paneId: UUID) -> SSHClient? {
-        sshClients[paneId]
+        sshShells[paneId]?.client
+    }
+
+    func shellId(for paneId: UUID) -> UUID? {
+        sshShells[paneId]?.shellId
+    }
+
+    func sshClient(for serverId: UUID) -> SSHClient? {
+        if let client = sharedSSHClients[serverId] {
+            return client
+        }
+
+        if let selectedTab = selectedTab(for: serverId) {
+            let preferredPaneIds = [selectedTab.focusedPaneId, selectedTab.rootPaneId] + selectedTab.allPaneIds
+            for paneId in preferredPaneIds {
+                if let client = sshShells[paneId]?.client {
+                    return client
+                }
+            }
+        }
+
+        let serverTabs = tabs(for: serverId)
+        for tab in serverTabs {
+            for paneId in tab.allPaneIds {
+                if let client = sshShells[paneId]?.client {
+                    return client
+                }
+            }
+        }
+
+        return nil
     }
 
     /// Clean up a pane (terminal + SSH)

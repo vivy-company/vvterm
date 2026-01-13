@@ -33,20 +33,54 @@ struct TranscriptionSettingsDefaults {
 
 struct TranscriptionSettingsStore {
     static func currentProvider() -> TranscriptionProvider {
-        if let raw = UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.provider),
-           let provider = TranscriptionProvider(rawValue: raw) {
+        guard let raw = UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.provider) else {
+            return TranscriptionSettingsDefaults.provider
+        }
+        if let provider = TranscriptionProvider(rawValue: raw) {
             return provider
         }
-        return TranscriptionSettingsDefaults.provider
+        switch raw {
+        case "whisper":
+            return .mlxWhisper
+        case "parakeet":
+            return .mlxParakeet
+        default:
+            return TranscriptionSettingsDefaults.provider
+        }
     }
 
     static func currentWhisperModelId() -> String {
-        UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.mlxWhisperModelId)
-            ?? TranscriptionSettingsDefaults.mlxWhisperModelId
+        let raw: String
+        if let modelId = UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.mlxWhisperModelId) {
+            raw = modelId
+        } else if let legacy = UserDefaults.standard.string(forKey: "whisperModelId") {
+            raw = legacy
+        } else {
+            raw = TranscriptionSettingsDefaults.mlxWhisperModelId
+        }
+        return normalizedWhisperModelId(raw)
     }
 
     static func currentParakeetModelId() -> String {
-        UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.mlxParakeetModelId)
-            ?? TranscriptionSettingsDefaults.mlxParakeetModelId
+        if let modelId = UserDefaults.standard.string(forKey: TranscriptionSettingsKeys.mlxParakeetModelId) {
+            return modelId
+        }
+        if let legacy = UserDefaults.standard.string(forKey: "parakeetModelId") {
+            return legacy
+        }
+        return TranscriptionSettingsDefaults.mlxParakeetModelId
+    }
+
+    private static func normalizedWhisperModelId(_ modelId: String) -> String {
+        let trimmed = modelId.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return TranscriptionSettingsDefaults.mlxWhisperModelId }
+        if trimmed == "mlx-community/whisper-medium-mlx" {
+            return "mlx-community/whisper-medium-mlx-8bit"
+        }
+        if trimmed.hasSuffix("-mlx") { return trimmed }
+        if trimmed.hasPrefix("mlx-community/whisper-") {
+            return "\(trimmed)-mlx"
+        }
+        return trimmed
     }
 }

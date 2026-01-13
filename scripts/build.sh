@@ -1,13 +1,27 @@
 #!/bin/bash
-# VivyTerm Build Orchestrator
-# Builds all vendor libraries for macOS and iOS targets
+# VivyTerm vendor build (GhosttyKit + libssh2/OpenSSL)
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Colors for output
+VENDOR_GHOSTTY="$PROJECT_ROOT/Vendor/libghostty"
+VENDOR_SSH="$PROJECT_ROOT/Vendor/libssh2"
+BUILD_DIR_SSH="$PROJECT_ROOT/.build/ssh"
+
+OPENSSL_VERSION="3.2.0"
+LIBSSH2_VERSION="1.11.0"
+MACOS_DEPLOYMENT_TARGET="13.3"
+IOS_DEPLOYMENT_TARGET="16.0"
+
+GHOSTTY_REPO="https://github.com/wiedymi/ghostty"
+GHOSTTY_REF="${GHOSTTY_REF:-custom-io}"
+BUNDLE_ID="app.vivy.VivyTerm"
+
+KEEP_WORKDIR="${KEEP_WORKDIR:-0}"
+GHOSTTY_WORKDIR=""
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -23,205 +37,403 @@ print_usage() {
     cat << EOF
 VivyTerm Build Script
 
-Usage: $0 [command] [options]
+Usage: $0 [command]
 
 Commands:
-  all           Build everything (macOS + iOS)
-  macos         Build macOS libraries only
-  ios           Build iOS libraries only
-  clean         Clean build artifacts
-  help          Show this help message
+  all       Build GhosttyKit + libssh2/OpenSSL (default)
+  ghostty   Build GhosttyKit.xcframework and copy .a libs
+  ssh       Build libssh2 + OpenSSL (macOS + iOS + simulator)
+  clean     Remove .build + Vendor libraries
+  help      Show this help message
 
-Options:
-  --skip-ghostty    Skip libghostty build
-  --skip-ssh        Skip libssh2 build
-  --verbose         Enable verbose output
-
-Examples:
-  $0 all                    # Build everything
-  $0 macos                  # Build macOS only
-  $0 ios                    # Build iOS only
-  $0 all --skip-ghostty     # Build everything except ghostty
-  $0 clean                  # Clean all build artifacts
-
+Env:
+  GHOSTTY_REF=<git-ref>   Build a specific ghostty ref (default: custom-io)
+  KEEP_WORKDIR=1          Keep ghostty build temp dir for debugging
 EOF
 }
 
-# Parse arguments
-COMMAND="${1:-all}"
-SKIP_GHOSTTY=false
-SKIP_SSH=false
-VERBOSE=false
+require_cmd() {
+    if ! command -v "$1" >/dev/null 2>&1; then
+        log_error "Missing dependency: $1"
+        exit 1
+    fi
+}
 
-shift || true
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --skip-ghostty)
-            SKIP_GHOSTTY=true
-            shift
-            ;;
-        --skip-ssh)
-            SKIP_SSH=true
-            shift
-            ;;
-        --verbose)
-            VERBOSE=true
-            set -x
-            shift
-            ;;
-        *)
-            log_error "Unknown option: $1"
-            print_usage
-            exit 1
-            ;;
-    esac
-done
+check_deps_ghostty() {
+    require_cmd git
+    require_cmd zig
+    require_cmd xcodebuild
+    require_cmd perl
+    require_cmd rsync
+}
 
-# Check dependencies
-check_deps() {
-    local missing=()
+check_deps_ssh() {
+    require_cmd curl
+    require_cmd tar
+    require_cmd cmake
+    require_cmd make
+    require_cmd xcrun
+}
 
-    for cmd in git cmake; do
-        if ! command -v "$cmd" >/dev/null 2>&1; then
-            missing+=("$cmd")
-        fi
-    done
+strip_lib() {
+    local lib="$1"
+    if command -v xcrun >/dev/null 2>&1; then
+        xcrun strip -S -x "$lib" || strip -S -x "$lib"
+    else
+        strip -S -x "$lib"
+    fi
+}
 
-    if ! command -v zig >/dev/null 2>&1; then
-        missing+=("zig (brew install zig)")
+build_ghosttykit() {
+    log_section "GhosttyKit"
+
+    GHOSTTY_WORKDIR="$(mktemp -d "/tmp/ghosttykit.XXXXXX")"
+    local workdir="$GHOSTTY_WORKDIR"
+
+    log_info "Cloning ghostty @ ${GHOSTTY_REF}..."
+    git clone --filter=blob:none --branch "${GHOSTTY_REF}" --depth 1 "${GHOSTTY_REPO}" "${workdir}/ghostty"
+
+    # Patch to link Metal frameworks (same as aizen)
+    if [ -f "${workdir}/ghostty/pkg/macos/build.zig" ]; then
+        perl -0pi -e 's/lib\.linkFramework\("IOSurface"\);/lib.linkFramework("IOSurface");\n    lib.linkFramework("Metal");\n    lib.linkFramework("MetalKit");/g' "${workdir}/ghostty/pkg/macos/build.zig"
+        perl -0pi -e 's/module\.linkFramework\("IOSurface", \.\{\}\);/module.linkFramework("IOSurface", .{});\n        module.linkFramework("Metal", .{});\n        module.linkFramework("MetalKit", .{});/g' "${workdir}/ghostty/pkg/macos/build.zig"
     fi
 
-    if ! command -v xcrun >/dev/null 2>&1; then
-        missing+=("Xcode Command Line Tools (xcode-select --install)")
+    # Patch IOSurfaceLayer for iOS
+    if [ -f "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig" ]; then
+        perl -0pi -e 's/const std = @import\\("std"\\);/const std = @import("std");\\nconst builtin = @import("builtin");/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
+        perl -0pi -e 's/const CALayer =\\s*\\n\\s*objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed;/const base_layer = switch (comptime builtin\\.os\\.tag) {\\n        \\.ios => objc\\.getClass\\("CAIOSurfaceLayer"\\) orelse\\n            objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed,\\n        else => objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed,\\n    };/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
+        perl -0pi -e 's/objc\\.allocateClassPair\\(CALayer, "IOSurfaceLayer"\\)/objc.allocateClassPair(base_layer, "IOSurfaceLayer")/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
+        perl -0pi -e 's/layer\\.setProperty\\("contentsGravity", macos\\.animation\\.kCAGravityTopLeft\\);/layer.setProperty("contentsGravity", macos.animation.kCAGravityTopLeft);\\n    layer.setProperty("opaque", true);/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
     fi
 
-    if [ ${#missing[@]} -gt 0 ]; then
-        log_error "Missing dependencies:"
-        for dep in "${missing[@]}"; do
-            echo "  - $dep"
-        done
+    # Patch bundle ID to use VivyTerm's instead of Ghostty's
+    sed -i '' "s/com\\.mitchellh\\.ghostty/${BUNDLE_ID}/g" "${workdir}/ghostty/src/build_config.zig"
+
+    # Lower iOS minimum to match app deployment target
+    perl -0pi -e 's/\\.ios => \\.\\{ \\.semver = \\.\\{\\n\\s*\\.major = \\d+,\\n\\s*\\.minor = \\d+,\\n\\s*\\.patch = \\d+,\\n\\s*\\} \\},/\\.ios => .{ .semver = .{\\n            .major = 16,\\n            .minor = 0,\\n            .patch = 0,\\n        } },/s' "${workdir}/ghostty/src/build/Config.zig"
+
+    log_info "Building GhosttyKit.xcframework..."
+
+    local zig_flags=(
+        -Dapp-runtime=none
+        -Demit-xcframework=true
+        -Demit-macos-app=false
+        -Demit-exe=false
+        -Demit-docs=false
+        -Demit-webdata=false
+        -Demit-helpgen=false
+        -Demit-terminfo=false
+        -Demit-termcap=false
+        -Demit-themes=false
+        -Doptimize=ReleaseFast
+        -Dstrip
+        -Dxcframework-target=universal
+    )
+
+    (cd "${workdir}/ghostty" && zig build "${zig_flags[@]}" -p "${workdir}/zig-out")
+
+    local xcframework="${workdir}/ghostty/macos/GhosttyKit.xcframework"
+    if [ ! -d "${xcframework}" ]; then
+        log_error "${xcframework} not found"
         exit 1
     fi
 
-    log_info "All dependencies found"
+    local macos_lib
+    local ios_lib
+    local sim_lib
+    macos_lib=$(find "${xcframework}" -path "*/macos-*/libghostty*.a" -type f -print -quit)
+    ios_lib=$(find "${xcframework}" -path "*/ios-arm64/libghostty*.a" -type f -print -quit)
+    sim_lib=$(find "${xcframework}" -path "*/ios-arm64-simulator/libghostty*.a" -type f -print -quit)
+
+    if [ -z "${macos_lib}" ] || [ -z "${ios_lib}" ] || [ -z "${sim_lib}" ]; then
+        log_error "Failed to locate libghostty.a inside xcframework"
+        exit 1
+    fi
+
+    mkdir -p "${VENDOR_GHOSTTY}/lib" "${VENDOR_GHOSTTY}/ios/lib" "${VENDOR_GHOSTTY}/ios-simulator/lib"
+    cp "${macos_lib}" "${VENDOR_GHOSTTY}/lib/libghostty.a"
+    cp "${ios_lib}" "${VENDOR_GHOSTTY}/ios/lib/libghostty.a"
+    cp "${sim_lib}" "${VENDOR_GHOSTTY}/ios-simulator/lib/libghostty.a"
+
+    if [ -d "${workdir}/ghostty/include" ]; then
+        mkdir -p "${VENDOR_GHOSTTY}/include" "${VENDOR_GHOSTTY}/ios/include" "${VENDOR_GHOSTTY}/ios-simulator/include"
+        rsync -a --exclude='module.modulemap' "${workdir}/ghostty/include/" "${VENDOR_GHOSTTY}/include/"
+        rsync -a --exclude='module.modulemap' "${workdir}/ghostty/include/" "${VENDOR_GHOSTTY}/ios/include/"
+        rsync -a --exclude='module.modulemap' "${workdir}/ghostty/include/" "${VENDOR_GHOSTTY}/ios-simulator/include/"
+    fi
+
+    rm -rf "${VENDOR_GHOSTTY}/GhosttyKit.xcframework"
+    rsync -a "${xcframework}" "${VENDOR_GHOSTTY}/"
+
+    printf "%s\n" "$(git -C "${workdir}/ghostty" rev-parse HEAD)" > "${VENDOR_GHOSTTY}/VERSION"
+
+    strip_lib "${VENDOR_GHOSTTY}/lib/libghostty.a"
+    strip_lib "${VENDOR_GHOSTTY}/ios/lib/libghostty.a"
+    strip_lib "${VENDOR_GHOSTTY}/ios-simulator/lib/libghostty.a"
+
+    log_info "GhosttyKit done"
+    log_info "  macOS: $(ls -lh "${VENDOR_GHOSTTY}/lib/libghostty.a" | awk '{print $5}')"
+    log_info "  iOS: $(ls -lh "${VENDOR_GHOSTTY}/ios/lib/libghostty.a" | awk '{print $5}')"
+    log_info "  iOS Simulator: $(ls -lh "${VENDOR_GHOSTTY}/ios-simulator/lib/libghostty.a" | awk '{print $5}')"
+
+    if [ "${KEEP_WORKDIR}" = "1" ]; then
+        log_warn "Keeping workdir: ${workdir}"
+    else
+        rm -rf "${workdir}"
+        GHOSTTY_WORKDIR=""
+    fi
 }
 
-# Build macOS libraries
-build_macos() {
-    log_section "Building macOS Libraries"
+# ---------- libssh2 / OpenSSL ----------
 
-    if [ "$SKIP_GHOSTTY" = false ]; then
-        log_info "Building libghostty for macOS..."
-        "${SCRIPT_DIR}/build-libghostty.sh"
-    else
-        log_warn "Skipping libghostty (--skip-ghostty)"
+download_sources() {
+    mkdir -p "${BUILD_DIR_SSH}"
+    cd "${BUILD_DIR_SSH}"
+
+    if [ ! -d "openssl-${OPENSSL_VERSION}" ]; then
+        log_info "Downloading OpenSSL ${OPENSSL_VERSION}..."
+        curl -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
+        tar xzf "openssl-${OPENSSL_VERSION}.tar.gz"
     fi
 
-    if [ "$SKIP_SSH" = false ]; then
-        log_info "Building libssh2 for macOS..."
-        "${SCRIPT_DIR}/build-libssh2.sh" macos
-    else
-        log_warn "Skipping libssh2 (--skip-ssh)"
+    if [ ! -d "libssh2-${LIBSSH2_VERSION}" ]; then
+        log_info "Downloading libssh2 ${LIBSSH2_VERSION}..."
+        curl -L -O "https://www.libssh2.org/download/libssh2-${LIBSSH2_VERSION}.tar.gz"
+        tar xzf "libssh2-${LIBSSH2_VERSION}.tar.gz"
     fi
-
-    log_info "macOS build complete"
 }
 
-# Build iOS libraries
-build_ios() {
-    log_section "Building iOS Libraries"
+build_openssl_macos() {
+    log_info "Building OpenSSL for macOS arm64..."
+    cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
 
-    if [ "$SKIP_GHOSTTY" = false ]; then
-        log_info "Building libghostty for iOS..."
-        "${SCRIPT_DIR}/build-libghostty-ios.sh"
-    else
-        log_warn "Skipping libghostty (--skip-ghostty)"
-    fi
+    make clean 2>/dev/null || true
 
-    if [ "$SKIP_SSH" = false ]; then
-        log_info "Building libssh2 for iOS..."
-        "${SCRIPT_DIR}/build-libssh2-ios.sh"
-    else
-        log_warn "Skipping libssh2 (--skip-ssh)"
-    fi
+    local mac_sdk
+    mac_sdk=$(xcrun --sdk macosx --show-sdk-path)
+    export MACOSX_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET}"
+    export CC="$(xcrun --sdk macosx -f clang) -isysroot ${mac_sdk} -mmacosx-version-min=${MACOS_DEPLOYMENT_TARGET}"
 
-    log_info "iOS build complete"
+    ./Configure darwin64-arm64-cc \
+        --prefix="${BUILD_DIR_SSH}/openssl-macos" \
+        no-shared \
+        no-tests
+
+    make -j"$(sysctl -n hw.ncpu)"
+    make install_sw
+
+    unset MACOSX_DEPLOYMENT_TARGET CC
 }
 
-# Clean build artifacts
+build_openssl_ios() {
+    log_info "Building OpenSSL for iOS arm64..."
+    cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+
+    make clean 2>/dev/null || true
+
+    local ios_sdk
+    ios_sdk=$(xcrun --sdk iphoneos --show-sdk-path)
+    export CROSS_TOP="$(xcrun --sdk iphoneos --show-sdk-platform-path)/Developer"
+    export CROSS_SDK="iPhoneOS.sdk"
+    export CC="$(xcrun --sdk iphoneos -f clang) -isysroot ${ios_sdk} -miphoneos-version-min=${IOS_DEPLOYMENT_TARGET}"
+
+    ./Configure ios64-xcrun \
+        --prefix="${BUILD_DIR_SSH}/openssl-ios" \
+        -miphoneos-version-min=${IOS_DEPLOYMENT_TARGET} \
+        no-shared \
+        no-tests \
+        no-apps
+
+    make -j"$(sysctl -n hw.ncpu)" build_libs
+    make install_sw
+
+    unset CROSS_TOP CROSS_SDK CC
+}
+
+build_openssl_simulator() {
+    log_info "Building OpenSSL for iOS Simulator arm64..."
+    cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+
+    make clean 2>/dev/null || true
+
+    local sim_sdk
+    sim_sdk=$(xcrun --sdk iphonesimulator --show-sdk-path)
+    export CROSS_TOP="$(xcrun --sdk iphonesimulator --show-sdk-platform-path)/Developer"
+    export CROSS_SDK="iPhoneSimulator.sdk"
+    export CC="$(xcrun --sdk iphonesimulator -f clang) -isysroot ${sim_sdk} -arch arm64 -mios-simulator-version-min=${IOS_DEPLOYMENT_TARGET}"
+
+    ./Configure iossimulator-xcrun \
+        --prefix="${BUILD_DIR_SSH}/openssl-simulator" \
+        -mios-simulator-version-min=${IOS_DEPLOYMENT_TARGET} \
+        no-shared \
+        no-tests \
+        no-apps
+
+    make -j"$(sysctl -n hw.ncpu)" build_libs
+    make install_sw
+
+    unset CROSS_TOP CROSS_SDK CC
+}
+
+build_libssh2_macos() {
+    log_info "Building libssh2 for macOS arm64..."
+    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
+
+    rm -rf build-macos
+    mkdir -p build-macos && cd build-macos
+
+    cmake .. \
+        -Wno-dev \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        -DCMAKE_OSX_ARCHITECTURES=arm64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET} \
+        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/macos" \
+        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-macos" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTING=OFF
+
+    make -j"$(sysctl -n hw.ncpu)"
+    make install
+
+    cp "${BUILD_DIR_SSH}/openssl-macos/lib/libssl.a" "${VENDOR_SSH}/macos/lib/"
+    cp "${BUILD_DIR_SSH}/openssl-macos/lib/libcrypto.a" "${VENDOR_SSH}/macos/lib/"
+}
+
+build_libssh2_ios() {
+    log_info "Building libssh2 for iOS arm64..."
+    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
+
+    rm -rf build-ios
+    mkdir -p build-ios && cd build-ios
+
+    local ios_sdk
+    ios_sdk=$(xcrun --sdk iphoneos --show-sdk-path)
+
+    cmake .. \
+        -Wno-dev \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        -DCMAKE_SYSTEM_NAME=iOS \
+        -DCMAKE_OSX_SYSROOT="${ios_sdk}" \
+        -DCMAKE_OSX_ARCHITECTURES=arm64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET} \
+        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/ios" \
+        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-ios" \
+        -DOPENSSL_INCLUDE_DIR="${BUILD_DIR_SSH}/openssl-ios/include" \
+        -DOPENSSL_CRYPTO_LIBRARY="${BUILD_DIR_SSH}/openssl-ios/lib/libcrypto.a" \
+        -DOPENSSL_SSL_LIBRARY="${BUILD_DIR_SSH}/openssl-ios/lib/libssl.a" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTING=OFF
+
+    make -j"$(sysctl -n hw.ncpu)"
+    make install
+
+    cp "${BUILD_DIR_SSH}/openssl-ios/lib/libssl.a" "${VENDOR_SSH}/ios/lib/"
+    cp "${BUILD_DIR_SSH}/openssl-ios/lib/libcrypto.a" "${VENDOR_SSH}/ios/lib/"
+}
+
+build_libssh2_simulator() {
+    log_info "Building libssh2 for iOS Simulator arm64..."
+    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
+
+    rm -rf build-simulator
+    mkdir -p build-simulator && cd build-simulator
+
+    local sim_sdk
+    sim_sdk=$(xcrun --sdk iphonesimulator --show-sdk-path)
+
+    cmake .. \
+        -Wno-dev \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+        -DCMAKE_SYSTEM_NAME=iOS \
+        -DCMAKE_OSX_SYSROOT="${sim_sdk}" \
+        -DCMAKE_OSX_ARCHITECTURES=arm64 \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET} \
+        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/ios-simulator" \
+        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-simulator" \
+        -DOPENSSL_INCLUDE_DIR="${BUILD_DIR_SSH}/openssl-simulator/include" \
+        -DOPENSSL_CRYPTO_LIBRARY="${BUILD_DIR_SSH}/openssl-simulator/lib/libcrypto.a" \
+        -DOPENSSL_SSL_LIBRARY="${BUILD_DIR_SSH}/openssl-simulator/lib/libssl.a" \
+        -DBUILD_SHARED_LIBS=OFF \
+        -DBUILD_EXAMPLES=OFF \
+        -DBUILD_TESTING=OFF
+
+    make -j"$(sysctl -n hw.ncpu)"
+    make install
+
+    cp "${BUILD_DIR_SSH}/openssl-simulator/lib/libssl.a" "${VENDOR_SSH}/ios-simulator/lib/"
+    cp "${BUILD_DIR_SSH}/openssl-simulator/lib/libcrypto.a" "${VENDOR_SSH}/ios-simulator/lib/"
+}
+
+create_modulemap() {
+    log_info "Writing libssh2 module map..."
+
+    cat > "${VENDOR_SSH}/module.modulemap" << 'EOF_MODULE'
+module libssh2 {
+    header "include/libssh2.h"
+    header "include/libssh2_sftp.h"
+    header "include/libssh2_publickey.h"
+    link "ssh2"
+    link "ssl"
+    link "crypto"
+    export *
+}
+EOF_MODULE
+}
+
+build_ssh() {
+    log_section "libssh2 + OpenSSL"
+    download_sources
+    build_openssl_macos
+    build_libssh2_macos
+    build_openssl_ios
+    build_libssh2_ios
+    build_openssl_simulator
+    build_libssh2_simulator
+    create_modulemap
+
+    log_info "libssh2 done"
+    log_info "  macOS: $(ls -lh "${VENDOR_SSH}/macos/lib/libssh2.a" | awk '{print $5}')"
+    log_info "  iOS: $(ls -lh "${VENDOR_SSH}/ios/lib/libssh2.a" | awk '{print $5}')"
+    log_info "  iOS Simulator: $(ls -lh "${VENDOR_SSH}/ios-simulator/lib/libssh2.a" | awk '{print $5}')"
+}
+
 clean() {
-    log_section "Cleaning Build Artifacts"
-
-    log_info "Removing .build directory..."
+    log_section "Clean"
     rm -rf "${PROJECT_ROOT}/.build"
-
-    log_info "Removing Vendor libraries..."
-    rm -rf "${PROJECT_ROOT}/Vendor/libghostty"
-    rm -rf "${PROJECT_ROOT}/Vendor/libssh2"
-
+    rm -rf "${VENDOR_GHOSTTY}"
+    rm -rf "${VENDOR_SSH}"
     log_info "Clean complete"
 }
 
-# Print build summary
-print_summary() {
-    log_section "Build Summary"
+COMMAND="${1:-all}"
 
-    echo "Vendor Libraries:"
-
-    if [ -d "${PROJECT_ROOT}/Vendor/libghostty" ]; then
-        echo "  libghostty:"
-        [ -f "${PROJECT_ROOT}/Vendor/libghostty/lib/libghostty.a" ] && echo "    - macOS: $(ls -lh "${PROJECT_ROOT}/Vendor/libghostty/lib/libghostty.a" 2>/dev/null | awk '{print $5}')"
-        [ -f "${PROJECT_ROOT}/Vendor/libghostty/ios/lib/libghostty.a" ] && echo "    - iOS: $(ls -lh "${PROJECT_ROOT}/Vendor/libghostty/ios/lib/libghostty.a" 2>/dev/null | awk '{print $5}')"
-        [ -f "${PROJECT_ROOT}/Vendor/libghostty/ios-simulator/lib/libghostty.a" ] && echo "    - iOS Simulator: $(ls -lh "${PROJECT_ROOT}/Vendor/libghostty/ios-simulator/lib/libghostty.a" 2>/dev/null | awk '{print $5}')"
-    fi
-
-    if [ -d "${PROJECT_ROOT}/Vendor/libssh2" ]; then
-        echo "  libssh2:"
-        [ -f "${PROJECT_ROOT}/Vendor/libssh2/macos/lib/libssh2.a" ] && echo "    - macOS: $(ls -lh "${PROJECT_ROOT}/Vendor/libssh2/macos/lib/libssh2.a" 2>/dev/null | awk '{print $5}')"
-        [ -f "${PROJECT_ROOT}/Vendor/libssh2/ios/lib/libssh2.a" ] && echo "    - iOS: $(ls -lh "${PROJECT_ROOT}/Vendor/libssh2/ios/lib/libssh2.a" 2>/dev/null | awk '{print $5}')"
-        [ -f "${PROJECT_ROOT}/Vendor/libssh2/ios-simulator/lib/libssh2.a" ] && echo "    - iOS Simulator: $(ls -lh "${PROJECT_ROOT}/Vendor/libssh2/ios-simulator/lib/libssh2.a" 2>/dev/null | awk '{print $5}')"
-    fi
-
-    echo ""
-    log_info "Build complete!"
-}
-
-# Main
-main() {
-    echo ""
-    echo "  VivyTerm Build System"
-    echo "  ====================="
-    echo ""
-
-    case "$COMMAND" in
-        all)
-            check_deps
-            build_macos
-            build_ios
-            print_summary
-            ;;
-        macos)
-            check_deps
-            build_macos
-            print_summary
-            ;;
-        ios)
-            check_deps
-            build_ios
-            print_summary
-            ;;
-        clean)
-            clean
-            ;;
-        help|--help|-h)
-            print_usage
-            ;;
-        *)
-            log_error "Unknown command: $COMMAND"
-            print_usage
-            exit 1
-            ;;
-    esac
-}
-
-main
+case "${COMMAND}" in
+    all)
+        check_deps_ghostty
+        check_deps_ssh
+        build_ghosttykit
+        build_ssh
+        ;;
+    ghostty)
+        check_deps_ghostty
+        build_ghosttykit
+        ;;
+    ssh)
+        check_deps_ssh
+        build_ssh
+        ;;
+    clean)
+        clean
+        ;;
+    help|--help|-h)
+        print_usage
+        ;;
+    *)
+        log_error "Unknown command: ${COMMAND}"
+        print_usage
+        exit 1
+        ;;
+ esac

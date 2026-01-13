@@ -1,3 +1,4 @@
+#if os(iOS)
 import WidgetKit
 import SwiftUI
 
@@ -8,3 +9,4 @@ struct VivyTermLiveActivityBundle: WidgetBundle {
         VivyTermLiveActivityWidget()
     }
 }
+#endif

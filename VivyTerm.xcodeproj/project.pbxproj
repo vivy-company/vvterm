@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4FB0ED9B3F04FE89CE2BD32E /* VivyTermLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4FB0ED9B3F04FE89CE2BD32E /* VivyTermLiveActivity.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A089872E7F6345088D2FA637 /* AppIntents.framework */; };
+		82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1853ABB6CF8195DF93B55895 /* ZIPFoundation */; };
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
 		CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B22F0CD851006804BF /* MLXNN */; };
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
@@ -52,6 +54,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A089872E7F6345088D2FA637 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
 		CC83127E2F0CD84D006804BF /* VivyTerm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VivyTerm.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC8312922F0CD84E006804BF /* VivyTermTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VivyTermTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC83129C2F0CD84E006804BF /* VivyTermUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VivyTermUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -122,6 +125,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */,
+				82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */,
 				CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */,
 				CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */,
 				CC83449F2F0D18CF006804BF /* MLX in Frameworks */,
@@ -155,6 +160,7 @@
 				CC8312952F0CD84E006804BF /* VivyTermTests */,
 				CC83129F2F0CD84E006804BF /* VivyTermUITests */,
 				CC83127F2F0CD84D006804BF /* Products */,
+				CCE343B22F14D398009AB1B8 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -167,6 +173,14 @@
 				F3220D94C71F0D68A0DF623E /* VivyTermLiveActivity.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CCE343B22F14D398009AB1B8 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A089872E7F6345088D2FA637 /* AppIntents.framework */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,6 +227,7 @@
 			);
 			name = VivyTerm;
 			packageProductDependencies = (
+				1853ABB6CF8195DF93B55895 /* ZIPFoundation */,
 				CC8312B12F0CD850006804BF /* MLX */,
 				CC8312B22F0CD851006804BF /* MLXNN */,
 				CC8312B32F0CD852006804BF /* MLXFFT */,
@@ -316,6 +331,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CC83127F2F0CD84D006804BF /* Products */;
@@ -395,6 +411,7 @@
 /* Begin PBXTargetDependency section */
 		8C20D610C36384746BDB0653 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = 0EA2F32A1035EAEEB6704E32 /* VivyTermLiveActivity */;
 			targetProxy = 2D63FACF96A1577111D37C0C /* PBXContainerItemProxy */;
 		};
@@ -998,9 +1015,22 @@
 				minimumVersion = 0.21.0;
 			};
 		};
+		8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.9;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1853ABB6CF8195DF93B55895 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
 		CC8312B12F0CD850006804BF /* MLX */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */;

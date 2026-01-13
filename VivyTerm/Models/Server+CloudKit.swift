@@ -72,8 +72,8 @@ extension Server {
         }
     }
 
-    func toRecord() -> CKRecord {
-        let recordID = CKRecord.ID(recordName: id.uuidString)
+    func toRecord(in zoneID: CKRecordZone.ID? = nil) -> CKRecord {
+        let recordID = CKRecord.ID(recordName: id.uuidString, zoneID: zoneID ?? CKRecordZone.default().zoneID)
         let record = CKRecord(recordType: "Server", recordID: recordID)
 
         record["workspaceId"] = workspaceId.uuidString

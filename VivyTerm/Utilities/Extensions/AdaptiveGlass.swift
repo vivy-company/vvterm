@@ -21,6 +21,20 @@ extension View {
         }
     }
 
+    /// Apply adaptive glass effect with circle shape
+    @ViewBuilder
+    func adaptiveGlassCircle() -> some View {
+        if #available(iOS 26, macOS 26, *) {
+            #if swift(>=6.1)
+            self.glassEffect(.regular.interactive(), in: Circle())
+            #else
+            self.background(.ultraThinMaterial, in: Circle())
+            #endif
+        } else {
+            self.background(.ultraThinMaterial, in: Circle())
+        }
+    }
+
     /// Apply adaptive glass effect with rounded rectangle shape
     @ViewBuilder
     func adaptiveGlassRect(cornerRadius: CGFloat = 12) -> some View {

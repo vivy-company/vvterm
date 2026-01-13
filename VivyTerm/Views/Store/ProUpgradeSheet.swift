@@ -24,7 +24,7 @@ struct ProUpgradeSheet: View {
     var body: some View {
         #if os(iOS)
         NavigationStack {
-            sheetContent
+            iosSheetContent
                 .navigationTitle("VVTerm Pro")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -38,14 +38,14 @@ struct ProUpgradeSheet: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
-                }
+            }
         }
         #else
-        sheetContent
+        macSheetContent
         #endif
     }
 
-    private var sheetContent: some View {
+    private var iosSheetContent: some View {
         VStack(spacing: 0) {
             #if os(macOS)
             // Header with close button (macOS only)
@@ -64,45 +64,7 @@ struct ProUpgradeSheet: View {
                 .padding(.bottom, 16)
 
             // Plan Options
-            glassContainer {
-                VStack(spacing: 8) {
-                    if let monthly = storeManager.monthlyProduct {
-                        PlanOptionRow(
-                            product: monthly,
-                            title: String(localized: "Monthly"),
-                            subtitle: String(localized: "Billed monthly"),
-                            badge: nil,
-                            isSelected: selectedProduct?.id == monthly.id
-                        ) {
-                            selectedProduct = monthly
-                        }
-                    }
-
-                    if let yearly = storeManager.yearlyProduct {
-                        PlanOptionRow(
-                            product: yearly,
-                            title: String(localized: "Yearly"),
-                            subtitle: String(localized: "Best value - billed yearly"),
-                            badge: PlanBadge(title: String(localized: "SAVE 74%"), style: .save),
-                            isSelected: selectedProduct?.id == yearly.id
-                        ) {
-                            selectedProduct = yearly
-                        }
-                    }
-
-                    if let lifetime = storeManager.lifetimeProduct {
-                        PlanOptionRow(
-                            product: lifetime,
-                            title: String(localized: "Lifetime"),
-                            subtitle: String(localized: "One-time purchase, forever"),
-                            badge: PlanBadge(title: String(localized: "FOREVER"), style: .forever),
-                            isSelected: selectedProduct?.id == lifetime.id
-                        ) {
-                            selectedProduct = lifetime
-                        }
-                    }
-                }
-            }
+            planOptionsSection
             .padding(.horizontal, 20)
             .padding(.bottom, 24)
 
@@ -111,11 +73,7 @@ struct ProUpgradeSheet: View {
                 .padding(.bottom, 20)
 
             // Restore Purchases
-            Button("Restore Purchases") {
-                Task { await storeManager.restorePurchases() }
-            }
-            .buttonStyle(.bordered)
-            .foregroundStyle(.primary)
+            restoreButton
             .padding(.bottom, 16)
 
             // Legal links
@@ -127,10 +85,6 @@ struct ProUpgradeSheet: View {
             Spacer()
             #endif
         }
-        #if os(macOS)
-        .frame(width: 420)
-        .fixedSize(horizontal: false, vertical: true)
-        #endif
         .task {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
@@ -164,6 +118,71 @@ struct ProUpgradeSheet: View {
             Text(errorMessage ?? String(localized: "Unknown error"))
         }
     }
+
+    #if os(macOS)
+    private var macSheetContent: some View {
+        VStack(spacing: 0) {
+            header
+                .padding(.horizontal, 20)
+                .padding(.top, 20)
+                .padding(.bottom, 12)
+
+            HStack(alignment: .top, spacing: 24) {
+                featuresSection
+                    .padding(.horizontal, 0)
+                    .padding(.vertical, 0)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                VStack(spacing: 16) {
+                    planOptionsSection
+
+                    subscribeButton
+
+                    restoreButton
+
+                    legalFooter
+                }
+                .frame(width: 260, alignment: .top)
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+        }
+        .frame(width: 680)
+        .fixedSize(horizontal: false, vertical: true)
+        .task {
+            await storeManager.loadProducts()
+            selectedProduct = storeManager.yearlyProduct
+        }
+        .onChange(of: storeManager.purchaseState) { newState in
+            switch newState {
+            case .purchased:
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showSuccess = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
+            case .failed(let message):
+                errorMessage = message
+            default:
+                break
+            }
+        }
+        .overlay {
+            if showSuccess {
+                successOverlay
+            }
+        }
+        .alert("Purchase Failed", isPresented: .init(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK") { errorMessage = nil }
+        } message: {
+            Text(errorMessage ?? String(localized: "Unknown error"))
+        }
+    }
+    #endif
 
     // MARK: - Success Overlay
 
@@ -255,6 +274,56 @@ struct ProUpgradeSheet: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
+    }
+
+    private var planOptionsSection: some View {
+        glassContainer {
+            VStack(spacing: 8) {
+                if let monthly = storeManager.monthlyProduct {
+                    PlanOptionRow(
+                        product: monthly,
+                        title: String(localized: "Monthly"),
+                        subtitle: String(localized: "Billed monthly"),
+                        badge: nil,
+                        isSelected: selectedProduct?.id == monthly.id
+                    ) {
+                        selectedProduct = monthly
+                    }
+                }
+
+                if let yearly = storeManager.yearlyProduct {
+                    PlanOptionRow(
+                        product: yearly,
+                        title: String(localized: "Yearly"),
+                        subtitle: String(localized: "Best value - billed yearly"),
+                        badge: PlanBadge(title: String(localized: "SAVE 74%"), style: .save),
+                        isSelected: selectedProduct?.id == yearly.id
+                    ) {
+                        selectedProduct = yearly
+                    }
+                }
+
+                if let lifetime = storeManager.lifetimeProduct {
+                    PlanOptionRow(
+                        product: lifetime,
+                        title: String(localized: "Lifetime"),
+                        subtitle: String(localized: "One-time purchase, forever"),
+                        badge: PlanBadge(title: String(localized: "FOREVER"), style: .forever),
+                        isSelected: selectedProduct?.id == lifetime.id
+                    ) {
+                        selectedProduct = lifetime
+                    }
+                }
+            }
+        }
+    }
+
+    private var restoreButton: some View {
+        Button("Restore Purchases") {
+            Task { await storeManager.restorePurchases() }
+        }
+        .buttonStyle(.bordered)
+        .foregroundStyle(.primary)
     }
 
     // MARK: - Legal Footer
@@ -410,9 +479,9 @@ private struct PlanOptionGlassStyle: ViewModifier {
     }
 }
 
-private extension ProUpgradeSheet {
-    @ViewBuilder
-    var subscribeButton: some View {
+    private extension ProUpgradeSheet {
+        @ViewBuilder
+        var subscribeButton: some View {
         #if swift(>=6.1)
         if #available(iOS 26, macOS 26, *) {
             Button {

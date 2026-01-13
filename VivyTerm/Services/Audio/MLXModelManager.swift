@@ -6,9 +6,9 @@ enum MLXModelKind: String, CaseIterable, Identifiable {
     case whisper
     case parakeetTDT
 
-    var id: String { rawValue }
+    nonisolated var id: String { rawValue }
 
-    var displayName: String {
+    nonisolated var displayName: String {
         switch self {
         case .whisper:
             return String(localized: "MLX Whisper")
@@ -17,7 +17,7 @@ enum MLXModelKind: String, CaseIterable, Identifiable {
         }
     }
 
-    var folderName: String {
+    nonisolated var folderName: String {
         switch self {
         case .whisper:
             return "whisper"
@@ -101,17 +101,17 @@ final class MLXModelManager: NSObject, ObservableObject {
         Self.modelDirectory(for: kind, modelId: normalizedModelId)
     }
 
-    static var modelsRoot: URL {
+    nonisolated static var modelsRoot: URL {
         #if os(iOS)
         // On iOS, use the app's documents directory
         let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         return documentsDir
-            .appendingPathComponent("vivyterm", isDirectory: true)
+            .appendingPathComponent("vvterm", isDirectory: true)
             .appendingPathComponent("models", isDirectory: true)
         #else
         let home = FileManager.default.homeDirectoryForCurrentUser
         return home
-            .appendingPathComponent(".vivyterm", isDirectory: true)
+            .appendingPathComponent(".vvterm", isDirectory: true)
             .appendingPathComponent("models", isDirectory: true)
         #endif
     }
@@ -190,30 +190,33 @@ final class MLXModelManager: NSObject, ObservableObject {
         guard !normalized.isEmpty else { return false }
         let directory = modelDirectory(for: kind, modelId: normalized)
         let config = directory.appendingPathComponent("config.json")
-        let weights = weightFiles(in: directory)
+        let weights = weightFiles(in: directory, allowedExtensions: allowedWeightExtensions(for: kind))
         return FileManager.default.fileExists(atPath: config.path) && !weights.isEmpty
     }
 
-    static func modelDirectory(for kind: MLXModelKind, modelId: String) -> URL {
+    nonisolated static func modelDirectory(for kind: MLXModelKind, modelId: String) -> URL {
         let sanitized = sanitizeModelId(modelId)
         return modelsRoot
             .appendingPathComponent(kind.folderName, isDirectory: true)
             .appendingPathComponent(sanitized, isDirectory: true)
     }
 
-    static func weightFiles(in directory: URL) -> [URL] {
+    nonisolated static func weightFiles(in directory: URL, allowedExtensions: Set<String>) -> [URL] {
         guard let files = try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil) else {
             return []
         }
-        let allowedExtensions = Set(["safetensors", "npz"])
         return files.filter { allowedExtensions.contains($0.pathExtension.lowercased()) }
+    }
+
+    static func allowedWeightExtensions(for kind: MLXModelKind) -> Set<String> {
+        return Set(["safetensors", "npz"])
     }
 
     private var normalizedModelId: String {
         modelId.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static func sanitizeModelId(_ modelId: String) -> String {
+    nonisolated private static func sanitizeModelId(_ modelId: String) -> String {
         let trimmed = modelId.trimmingCharacters(in: .whitespacesAndNewlines)
         let collapsed = trimmed.isEmpty ? "unknown-model" : trimmed
         return collapsed.replacingOccurrences(of: "/", with: "--")
@@ -279,6 +282,7 @@ final class MLXModelManager: NSObject, ObservableObject {
         let base = "https://huggingface.co/\(modelId)/resolve/main"
         var configPath: String?
         var weightPaths: [String] = []
+        let allowedExtensions = Self.allowedWeightExtensions(for: kind)
 
         if let files = try? await fetchModelFiles() {
             configPath = files.first { $0.hasSuffix("config.json") }
@@ -304,7 +308,23 @@ final class MLXModelManager: NSObject, ObservableObject {
         }
 
         if weightPaths.isEmpty {
-            weightPaths = try await resolveWeightsFallback(base: base)
+            if let indexed = try await resolveWeightsFromIndex(base: base) {
+                weightPaths = indexed
+            }
+        }
+
+        if !weightPaths.isEmpty {
+            weightPaths = weightPaths.filter { path in
+                allowedExtensions.contains((path as NSString).pathExtension.lowercased())
+            }
+            let hasSafetensors = weightPaths.contains { ($0 as NSString).pathExtension.lowercased() == "safetensors" }
+            if hasSafetensors {
+                weightPaths = weightPaths.filter { ($0 as NSString).pathExtension.lowercased() == "safetensors" }
+            }
+        }
+
+        if weightPaths.isEmpty {
+            weightPaths = try await resolveWeightsFallback(base: base, allowedExtensions: allowedExtensions)
         }
 
         guard !weightPaths.isEmpty else {
@@ -321,6 +341,16 @@ final class MLXModelManager: NSObject, ObservableObject {
             items.append(DownloadItem(url: url, destination: modelDirectory.appendingPathComponent((path as NSString).lastPathComponent)))
         }
 
+        if kind == .whisper {
+            let tokenizerBase = "https://raw.githubusercontent.com/openai/whisper/main/whisper/assets"
+            let tokenizerFiles = ["gpt2.tiktoken", "multilingual.tiktoken"]
+            for name in tokenizerFiles {
+                if let url = URL(string: "\(tokenizerBase)/\(name)") {
+                    items.append(DownloadItem(url: url, destination: modelDirectory.appendingPathComponent(name)))
+                }
+            }
+        }
+
         return items
     }
 
@@ -331,9 +361,11 @@ final class MLXModelManager: NSObject, ObservableObject {
         return info.siblings.map(\.rfilename)
     }
 
-    private func resolveWeightsFallback(base: String) async throws -> [String] {
+    private func resolveWeightsFallback(base: String, allowedExtensions: Set<String>) async throws -> [String] {
         let candidates = ["model.safetensors", "weights.safetensors", "weights.npz", "model.npz"]
         for name in candidates {
+            let ext = (name as NSString).pathExtension.lowercased()
+            guard allowedExtensions.contains(ext) else { continue }
             let url = URL(string: "\(base)/\(name)")!
             var request = URLRequest(url: url)
             request.httpMethod = "HEAD"
@@ -347,6 +379,24 @@ final class MLXModelManager: NSObject, ObservableObject {
             }
         }
         return []
+    }
+
+    private func resolveWeightsFromIndex(base: String) async throws -> [String]? {
+        let indexNames = ["model.safetensors.index.json", "weights.safetensors.index.json"]
+        for name in indexNames {
+            let url = URL(string: "\(base)/\(name)")!
+            do {
+                let (data, _) = try await session.data(from: url)
+                let index = try JSONDecoder().decode(SafetensorsIndex.self, from: data)
+                let weights = Array(Set(index.weightMap.values)).sorted()
+                if !weights.isEmpty {
+                    return weights
+                }
+            } catch {
+                continue
+            }
+        }
+        return nil
     }
 
     private func download(_ item: DownloadItem) async throws {

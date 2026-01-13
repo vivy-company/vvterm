@@ -4,7 +4,7 @@ import os.log
 
 // MARK: - Server Stats Collector
 
-/// Main stats collector that creates its own SSH connection to collect server stats
+/// Main stats collector that uses a shared SSH connection when available
 @MainActor
 final class ServerStatsCollector: ObservableObject {
     @Published var stats = ServerStats()
@@ -18,6 +18,7 @@ final class ServerStatsCollector: ObservableObject {
 
     // Own SSH client for stats collection
     private var sshClient: SSHClient?
+    private var ownsClient = false
 
     // Platform detection and collector
     private var remotePlatform: RemotePlatform = .unknown
@@ -26,7 +27,7 @@ final class ServerStatsCollector: ObservableObject {
 
     // MARK: - Collection Control
 
-    func startCollecting(for server: Server) async {
+    func startCollecting(for server: Server, using sharedClient: SSHClient? = nil) async {
         guard !isCollecting else { return }
         isCollecting = true
         connectionError = nil
@@ -36,8 +37,17 @@ final class ServerStatsCollector: ObservableObject {
         remotePlatform = .unknown
         platformCollector = nil
 
-        // Create SSH client and connect
-        let client = SSHClient()
+        // Use shared client if available, otherwise create one
+        let client: SSHClient
+        let ownsClient: Bool
+        if let sharedClient {
+            client = sharedClient
+            ownsClient = false
+        } else {
+            client = SSHClient()
+            ownsClient = true
+        }
+        self.ownsClient = ownsClient
         self.sshClient = client
 
         // Get credentials
@@ -78,10 +88,13 @@ final class ServerStatsCollector: ObservableObject {
             }
 
             // Cleanup
-            await client.disconnect()
+            if ownsClient {
+                await client.disconnect()
+            }
             await MainActor.run { [weak self] in
                 self?.isCollecting = false
                 self?.sshClient = nil
+                self?.ownsClient = false
             }
         }
     }
@@ -91,13 +104,14 @@ final class ServerStatsCollector: ObservableObject {
         collectTask?.cancel()
         collectTask = nil
 
-        // Disconnect SSH
-        if let client = sshClient {
+        // Disconnect SSH only if we own the connection
+        if ownsClient, let client = sshClient {
             Task.detached {
                 await client.disconnect()
             }
         }
         sshClient = nil
+        ownsClient = false
     }
 
     // MARK: - Stats Collection

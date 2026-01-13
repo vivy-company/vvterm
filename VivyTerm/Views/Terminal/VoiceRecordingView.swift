@@ -11,8 +11,20 @@ struct VoiceRecordingView: View {
     @ObservedObject var audioService: AudioService
     let onSend: (String) -> Void
     let onCancel: () -> Void
+    @Binding var isProcessing: Bool
 
     var body: some View {
+        VStack(spacing: 6) {
+            if isProcessing {
+                processingView
+            } else {
+                recordingView
+            }
+        }
+        .animation(.easeInOut(duration: 0.2), value: isProcessing)
+    }
+
+    private var recordingView: some View {
         VStack(spacing: 6) {
             // Transcription preview
             if !audioService.partialTranscription.isEmpty || !audioService.transcribedText.isEmpty {
@@ -29,6 +41,7 @@ struct VoiceRecordingView: View {
             HStack(spacing: 0) {
                 // Cancel Button
                 Button {
+                    isProcessing = false
                     audioService.cancelRecording()
                     onCancel()
                 } label: {
@@ -63,16 +76,14 @@ struct VoiceRecordingView: View {
 
                 // Send Button
                 Button {
+                    guard !isProcessing else { return }
+                    isProcessing = true
                     Task {
                         let text = await audioService.stopRecording()
-                        if !text.isEmpty {
-                            await MainActor.run {
-                                onSend(text)
-                            }
-                        } else {
-                            await MainActor.run {
-                                onSend(audioService.partialTranscription)
-                            }
+                        let output = text.isEmpty ? audioService.partialTranscription : text
+                        await MainActor.run {
+                            isProcessing = false
+                            onSend(output)
                         }
                     }
                 } label: {
@@ -85,6 +96,22 @@ struct VoiceRecordingView: View {
             }
             .frame(height: 40)
         }
+    }
+
+    private var processingView: some View {
+        HStack(spacing: 12) {
+            SiriOrbView(size: 30)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Processing…")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Transcribing audio")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundColor(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+        .transition(.opacity.combined(with: .scale(scale: 0.98)))
     }
 
     private func formatDuration(_ duration: TimeInterval) -> String {
@@ -174,5 +201,62 @@ struct AnimatedWaveformView: View {
                 cachedHeights[index] = targetHeights[index]
             }
         }
+    }
+}
+
+// MARK: - Siri Orb
+
+private struct SiriOrbView: View {
+    let size: CGFloat
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 0.033)) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            let angle = Angle(degrees: t * 40)
+            let pulse = 0.92 + 0.08 * sin(t * 2.2)
+            let glow = 0.5 + 0.3 * sin(t * 3.1 + 1.2)
+
+            ZStack {
+                Circle()
+                    .fill(
+                        AngularGradient(
+                            gradient: Gradient(colors: [
+                                Color.cyan,
+                                Color.blue,
+                                Color.purple,
+                                Color.pink,
+                                Color.cyan
+                            ]),
+                            center: .center,
+                            angle: angle
+                        )
+                    )
+                    .frame(width: size, height: size)
+                    .scaleEffect(pulse)
+
+                Circle()
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    .frame(width: size, height: size)
+
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.35),
+                                Color.clear
+                            ]),
+                            center: .topLeading,
+                            startRadius: 2,
+                            endRadius: size
+                        )
+                    )
+                    .frame(width: size, height: size)
+                    .blur(radius: 6)
+                    .opacity(glow)
+            }
+            .shadow(color: Color.white.opacity(0.12), radius: 10, x: 0, y: 6)
+        }
+        .frame(width: size, height: size)
+        .accessibilityHidden(true)
     }
 }

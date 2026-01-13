@@ -1,3 +1,4 @@
+#if os(iOS)
 import ActivityKit
 import SwiftUI
 import WidgetKit
@@ -115,3 +116,4 @@ private struct AppIconView: View {
             .scaledToFit()
     }
 }
+#endif
