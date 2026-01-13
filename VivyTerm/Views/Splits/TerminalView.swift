@@ -25,9 +25,25 @@ struct TerminalTabView: View {
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalVoiceButtonEnabled") private var voiceButtonEnabled = true
+
+    @StateObject private var audioService = AudioService()
+    @State private var showingVoiceRecording = false
+    @State private var voiceProcessing = false
+    @State private var showingPermissionError = false
+    @State private var permissionErrorMessage = ""
+    @State private var keyMonitor: Any?
 
     private var dividerColor: Color {
         ThemeColorParser.splitDividerColor(for: terminalThemeName)
+    }
+
+    private var focusedTerminal: GhosttyTerminalView? {
+        TerminalTabManager.shared.getTerminal(for: tab.focusedPaneId)
+    }
+
+    private var hasFocusedTerminal: Bool {
+        focusedTerminal != nil
     }
 
     /// Split actions for menu commands - only active when this tab is selected
@@ -42,6 +58,8 @@ struct TerminalTabView: View {
 
     var body: some View {
         ZStack {
+            // Refresh when terminals register/unregister so overlays can update immediately.
+            let _ = tabManager.terminalRegistryVersion
             if let layout = tab.layout {
                 renderNode(layout)
             } else {
@@ -52,8 +70,21 @@ struct TerminalTabView: View {
                     isFocused: true,
                     isTabSelected: isSelected,
                     onFocus: { },
-                    onProcessExit: { handlePaneExit(paneId: tab.rootPaneId) }
+                    onProcessExit: { handlePaneExit(paneId: tab.rootPaneId) },
+                    showsVoiceButton: isSelected
+                        && voiceButtonEnabled
+                        && !showingVoiceRecording
+                        && hasFocusedTerminal,
+                    onVoiceTrigger: { startVoiceRecording() }
                 )
+            }
+
+            if isSelected && hasFocusedTerminal {
+                if showingVoiceRecording {
+                    voiceOverlay
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
         }
         .focusedValue(\.activeServerId, isSelected ? server.id : nil)
@@ -77,6 +108,30 @@ struct TerminalTabView: View {
         } message: {
             Text("The SSH connection will be terminated.")
         }
+        .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(permissionErrorMessage)
+        }
+        .onAppear {
+            updateKeyMonitor()
+        }
+        .onChange(of: isSelected) { _ in
+            updateKeyMonitor()
+            if !isSelected, showingVoiceRecording {
+                audioService.cancelRecording()
+                showingVoiceRecording = false
+                voiceProcessing = false
+            }
+        }
+        .onDisappear {
+            cleanupKeyMonitor()
+            if showingVoiceRecording {
+                audioService.cancelRecording()
+                showingVoiceRecording = false
+                voiceProcessing = false
+            }
+        }
     }
 
     private func requestClosePane() {
@@ -95,7 +150,13 @@ struct TerminalTabView: View {
                     isFocused: tab.focusedPaneId == paneId,
                     isTabSelected: isSelected,
                     onFocus: { focusPane(paneId) },
-                    onProcessExit: { handlePaneExit(paneId: paneId) }
+                    onProcessExit: { handlePaneExit(paneId: paneId) },
+                    showsVoiceButton: isSelected
+                        && voiceButtonEnabled
+                        && !showingVoiceRecording
+                        && tab.focusedPaneId == paneId
+                        && hasFocusedTerminal,
+                    onVoiceTrigger: { startVoiceRecording() }
                 )
                 .id("\(paneId)-\(layoutVersion)")
             )
@@ -153,17 +214,143 @@ struct TerminalTabView: View {
     // MARK: - Split Actions
 
     func splitHorizontal() {
-        guard let newPaneId = tabManager.splitHorizontal(tab: tab, paneId: tab.focusedPaneId) else { return }
+        guard tabManager.splitHorizontal(tab: tab, paneId: tab.focusedPaneId) != nil else { return }
         layoutVersion += 1
     }
 
     func splitVertical() {
-        guard let newPaneId = tabManager.splitVertical(tab: tab, paneId: tab.focusedPaneId) else { return }
+        guard tabManager.splitVertical(tab: tab, paneId: tab.focusedPaneId) != nil else { return }
         layoutVersion += 1
     }
 
     func closeCurrentPane() {
         tabManager.closePane(tab: tab, paneId: tab.focusedPaneId)
+    }
+
+    // MARK: - Voice Input (macOS)
+
+    private var voiceOverlay: some View {
+        VoiceRecordingView(
+            audioService: audioService,
+            onSend: { transcribedText in
+                sendTranscriptionToTerminal(transcribedText)
+                showingVoiceRecording = false
+                voiceProcessing = false
+            },
+            onCancel: {
+                showingVoiceRecording = false
+                voiceProcessing = false
+            },
+            isProcessing: $voiceProcessing
+        )
+        .padding(12)
+        .frame(maxWidth: 520)
+        .adaptiveGlass()
+        .overlay(
+            Capsule()
+                .stroke(Color.white.opacity(0.08), lineWidth: 1)
+        )
+        .padding(16)
+    }
+
+    private func updateKeyMonitor() {
+        if isSelected {
+            setupKeyMonitor()
+        } else {
+            cleanupKeyMonitor()
+        }
+    }
+
+    private func setupKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [self] event in
+            handleVoiceShortcut(event)
+        }
+    }
+
+    private func cleanupKeyMonitor() {
+        if let monitor = keyMonitor {
+            NSEvent.removeMonitor(monitor)
+            keyMonitor = nil
+        }
+    }
+
+    private func handleVoiceShortcut(_ event: NSEvent) -> NSEvent? {
+        guard isSelected else { return event }
+
+        let keyCodeEscape: UInt16 = 53
+        let keyCodeReturn: UInt16 = 36
+
+        if showingVoiceRecording {
+            if event.keyCode == keyCodeEscape {
+                audioService.cancelRecording()
+                showingVoiceRecording = false
+                voiceProcessing = false
+                return nil
+            }
+            if event.keyCode == keyCodeReturn {
+                toggleVoiceRecording()
+                return nil
+            }
+        }
+
+        // Check for Cmd+Shift+M
+        guard event.modifierFlags.contains(.command),
+              event.modifierFlags.contains(.shift),
+              event.charactersIgnoringModifiers?.lowercased() == "m" else {
+            return event
+        }
+        toggleVoiceRecording()
+        return nil
+    }
+
+    private func toggleVoiceRecording() {
+        if showingVoiceRecording {
+            Task {
+                let text = await audioService.stopRecording()
+                await MainActor.run {
+                    let fallback = text.isEmpty ? audioService.partialTranscription : text
+                    sendTranscriptionToTerminal(fallback)
+                    showingVoiceRecording = false
+                    voiceProcessing = false
+                }
+            }
+        } else {
+            startVoiceRecording()
+        }
+    }
+
+    private func startVoiceRecording() {
+        Task {
+            do {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showingVoiceRecording = true
+                }
+                try await audioService.startRecording()
+            } catch {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    showingVoiceRecording = false
+                }
+                voiceProcessing = false
+                if let recordingError = error as? AudioService.RecordingError {
+                    permissionErrorMessage = recordingError.localizedDescription
+                        + "\n\n"
+                        + String(localized: "Enable Microphone and Speech Recognition in System Settings.")
+                } else {
+                    permissionErrorMessage = error.localizedDescription
+                }
+                showingPermissionError = true
+            }
+        }
+    }
+
+    private func sendTranscriptionToTerminal(_ text: String) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        guard let terminal = focusedTerminal else { return }
+        DispatchQueue.main.async {
+            terminal.sendText(trimmed)
+        }
     }
 }
 
@@ -177,6 +364,8 @@ struct TerminalPaneView: View {
     let isTabSelected: Bool
     let onFocus: () -> Void
     let onProcessExit: () -> Void
+    let showsVoiceButton: Bool
+    let onVoiceTrigger: () -> Void
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
@@ -235,6 +424,12 @@ struct TerminalPaneView: View {
                     }
                 }
             }
+
+            if showsVoiceButton && isFocused && isTabSelected {
+                voiceTriggerButton
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                    .transition(.opacity)
+            }
         }
         .opacity(isFocused ? 1.0 : 0.7)
         .task {
@@ -248,6 +443,20 @@ struct TerminalPaneView: View {
                 connectionError = String(localized: "Failed to load credentials")
             }
         }
+    }
+
+    private var voiceTriggerButton: some View {
+        Button {
+            onVoiceTrigger()
+        } label: {
+            Image(systemName: "mic.fill")
+                .font(.system(size: 16, weight: .semibold))
+                .padding(10)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .help(Text("Voice input (Command+Shift+M)"))
+        .padding(14)
     }
 }
 
@@ -282,8 +491,17 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             existingTerminal.onResize = { [paneId] cols, rows in
                 guard cols > 0 && rows > 0 else { return }
                 Task {
-                    if let client = TerminalTabManager.shared.getSSHClient(for: paneId) {
-                        try? await client.resize(cols: cols, rows: rows)
+                    if let client = TerminalTabManager.shared.getSSHClient(for: paneId),
+                       let shellId = TerminalTabManager.shared.shellId(for: paneId) {
+                        try? await client.resize(cols: cols, rows: rows, for: shellId)
+                    }
+                }
+            }
+            existingTerminal.writeCallback = { [paneId] data in
+                if let client = TerminalTabManager.shared.getSSHClient(for: paneId),
+                   let shellId = TerminalTabManager.shared.shellId(for: paneId) {
+                    Task.detached(priority: .userInitiated) {
+                        try? await client.write(data, to: shellId)
                     }
                 }
             }
@@ -376,7 +594,8 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(server: server, credentials: credentials, onProcessExit: onProcessExit)
+        let client = TerminalTabManager.shared.sharedSSHClient(for: server)
+        return Coordinator(server: server, credentials: credentials, onProcessExit: onProcessExit, sshClient: client)
     }
 
     class Coordinator {
@@ -385,23 +604,26 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
         let onProcessExit: () -> Void
         weak var terminal: GhosttyTerminalView?
         var paneId: UUID?
-        let sshClient = SSHClient()
+        let sshClient: SSHClient
+        var shellId: UUID?
         var shellTask: Task<Void, Never>?
         var isReusingTerminal = false
         var wasActive = false
         private var lastSize: (cols: Int, rows: Int) = (0, 0)
         private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHPane")
 
-        init(server: Server, credentials: ServerCredentials, onProcessExit: @escaping () -> Void) {
+        init(server: Server, credentials: ServerCredentials, onProcessExit: @escaping () -> Void, sshClient: SSHClient) {
             self.server = server
             self.credentials = credentials
             self.onProcessExit = onProcessExit
+            self.sshClient = sshClient
         }
 
         func sendToSSH(_ data: Data) {
-            Task.detached(priority: .userInitiated) { [sshClient, logger] in
+            guard let shellId else { return }
+            Task.detached(priority: .userInitiated) { [sshClient, logger, shellId] in
                 do {
-                    try await sshClient.write(data)
+                    try await sshClient.write(data, to: shellId)
                 } catch {
                     logger.error("Failed to send to SSH: \(error.localizedDescription)")
                 }
@@ -411,13 +633,14 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
         func handleResize(cols: Int, rows: Int) {
             guard cols > 0 && rows > 0 else { return }
             guard cols != lastSize.cols || rows != lastSize.rows else { return }
+            guard let shellId else { return }
 
             lastSize = (cols, rows)
             logger.info("Terminal resized to \(cols)x\(rows)")
 
             Task {
                 do {
-                    try await sshClient.resize(cols: cols, rows: rows)
+                    try await sshClient.resize(cols: cols, rows: rows, for: shellId)
                 } catch {
                     logger.warning("Failed to resize PTY: \(error.localizedDescription)")
                 }
@@ -425,26 +648,21 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
         }
 
         func startSSHConnection(terminal: GhosttyTerminalView) {
-            shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
-                guard let self = self, let terminal = terminal else { return }
+            let sshClient = self.sshClient
+            let server = self.server
+            let credentials = self.credentials
+            let paneId = self.paneId
+            let onProcessExit = self.onProcessExit
+            let logger = self.logger
 
-                let sshClient = self.sshClient
-                let server = self.server
-                let credentials = self.credentials
-                let paneId = self.paneId
-                let onProcessExit = self.onProcessExit
-                let logger = self.logger
+            shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, paneId, onProcessExit, logger] in
+                guard let self = self, let terminal = terminal else { return }
 
                 do {
                     logger.info("Connecting to \(server.host)...")
                     _ = try await sshClient.connect(to: server, credentials: credentials)
 
                     guard !Task.isCancelled else { return }
-
-                    // Register SSH client with tab manager
-                    if let paneId = paneId {
-                        await TerminalTabManager.shared.registerSSHClient(sshClient, for: paneId)
-                    }
 
                     let size = await terminal.terminalSize()
                     let cols = Int(size?.columns ?? 80)
@@ -455,12 +673,20 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                         self.lastSize = (cols, rows)
                     }
 
-                    let outputStream = try await sshClient.startShell(cols: cols, rows: rows)
+                    let shell = try await sshClient.startShell(cols: cols, rows: rows)
+
+                    if let paneId = paneId {
+                        await TerminalTabManager.shared.registerSSHClient(sshClient, shellId: shell.id, for: paneId, serverId: server.id)
+                    }
+
+                    await MainActor.run {
+                        self.shellId = shell.id
+                    }
 
                     guard !Task.isCancelled else { return }
 
                     // Read data in background, feed to terminal
-                    for await data in outputStream {
+                    for await data in shell.stream {
                         guard !Task.isCancelled else { break }
 
                         let shouldContinue = await MainActor.run { [weak self] () -> Bool in
@@ -493,11 +719,12 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             shellTask?.cancel()
             shellTask = nil
 
-            sshClient.abort()
-
-            Task.detached(priority: .high) { [sshClient] in
-                await sshClient.disconnect()
+            if let shellId {
+                Task.detached(priority: .high) { [sshClient, shellId] in
+                    await sshClient.closeShell(shellId)
+                }
             }
+            self.shellId = nil
 
             if let terminal = terminal {
                 terminal.cleanup()

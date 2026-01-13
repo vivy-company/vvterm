@@ -8,9 +8,9 @@ import SwiftUI
 // MARK: - Transcription Settings View
 
 struct TranscriptionSettingsView: View {
-    @AppStorage("transcriptionProvider") private var provider = "system"
-    @AppStorage("whisperModelId") private var whisperModelId = "mlx-community/whisper-tiny"
-    @AppStorage("parakeetModelId") private var parakeetModelId = "mlx-community/parakeet-tdt-0.6b-v2"
+    @AppStorage(TranscriptionSettingsKeys.provider) private var provider = TranscriptionSettingsDefaults.provider.rawValue
+    @AppStorage(TranscriptionSettingsKeys.mlxWhisperModelId) private var whisperModelId = TranscriptionSettingsDefaults.mlxWhisperModelId
+    @AppStorage(TranscriptionSettingsKeys.mlxParakeetModelId) private var parakeetModelId = TranscriptionSettingsDefaults.mlxParakeetModelId
     @AppStorage("transcriptionLanguage") private var language = "en"
 
     @StateObject private var whisperManager: MLXModelManager
@@ -30,8 +30,8 @@ struct TranscriptionSettingsView: View {
     ]
 
     init() {
-        let whisper = MLXModelManager(kind: .whisper, modelId: UserDefaults.standard.string(forKey: "whisperModelId") ?? "mlx-community/whisper-tiny")
-        let parakeet = MLXModelManager(kind: .parakeetTDT, modelId: UserDefaults.standard.string(forKey: "parakeetModelId") ?? "mlx-community/parakeet-tdt-0.6b-v2")
+        let whisper = MLXModelManager(kind: .whisper, modelId: Self.resolveWhisperModelId())
+        let parakeet = MLXModelManager(kind: .parakeetTDT, modelId: Self.resolveParakeetModelId())
         _whisperManager = StateObject(wrappedValue: whisper)
         _parakeetManager = StateObject(wrappedValue: parakeet)
     }
@@ -40,10 +40,10 @@ struct TranscriptionSettingsView: View {
         Form {
             Section {
                 Picker("Engine", selection: $provider) {
-                    Text("System (Apple)").tag("system")
+                    Text("System (Apple)").tag(TranscriptionProvider.system.rawValue)
                     #if arch(arm64)
-                    Text("Whisper (MLX)").tag("whisper")
-                    Text("Parakeet (MLX)").tag("parakeet")
+                    Text("Whisper (MLX)").tag(TranscriptionProvider.mlxWhisper.rawValue)
+                    Text("Parakeet (MLX)").tag(TranscriptionProvider.mlxParakeet.rawValue)
                     #endif
                 }
             } header: {
@@ -52,7 +52,7 @@ struct TranscriptionSettingsView: View {
                 Text(providerDescription)
             }
 
-            if provider == "system" {
+            if provider == TranscriptionProvider.system.rawValue {
                 Section("Language") {
                     Picker("Language", selection: $language) {
                         ForEach(languages, id: \.0) { code, name in
@@ -63,20 +63,22 @@ struct TranscriptionSettingsView: View {
             }
 
             #if arch(arm64)
-            if provider == "whisper" {
+            if provider == TranscriptionProvider.mlxWhisper.rawValue {
                 modelSection(
                     manager: whisperManager,
                     modelBinding: $whisperModelId,
                     models: [
-                        ("mlx-community/whisper-tiny", String(localized: "Tiny"), "~39 MB"),
-                        ("mlx-community/whisper-base", String(localized: "Base"), "~74 MB"),
-                        ("mlx-community/whisper-small", String(localized: "Small"), "~244 MB"),
-                        ("mlx-community/whisper-medium", String(localized: "Medium"), "~769 MB")
+                        ("mlx-community/whisper-tiny-mlx", String(localized: "Tiny"), "~39 MB"),
+                        ("mlx-community/whisper-base-mlx", String(localized: "Base"), "~74 MB"),
+                        ("mlx-community/whisper-small-mlx", String(localized: "Small"), "~244 MB"),
+                        ("mlx-community/whisper-medium-mlx-8bit", String(localized: "Medium (8-bit)"), "~400 MB"),
+                        ("mlx-community/whisper-medium-mlx-q4", String(localized: "Medium (Q4)"), "~250 MB"),
+                        ("mlx-community/whisper-medium-mlx-fp32", String(localized: "Medium (FP32)"), "~1.5 GB")
                     ]
                 )
             }
 
-            if provider == "parakeet" {
+            if provider == TranscriptionProvider.mlxParakeet.rawValue {
                 modelSection(
                     manager: parakeetManager,
                     modelBinding: $parakeetModelId,
@@ -91,6 +93,7 @@ struct TranscriptionSettingsView: View {
         }
         .formStyle(.grouped)
         .onAppear {
+            migrateLegacySettings()
             whisperManager.refreshStatus()
             parakeetManager.refreshStatus()
         }
@@ -98,11 +101,11 @@ struct TranscriptionSettingsView: View {
 
     private var providerDescription: String {
         switch provider {
-        case "system":
+        case TranscriptionProvider.system.rawValue:
             return String(localized: "Uses Apple's built-in speech recognition. Requires network for best results.")
-        case "whisper":
+        case TranscriptionProvider.mlxWhisper.rawValue:
             return String(localized: "OpenAI Whisper runs locally using MLX. Works offline after download.")
-        case "parakeet":
+        case TranscriptionProvider.mlxParakeet.rawValue:
             return String(localized: "NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription.")
         default:
             return ""
@@ -155,10 +158,10 @@ struct TranscriptionSettingsView: View {
             }
 
             if manager.isModelAvailable {
-                Divider()
                 Button("Delete Model", role: .destructive) {
                     manager.removeModel()
                 }
+                .padding(.top, 4)
             }
         } header: {
             Text("Model")
@@ -215,7 +218,7 @@ struct TranscriptionSettingsView: View {
     @ViewBuilder
     private var storageSection: some View {
         #if arch(arm64)
-        let activeManager = provider == "whisper" ? whisperManager : parakeetManager
+        let activeManager = provider == TranscriptionProvider.mlxWhisper.rawValue ? whisperManager : parakeetManager
         if activeManager.totalStorageBytes > 0 {
             Section("Storage") {
                 HStack {
@@ -238,5 +241,54 @@ struct TranscriptionSettingsView: View {
             }
         }
         #endif
+    }
+
+    private static func resolveWhisperModelId() -> String {
+        let defaults = UserDefaults.standard
+        if let current = defaults.string(forKey: TranscriptionSettingsKeys.mlxWhisperModelId) {
+            return current
+        }
+        if let legacy = defaults.string(forKey: "whisperModelId") {
+            defaults.set(legacy, forKey: TranscriptionSettingsKeys.mlxWhisperModelId)
+            return legacy
+        }
+        return TranscriptionSettingsDefaults.mlxWhisperModelId
+    }
+
+    private static func resolveParakeetModelId() -> String {
+        let defaults = UserDefaults.standard
+        if let current = defaults.string(forKey: TranscriptionSettingsKeys.mlxParakeetModelId) {
+            return current
+        }
+        if let legacy = defaults.string(forKey: "parakeetModelId") {
+            defaults.set(legacy, forKey: TranscriptionSettingsKeys.mlxParakeetModelId)
+            return legacy
+        }
+        return TranscriptionSettingsDefaults.mlxParakeetModelId
+    }
+
+    private func migrateLegacySettings() {
+        let defaults = UserDefaults.standard
+        if let legacyProvider = defaults.string(forKey: TranscriptionSettingsKeys.provider) {
+            if legacyProvider == "whisper" {
+                defaults.set(TranscriptionProvider.mlxWhisper.rawValue, forKey: TranscriptionSettingsKeys.provider)
+                provider = TranscriptionProvider.mlxWhisper.rawValue
+            } else if legacyProvider == "parakeet" {
+                defaults.set(TranscriptionProvider.mlxParakeet.rawValue, forKey: TranscriptionSettingsKeys.provider)
+                provider = TranscriptionProvider.mlxParakeet.rawValue
+            }
+        }
+
+        if defaults.string(forKey: TranscriptionSettingsKeys.mlxWhisperModelId) == nil,
+           let legacy = defaults.string(forKey: "whisperModelId") {
+            defaults.set(legacy, forKey: TranscriptionSettingsKeys.mlxWhisperModelId)
+            whisperModelId = legacy
+        }
+
+        if defaults.string(forKey: TranscriptionSettingsKeys.mlxParakeetModelId) == nil,
+           let legacy = defaults.string(forKey: "parakeetModelId") {
+            defaults.set(legacy, forKey: TranscriptionSettingsKeys.mlxParakeetModelId)
+            parakeetModelId = legacy
+        }
     }
 }

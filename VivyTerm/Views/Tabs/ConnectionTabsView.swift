@@ -38,6 +38,8 @@ struct ConnectionTerminalContainer: View {
         Binding(
             get: { tabManager.selectedViewByServer[server.id] ?? "stats" },
             set: { newValue in
+                let current = tabManager.selectedViewByServer[server.id] ?? "stats"
+                guard current != newValue else { return }
                 DispatchQueue.main.async {
                     tabManager.selectedViewByServer[server.id] = newValue
                 }
@@ -59,6 +61,8 @@ struct ConnectionTerminalContainer: View {
         Binding(
             get: { tabManager.selectedTabByServer[server.id] },
             set: { newValue in
+                let current = tabManager.selectedTabByServer[server.id]
+                guard current != newValue else { return }
                 DispatchQueue.main.async {
                     tabManager.selectedTabByServer[server.id] = newValue
                 }
@@ -76,7 +80,11 @@ struct ConnectionTerminalContainer: View {
         ZStack {
             // Stats view - always in hierarchy, visibility controlled by opacity
             // Pass isVisible to pause/resume collection when hidden
-            ServerStatsView(server: server, isVisible: selectedView == "stats")
+            ServerStatsView(
+                server: server,
+                isVisible: selectedView == "stats",
+                sharedClientProvider: { tabManager.sshClient(for: server.id) }
+            )
                 .opacity(selectedView == "stats" ? 1 : 0)
                 .allowsHitTesting(selectedView == "stats")
                 .zIndex(selectedView == "stats" ? 1 : 0)

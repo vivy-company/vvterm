@@ -46,8 +46,20 @@ final class ConnectionSessionManager: ObservableObject {
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ConnectionSession")
 
-    /// SSH clients indexed by session ID for stats collection and command execution
-    private var sshClients: [UUID: SSHClient] = [:]
+    private struct SSHShellRegistration {
+        let serverId: UUID
+        let client: SSHClient
+        let shellId: UUID
+    }
+
+    /// Shell handles indexed by session ID
+    private var sshShells: [UUID: SSHShellRegistration] = [:]
+
+    /// Shared SSH clients per server
+    private var sharedSSHClients: [UUID: SSHClient] = [:]
+
+    /// Shell counts per server for shared client lifecycle
+    private var serverShellCounts: [UUID: Int] = [:]
 
     /// Terminal views indexed by session ID for voice input and other external interactions
     private var terminalViews: [UUID: GhosttyTerminalView] = [:]
@@ -115,8 +127,11 @@ final class ConnectionSessionManager: ObservableObject {
         selectedSessionId = session.id
         connectedServerId = server.id
 
-        // Update server's last connected
-        await ServerManager.shared.updateLastConnected(for: server)
+        // Update server's last connected after the navigation animation completes
+        Task { [server] in
+            try? await Task.sleep(for: .milliseconds(350))
+            await ServerManager.shared.updateLastConnected(for: server)
+        }
 
         logger.info("Created session for \(server.name)")
         return session
@@ -201,9 +216,10 @@ final class ConnectionSessionManager: ObservableObject {
             terminal.forceRefresh()
 
             if let size = terminal.terminalSize(),
-               let client = self?.sshClient(for: session) {
+               let client = self?.sshClient(for: session),
+               let shellId = self?.shellId(for: session) {
                 Task {
-                    try? await client.resize(cols: Int(size.columns), rows: Int(size.rows))
+                    try? await client.resize(cols: Int(size.columns), rows: Int(size.rows), for: shellId)
                 }
             }
 
@@ -291,18 +307,67 @@ final class ConnectionSessionManager: ObservableObject {
 
     // MARK: - SSH Client Registration
 
-    func registerSSHClient(_ client: SSHClient, for sessionId: UUID) {
-        sshClients[sessionId] = client
+    func sharedSSHClient(for server: Server) -> SSHClient {
+        if let client = sharedSSHClients[server.id] {
+            return client
+        }
+        let client = SSHClient()
+        sharedSSHClients[server.id] = client
+        return client
+    }
+
+    func registerSSHClient(_ client: SSHClient, shellId: UUID, for sessionId: UUID, serverId: UUID) {
+        if let existing = sshShells[sessionId] {
+            Task.detached { [client = existing.client, shellId = existing.shellId] in
+                await client.closeShell(shellId)
+            }
+            serverShellCounts[existing.serverId] = max((serverShellCounts[existing.serverId] ?? 1) - 1, 0)
+        }
+
+        sshShells[sessionId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
+        serverShellCounts[serverId, default: 0] += 1
+        sharedSSHClients[serverId] = client
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
-        if let client = sshClients.removeValue(forKey: sessionId) {
+        guard let registration = sshShells.removeValue(forKey: sessionId) else { return }
+
+        await registration.client.closeShell(registration.shellId)
+
+        let serverId = registration.serverId
+        let newCount = max((serverShellCounts[serverId] ?? 1) - 1, 0)
+        serverShellCounts[serverId] = newCount
+
+        if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
             await client.disconnect()
         }
     }
 
     func sshClient(for session: ConnectionSession) -> SSHClient? {
-        sshClients[session.id]
+        sshShells[session.id]?.client
+    }
+
+    func shellId(for session: ConnectionSession) -> UUID? {
+        sshShells[session.id]?.shellId
+    }
+
+    func sshClient(for serverId: UUID) -> SSHClient? {
+        if let client = sharedSSHClients[serverId] {
+            return client
+        }
+
+        if let selectedId = selectedSessionId,
+           let selectedSession = sessions.first(where: { $0.id == selectedId && $0.serverId == serverId }),
+           let client = sshShells[selectedSession.id]?.client {
+            return client
+        }
+
+        if let anySession = sessions.first(where: { $0.serverId == serverId }),
+           let client = sshShells[anySession.id]?.client {
+            return client
+        }
+
+        return nil
     }
 
     // MARK: - Terminal Registration (with LRU caching)
@@ -352,11 +417,9 @@ final class ConnectionSessionManager: ObservableObject {
                 terminal.cleanup()
             }
 
-            // Also cleanup associated SSH client
-            if let client = sshClients.removeValue(forKey: oldestId) {
-                Task.detached {
-                    await client.disconnect()
-                }
+            // Also cleanup associated SSH shell
+            Task.detached { [weak self] in
+                await self?.unregisterSSHClient(for: oldestId)
             }
 
             // Call shell cancel handler

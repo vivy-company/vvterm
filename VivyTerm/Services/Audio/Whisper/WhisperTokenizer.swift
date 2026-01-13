@@ -156,6 +156,35 @@ nonisolated final class WhisperTokenizer {
         if let url = Bundle.main.url(forResource: name, withExtension: fileExtension, subdirectory: "Resources/Whisper") {
             return url
         }
-        return Bundle.main.url(forResource: name, withExtension: fileExtension)
+        if let url = Bundle.main.url(forResource: name, withExtension: fileExtension) {
+            return url
+        }
+        return modelResourceURL(name: name, fileExtension: fileExtension)
+    }
+
+    private static func modelResourceURL(name: String, fileExtension: String) -> URL? {
+        guard fileExtension == "tiktoken" else { return nil }
+
+        let modelId = TranscriptionSettingsStore.currentWhisperModelId()
+        let modelDir = MLXModelManager.modelDirectory(for: .whisper, modelId: modelId)
+        let url = modelDir.appendingPathComponent("\(name).\(fileExtension)")
+        if FileManager.default.fileExists(atPath: url.path) {
+            return url
+        }
+        return downloadTokenizer(name: name, destination: url)
+    }
+
+    private static func downloadTokenizer(name: String, destination: URL) -> URL? {
+        let base = "https://raw.githubusercontent.com/openai/whisper/main/whisper/assets"
+        guard let url = URL(string: "\(base)/\(name).tiktoken") else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            let directory = destination.deletingLastPathComponent()
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            try data.write(to: destination, options: [.atomic])
+            return destination
+        } catch {
+            return nil
+        }
     }
 }

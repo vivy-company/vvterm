@@ -144,7 +144,7 @@ struct ServerEnvironment: Identifiable, Codable, Hashable {
 // MARK: - Color Extension
 
 extension Color {
-    static func fromHex(_ hex: String) -> Color {
+    nonisolated static func fromHex(_ hex: String) -> Color {
         let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         var int: UInt64 = 0
         Scanner(string: hex).scanHexInt64(&int)

@@ -18,6 +18,7 @@ protocol SSHTerminalCoordinator: AnyObject {
     var onProcessExit: () -> Void { get }
     var terminalView: GhosttyTerminalView? { get set }
     var sshClient: SSHClient { get }
+    var shellId: UUID? { get set }
     var shellTask: Task<Void, Never>? { get set }
     var logger: Logger { get }
 
@@ -32,9 +33,10 @@ extension SSHTerminalCoordinator {
     func sendToSSH(_ data: Data) {
         // Use high-priority detached task to minimize latency
         // Task.detached avoids inheriting actor context, reducing overhead
-        Task.detached(priority: .userInitiated) { [sshClient, logger] in
+        guard let shellId else { return }
+        Task.detached(priority: .userInitiated) { [sshClient, logger, shellId] in
             do {
-                try await sshClient.write(data)
+                try await sshClient.write(data, to: shellId)
             } catch {
                 logger.error("Failed to send to SSH: \(error.localizedDescription)")
             }
@@ -44,14 +46,12 @@ extension SSHTerminalCoordinator {
     func cancelShell() {
         shellTask?.cancel()
         shellTask = nil
-
-        // Immediately abort SSH connection to unblock any pending I/O
-        sshClient.abort()
-
-        // Disconnect SSH in background to cleanup resources
-        Task.detached(priority: .high) { [sshClient] in
-            await sshClient.disconnect()
+        if let shellId {
+            Task.detached(priority: .high) { [sshClient, shellId] in
+                await sshClient.closeShell(shellId)
+            }
         }
+        self.shellId = nil
 
         // Cleanup terminal to break retain cycles and release resources
         if let terminal = terminalView {
@@ -79,10 +79,6 @@ extension SSHTerminalCoordinator {
 
                 guard !Task.isCancelled else { return }
 
-                await MainActor.run {
-                    ConnectionSessionManager.shared.registerSSHClient(sshClient, for: sessionId)
-                }
-
                 let size = await terminal.terminalSize()
                 let cols = Int(size?.columns ?? 80)
                 let rows = Int(size?.rows ?? 24)
@@ -90,7 +86,15 @@ extension SSHTerminalCoordinator {
                 // Platform-specific hook before shell start
                 await self.onBeforeShellStart(cols: cols, rows: rows)
 
-                let outputStream = try await sshClient.startShell(cols: cols, rows: rows)
+                let shell = try await sshClient.startShell(cols: cols, rows: rows)
+
+                await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id] in
+                    ConnectionSessionManager.shared.registerSSHClient(sshClient, shellId: shellId, for: sessionId, serverId: serverId)
+                }
+
+                await MainActor.run {
+                    self.shellId = shell.id
+                }
 
                 guard !Task.isCancelled else { return }
 
@@ -99,7 +103,7 @@ extension SSHTerminalCoordinator {
 
                 // Read data in background, feed to terminal on main thread
                 // CVDisplayLink in GhosttyTerminalView handles frame-rate batching
-                for await data in outputStream {
+                for await data in shell.stream {
                     guard !Task.isCancelled else { break }
 
                     // Feed data to terminal - display link batches rendering
@@ -154,7 +158,8 @@ struct SSHTerminalWrapper: NSViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit)
+        let client = ConnectionSessionManager.shared.sharedSSHClient(for: server)
+        return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 
     func makeNSView(context: Context) -> NSView {
@@ -177,8 +182,17 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             existingTerminal.onResize = { [session] cols, rows in
                 guard cols > 0 && rows > 0 else { return }
                 Task {
-                    if let client = ConnectionSessionManager.shared.sshClient(for: session) {
-                        try? await client.resize(cols: cols, rows: rows)
+                    if let client = ConnectionSessionManager.shared.sshClient(for: session),
+                       let shellId = ConnectionSessionManager.shared.shellId(for: session) {
+                        try? await client.resize(cols: cols, rows: rows, for: shellId)
+                    }
+                }
+            }
+            existingTerminal.writeCallback = { data in
+                if let client = ConnectionSessionManager.shared.sshClient(for: session),
+                   let shellId = ConnectionSessionManager.shared.shellId(for: session) {
+                    Task.detached(priority: .userInitiated) {
+                        try? await client.write(data, to: shellId)
                     }
                 }
             }
@@ -274,7 +288,8 @@ struct SSHTerminalWrapper: NSViewRepresentable {
         let onProcessExit: () -> Void
         weak var terminalView: GhosttyTerminalView?
 
-        let sshClient = SSHClient()
+        let sshClient: SSHClient
+        var shellId: UUID?
         var shellTask: Task<Void, Never>?
         let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
 
@@ -284,24 +299,26 @@ struct SSHTerminalWrapper: NSViewRepresentable {
         /// If true, this coordinator is reusing an existing terminal and should NOT cleanup on deinit
         var isReusingTerminal = false
 
-        init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void) {
+        init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void, sshClient: SSHClient) {
             self.server = server
             self.credentials = credentials
             self.sessionId = sessionId
             self.onProcessExit = onProcessExit
+            self.sshClient = sshClient
         }
 
         /// Handle terminal resize notification from GhosttyTerminalView
         func handleResize(cols: Int, rows: Int) {
             guard cols > 0 && rows > 0 else { return }
             guard cols != lastSize.cols || rows != lastSize.rows else { return }
+            guard let shellId else { return }
 
             lastSize = (cols, rows)
             logger.info("Terminal resized to \(cols)x\(rows)")
 
             Task {
                 do {
-                    try await sshClient.resize(cols: cols, rows: rows)
+                    try await sshClient.resize(cols: cols, rows: rows, for: shellId)
                 } catch {
                     logger.warning("Failed to resize PTY: \(error.localizedDescription)")
                 }
@@ -435,7 +452,8 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit)
+        let client = ConnectionSessionManager.shared.sharedSSHClient(for: server)
+        return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 
     func makeUIView(context: Context) -> UIView {
@@ -452,9 +470,10 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             // Update write callback to use this coordinator (which will use session manager's SSH client)
             existingTerminal.writeCallback = { data in
                 // Use SSH client from session manager, not coordinator's client
-                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session) {
+                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session),
+                   let shellId = ConnectionSessionManager.shared.shellId(for: session) {
                     Task.detached(priority: .userInitiated) {
-                        try? await sshClient.write(data)
+                        try? await sshClient.write(data, to: shellId)
                     }
                 }
             }
@@ -480,10 +499,11 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                 terminal.forceRefresh()
 
                 // Also trigger SSH resize to force server to redraw prompt
-                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session) {
+                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session),
+                   let shellId = ConnectionSessionManager.shared.shellId(for: session) {
                     Task {
-                        if let size = await terminal.terminalSize() {
-                            try? await sshClient.resize(cols: Int(size.columns), rows: Int(size.rows))
+                        if let size = terminal.terminalSize() {
+                            try? await sshClient.resize(cols: Int(size.columns), rows: Int(size.rows), for: shellId)
                         }
                     }
                 }
@@ -660,7 +680,8 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         let onProcessExit: () -> Void
         weak var terminalView: GhosttyTerminalView?
 
-        let sshClient = SSHClient()
+        let sshClient: SSHClient
+        var shellId: UUID?
         var shellTask: Task<Void, Never>?
         let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VivyTerm", category: "SSHTerminal")
 
@@ -670,11 +691,12 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         /// If true, session is still active and we shouldn't cleanup on deinit (user just navigated away)
         var preserveSession = false
 
-        init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void) {
+        init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void, sshClient: SSHClient) {
             self.server = server
             self.credentials = credentials
             self.sessionId = sessionId
             self.onProcessExit = onProcessExit
+            self.sshClient = sshClient
         }
 
         // MARK: - SSHTerminalCoordinator hooks
@@ -692,8 +714,10 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                     // Trigger resize to force server to redraw prompt
                     if let self = self {
                         Task {
-                            if let size = await terminal?.terminalSize() {
-                                try? await self.sshClient.resize(cols: Int(size.columns), rows: Int(size.rows))
+                            if let size = terminal?.terminalSize() {
+                                if let shellId = self.shellId {
+                                    try? await self.sshClient.resize(cols: Int(size.columns), rows: Int(size.rows), for: shellId)
+                                }
                             }
                         }
                     }

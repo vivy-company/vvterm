@@ -21,10 +21,10 @@ nonisolated public func getLogMel(_ audio: MLXArray, config: PreprocessConfig) t
             value: MLXArray(config.padValue))
     }
 
-    // Apply pre-emphasis if configured
-    if let preemph = config.preemph {
+    // Apply pre-emphasis high-pass filter to match mlx-audio preprocessing
+    if config.preemph > 0 {
         let prefix = x[0..<1]
-        let diff = x[1...] - preemph * x[0..<(x.shape[0] - 1)]
+        let diff = x[1...] - config.preemph * x[0..<(x.shape[0] - 1)]
         x = MLX.concatenated([prefix, diff], axis: 0)
     }
 
@@ -52,7 +52,8 @@ nonisolated public func getLogMel(_ audio: MLXArray, config: PreprocessConfig) t
     let melFilters = try createMelFilterbank(
         sampleRate: config.sampleRate,
         nFFT: config.nFFT,
-        nMels: config.features
+        nMels: config.features,
+        normalize: config.normalize
     )
 
     let melSpectrum = matmul(
@@ -136,8 +137,6 @@ nonisolated private func stft(
     winLength: Int,
     window: MLXArray
 ) throws -> MLXArray {
-
-    // Pad the window to nFFT length if needed
     var actualWindow = window
     if winLength != nFFT {
         if winLength > nFFT {
@@ -146,43 +145,33 @@ nonisolated private func stft(
             let padding = nFFT - winLength
             let padArray = [(0, padding)]
             actualWindow = MLX.padded(
-                window, widths: padArray.map { IntOrPair($0) }, mode: .constant,
-                value: MLXArray(0.0))
+                window,
+                widths: padArray.map { IntOrPair($0) },
+                mode: .constant,
+                value: MLXArray(0.0)
+            )
         }
     }
 
-    // Pad the signal
     let padding = nFFT / 2
-    var paddedX = x
-
-    // Reflect padding (simplified)
     let prefix = x[1..<(padding + 1)].reversed(axes: [0])
     let suffix = x[(x.shape[0] - padding - 1)..<(x.shape[0] - 1)].reversed(axes: [0])
-    paddedX = MLX.concatenated([prefix, x, suffix], axis: 0)
+    let paddedX = MLX.concatenated([prefix, x, suffix], axis: 0)
 
-    // Create frames
-    let numFrames = (paddedX.shape[0] - nFFT + hopLength) / hopLength
-    var frames: [MLXArray] = []
-
-    for i in 0..<numFrames {
-        let start = i * hopLength
-        let end = start + nFFT
-        if end <= paddedX.shape[0] {
-            let frame = paddedX[start..<end] * actualWindow
-            frames.append(frame)
-        }
+    let numFrames = 1 + (paddedX.shape[0] - nFFT) / hopLength
+    if numFrames <= 0 {
+        throw ParakeetError.audioProcessingError(
+            "Input is too short (length=\(paddedX.shape[0])) for nFFT=\(nFFT)"
+        )
     }
 
-    if frames.isEmpty {
-        throw ParakeetError.audioProcessingError("No frames could be extracted")
-    }
+    let frames = asStrided(
+        paddedX,
+        [numFrames, nFFT],
+        strides: [hopLength, 1]
+    )
 
-    let frameMatrix = MLX.stacked(frames, axis: 0)
-
-    // Apply FFT
-    let fftResult = MLX.rfft(frameMatrix, axis: -1)
-
-    return fftResult
+    return MLX.rfft(frames * actualWindow, axis: -1)
 }
 
 // MARK: - Mel Filterbank
@@ -190,68 +179,72 @@ nonisolated private func stft(
 nonisolated private func createMelFilterbank(
     sampleRate: Int,
     nFFT: Int,
-    nMels: Int
+    nMels: Int,
+    normalize: String
 ) throws -> MLXArray {
-
-    let nyquist = Float(sampleRate) / 2.0
     let nFreqs = nFFT / 2 + 1
+    let allFreqs = MLXArray.linspace(0.0, Float(sampleRate) / 2.0, count: nFreqs)
 
-    // Create mel scale points
-    let melMin = hzToMel(0.0)
-    let melMax = hzToMel(nyquist)
+    let melMin = hzToMelSlaney(0.0)
+    let melMax = hzToMelSlaney(Float(sampleRate) / 2.0)
     let melPoints = MLXArray.linspace(melMin, melMax, count: nMels + 2)
+    let hzPoints = melToHzSlaney(melPoints)
 
-    // Convert back to Hz
-    let hzPoints = melToHz(melPoints)
+    let fDiff = hzPoints[1...] - hzPoints[0..<(hzPoints.shape[0] - 1)]
+    let slopes = hzPoints.expandedDimensions(axis: 0) - allFreqs.expandedDimensions(axis: 1)
 
-    // Convert to FFT bin indices
-    let binIndices = hzPoints * Float(nFFT) / Float(sampleRate)
+    let downSlopes = (-slopes[0..., 0..<nMels]) / fDiff[0..<nMels]
+    let upSlopes = slopes[0..., 2..<(nMels + 2)] / fDiff[1..<(nMels + 1)]
 
-    // Create filterbank
-    let filterbank = MLXArray.zeros([nMels, nFreqs])
+    var filterbank = MLX.maximum(
+        MLXArray.zeros(downSlopes.shape),
+        MLX.minimum(downSlopes, upSlopes)
+    )
 
-    for m in 0..<nMels {
-        let leftBin = binIndices[m].item(Float.self)
-        let centerBin = binIndices[m + 1].item(Float.self)
-        let rightBin = binIndices[m + 2].item(Float.self)
-
-        // Create triangular filter with continuous values (not just integer bins)
-        for f in 0..<nFreqs {
-            let freq = Float(f)
-
-            if freq >= leftBin && freq <= centerBin && centerBin > leftBin {
-                let weight = (freq - leftBin) / (centerBin - leftBin)
-                filterbank[m, f] = MLXArray(weight)
-            } else if freq > centerBin && freq <= rightBin && rightBin > centerBin {
-                let weight = (rightBin - freq) / (rightBin - centerBin)
-                filterbank[m, f] = MLXArray(weight)
-            }
-        }
-
-        // Apply exact "slaney" normalization to match librosa
-        // Slaney normalization: 2.0 / (mel_f[i+2] - mel_f[i])
-        let melRange = melPoints[m + 2].item(Float.self) - melPoints[m].item(Float.self)
-        if melRange > 0 {
-            let slaneynorm = 2.0 / melRange
-            filterbank[m] = filterbank[m] * slaneynorm
-        }
+    if normalize == "slaney" {
+        let enorm = 2.0 / (hzPoints[2..<(nMels + 2)] - hzPoints[0..<nMels])
+        filterbank = filterbank * enorm.expandedDimensions(axis: 0)
     }
 
-    return filterbank
+    return filterbank.transposed(axes: [1, 0])
 }
 
-// MARK: - Mel Scale Conversion
+// MARK: - Mel Scale Conversion (Slaney)
 
-nonisolated private func hzToMel(_ hz: Float) -> Float {
-    return 2595.0 * log10(1.0 + hz / 700.0)
+nonisolated private func hzToMelSlaney(_ hz: Float) -> Float {
+    let fMin: Float = 0.0
+    let fSp: Float = 200.0 / 3.0
+    var mels = (hz - fMin) / fSp
+    let minLogHz: Float = 1000.0
+    let minLogMel: Float = (minLogHz - fMin) / fSp
+    let logStep: Float = Foundation.log(6.4) / 27.0
+    if hz >= minLogHz {
+        mels = minLogMel + Foundation.log(hz / minLogHz) / logStep
+    }
+    return mels
 }
 
-nonisolated private func hzToMel(_ hz: MLXArray) -> MLXArray {
-    return 2595.0 * log10(1.0 + hz / 700.0)
+nonisolated private func hzToMelSlaney(_ hz: MLXArray) -> MLXArray {
+    let fMin: Float = 0.0
+    let fSp: Float = 200.0 / 3.0
+    let minLogHz: Float = 1000.0
+    let minLogMel: Float = (minLogHz - fMin) / fSp
+    let logStep: Float = Foundation.log(6.4) / 27.0
+    let linear = (hz - fMin) / fSp
+    let logPart = minLogMel + log(hz / minLogHz) / logStep
+    return which(hz .>= minLogHz, logPart, linear)
 }
 
-nonisolated private func melToHz(_ mel: MLXArray) -> MLXArray {
-    return 700.0 * (pow(10.0, mel / 2595.0) - 1.0)
+nonisolated private func melToHzSlaney(_ mel: MLXArray) -> MLXArray {
+    let fMin: Float = 0.0
+    let fSp: Float = 200.0 / 3.0
+    let minLogHz: Float = 1000.0
+    let minLogMel: Float = (minLogHz - fMin) / fSp
+    let logStep: Float = Foundation.log(6.4) / 27.0
+
+    let freqs = fMin + fSp * mel
+    let logFreqs = minLogHz * MLX.exp(logStep * (mel - minLogMel))
+    return which(mel .>= minLogMel, logFreqs, freqs)
 }
 
 // MARK: - Utility Functions
@@ -276,9 +269,6 @@ nonisolated private func log(_ x: MLXArray) -> MLXArray {
     return MLX.log(x)
 }
 
-nonisolated private func log10(_ x: Float) -> Float {
-    return Foundation.log10(x)
-}
 
 nonisolated private func log10(_ x: MLXArray) -> MLXArray {
     return MLX.log(x) / MLX.log(MLXArray(10.0))

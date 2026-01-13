@@ -171,12 +171,84 @@ import MLX
 
 // MARK: - Custom LSTM Implementation
 
+@preconcurrency nonisolated public class LSTMLayer: Module {
+    public var Wx: MLXArray
+    public var Wh: MLXArray
+    public var bias: MLXArray?
+
+    public init(inputSize: Int, hiddenSize: Int, bias: Bool = true) {
+        let scale = 1 / sqrt(Float(hiddenSize))
+        self.Wx = MLXRandom.uniform(
+            low: -scale, high: scale, [4 * hiddenSize, inputSize]
+        )
+        self.Wh = MLXRandom.uniform(
+            low: -scale, high: scale, [4 * hiddenSize, hiddenSize]
+        )
+        if bias {
+            self.bias = MLXRandom.uniform(
+                low: -scale, high: scale, [4 * hiddenSize]
+            )
+        } else {
+            self.bias = nil
+        }
+
+        super.init()
+    }
+
+    public func callAsFunction(
+        _ x: MLXArray,
+        hidden: MLXArray? = nil,
+        cell: MLXArray? = nil
+    ) -> (MLXArray, MLXArray) {
+        var x = x
+
+        if let bias {
+            x = addMM(bias, x, Wx.T)
+        } else {
+            x = matmul(x, Wx.T)
+        }
+
+        var hidden: MLXArray! = hidden
+        var cell: MLXArray! = cell
+        var allHidden = [MLXArray]()
+        var allCell = [MLXArray]()
+
+        for index in 0..<x.dim(-2) {
+            var ifgo = x[.ellipsis, index, 0...]
+            if hidden != nil {
+                ifgo = addMM(ifgo, hidden, Wh.T)
+            }
+
+            let pieces = split(ifgo, parts: 4, axis: -1)
+
+            let i = sigmoid(pieces[0])
+            let f = sigmoid(pieces[1])
+            let g = tanh(pieces[2])
+            let o = sigmoid(pieces[3])
+
+            if cell != nil {
+                cell = f * cell + i * g
+            } else {
+                cell = i * g
+            }
+
+            hidden = o * tanh(cell)
+
+            allHidden.append(hidden)
+            allCell.append(cell)
+        }
+
+        // Keep batch-first output: [batch, time, hidden]
+        return (stacked(allHidden, axis: 1), stacked(allCell, axis: 1))
+    }
+}
+
 @preconcurrency nonisolated public class CustomLSTM: Module {
     let inputSize: Int
     let hiddenSize: Int
     let numLayers: Int
     let batchFirst: Bool
-    let lstmLayers: [MLXNN.LSTM]
+    let lstmLayers: [LSTMLayer]
 
     public init(
         inputSize: Int,
@@ -191,15 +263,16 @@ import MLX
         self.batchFirst = batchFirst
 
         // Create LSTM layers
-        var layers: [MLXNN.LSTM] = []
+        var layers: [LSTMLayer] = []
         for i in 0..<numLayers {
             let layerInputSize = (i == 0) ? inputSize : hiddenSize
             layers.append(
-                MLXNN.LSTM(
+                LSTMLayer(
                     inputSize: layerInputSize,
                     hiddenSize: hiddenSize,
                     bias: bias
-                ))
+                )
+            )
         }
         self.lstmLayers = layers
 
@@ -211,12 +284,9 @@ import MLX
         hiddenState: (MLXArray, MLXArray)?
     ) -> (MLXArray, (MLXArray, MLXArray)) {
 
-        var x = input
+        let x = input
 
-        // Convert to seq-first if batch_first (matching Python)
-        if batchFirst {
-            x = x.transposed(axes: [1, 0, 2])  // [batch, seq, features] -> [seq, batch, features]
-        }
+        // Keep batch-first layout to match MLXNN expectations and the rest of the model.
 
         // Initialize hidden states if not provided
         let h: [MLXArray?]
@@ -244,7 +314,7 @@ import MLX
         for i in 0..<numLayers {
             let layer = lstmLayers[i]
 
-            // MLXNN.LSTM returns (allHidden, allCell) - sequences over time
+            // LSTMLayer returns (allHidden, allCell) with batch-first layout
             let (allHidden, allCell) = layer(outputs, hidden: h[i], cell: c[i])
 
             // Use allHidden as outputs for next layer
@@ -252,8 +322,8 @@ import MLX
 
             // Extract final states (last time step) for this layer
             // Python: next_h.append(all_h_steps[-1])
-            let finalHidden = allHidden[-1]  // Last time step: [batch, hidden]
-            let finalCell = allCell[-1]  // Last time step: [batch, hidden]
+            let finalHidden = allHidden[0..., -1, 0...]  // Last time step: [batch, hidden]
+            let finalCell = allCell[0..., -1, 0...]  // Last time step: [batch, hidden]
 
             nextH.append(finalHidden)
             nextC.append(finalCell)

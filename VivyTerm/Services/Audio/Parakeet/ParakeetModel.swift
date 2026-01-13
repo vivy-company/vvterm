@@ -16,7 +16,7 @@ nonisolated public struct PreprocessConfig: Codable {
     public let dither: Float
     public let padTo: Int
     public let padValue: Float
-    public let preemph: Float?
+    public let preemph: Float
     public let magPower: Float = 2.0
 
     public var winLength: Int {
@@ -40,6 +40,21 @@ nonisolated public struct PreprocessConfig: Codable {
         case padValue = "pad_value"
         case preemph
         case magPower = "mag_power"
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        sampleRate = try container.decode(Int.self, forKey: .sampleRate)
+        normalize = try container.decode(String.self, forKey: .normalize)
+        windowSize = try container.decode(Float.self, forKey: .windowSize)
+        windowStride = try container.decode(Float.self, forKey: .windowStride)
+        window = try container.decode(String.self, forKey: .window)
+        features = try container.decode(Int.self, forKey: .features)
+        nFFT = try container.decode(Int.self, forKey: .nFFT)
+        dither = try container.decode(Float.self, forKey: .dither)
+        padTo = try container.decodeIfPresent(Int.self, forKey: .padTo) ?? 0
+        padValue = try container.decodeIfPresent(Float.self, forKey: .padValue) ?? 0.0
+        preemph = try container.decodeIfPresent(Float.self, forKey: .preemph) ?? 0.97
     }
 }
 
@@ -268,10 +283,15 @@ nonisolated public struct DecodingConfig {
     public let vocabulary: [String]
     public let durations: [Int]
     public let maxSymbols: Int
+    public let blankTokenId: Int
+    public let numClasses: Int
+    public let numExtraOutputs: Int
 
     private let encoder: Conformer
     private let decoder: PredictNetwork
     private let joint: JointNetwork
+    private let decoderConfig: PredictConfig
+    private let jointConfig: JointConfig
 
     public init(config: ParakeetTDTConfig) throws {
         guard config.decoding.modelType == "tdt" else {
@@ -280,9 +300,15 @@ nonisolated public struct DecodingConfig {
 
         self.preprocessConfig = config.preprocessor
         self.encoderConfig = config.encoder
+        self.decoderConfig = config.decoder
+        self.jointConfig = config.joint
         self.vocabulary = config.joint.vocabulary
         self.durations = config.decoding.durations
         self.maxSymbols = config.decoding.greedy?["max_symbols"] as? Int ?? 10
+        let vocabSize = config.decoder.vocabSize
+        self.numClasses = config.joint.numClasses > 0 ? config.joint.numClasses : vocabSize
+        self.numExtraOutputs = config.joint.numExtraOutputs > 0 ? config.joint.numExtraOutputs : config.decoding.durations.count
+        self.blankTokenId = vocabSize
 
         self.encoder = Conformer(config: config.encoder)
         self.decoder = PredictNetwork(config: config.decoder)
@@ -443,7 +469,8 @@ nonisolated public struct DecodingConfig {
                     break
                 }
 
-                let vocabSize = vocabulary.count
+                let tokenCount = numClasses + 1
+                let extraOutputs = numExtraOutputs
 
                 guard jointOut.shape.count >= 4 else {
                     throw ParakeetError.audioProcessingError(
@@ -452,14 +479,14 @@ nonisolated public struct DecodingConfig {
 
                 let lastDim = jointOut.shape[jointOut.shape.count - 1]
 
-                guard lastDim > vocabSize else {
+                guard lastDim >= tokenCount + extraOutputs else {
                     throw ParakeetError.audioProcessingError(
-                        "Joint output last dimension (\(lastDim)) is not larger than vocab size (\(vocabSize))"
+                        "Joint output last dimension (\(lastDim)) is smaller than tokens+extra (\(tokenCount)+\(extraOutputs))"
                     )
                 }
 
-                let vocabSlice = jointOut[0, 0, 0..., 0..<(vocabSize + 1)]
-                let decisionSlice = jointOut[0, 0, 0..., (vocabSize + 1)..<lastDim]
+                let vocabSlice = jointOut[0, 0, 0..., 0..<tokenCount]
+                let decisionSlice = jointOut[0, 0, 0..., tokenCount..<(tokenCount + extraOutputs)]
 
                 guard vocabSlice.shape[0] > 0 && decisionSlice.shape[0] > 0 else {
                     throw ParakeetError.audioProcessingError(
@@ -469,32 +496,36 @@ nonisolated public struct DecodingConfig {
                 let predToken = Int(vocabSlice.argMax(axis: -1).item(Int32.self))
                 let decision = Int(decisionSlice.argMax(axis: -1).item(Int32.self))
 
-                if predToken != vocabSize {
+                if predToken != blankTokenId, predToken >= 0, predToken < vocabulary.count {
                     let tokenText = ParakeetTokenizer.decode([predToken], vocabulary)
-                    let startTime =
-                        Float(step * encoderConfig.subsamplingFactor)
-                        / Float(preprocessConfig.sampleRate) * Float(preprocessConfig.hopLength)
-                    let duration =
-                        Float(durations[decision] * encoderConfig.subsamplingFactor)
-                        / Float(preprocessConfig.sampleRate) * Float(preprocessConfig.hopLength)
+                    if tokenText.isEmpty == false {
+                        let decisionIndex = min(decision, max(durations.count - 1, 0))
+                        let startTime =
+                            Float(step * encoderConfig.subsamplingFactor)
+                            / Float(preprocessConfig.sampleRate) * Float(preprocessConfig.hopLength)
+                        let duration =
+                            Float(durations[decisionIndex] * encoderConfig.subsamplingFactor)
+                            / Float(preprocessConfig.sampleRate) * Float(preprocessConfig.hopLength)
 
-                    hypothesis.append(
-                        AlignedToken(
-                            id: predToken,
-                            start: startTime,
-                            duration: duration,
-                            text: tokenText
-                        ))
+                        hypothesis.append(
+                            AlignedToken(
+                                id: predToken,
+                                start: startTime,
+                                duration: duration,
+                                text: tokenText
+                            ))
 
-                    currentLastToken = predToken
-                    actualHiddenState[batch] = decoderHidden
+                        currentLastToken = predToken
+                        actualHiddenState[batch] = decoderHidden
+                    }
                 }
 
-                step += durations[decision]
+                let stepDuration = durations[min(decision, max(durations.count - 1, 0))]
+                step += stepDuration
 
                 newSymbols += 1
 
-                if durations[decision] != 0 {
+                if stepDuration != 0 {
                     newSymbols = 0
                 } else {
                     if newSymbols >= maxSymbols {
@@ -531,6 +562,17 @@ nonisolated public struct DecodingConfig {
         self.update(parameters: flatWeights)
     }
 
+    public func loadWeights(from arrays: [String: MLXArray]) throws {
+        var mappedWeights: [String: MLXArray] = [:]
+        for (key, weight) in arrays {
+            if let swiftKey = mapSafetensorsKeyToSwiftPath(key) {
+                mappedWeights[swiftKey] = weight
+            }
+        }
+        let flatWeights = ModuleParameters.unflattened(mappedWeights)
+        self.update(parameters: flatWeights)
+    }
+
     public func loadWeights(from url: URL) throws {
         try loadWeights(from: [url])
     }
@@ -556,13 +598,13 @@ nonisolated public struct DecodingConfig {
 
                 layerKey = layerKey.replacingOccurrences(of: "norm_self_att", with: "normSelfAtt")
                 layerKey = layerKey.replacingOccurrences(
-                    of: "self_attn.linear_q", with: "selfAttn.wq")
+                    of: "self_attn.linear_q", with: "selfAttn.linearQ")
                 layerKey = layerKey.replacingOccurrences(
-                    of: "self_attn.linear_k", with: "selfAttn.wk")
+                    of: "self_attn.linear_k", with: "selfAttn.linearK")
                 layerKey = layerKey.replacingOccurrences(
-                    of: "self_attn.linear_v", with: "selfAttn.wv")
+                    of: "self_attn.linear_v", with: "selfAttn.linearV")
                 layerKey = layerKey.replacingOccurrences(
-                    of: "self_attn.linear_out", with: "selfAttn.wo")
+                    of: "self_attn.linear_out", with: "selfAttn.linearOut")
                 layerKey = layerKey.replacingOccurrences(
                     of: "self_attn.linear_pos", with: "selfAttn.linearPos")
                 layerKey = layerKey.replacingOccurrences(

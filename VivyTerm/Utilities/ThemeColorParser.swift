@@ -11,7 +11,7 @@ struct ThemeColorParser {
     /// Extracts background color from a Ghostty theme file
     /// - Parameter themeName: The name of the theme (e.g., "Aizen Dark")
     /// - Returns: The background Color if found, nil otherwise
-    static func backgroundColor(for themeName: String) -> Color? {
+    nonisolated static func backgroundColor(for themeName: String) -> Color? {
         guard let resourcePath = Bundle.main.resourcePath else { return nil }
 
         // Try structured path first
@@ -56,7 +56,7 @@ struct ThemeColorParser {
 
     /// Computes the split divider color based on the background color
     /// Uses Ghostty's algorithm: darken by 8% for light backgrounds, 40% for dark
-    static func splitDividerColor(for themeName: String) -> Color {
+    nonisolated static func splitDividerColor(for themeName: String) -> Color {
         guard let bgColor = backgroundColor(for: themeName) else {
             return Color(white: 0.3)
         }

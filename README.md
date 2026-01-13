@@ -53,11 +53,8 @@ VVTerm is an SSH terminal app for iOS and macOS. Connect to your servers from an
 git clone https://github.com/vivy-company/vvterm.git
 cd vvterm
 
-# Build libssh2 + OpenSSL
-./scripts/build-libssh2.sh all
-
-# Build libghostty
-./scripts/build-libghostty.sh
+# Build vendor libraries (GhosttyKit + libssh2/OpenSSL)
+./scripts/build.sh all
 
 # Open in Xcode and build
 open VivyTerm.xcodeproj

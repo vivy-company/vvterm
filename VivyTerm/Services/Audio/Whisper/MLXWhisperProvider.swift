@@ -94,9 +94,17 @@ nonisolated final class WhisperModelLoader {
             throw NSError(domain: "MLXWhisper", code: -2, userInfo: [NSLocalizedDescriptionKey: "Missing model weights"])
         }
 
+        let safetensors = weightURLs.filter { $0.pathExtension.lowercased() == "safetensors" }
+        let npz = weightURLs.filter { $0.pathExtension.lowercased() == "npz" }
+
         var weights: [String: MLXArray] = [:]
-        for url in weightURLs {
-            let arrays = try loadArrays(url: url)
+        if !safetensors.isEmpty {
+            for url in safetensors {
+                let arrays = try loadArrays(url: url)
+                weights.merge(arrays) { _, new in new }
+            }
+        } else if let npzURL = npz.first {
+            let arrays = try NPZLoader.loadArrays(from: npzURL)
             weights.merge(arrays) { _, new in new }
         }
         let model = WhisperModel(dims: config, dtype: .float16)
@@ -118,8 +126,13 @@ nonisolated final class WhisperModelLoader {
         return files.filter { allowedExtensions.contains($0.pathExtension.lowercased()) }
     }
 
+    private enum WeightNode {
+        case value(MLXArray)
+        case dictionary([String: WeightNode])
+    }
+
     private static func nestedDictionary(from flat: [String: MLXArray]) -> NestedDictionary<String, MLXArray> {
-        var root: [String: NestedItem<String, MLXArray>] = [:]
+        var root: [String: WeightNode] = [:]
 
         for (key, value) in flat {
             var parts = key.split(separator: ".").map(String.init)
@@ -130,13 +143,17 @@ nonisolated final class WhisperModelLoader {
             insert(value: value, parts: parts[...], into: &root)
         }
 
-        return NestedDictionary(values: root)
+        var converted: [String: NestedItem<String, MLXArray>] = [:]
+        for (key, node) in root {
+            converted[key] = toNestedItem(node)
+        }
+        return NestedDictionary(values: converted)
     }
 
     private static func insert(
         value: MLXArray,
         parts: ArraySlice<String>,
-        into dict: inout [String: NestedItem<String, MLXArray>]
+        into dict: inout [String: WeightNode]
     ) {
         guard let head = parts.first else { return }
         let remaining = parts.dropFirst()
@@ -145,7 +162,7 @@ nonisolated final class WhisperModelLoader {
             return
         }
 
-        var child: [String: NestedItem<String, MLXArray>]
+        var child: [String: WeightNode]
         if case .dictionary(let existing)? = dict[head] {
             child = existing
         } else {
@@ -153,6 +170,38 @@ nonisolated final class WhisperModelLoader {
         }
         insert(value: value, parts: remaining, into: &child)
         dict[head] = .dictionary(child)
+    }
+
+    private static func toNestedItem(_ node: WeightNode) -> NestedItem<String, MLXArray> {
+        switch node {
+        case .value(let value):
+            return .value(value)
+        case .dictionary(let dict):
+            if let arrayItems = numericArray(from: dict) {
+                return .array(arrayItems)
+            }
+
+            var converted: [String: NestedItem<String, MLXArray>] = [:]
+            for (key, child) in dict {
+                converted[key] = toNestedItem(child)
+            }
+            return .dictionary(converted)
+        }
+    }
+
+    private static func numericArray(from dict: [String: WeightNode]) -> [NestedItem<String, MLXArray>]? {
+        guard !dict.isEmpty else { return nil }
+        let indices = dict.keys.compactMap { Int($0) }
+        guard indices.count == dict.count else { return nil }
+        guard let minIndex = indices.min(), let maxIndex = indices.max() else { return nil }
+        guard minIndex == 0 && maxIndex == dict.count - 1 else { return nil }
+
+        var items = Array(repeating: NestedItem<String, MLXArray>.dictionary([:]), count: maxIndex + 1)
+        for (key, node) in dict {
+            guard let index = Int(key) else { continue }
+            items[index] = toNestedItem(node)
+        }
+        return items
     }
 }
 #endif

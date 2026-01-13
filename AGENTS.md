@@ -60,9 +60,10 @@ VivyTerm/
 
 ### libghostty
 Pre-built xcframework at `Vendor/libghostty/GhosttyKit.xcframework`
+Build with: `./scripts/build.sh ghostty`
 
 ### libssh2 + OpenSSL
-Build with: `./scripts/build-libssh2.sh [macos|ios|simulator|all]`
+Build with: `./scripts/build.sh ssh`
 Output: `Vendor/libssh2/{macos,ios,ios-simulator}/`
 
 ## Data Models

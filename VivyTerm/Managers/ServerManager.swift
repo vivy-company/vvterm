@@ -93,32 +93,14 @@ final class ServerManager: ObservableObject {
         }
 
         do {
-            async let fetchedWorkspaces = cloudKit.fetchWorkspaces()
-            async let fetchedServers = cloudKit.fetchServers()
-
-            let (w, s) = try await (fetchedWorkspaces, fetchedServers)
+            let changes = try await cloudKit.fetchChanges()
 
             // Merge CloudKit data with local (CloudKit wins for conflicts, dedupe by ID)
-            logger.info("CloudKit returned \(w.count) workspaces, \(s.count) servers")
+            logger.info(
+                "CloudKit returned \(changes.workspaces.count) workspaces, \(changes.servers.count) servers (full fetch: \(changes.isFullFetch))"
+            )
 
-            if !w.isEmpty {
-                // Deduplicate by ID - CloudKit data takes precedence
-                var workspaceMap: [UUID: Workspace] = [:]
-                for workspace in w {
-                    workspaceMap[workspace.id] = workspace
-                    logger.info("Workspace from CloudKit: \(workspace.name) (id: \(workspace.id))")
-                }
-                workspaces = Array(workspaceMap.values).sorted { $0.order < $1.order }
-            }
-            if !s.isEmpty {
-                // Deduplicate by ID - CloudKit data takes precedence
-                var serverMap: [UUID: Server] = [:]
-                for server in s {
-                    serverMap[server.id] = server
-                    logger.info("Server from CloudKit: \(server.name) (id: \(server.id), workspaceId: \(server.workspaceId))")
-                }
-                servers = Array(serverMap.values).sorted { $0.name < $1.name }
-            }
+            applyCloudKitChanges(changes)
 
             // Ensure at least one workspace exists before checking orphans
             if workspaces.isEmpty {
@@ -157,6 +139,77 @@ final class ServerManager: ObservableObject {
             colorHex: "#007AFF",
             order: 0
         )
+    }
+
+    private func applyCloudKitChanges(_ changes: CloudKitChanges) {
+        if changes.isFullFetch {
+            if !changes.workspaces.isEmpty {
+                workspaces = dedupedWorkspaces(from: changes.workspaces)
+            }
+            if !changes.servers.isEmpty {
+                servers = dedupedServers(from: changes.servers)
+            }
+            return
+        }
+
+        if !changes.workspaces.isEmpty {
+            upsertWorkspaces(changes.workspaces)
+        }
+        if !changes.deletedWorkspaceIDs.isEmpty {
+            removeWorkspaces(withIDs: changes.deletedWorkspaceIDs)
+        }
+        if !changes.servers.isEmpty {
+            upsertServers(changes.servers)
+        }
+        if !changes.deletedServerIDs.isEmpty {
+            removeServers(withIDs: changes.deletedServerIDs)
+        }
+    }
+
+    private func dedupedWorkspaces(from updates: [Workspace]) -> [Workspace] {
+        var workspaceMap: [UUID: Workspace] = [:]
+        for workspace in updates {
+            workspaceMap[workspace.id] = workspace
+            logger.info("Workspace from CloudKit: \(workspace.name) (id: \(workspace.id))")
+        }
+        return Array(workspaceMap.values).sorted { $0.order < $1.order }
+    }
+
+    private func dedupedServers(from updates: [Server]) -> [Server] {
+        var serverMap: [UUID: Server] = [:]
+        for server in updates {
+            serverMap[server.id] = server
+            logger.info("Server from CloudKit: \(server.name) (id: \(server.id), workspaceId: \(server.workspaceId))")
+        }
+        return Array(serverMap.values).sorted { $0.name < $1.name }
+    }
+
+    private func upsertWorkspaces(_ updates: [Workspace]) {
+        var workspaceMap = Dictionary(uniqueKeysWithValues: workspaces.map { ($0.id, $0) })
+        for workspace in updates {
+            workspaceMap[workspace.id] = workspace
+            logger.info("Workspace updated from CloudKit: \(workspace.name) (id: \(workspace.id))")
+        }
+        workspaces = Array(workspaceMap.values).sorted { $0.order < $1.order }
+    }
+
+    private func upsertServers(_ updates: [Server]) {
+        var serverMap = Dictionary(uniqueKeysWithValues: servers.map { ($0.id, $0) })
+        for server in updates {
+            serverMap[server.id] = server
+            logger.info("Server updated from CloudKit: \(server.name) (id: \(server.id), workspaceId: \(server.workspaceId))")
+        }
+        servers = Array(serverMap.values).sorted { $0.name < $1.name }
+    }
+
+    private func removeWorkspaces(withIDs ids: [UUID]) {
+        let idSet = Set(ids)
+        workspaces.removeAll { idSet.contains($0.id) }
+    }
+
+    private func removeServers(withIDs ids: [UUID]) {
+        let idSet = Set(ids)
+        servers.removeAll { idSet.contains($0.id) }
     }
 
     /// Repairs servers that reference non-existent workspaces by reassigning them to the first available workspace
@@ -615,8 +668,15 @@ final class ServerManager: ObservableObject {
 
     func deleteEnvironment(
         _ environment: ServerEnvironment,
+        in workspace: Workspace
+    ) async throws -> Workspace {
+        try await deleteEnvironment(environment, in: workspace, fallback: .production)
+    }
+
+    func deleteEnvironment(
+        _ environment: ServerEnvironment,
         in workspace: Workspace,
-        fallback: ServerEnvironment = .production
+        fallback: ServerEnvironment
     ) async throws -> Workspace {
         var updatedWorkspace = workspace
         updatedWorkspace.environments.removeAll { $0.id == environment.id }

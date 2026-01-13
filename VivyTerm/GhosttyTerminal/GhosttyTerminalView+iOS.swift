@@ -1328,16 +1328,27 @@ private class TerminalInputAccessoryView: UIInputView {
     private func makePillButton(title: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
-        button.setTitleColor(.label, for: .normal)
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.plain()
+            config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 14)
+            config.attributedTitle = AttributedString(
+                title,
+                attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 15, weight: .medium)])
+            )
+            config.baseForegroundColor = .label
+            button.configuration = config
+        } else {
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+            button.setTitleColor(.label, for: .normal)
+            button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        }
         button.backgroundColor = UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor.white.withAlphaComponent(0.12)
                 : UIColor.black.withAlphaComponent(0.06)
         }
         button.layer.cornerRadius = 16
-        button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
         button.addTarget(self, action: action, for: .touchUpInside)
 
         NSLayoutConstraint.activate([
@@ -1372,9 +1383,21 @@ private class TerminalInputAccessoryView: UIInputView {
     private func makeModifierButton(title: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
-        button.setTitleColor(.secondaryLabel, for: .normal)
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.plain()
+            config.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)
+            config.attributedTitle = AttributedString(
+                title,
+                attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 14, weight: .semibold)])
+            )
+            config.baseForegroundColor = .secondaryLabel
+            button.configuration = config
+        } else {
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+            button.setTitleColor(.secondaryLabel, for: .normal)
+            button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 10, bottom: 4, right: 10)
+        }
         button.backgroundColor = UIColor { traits in
             traits.userInterfaceStyle == .dark
                 ? UIColor.white.withAlphaComponent(0.08)
@@ -1383,7 +1406,6 @@ private class TerminalInputAccessoryView: UIInputView {
         button.layer.cornerRadius = 14
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
-        button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 10, bottom: 4, right: 10)
         button.addTarget(self, action: action, for: .touchUpInside)
 
         NSLayoutConstraint.activate([

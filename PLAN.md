@@ -2625,12 +2625,7 @@ final class SettingsWindowManager {
 ```
 VivyTerm/
 ├── scripts/
-│   ├── build.sh                        # Main build orchestrator (Debug/Release, arm64/x86_64/universal)
-│   ├── build-libghostty.sh             # Build libghostty for macOS (arm64 + x86_64)
-│   ├── build-libghostty-ios.sh         # Build libghostty for iOS (arm64) + Simulator (arm64 + x86_64)
-│   ├── build-libssh2.sh                # Build libssh2 + OpenSSL for SSH support
-│   ├── build-libssh2-ios.sh            # Build libssh2 + OpenSSL for iOS
-│   └── organize-resources.sh           # Post-build resource organization (themes, terminfo)
+│   └── build.sh                        # Builds GhosttyKit + libssh2/OpenSSL (arm64 targets)
 │
 ├── Vendor/
 │   ├── libghostty/
@@ -2813,31 +2808,18 @@ VivyTerm/
 
 ---
 
-## Build Scripts Detail
+## Build Script Detail
 
-### `build-libghostty.sh` (macOS)
+### `build.sh`
 ```bash
-# Clones ghostty, builds with Zig for arm64 ONLY
-# Patches bundle ID: com.mitchellh.ghostty → com.vivy.vivyterm
-# Output: Vendor/libghostty/macos/lib/libghostty.a
-# No x86_64 - Intel Macs have Metal GPU driver bugs
-```
-
-### `build-libghostty-ios.sh` (iOS)
-```bash
-# Builds libghostty for:
-#   - iOS device (arm64)
-#   - iOS Simulator (arm64 only - Apple Silicon Macs)
-# Uses Zig cross-compilation with iOS SDK
-# Output: Vendor/libghostty/ios/ and ios-simulator/
-```
-
-### `build-libssh2.sh` / `build-libssh2-ios.sh`
-```bash
-# Builds SSH stack (arm64 only):
-#   1. OpenSSL 3.x (libssl.a, libcrypto.a)
-#   2. libssh2 with OpenSSL backend
-# Single architecture for each platform
+# Single entry point for vendor builds:
+#   - GhosttyKit.xcframework + libghostty.a (macOS/iOS/simulator)
+#   - OpenSSL 3.x + libssh2 (macOS/iOS/simulator, arm64 only)
+#
+# Usage:
+#   ./scripts/build.sh all
+#   ./scripts/build.sh ghostty
+#   ./scripts/build.sh ssh
 ```
 
 ---
@@ -3024,10 +3006,7 @@ actor SSHClient {
 ### Phase 1: Project Setup & Build System
 - [ ] Create Xcode project with iOS + macOS targets
 - [ ] Set up folder structure
-- [ ] Create build-libghostty.sh (macOS arm64)
-- [ ] Create build-libghostty-ios.sh (iOS + Simulator arm64)
-- [ ] Create build-libssh2.sh (macOS arm64)
-- [ ] Create build-libssh2-ios.sh (iOS + Simulator arm64)
+- [ ] Consolidate vendor builds into scripts/build.sh (GhosttyKit + libssh2/OpenSSL)
 - [ ] Build and verify vendor libraries
 - [ ] Copy GhosttyTerminal from aizen, adapt for multiplatform
 
@@ -3699,7 +3678,7 @@ struct TerminalSettingsView: View {
 | `Views/Settings/TerminalSettingsView.swift` | `Views/Settings/TerminalSettingsView.swift` |
 | `Views/Settings/Components/TerminalPresetFormView.swift` | `Views/Settings/TerminalPresetFormView.swift` |
 | `Managers/TerminalPresetManager.swift` | `Managers/TerminalPresetManager.swift` |
-| `scripts/build-libghostty.sh` | `scripts/build-libghostty.sh` (adapt) |
+| `scripts/build.sh` | `scripts/build.sh` (vendor build entry point) |
 | `scripts/organize-resources.sh` | `scripts/organize-resources.sh` (adapt) |
 | `Resources/ghostty/themes/*` | `Resources/ghostty/themes/*` |
 | `Resources/ghostty/shell-integration/*` | `Resources/ghostty/shell-integration/*` |
@@ -3717,4 +3696,4 @@ struct TerminalSettingsView: View {
 | `WorktreeSessionTabs.swift` | Tab bar scroll view (`SessionTabsScrollView`) |
 | `TerminalTabView.swift` | Terminal container (ZStack with opacity switching) |
 | `TerminalSessionManager.swift` | Session lifecycle management |
-| `build-libgit2.sh` | `build-libssh2.sh` (similar build process) |
+| `build-libgit2.sh` | `scripts/build.sh` (libssh2/OpenSSL section) |

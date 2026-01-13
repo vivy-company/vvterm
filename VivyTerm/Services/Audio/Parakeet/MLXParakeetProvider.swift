@@ -60,8 +60,17 @@ nonisolated final class ParakeetModelLoader {
             throw NSError(domain: "MLXParakeet", code: -2, userInfo: [NSLocalizedDescriptionKey: "Missing model weights"])
         }
 
+        let safetensors = weightURLs.filter { $0.pathExtension.lowercased() == "safetensors" }
+        let npz = weightURLs.filter { $0.pathExtension.lowercased() == "npz" }
+
         let model = try ParakeetTDT(config: config)
-        try model.loadWeights(from: weightURLs)
+        if !safetensors.isEmpty {
+            try model.loadWeights(from: safetensors)
+        } else if let npzURL = npz.first {
+            let arrays = try NPZLoader.loadArrays(from: npzURL)
+            try model.loadWeights(from: arrays)
+        }
+        model.train(false)
         eval(model)
 
         cachedModel = model
