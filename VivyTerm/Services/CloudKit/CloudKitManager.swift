@@ -47,7 +47,7 @@ final class CloudKitManager: ObservableObject {
             switch self {
             case .idle: return String(localized: "Synced")
             case .syncing: return String(localized: "Syncing...")
-            case .error(let message): return String(localized: "Error: \(message)")
+            case .error(let message): return String(format: String(localized: "Error: %@"), message)
             case .offline: return String(localized: "Offline")
             case .disabled: return String(localized: "Disabled")
             }
@@ -101,7 +101,7 @@ final class CloudKitManager: ObservableObject {
             case .temporarilyUnavailable:
                 statusDescription = String(localized: "temporarilyUnavailable - iCloud temporarily unavailable")
             @unknown default:
-                statusDescription = String(localized: "unknown status: \(status.rawValue)")
+                statusDescription = String(format: String(localized: "unknown status: %@"), String(status.rawValue))
             }
 
             logger.info("CloudKit account status: \(statusDescription)")
@@ -117,7 +117,7 @@ final class CloudKitManager: ObservableObject {
         } catch {
             logger.error("CloudKit account status check failed: \(error.localizedDescription)")
             isAvailable = false
-            accountStatusDetail = String(localized: "Error: \(error.localizedDescription)")
+            accountStatusDetail = String(format: String(localized: "Error: %@"), error.localizedDescription)
             syncStatus = .error(error.localizedDescription)
             accountStatusChecked = true
         }

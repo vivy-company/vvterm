@@ -167,12 +167,12 @@ private struct CPUStatsCard: View, Equatable {
                 // Breakdown grid
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 16) {
-                        StatLabel(color: .pink, label: String(localized: "SYS"), value: "\(Int(system)) %")
-                        StatLabel(color: .green, label: String(localized: "USER"), value: "\(Int(user)) %")
+                        StatLabel(color: .pink, label: String(localized: "SYS"), value: String(format: String(localized: "%lld %%"), Int64(system)))
+                        StatLabel(color: .green, label: String(localized: "USER"), value: String(format: String(localized: "%lld %%"), Int64(user)))
                     }
                     HStack(spacing: 16) {
-                        StatLabel(color: .yellow, label: String(localized: "IOWAIT"), value: "\(Int(iowait)) %")
-                        StatLabel(color: .purple, label: String(localized: "STEAL"), value: "\(Int(steal)) %")
+                        StatLabel(color: .yellow, label: String(localized: "IOWAIT"), value: String(format: String(localized: "%lld %%"), Int64(iowait)))
+                        StatLabel(color: .purple, label: String(localized: "STEAL"), value: String(format: String(localized: "%lld %%"), Int64(steal)))
                     }
                 }
 
@@ -181,7 +181,7 @@ private struct CPUStatsCard: View, Equatable {
                 // Circular gauge with percentage inside (on right)
                 ZStack {
                     CircularGauge(value: usage / 100, color: cpuColor)
-                    Text("\(Int(usage))%")
+                    Text(String(format: String(localized: "%lld%%"), Int64(usage)))
                         .font(.system(size: 12, weight: .semibold, design: .monospaced))
                         .frame(width: 36)
                 }
@@ -193,7 +193,7 @@ private struct CPUStatsCard: View, Equatable {
             // Bottom row: cores, idle, uptime, load
             HStack(spacing: 0) {
                 StatColumn(label: String(localized: "CORES"), value: "\(cores)")
-                StatColumn(label: String(localized: "IDLE"), value: "\(Int(idle)) %")
+                StatColumn(label: String(localized: "IDLE"), value: String(format: String(localized: "%lld %%"), Int64(idle)))
                 StatColumn(label: String(localized: "UPTIME"), value: formatUptime(uptime))
                 StatColumn(label: String(localized: "LOAD"), value: String(format: "%.1f,%.1f,%.1f", loadAverage.0, loadAverage.1, loadAverage.2))
             }
@@ -244,7 +244,7 @@ private struct MemoryStatsCard: View, Equatable {
             // Ring chart with percentage
             ZStack {
                 CircularGauge(value: percent / 100, color: memoryColor)
-                Text("\(Int(percent))%")
+                Text(String(format: String(localized: "%lld%%"), Int64(percent)))
                     .font(.system(size: 10, weight: .semibold, design: .monospaced))
                     .frame(width: 36)
             }
@@ -374,7 +374,7 @@ private struct VolumeRow: View {
 
                 Spacer()
 
-                Text("\(formatBytes(volume.used))/\(formatBytes(volume.total))")
+                Text(String(format: String(localized: "%@/%@"), formatBytes(volume.used), formatBytes(volume.total)))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

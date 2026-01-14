@@ -72,6 +72,16 @@ struct TerminalContainerView: View {
 
             let state = session.connectionState
             let shouldAttemptConnection = terminalAlreadyExists || state.isConnected || state.isConnecting
+            let isFailedState: Bool = {
+                if case .failed = state { return true }
+                return false
+            }()
+            let hasServerAndCredentials = server != nil && credentials != nil
+            let shouldShowInitializing = !terminalAlreadyExists
+                && !isFailedState
+                && state != .disconnected
+                && (ghosttyApp.readiness != .ready || !isReady)
+            let shouldShowInitializingOverlay = shouldShowInitializing && hasServerAndCredentials
 
             if shouldAttemptConnection {
                 Color.clear
@@ -112,15 +122,6 @@ struct TerminalContainerView: View {
                         #endif
                     }
 
-                    if !isReady && !terminalAlreadyExists && ghosttyApp.readiness == .ready {
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                            Text("Initializing terminal...")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-
                     if ghosttyApp.readiness == .error {
                         VStack(spacing: 12) {
                             ProgressView()
@@ -128,9 +129,7 @@ struct TerminalContainerView: View {
                             Text("Terminal initialization failed")
                                 .foregroundStyle(.red)
                         }
-                    }
-
-                    if ghosttyApp.readiness != .ready && ghosttyApp.readiness != .error {
+                    } else if shouldShowInitializingOverlay {
                         VStack(spacing: 12) {
                             ProgressView()
                                 .progressViewStyle(.circular)
@@ -141,52 +140,54 @@ struct TerminalContainerView: View {
                 }
             }
 
-            switch state {
-            case .connecting:
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Connecting...")
-                        .foregroundStyle(.secondary)
-                }
-            case .reconnecting(let attempt):
-                VStack(spacing: 16) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Reconnecting (attempt \(attempt))...")
-                        .foregroundStyle(.orange)
-                }
-            case .disconnected:
-                VStack(spacing: 16) {
-                    Image(systemName: "bolt.slash")
-                        .font(.largeTitle)
-                        .foregroundStyle(.secondary)
-                    Text("Disconnected")
-                        .foregroundStyle(.secondary)
-                    Button("Reconnect") {
-                        Task { await retryConnection() }
+            if ghosttyApp.readiness != .error && !shouldShowInitializingOverlay {
+                switch state {
+                case .connecting:
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Connecting...")
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.bordered)
-                }
-            case .failed(let error):
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                        .foregroundStyle(.red)
-                    Text("Connection Failed")
-                        .font(.headline)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    Button("Retry") {
-                        Task { await retryConnection() }
+                case .reconnecting(let attempt):
+                    VStack(spacing: 16) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text(String(format: String(localized: "Reconnecting (attempt %lld)..."), Int64(attempt)))
+                            .foregroundStyle(.orange)
                     }
-                    .buttonStyle(.bordered)
+                case .disconnected:
+                    VStack(spacing: 16) {
+                        Image(systemName: "bolt.slash")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                        Text("Disconnected")
+                            .foregroundStyle(.secondary)
+                        Button("Reconnect") {
+                            Task { await retryConnection() }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                case .failed(let error):
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                        Text("Connection Failed")
+                            .font(.headline)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                        Button("Retry") {
+                            Task { await retryConnection() }
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                case .connected, .idle:
+                    EmptyView()
                 }
-            case .connected, .idle:
-                EmptyView()
             }
 
             // Error overlay
@@ -235,7 +236,7 @@ struct TerminalContainerView: View {
             do {
                 credentials = try KeychainManager.shared.getCredentials(for: server)
             } catch {
-                errorMessage = String(localized: "Failed to load credentials: \(error.localizedDescription)")
+                errorMessage = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
             }
         }
         .onAppear {

@@ -49,7 +49,7 @@ struct iOSServerRow: View {
                         .fontWeight(.medium)
                         .foregroundStyle(isLocked ? .secondary : .primary)
 
-                    Text("\(server.username)@\(server.host):\(server.port)")
+                    Text(verbatim: "\(server.username)@\(server.host):\(server.port)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -224,7 +224,7 @@ struct iOSWorkspacePickerView: View {
                                     .foregroundStyle(.blue)
                             }
 
-                            Text("\(serverManager.servers(in: workspace, environment: nil).count)")
+                        Text(serverManager.servers(in: workspace, environment: nil).count, format: .number)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

@@ -120,7 +120,7 @@ struct KeychainSettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: { key in
-            Text("Are you sure you want to delete '\(key.name)'? This cannot be undone.")
+            Text(String(format: String(localized: "Are you sure you want to delete '%@'? This cannot be undone."), key.name))
         }
     }
 
@@ -170,7 +170,7 @@ struct KeychainSettingsView: View {
             loadKeys()
             error = nil
         } catch {
-            self.error = String(localized: "Failed to delete key: \(error.localizedDescription)")
+            self.error = String(format: String(localized: "Failed to delete key: %@"), error.localizedDescription)
         }
     }
 
@@ -215,7 +215,8 @@ private struct SSHKeyRow: View {
                             .font(.caption)
                             .foregroundStyle(.green)
                     }
-                    Text("Added \(key.createdAt, style: .relative) ago")
+                    let relative = key.createdAt.formatted(.relative(presentation: .named))
+                    Text(String(format: String(localized: "Added %@"), relative))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -291,7 +292,7 @@ struct AddSSHKeySheet: View {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
-                            Text("Key loaded (\(keyContent.count) characters)")
+                            Text(String(format: String(localized: "Key loaded (%lld characters)"), Int64(keyContent.count)))
                                 .font(.caption)
                                 .foregroundStyle(.green)
                         }
@@ -371,10 +372,10 @@ struct AddSSHKeySheet: View {
                     name = filename.replacingOccurrences(of: "id_", with: "").capitalized + " Key"
                 }
             } catch {
-                self.error = String(localized: "Failed to read key file: \(error.localizedDescription)")
+                self.error = String(format: String(localized: "Failed to read key file: %@"), error.localizedDescription)
             }
         case .failure(let error):
-            self.error = String(localized: "Failed to import key: \(error.localizedDescription)")
+            self.error = String(format: String(localized: "Failed to import key: %@"), error.localizedDescription)
         }
     }
 
@@ -397,7 +398,7 @@ struct AddSSHKeySheet: View {
             onSave(entry)
             dismiss()
         } catch {
-            self.error = String(localized: "Failed to save key: \(error.localizedDescription)")
+            self.error = String(format: String(localized: "Failed to save key: %@"), error.localizedDescription)
             isSaving = false
         }
     }
@@ -504,7 +505,7 @@ struct GenerateSSHKeySheet: View {
                 }
             } catch {
                 await MainActor.run {
-                    self.error = String(localized: "Failed to generate key: \(error.localizedDescription)")
+                    self.error = String(format: String(localized: "Failed to generate key: %@"), error.localizedDescription)
                     self.isGenerating = false
                 }
             }
@@ -568,7 +569,7 @@ struct KeyDetailsSheet: View {
                 } header: {
                     Text(String(localized: "Public Key"))
                 } footer: {
-                    Text("Add this to your server's ~/.ssh/authorized_keys file.")
+                    Text(String(localized: "Add this to your server's ~/.ssh/authorized_keys file:"))
                 }
             }
             .formStyle(.grouped)

@@ -336,10 +336,10 @@ struct ProUpgradeSheet: View {
 
             HStack(spacing: 10) {
                 legalLink(title: "Terms of Service", url: "https://vvterm.com/terms")
-                Text("•")
+                Text(verbatim: "•")
                     .foregroundStyle(.tertiary)
                 legalLink(title: "Privacy Policy", url: "https://vvterm.com/privacy")
-                Text("•")
+                Text(verbatim: "•")
                     .foregroundStyle(.tertiary)
                 legalLink(title: "Refund Policy", url: "https://vvterm.com/refund")
             }
@@ -353,9 +353,9 @@ struct ProUpgradeSheet: View {
     private var subscribeButtonTitle: String {
         guard let product = selectedProduct else { return String(localized: "Select a Plan") }
         if product.id == VivyTermProducts.proLifetime {
-            return String(localized: "Buy - \(product.displayPrice)")
+            return String(format: String(localized: "Buy - %@"), product.displayPrice)
         }
-        return String(localized: "Subscribe - \(product.displayPrice)")
+        return String(format: String(localized: "Subscribe - %@"), product.displayPrice)
     }
 }
 

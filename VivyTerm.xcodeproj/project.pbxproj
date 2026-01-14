@@ -538,7 +538,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
-				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -581,6 +580,7 @@
 					"-framework",
 					QuartzCore,
 				);
+				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -677,7 +677,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.0;
-				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -720,6 +719,7 @@
 					"-framework",
 					QuartzCore,
 				);
+				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

@@ -1032,12 +1032,12 @@ extension GhosttyTerminalView: UIEditMenuInteractionDelegate {
         var actions: [UIMenuElement] = []
 
         if let cSurface = surface?.unsafeCValue, ghostty_surface_has_selection(cSurface) {
-            actions.append(UIAction(title: "Copy", image: UIImage(systemName: "doc.on.doc")) { [weak self] _ in
+            actions.append(UIAction(title: String(localized: "Copy"), image: UIImage(systemName: "doc.on.doc")) { [weak self] _ in
                 self?.copy(nil)
             })
         }
 
-        actions.append(UIAction(title: "Paste", image: UIImage(systemName: "doc.on.clipboard")) { [weak self] _ in
+        actions.append(UIAction(title: String(localized: "Paste"), image: UIImage(systemName: "doc.on.clipboard")) { [weak self] _ in
             self?.paste(nil)
         })
 
@@ -1252,7 +1252,7 @@ private class TerminalInputAccessoryView: UIInputView {
         addSubview(scrollView)
 
         let voice = makeIconButton(icon: "mic.fill", action: #selector(tapVoice))
-        voice.accessibilityLabel = "Voice input"
+        voice.accessibilityLabel = String(localized: "Voice input")
         voiceButton = voice
         voice.translatesAutoresizingMaskIntoConstraints = false
         addSubview(voice)
@@ -1289,8 +1289,8 @@ private class TerminalInputAccessoryView: UIInputView {
         ])
 
         // Modifier buttons (toggle style)
-        let ctrl = makeModifierButton(title: "Ctrl", action: #selector(toggleCtrl))
-        let alt = makeModifierButton(title: "Alt", action: #selector(toggleAlt))
+        let ctrl = makeModifierButton(title: String(localized: "Ctrl"), action: #selector(toggleCtrl))
+        let alt = makeModifierButton(title: String(localized: "Alt"), action: #selector(toggleAlt))
         ctrlButton = ctrl
         altButton = alt
         stack.addArrangedSubview(ctrl)
@@ -1298,15 +1298,15 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makeSeparator())
 
         // Control sequences
-        stack.addArrangedSubview(makePillButton(title: "^C", action: #selector(tapCtrlC)))
-        stack.addArrangedSubview(makePillButton(title: "^D", action: #selector(tapCtrlD)))
-        stack.addArrangedSubview(makePillButton(title: "^Z", action: #selector(tapCtrlZ)))
-        stack.addArrangedSubview(makePillButton(title: "^L", action: #selector(tapCtrlL)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "^C"), action: #selector(tapCtrlC)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "^D"), action: #selector(tapCtrlD)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "^Z"), action: #selector(tapCtrlZ)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "^L"), action: #selector(tapCtrlL)))
         stack.addArrangedSubview(makeSeparator())
 
         // Common keys
-        stack.addArrangedSubview(makePillButton(title: "Esc", action: #selector(tapEsc)))
-        stack.addArrangedSubview(makePillButton(title: "Tab", action: #selector(tapTab)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
         stack.addArrangedSubview(makeSeparator())
 
         // Arrow keys
@@ -1317,10 +1317,10 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makeSeparator())
 
         // Navigation
-        stack.addArrangedSubview(makePillButton(title: "Home", action: #selector(tapHome)))
-        stack.addArrangedSubview(makePillButton(title: "End", action: #selector(tapEnd)))
-        stack.addArrangedSubview(makePillButton(title: "PgUp", action: #selector(tapPgUp)))
-        stack.addArrangedSubview(makePillButton(title: "PgDn", action: #selector(tapPgDn)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Home"), action: #selector(tapHome)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "End"), action: #selector(tapEnd)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "PgUp"), action: #selector(tapPgUp)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "PgDn"), action: #selector(tapPgDn)))
 
         updateVoiceButtonState()
     }

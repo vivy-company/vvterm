@@ -65,7 +65,7 @@ struct AboutView: View {
                 Text("VVTerm")
                     .font(.system(size: 24, weight: .bold))
 
-                Text("Version \(appVersion) (\(buildNumber))")
+                Text(String(format: String(localized: "Version %@ (%@)"), appVersion, buildNumber))
                     .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
@@ -110,7 +110,7 @@ struct AboutView: View {
                 .padding(.horizontal, 32)
 
             // Copyright
-            Text("© \(Calendar.current.component(.year, from: Date())) Vivy Technologies Co., Limited")
+        Text(String(format: String(localized: "© %lld Vivy Technologies Co., Limited"), Int64(Calendar.current.component(.year, from: Date()))))
                 .font(.system(size: 11))
                 .foregroundStyle(.tertiary)
                 .padding(.vertical, 16)

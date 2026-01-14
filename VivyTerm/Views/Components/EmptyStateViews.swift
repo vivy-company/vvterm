@@ -25,7 +25,7 @@ struct ServerConnectEmptyState: View {
                         .font(.title2)
                         .fontWeight(.semibold)
 
-                    Text("\(server.username)@\(server.host):\(server.port)")
+                    Text(verbatim: "\(server.username)@\(server.host):\(server.port)")
                         .font(.body)
                         .foregroundStyle(.secondary)
                 }

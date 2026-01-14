@@ -13,7 +13,7 @@ struct VivyTermLiveActivityWidget: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 8) {
                         AppIconView(size: 20)
-                        Text("VVTerm")
+                        Text(String(localized: "VVTerm"))
                             .font(.headline)
                         StatusDot(status: context.state.status)
                     }
@@ -22,9 +22,9 @@ struct VivyTermLiveActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     HStack(spacing: 6) {
-                        Text("\(context.state.activeCount)")
+                        Text(context.state.activeCount, format: .number)
                             .font(.headline)
-                        Text("active")
+                        Text(String(localized: "active"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -34,7 +34,7 @@ struct VivyTermLiveActivityWidget: Widget {
             } compactLeading: {
                 AppIconView(size: 16)
             } compactTrailing: {
-                Text("\(context.state.activeCount)")
+                Text(context.state.activeCount, format: .number)
                     .font(.caption)
             } minimal: {
                 AppIconView(size: 16)
@@ -52,7 +52,7 @@ private struct VivyTermLiveActivityLockScreenView: View {
             AppIconView(size: 32)
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
-                    Text("VVTerm")
+                    Text(String(localized: "VVTerm"))
                         .font(.headline)
                     StatusDot(status: context.state.status)
                 }
@@ -68,9 +68,9 @@ private struct VivyTermLiveActivityLockScreenView: View {
 
     private var sessionCountLabel: String {
         if context.state.activeCount == 1 {
-            return "1 active session"
+            return String(localized: "1 active session")
         }
-        return "\(context.state.activeCount) active sessions"
+        return String(format: String(localized: "%lld active sessions"), Int64(context.state.activeCount))
     }
 }
 

@@ -273,7 +273,7 @@ struct ServerSidebarView: View {
                 Text("Upgrade to Pro")
                     .font(.subheadline)
                     .foregroundStyle(.primary)
-                Text("•")
+                    Text(verbatim: "•")
                     .font(.subheadline)
                     .foregroundStyle(.tertiary)
                 Text("Support VVTerm")
@@ -408,7 +408,7 @@ struct EnvironmentMenu: View {
                 HStack {
                     Text("All")
                     Spacer()
-                    Text("(\(totalCount))")
+                    Text(String(format: String(localized: "(%lld)"), Int64(totalCount)))
                         .foregroundStyle(.secondary)
                     if selected == nil {
                         Image(systemName: "checkmark")
@@ -494,7 +494,7 @@ struct EnvironmentMenu: View {
                     .frame(width: 8, height: 8)
                 Text(env.displayName)
                 Spacer()
-                Text("(\(serverCounts[env.id] ?? 0))")
+                Text(String(format: String(localized: "(%lld)"), Int64(serverCounts[env.id] ?? 0)))
                     .foregroundStyle(.secondary)
                 if selected?.id == env.id {
                     Image(systemName: "checkmark")

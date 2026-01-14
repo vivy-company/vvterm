@@ -61,14 +61,14 @@ struct SyncSettingsView: View {
                     HStack {
                         Label("Workspaces", systemImage: "folder")
                         Spacer()
-                        Text("\(serverManager.workspaces.count)")
+                        Text(serverManager.workspaces.count, format: .number)
                             .foregroundStyle(.secondary)
                     }
 
                     HStack {
                         Label("Servers", systemImage: "server.rack")
                         Spacer()
-                        Text("\(serverManager.servers.count)")
+                        Text(serverManager.servers.count, format: .number)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -90,7 +90,7 @@ struct SyncSettingsView: View {
                     HStack {
                         Text("Container")
                         Spacer()
-                        Text("iCloud.app.vivy.VivyTerm")
+                        Text(String(localized: "iCloud.app.vivy.VivyTerm"))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
