@@ -256,13 +256,13 @@ struct GlassTabItem: View {
 
 #Preview("Glass Buttons") {
     VStack(spacing: 20) {
-        Button("Standard Glass") {}
+        Button(String(localized: "Standard Glass")) {}
             .buttonStyle(GlassButtonStyle())
 
-        Button("Tinted Glass") {}
+        Button(String(localized: "Tinted Glass")) {}
             .buttonStyle(GlassButtonStyle(tint: .green))
 
-        Button("Red Tint") {}
+        Button(String(localized: "Red Tint")) {}
             .buttonStyle(GlassButtonStyle(tint: .red))
     }
     .padding()
@@ -272,9 +272,9 @@ struct GlassTabItem: View {
 #Preview("Glass Card") {
     GlassCard {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Server Name")
+            Text(String(localized: "Server Name"))
                 .font(.headline)
-            Text("192.168.1.1:22")
+            Text(String(localized: "192.168.1.1:22"))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -290,7 +290,7 @@ struct GlassTabItem: View {
                 Image(systemName: "chevron.left")
             }
             Spacer()
-            Text("Terminal")
+            Text(String(localized: "Terminal"))
                 .font(.headline)
             Spacer()
             Button {} label: {

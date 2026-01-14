@@ -143,7 +143,9 @@ struct TranscriptionSettingsView: View {
                     ProgressView(value: progress.fraction)
                     HStack {
                         if progress.totalBytes > 0 {
-                            Text("\(ByteCountFormatter.string(fromByteCount: progress.bytesDownloaded, countStyle: .file)) / \(ByteCountFormatter.string(fromByteCount: progress.totalBytes, countStyle: .file))")
+                            Text(String(format: String(localized: "%@ / %@"),
+                                        ByteCountFormatter.string(fromByteCount: progress.bytesDownloaded, countStyle: .file),
+                                        ByteCountFormatter.string(fromByteCount: progress.totalBytes, countStyle: .file)))
                         } else {
                             Text("Downloading...")
                         }
@@ -167,7 +169,8 @@ struct TranscriptionSettingsView: View {
             Text("Model")
         } footer: {
             if let repoSize = manager.repoSizeBytes {
-                Text("Download size: \(ByteCountFormatter.string(fromByteCount: repoSize, countStyle: .file))")
+                Text(String(format: String(localized: "Download size: %@"),
+                            ByteCountFormatter.string(fromByteCount: repoSize, countStyle: .file)))
             }
         }
     }

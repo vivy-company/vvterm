@@ -112,7 +112,7 @@ struct ServerFormSheet: View {
                     Section {
                         ProLimitBanner(
                             title: String(localized: "Server Limit Reached"),
-                            message: String(localized: "You've reached the limit of \(FreeTierLimits.maxServers) servers. Upgrade to Pro for unlimited servers.")
+                            message: String(format: String(localized: "You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers."), Int64(FreeTierLimits.maxServers))
                         ) {
                             showingProUpgrade = true
                         }
@@ -207,16 +207,16 @@ struct ServerFormSheet: View {
                             HStack(spacing: 8) {
                                 ProgressView()
                                     .progressViewStyle(.circular)
-                                Text("Testing connection...")
+                                Text(String(localized: "Testing connection..."))
                             }
                         } else {
-                            Text("Test Connection")
+                            Text(String(localized: "Test Connection"))
                         }
                     }
                     .disabled(!isValid || isTestingConnection)
 
                     if connectionTestSucceeded && hasValidConnectionTest {
-                        Label("Connection successful", systemImage: "checkmark.circle.fill")
+                        Label(String(localized: "Connection successful"), systemImage: "checkmark.circle.fill")
                             .foregroundStyle(.green)
                             .font(.caption)
                     } else if let connectionTestError {
@@ -224,7 +224,7 @@ struct ServerFormSheet: View {
                             .foregroundStyle(.red)
                             .font(.caption)
                     } else if shouldRequireConnectionTest {
-                        Text("Connection will be verified before saving.")
+                        Text(String(localized: "Connection will be verified before saving."))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -293,7 +293,7 @@ struct ServerFormSheet: View {
                         }
                     }
                 } catch {
-                    self.error = String(localized: "Failed to load credentials: \(error.localizedDescription)")
+                    self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
                 }
 
                 if initialConnectionSnapshot == nil {
@@ -403,7 +403,7 @@ struct ServerFormSheet: View {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
-                Text("Using stored key: \(selectedStoredKey!.name)")
+                Text(String(format: String(localized: "Using stored key: %@"), selectedStoredKey!.name))
                     .font(.caption)
                     .foregroundStyle(.green)
             }
@@ -421,7 +421,7 @@ struct ServerFormSheet: View {
                 }
             }
         } catch {
-            self.error = String(localized: "Failed to load key: \(error.localizedDescription)")
+            self.error = String(format: String(localized: "Failed to load key: %@"), error.localizedDescription)
         }
     }
 
@@ -542,10 +542,10 @@ struct ServerFormSheet: View {
                 let keyContent = try String(contentsOf: url, encoding: .utf8)
                 sshKey = keyContent
             } catch {
-                self.error = String(localized: "Failed to read key file: \(error.localizedDescription)")
+                self.error = String(format: String(localized: "Failed to read key file: %@"), error.localizedDescription)
             }
         case .failure(let error):
-            self.error = String(localized: "Failed to import key: \(error.localizedDescription)")
+            self.error = String(format: String(localized: "Failed to import key: %@"), error.localizedDescription)
         }
     }
 

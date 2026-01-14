@@ -103,9 +103,9 @@ struct VoiceRecordingView: View {
             SiriOrbView(size: 30)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Processing…")
+                Text(String(localized: "Processing..."))
                     .font(.system(size: 13, weight: .semibold))
-                Text("Transcribing audio")
+                Text(String(localized: "Transcribing audio"))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.secondary)
             }

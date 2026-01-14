@@ -1,0 +1,5 @@
+/* Live Activity */
+"VVTerm" = "VVTerm";
+"active" = "đang hoạt động";
+"1 active session" = "1 phiên hoạt động";
+"%lld active sessions" = "%lld phiên hoạt động";

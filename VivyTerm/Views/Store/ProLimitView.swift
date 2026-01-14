@@ -46,7 +46,7 @@ struct ProFeatureLock: View {
                 .font(.largeTitle)
                 .foregroundStyle(.secondary)
 
-            Text("\(feature) is a Pro feature")
+            Text(String(format: String(localized: "%@ is a Pro feature"), feature))
                 .font(.headline)
 
             Text(description)
@@ -89,11 +89,11 @@ struct LimitReachedAlert: ViewModifier {
         var message: String {
             switch self {
             case .servers:
-                return String(localized: "You've reached the limit of \(FreeTierLimits.maxServers) servers on the free plan. Upgrade to Pro for unlimited servers.")
+                return String(format: String(localized: "You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers."), Int64(FreeTierLimits.maxServers))
             case .workspaces:
-                return String(localized: "You've reached the limit of \(FreeTierLimits.maxWorkspaces) workspace on the free plan. Upgrade to Pro for unlimited workspaces.")
+                return String(format: String(localized: "You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces."), Int64(FreeTierLimits.maxWorkspaces))
             case .tabs:
-                return String(localized: "You can only have \(FreeTierLimits.maxTabs) connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections.")
+                return String(format: String(localized: "You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections."), Int64(FreeTierLimits.maxTabs))
             }
         }
     }
@@ -184,7 +184,7 @@ struct UsageIndicator: View {
             Spacer()
 
             HStack(spacing: 4) {
-                Text("\(current)/\(limit)")
+                Text(String(format: String(localized: "%lld/%lld"), Int64(current), Int64(limit)))
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundStyle(isAtLimit ? .orange : .secondary)
@@ -224,9 +224,9 @@ struct LockedItemAlert: ViewModifier {
         var message: String {
             switch self {
             case .server:
-                return String(localized: "This server exceeds your free plan limit of \(FreeTierLimits.maxServers) servers. Renew your Pro subscription to access all your servers.")
+                return String(format: String(localized: "This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers."), Int64(FreeTierLimits.maxServers))
             case .workspace:
-                return String(localized: "This workspace exceeds your free plan limit of \(FreeTierLimits.maxWorkspaces) workspace. Renew your Pro subscription to access all your workspaces.")
+                return String(format: String(localized: "This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces."), Int64(FreeTierLimits.maxWorkspaces))
             }
         }
     }
@@ -239,7 +239,7 @@ struct LockedItemAlert: ViewModifier {
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
-                Text("\"\(itemName)\" \(itemType.message)")
+                Text(String(format: String(localized: "\"%@\" %@"), itemName, itemType.message))
             }
             .sheet(isPresented: $showUpgrade) {
                 ProUpgradeSheet()

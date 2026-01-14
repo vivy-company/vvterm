@@ -51,21 +51,21 @@ struct ProSettingsView: View {
                     HStack {
                         Text("Servers")
                         Spacer()
-                        Text("\(serverManager.servers.count) of \(FreeTierLimits.maxServers) used")
+                        Text(String(format: String(localized: "%lld of %lld used"), Int64(serverManager.servers.count), Int64(FreeTierLimits.maxServers)))
                             .foregroundStyle(.secondary)
                     }
 
                     HStack {
                         Text("Workspaces")
                         Spacer()
-                        Text("\(serverManager.workspaces.count) of \(FreeTierLimits.maxWorkspaces) used")
+                        Text(String(format: String(localized: "%lld of %lld used"), Int64(serverManager.workspaces.count), Int64(FreeTierLimits.maxWorkspaces)))
                             .foregroundStyle(.secondary)
                     }
 
                     HStack {
                         Text("Simultaneous Connections")
                         Spacer()
-                        Text("\(FreeTierLimits.maxTabs) max")
+                        Text(String(format: String(localized: "%lld max"), Int64(FreeTierLimits.maxTabs)))
                             .foregroundStyle(.secondary)
                     }
                 }

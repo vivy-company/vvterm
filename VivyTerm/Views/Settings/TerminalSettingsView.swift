@@ -48,7 +48,7 @@ struct TerminalSettingsView: View {
                 .disabled(availableFonts.isEmpty)
 
                 HStack {
-                    Text("Size: \(Int(fontSize))pt")
+                    Text(String(format: String(localized: "Size: %lldpt"), Int64(fontSize)))
                         .frame(width: 80, alignment: .leading)
                     Slider(value: Binding(
                         get: { fontSize },

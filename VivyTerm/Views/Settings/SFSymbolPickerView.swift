@@ -317,7 +317,7 @@ struct SFSymbolPickerView: View {
             LazyVStack(spacing: 0) {
                 // Count label
                 HStack {
-                    Text("\(allFilteredSymbols.count) symbols")
+                    Text(String(format: String(localized: "%lld symbols"), Int64(allFilteredSymbols.count)))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
@@ -339,7 +339,7 @@ struct SFSymbolPickerView: View {
                     Button {
                         displayLimit += pageSize
                     } label: {
-                        Text("Load more (\(allFilteredSymbols.count - displayLimit) remaining)")
+                        Text(String(format: String(localized: "Load more (%lld remaining)"), Int64(allFilteredSymbols.count - displayLimit)))
                             .font(.caption)
                             .foregroundColor(.accentColor)
                             .padding(.vertical, 12)

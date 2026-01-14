@@ -152,8 +152,11 @@ struct iOSServerListView: View {
                             .foregroundStyle(.primary)
 
                         Spacer()
-
-                        Text("\(filteredServers.count) servers")
+                        let serverCount = filteredServers.count
+                        Text(serverCount == 1
+                             ? String(format: String(localized: "%lld server"), Int64(serverCount))
+                             : String(format: String(localized: "%lld servers"), Int64(serverCount))
+                        )
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
@@ -501,7 +504,7 @@ struct iOSEnvironmentFilterMenu: View {
                 HStack {
                     Text("All")
                     Spacer()
-                    Text("(\(totalCount))")
+                    Text(String(format: String(localized: "(%lld)"), Int64(totalCount)))
                         .foregroundStyle(.secondary)
                     if selected == nil {
                         Image(systemName: "checkmark")
@@ -566,7 +569,7 @@ struct iOSEnvironmentFilterMenu: View {
                     .frame(width: 8, height: 8)
                 Text(env.displayName)
                 Spacer()
-                Text("(\(serverCounts[env.id] ?? 0))")
+                Text(String(format: String(localized: "(%lld)"), Int64(serverCounts[env.id] ?? 0)))
                     .foregroundStyle(.secondary)
                 if selected?.id == env.id {
                     Image(systemName: "checkmark")
@@ -771,7 +774,7 @@ struct iOSTerminalView: View {
 
     private var alertContent: some View {
         sheetContent
-            .alert("Close Tab?", isPresented: isCloseAlertPresented, presenting: pendingCloseSession) { session in
+            .alert(String(localized: "Close Tab?"), isPresented: isCloseAlertPresented, presenting: pendingCloseSession) { session in
                 Button("Close", role: .destructive) {
                     sessionManager.closeSession(session)
                     pendingCloseSession = nil
@@ -780,7 +783,7 @@ struct iOSTerminalView: View {
                     pendingCloseSession = nil
                 }
             } message: { session in
-                Text("This will disconnect \"\(session.title)\".")
+                Text(String(format: String(localized: "This will disconnect \"%@\"."), session.title))
             }
     }
 
@@ -919,9 +922,9 @@ struct iOSTerminalView: View {
             ProgressView()
                 .progressViewStyle(.circular)
                 .scaleEffect(1.1)
-            Text("Connecting to \(serverName)")
+            Text(String(format: String(localized: "Connecting to %@..."), serverName))
                 .font(.headline)
-            Text("Preparing server details...")
+            Text(String(localized: "Preparing server details..."))
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }

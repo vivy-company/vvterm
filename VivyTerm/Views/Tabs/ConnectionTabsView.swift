@@ -220,7 +220,7 @@ struct ConnectionTerminalContainer: View {
             }
             .help(Text("Disconnect from server"))
             .confirmationDialog(
-                String(localized: "Disconnect from \(server.name)?"),
+                String(format: String(localized: "Disconnect from %@?"), server.name),
                 isPresented: $showingDisconnectConfirmation,
                 titleVisibility: .visible
             ) {
@@ -396,7 +396,7 @@ struct TerminalTabButton: View {
 
                 // Pane count indicator (if splits)
                 if tab.paneCount > 1 {
-                    Text("⊞")
+                    Text(verbatim: "⊞")
                         .font(.system(size: 10))
                         .foregroundStyle(.tertiary)
                 }

@@ -437,7 +437,7 @@ struct TerminalPaneView: View {
                 VStack(spacing: 12) {
                     ProgressView()
                         .progressViewStyle(.circular)
-                    Text("Connecting to \(server.name)...")
+                    Text(String(format: String(localized: "Connecting to %@..."), server.name))
                         .foregroundStyle(.secondary)
                 }
             }

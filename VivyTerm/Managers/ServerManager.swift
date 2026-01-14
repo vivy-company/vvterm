@@ -719,11 +719,11 @@ enum VivyTermError: LocalizedError {
         switch self {
         case .proRequired(let message): return message
         case .serverLocked(let serverName):
-            return String(localized: "Server '\(serverName)' is locked")
+            return String(format: String(localized: "Server '%@' is locked"), serverName)
         case .workspaceLocked(let workspaceName):
-            return String(localized: "Workspace '\(workspaceName)' is locked")
+            return String(format: String(localized: "Workspace '%@' is locked"), workspaceName)
         case .connectionFailed(let message):
-            return String(localized: "Connection failed: \(message)")
+            return String(format: String(localized: "Connection failed: %@"), message)
         case .authenticationFailed:
             return String(localized: "Authentication failed")
         case .timeout:
