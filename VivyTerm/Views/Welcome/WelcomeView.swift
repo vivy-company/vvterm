@@ -26,6 +26,7 @@ private struct iOSWelcomeContent: View {
     private let features: [(icon: String, title: String, description: String, color: Color)] = [
         ("terminal.fill", String(localized: "SSH Terminal"), String(localized: "Connect to servers with GPU-accelerated terminal emulation."), .blue),
         ("icloud.fill", String(localized: "iCloud Sync"), String(localized: "Servers and credentials sync across all your devices."), .cyan),
+        ("clock.arrow.circlepath", String(localized: "Session Persistence"), String(localized: "Keep sessions alive with tmux, even after disconnects."), .teal),
         ("key.fill", String(localized: "Secure Storage"), String(localized: "Passwords and SSH keys protected by Keychain."), .green),
         ("waveform", String(localized: "Voice Commands"), String(localized: "Speak commands with on-device speech recognition."), .orange)
     ]
@@ -114,6 +115,7 @@ private struct macOSWelcomeContent: View {
     private let features: [(icon: String, title: String, description: String, color: Color)] = [
         ("terminal.fill", String(localized: "SSH Terminal"), String(localized: "Connect to servers with GPU-accelerated terminal emulation."), .blue),
         ("icloud.fill", String(localized: "iCloud Sync"), String(localized: "Servers and credentials sync across all your devices."), .cyan),
+        ("clock.arrow.circlepath", String(localized: "Session Persistence"), String(localized: "Keep sessions alive with tmux, even after disconnects."), .teal),
         ("key.fill", String(localized: "Secure Storage"), String(localized: "Passwords and SSH keys protected by Keychain."), .green),
         ("waveform", String(localized: "Voice Commands"), String(localized: "Speak commands with on-device speech recognition."), .orange)
     ]

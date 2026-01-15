@@ -90,6 +90,8 @@
 "Connect to servers with GPU-accelerated terminal emulation." = "Připojte se k serverům s GPU‑akcelerovanou emulací terminálu.";
 "iCloud Sync" = "Synchronizace iCloud";
 "Servers and credentials sync across all your devices." = "Servery a přihlašovací údaje se synchronizují na všech vašich zařízeních.";
+"Session Persistence" = "Zachování relací";
+"Keep sessions alive with tmux, even after disconnects." = "Udržujte relace aktivní s tmux i po odpojení.";
 "Secure Storage" = "Bezpečné úložiště";
 "Passwords and SSH keys protected by Keychain." = "Hesla a SSH klíče chráněny Klíčenkou.";
 "Voice Commands" = "Hlasové příkazy";

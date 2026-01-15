@@ -99,6 +99,8 @@
 "Connect to servers with GPU-accelerated terminal emulation." = "Kết nối máy chủ với mô phỏng terminal tăng tốc GPU.";
 "iCloud Sync" = "Đồng bộ iCloud";
 "Servers and credentials sync across all your devices." = "Máy chủ và thông tin xác thực được đồng bộ trên tất cả thiết bị.";
+"Session Persistence" = "Duy trì phiên";
+"Keep sessions alive with tmux, even after disconnects." = "Giữ phiên hoạt động với tmux, ngay cả khi bị ngắt kết nối.";
 "Secure Storage" = "Lưu trữ an toàn";
 "Passwords and SSH keys protected by Keychain." = "Mật khẩu và khóa SSH được bảo vệ bởi Keychain.";
 "Voice Commands" = "Lệnh giọng nói";
