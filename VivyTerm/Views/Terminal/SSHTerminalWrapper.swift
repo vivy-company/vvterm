@@ -402,7 +402,15 @@ final class TerminalContainerUIView: UIView {
             }
         }
     }
+    var keyboardInset: CGFloat = 0 {
+        didSet {
+            if keyboardInset != oldValue {
+                setNeedsLayout()
+            }
+        }
+    }
     private var pendingRefresh = false
+    private var lastLaidOutSize: CGSize = .zero
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -417,8 +425,16 @@ final class TerminalContainerUIView: UIView {
         super.layoutSubviews()
 
         guard let terminalView = terminalView else { return }
-        if terminalView.frame != bounds {
-            terminalView.frame = bounds
+        let clampedInset = min(max(0, keyboardInset), bounds.height)
+        let availableBounds = bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: clampedInset, right: 0))
+        if terminalView.frame != availableBounds {
+            terminalView.frame = availableBounds
+        }
+        if availableBounds.size != lastLaidOutSize {
+            lastLaidOutSize = availableBounds.size
+            if availableBounds.width > 0 && availableBounds.height > 0 {
+                terminalView.sizeDidChange(availableBounds.size)
+            }
         }
 
         guard bounds.width > 0 && bounds.height > 0 else { return }
@@ -512,6 +528,8 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             // Rewrap in a fresh container so layout/safe-area changes apply correctly.
             let container = TerminalContainerUIView()
             container.backgroundColor = .black
+            coordinator.containerView = container
+            coordinator.startKeyboardMonitoring()
 
             if existingTerminal.superview != nil {
                 existingTerminal.removeFromSuperview()
@@ -555,6 +573,8 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         // This allows the navigation animation to complete smoothly
         let container = TerminalContainerUIView()
         container.backgroundColor = .black
+        coordinator.containerView = container
+        coordinator.startKeyboardMonitoring()
 
         // Defer heavy terminal creation to after animation completes (150ms for iOS navigation)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak coordinator, weak container] in
@@ -626,10 +646,13 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     func updateUIView(_ uiView: UIView, context: Context) {
         // Get terminal view - either directly or from container
         let terminalView: GhosttyTerminalView?
+        let isDirectTerminalView: Bool
         if let direct = uiView as? GhosttyTerminalView {
             terminalView = direct
+            isDirectTerminalView = true
         } else if let container = uiView as? TerminalContainerUIView {
             terminalView = container.terminalView
+            isDirectTerminalView = false
         } else {
             return
         }
@@ -648,7 +671,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         guard let terminalView = terminalView else { return }
 
         terminalView.onVoiceButtonTapped = onVoiceTrigger
-        if size.width > 0 && size.height > 0 && size != context.coordinator.lastReportedSize {
+        if isDirectTerminalView, size.width > 0, size.height > 0, size != context.coordinator.lastReportedSize {
             context.coordinator.lastReportedSize = size
             terminalView.sizeDidChange(size)
         }
@@ -660,6 +683,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
         if let container = uiView as? TerminalContainerUIView {
             container.isActive = isActive
+            container.keyboardInset = context.coordinator.keyboardInset
             if isActive {
                 container.requestRefresh()
             } else {
@@ -730,6 +754,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         let sessionId: UUID
         let onProcessExit: () -> Void
         weak var terminalView: GhosttyTerminalView?
+        weak var containerView: TerminalContainerUIView?
 
         let sshClient: SSHClient
         var shellId: UUID?
@@ -742,6 +767,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         /// If true, session is still active and we shouldn't cleanup on deinit (user just navigated away)
         var preserveSession = false
         var lastReportedSize: CGSize = .zero
+        var keyboardInset: CGFloat = 0
+        private var keyboardObservers: [NSObjectProtocol] = []
+        private var lastKeyboardFrame: CGRect = .zero
 
         init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void, sshClient: SSHClient) {
             self.server = server
@@ -749,6 +777,46 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             self.sessionId = sessionId
             self.onProcessExit = onProcessExit
             self.sshClient = sshClient
+        }
+
+        func startKeyboardMonitoring() {
+            guard keyboardObservers.isEmpty else { return }
+            let center = NotificationCenter.default
+            keyboardObservers.append(center.addObserver(
+                forName: UIResponder.keyboardWillChangeFrameNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                self?.handleKeyboardNotification(notification)
+            })
+            keyboardObservers.append(center.addObserver(
+                forName: UIResponder.keyboardWillHideNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] notification in
+                self?.handleKeyboardNotification(notification)
+            })
+        }
+
+        private func handleKeyboardNotification(_ notification: Notification) {
+            guard let containerView = containerView,
+                  let window = containerView.window,
+                  let frameValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+                return
+            }
+
+            lastKeyboardFrame = frameValue
+            let keyboardFrameInWindow = window.convert(frameValue, from: nil)
+            let containerFrameInWindow = containerView.convert(containerView.bounds, to: window)
+            let overlap = containerFrameInWindow.intersection(keyboardFrameInWindow).height
+            let newInset = max(0, overlap)
+
+            if newInset != keyboardInset {
+                keyboardInset = newInset
+                containerView.keyboardInset = newInset
+                containerView.setNeedsLayout()
+                containerView.layoutIfNeeded()
+            }
         }
 
         // MARK: - SSHTerminalCoordinator hooks
@@ -778,6 +846,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         }
 
         deinit {
+            for observer in keyboardObservers {
+                NotificationCenter.default.removeObserver(observer)
+            }
             // Don't cleanup if session is still active (user just navigated away)
             guard !preserveSession else { return }
             cancelShell()
