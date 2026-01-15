@@ -108,13 +108,13 @@ struct AboutSettingsView: View {
             }
 
             Section("Links") {
-                Link(destination: URL(string: "https://vivy.dev")!) {
+                Link(destination: URL(string: "https://vvterm.com")!) {
                     Label("Visit Website", systemImage: "globe")
                 }
                 .tint(.primary)
                 .foregroundStyle(.primary)
 
-                Link(destination: URL(string: "https://vivy.dev/privacy")!) {
+                Link(destination: URL(string: "https://vvterm.com/privacy")!) {
                     Label("Privacy Policy", systemImage: "hand.raised")
                 }
                 .tint(.primary)

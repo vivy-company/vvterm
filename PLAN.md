@@ -1797,9 +1797,9 @@ struct ProUpgradeSheet: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 4) {
-                    Link("Terms of Service", destination: URL(string: "https://vivy.dev/terms")!)
+                    Link("Terms of Service", destination: URL(string: "https://vvterm.com/terms")!)
                     Text("•")
-                    Link("Privacy Policy", destination: URL(string: "https://vivy.dev/privacy")!)
+                    Link("Privacy Policy", destination: URL(string: "https://vvterm.com/privacy")!)
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
