@@ -15,7 +15,16 @@ enum TmuxStatus: String, Codable, Hashable {
         case .off: return "off"
         case .missing: return "tmux missing"
         case .installing: return "tmux install"
-        case .unknown: return ""
+        case .unknown: return "tmux"
+        }
+    }
+
+    var indicatesTmux: Bool {
+        switch self {
+        case .foreground, .background, .unknown:
+            return true
+        case .off, .missing, .installing:
+            return false
         }
     }
 

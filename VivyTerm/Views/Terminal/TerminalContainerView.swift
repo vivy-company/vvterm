@@ -24,6 +24,8 @@ struct TerminalContainerView: View {
     @State private var credentials: ServerCredentials?
     @State private var reconnectToken = UUID()
     @State private var showingTmuxInstallPrompt = false
+    @State private var didAutoReconnect = false
+    @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
     /// Check if terminal already exists (was previously created)
     private var terminalAlreadyExists: Bool {
@@ -164,6 +166,13 @@ struct TerminalContainerView: View {
                             .foregroundStyle(.secondary)
                         Text("Disconnected")
                             .foregroundStyle(.secondary)
+                        if session.tmuxStatus.indicatesTmux {
+                            Text("tmux session is still running on the server.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                        }
                         Button("Reconnect") {
                             Task { await retryConnection() }
                         }
@@ -254,6 +263,7 @@ struct TerminalContainerView: View {
             if session.tmuxStatus == .missing {
                 showingTmuxInstallPrompt = true
             }
+            attemptAutoReconnectIfNeeded()
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
         .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
@@ -340,6 +350,14 @@ struct TerminalContainerView: View {
         Task {
             try? await ServerManager.shared.updateServer(server)
         }
+    }
+
+    private func attemptAutoReconnectIfNeeded() {
+        guard !didAutoReconnect else { return }
+        guard autoReconnectEnabled else { return }
+        guard session.connectionState == .disconnected else { return }
+        didAutoReconnect = true
+        Task { await retryConnection() }
     }
 
     @MainActor
