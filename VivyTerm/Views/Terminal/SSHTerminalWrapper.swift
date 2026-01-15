@@ -511,6 +511,10 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             existingTerminal.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             container.addSubview(existingTerminal)
             container.terminalView = existingTerminal
+            coordinator.lastReportedSize = container.bounds.size
+            if container.bounds.width > 0 && container.bounds.height > 0 {
+                existingTerminal.sizeDidChange(container.bounds.size)
+            }
 
             // Resume rendering since it was paused when navigating away
             existingTerminal.resumeRendering()
@@ -626,6 +630,10 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         guard let terminalView = terminalView else { return }
 
         terminalView.onVoiceButtonTapped = onVoiceTrigger
+        if size.width > 0 && size.height > 0 && size != context.coordinator.lastReportedSize {
+            context.coordinator.lastReportedSize = size
+            terminalView.sizeDidChange(size)
+        }
 
         if context.coordinator.isTerminalReady {
             // Keep rendering even when inactive so tab switching doesn't stall frames.
@@ -715,6 +723,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
         /// If true, session is still active and we shouldn't cleanup on deinit (user just navigated away)
         var preserveSession = false
+        var lastReportedSize: CGSize = .zero
 
         init(server: Server, credentials: ServerCredentials, sessionId: UUID, onProcessExit: @escaping () -> Void, sshClient: SSHClient) {
             self.server = server
