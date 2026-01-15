@@ -1289,16 +1289,24 @@ private class TerminalInputAccessoryView: UIInputView {
     private weak var altButton: UIButton?
     private weak var voiceButton: UIButton?
     private weak var backgroundEffectView: UIVisualEffectView?
+    private var defaultsObserver: NSObjectProtocol?
 
     init(onKey: @escaping (TerminalKey) -> Void, onVoice: (() -> Void)? = nil) {
         self.onKey = onKey
         self.onVoice = onVoice
         super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 48), inputViewStyle: .keyboard)
         setupView()
+        observeThemeChanges()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not supported")
+    }
+
+    deinit {
+        if let observer = defaultsObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
     }
 
     private func setupView() {
@@ -1406,14 +1414,37 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func updateBackgroundEffect() {
         guard let backgroundEffectView else { return }
-        if UIAccessibility.isReduceTransparencyEnabled {
-            backgroundEffectView.effect = nil
-            backgroundEffectView.backgroundColor = UIColor { traits in
-                traits.userInterfaceStyle == .dark ? .black : .systemBackground
-            }
+        backgroundEffectView.effect = nil
+        backgroundEffectView.backgroundColor = resolveThemeBackgroundColor()
+    }
+
+    private func observeThemeChanges() {
+        defaultsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateBackgroundEffect()
+        }
+    }
+
+    private func resolveThemeBackgroundColor() -> UIColor {
+        let defaults = UserDefaults.standard
+        let usePerAppearance = defaults.object(forKey: "terminalUsePerAppearanceTheme") as? Bool ?? true
+        let darkTheme = defaults.string(forKey: "terminalThemeName") ?? "Aizen Dark"
+        let lightTheme = defaults.string(forKey: "terminalThemeNameLight") ?? "Aizen Light"
+        let themeName: String
+        if usePerAppearance {
+            themeName = traitCollection.userInterfaceStyle == .dark ? darkTheme : lightTheme
         } else {
-            backgroundEffectView.effect = UIBlurEffect(style: .systemUltraThinMaterial)
-            backgroundEffectView.backgroundColor = .clear
+            themeName = darkTheme
+        }
+
+        if let color = ThemeColorParser.backgroundColor(for: themeName) {
+            return UIColor(color)
+        }
+        return UIColor { traits in
+            traits.userInterfaceStyle == .dark ? .black : .systemBackground
         }
     }
 
