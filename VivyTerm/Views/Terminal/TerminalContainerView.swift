@@ -319,6 +319,7 @@ struct TerminalContainerView: View {
             await MainActor.run {
                 if let color = resolved {
                     terminalBackgroundColor = color
+                    UserDefaults.standard.set(color.toHex(), forKey: "terminalBackgroundColor")
                 } else {
                     #if os(iOS)
                     terminalBackgroundColor = Color(UIColor.systemBackground)
