@@ -397,13 +397,11 @@ final class TerminalContainerUIView: UIView {
     var isActive = false {
         didSet {
             if isActive != oldValue {
-                needsSizeUpdate = true
                 pendingRefresh = true
+                setNeedsLayout()
             }
         }
     }
-    private var lastLayoutSize: CGSize = .zero
-    private var needsSizeUpdate = false
     private var pendingRefresh = false
 
     override init(frame: CGRect) {
@@ -423,20 +421,10 @@ final class TerminalContainerUIView: UIView {
             terminalView.frame = bounds
         }
 
-        let size = bounds.size
-        guard size.width > 0 && size.height > 0 else { return }
-        if isActive {
-            if size != lastLayoutSize || needsSizeUpdate || pendingRefresh {
-                lastLayoutSize = size
-                needsSizeUpdate = false
-                terminalView.sizeDidChange(size)
-                if pendingRefresh {
-                    terminalView.forceRefresh()
-                    pendingRefresh = false
-                }
-            }
-        } else {
-            lastLayoutSize = size
+        guard bounds.width > 0 && bounds.height > 0 else { return }
+        if isActive && pendingRefresh {
+            terminalView.forceRefresh()
+            pendingRefresh = false
         }
     }
 
