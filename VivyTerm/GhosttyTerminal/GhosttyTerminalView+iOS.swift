@@ -1412,6 +1412,11 @@ private class TerminalInputAccessoryView: UIInputView {
         }
     }
 
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        updateBackgroundEffect()
+    }
+
     private func updateBackgroundEffect() {
         guard let backgroundEffectView else { return }
         backgroundEffectView.effect = nil
@@ -1442,6 +1447,9 @@ private class TerminalInputAccessoryView: UIInputView {
 
         if let color = ThemeColorParser.backgroundColor(for: themeName) {
             return UIColor(color)
+        }
+        if let cachedHex = defaults.string(forKey: "terminalBackgroundColor") {
+            return UIColor(Color.fromHex(cachedHex))
         }
         return UIColor { traits in
             traits.userInterfaceStyle == .dark ? .black : .systemBackground
