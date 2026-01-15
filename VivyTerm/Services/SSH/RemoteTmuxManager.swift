@@ -9,7 +9,8 @@ actor RemoteTmuxManager {
     private init() {}
 
     func isTmuxAvailable(using client: SSHClient) async -> Bool {
-        let command = "sh -lc 'command -v tmux >/dev/null 2>&1 && echo 1 || echo 0'"
+        let body = "\(shellPathExport()); command -v tmux >/dev/null 2>&1 && echo 1 || echo 0"
+        let command = "sh -lc \(shellQuoted(body))"
         let output = try? await client.execute(command)
         return output?.trimmingCharacters(in: .whitespacesAndNewlines) == "1"
     }
@@ -23,7 +24,7 @@ actor RemoteTmuxManager {
     nonisolated func attachCommand(sessionName: String, workingDirectory: String) -> String {
         let escapedDir = shellDirectoryArgument(workingDirectory)
         let escapedSession = shellQuoted(sessionName)
-        return "exec tmux -u -f \(configPath) new-session -A -s \(escapedSession) -c \(escapedDir)"
+        return "\(shellPathPrefix()) exec tmux -u -f \(configPath) new-session -A -s \(escapedSession) -c \(escapedDir)"
     }
 
     nonisolated func installAndAttachScript(sessionName: String, workingDirectory: String) -> String {
@@ -32,6 +33,7 @@ actor RemoteTmuxManager {
         let attach = "exec tmux -u -f \(configPath) new-session -A -s \(escapedSession) -c \(escapedDir)"
         let configWrite = configWriteCommand()
         let body = """
+        \(shellPathExport());
         \(configWrite);
         if command -v tmux >/dev/null 2>&1; then \(attach); fi;
         if command -v sudo >/dev/null 2>&1; then SUDO="sudo"; else SUDO=""; fi;
@@ -84,7 +86,8 @@ actor RemoteTmuxManager {
 
     func killSession(named sessionName: String, using client: SSHClient) async {
         let quoted = shellQuoted(sessionName)
-        let command = "sh -lc 'tmux kill-session -t \(quoted) 2>/dev/null || true'"
+        let body = "\(shellPathExport()); tmux kill-session -t \(quoted) 2>/dev/null || true"
+        let command = "sh -lc \(shellQuoted(body))"
         _ = try? await client.execute(command)
     }
 
@@ -99,6 +102,32 @@ actor RemoteTmuxManager {
         }
         let escaped = value.replacingOccurrences(of: "\"", with: "\\\"")
         return "\"\(escaped)\""
+    }
+
+    nonisolated private func shellPathPrefix() -> String {
+        "PATH=\"\(shellPathValue())\""
+    }
+
+    nonisolated private func shellPathExport() -> String {
+        "export PATH=\"\(shellPathValue())\""
+    }
+
+    nonisolated private func shellPathValue() -> String {
+        let paths = [
+            "$HOME/.local/bin",
+            "/opt/homebrew/bin",
+            "/opt/homebrew/sbin",
+            "/usr/local/bin",
+            "/usr/local/sbin",
+            "/opt/local/bin",
+            "/opt/local/sbin",
+            "/snap/bin",
+            "/usr/bin",
+            "/bin",
+            "/usr/sbin",
+            "/sbin"
+        ]
+        return paths.joined(separator: ":") + ":$PATH"
     }
 
     nonisolated private func configWriteCommand() -> String {
