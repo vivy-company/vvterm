@@ -37,12 +37,6 @@
     <key>com.apple.security.device.audio-input</key>
     <true/>
 
-    <!-- Hardened Runtime (required for notarization) -->
-    <key>com.apple.security.cs.allow-jit</key>
-    <false/>
-    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-    <false/>
-    <key>com.apple.security.cs.disable-library-validation</key>
-    <false/>
+    <!-- Hardened runtime exceptions are not allowed for App Store builds. -->
 </dict>
 </plist>

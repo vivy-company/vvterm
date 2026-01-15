@@ -93,6 +93,61 @@ build_ghosttykit() {
     log_info "Cloning ghostty @ ${GHOSTTY_REF}..."
     git clone --filter=blob:none --branch "${GHOSTTY_REF}" --depth 1 "${GHOSTTY_REPO}" "${workdir}/ghostty"
 
+    local embedded_path="${workdir}/ghostty/src/apprt/embedded.zig"
+    if [ -f "${embedded_path}" ]; then
+        log_info "Disabling Ghostty window blur (App Store safe)..."
+        python3 - <<PY
+from pathlib import Path
+
+path = Path("${embedded_path}")
+text = path.read_text()
+old = """    /// Sets the window background blur on macOS to the desired value.
+    /// I do this in Zig as an extern function because I don't know how to
+    /// call these functions in Swift.
+    ///
+    /// This uses an undocumented, non-public API because this is what
+    /// every terminal appears to use, including Terminal.app.
+    export fn ghostty_set_window_background_blur(
+        app: *App,
+        window: *anyopaque,
+    ) void {
+        // This is only supported on macOS
+        if (comptime builtin.target.os.tag != .macos) return;
+
+        const config = &app.config;
+
+        // Do nothing if we don't have background transparency enabled
+        if (config.@\\"background-opacity\\" >= 1.0) return;
+
+        const nswindow = objc.Object.fromId(window);
+        _ = CGSSetWindowBackgroundBlurRadius(
+            CGSDefaultConnectionForThread(),
+            nswindow.msgSend(usize, objc.sel(\\"windowNumber\\"), .{}),
+            @intCast(config.@\\"background-blur\\".cval()),
+        );
+    }
+
+    /// See ghostty_set_window_background_blur
+    extern \\"c\\" fn CGSSetWindowBackgroundBlurRadius(*anyopaque, usize, c_int) i32;
+    extern \\"c\\" fn CGSDefaultConnectionForThread() *anyopaque;
+"""
+new = """    /// Sets the window background blur on macOS to the desired value.
+    /// App Store builds must avoid non-public APIs; keep this as a no-op.
+    export fn ghostty_set_window_background_blur(
+        app: *App,
+        window: *anyopaque,
+    ) void {
+        _ = app;
+        _ = window;
+        return;
+    }
+"""
+if old not in text:
+    raise SystemExit("Ghostty private blur block not found; aborting.")
+path.write_text(text.replace(old, new))
+PY
+    fi
+
     # Patch to link Metal frameworks (same as aizen)
     if [ -f "${workdir}/ghostty/pkg/macos/build.zig" ]; then
         perl -0pi -e 's/lib\.linkFramework\("IOSurface"\);/lib.linkFramework("IOSurface");\n    lib.linkFramework("Metal");\n    lib.linkFramework("MetalKit");/g' "${workdir}/ghostty/pkg/macos/build.zig"
