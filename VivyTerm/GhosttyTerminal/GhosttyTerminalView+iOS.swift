@@ -554,23 +554,28 @@ class GhosttyTerminalView: UIView {
     /// Display link for momentum animation
     private var momentumDisplayLink: CADisplayLink?
     private var momentumVelocity: CGPoint = .zero
+    private var momentumPhase: Ghostty.Input.Momentum = .none
 
     @objc private func handlePanGesture(_ recognizer: UIPanGestureRecognizer) {
         guard let surface = surface else { return }
         if isSelecting { return }
 
         let translation = recognizer.translation(in: self)
+        let location = recognizer.location(in: self)
 
         switch recognizer.state {
         case .began:
             isScrolling = true
             stopMomentumScrolling()
         case .changed:
+            // Update mouse position so TUI apps receive wheel events with coordinates.
+            let pos = ghosttyPoint(location)
+            surface.sendMousePos(.init(x: pos.x, y: pos.y, mods: []))
             // Send scroll delta directly with increased multiplier for snappy feel
             let scrollEvent = Ghostty.Input.MouseScrollEvent(
                 x: Double(translation.x) * Self.scrollMultiplier,
                 y: Double(translation.y) * Self.scrollMultiplier,
-                mods: Ghostty.Input.ScrollMods(precision: true, momentum: .changed)
+                mods: Ghostty.Input.ScrollMods(precision: true, momentum: .none)
             )
             surface.sendMouseScroll(scrollEvent)
             requestRender()
@@ -604,6 +609,7 @@ class GhosttyTerminalView: UIView {
         )
 
         // Create display link for smooth animation
+        momentumPhase = .began
         momentumDisplayLink = CADisplayLink(target: self, selector: #selector(momentumScrollTick))
         momentumDisplayLink?.add(to: .main, forMode: .common)
     }
@@ -625,13 +631,17 @@ class GhosttyTerminalView: UIView {
             return
         }
 
-        // Send momentum scroll event
+        // Send momentum scroll event (began -> changed)
         let scrollEvent = Ghostty.Input.MouseScrollEvent(
             x: Double(momentumVelocity.x),
             y: Double(momentumVelocity.y),
-            mods: Ghostty.Input.ScrollMods(precision: true, momentum: .changed)
+            mods: Ghostty.Input.ScrollMods(
+                precision: true,
+                momentum: momentumPhase == .began ? .began : .changed
+            )
         )
         surface.sendMouseScroll(scrollEvent)
+        momentumPhase = .changed
         requestRender()
     }
 
@@ -639,6 +649,7 @@ class GhosttyTerminalView: UIView {
         momentumDisplayLink?.invalidate()
         momentumDisplayLink = nil
         momentumVelocity = .zero
+        momentumPhase = .none
     }
 
     private func sendMomentumEnd() {
@@ -649,6 +660,7 @@ class GhosttyTerminalView: UIView {
             mods: Ghostty.Input.ScrollMods(precision: true, momentum: .ended)
         )
         surface.sendMouseScroll(endEvent)
+        momentumPhase = .none
     }
 
     // MARK: - Selection Gestures

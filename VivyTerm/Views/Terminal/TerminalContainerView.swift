@@ -23,6 +23,7 @@ struct TerminalContainerView: View {
     @State private var errorMessage: String?
     @State private var credentials: ServerCredentials?
     @State private var reconnectToken = UUID()
+    @State private var showingTmuxInstallPrompt = false
 
     /// Check if terminal already exists (was previously created)
     private var terminalAlreadyExists: Bool {
@@ -190,6 +191,15 @@ struct TerminalContainerView: View {
                 }
             }
 
+            if session.tmuxStatus == .installing {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Installing tmux...")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             // Error overlay
             if let error = errorMessage {
                 VStack {
@@ -241,6 +251,9 @@ struct TerminalContainerView: View {
         }
         .onAppear {
             updateTerminalBackgroundColor()
+            if session.tmuxStatus == .missing {
+                showingTmuxInstallPrompt = true
+            }
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
         .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
@@ -251,6 +264,11 @@ struct TerminalContainerView: View {
                 updateTerminalBackgroundColor()
             }
         }
+        .onChange(of: session.tmuxStatus) { status in
+            if status == .missing {
+                showingTmuxInstallPrompt = true
+            }
+        }
         #if os(macOS) || os(iOS)
         .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {
             Button("OK", role: .cancel) { }
@@ -258,6 +276,18 @@ struct TerminalContainerView: View {
             Text(permissionErrorMessage)
         }
         #endif
+        .alert("Install tmux?", isPresented: $showingTmuxInstallPrompt) {
+            Button("Install") {
+                Task {
+                    await ConnectionSessionManager.shared.startTmuxInstall(for: session.id)
+                }
+            }
+            Button("Continue without persistence", role: .cancel) {
+                disableTmuxForServer()
+            }
+        } message: {
+            Text("tmux keeps your terminal session alive across app restarts and disconnects.")
+        }
         #if os(macOS)
         .onAppear {
             setupKeyMonitor()
@@ -299,6 +329,15 @@ struct TerminalContainerView: View {
                     #endif
                 }
             }
+        }
+    }
+
+    private func disableTmuxForServer() {
+        guard var server = server else { return }
+        server.tmuxEnabledOverride = false
+        ConnectionSessionManager.shared.disableTmux(for: server.id)
+        Task {
+            try? await ServerManager.shared.updateServer(server)
         }
     }
 

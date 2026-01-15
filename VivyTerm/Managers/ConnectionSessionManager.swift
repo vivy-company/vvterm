@@ -17,19 +17,29 @@ final class ConnectionSessionManager: ObservableObject {
     @Published var sessions: [ConnectionSession] = [] {
         didSet {
             LiveActivityManager.shared.refresh(with: sessions)
+            schedulePersist()
         }
     }
-    @Published var selectedSessionId: UUID?
+    @Published var selectedSessionId: UUID? {
+        didSet {
+            schedulePersist()
+            updateTmuxSelectionStatuses()
+        }
+    }
 
     /// Servers we're currently connected to (persists even when all terminals closed)
     /// Cleared when user explicitly disconnects from a server
     @Published var connectedServerIds: Set<UUID> = []
 
     /// Per-server view state (stats/terminal) - persists when switching servers
-    @Published var selectedViewByServer: [UUID: String] = [:]
+    @Published var selectedViewByServer: [UUID: String] = [:] {
+        didSet { schedulePersist() }
+    }
 
     /// Per-server selected terminal tab - persists when switching servers
-    @Published var selectedSessionByServer: [UUID: UUID] = [:]
+    @Published var selectedSessionByServer: [UUID: UUID] = [:] {
+        didSet { schedulePersist() }
+    }
 
 
     /// Legacy single server ID for backward compatibility
@@ -76,7 +86,13 @@ final class ConnectionSessionManager: ObservableObject {
     /// LRU access order - most recently accessed at the end
     private var terminalAccessOrder: [UUID] = []
 
-    private init() {}
+    private let persistenceKey = "connectionSessionsSnapshot.v1"
+    private var persistTask: Task<Void, Never>?
+    private var isRestoring = false
+
+    private init() {
+        restoreSnapshot()
+    }
 
     // MARK: - Session Management
 
@@ -120,7 +136,8 @@ final class ConnectionSessionManager: ObservableObject {
         let session = ConnectionSession(
             serverId: server.id,
             title: server.name,
-            connectionState: .connecting  // Will connect when terminal view appears
+            connectionState: .connecting,  // Will connect when terminal view appears
+            tmuxStatus: isTmuxEnabled(for: server.id) ? .unknown : .off
         )
 
         sessions.append(session)
@@ -149,6 +166,9 @@ final class ConnectionSessionManager: ObservableObject {
         case .connected:
             connectedServerIds.insert(serverId)
         case .disconnected, .failed:
+            if sessions[index].tmuxStatus == .foreground {
+                sessions[index].tmuxStatus = .background
+            }
             let hasOtherConnections = sessions.contains {
                 $0.serverId == serverId && $0.connectionState.isConnected
             }
@@ -164,6 +184,11 @@ final class ConnectionSessionManager: ObservableObject {
         sessions.first(where: { $0.id == sessionId })?.connectionState
     }
 
+    func updateTmuxStatus(_ sessionId: UUID, status: TmuxStatus) {
+        guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else { return }
+        sessions[index].tmuxStatus = status
+    }
+
     // MARK: - Close Terminal
 
     /// Closes a terminal session and removes it from the list
@@ -172,6 +197,10 @@ final class ConnectionSessionManager: ObservableObject {
         let title = session.title
         let wasSelected = selectedSessionId == sessionId
         var replacementSessionId: UUID?
+
+        if session.tmuxStatus == .foreground || session.tmuxStatus == .background || session.tmuxStatus == .installing {
+            killTmuxIfNeeded(for: sessionId)
+        }
 
         if wasSelected {
             let serverSessions = sessions.filter { $0.serverId == session.serverId }
@@ -354,6 +383,10 @@ final class ConnectionSessionManager: ObservableObject {
         sshShells[sessionId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
+
+        Task { [weak self] in
+            await self?.handleTmuxLifecycle(sessionId: sessionId, serverId: serverId, client: client, shellId: shellId)
+        }
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
@@ -496,6 +529,247 @@ final class ConnectionSessionManager: ObservableObject {
         await unregisterSSHClient(for: session.id)
     }
 
+}
+
+// MARK: - Persistence
+
+extension ConnectionSessionManager {
+    private func schedulePersist() {
+        guard !isRestoring else { return }
+        persistTask?.cancel()
+        persistTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            await MainActor.run {
+                self?.persistSnapshot()
+            }
+        }
+    }
+
+    private func persistSnapshot() {
+        let sessionsSnapshot = sessions.map { ConnectionSessionsSnapshot.SessionSnapshot(from: $0) }
+        let serverSelections = Set(sessions.map(\.serverId)).map { serverId in
+            ConnectionSessionsSnapshot.ServerSnapshot(
+                serverId: serverId,
+                selectedSessionId: selectedSessionByServer[serverId],
+                selectedView: selectedViewByServer[serverId]
+            )
+        }
+
+        let snapshot = ConnectionSessionsSnapshot(
+            sessions: sessionsSnapshot,
+            selectedSessionId: selectedSessionId,
+            serverSelections: serverSelections
+        )
+
+        do {
+            let data = try JSONEncoder().encode(snapshot)
+            UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to persist session snapshot: \(error.localizedDescription)")
+        }
+    }
+
+    private func restoreSnapshot() {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        do {
+            let snapshot = try JSONDecoder().decode(ConnectionSessionsSnapshot.self, from: data)
+            isRestoring = true
+
+            var restoredSessions = snapshot.sessions.map { $0.toSession() }
+            for index in restoredSessions.indices {
+                let serverId = restoredSessions[index].serverId
+                if !isTmuxEnabled(for: serverId) {
+                    restoredSessions[index].tmuxStatus = .off
+                }
+            }
+            sessions = restoredSessions
+            selectedSessionId = snapshot.selectedSessionId
+            selectedSessionByServer = Dictionary(
+                uniqueKeysWithValues: snapshot.serverSelections.compactMap { snapshot in
+                    guard let selected = snapshot.selectedSessionId else { return nil }
+                    return (snapshot.serverId, selected)
+                }
+            )
+            selectedViewByServer = Dictionary(
+                uniqueKeysWithValues: snapshot.serverSelections.compactMap { snapshot in
+                    guard let view = snapshot.selectedView else { return nil }
+                    return (snapshot.serverId, view)
+                }
+            )
+            connectedServerIds = Set(restoredSessions.map(\.serverId))
+        } catch {
+            logger.error("Failed to restore session snapshot: \(error.localizedDescription)")
+        }
+        isRestoring = false
+    }
+}
+
+private struct ConnectionSessionsSnapshot: Codable {
+    struct SessionSnapshot: Codable {
+        let id: UUID
+        let serverId: UUID
+        let title: String
+        let createdAt: Date
+        let lastActivity: Date
+        let autoReconnect: Bool
+        let parentSessionId: UUID?
+
+        init(from session: ConnectionSession) {
+            self.id = session.id
+            self.serverId = session.serverId
+            self.title = session.title
+            self.createdAt = session.createdAt
+            self.lastActivity = session.lastActivity
+            self.autoReconnect = session.autoReconnect
+            self.parentSessionId = session.parentSessionId
+        }
+
+        func toSession() -> ConnectionSession {
+            ConnectionSession(
+                id: id,
+                serverId: serverId,
+                title: title,
+                connectionState: .disconnected,
+                createdAt: createdAt,
+                lastActivity: lastActivity,
+                terminalSurfaceId: nil,
+                autoReconnect: autoReconnect,
+                parentSessionId: parentSessionId
+            )
+        }
+    }
+
+    struct ServerSnapshot: Codable {
+        let serverId: UUID
+        let selectedSessionId: UUID?
+        let selectedView: String?
+    }
+
+    let sessions: [SessionSnapshot]
+    let selectedSessionId: UUID?
+    let serverSelections: [ServerSnapshot]
+}
+
+// MARK: - tmux Integration
+
+extension ConnectionSessionManager {
+    private var tmuxEnabledDefault: Bool {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "terminalTmuxEnabledDefault") == nil {
+            return true
+        }
+        return defaults.bool(forKey: "terminalTmuxEnabledDefault")
+    }
+
+    private func isTmuxEnabled(for serverId: UUID) -> Bool {
+        if let server = ServerManager.shared.servers.first(where: { $0.id == serverId }) {
+            if let override = server.tmuxEnabledOverride {
+                return override
+            }
+        }
+        return tmuxEnabledDefault
+    }
+
+    private func tmuxSessionName(for sessionId: UUID) -> String {
+        "vvterm_\(sessionId.uuidString)"
+    }
+
+    private func updateTmuxSelectionStatuses() {
+        guard let selectedId = selectedSessionId else {
+            for index in sessions.indices {
+                if sessions[index].tmuxStatus == .foreground {
+                    sessions[index].tmuxStatus = .background
+                }
+            }
+            return
+        }
+        for index in sessions.indices {
+            let status = sessions[index].tmuxStatus
+            guard status == .foreground || status == .background else { continue }
+            sessions[index].tmuxStatus = (sessions[index].id == selectedId) ? .foreground : .background
+        }
+    }
+
+    private func handleTmuxLifecycle(
+        sessionId: UUID,
+        serverId: UUID,
+        client: SSHClient,
+        shellId: UUID
+    ) async {
+        guard isTmuxEnabled(for: serverId) else {
+            await MainActor.run {
+                self.updateTmuxStatus(sessionId, status: .off)
+            }
+            return
+        }
+
+        let tmuxAvailable = await RemoteTmuxManager.shared.isTmuxAvailable(using: client)
+        guard tmuxAvailable else {
+            await MainActor.run {
+                self.updateTmuxStatus(sessionId, status: .missing)
+            }
+            return
+        }
+
+        let isSelected = await MainActor.run { self.selectedSessionId == sessionId }
+        let status: TmuxStatus = isSelected ? .foreground : .background
+        await MainActor.run {
+            self.updateTmuxStatus(sessionId, status: status)
+        }
+
+        await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let command = RemoteTmuxManager.shared.attachCommand(
+            sessionName: tmuxSessionName(for: sessionId),
+            workingDirectory: "~"
+        )
+        await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
+    }
+
+    func startTmuxInstall(for sessionId: UUID) async {
+        guard let registration = sshShells[sessionId] else { return }
+        let serverId = registration.serverId
+        guard isTmuxEnabled(for: serverId) else { return }
+
+        updateTmuxStatus(sessionId, status: .installing)
+
+        let script = RemoteTmuxManager.shared.installAndAttachScript(
+            sessionName: tmuxSessionName(for: sessionId),
+            workingDirectory: "~"
+        )
+        await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
+
+        Task { [weak self] in
+            guard let self else { return }
+            for _ in 0..<6 {
+                try? await Task.sleep(for: .seconds(2))
+                let available = await RemoteTmuxManager.shared.isTmuxAvailable(using: registration.client)
+                if available {
+                    let isSelected = await MainActor.run { self.selectedSessionId == sessionId }
+                    await MainActor.run {
+                        self.updateTmuxStatus(sessionId, status: isSelected ? .foreground : .background)
+                    }
+                    return
+                }
+            }
+            await MainActor.run {
+                self.updateTmuxStatus(sessionId, status: .missing)
+            }
+        }
+    }
+
+    func killTmuxIfNeeded(for sessionId: UUID) {
+        guard let registration = sshShells[sessionId] else { return }
+        Task.detached { [client = registration.client, sessionId] in
+            let sessionName = "vvterm_\(sessionId.uuidString)"
+            await RemoteTmuxManager.shared.killSession(named: sessionName, using: client)
+        }
+    }
+
+    func disableTmux(for serverId: UUID) {
+        for index in sessions.indices where sessions[index].serverId == serverId {
+            sessions[index].tmuxStatus = .off
+        }
+    }
 }
 
 // MARK: - Connection Reliability Manager

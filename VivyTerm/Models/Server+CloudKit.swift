@@ -59,6 +59,7 @@ extension Server {
         self.notes = record["notes"] as? String
         self.lastConnected = record["lastConnected"] as? Date
         self.isFavorite = record["isFavorite"] as? Bool ?? false
+        self.tmuxEnabledOverride = record["tmuxEnabledOverride"] as? Bool
         self.createdAt = record["createdAt"] as? Date ?? Date()
         self.updatedAt = record["updatedAt"] as? Date ?? Date()
         self.keychainCredentialId = record["keychainCredentialId"] as? String ?? id.uuidString
@@ -89,6 +90,7 @@ extension Server {
         record["notes"] = notes
         record["lastConnected"] = lastConnected
         record["isFavorite"] = isFavorite
+        record["tmuxEnabledOverride"] = tmuxEnabledOverride
         record["createdAt"] = createdAt
         record["updatedAt"] = Date()
         record["keychainCredentialId"] = keychainCredentialId

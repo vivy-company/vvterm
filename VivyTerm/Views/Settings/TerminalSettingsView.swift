@@ -20,6 +20,7 @@ struct TerminalSettingsView: View {
     @AppStorage("terminalNotificationsEnabled") private var terminalNotificationsEnabled = true
     @AppStorage("terminalProgressEnabled") private var terminalProgressEnabled = true
     @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true
+    @AppStorage("terminalTmuxEnabledDefault") private var tmuxEnabledDefault = true
 
     // Copy settings
     @AppStorage("terminalCopyTrimTrailingWhitespace") private var copyTrimTrailingWhitespace = true
@@ -90,6 +91,16 @@ struct TerminalSettingsView: View {
                 Toggle("Enable terminal notifications", isOn: $terminalNotificationsEnabled)
                 Toggle("Show progress overlays", isOn: $terminalProgressEnabled)
                 Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
+            }
+
+            Section {
+                Toggle("Enable tmux by default", isOn: $tmuxEnabledDefault)
+            } header: {
+                Text("Session Persistence")
+            } footer: {
+                Text("When enabled, sessions run inside tmux and survive app restarts or disconnects.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

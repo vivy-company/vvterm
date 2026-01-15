@@ -12,7 +12,7 @@ import Foundation
 
 /// Represents a single tab in the terminal toolbar.
 /// Each tab can contain multiple panes via splits.
-struct TerminalTab: Identifiable, Equatable {
+struct TerminalTab: Identifiable, Equatable, Codable {
     let id: UUID
     let serverId: UUID
     var title: String
@@ -31,15 +31,18 @@ struct TerminalTab: Identifiable, Equatable {
         id: UUID = UUID(),
         serverId: UUID,
         title: String,
-        createdAt: Date = Date()
+        createdAt: Date = Date(),
+        rootPaneId: UUID = UUID(),
+        focusedPaneId: UUID? = nil,
+        layout: TerminalSplitNode? = nil
     ) {
         self.id = id
         self.serverId = serverId
         self.title = title
         self.createdAt = createdAt
-        self.rootPaneId = UUID()
-        self.focusedPaneId = rootPaneId
-        self.layout = nil
+        self.rootPaneId = rootPaneId
+        self.focusedPaneId = focusedPaneId ?? rootPaneId
+        self.layout = layout
     }
 
     /// All pane IDs in this tab (from layout or just root)
@@ -67,6 +70,7 @@ struct TerminalPaneState {
     let serverId: UUID
     var connectionState: ConnectionState
     var lastActivity: Date
+    var tmuxStatus: TmuxStatus
 
     init(paneId: UUID, tabId: UUID, serverId: UUID) {
         self.paneId = paneId
@@ -74,5 +78,6 @@ struct TerminalPaneState {
         self.serverId = serverId
         self.connectionState = .connecting
         self.lastActivity = Date()
+        self.tmuxStatus = .unknown
     }
 }

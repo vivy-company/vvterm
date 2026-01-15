@@ -22,6 +22,7 @@ struct ServerFormSheet: View {
     @State private var sshPassphrase: String = ""
     @State private var selectedEnvironment: ServerEnvironment = .production
     @State private var notes: String = ""
+    @State private var tmuxEnabled: Bool = true
 
     @State private var showingKeyImporter = false
     @State private var showingProUpgrade = false
@@ -58,6 +59,9 @@ struct ServerFormSheet: View {
             _authMethod = State(initialValue: server.authMethod)
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
+            _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
+        } else {
+            _tmuxEnabled = State(initialValue: Self.defaultTmuxEnabled())
         }
     }
 
@@ -228,6 +232,13 @@ struct ServerFormSheet: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                }
+
+                Section("Session Persistence") {
+                    Toggle("Use tmux to preserve sessions", isOn: $tmuxEnabled)
+                    Text("Sessions stay alive across app restarts and disconnects when tmux is available.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 // Environment
@@ -466,8 +477,17 @@ struct ServerFormSheet: View {
             username: username,
             authMethod: authMethod,
             notes: notes.isEmpty ? nil : notes,
+            tmuxEnabledOverride: tmuxEnabled,
             createdAt: createdAt
         )
+    }
+
+    private static func defaultTmuxEnabled() -> Bool {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "terminalTmuxEnabledDefault") == nil {
+            return true
+        }
+        return defaults.bool(forKey: "terminalTmuxEnabledDefault")
     }
 
     private func buildCredentials(for serverId: UUID) -> ServerCredentials {
