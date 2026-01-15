@@ -90,6 +90,8 @@
 "Connect to servers with GPU-accelerated terminal emulation." = "使用 GPU 加速的终端模拟连接服务器。";
 "iCloud Sync" = "iCloud 同步";
 "Servers and credentials sync across all your devices." = "服务器和凭据在所有设备间同步。";
+"Session Persistence" = "会话持久化";
+"Keep sessions alive with tmux, even after disconnects." = "使用 tmux 即使断开连接也能保留会话。";
 "Secure Storage" = "安全存储";
 "Passwords and SSH keys protected by Keychain." = "密码与 SSH 密钥由钥匙串保护。";
 "Voice Commands" = "语音命令";
