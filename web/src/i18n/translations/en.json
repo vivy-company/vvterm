@@ -43,7 +43,7 @@
     },
     "keychain": {
       "title": "Keychain Security",
-      "desc": "Credentials stored securely in Apple Keychain. Never synced to the cloud."
+      "desc": "Credentials stored securely in Apple Keychain. iCloud Keychain can sync them across devices when enabled."
     }
   },
   "howItWorks": {
@@ -126,7 +126,7 @@
     },
     "q2": {
       "question": "How does iCloud sync work?",
-      "answer": "Server configurations (name, host, port, username) sync via iCloud to all your devices. Passwords and SSH keys are stored locally in Keychain and never synced — you'll need to re-enter credentials on each device."
+      "answer": "Server configurations (name, host, port, username) sync via iCloud to all your devices. Passwords and SSH keys are stored in Apple Keychain and sync via iCloud Keychain when iCloud sync is enabled."
     },
     "q3": {
       "question": "Which authentication methods are supported?",
@@ -158,7 +158,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2025 Vivy Technologies Co., Limited",
+    "copyright": "Vivy Technologies Co., Limited",
     "discord": "Discord",
     "github": "GitHub"
   }

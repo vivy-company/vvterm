@@ -60,6 +60,7 @@ function AppContent() {
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<ShowcaseTab>("mac");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
+  const currentYear = new Date().getFullYear();
 
   const trackEvent = (eventName: string) => {
     if (typeof window !== "undefined" && window.umami) {
@@ -319,7 +320,7 @@ function AppContent() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-white/8 mt-20">
         <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center md:items-center gap-6">
-          <p className="text-sm text-[#86868b] text-center md:text-left">{t("footer.copyright")}</p>
+          <p className="text-sm text-[#86868b] text-center md:text-left">© {currentYear} {t("footer.copyright")}</p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
             <a href="https://discord.gg/zemMZtrkSb" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.discord")}

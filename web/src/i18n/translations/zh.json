@@ -43,7 +43,7 @@
     },
     "keychain": {
       "title": "钥匙串安全",
-      "desc": "凭据安全存储在 Apple 钥匙串中。绝不同步到云端。"
+      "desc": "凭据安全存储在 Apple 钥匙串中。启用 iCloud 钥匙串后可在设备间同步。"
     }
   },
   "howItWorks": {
@@ -126,7 +126,7 @@
     },
     "q2": {
       "question": "iCloud 同步如何工作？",
-      "answer": "服务器配置（名称、主机、端口、用户名）通过 iCloud 同步到所有设备。密码和 SSH 密钥存储在本地钥匙串中，绝不同步——你需要在每台设备上重新输入凭据。"
+      "answer": "服务器配置（名称、主机、端口、用户名）通过 iCloud 同步到所有设备。密码和 SSH 密钥存储在 Apple 钥匙串中，启用 iCloud 钥匙串后会在设备间同步。"
     },
     "q3": {
       "question": "支持哪些认证方式？",
@@ -158,7 +158,7 @@
     }
   },
   "footer": {
-    "copyright": "© 2025 Vivy Technologies Co., Limited",
+    "copyright": "Vivy Technologies Co., Limited",
     "discord": "Discord",
     "github": "GitHub"
   }

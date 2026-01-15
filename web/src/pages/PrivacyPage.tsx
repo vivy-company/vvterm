@@ -8,7 +8,7 @@ export function PrivacyPage() {
           <img src="/logo.png" alt="VVTerm" className="w-12 h-12 rounded-xl" />
         </a>
         <h1 className="text-4xl font-semibold tracking-tight mb-2">Privacy Policy</h1>
-        <p className="text-[#86868b] mb-8">Last updated: {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+        <p className="text-[#86868b] mb-8">Last updated: January 15, 2026</p>
 
         <div className="prose prose-invert max-w-none space-y-6 text-[#86868b]">
           <section>
@@ -28,8 +28,8 @@ export function PrivacyPage() {
             </p>
             <h3 className="text-lg font-medium text-white mb-2 mt-4">Credentials</h3>
             <p>
-              SSH passwords and private keys are stored locally in Apple Keychain on each device. Credentials are never synced to iCloud or our servers.
-              They remain on your device and are protected by your device's security (Face ID, Touch ID, or passcode).
+              SSH passwords and private keys are stored in Apple Keychain. If iCloud sync is enabled, credentials sync via iCloud Keychain
+              across your devices. We never receive these credentials, and they are protected by your device's security (Face ID, Touch ID, or passcode).
             </p>
             <h3 className="text-lg font-medium text-white mb-2 mt-4">Analytics Data</h3>
             <p>
@@ -57,7 +57,7 @@ export function PrivacyPage() {
             <h2 className="text-xl font-semibold text-white mb-3">4. Data Storage and Security</h2>
             <p>
               Server configurations are synced via Apple iCloud, subject to Apple's security measures.
-              Credentials remain local to each device in Apple Keychain. We do not operate our own servers to store your data.
+              Credentials are stored in Apple Keychain and may sync via iCloud Keychain when enabled. We do not operate our own servers to store your data.
               We do not sell or share your personal information with third parties.
             </p>
           </section>

@@ -8,7 +8,7 @@ export function TermsPage() {
           <img src="/logo.png" alt="VVTerm" className="w-12 h-12 rounded-xl" />
         </a>
         <h1 className="text-4xl font-semibold tracking-tight mb-2">Terms of Service</h1>
-        <p className="text-[#86868b] mb-8">Last updated: {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
+        <p className="text-[#86868b] mb-8">Last updated: January 15, 2026</p>
 
         <div className="prose prose-invert max-w-none space-y-6 text-[#86868b]">
           <section>
