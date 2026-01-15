@@ -69,19 +69,17 @@ struct iOSServerRow: View {
         }
         .buttonStyle(.plain)
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-            if !isLocked {
-                Button(role: .destructive) {
-                    Task { try? await ServerManager.shared.deleteServer(server) }
-                } label: {
-                    Label("Remove", systemImage: "trash")
-                }
+            Button {
+                onEdit()
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            .tint(.orange)
 
-                Button {
-                    onEdit()
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-                .tint(.orange)
+            Button(role: .destructive) {
+                Task { try? await ServerManager.shared.deleteServer(server) }
+            } label: {
+                Label("Remove", systemImage: "trash")
             }
         }
         .contextMenu {
@@ -90,6 +88,18 @@ struct iOSServerRow: View {
                     onLockedTap?()
                 } label: {
                     Label("Unlock with Pro", systemImage: "lock.open.fill")
+                }
+
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
+                }
+
+                Button(role: .destructive) {
+                    Task { try? await ServerManager.shared.deleteServer(server) }
+                } label: {
+                    Label("Remove", systemImage: "trash")
                 }
             } else {
                 Button {
