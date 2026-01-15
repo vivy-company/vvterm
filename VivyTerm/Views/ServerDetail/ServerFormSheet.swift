@@ -1,5 +1,7 @@
 import SwiftUI
-import UniformTypeIdentifiers
+#if os(iOS)
+import UIKit
+#endif
 
 // MARK: - Server Form Sheet
 
@@ -24,7 +26,6 @@ struct ServerFormSheet: View {
     @State private var notes: String = ""
     @State private var tmuxEnabled: Bool = true
 
-    @State private var showingKeyImporter = false
     @State private var showingProUpgrade = false
     @State private var showingAddKeySheet = false
     @State private var isSaving = false
@@ -87,7 +88,7 @@ struct ServerFormSheet: View {
         ConnectionTestSnapshot(
             host: host,
             port: port,
-            username: username,
+            username: effectiveUsername,
             authMethod: authMethod,
             password: password,
             sshKey: sshKey,
@@ -109,208 +110,75 @@ struct ServerFormSheet: View {
     }
 
     var body: some View {
+        #if os(iOS)
+        formContent
+        #else
         NavigationStack {
-            Form {
-                // Limit Banner (only for new servers, non-Pro users at limit)
-                if isAtLimit {
-                    Section {
-                        ProLimitBanner(
-                            title: String(localized: "Server Limit Reached"),
-                            message: String(format: String(localized: "You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers."), Int64(FreeTierLimits.maxServers))
-                        ) {
-                            showingProUpgrade = true
-                        }
+            formContent
+        }
+        #endif
+    }
+
+    private var formContent: some View {
+        Form {
+            limitSection
+            serverSection
+            authSection
+            connectionSection
+            sessionSection
+            environmentSection
+            notesSection
+            errorSection
+        }
+        .formStyle(.grouped)
+        #if os(iOS)
+        .environment(\.defaultMinListRowHeight, 34)
+        .modifier(CompactListSectionSpacingModifier())
+        .modifier(TransparentNavigationBarModifier())
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarAppearance(
+            backgroundColor: .clear,
+            isTranslucent: true,
+            shadowColor: .clear
+        )
+        #endif
+        .navigationTitle(isEditing ? String(localized: "Edit Server") : String(localized: "Add Server"))
+        .task {
+            // Load credentials from keychain when editing
+            guard let server = server else { return }
+            isLoadingCredentials = true
+            defer { isLoadingCredentials = false }
+
+            do {
+                let credentials = try KeychainManager.shared.getCredentials(for: server)
+
+                switch server.authMethod {
+                case .password:
+                    if let pwd = credentials.password {
+                        password = pwd
                     }
-                } else if !isEditing && !storeManager.isPro {
-                    // Show usage indicator when approaching limit
-                    Section {
-                        UsageIndicator(
-                            current: serverCount,
-                            limit: FreeTierLimits.maxServers,
-                            label: String(localized: "Servers"),
-                            showUpgrade: $showingProUpgrade
-                        )
+                case .sshKey:
+                    if let keyData = credentials.privateKey,
+                       let keyString = String(data: keyData, encoding: .utf8) {
+                        sshKey = keyString
                     }
-                }
-
-                // Basic Info
-                Section("Server Info") {
-                    TextField("Name", text: $name)
-                        #if os(iOS)
-                        .textContentType(.name)
-                        #endif
-
-                    TextField("Host", text: $host)
-                        #if os(iOS)
-                        .textContentType(.URL)
-                        #endif
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        .keyboardType(.URL)
-                        #endif
-
-                    TextField("Port", text: $port)
-                        #if os(iOS)
-                        .keyboardType(.numberPad)
-                        #endif
-
-                    TextField("Username", text: $username)
-                        #if os(iOS)
-                        .textContentType(.username)
-                        #endif
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        #endif
-                }
-
-                // Authentication
-                Section("Authentication") {
-                    Picker("Method", selection: $authMethod) {
-                        ForEach(AuthMethod.allCases) { method in
-                            Label(method.displayName, systemImage: method.icon)
-                                .tag(method)
-                        }
+                case .sshKeyWithPassphrase:
+                    if let keyData = credentials.privateKey,
+                       let keyString = String(data: keyData, encoding: .utf8) {
+                        sshKey = keyString
                     }
-
-                    switch authMethod {
-                    case .password:
-                        SecureField("Password", text: $password)
-                            #if os(iOS)
-                            .textContentType(.password)
-                            #endif
-
-                    case .sshKey:
-                        keyInputView
-                        if !sshKey.isEmpty {
-                            Text("Key loaded")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        }
-
-                    case .sshKeyWithPassphrase:
-                        keyInputView
-                        if !sshKey.isEmpty {
-                            Text("Key loaded")
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        }
-                        SecureField("Key Passphrase", text: $sshPassphrase)
+                    if let phrase = credentials.passphrase {
+                        sshPassphrase = phrase
                     }
                 }
-
-                // Connection Test
-                Section("Connection") {
-                    Button {
-                        Task {
-                            await runConnectionTest(force: true)
-                        }
-                    } label: {
-                        if isTestingConnection {
-                            HStack(spacing: 8) {
-                                ProgressView()
-                                    .progressViewStyle(.circular)
-                                Text(String(localized: "Testing connection..."))
-                            }
-                        } else {
-                            Text(String(localized: "Test Connection"))
-                        }
-                    }
-                    .disabled(!isValid || isTestingConnection)
-
-                    if connectionTestSucceeded && hasValidConnectionTest {
-                        Label(String(localized: "Connection successful"), systemImage: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                            .font(.caption)
-                    } else if let connectionTestError {
-                        Text(connectionTestError)
-                            .foregroundStyle(.red)
-                            .font(.caption)
-                    } else if shouldRequireConnectionTest {
-                        Text(String(localized: "Connection will be verified before saving."))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("Session Persistence") {
-                    Toggle("Use tmux to preserve sessions", isOn: $tmuxEnabled)
-                    Text("Sessions stay alive across app restarts and disconnects when tmux is available.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                // Environment
-                Section("Server Environment") {
-                    Picker("Environment", selection: $selectedEnvironment) {
-                        ForEach(workspace?.environments ?? ServerEnvironment.builtInEnvironments) { env in
-                            HStack {
-                                Circle()
-                                    .fill(env.color)
-                                    .frame(width: 8, height: 8)
-                                Text(env.displayName)
-                            }
-                            .tag(env)
-                        }
-                    }
-                }
-
-                // Notes
-                Section("Notes") {
-                    TextEditor(text: $notes)
-                        .frame(minHeight: 80)
-                }
-
-                // Error
-                if let error = error {
-                    Section {
-                        Text(error)
-                            .foregroundStyle(.red)
-                    }
-                }
+            } catch {
+                self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
             }
-            .formStyle(.grouped)
-            .navigationTitle(isEditing ? String(localized: "Edit Server") : String(localized: "Add Server"))
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
-            #endif
-            .task {
-                // Load credentials from keychain when editing
-                guard let server = server else { return }
-                isLoadingCredentials = true
-                defer { isLoadingCredentials = false }
 
-                do {
-                    let credentials = try KeychainManager.shared.getCredentials(for: server)
-
-                    switch server.authMethod {
-                    case .password:
-                        if let pwd = credentials.password {
-                            password = pwd
-                        }
-                    case .sshKey:
-                        if let keyData = credentials.privateKey,
-                           let keyString = String(data: keyData, encoding: .utf8) {
-                            sshKey = keyString
-                        }
-                    case .sshKeyWithPassphrase:
-                        if let keyData = credentials.privateKey,
-                           let keyString = String(data: keyData, encoding: .utf8) {
-                            sshKey = keyString
-                        }
-                        if let phrase = credentials.passphrase {
-                            sshPassphrase = phrase
-                        }
-                    }
-                } catch {
-                    self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
-                }
-
-                if initialConnectionSnapshot == nil {
-                    initialConnectionSnapshot = connectionSnapshot
-                }
+            if initialConnectionSnapshot == nil {
+                initialConnectionSnapshot = connectionSnapshot
             }
+        }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -324,13 +192,6 @@ struct ServerFormSheet: View {
             }
             .sheet(isPresented: $showingProUpgrade) {
                 ProUpgradeSheet()
-            }
-            .fileImporter(
-                isPresented: $showingKeyImporter,
-                allowedContentTypes: [.data, .text],
-                allowsMultipleSelection: false
-            ) { result in
-                handleKeyImport(result)
             }
             .sheet(isPresented: $showingAddKeySheet) {
                 AddSSHKeySheet(onSave: { entry in
@@ -352,16 +213,223 @@ struct ServerFormSheet: View {
             .onChange(of: password) { _ in resetConnectionTestState() }
             .onChange(of: sshKey) { _ in resetConnectionTestState() }
             .onChange(of: sshPassphrase) { _ in resetConnectionTestState() }
+    }
+
+    @ViewBuilder
+    private var limitSection: some View {
+        if isAtLimit {
+            Section {
+                ProLimitBanner(
+                    title: String(localized: "Server Limit Reached"),
+                    message: String(format: String(localized: "You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers."), Int64(FreeTierLimits.maxServers))
+                ) {
+                    showingProUpgrade = true
+                }
+            }
+        } else if !isEditing && !storeManager.isPro {
+            Section {
+                UsageIndicator(
+                    current: serverCount,
+                    limit: FreeTierLimits.maxServers,
+                    label: String(localized: "Servers"),
+                    showUpgrade: $showingProUpgrade
+                )
+            }
         }
     }
 
+    private var serverSection: some View {
+        Section {
+            TextField("Name", text: $name)
+                #if os(iOS)
+                .textContentType(.name)
+                #endif
+
+            HStack(spacing: 12) {
+                TextField("Host", text: $host)
+                    #if os(iOS)
+                    .textContentType(.URL)
+                    #endif
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    #endif
+
+                TextField("Port", text: $port)
+                    #if os(iOS)
+                    .keyboardType(.numberPad)
+                    #endif
+                    .multilineTextAlignment(.trailing)
+                    .frame(width: 76)
+            }
+
+            TextField("Username", text: $username, prompt: Text("root"))
+                #if os(iOS)
+                .textContentType(.username)
+                #endif
+                .autocorrectionDisabled()
+                #if os(iOS)
+                .textInputAutocapitalization(.never)
+                #endif
+        } header: {
+            sectionHeader("Server")
+        }
+    }
+
+    @ViewBuilder
+    private var authSection: some View {
+        Section {
+            Picker("Method", selection: $authMethod) {
+                ForEach(AuthMethod.allCases) { method in
+                    Label(method.displayName, systemImage: method.icon)
+                        .tag(method)
+                }
+            }
+
+            switch authMethod {
+            case .password:
+                SecureField("Password", text: $password)
+                    #if os(iOS)
+                    .textContentType(.password)
+                    #endif
+
+            case .sshKey:
+                keyInputView
+
+            case .sshKeyWithPassphrase:
+                keyInputView
+                SecureField("Key Passphrase", text: $sshPassphrase)
+            }
+        } header: {
+            sectionHeader("Authentication")
+        }
+    }
+
+    private var connectionSection: some View {
+        Section {
+            Button {
+                Task {
+                    await runConnectionTest(force: true)
+                }
+            } label: {
+                Text(String(localized: "Test Connection"))
+                    .opacity(isTestingConnection ? 0 : 1)
+                    .overlay {
+                        if isTestingConnection {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text(String(localized: "Testing..."))
+                            }
+                        }
+                    }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.regular)
+            .disabled(!isValid || isTestingConnection)
+        } header: {
+            sectionHeader("Connection")
+        } footer: {
+            connectionFooter
+        }
+    }
+
+    private var sessionSection: some View {
+        Section {
+            Toggle("Use tmux to preserve sessions", isOn: $tmuxEnabled)
+        } header: {
+            sectionHeader("Session")
+        } footer: {
+            Text("Sessions stay alive across app restarts and disconnects when tmux is available.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var environmentSection: some View {
+        Section {
+            Picker("Environment", selection: $selectedEnvironment) {
+                ForEach(workspace?.environments ?? ServerEnvironment.builtInEnvironments) { env in
+                    HStack {
+                        Circle()
+                            .fill(env.color)
+                            .frame(width: 8, height: 8)
+                        Text(env.displayName)
+                    }
+                    .tag(env)
+                }
+            }
+        } header: {
+            sectionHeader("Environment")
+        }
+    }
+
+    private var notesSection: some View {
+        Section {
+            TextEditor(text: $notes)
+                .frame(minHeight: 56)
+                #if os(iOS)
+                .scrollContentBackground(.hidden)
+                .background(Color.clear)
+                #endif
+        } header: {
+            sectionHeader("Notes")
+        }
+    }
+
+    @ViewBuilder
+    private var errorSection: some View {
+        if let error = error {
+            Section {
+                Text(error)
+                    .foregroundStyle(.red)
+            }
+        }
+    }
+
+    #if os(iOS)
+    private struct CompactListSectionSpacingModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            if #available(iOS 17.0, *) {
+                content.listSectionSpacing(.compact)
+            } else {
+                content
+            }
+        }
+    }
+
+    private struct TransparentNavigationBarModifier: ViewModifier {
+        func body(content: Content) -> some View {
+            if #available(iOS 16.0, *) {
+                content.toolbarBackground(.hidden, for: .navigationBar)
+            } else {
+                content
+            }
+        }
+    }
+    #endif
+
     // MARK: - Key Input View
+
+    @ViewBuilder
+    private var connectionFooter: some View {
+        if connectionTestSucceeded && hasValidConnectionTest {
+            Label(String(localized: "Connection successful"), systemImage: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+                .font(.caption)
+        } else if let connectionTestError {
+            Text(connectionTestError)
+                .foregroundStyle(.red)
+                .font(.caption)
+        }
+    }
 
     @ViewBuilder
     private var keyInputView: some View {
         // Stored keys picker
         if !storedKeys.isEmpty {
-            Picker("Use Stored Key", selection: $selectedStoredKey) {
+            Picker("Stored Key", selection: $selectedStoredKey) {
                 Text("Select a key...").tag(nil as SSHKeyEntry?)
                 ForEach(storedKeys) { key in
                     HStack {
@@ -378,46 +446,8 @@ struct ServerFormSheet: View {
             }
         }
 
-        // Manual key input options
-        HStack {
-            Button("Import File") {
-                showingKeyImporter = true
-            }
-
-            Button("Paste") {
-                #if os(iOS)
-                if let key = UIPasteboard.general.string {
-                    sshKey = key
-                    selectedStoredKey = nil
-                }
-                #elseif os(macOS)
-                if let key = NSPasteboard.general.string(forType: .string) {
-                    sshKey = key
-                    selectedStoredKey = nil
-                }
-                #endif
-            }
-
-            Spacer()
-
-            Button("Add to Keychain") {
-                showingAddKeySheet = true
-            }
-            .font(.caption)
-        }
-
-        if sshKey.isEmpty && selectedStoredKey == nil {
-            Text("Select a stored key or import/paste a new one")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        } else if selectedStoredKey != nil {
-            HStack {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                Text(String(format: String(localized: "Using stored key: %@"), selectedStoredKey!.name))
-                    .font(.caption)
-                    .foregroundStyle(.green)
-            }
+        Button("Add to Keychain") {
+            showingAddKeySheet = true
         }
     }
 
@@ -441,7 +471,6 @@ struct ServerFormSheet: View {
     private var isValid: Bool {
         !name.isEmpty &&
         !host.isEmpty &&
-        !username.isEmpty &&
         Int(port) != nil &&
         hasValidCredentials
     }
@@ -474,12 +503,28 @@ struct ServerFormSheet: View {
             name: name,
             host: host,
             port: portNum,
-            username: username,
+            username: effectiveUsername,
             authMethod: authMethod,
             notes: notes.isEmpty ? nil : notes,
             tmuxEnabledOverride: tmuxEnabled,
             createdAt: createdAt
         )
+    }
+
+    private var effectiveUsername: String {
+        let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? "root" : trimmed
+    }
+
+    private func sectionHeader(_ title: LocalizedStringKey) -> some View {
+        #if os(iOS)
+        Text(title)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .textCase(nil)
+        #else
+        Text(title)
+        #endif
     }
 
     private static func defaultTmuxEnabled() -> Bool {
@@ -550,23 +595,6 @@ struct ServerFormSheet: View {
         }
 
         return success
-    }
-
-    // MARK: - Actions
-
-    private func handleKeyImport(_ result: Result<[URL], Error>) {
-        switch result {
-        case .success(let urls):
-            guard let url = urls.first else { return }
-            do {
-                let keyContent = try String(contentsOf: url, encoding: .utf8)
-                sshKey = keyContent
-            } catch {
-                self.error = String(format: String(localized: "Failed to read key file: %@"), error.localizedDescription)
-            }
-        case .failure(let error):
-            self.error = String(format: String(localized: "Failed to import key: %@"), error.localizedDescription)
-        }
     }
 
     private func saveServer() {

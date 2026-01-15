@@ -260,42 +260,22 @@ struct AddSSHKeySheet: View {
                 }
 
                 Section("Private Key") {
-                    HStack {
+                    Menu {
                         Button("Import Key File") {
                             showingKeyImporter = true
                         }
 
                         Button("Paste") {
-                            #if os(iOS)
-                            if let key = UIPasteboard.general.string {
-                                keyContent = key
-                                if name.isEmpty {
-                                    name = extractKeyName(from: key)
-                                }
-                            }
-                            #elseif os(macOS)
-                            if let key = NSPasteboard.general.string(forType: .string) {
-                                keyContent = key
-                                if name.isEmpty {
-                                    name = extractKeyName(from: key)
-                                }
-                            }
-                            #endif
+                            pasteKeyFromClipboard()
                         }
+                    } label: {
+                        Label(keyContent.isEmpty ? "Add Private Key" : "Replace Private Key", systemImage: "key.fill")
                     }
 
-                    if keyContent.isEmpty {
-                        Text("Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents")
+                    if !keyContent.isEmpty {
+                        Label(String(localized: "Key loaded"), systemImage: "checkmark.circle.fill")
                             .font(.caption)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
-                            Text(String(format: String(localized: "Key loaded (%lld characters)"), Int64(keyContent.count)))
-                                .font(.caption)
-                                .foregroundStyle(.green)
-                        }
+                            .foregroundStyle(.green)
                     }
                 }
 
@@ -350,6 +330,24 @@ struct AddSSHKeySheet: View {
             return ""
         }
         return ""
+    }
+
+    private func pasteKeyFromClipboard() {
+        #if os(iOS)
+        if let key = UIPasteboard.general.string {
+            keyContent = key
+            if name.isEmpty {
+                name = extractKeyName(from: key)
+            }
+        }
+        #elseif os(macOS)
+        if let key = NSPasteboard.general.string(forType: .string) {
+            keyContent = key
+            if name.isEmpty {
+                name = extractKeyName(from: key)
+            }
+        }
+        #endif
     }
 
     private func handleKeyImport(_ result: Result<[URL], Error>) {
