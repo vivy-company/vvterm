@@ -40,6 +40,10 @@ class GhosttyTerminalView: UIView {
     /// Callback when the surface has produced its first layout/draw (used to hide loading UI)
     var onReady: (() -> Void)?
 
+    /// Callback invoked when the terminal grid changes (cols, rows).
+    /// In custom I/O mode (SSH), the embedder should send a window-change.
+    var onResize: ((Int, Int) -> Void)?
+
     /// Callback for OSC 9;4 progress reports
     var onProgressReport: ((GhosttyProgressState, Int?) -> Void)?
 
@@ -66,6 +70,7 @@ class GhosttyTerminalView: UIView {
     /// Track last surface size in pixels to avoid redundant resize/draw work.
     private var lastPixelSize: CGSize = .zero
     private var lastContentScale: CGFloat = 0
+    private var lastReportedGrid: (cols: Int, rows: Int) = (0, 0)
 
     /// Cell size in points for row-to-pixel conversion
     var cellSize: CGSize = .zero
@@ -280,6 +285,7 @@ class GhosttyTerminalView: UIView {
         onProcessExit = nil
         onTitleChange = nil
         onProgressReport = nil
+        onResize = nil
         writeCallback = nil
 
         // Stop rendering/input callbacks and mark as occluded
@@ -428,6 +434,7 @@ class GhosttyTerminalView: UIView {
             UInt32(pixelWidth),
             UInt32(pixelHeight)
         )
+        reportGridResizeIfNeeded()
 
         if !isPaused {
             // CRITICAL: iOS has no CADisplayLink - explicitly trigger rendering
@@ -441,6 +448,16 @@ class GhosttyTerminalView: UIView {
                 self?.onReady?()
             }
         }
+    }
+
+    private func reportGridResizeIfNeeded() {
+        guard let size = terminalSize() else { return }
+        let cols = Int(size.columns)
+        let rows = Int(size.rows)
+        guard cols > 0, rows > 0 else { return }
+        guard cols != lastReportedGrid.cols || rows != lastReportedGrid.rows else { return }
+        lastReportedGrid = (cols, rows)
+        onResize?(cols, rows)
     }
 
     // MARK: - UIView Overrides

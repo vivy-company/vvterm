@@ -499,6 +499,15 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                     }
                 }
             }
+            existingTerminal.onResize = { [session] cols, rows in
+                guard cols > 0 && rows > 0 else { return }
+                Task {
+                    if let sshClient = ConnectionSessionManager.shared.sshClient(for: session),
+                       let shellId = ConnectionSessionManager.shared.shellId(for: session) {
+                        try? await sshClient.resize(cols: cols, rows: rows, for: shellId)
+                    }
+                }
+            }
 
             // Rewrap in a fresh container so layout/safe-area changes apply correctly.
             let container = TerminalContainerUIView()
@@ -586,6 +595,15 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                 coordinator?.sendToSSH(data)
             }
             terminalView.setupWriteCallback()
+            terminalView.onResize = { [session] cols, rows in
+                guard cols > 0 && rows > 0 else { return }
+                Task {
+                    if let sshClient = ConnectionSessionManager.shared.sshClient(for: session),
+                       let shellId = ConnectionSessionManager.shared.shellId(for: session) {
+                        try? await sshClient.resize(cols: cols, rows: rows, for: shellId)
+                    }
+                }
+            }
 
             // Add terminal to container with fade-in animation
             terminalView.frame = container.bounds
