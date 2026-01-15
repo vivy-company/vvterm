@@ -1288,6 +1288,7 @@ private class TerminalInputAccessoryView: UIInputView {
     private weak var ctrlButton: UIButton?
     private weak var altButton: UIButton?
     private weak var voiceButton: UIButton?
+    private weak var backgroundEffectView: UIVisualEffectView?
 
     init(onKey: @escaping (TerminalKey) -> Void, onVoice: (() -> Void)? = nil) {
         self.onKey = onKey
@@ -1302,6 +1303,19 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func setupView() {
         autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        backgroundColor = .clear
+
+        let blur = UIVisualEffectView(effect: nil)
+        blur.translatesAutoresizingMaskIntoConstraints = false
+        insertSubview(blur, at: 0)
+        NSLayoutConstraint.activate([
+            blur.topAnchor.constraint(equalTo: topAnchor),
+            blur.bottomAnchor.constraint(equalTo: bottomAnchor),
+            blur.leadingAnchor.constraint(equalTo: leadingAnchor),
+            blur.trailingAnchor.constraint(equalTo: trailingAnchor)
+        ])
+        backgroundEffectView = blur
+        updateBackgroundEffect()
 
         let scrollView = UIScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -1381,6 +1395,26 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makePillButton(title: String(localized: "PgDn"), action: #selector(tapPgDn)))
 
         updateVoiceButtonState()
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        if previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle {
+            updateBackgroundEffect()
+        }
+    }
+
+    private func updateBackgroundEffect() {
+        guard let backgroundEffectView else { return }
+        if UIAccessibility.isReduceTransparencyEnabled {
+            backgroundEffectView.effect = nil
+            backgroundEffectView.backgroundColor = UIColor { traits in
+                traits.userInterfaceStyle == .dark ? .black : .systemBackground
+            }
+        } else {
+            backgroundEffectView.effect = UIBlurEffect(style: .systemUltraThinMaterial)
+            backgroundEffectView.backgroundColor = .clear
+        }
     }
 
     private func makePillButton(title: String, action: Selector) -> UIButton {
