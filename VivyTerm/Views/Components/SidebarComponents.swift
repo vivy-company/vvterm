@@ -77,6 +77,14 @@ struct ServerRow: View {
                 } label: {
                     Label("Unlock with Pro", systemImage: "lock.open.fill")
                 }
+
+                Button("Edit") {
+                    onEdit(server)
+                }
+
+                Button("Remove", role: .destructive) {
+                    Task { try? await ServerManager.shared.deleteServer(server) }
+                }
             } else {
                 Button("Connect") {
                     tabManager.connectedServerIds.insert(server.id)
