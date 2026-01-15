@@ -374,6 +374,7 @@ struct TerminalPaneView: View {
     @State private var credentials: ServerCredentials?
     @State private var connectionError: String?
     @State private var reconnectToken = UUID()
+    @State private var showingTmuxInstallPrompt = false
 
     private var paneState: TerminalPaneState? {
         TerminalTabManager.shared.paneStates[paneId]
@@ -442,6 +443,15 @@ struct TerminalPaneView: View {
                 }
             }
 
+            if paneState?.tmuxStatus == .installing {
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                    Text("Installing tmux...")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             if showsVoiceButton && isFocused && isTabSelected {
                 voiceTriggerButton
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -459,6 +469,36 @@ struct TerminalPaneView: View {
             } catch {
                 connectionError = String(localized: "Failed to load credentials")
             }
+
+            if paneState?.tmuxStatus == .missing {
+                showingTmuxInstallPrompt = true
+            }
+        }
+        .onChange(of: paneState?.tmuxStatus) { status in
+            if status == .missing {
+                showingTmuxInstallPrompt = true
+            }
+        }
+        .alert("Install tmux?", isPresented: $showingTmuxInstallPrompt) {
+            Button("Install") {
+                Task {
+                    await TerminalTabManager.shared.startTmuxInstall(for: paneId)
+                }
+            }
+            Button("Continue without persistence", role: .cancel) {
+                disableTmuxForServer()
+            }
+        } message: {
+            Text("tmux keeps your terminal session alive across app restarts and disconnects.")
+        }
+    }
+
+    private func disableTmuxForServer() {
+        var updatedServer = server
+        updatedServer.tmuxEnabledOverride = false
+        TerminalTabManager.shared.disableTmux(for: server.id)
+        Task {
+            try? await ServerManager.shared.updateServer(updatedServer)
         }
     }
 

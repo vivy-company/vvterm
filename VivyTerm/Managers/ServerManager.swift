@@ -243,6 +243,7 @@ final class ServerManager: ObservableObject {
                     notes: servers[i].notes,
                     lastConnected: servers[i].lastConnected,
                     isFavorite: servers[i].isFavorite,
+                    tmuxEnabledOverride: servers[i].tmuxEnabledOverride,
                     createdAt: servers[i].createdAt,
                     updatedAt: Date(),
                     keychainCredentialId: servers[i].keychainCredentialId
@@ -311,6 +312,7 @@ final class ServerManager: ObservableObject {
             authMethod: server.authMethod,
             tags: server.tags,
             notes: server.notes,
+            tmuxEnabledOverride: server.tmuxEnabledOverride,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -352,6 +354,7 @@ final class ServerManager: ObservableObject {
             notes: server.notes,
             lastConnected: server.lastConnected,
             isFavorite: server.isFavorite,
+            tmuxEnabledOverride: server.tmuxEnabledOverride,
             createdAt: server.createdAt,
             updatedAt: Date()
         )
@@ -403,6 +406,7 @@ final class ServerManager: ObservableObject {
             notes: server.notes,
             lastConnected: Date(),
             isFavorite: server.isFavorite,
+            tmuxEnabledOverride: server.tmuxEnabledOverride,
             createdAt: server.createdAt,
             updatedAt: Date()
         )

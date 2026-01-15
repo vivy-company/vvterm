@@ -15,6 +15,8 @@ struct Server: Identifiable, Codable, Hashable {
     var notes: String?
     var lastConnected: Date?
     var isFavorite: Bool
+    /// Override for tmux persistence (nil = use global default)
+    var tmuxEnabledOverride: Bool?
     var createdAt: Date
     var updatedAt: Date
 
@@ -34,6 +36,7 @@ struct Server: Identifiable, Codable, Hashable {
         notes: String? = nil,
         lastConnected: Date? = nil,
         isFavorite: Bool = false,
+        tmuxEnabledOverride: Bool? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date(),
         keychainCredentialId: String? = nil
@@ -50,6 +53,7 @@ struct Server: Identifiable, Codable, Hashable {
         self.notes = notes
         self.lastConnected = lastConnected
         self.isFavorite = isFavorite
+        self.tmuxEnabledOverride = tmuxEnabledOverride
         self.createdAt = createdAt
         self.updatedAt = updatedAt
         self.keychainCredentialId = keychainCredentialId ?? id.uuidString

@@ -19,15 +19,51 @@ enum TerminalSplitDirection: String, Codable, Equatable {
 
 /// A split node stores pane IDs, not connection objects.
 /// This allows the view hierarchy to change without losing terminal state.
-indirect enum TerminalSplitNode: Equatable {
+indirect enum TerminalSplitNode: Equatable, Codable {
     case leaf(paneId: UUID)
     case split(Split)
 
-    struct Split: Equatable {
+    struct Split: Equatable, Codable {
         let direction: TerminalSplitDirection
         let ratio: Double  // 0.0 to 1.0, left/top percentage
         let left: TerminalSplitNode
         let right: TerminalSplitNode
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case type
+        case paneId
+        case split
+    }
+
+    private enum NodeType: String, Codable {
+        case leaf
+        case split
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let type = try container.decode(NodeType.self, forKey: .type)
+        switch type {
+        case .leaf:
+            let paneId = try container.decode(UUID.self, forKey: .paneId)
+            self = .leaf(paneId: paneId)
+        case .split:
+            let split = try container.decode(Split.self, forKey: .split)
+            self = .split(split)
+        }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .leaf(let paneId):
+            try container.encode(NodeType.leaf, forKey: .type)
+            try container.encode(paneId, forKey: .paneId)
+        case .split(let split):
+            try container.encode(NodeType.split, forKey: .type)
+            try container.encode(split, forKey: .split)
+        }
     }
 
     // MARK: - Tree Operations

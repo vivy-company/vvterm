@@ -139,6 +139,15 @@ struct iOSActiveConnectionRow: View {
 
                 Spacer()
 
+                if !session.tmuxStatus.shortLabel.isEmpty {
+                    Text(session.tmuxStatus.shortLabel)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(.ultraThinMaterial, in: Capsule())
+                }
+
                 Text(tabCountText)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

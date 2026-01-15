@@ -24,16 +24,25 @@ final class TerminalTabManager: ObservableObject {
     // MARK: - Published State
 
     /// All tabs, organized by server
-    @Published var tabsByServer: [UUID: [TerminalTab]] = [:]
+    @Published var tabsByServer: [UUID: [TerminalTab]] = [:] {
+        didSet { schedulePersist() }
+    }
 
     /// Currently selected tab ID per server
-    @Published var selectedTabByServer: [UUID: UUID] = [:]
+    @Published var selectedTabByServer: [UUID: UUID] = [:] {
+        didSet {
+            schedulePersist()
+            updateTmuxSelectionStatuses()
+        }
+    }
 
     /// Servers that are currently "connected" (have at least one tab open)
     @Published var connectedServerIds: Set<UUID> = []
 
     /// Selected view type per server (stats/terminal)
-    @Published var selectedViewByServer: [UUID: String] = [:]
+    @Published var selectedViewByServer: [UUID: String] = [:] {
+        didSet { schedulePersist() }
+    }
 
     // MARK: - Terminal Registry
 
@@ -63,7 +72,13 @@ final class TerminalTabManager: ObservableObject {
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "TerminalTabManager")
 
-    private init() {}
+    private let persistenceKey = "terminalTabsSnapshot.v1"
+    private var persistTask: Task<Void, Never>?
+    private var isRestoring = false
+
+    private init() {
+        restoreSnapshot()
+    }
 
     // MARK: - Tab Management
 
@@ -94,11 +109,13 @@ final class TerminalTabManager: ObservableObject {
 
         // Create pane state FIRST (before any @Published updates)
         // This ensures the view has state when it renders
-        paneStates[tab.rootPaneId] = TerminalPaneState(
+        var rootState = TerminalPaneState(
             paneId: tab.rootPaneId,
             tabId: tab.id,
             serverId: server.id
         )
+        rootState.tmuxStatus = isTmuxEnabled(for: server.id) ? .unknown : .off
+        paneStates[tab.rootPaneId] = rootState
 
         // Now update tabs (triggers @Published, view will have state ready)
         var serverTabs = tabsByServer[server.id] ?? []
@@ -166,11 +183,13 @@ final class TerminalTabManager: ObservableObject {
 
         // Create pane state FIRST (before any @Published updates)
         // This ensures the view has state when it renders
-        paneStates[newPaneId] = TerminalPaneState(
+        var newState = TerminalPaneState(
             paneId: newPaneId,
             tabId: tab.id,
             serverId: tab.serverId
         )
+        newState.tmuxStatus = isTmuxEnabled(for: tab.serverId) ? .unknown : .off
+        paneStates[newPaneId] = newState
 
         // Create the new split node
         let newSplit = TerminalSplitNode.split(TerminalSplitNode.Split(
@@ -250,6 +269,7 @@ final class TerminalTabManager: ObservableObject {
               let index = serverTabs.firstIndex(where: { $0.id == tab.id }) else { return }
         serverTabs[index] = tab
         tabsByServer[tab.serverId] = serverTabs
+        updateTmuxFocus(for: tab)
     }
 
     // MARK: - Terminal Registry
@@ -295,6 +315,10 @@ final class TerminalTabManager: ObservableObject {
         sshShells[paneId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
+
+        Task { [weak self] in
+            await self?.handleTmuxLifecycle(paneId: paneId, serverId: serverId, client: client, shellId: shellId)
+        }
     }
 
     /// Unregister SSH shell
@@ -349,6 +373,11 @@ final class TerminalTabManager: ObservableObject {
 
     /// Clean up a pane (terminal + SSH)
     private func cleanupPane(_ paneId: UUID) {
+        if let status = paneStates[paneId]?.tmuxStatus,
+           status == .foreground || status == .background || status == .installing {
+            killTmuxIfNeeded(for: paneId)
+        }
+
         unregisterTerminal(for: paneId)
         paneStates.removeValue(forKey: paneId)
 
@@ -362,5 +391,271 @@ final class TerminalTabManager: ObservableObject {
     /// Update connection state for a pane
     func updatePaneState(_ paneId: UUID, connectionState: ConnectionState) {
         paneStates[paneId]?.connectionState = connectionState
+        switch connectionState {
+        case .disconnected, .failed:
+            if paneStates[paneId]?.tmuxStatus == .foreground {
+                paneStates[paneId]?.tmuxStatus = .background
+            }
+        default:
+            break
+        }
     }
+
+    func updatePaneTmuxStatus(_ paneId: UUID, status: TmuxStatus) {
+        paneStates[paneId]?.tmuxStatus = status
+    }
+
+    // MARK: - tmux Integration
+
+    private var tmuxEnabledDefault: Bool {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: "terminalTmuxEnabledDefault") == nil {
+            return true
+        }
+        return defaults.bool(forKey: "terminalTmuxEnabledDefault")
+    }
+
+    private func isTmuxEnabled(for serverId: UUID) -> Bool {
+        if let server = ServerManager.shared.servers.first(where: { $0.id == serverId }) {
+            if let override = server.tmuxEnabledOverride {
+                return override
+            }
+        }
+        return tmuxEnabledDefault
+    }
+
+    private func tmuxSessionName(for paneId: UUID) -> String {
+        "vvterm_\(paneId.uuidString)"
+    }
+
+    private func updateTmuxSelectionStatuses() {
+        for serverId in tabsByServer.keys {
+            let tabsForServer = tabs(for: serverId)
+            for tab in tabsForServer {
+                updateTmuxFocus(for: tab)
+            }
+        }
+    }
+
+    private func updateTmuxFocus(for tab: TerminalTab) {
+        let isSelectedTab = selectedTabByServer[tab.serverId] == tab.id
+        for paneId in tab.allPaneIds {
+            guard let state = paneStates[paneId] else { continue }
+            guard state.tmuxStatus == .foreground || state.tmuxStatus == .background else { continue }
+            let newStatus: TmuxStatus = (isSelectedTab && tab.focusedPaneId == paneId) ? .foreground : .background
+            if state.tmuxStatus != newStatus {
+                paneStates[paneId]?.tmuxStatus = newStatus
+            }
+        }
+    }
+
+    private func handleTmuxLifecycle(
+        paneId: UUID,
+        serverId: UUID,
+        client: SSHClient,
+        shellId: UUID
+    ) async {
+        guard isTmuxEnabled(for: serverId) else {
+            await MainActor.run {
+                self.updatePaneTmuxStatus(paneId, status: .off)
+            }
+            return
+        }
+
+        let tmuxAvailable = await RemoteTmuxManager.shared.isTmuxAvailable(using: client)
+        guard tmuxAvailable else {
+            await MainActor.run {
+                self.updatePaneTmuxStatus(paneId, status: .missing)
+            }
+            return
+        }
+
+        let status = await MainActor.run { () -> TmuxStatus in
+            guard let tab = self.selectedTab(for: serverId) else { return .background }
+            return (tab.id == self.selectedTabByServer[serverId] && tab.focusedPaneId == paneId) ? .foreground : .background
+        }
+        await MainActor.run {
+            self.updatePaneTmuxStatus(paneId, status: status)
+        }
+
+        await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let command = RemoteTmuxManager.shared.attachCommand(
+            sessionName: tmuxSessionName(for: paneId),
+            workingDirectory: "~"
+        )
+        await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
+    }
+
+    func startTmuxInstall(for paneId: UUID) async {
+        guard let registration = sshShells[paneId] else { return }
+        let serverId = registration.serverId
+        guard isTmuxEnabled(for: serverId) else { return }
+
+        updatePaneTmuxStatus(paneId, status: .installing)
+
+        let script = RemoteTmuxManager.shared.installAndAttachScript(
+            sessionName: tmuxSessionName(for: paneId),
+            workingDirectory: "~"
+        )
+        await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
+
+        Task { [weak self] in
+            guard let self else { return }
+            for _ in 0..<6 {
+                try? await Task.sleep(for: .seconds(2))
+                let available = await RemoteTmuxManager.shared.isTmuxAvailable(using: registration.client)
+                if available {
+                    let status = await MainActor.run { () -> TmuxStatus in
+                        guard let tab = self.selectedTab(for: serverId) else { return .background }
+                        return (tab.id == self.selectedTabByServer[serverId] && tab.focusedPaneId == paneId) ? .foreground : .background
+                    }
+                    await MainActor.run {
+                        self.updatePaneTmuxStatus(paneId, status: status)
+                    }
+                    return
+                }
+            }
+            await MainActor.run {
+                self.updatePaneTmuxStatus(paneId, status: .missing)
+            }
+        }
+    }
+
+    func killTmuxIfNeeded(for paneId: UUID) {
+        guard let registration = sshShells[paneId] else { return }
+        Task.detached { [client = registration.client, paneId] in
+            let sessionName = "vvterm_\(paneId.uuidString)"
+            await RemoteTmuxManager.shared.killSession(named: sessionName, using: client)
+        }
+    }
+
+    func disableTmux(for serverId: UUID) {
+        for (paneId, state) in paneStates where state.serverId == serverId {
+            paneStates[paneId]?.tmuxStatus = .off
+        }
+    }
+
+    // MARK: - Persistence
+
+    private func schedulePersist() {
+        guard !isRestoring else { return }
+        persistTask?.cancel()
+        persistTask = Task { [weak self] in
+            try? await Task.sleep(for: .milliseconds(300))
+            await MainActor.run {
+                self?.persistSnapshot()
+            }
+        }
+    }
+
+    private func persistSnapshot() {
+        let serverSnapshots = tabsByServer.map { serverId, tabs in
+            TerminalTabsSnapshot.ServerSnapshot(
+                serverId: serverId,
+                tabs: tabs.map { TerminalTabsSnapshot.TabSnapshot(from: $0) },
+                selectedTabId: selectedTabByServer[serverId],
+                selectedView: selectedViewByServer[serverId]
+            )
+        }
+
+        let snapshot = TerminalTabsSnapshot(servers: serverSnapshots)
+        do {
+            let data = try JSONEncoder().encode(snapshot)
+            UserDefaults.standard.set(data, forKey: persistenceKey)
+        } catch {
+            logger.error("Failed to persist tabs snapshot: \(error.localizedDescription)")
+        }
+    }
+
+    private func restoreSnapshot() {
+        guard let data = UserDefaults.standard.data(forKey: persistenceKey) else { return }
+        do {
+            let snapshot = try JSONDecoder().decode(TerminalTabsSnapshot.self, from: data)
+            isRestoring = true
+
+            var restoredTabsByServer: [UUID: [TerminalTab]] = [:]
+            var restoredSelectedTabs: [UUID: UUID] = [:]
+            var restoredSelectedViews: [UUID: String] = [:]
+            var restoredPaneStates: [UUID: TerminalPaneState] = [:]
+
+            for server in snapshot.servers {
+                let tabs = server.tabs.map { $0.toTerminalTab() }
+                restoredTabsByServer[server.serverId] = tabs
+                if let selected = server.selectedTabId {
+                    restoredSelectedTabs[server.serverId] = selected
+                }
+                if let view = server.selectedView {
+                    restoredSelectedViews[server.serverId] = view
+                }
+
+                for tab in tabs {
+                    for paneId in tab.allPaneIds {
+                        var paneState = TerminalPaneState(
+                            paneId: paneId,
+                            tabId: tab.id,
+                            serverId: tab.serverId
+                        )
+                        if !isTmuxEnabled(for: tab.serverId) {
+                            paneState.tmuxStatus = .off
+                        }
+                        restoredPaneStates[paneId] = paneState
+                    }
+                }
+            }
+
+            tabsByServer = restoredTabsByServer
+            selectedTabByServer = restoredSelectedTabs
+            selectedViewByServer = restoredSelectedViews
+            paneStates = restoredPaneStates
+            connectedServerIds = Set(restoredTabsByServer.keys)
+        } catch {
+            logger.error("Failed to restore tabs snapshot: \(error.localizedDescription)")
+        }
+        isRestoring = false
+    }
+}
+
+// MARK: - Persistence Snapshot
+
+private struct TerminalTabsSnapshot: Codable {
+    struct ServerSnapshot: Codable {
+        let serverId: UUID
+        let tabs: [TabSnapshot]
+        let selectedTabId: UUID?
+        let selectedView: String?
+    }
+
+    struct TabSnapshot: Codable {
+        let id: UUID
+        let serverId: UUID
+        let title: String
+        let createdAt: Date
+        let layout: TerminalSplitNode?
+        let focusedPaneId: UUID
+        let rootPaneId: UUID
+
+        init(from tab: TerminalTab) {
+            self.id = tab.id
+            self.serverId = tab.serverId
+            self.title = tab.title
+            self.createdAt = tab.createdAt
+            self.layout = tab.layout
+            self.focusedPaneId = tab.focusedPaneId
+            self.rootPaneId = tab.rootPaneId
+        }
+
+        func toTerminalTab() -> TerminalTab {
+            TerminalTab(
+                id: id,
+                serverId: serverId,
+                title: title,
+                createdAt: createdAt,
+                rootPaneId: rootPaneId,
+                focusedPaneId: focusedPaneId,
+                layout: layout
+            )
+        }
+    }
+
+    let servers: [ServerSnapshot]
 }
