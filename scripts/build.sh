@@ -15,7 +15,7 @@ LIBSSH2_VERSION="1.11.0"
 MACOS_DEPLOYMENT_TARGET="13.3"
 IOS_DEPLOYMENT_TARGET="16.0"
 
-GHOSTTY_REPO="https://github.com/wiedymi/ghostty"
+GHOSTTY_REPO="git@github.com:wiedymi/ghostty.git"
 GHOSTTY_REF="${GHOSTTY_REF:-custom-io}"
 BUNDLE_ID="app.vivy.VivyTerm"
 
@@ -99,13 +99,7 @@ build_ghosttykit() {
         perl -0pi -e 's/module\.linkFramework\("IOSurface", \.\{\}\);/module.linkFramework("IOSurface", .{});\n        module.linkFramework("Metal", .{});\n        module.linkFramework("MetalKit", .{});/g' "${workdir}/ghostty/pkg/macos/build.zig"
     fi
 
-    # Patch IOSurfaceLayer for iOS
-    if [ -f "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig" ]; then
-        perl -0pi -e 's/const std = @import\\("std"\\);/const std = @import("std");\\nconst builtin = @import("builtin");/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
-        perl -0pi -e 's/const CALayer =\\s*\\n\\s*objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed;/const base_layer = switch (comptime builtin\\.os\\.tag) {\\n        \\.ios => objc\\.getClass\\("CAIOSurfaceLayer"\\) orelse\\n            objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed,\\n        else => objc\\.getClass\\("CALayer"\\) orelse return error\\.ObjCFailed,\\n    };/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
-        perl -0pi -e 's/objc\\.allocateClassPair\\(CALayer, "IOSurfaceLayer"\\)/objc.allocateClassPair(base_layer, "IOSurfaceLayer")/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
-        perl -0pi -e 's/layer\\.setProperty\\("contentsGravity", macos\\.animation\\.kCAGravityTopLeft\\);/layer.setProperty("contentsGravity", macos.animation.kCAGravityTopLeft);\\n    layer.setProperty("opaque", true);/' "${workdir}/ghostty/src/renderer/metal/IOSurfaceLayer.zig"
-    fi
+    # IOSurfaceLayer fixes live in the Ghostty fork; no local patching here.
 
     # Patch bundle ID to use VivyTerm's instead of Ghostty's
     sed -i '' "s/com\\.mitchellh\\.ghostty/${BUNDLE_ID}/g" "${workdir}/ghostty/src/build_config.zig"
@@ -172,6 +166,11 @@ build_ghosttykit() {
     strip_lib "${VENDOR_GHOSTTY}/lib/libghostty.a"
     strip_lib "${VENDOR_GHOSTTY}/ios/lib/libghostty.a"
     strip_lib "${VENDOR_GHOSTTY}/ios-simulator/lib/libghostty.a"
+
+    # Also strip static libs inside the xcframework to stay under GitHub size limits.
+    while IFS= read -r -d '' lib; do
+        strip_lib "${lib}"
+    done < <(find "${VENDOR_GHOSTTY}/GhosttyKit.xcframework" -name "*.a" -type f -print0)
 
     log_info "GhosttyKit done"
     log_info "  macOS: $(ls -lh "${VENDOR_GHOSTTY}/lib/libghostty.a" | awk '{print $5}')"

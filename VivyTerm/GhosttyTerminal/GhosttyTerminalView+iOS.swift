@@ -63,6 +63,10 @@ class GhosttyTerminalView: UIView {
     private static let idleTimeout: CFTimeInterval = 0.1  // 100ms idle before stopping display link
     private static let blinkInterval: TimeInterval = 0.5  // Cursor blink cadence when idle
 
+    /// Track last surface size in pixels to avoid redundant resize/draw work.
+    private var lastPixelSize: CGSize = .zero
+    private var lastContentScale: CGFloat = 0
+
     /// Cell size in points for row-to-pixel conversion
     var cellSize: CGSize = .zero
 
@@ -320,7 +324,6 @@ class GhosttyTerminalView: UIView {
         }
 
         // Request a render to restart display link if needed
-        configureIOSurfaceLayers()
         sizeDidChange(bounds.size)
         requestRender()
         if window != nil {
@@ -371,17 +374,7 @@ class GhosttyTerminalView: UIView {
         // Ghostty's Metal renderer on iOS adds IOSurfaceLayer as a sublayer but doesn't
         // set its frame/contentsScale - we must do it here immediately after creation.
         // Without this, setSurfaceCallback will discard all frames due to size mismatch.
-        let scale = self.contentScaleFactor
-        if let sublayers = layer.sublayers {
-            let ioLayers = sublayers.filter { String(describing: type(of: $0)) == "IOSurfaceLayer" }
-            for sublayer in ioLayers {
-                CATransaction.begin()
-                CATransaction.setDisableActions(true)
-                sublayer.frame = bounds
-                sublayer.contentsScale = scale
-                CATransaction.commit()
-            }
-        }
+        configureIOSurfaceLayers(size: bounds.size)
 
         // Wrap in Swift Surface class
         self.surface = Ghostty.Surface(cSurface: cSurface)
@@ -406,12 +399,34 @@ class GhosttyTerminalView: UIView {
         guard let surface = surface?.unsafeCValue else { return }
         guard size.width > 0 && size.height > 0 else { return }
 
+        updateContentScaleIfNeeded()
+        configureIOSurfaceLayers(size: size)
+
         let scale = self.contentScaleFactor
+        let pixelWidth = floor(size.width * scale)
+        let pixelHeight = floor(size.height * scale)
+        guard pixelWidth > 0 && pixelHeight > 0 else { return }
+        let pixelSize = CGSize(width: pixelWidth, height: pixelHeight)
+
+        // Avoid redundant resize/draw passes when size hasn't changed.
+        let sizeChanged = pixelSize != lastPixelSize || scale != lastContentScale
+        if !sizeChanged {
+            if !didSignalReady {
+                didSignalReady = true
+                DispatchQueue.main.async { [weak self] in
+                    self?.onReady?()
+                }
+            }
+            return
+        }
+        lastPixelSize = pixelSize
+        lastContentScale = scale
+
         ghostty_surface_set_content_scale(surface, scale, scale)
         ghostty_surface_set_size(
             surface,
-            UInt32(size.width * scale),
-            UInt32(size.height * scale)
+            UInt32(pixelWidth),
+            UInt32(pixelHeight)
         )
 
         if !isPaused {
@@ -454,9 +469,8 @@ class GhosttyTerminalView: UIView {
         super.layoutSubviews()
 
         guard !isShuttingDown else { return }
-        configureIOSurfaceLayers()
 
-        // Now tell Ghostty the new size - it will render to the correctly-sized layer
+        // Tell Ghostty the new size after the view has laid out.
         sizeDidChange(bounds.size)
 
     }
@@ -471,9 +485,6 @@ class GhosttyTerminalView: UIView {
         }
 
         if isVisible {
-            // Ensure sublayer is configured before calling sizeDidChange
-            // This handles the case where window assignment happens after init
-            configureIOSurfaceLayers()
             sizeDidChange(frame.size)
             // Note: becomeFirstResponder is now handled by SSHTerminalWrapper.updateUIView
             // based on isActive flag to avoid keyboard showing when terminal is hidden
@@ -927,12 +938,18 @@ class GhosttyTerminalView: UIView {
         guard let surface = surface?.unsafeCValue else { return }
         guard bounds.width > 0 && bounds.height > 0 else { return }
 
-        configureIOSurfaceLayers()
+        updateContentScaleIfNeeded()
+        configureIOSurfaceLayers(size: bounds.size)
 
         // Set scale and size
         let scale = self.contentScaleFactor
+        let pixelWidth = floor(bounds.width * scale)
+        let pixelHeight = floor(bounds.height * scale)
+        guard pixelWidth > 0 && pixelHeight > 0 else { return }
+        lastPixelSize = CGSize(width: pixelWidth, height: pixelHeight)
+        lastContentScale = scale
         ghostty_surface_set_content_scale(surface, scale, scale)
-        ghostty_surface_set_size(surface, UInt32(bounds.width * scale), UInt32(bounds.height * scale))
+        ghostty_surface_set_size(surface, UInt32(pixelWidth), UInt32(pixelHeight))
         if window != nil {
             ghostty_surface_set_occlusion(surface, false)
         }
@@ -947,17 +964,29 @@ class GhosttyTerminalView: UIView {
     }
 
     private func configureIOSurfaceLayers() {
+        configureIOSurfaceLayers(size: nil)
+    }
+
+    private func configureIOSurfaceLayers(size: CGSize?) {
         let scale = self.contentScaleFactor
         guard let sublayers = layer.sublayers else { return }
         let ioLayers = sublayers.filter { String(describing: type(of: $0)) == "IOSurfaceLayer" }
         guard !ioLayers.isEmpty else { return }
+        let targetBounds = size.map { CGRect(origin: .zero, size: $0) } ?? bounds
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for sublayer in ioLayers {
-            sublayer.frame = bounds
+            sublayer.frame = targetBounds
             sublayer.contentsScale = scale
         }
         CATransaction.commit()
+    }
+
+    private func updateContentScaleIfNeeded() {
+        let targetScale = window?.screen.scale ?? UIScreen.main.scale
+        if contentScaleFactor != targetScale {
+            contentScaleFactor = targetScale
+        }
     }
 
     // MARK: - Custom I/O API (for SSH clients)
