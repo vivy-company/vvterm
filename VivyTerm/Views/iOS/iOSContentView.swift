@@ -307,6 +307,7 @@ struct iOSServerListView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
+                .modifier(AppearanceModifier())
         }
         .sheet(isPresented: $showingWorkspacePicker) {
             NavigationStack {
