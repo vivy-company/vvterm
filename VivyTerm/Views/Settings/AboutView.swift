@@ -86,7 +86,7 @@ struct AboutView: View {
                     title: String(localized: "Visit Website"),
                     icon: "globe",
                     isSystemImage: true,
-                    url: "https://vivy.dev"
+                    url: "https://vvterm.com"
                 )
 
                 LinkButton(
@@ -100,7 +100,7 @@ struct AboutView: View {
                     title: String(localized: "Privacy Policy"),
                     icon: "hand.raised",
                     isSystemImage: true,
-                    url: "https://vivy.dev/privacy"
+                    url: "https://vvterm.com/privacy"
                 )
             }
             .padding(.horizontal, 32)
