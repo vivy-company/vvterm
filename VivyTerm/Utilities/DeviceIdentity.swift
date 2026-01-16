@@ -5,7 +5,8 @@ enum DeviceIdentity {
     private static let keychain = KeychainStore(service: "app.vivy.VivyTerm")
 
     static let id: String = {
-        if let existing = try? keychain.getString(storageKey), let value = existing, !value.isEmpty {
+        let storedValue = (try? keychain.getString(storageKey)) ?? nil
+        if let value = storedValue, !value.isEmpty {
             return value
         }
 

@@ -15,6 +15,7 @@ struct ServerSidebarView: View {
     @State private var showingSettings = false
     @State private var showingSupport = false
     @State private var showingProUpgrade = false
+    @State private var showingCustomEnvironmentAlert = false
     @State private var showingCreateEnvironment = false
     @State private var editingEnvironment: ServerEnvironment?
     @State private var environmentToDelete: ServerEnvironment?
@@ -210,21 +211,21 @@ struct ServerSidebarView: View {
                         if storeManager.isPro {
                             showingCreateEnvironment = true
                         } else {
-                            showingProUpgrade = true
+                            showingCustomEnvironmentAlert = true
                         }
                     },
                     onEditCustom: { environment in
                         if storeManager.isPro {
                             editingEnvironment = environment
                         } else {
-                            showingProUpgrade = true
+                            showingCustomEnvironmentAlert = true
                         }
                     },
                     onDeleteCustom: { environment in
                         if storeManager.isPro {
                             environmentToDelete = environment
                         } else {
-                            showingProUpgrade = true
+                            showingCustomEnvironmentAlert = true
                         }
                     }
                 )
@@ -257,6 +258,11 @@ struct ServerSidebarView: View {
                 get: { lockedServerAlert != nil },
                 set: { if !$0 { lockedServerAlert = nil } }
             )
+        )
+        .proFeatureAlert(
+            title: String(localized: "Custom Environments"),
+            message: String(localized: "Upgrade to Pro for custom environments"),
+            isPresented: $showingCustomEnvironmentAlert
         )
     }
 

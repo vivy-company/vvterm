@@ -120,6 +120,36 @@ extension View {
     }
 }
 
+// MARK: - Pro Feature Alert
+
+struct ProFeatureAlert: ViewModifier {
+    let title: String
+    let message: String
+    @Binding var isPresented: Bool
+    @State private var showUpgrade = false
+
+    func body(content: Content) -> some View {
+        content
+            .alert(title, isPresented: $isPresented) {
+                Button("Upgrade to Pro") {
+                    showUpgrade = true
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text(message)
+            }
+            .sheet(isPresented: $showUpgrade) {
+                ProUpgradeSheet()
+            }
+    }
+}
+
+extension View {
+    func proFeatureAlert(title: String, message: String, isPresented: Binding<Bool>) -> some View {
+        modifier(ProFeatureAlert(title: title, message: message, isPresented: isPresented))
+    }
+}
+
 // MARK: - Pro Badge
 
 struct ProBadge: View {

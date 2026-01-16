@@ -80,7 +80,7 @@ struct NoServerSelectedEmptyState: View {
 
 struct MultiConnectionUpgradeEmptyState: View {
     let server: Server
-    @State private var showingProUpgrade = false
+    @State private var showingTabLimitAlert = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -112,7 +112,7 @@ struct MultiConnectionUpgradeEmptyState: View {
             }
 
             Button {
-                showingProUpgrade = true
+                showingTabLimitAlert = true
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "star.fill")
@@ -129,9 +129,7 @@ struct MultiConnectionUpgradeEmptyState: View {
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .sheet(isPresented: $showingProUpgrade) {
-            ProUpgradeSheet()
-        }
+        .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
     }
 }
 

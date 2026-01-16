@@ -17,7 +17,7 @@ struct iOSContentView: View {
     @State private var selectedServer: Server?
     @State private var selectedEnvironment: ServerEnvironment?
     @State private var showingTerminal = false
-    @State private var showingProUpgrade = false
+    @State private var showingTabLimitAlert = false
     @State private var lockedServerName: String?
     @State private var connectingServer: Server?
     @State private var isConnecting = false
@@ -30,7 +30,6 @@ struct iOSContentView: View {
                 selectedWorkspace: $selectedWorkspace,
                 selectedEnvironment: $selectedEnvironment,
                 showingTerminal: $showingTerminal,
-                showingProUpgrade: $showingProUpgrade,
                 onServerSelected: { server in
                     selectedServer = server
                     connectingServer = server
@@ -47,7 +46,7 @@ struct iOSContentView: View {
                             showingTerminal = false
                             switch error {
                             case .proRequired:
-                                showingProUpgrade = true
+                                showingTabLimitAlert = true
                             case .serverLocked(let name):
                                 lockedServerName = name
                             default:
@@ -99,9 +98,7 @@ struct iOSContentView: View {
                 showingTerminal = false
             }
         }
-        .sheet(isPresented: $showingProUpgrade) {
-            ProUpgradeSheet()
-        }
+        .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
         .lockedItemAlert(
             .server,
             itemName: lockedServerName ?? "",
@@ -119,7 +116,6 @@ struct iOSServerListView: View {
     @Binding var selectedWorkspace: Workspace?
     @Binding var selectedEnvironment: ServerEnvironment?
     @Binding var showingTerminal: Bool
-    @Binding var showingProUpgrade: Bool
     let onServerSelected: (Server) -> Void
 
     @ObservedObject private var storeManager = StoreManager.shared
@@ -135,6 +131,7 @@ struct iOSServerListView: View {
     @State private var serverToEdit: Server?
     @State private var lockedServerAlert: Server?
     @State private var navigationBarAppearanceToken = UUID()
+    @State private var showingCustomEnvironmentAlert = false
 
     var body: some View {
         List {
@@ -201,21 +198,21 @@ struct iOSServerListView: View {
                                 if storeManager.isPro {
                                     showingCreateEnvironment = true
                                 } else {
-                                    showingProUpgrade = true
+                                    showingCustomEnvironmentAlert = true
                                 }
                             },
                             onEditCustom: { environment in
                                 if storeManager.isPro {
                                     editingEnvironment = environment
                                 } else {
-                                    showingProUpgrade = true
+                                    showingCustomEnvironmentAlert = true
                                 }
                             },
                             onDeleteCustom: { environment in
                                 if storeManager.isPro {
                                     environmentToDelete = environment
                                 } else {
-                                    showingProUpgrade = true
+                                    showingCustomEnvironmentAlert = true
                                 }
                             }
                         )
@@ -396,6 +393,11 @@ struct iOSServerListView: View {
                 get: { lockedServerAlert != nil },
                 set: { if !$0 { lockedServerAlert = nil } }
             )
+        )
+        .proFeatureAlert(
+            title: String(localized: "Custom Environments"),
+            message: String(localized: "Upgrade to Pro for custom environments"),
+            isPresented: $showingCustomEnvironmentAlert
         )
     }
 
@@ -594,7 +596,7 @@ struct iOSTerminalView: View {
 
     /// Delayed flag to allow tab animation to complete before creating terminal
     @State private var shouldShowTerminalBySession: [UUID: Bool] = [:]
-    @State private var showingProUpgrade = false
+    @State private var showingTabLimitAlert = false
     @State private var serverToEdit: Server?
     @State private var terminalBackgroundColor: Color = .black
     @State private var currentServerId: UUID?
@@ -758,9 +760,7 @@ struct iOSTerminalView: View {
 
     private var sheetContent: some View {
         baseContent
-            .sheet(isPresented: $showingProUpgrade) {
-                ProUpgradeSheet()
-            }
+            .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
             .sheet(item: $serverToEdit) { server in
                 NavigationStack {
                     ServerFormSheet(
@@ -999,7 +999,7 @@ struct iOSTerminalView: View {
     private func openNewTab() {
         guard let server = selectedServer else { return }
         guard sessionManager.canOpenNewTab else {
-            showingProUpgrade = true
+            showingTabLimitAlert = true
             return
         }
         Task { try? await sessionManager.openConnection(to: server, forceNew: true) }

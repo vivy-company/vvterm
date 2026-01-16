@@ -26,7 +26,7 @@ struct ServerFormSheet: View {
     @State private var notes: String = ""
     @State private var tmuxEnabled: Bool = true
 
-    @State private var showingProUpgrade = false
+    @State private var showingServerLimitAlert = false
     @State private var showingAddKeySheet = false
     @State private var isSaving = false
     @State private var isLoadingCredentials = false
@@ -190,9 +190,6 @@ struct ServerFormSheet: View {
                     .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
                 }
             }
-            .sheet(isPresented: $showingProUpgrade) {
-                ProUpgradeSheet()
-            }
             .sheet(isPresented: $showingAddKeySheet) {
                 AddSSHKeySheet(onSave: { entry in
                     storedKeys = KeychainManager.shared.getStoredSSHKeys()
@@ -200,6 +197,7 @@ struct ServerFormSheet: View {
                     loadStoredKey(entry)
                 })
             }
+            .limitReachedAlert(.servers, isPresented: $showingServerLimitAlert)
             .onAppear {
                 storedKeys = KeychainManager.shared.getStoredSSHKeys()
                 if !isEditing && initialConnectionSnapshot == nil {
@@ -223,7 +221,7 @@ struct ServerFormSheet: View {
                     title: String(localized: "Server Limit Reached"),
                     message: String(format: String(localized: "You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers."), Int64(FreeTierLimits.maxServers))
                 ) {
-                    showingProUpgrade = true
+                    showingServerLimitAlert = true
                 }
             }
         } else if !isEditing && !storeManager.isPro {
@@ -232,7 +230,7 @@ struct ServerFormSheet: View {
                     current: serverCount,
                     limit: FreeTierLimits.maxServers,
                     label: String(localized: "Servers"),
-                    showUpgrade: $showingProUpgrade
+                    showUpgrade: $showingServerLimitAlert
                 )
             }
         }
@@ -651,7 +649,7 @@ struct ServerFormSheet: View {
             } catch let error as VivyTermError {
                 await MainActor.run {
                     if case .proRequired = error {
-                        self.showingProUpgrade = true
+                        self.showingServerLimitAlert = true
                     } else {
                         self.error = error.localizedDescription
                     }
