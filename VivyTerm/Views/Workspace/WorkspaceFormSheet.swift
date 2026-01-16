@@ -12,7 +12,7 @@ struct WorkspaceFormSheet: View {
 
     @State private var name: String = ""
     @State private var selectedColor: Color = .blue
-    @State private var showingProUpgrade = false
+    @State private var showingWorkspaceLimitAlert = false
     @State private var isSaving = false
     @State private var error: String?
 
@@ -51,7 +51,7 @@ struct WorkspaceFormSheet: View {
                             title: String(localized: "Workspace Limit Reached"),
                             message: String(localized: "Upgrade to Pro for unlimited workspaces.")
                         ) {
-                            showingProUpgrade = true
+                            showingWorkspaceLimitAlert = true
                         }
                     }
                 }
@@ -129,9 +129,7 @@ struct WorkspaceFormSheet: View {
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)
                 }
             }
-            .sheet(isPresented: $showingProUpgrade) {
-                ProUpgradeSheet()
-            }
+            .limitReachedAlert(.workspaces, isPresented: $showingWorkspaceLimitAlert)
         }
     }
 
@@ -170,7 +168,7 @@ struct WorkspaceFormSheet: View {
             } catch let error as VivyTermError {
                 await MainActor.run {
                     if case .proRequired = error {
-                        self.showingProUpgrade = true
+                        self.showingWorkspaceLimitAlert = true
                     } else {
                         self.error = error.localizedDescription
                     }

@@ -26,8 +26,8 @@ struct ConnectionTerminalContainer: View {
     /// Disconnect confirmation
     @State private var showingDisconnectConfirmation = false
 
-    /// Pro upgrade sheet
-    @State private var showingProUpgrade = false
+    /// Tab limit alert
+    @State private var showingTabLimitAlert = false
 
     /// Selected view type - persisted per server
     private var selectedView: String {
@@ -146,14 +146,12 @@ struct ConnectionTerminalContainer: View {
             disconnectToolbarItem
         }
         #endif
-        .sheet(isPresented: $showingProUpgrade) {
-            ProUpgradeSheet()
-        }
+        .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
     }
 
     private func openNewTab() {
         guard tabManager.canOpenNewTab else {
-            showingProUpgrade = true
+            showingTabLimitAlert = true
             return
         }
         let tab = tabManager.openTab(for: server)
