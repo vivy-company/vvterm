@@ -61,6 +61,18 @@ extension SSHTerminalCoordinator {
         terminalView = nil
     }
 
+    func suspendShell() {
+        // Cancel in-flight SSH work but keep the terminal surface for reuse
+        shellTask?.cancel()
+        shellTask = nil
+        if let shellId {
+            Task.detached(priority: .high) { [sshClient, shellId] in
+                await sshClient.closeShell(shellId)
+            }
+        }
+        self.shellId = nil
+    }
+
     func startSSHConnection(terminal: GhosttyTerminalView) {
         // Capture all values needed in the detached task before creating it
         // to avoid accessing main actor-isolated properties from detached context
@@ -274,6 +286,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
         // Register shell cancel handler so closeSession can cancel the shell task
         ConnectionSessionManager.shared.registerShellCancelHandler({ [weak coordinator] in
             coordinator?.cancelShell()
+        }, for: session.id)
+        ConnectionSessionManager.shared.registerShellSuspendHandler({ [weak coordinator] in
+            coordinator?.suspendShell()
         }, for: session.id)
 
         // Setup write callback to send keyboard input to SSH
@@ -609,6 +624,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             ConnectionSessionManager.shared.registerShellCancelHandler({ [weak coordinator] in
                 coordinator?.cancelShell()
             }, for: session.id)
+            ConnectionSessionManager.shared.registerShellSuspendHandler({ [weak coordinator] in
+                coordinator?.suspendShell()
+            }, for: session.id)
 
             // Setup write callback
             terminalView.writeCallback = { [weak coordinator] data in
@@ -730,6 +748,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
         // Session was closed - full cleanup
         ConnectionSessionManager.shared.unregisterShellCancelHandler(for: coordinator.sessionId)
+        ConnectionSessionManager.shared.unregisterShellSuspendHandler(for: coordinator.sessionId)
         ConnectionSessionManager.shared.unregisterTerminal(for: coordinator.sessionId)
         coordinator.cancelShell()
 
