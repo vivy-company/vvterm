@@ -77,6 +77,9 @@ final class ConnectionSessionManager: ObservableObject {
     /// Shell cancel handlers indexed by session ID - called before closing to cancel async tasks
     private var shellCancelHandlers: [UUID: () -> Void] = [:]
 
+    /// Servers that already ran tmux cleanup (per app launch)
+    private var tmuxCleanupServers: Set<UUID> = []
+
     // MARK: - LRU Terminal Cache
 
     /// Maximum number of terminal surfaces to keep in memory
@@ -671,7 +674,7 @@ extension ConnectionSessionManager {
     }
 
     private func tmuxSessionName(for sessionId: UUID) -> String {
-        "vvterm_\(sessionId.uuidString)"
+        "vvterm_\(DeviceIdentity.id)_\(sessionId.uuidString)"
     }
 
     private func updateTmuxSelectionStatuses() {
@@ -709,6 +712,17 @@ extension ConnectionSessionManager {
                 self.updateTmuxStatus(sessionId, status: .missing)
             }
             return
+        }
+
+        if !tmuxCleanupServers.contains(serverId) {
+            tmuxCleanupServers.insert(serverId)
+            let keepNames = Set(sessions.filter { $0.serverId == serverId }.map { tmuxSessionName(for: $0.id) })
+            await RemoteTmuxManager.shared.cleanupLegacySessions(using: client)
+            await RemoteTmuxManager.shared.cleanupDetachedSessions(
+                deviceId: DeviceIdentity.id,
+                keeping: keepNames,
+                using: client
+            )
         }
 
         let isSelected = await MainActor.run { self.selectedSessionId == sessionId }
@@ -759,8 +773,8 @@ extension ConnectionSessionManager {
 
     func killTmuxIfNeeded(for sessionId: UUID) {
         guard let registration = sshShells[sessionId] else { return }
-        Task.detached { [client = registration.client, sessionId] in
-            let sessionName = "vvterm_\(sessionId.uuidString)"
+        let sessionName = tmuxSessionName(for: sessionId)
+        Task.detached { [client = registration.client, sessionName] in
             await RemoteTmuxManager.shared.killSession(named: sessionName, using: client)
         }
     }

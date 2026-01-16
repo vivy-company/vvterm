@@ -9,10 +9,11 @@ actor RemoteTmuxManager {
     private init() {}
 
     func isTmuxAvailable(using client: SSHClient) async -> Bool {
-        let body = "\(shellPathExport()); command -v tmux >/dev/null 2>&1 && echo 1 || echo 0"
+        let okMarker = "__VVTERM_TMUX_OK__"
+        let body = "\(shellPathExport()); if command -v tmux >/dev/null 2>&1; then printf '\(okMarker)'; else printf '__VVTERM_TMUX_NO__'; fi"
         let command = "sh -lc \(shellQuoted(body))"
         let output = try? await client.execute(command)
-        return output?.trimmingCharacters(in: .whitespacesAndNewlines) == "1"
+        return output?.contains(okMarker) == true
     }
 
     func prepareConfig(using client: SSHClient) async {
@@ -89,6 +90,39 @@ actor RemoteTmuxManager {
         let body = "\(shellPathExport()); tmux kill-session -t \(quoted) 2>/dev/null || true"
         let command = "sh -lc \(shellQuoted(body))"
         _ = try? await client.execute(command)
+    }
+
+    func cleanupLegacySessions(using client: SSHClient) async {
+        let body = """
+        \(shellPathExport());
+        if command -v tmux >/dev/null 2>&1; then
+          tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null | awk '$1 ~ /^vvterm_[0-9a-fA-F-]+$/ && $2 == 0 { print $1 }' | while IFS= read -r name; do
+            tmux kill-session -t "$name" 2>/dev/null || true;
+          done;
+        fi
+        """
+        let command = "sh -lc \(shellQuoted(body))"
+        _ = try? await client.execute(command)
+    }
+
+    func cleanupDetachedSessions(deviceId: String, keeping sessionNames: Set<String>, using client: SSHClient) async {
+        let body = "\(shellPathExport()); tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null"
+        let command = "sh -lc \(shellQuoted(body))"
+        guard let output = try? await client.execute(command) else { return }
+
+        let prefix = "vvterm_\(deviceId)_"
+        let keep = sessionNames
+
+        for line in output.split(separator: "\n") {
+            let parts = line.split(separator: " ", maxSplits: 1)
+            guard parts.count == 2 else { continue }
+            let name = String(parts[0])
+            guard name.hasPrefix(prefix) else { continue }
+            guard let attachedCount = Int(parts[1].trimmingCharacters(in: .whitespaces)),
+                  attachedCount == 0 else { continue }
+            guard !keep.contains(name) else { continue }
+            await killSession(named: name, using: client)
+        }
     }
 
     nonisolated private func shellQuoted(_ value: String) -> String {

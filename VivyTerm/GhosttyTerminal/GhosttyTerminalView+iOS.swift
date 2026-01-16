@@ -61,6 +61,8 @@ class GhosttyTerminalView: UIView {
     private var displayLink: CADisplayLink?
     private var needsRender = false
     private var blinkTimer: DispatchSourceTimer?
+    private var keyRepeatTimer: DispatchSourceTimer?
+    private var repeatingKey: Ghostty.Input.Key?
 
     /// Idle detection for display link - stops after timeout to save CPU
     private var lastActivityTime: CFAbsoluteTime = 0
@@ -479,6 +481,7 @@ class GhosttyTerminalView: UIView {
         if result, let surface = surface?.unsafeCValue {
             ghostty_surface_set_focus(surface, false)
         }
+        stopKeyRepeat()
         return result
     }
 
@@ -756,8 +759,7 @@ class GhosttyTerminalView: UIView {
     }
 
     private func showEditMenu(at location: CGPoint) {
-        guard let cSurface = surface?.unsafeCValue else { return }
-        guard ghostty_surface_has_selection(cSurface) else { return }
+        guard surface?.unsafeCValue != nil else { return }
         let config = UIEditMenuConfiguration(identifier: nil, sourcePoint: location)
         editMenuInteraction?.presentEditMenu(with: config)
     }
@@ -787,9 +789,46 @@ class GhosttyTerminalView: UIView {
     // MARK: - Keyboard Input (Hardware Keyboard)
 
     override var keyCommands: [UIKeyCommand]? {
-        // Return nil to let the system handle key commands
-        // Individual key handling is done via pressesBegan/pressesEnded
+        // Keep keyCommands nil; handle command shortcuts in pressesBegan.
         return nil
+    }
+
+    private func handleCommandShortcut(_ key: UIKey) -> Bool {
+        guard key.modifierFlags.contains(.command) else { return false }
+        let input = key.charactersIgnoringModifiers.lowercased()
+        switch input {
+        case "v":
+            paste(nil)
+            requestRender()
+            return true
+        case "c":
+            if canPerformAction(#selector(copy(_:)), withSender: nil) {
+                copy(nil)
+            }
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func startKeyRepeat(for key: Ghostty.Input.Key) {
+        guard key == .backspace || key == .delete else { return }
+        stopKeyRepeat()
+        repeatingKey = key
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 0.35, repeating: 0.05)
+        timer.setEventHandler { [weak self] in
+            guard let self = self, let repeatKey = self.repeatingKey else { return }
+            self.sendKeyPress(repeatKey)
+        }
+        keyRepeatTimer = timer
+        timer.resume()
+    }
+
+    private func stopKeyRepeat() {
+        keyRepeatTimer?.cancel()
+        keyRepeatTimer = nil
+        repeatingKey = nil
     }
 
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
@@ -800,6 +839,15 @@ class GhosttyTerminalView: UIView {
 
         for press in presses {
             guard let key = press.key else { continue }
+            if handleCommandShortcut(key) { continue }
+            switch key.keyCode {
+            case .keyboardDeleteOrBackspace:
+                startKeyRepeat(for: .backspace)
+            case .keyboardDeleteForward:
+                startKeyRepeat(for: .delete)
+            default:
+                break
+            }
 
             // Convert UIKey to Ghostty key event
             if let keyEvent = Ghostty.Input.KeyEvent(uiKey: key, action: .press) {
@@ -822,7 +870,13 @@ class GhosttyTerminalView: UIView {
                 surface.sendKeyEvent(keyEvent)
             }
         }
+        stopKeyRepeat()
         requestRender()
+    }
+
+    override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        super.pressesCancelled(presses, with: event)
+        stopKeyRepeat()
     }
 
     // MARK: - Text Input from Software Keyboard
@@ -1290,6 +1344,8 @@ private class TerminalInputAccessoryView: UIInputView {
     private weak var voiceButton: UIButton?
     private weak var backgroundEffectView: UIVisualEffectView?
     private var defaultsObserver: NSObjectProtocol?
+    private var keyRepeatTimer: DispatchSourceTimer?
+    private var repeatingKey: TerminalKey?
 
     init(onKey: @escaping (TerminalKey) -> Void, onVoice: (() -> Void)? = nil) {
         self.onKey = onKey
@@ -1307,6 +1363,7 @@ private class TerminalInputAccessoryView: UIInputView {
         if let observer = defaultsObserver {
             NotificationCenter.default.removeObserver(observer)
         }
+        stopKeyRepeat()
     }
 
     private func setupView() {
@@ -1387,6 +1444,7 @@ private class TerminalInputAccessoryView: UIInputView {
         // Common keys
         stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
         stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: "Bksp", key: .backspace))
         stack.addArrangedSubview(makeSeparator())
 
         // Arrow keys
@@ -1489,6 +1547,45 @@ private class TerminalInputAccessoryView: UIInputView {
         return button
     }
 
+    private func makeRepeatablePillButton(title: String, key: TerminalKey) -> UIButton {
+        let button = RepeatableKeyButton(type: .system)
+        button.key = key
+        button.translatesAutoresizingMaskIntoConstraints = false
+        if #available(iOS 15.0, *) {
+            var config = UIButton.Configuration.plain()
+            config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 14)
+            config.attributedTitle = AttributedString(
+                title,
+                attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 15, weight: .medium)])
+            )
+            config.baseForegroundColor = .label
+            button.configuration = config
+        } else {
+            button.setTitle(title, for: .normal)
+            button.titleLabel?.font = .systemFont(ofSize: 15, weight: .medium)
+            button.setTitleColor(.label, for: .normal)
+            button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 14, bottom: 6, right: 14)
+        }
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.12)
+                : UIColor.black.withAlphaComponent(0.06)
+        }
+        button.layer.cornerRadius = 16
+
+        button.addTarget(self, action: #selector(repeatButtonDown(_:)), for: .touchDown)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchUpOutside)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchCancel)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchDragExit)
+
+        NSLayoutConstraint.activate([
+            button.heightAnchor.constraint(equalToConstant: 32)
+        ])
+
+        return button
+    }
+
     private func makeIconButton(icon: String, action: Selector) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -1572,6 +1669,34 @@ private class TerminalInputAccessoryView: UIInputView {
         onKey(modifiedKey)
     }
 
+    @objc private func repeatButtonDown(_ sender: RepeatableKeyButton) {
+        startKeyRepeat(for: sender.key)
+    }
+
+    @objc private func repeatButtonUp(_ sender: RepeatableKeyButton) {
+        stopKeyRepeat()
+    }
+
+    private func startKeyRepeat(for key: TerminalKey) {
+        stopKeyRepeat()
+        repeatingKey = key
+        sendKey(key)
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + 0.35, repeating: 0.05)
+        timer.setEventHandler { [weak self] in
+            guard let self = self, let repeatingKey = self.repeatingKey else { return }
+            self.sendKey(repeatingKey)
+        }
+        keyRepeatTimer = timer
+        timer.resume()
+    }
+
+    private func stopKeyRepeat() {
+        keyRepeatTimer?.cancel()
+        keyRepeatTimer = nil
+        repeatingKey = nil
+    }
+
     func consumeModifiers() -> (ctrl: Bool, alt: Bool) {
         let ctrl = ctrlActive
         let alt = altActive
@@ -1648,6 +1773,10 @@ private class TerminalInputAccessoryView: UIInputView {
     @objc private func tapPgUp() { sendKey(.pageUp) }
     @objc private func tapPgDn() { sendKey(.pageDown) }
     @objc private func tapVoice() { onVoice?() }
+}
+
+private final class RepeatableKeyButton: UIButton {
+    var key: TerminalKey = .backspace
 }
 
 // MARK: - Software Keyboard (UIKeyInput)

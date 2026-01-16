@@ -58,6 +58,10 @@ struct ProUpgradeSheet: View {
             Spacer().frame(height: 8)
             #endif
 
+            limitsSection
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
+
             // Features
             featuresSection
                 .padding(.horizontal, 20)
@@ -128,10 +132,13 @@ struct ProUpgradeSheet: View {
                 .padding(.bottom, 12)
 
             HStack(alignment: .top, spacing: 24) {
-                featuresSection
-                    .padding(.horizontal, 0)
-                    .padding(.vertical, 0)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .leading, spacing: 12) {
+                    limitsSection
+                    featuresSection
+                }
+                .padding(.horizontal, 0)
+                .padding(.vertical, 0)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
                 VStack(spacing: 16) {
                     planOptionsSection
@@ -274,6 +281,31 @@ struct ProUpgradeSheet: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
+    }
+
+    private var limitsSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Free plan limits")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+            Text(String(
+                format: String(localized: "%lld workspaces • %lld servers • %lld active connection"),
+                Int64(FreeTierLimits.maxWorkspaces),
+                Int64(FreeTierLimits.maxServers),
+                Int64(FreeTierLimits.maxTabs)
+            ))
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text("Hit a limit? Remove items or upgrade to Pro.")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.primary.opacity(0.06))
+        )
     }
 
     private var planOptionsSection: some View {
