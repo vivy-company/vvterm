@@ -644,6 +644,7 @@ struct ServerFormSheet: View {
                 }
 
                 await MainActor.run {
+                    isSaving = false
                     onSave(newServer)
                     dismiss()
                 }

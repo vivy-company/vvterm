@@ -344,12 +344,8 @@ struct TerminalContainerView: View {
     }
 
     private func disableTmuxForServer() {
-        guard var server = server else { return }
-        server.tmuxEnabledOverride = false
+        guard let server else { return }
         ConnectionSessionManager.shared.disableTmux(for: server.id)
-        Task {
-            try? await ServerManager.shared.updateServer(server)
-        }
     }
 
     private func attemptAutoReconnectIfNeeded() {

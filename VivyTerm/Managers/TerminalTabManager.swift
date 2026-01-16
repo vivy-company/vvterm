@@ -70,6 +70,9 @@ final class TerminalTabManager: ObservableObject {
     /// Bumps when a terminal view is registered/unregistered so views refresh.
     @Published private(set) var terminalRegistryVersion: Int = 0
 
+    /// Servers that already ran tmux cleanup (per app launch)
+    private var tmuxCleanupServers: Set<UUID> = []
+
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "TerminalTabManager")
 
     private let persistenceKey = "terminalTabsSnapshot.v1"
@@ -425,7 +428,7 @@ final class TerminalTabManager: ObservableObject {
     }
 
     private func tmuxSessionName(for paneId: UUID) -> String {
-        "vvterm_\(paneId.uuidString)"
+        "vvterm_\(DeviceIdentity.id)_\(paneId.uuidString)"
     }
 
     private func updateTmuxSelectionStatuses() {
@@ -468,6 +471,19 @@ final class TerminalTabManager: ObservableObject {
                 self.updatePaneTmuxStatus(paneId, status: .missing)
             }
             return
+        }
+
+        if !tmuxCleanupServers.contains(serverId) {
+            tmuxCleanupServers.insert(serverId)
+            let keepNames = Set(tabs(for: serverId).flatMap { tab in
+                tab.allPaneIds.map { tmuxSessionName(for: $0) }
+            })
+            await RemoteTmuxManager.shared.cleanupLegacySessions(using: client)
+            await RemoteTmuxManager.shared.cleanupDetachedSessions(
+                deviceId: DeviceIdentity.id,
+                keeping: keepNames,
+                using: client
+            )
         }
 
         let status = await MainActor.run { () -> TmuxStatus in
@@ -523,8 +539,8 @@ final class TerminalTabManager: ObservableObject {
 
     func killTmuxIfNeeded(for paneId: UUID) {
         guard let registration = sshShells[paneId] else { return }
-        Task.detached { [client = registration.client, paneId] in
-            let sessionName = "vvterm_\(paneId.uuidString)"
+        let sessionName = tmuxSessionName(for: paneId)
+        Task.detached { [client = registration.client, sessionName] in
             await RemoteTmuxManager.shared.killSession(named: sessionName, using: client)
         }
     }

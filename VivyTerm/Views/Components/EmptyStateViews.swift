@@ -100,7 +100,10 @@ struct MultiConnectionUpgradeEmptyState: View {
                         .font(.body)
                         .foregroundStyle(.secondary)
 
-                    Text("Upgrade to connect to multiple servers simultaneously")
+                    Text(String(
+                        format: String(localized: "Free plan allows %lld active connection. Disconnect another server or upgrade."),
+                        Int64(FreeTierLimits.maxTabs)
+                    ))
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                         .multilineTextAlignment(.center)

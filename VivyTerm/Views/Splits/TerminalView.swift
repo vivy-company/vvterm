@@ -494,12 +494,7 @@ struct TerminalPaneView: View {
     }
 
     private func disableTmuxForServer() {
-        var updatedServer = server
-        updatedServer.tmuxEnabledOverride = false
         TerminalTabManager.shared.disableTmux(for: server.id)
-        Task {
-            try? await ServerManager.shared.updateServer(updatedServer)
-        }
     }
 
     private func retryConnection() {
