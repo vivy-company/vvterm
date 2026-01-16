@@ -212,10 +212,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ = semaphore.wait(timeout: .now() + 2)
     }
 
-    // Handle app going to background - close connections to save resources
+    // Handle app going to background - suspend connections to save resources
     func applicationDidEnterBackground(_ application: UIApplication) {
         Task {
-            ConnectionSessionManager.shared.disconnectAll()
+            ConnectionSessionManager.shared.suspendAllForBackground()
         }
     }
 }

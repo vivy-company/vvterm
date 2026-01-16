@@ -596,6 +596,8 @@ struct iOSTerminalView: View {
 
     /// Delayed flag to allow tab animation to complete before creating terminal
     @State private var shouldShowTerminalBySession: [UUID: Bool] = [:]
+    /// Force terminal rebuilds to restart SSH on foreground reconnect
+    @State private var reconnectTokenBySession: [UUID: UUID] = [:]
     @State private var showingTabLimitAlert = false
     @State private var serverToEdit: Server?
     @State private var terminalBackgroundColor: Color = .black
@@ -605,6 +607,7 @@ struct iOSTerminalView: View {
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
     @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
     @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
+    @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
     private var effectiveThemeName: String {
         guard usePerAppearanceTheme else { return terminalThemeName }
@@ -683,6 +686,21 @@ struct iOSTerminalView: View {
         }
     }
 
+    private func attemptForegroundReconnectIfNeeded() {
+        guard autoReconnectEnabled else { return }
+        guard selectedView == "terminal" else { return }
+        guard let session = selectedSession else { return }
+
+        switch session.connectionState {
+        case .disconnected, .failed:
+            Task { try? await sessionManager.reconnect(session: session) }
+            reconnectTokenBySession[session.id] = UUID()
+            shouldShowTerminalBySession[session.id] = true
+        default:
+            break
+        }
+    }
+
     var body: some View {
         alertContent
             .onAppear {
@@ -712,6 +730,7 @@ struct iOSTerminalView: View {
                        let session = selectedSession {
                         refreshTerminal(for: session)
                     }
+                    attemptForegroundReconnectIfNeeded()
                 }
             }
             .onChange(of: connectingServer?.id) { newValue in
@@ -730,6 +749,7 @@ struct iOSTerminalView: View {
                 }
                 let activeIds = Set(serverSessions.map { $0.id })
                 shouldShowTerminalBySession = shouldShowTerminalBySession.filter { activeIds.contains($0.key) }
+                reconnectTokenBySession = reconnectTokenBySession.filter { activeIds.contains($0.key) }
                 if currentServerId != nil,
                    let selectedId = sessionManager.selectedSessionId,
                    !serverSessions.contains(where: { $0.id == selectedId }) {
@@ -939,6 +959,7 @@ struct iOSTerminalView: View {
         let isSelected = effectiveSelectedSessionId == session.id
         let terminalAlreadyExists = ConnectionSessionManager.shared.getTerminal(for: session.id) != nil
         let shouldShowTerminal = shouldShowTerminalBySession[session.id] ?? false
+        let reconnectToken = reconnectTokenBySession[session.id] ?? session.id
 
         ZStack {
             if shouldShowTerminal || terminalAlreadyExists {
@@ -947,6 +968,7 @@ struct iOSTerminalView: View {
                     server: server,
                     isActive: isSelected && viewSelection == "terminal"
                 )
+                .id(reconnectToken)
                 .opacity(viewSelection == "terminal" ? 1 : 0)
                 .allowsHitTesting(viewSelection == "terminal")
             }

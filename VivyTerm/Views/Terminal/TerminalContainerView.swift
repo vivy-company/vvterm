@@ -100,7 +100,7 @@ struct TerminalContainerView: View {
                             credentials: credentials,
                             isActive: isActive,
                             onProcessExit: {
-                                ConnectionSessionManager.shared.closeSession(session)
+                                ConnectionSessionManager.shared.handleShellExit(for: session.id)
                             },
                             onReady: {
                                 isReady = true

@@ -76,6 +76,8 @@ final class ConnectionSessionManager: ObservableObject {
 
     /// Shell cancel handlers indexed by session ID - called before closing to cancel async tasks
     private var shellCancelHandlers: [UUID: () -> Void] = [:]
+    /// Shell suspend handlers indexed by session ID - cancel in-flight connects without destroying terminals
+    private var shellSuspendHandlers: [UUID: () -> Void] = [:]
 
     /// Servers that already ran tmux cleanup (per app launch)
     private var tmuxCleanupServers: Set<UUID> = []
@@ -224,6 +226,7 @@ final class ConnectionSessionManager: ObservableObject {
         // Cancel shell task first to stop async work
         shellCancelHandlers[sessionId]?()
         shellCancelHandlers.removeValue(forKey: sessionId)
+        shellSuspendHandlers.removeValue(forKey: sessionId)
 
         // Remove from UI immediately
         sessions.removeAll { $0.id == sessionId }
@@ -299,6 +302,30 @@ final class ConnectionSessionManager: ObservableObject {
         }
         connectedServerId = nil
         logger.info("Disconnected all sessions")
+    }
+
+    /// Disconnects all sessions without removing tabs (used when app backgrounds)
+    func suspendAllForBackground() {
+        let sessionsToSuspend = sessions
+        for session in sessionsToSuspend {
+            if session.connectionState.isConnected || session.connectionState.isConnecting {
+                updateSessionState(session.id, to: .disconnected)
+            }
+            // Cancel any in-flight connects while preserving terminal state
+            shellSuspendHandlers[session.id]?()
+            Task.detached { [weak self] in
+                await self?.unregisterSSHClient(for: session.id)
+            }
+        }
+        logger.info("Suspended all sessions for background")
+    }
+
+    /// Handle shell exit without removing the session (keeps tab for reconnect)
+    func handleShellExit(for sessionId: UUID) {
+        updateSessionState(sessionId, to: .disconnected)
+        Task.detached { [weak self] in
+            await self?.unregisterSSHClient(for: sessionId)
+        }
     }
 
     /// Disconnect all sessions for a specific server
@@ -488,6 +515,7 @@ final class ConnectionSessionManager: ObservableObject {
             // Call shell cancel handler
             shellCancelHandlers[oldestId]?()
             shellCancelHandlers.removeValue(forKey: oldestId)
+            shellSuspendHandlers.removeValue(forKey: oldestId)
         }
     }
 
@@ -499,6 +527,14 @@ final class ConnectionSessionManager: ObservableObject {
 
     func unregisterShellCancelHandler(for sessionId: UUID) {
         shellCancelHandlers.removeValue(forKey: sessionId)
+    }
+
+    func registerShellSuspendHandler(_ handler: @escaping () -> Void, for sessionId: UUID) {
+        shellSuspendHandlers[sessionId] = handler
+    }
+
+    func unregisterShellSuspendHandler(for sessionId: UUID) {
+        shellSuspendHandlers.removeValue(forKey: sessionId)
     }
 
     func getTerminal(for sessionId: UUID) -> GhosttyTerminalView? {
