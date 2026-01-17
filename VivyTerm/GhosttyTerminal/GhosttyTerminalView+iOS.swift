@@ -1425,6 +1425,10 @@ private class TerminalInputAccessoryView: UIInputView {
             stack.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor, constant: -16)
         ])
 
+        // Common keys (prioritize frequent terminal actions)
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
+
         // Modifier buttons (toggle style)
         let ctrl = makeModifierButton(title: String(localized: "Ctrl"), action: #selector(toggleCtrl))
         let alt = makeModifierButton(title: String(localized: "Alt"), action: #selector(toggleAlt))
@@ -1434,24 +1438,19 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(alt)
         stack.addArrangedSubview(makeSeparator())
 
+        // Arrow keys + backspace
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.up", action: #selector(tapUp)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.down", action: #selector(tapDown)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.left", action: #selector(tapLeft)))
+        stack.addArrangedSubview(makeIconButton(icon: "arrow.right", action: #selector(tapRight)))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: "Bksp", key: .backspace))
+        stack.addArrangedSubview(makeSeparator())
+
         // Control sequences
         stack.addArrangedSubview(makePillButton(title: String(localized: "^C"), action: #selector(tapCtrlC)))
         stack.addArrangedSubview(makePillButton(title: String(localized: "^D"), action: #selector(tapCtrlD)))
         stack.addArrangedSubview(makePillButton(title: String(localized: "^Z"), action: #selector(tapCtrlZ)))
         stack.addArrangedSubview(makePillButton(title: String(localized: "^L"), action: #selector(tapCtrlL)))
-        stack.addArrangedSubview(makeSeparator())
-
-        // Common keys
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
-        stack.addArrangedSubview(makeRepeatablePillButton(title: "Bksp", key: .backspace))
-        stack.addArrangedSubview(makeSeparator())
-
-        // Arrow keys
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.up", action: #selector(tapUp)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.down", action: #selector(tapDown)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.left", action: #selector(tapLeft)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.right", action: #selector(tapRight)))
         stack.addArrangedSubview(makeSeparator())
 
         // Navigation
@@ -1710,34 +1709,34 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func updateModifierState() {
         UIView.animate(withDuration: 0.2) {
-            // Ctrl button
-            if self.ctrlActive {
-                self.ctrlButton?.backgroundColor = .systemBlue
-                self.ctrlButton?.setTitleColor(.white, for: .normal)
-                self.ctrlButton?.layer.borderColor = UIColor.clear.cgColor
-            } else {
-                self.ctrlButton?.backgroundColor = UIColor { traits in
-                    traits.userInterfaceStyle == .dark
-                        ? UIColor.white.withAlphaComponent(0.08)
-                        : UIColor.black.withAlphaComponent(0.04)
-                }
-                self.ctrlButton?.setTitleColor(.secondaryLabel, for: .normal)
-                self.ctrlButton?.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
-            }
+            self.updateModifierButton(self.ctrlButton, isActive: self.ctrlActive)
+            self.updateModifierButton(self.altButton, isActive: self.altActive)
+        }
+    }
 
-            // Alt button
-            if self.altActive {
-                self.altButton?.backgroundColor = .systemBlue
-                self.altButton?.setTitleColor(.white, for: .normal)
-                self.altButton?.layer.borderColor = UIColor.clear.cgColor
+    private func updateModifierButton(_ button: UIButton?, isActive: Bool) {
+        guard let button else { return }
+        if isActive {
+            button.backgroundColor = .systemBlue
+            button.layer.borderColor = UIColor.clear.cgColor
+            if #available(iOS 15.0, *), var config = button.configuration {
+                config.baseForegroundColor = .white
+                button.configuration = config
             } else {
-                self.altButton?.backgroundColor = UIColor { traits in
-                    traits.userInterfaceStyle == .dark
-                        ? UIColor.white.withAlphaComponent(0.08)
-                        : UIColor.black.withAlphaComponent(0.04)
-                }
-                self.altButton?.setTitleColor(.secondaryLabel, for: .normal)
-                self.altButton?.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
+                button.setTitleColor(.white, for: .normal)
+            }
+        } else {
+            button.backgroundColor = UIColor { traits in
+                traits.userInterfaceStyle == .dark
+                    ? UIColor.white.withAlphaComponent(0.08)
+                    : UIColor.black.withAlphaComponent(0.04)
+            }
+            button.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
+            if #available(iOS 15.0, *), var config = button.configuration {
+                config.baseForegroundColor = .secondaryLabel
+                button.configuration = config
+            } else {
+                button.setTitleColor(.secondaryLabel, for: .normal)
             }
         }
     }
