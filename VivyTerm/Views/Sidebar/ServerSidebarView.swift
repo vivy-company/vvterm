@@ -234,23 +234,22 @@ struct ServerSidebarView: View {
             .padding(.vertical, 8)
 
             // Server list
-            List {
-                ForEach(filteredServers) { server in
-                    ServerRow(
-                        server: server,
-                        isSelected: selectedServer?.id == server.id,
-                        onEdit: { serverToEdit = $0 },
-                        onSelect: { selectedServer = server },
-                        onLockedTap: { lockedServerAlert = server }
-                    )
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8))
+            ScrollView {
+                LazyVStack(spacing: 4) {
+                    ForEach(filteredServers) { server in
+                        ServerRow(
+                            server: server,
+                            isSelected: selectedServer?.id == server.id,
+                            onEdit: { serverToEdit = $0 },
+                            onSelect: { selectedServer = server },
+                            onLockedTap: { lockedServerAlert = server }
+                        )
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 2)
+                    }
                 }
+                .padding(.vertical, 4)
             }
-            .listStyle(.plain)
-            .selectionDisabledIfAvailable(true)
-            .scrollContentBackground(.hidden)
         }
         .lockedItemAlert(
             .server,
@@ -508,20 +507,5 @@ struct EnvironmentMenu: View {
                 }
             }
         }
-    }
-}
-
-private extension View {
-    @ViewBuilder
-    func selectionDisabledIfAvailable(_ disabled: Bool) -> some View {
-        #if os(macOS)
-        if #available(macOS 14.0, *) {
-            self.selectionDisabled(disabled)
-        } else {
-            self
-        }
-        #else
-        self
-        #endif
     }
 }

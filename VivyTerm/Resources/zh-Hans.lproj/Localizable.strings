@@ -20,6 +20,10 @@
 "Manage subscription" = "管理订阅";
 "Manage your subscription" = "管理你的订阅";
 "Restore Purchases" = "恢复购买";
+"Restoring..." = "正在恢复...";
+"Restore Failed" = "恢复失败";
+"Your purchases have been restored." = "您的购买已恢复。";
+"No active purchases were found for this Apple ID." = "此 Apple ID 未找到有效购买。";
 "Renew" = "续订";
 "Renew Pro" = "续订 Pro";
 "Close" = "关闭";

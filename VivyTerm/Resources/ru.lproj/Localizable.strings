@@ -20,6 +20,10 @@
 "Manage subscription" = "Управление подпиской";
 "Manage your subscription" = "Управляйте подпиской";
 "Restore Purchases" = "Восстановить покупки";
+"Restoring..." = "Восстановление...";
+"Restore Failed" = "Не удалось восстановить";
+"Your purchases have been restored." = "Ваши покупки были восстановлены.";
+"No active purchases were found for this Apple ID." = "Для этого Apple ID не найдено активных покупок.";
 "Renew" = "Продлить";
 "Renew Pro" = "Продлить Pro";
 "Close" = "Закрыть";

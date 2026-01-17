@@ -9,7 +9,7 @@ struct ProUpgradeSheet: View {
 
     @State private var selectedProduct: Product?
     @State private var showSuccess = false
-    @State private var errorMessage: String?
+    @State private var alertInfo: AlertInfo?
 
     private var features: [(icon: String, title: String, description: String, color: Color)] {
         [
@@ -19,6 +19,13 @@ struct ProUpgradeSheet: View {
             ("tag", String(localized: "Custom Environments"), String(localized: "Create custom environment labels beyond Prod/Staging/Dev"), .orange),
             ("star", String(localized: "All Future Features"), String(localized: "Get access to every new Pro feature"), .yellow)
         ]
+    }
+
+    private struct AlertInfo: Identifiable {
+        let id = UUID()
+        let title: String
+        let message: String
+        let isRestore: Bool
     }
 
     var body: some View {
@@ -99,7 +106,31 @@ struct ProUpgradeSheet: View {
                     dismiss()
                 }
             case .failed(let message):
-                errorMessage = message
+                alertInfo = AlertInfo(
+                    title: String(localized: "Purchase Failed"),
+                    message: message,
+                    isRestore: false
+                )
+            default:
+                break
+            }
+        }
+        .onChange(of: storeManager.restoreState) { newState in
+            switch newState {
+            case .restored(let hasAccess):
+                alertInfo = AlertInfo(
+                    title: String(localized: "Restore Purchases"),
+                    message: hasAccess
+                    ? String(localized: "Your purchases have been restored.")
+                    : String(localized: "No active purchases were found for this Apple ID."),
+                    isRestore: true
+                )
+            case .failed(let message):
+                alertInfo = AlertInfo(
+                    title: String(localized: "Restore Failed"),
+                    message: message,
+                    isRestore: true
+                )
             default:
                 break
             }
@@ -109,13 +140,25 @@ struct ProUpgradeSheet: View {
                 successOverlay
             }
         }
-        .alert("Purchase Failed", isPresented: .init(
-            get: { errorMessage != nil },
-            set: { if !$0 { errorMessage = nil } }
-        )) {
-            Button("OK") { errorMessage = nil }
-        } message: {
-            Text(errorMessage ?? String(localized: "Unknown error"))
+        .alert(alertInfo?.title ?? "", isPresented: .init(
+            get: { alertInfo != nil },
+            set: { isPresented in
+                if !isPresented {
+                    if alertInfo?.isRestore == true {
+                        storeManager.restoreState = .idle
+                    }
+                    alertInfo = nil
+                }
+            }
+        ), presenting: alertInfo) { info in
+            Button("OK") {
+                if info.isRestore {
+                    storeManager.restoreState = .idle
+                }
+                alertInfo = nil
+            }
+        } message: { info in
+            Text(info.message)
         }
     }
 
@@ -165,7 +208,31 @@ struct ProUpgradeSheet: View {
                     dismiss()
                 }
             case .failed(let message):
-                errorMessage = message
+                alertInfo = AlertInfo(
+                    title: String(localized: "Purchase Failed"),
+                    message: message,
+                    isRestore: false
+                )
+            default:
+                break
+            }
+        }
+        .onChange(of: storeManager.restoreState) { newState in
+            switch newState {
+            case .restored(let hasAccess):
+                alertInfo = AlertInfo(
+                    title: String(localized: "Restore Purchases"),
+                    message: hasAccess
+                    ? String(localized: "Your purchases have been restored.")
+                    : String(localized: "No active purchases were found for this Apple ID."),
+                    isRestore: true
+                )
+            case .failed(let message):
+                alertInfo = AlertInfo(
+                    title: String(localized: "Restore Failed"),
+                    message: message,
+                    isRestore: true
+                )
             default:
                 break
             }
@@ -175,13 +242,25 @@ struct ProUpgradeSheet: View {
                 successOverlay
             }
         }
-        .alert("Purchase Failed", isPresented: .init(
-            get: { errorMessage != nil },
-            set: { if !$0 { errorMessage = nil } }
-        )) {
-            Button("OK") { errorMessage = nil }
-        } message: {
-            Text(errorMessage ?? String(localized: "Unknown error"))
+        .alert(alertInfo?.title ?? "", isPresented: .init(
+            get: { alertInfo != nil },
+            set: { isPresented in
+                if !isPresented {
+                    if alertInfo?.isRestore == true {
+                        storeManager.restoreState = .idle
+                    }
+                    alertInfo = nil
+                }
+            }
+        ), presenting: alertInfo) { info in
+            Button("OK") {
+                if info.isRestore {
+                    storeManager.restoreState = .idle
+                }
+                alertInfo = nil
+            }
+        } message: { info in
+            Text(info.message)
         }
     }
     #endif
@@ -321,11 +400,23 @@ struct ProUpgradeSheet: View {
     }
 
     private var restoreButton: some View {
-        Button("Restore Purchases") {
+        Button {
             Task { await storeManager.restorePurchases() }
+        } label: {
+            HStack(spacing: 8) {
+                if storeManager.restoreState == .restoring {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .scaleEffect(0.8)
+                }
+                Text(storeManager.restoreState == .restoring
+                     ? String(localized: "Restoring...")
+                     : String(localized: "Restore Purchases"))
+            }
         }
         .buttonStyle(.bordered)
         .foregroundStyle(.primary)
+        .disabled(storeManager.restoreState == .restoring)
     }
 
     // MARK: - Legal Footer

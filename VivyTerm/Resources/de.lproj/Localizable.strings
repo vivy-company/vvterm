@@ -20,6 +20,10 @@
 "Manage subscription" = "Abo verwalten";
 "Manage your subscription" = "Verwalte dein Abo";
 "Restore Purchases" = "Käufe wiederherstellen";
+"Restoring..." = "Wird wiederhergestellt...";
+"Restore Failed" = "Wiederherstellung fehlgeschlagen";
+"Your purchases have been restored." = "Ihre Käufe wurden wiederhergestellt.";
+"No active purchases were found for this Apple ID." = "Für diese Apple-ID wurden keine aktiven Käufe gefunden.";
 "Renew" = "Verlängern";
 "Renew Pro" = "Pro verlängern";
 "Close" = "Schließen";

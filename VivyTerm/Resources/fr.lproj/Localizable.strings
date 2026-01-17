@@ -20,6 +20,10 @@
 "Manage subscription" = "Gérer l’abonnement";
 "Manage your subscription" = "Gérez votre abonnement";
 "Restore Purchases" = "Restaurer les achats";
+"Restoring..." = "Restauration en cours...";
+"Restore Failed" = "Échec de la restauration";
+"Your purchases have been restored." = "Vos achats ont été restaurés.";
+"No active purchases were found for this Apple ID." = "Aucun achat actif n’a été trouvé pour cet identifiant Apple.";
 "Renew" = "Renouveler";
 "Renew Pro" = "Renouveler Pro";
 "Close" = "Fermer";
