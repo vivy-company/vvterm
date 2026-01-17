@@ -68,14 +68,15 @@ struct iOSServerRow: View {
             .opacity(isLocked ? 0.7 : 1.0)
         }
         .buttonStyle(.plain)
-        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+        .swipeActions(edge: .leading, allowsFullSwipe: false) {
             Button {
                 onEdit()
             } label: {
                 Label("Edit", systemImage: "pencil")
             }
             .tint(.orange)
-
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
             Button(role: .destructive) {
                 Task { try? await ServerManager.shared.deleteServer(server) }
             } label: {
