@@ -30,15 +30,17 @@ final class LiveActivityManager {
     @available(iOS 16.1, *)
     private func updateActivity(for sessions: [ConnectionSession]) async {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            await endActivityIfNeeded()
+            await endAllActivities()
             return
         }
 
         let activeCount = sessions.filter { $0.connectionState.isConnected || $0.connectionState.isConnecting }.count
         if activeCount == 0 {
-            await endActivityIfNeeded()
+            await endAllActivities()
             return
         }
+
+        await attachToExistingActivityIfNeeded()
 
         let status: VivyTermLiveActivityStatus
         if sessions.contains(where: { if case .reconnecting = $0.connectionState { return true } else { return false } }) {
@@ -69,9 +71,25 @@ final class LiveActivityManager {
     }
 
     @available(iOS 16.1, *)
-    private func endActivityIfNeeded() async {
-        guard let activity else { return }
-        await activity.end(dismissalPolicy: .immediate)
+    private func attachToExistingActivityIfNeeded() async {
+        guard activity == nil else { return }
+        let existing = Activity<VivyTermActivityAttributes>.activities
+        guard let current = existing.first else { return }
+        activity = current
+
+        if existing.count > 1 {
+            for duplicate in existing.dropFirst() {
+                await duplicate.end(dismissalPolicy: .immediate)
+            }
+        }
+    }
+
+    @available(iOS 16.1, *)
+    private func endAllActivities() async {
+        let existing = Activity<VivyTermActivityAttributes>.activities
+        for activity in existing {
+            await activity.end(dismissalPolicy: .immediate)
+        }
         self.activity = nil
         lastState = nil
     }
