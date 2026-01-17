@@ -187,12 +187,7 @@ struct ServerFormSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
-                        HStack(spacing: 8) {
-                            ProgressView()
-                            Text(String(localized: "Saving..."))
-                        }
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
+                        ProgressView()
                     } else {
                         Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
                             saveServer()
