@@ -25,7 +25,9 @@ final class KeychainStore: @unchecked Sendable {
         ]
 
         // Remove existing item if any
-        SecItemDelete(query as CFDictionary)
+        var deleteQuery = query
+        deleteQuery[kSecAttrSynchronizable as String] = kSecAttrSynchronizableAny
+        SecItemDelete(deleteQuery as CFDictionary)
 
         var attributes = query
         attributes[kSecValueData as String] = data
