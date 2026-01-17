@@ -194,6 +194,12 @@ final class ConnectionSessionManager: ObservableObject {
         sessions[index].tmuxStatus = status
     }
 
+    func updateSessionWorkingDirectory(_ sessionId: UUID, rawDirectory: String) {
+        guard let normalized = normalizeWorkingDirectory(rawDirectory) else { return }
+        guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else { return }
+        sessions[index].workingDirectory = normalized
+    }
+
     // MARK: - Close Terminal
 
     /// Closes a terminal session and removes it from the list
@@ -652,6 +658,7 @@ private struct ConnectionSessionsSnapshot: Codable {
         let lastActivity: Date
         let autoReconnect: Bool
         let parentSessionId: UUID?
+        let workingDirectory: String?
 
         init(from session: ConnectionSession) {
             self.id = session.id
@@ -661,6 +668,7 @@ private struct ConnectionSessionsSnapshot: Codable {
             self.lastActivity = session.lastActivity
             self.autoReconnect = session.autoReconnect
             self.parentSessionId = session.parentSessionId
+            self.workingDirectory = session.workingDirectory
         }
 
         func toSession() -> ConnectionSession {
@@ -673,6 +681,7 @@ private struct ConnectionSessionsSnapshot: Codable {
                 lastActivity: lastActivity,
                 terminalSurfaceId: nil,
                 autoReconnect: autoReconnect,
+                workingDirectory: workingDirectory,
                 parentSessionId: parentSessionId
             )
         }
@@ -711,6 +720,37 @@ extension ConnectionSessionManager {
 
     private func tmuxSessionName(for sessionId: UUID) -> String {
         "vvterm_\(DeviceIdentity.id)_\(sessionId.uuidString)"
+    }
+
+    private func tmuxWorkingDirectory(for sessionId: UUID) -> String {
+        let candidate = sessions.first(where: { $0.id == sessionId })?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let candidate, !candidate.isEmpty {
+            return candidate
+        }
+        return "~"
+    }
+
+    func workingDirectory(for sessionId: UUID) -> String? {
+        sessions.first(where: { $0.id == sessionId })?.workingDirectory
+    }
+
+    func shouldApplyWorkingDirectory(for sessionId: UUID) -> Bool {
+        guard let status = sessions.first(where: { $0.id == sessionId })?.tmuxStatus else { return false }
+        return status == .off || status == .missing
+    }
+
+    private func normalizeWorkingDirectory(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let schemeRange = trimmed.range(of: "://") {
+            let afterScheme = trimmed[schemeRange.upperBound...]
+            guard let pathStart = afterScheme.firstIndex(of: "/") else { return nil }
+            let path = String(afterScheme[pathStart...])
+            return path.removingPercentEncoding ?? path
+        }
+
+        return trimmed
     }
 
     private func updateTmuxSelectionStatuses() {
@@ -770,7 +810,7 @@ extension ConnectionSessionManager {
         await RemoteTmuxManager.shared.prepareConfig(using: client)
         let command = RemoteTmuxManager.shared.attachCommand(
             sessionName: tmuxSessionName(for: sessionId),
-            workingDirectory: "~"
+            workingDirectory: tmuxWorkingDirectory(for: sessionId)
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
     }
@@ -784,7 +824,7 @@ extension ConnectionSessionManager {
 
         let script = RemoteTmuxManager.shared.installAndAttachScript(
             sessionName: tmuxSessionName(for: sessionId),
-            workingDirectory: "~"
+            workingDirectory: tmuxWorkingDirectory(for: sessionId)
         )
         await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
 

@@ -231,6 +231,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
                     }
                 }
             }
+            existingTerminal.onPwdChange = { [sessionId = session.id] rawDirectory in
+                ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
+            }
             existingTerminal.writeCallback = { data in
                 if let client = ConnectionSessionManager.shared.sshClient(for: session),
                    let shellId = ConnectionSessionManager.shared.shellId(for: session) {
@@ -278,6 +281,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             }
         }
         terminalView.onProcessExit = onProcessExit
+        terminalView.onPwdChange = { [sessionId = session.id] rawDirectory in
+            ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
+        }
 
         // Store terminal reference in coordinator and register with session manager
         coordinator.terminalView = terminalView
@@ -381,6 +387,24 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             await MainActor.run {
                 self.lastSize = (cols, rows)
             }
+        }
+
+        func onShellStarted(terminal: GhosttyTerminalView) async {
+            await applyWorkingDirectoryIfNeeded()
+        }
+
+        private func applyWorkingDirectoryIfNeeded() async {
+            guard ConnectionSessionManager.shared.shouldApplyWorkingDirectory(for: sessionId) else { return }
+            guard let cwd = ConnectionSessionManager.shared.workingDirectory(for: sessionId) else { return }
+            guard let payload = cdCommand(for: cwd).data(using: .utf8) else { return }
+            if let shellId {
+                try? await sshClient.write(payload, to: shellId)
+            }
+        }
+
+        private func cdCommand(for path: String) -> String {
+            let escaped = path.replacingOccurrences(of: "'", with: "'\"'\"'")
+            return "cd -- '\(escaped)'\n"
         }
 
         deinit {
@@ -519,6 +543,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             // Mark as reusing so we don't cleanup on deinit
             coordinator.preserveSession = true
             existingTerminal.onVoiceButtonTapped = onVoiceTrigger
+            existingTerminal.onPwdChange = { [sessionId = session.id] rawDirectory in
+                ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
+            }
 
             // Update write callback to use this coordinator (which will use session manager's SSH client)
             existingTerminal.writeCallback = { data in
@@ -615,6 +642,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
             }
             terminalView.onProcessExit = onProcessExit
             terminalView.onVoiceButtonTapped = onVoiceTrigger
+            terminalView.onPwdChange = { [sessionId = session.id] rawDirectory in
+                ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
+            }
 
             // Store terminal reference
             coordinator.terminalView = terminalView
@@ -841,6 +871,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         // MARK: - SSHTerminalCoordinator hooks
 
         func onShellStarted(terminal: GhosttyTerminalView) async {
+            await applyWorkingDirectoryIfNeeded()
             // Force refresh after shell starts (must be on main thread)
             await MainActor.run { [weak self] in
                 terminal.forceRefresh()
@@ -862,6 +893,20 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                     }
                 }
             }
+        }
+
+        private func applyWorkingDirectoryIfNeeded() async {
+            guard ConnectionSessionManager.shared.shouldApplyWorkingDirectory(for: sessionId) else { return }
+            guard let cwd = ConnectionSessionManager.shared.workingDirectory(for: sessionId) else { return }
+            guard let payload = cdCommand(for: cwd).data(using: .utf8) else { return }
+            if let shellId {
+                try? await sshClient.write(payload, to: shellId)
+            }
+        }
+
+        private func cdCommand(for path: String) -> String {
+            let escaped = path.replacingOccurrences(of: "'", with: "'\"'\"'")
+            return "cd -- '\(escaped)'\n"
         }
 
         deinit {
