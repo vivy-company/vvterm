@@ -50,6 +50,7 @@ struct ConnectionSession: Identifiable, Hashable {
     var terminalSurfaceId: String?
     var autoReconnect: Bool
     var tmuxStatus: TmuxStatus
+    var workingDirectory: String?
     /// If set, this session is a split child of the parent session (not shown in tabs)
     var parentSessionId: UUID?
 
@@ -63,6 +64,7 @@ struct ConnectionSession: Identifiable, Hashable {
         terminalSurfaceId: String? = nil,
         autoReconnect: Bool = true,
         tmuxStatus: TmuxStatus = .unknown,
+        workingDirectory: String? = nil,
         parentSessionId: UUID? = nil
     ) {
         self.id = id
@@ -74,6 +76,7 @@ struct ConnectionSession: Identifiable, Hashable {
         self.terminalSurfaceId = terminalSurfaceId
         self.autoReconnect = autoReconnect
         self.tmuxStatus = tmuxStatus
+        self.workingDirectory = workingDirectory
         self.parentSessionId = parentSessionId
     }
 
