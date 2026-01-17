@@ -205,6 +205,7 @@ struct iOSWorkspacePickerView: View {
     @State private var lockedWorkspaceAlert: Workspace?
     @State private var showingCreateWorkspace = false
     @State private var workspaceToEdit: Workspace?
+    @State private var workspaceToDelete: Workspace?
 
     var body: some View {
         List {
@@ -271,7 +272,7 @@ struct iOSWorkspacePickerView: View {
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                     if !isLocked {
                         Button(role: .destructive) {
-                            deleteWorkspace(workspace)
+                            workspaceToDelete = workspace
                         } label: {
                             Label("Delete Workspace", systemImage: "trash")
                         }
@@ -325,6 +326,19 @@ struct iOSWorkspacePickerView: View {
                 set: { if !$0 { lockedWorkspaceAlert = nil } }
             )
         )
+        .alert("Delete Workspace?", isPresented: Binding(
+            get: { workspaceToDelete != nil },
+            set: { if !$0 { workspaceToDelete = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                if let workspace = workspaceToDelete {
+                    deleteWorkspace(workspace)
+                }
+            }
+        } message: {
+            Text(deleteWarningText(for: workspaceToDelete))
+        }
     }
 
     private func deleteWorkspace(_ workspace: Workspace) {
@@ -334,6 +348,20 @@ struct iOSWorkspacePickerView: View {
                 selectedWorkspace = serverManager.workspaces.first
             }
         }
+    }
+
+    private func deleteWarningText(for workspace: Workspace?) -> String {
+        guard let workspace else {
+            return "This will delete the workspace and all servers in it. This cannot be undone."
+        }
+        let count = serverManager.servers(in: workspace, environment: nil).count
+        if count == 0 {
+            return "This will delete the workspace. This cannot be undone."
+        }
+        if count == 1 {
+            return "This will delete the workspace and its 1 server. This cannot be undone."
+        }
+        return "This will delete the workspace and all \(count) servers in it. This cannot be undone."
     }
 }
 #endif

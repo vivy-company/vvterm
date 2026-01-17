@@ -13,6 +13,7 @@ struct WorkspaceFormSheet: View {
     @State private var name: String = ""
     @State private var selectedColor: Color = .blue
     @State private var showingWorkspaceLimitAlert = false
+    @State private var workspaceToDelete: Workspace?
     @State private var isSaving = false
     @State private var error: String?
 
@@ -102,7 +103,7 @@ struct WorkspaceFormSheet: View {
                 if isEditing {
                     Section {
                         Button(role: .destructive) {
-                            deleteWorkspace()
+                            workspaceToDelete = workspace
                         } label: {
                             HStack {
                                 Spacer()
@@ -130,6 +131,17 @@ struct WorkspaceFormSheet: View {
                 }
             }
             .limitReachedAlert(.workspaces, isPresented: $showingWorkspaceLimitAlert)
+            .alert("Delete Workspace?", isPresented: Binding(
+                get: { workspaceToDelete != nil },
+                set: { if !$0 { workspaceToDelete = nil } }
+            )) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    deleteWorkspace()
+                }
+            } message: {
+                Text(deleteWarningText(for: workspaceToDelete))
+            }
         }
     }
 
@@ -198,6 +210,20 @@ struct WorkspaceFormSheet: View {
                 }
             }
         }
+    }
+
+    private func deleteWarningText(for workspace: Workspace?) -> String {
+        guard let workspace else {
+            return "This will delete the workspace and all servers in it. This cannot be undone."
+        }
+        let count = serverManager.servers(in: workspace, environment: nil).count
+        if count == 0 {
+            return "This will delete the workspace. This cannot be undone."
+        }
+        if count == 1 {
+            return "This will delete the workspace and its 1 server. This cannot be undone."
+        }
+        return "This will delete the workspace and all \(count) servers in it. This cannot be undone."
     }
 }
 

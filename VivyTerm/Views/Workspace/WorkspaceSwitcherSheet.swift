@@ -10,6 +10,7 @@ struct WorkspaceSwitcherSheet: View {
     @State private var hoveredWorkspace: Workspace?
     @State private var showingCreateWorkspace = false
     @State private var workspaceToEdit: Workspace?
+    @State private var workspaceToDelete: Workspace?
     @State private var lockedWorkspaceAlert: Workspace?
 
     var body: some View {
@@ -47,6 +48,9 @@ struct WorkspaceSwitcherSheet: View {
                             },
                             onLockedTap: {
                                 lockedWorkspaceAlert = workspace
+                            },
+                            onDeleteRequest: {
+                                workspaceToDelete = workspace
                             }
                         )
                         .onHover { hovering in
@@ -101,10 +105,36 @@ struct WorkspaceSwitcherSheet: View {
                 set: { if !$0 { lockedWorkspaceAlert = nil } }
             )
         )
+        .alert("Delete Workspace?", isPresented: Binding(
+            get: { workspaceToDelete != nil },
+            set: { if !$0 { workspaceToDelete = nil } }
+        )) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                guard let workspace = workspaceToDelete else { return }
+                Task { try? await serverManager.deleteWorkspace(workspace) }
+            }
+        } message: {
+            Text(deleteWarningText(for: workspaceToDelete))
+        }
     }
 
     private func serverCount(for workspace: Workspace) -> Int {
         serverManager.servers.filter { $0.workspaceId == workspace.id }.count
+    }
+
+    private func deleteWarningText(for workspace: Workspace?) -> String {
+        guard let workspace else {
+            return "This will delete the workspace and all servers in it. This cannot be undone."
+        }
+        let count = serverCount(for: workspace)
+        if count == 0 {
+            return "This will delete the workspace. This cannot be undone."
+        }
+        if count == 1 {
+            return "This will delete the workspace and its 1 server. This cannot be undone."
+        }
+        return "This will delete the workspace and all \(count) servers in it. This cannot be undone."
     }
 }
 
@@ -119,6 +149,7 @@ struct WorkspaceSwitcherRow: View {
     let onSelect: () -> Void
     let onEdit: () -> Void
     var onLockedTap: (() -> Void)? = nil
+    let onDeleteRequest: () -> Void
 
     var body: some View {
         HStack(spacing: 12) {
@@ -194,9 +225,7 @@ struct WorkspaceSwitcherRow: View {
                 }
 
                 Button(role: .destructive) {
-                    Task {
-                        try? await ServerManager.shared.deleteWorkspace(workspace)
-                    }
+                    onDeleteRequest()
                 } label: {
                     Label("Delete Workspace", systemImage: "trash")
                 }

@@ -138,11 +138,12 @@ final class ConnectionSessionManager: ObservableObject {
         }
 
         let preferredSessionId = selectedSessionByServer[server.id] ?? selectedSessionId
-        var sourceWorkingDirectory = sessions.first(where: { $0.id == preferredSessionId })?.workingDirectory
+        let fallbackSessionId = sessions.first(where: { $0.serverId == server.id })?.id
+        let sourceSessionId = preferredSessionId ?? fallbackSessionId
+        var sourceWorkingDirectory = sessions.first(where: { $0.id == sourceSessionId })?.workingDirectory
             ?? sessions.first(where: { $0.serverId == server.id })?.workingDirectory
-        if sourceWorkingDirectory == nil,
-           isTmuxEnabled(for: server.id),
-           let sourceSessionId = preferredSessionId,
+        if isTmuxEnabled(for: server.id),
+           let sourceSessionId,
            let sourceSession = sessions.first(where: { $0.id == sourceSessionId }),
            let client = sshClient(for: sourceSession),
            let path = await RemoteTmuxManager.shared.currentPath(
@@ -150,6 +151,9 @@ final class ConnectionSessionManager: ObservableObject {
                using: client
            ) {
             sourceWorkingDirectory = path
+            if let index = sessions.firstIndex(where: { $0.id == sourceSessionId }) {
+                sessions[index].workingDirectory = path
+            }
         }
 
         // Create new session - actual SSH connection happens in SSHTerminalWrapper
@@ -739,11 +743,6 @@ extension ConnectionSessionManager {
     }
 
     private func resolveTmuxWorkingDirectory(for sessionId: UUID, using client: SSHClient) async -> String {
-        if let candidate = sessions.first(where: { $0.id == sessionId })?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
-           !candidate.isEmpty {
-            return candidate
-        }
-
         if let path = await RemoteTmuxManager.shared.currentPath(
             sessionName: tmuxSessionName(for: sessionId),
             using: client
@@ -752,6 +751,11 @@ extension ConnectionSessionManager {
                 sessions[index].workingDirectory = path
             }
             return path
+        }
+
+        if let candidate = sessions.first(where: { $0.id == sessionId })?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !candidate.isEmpty {
+            return candidate
         }
 
         return "~"
