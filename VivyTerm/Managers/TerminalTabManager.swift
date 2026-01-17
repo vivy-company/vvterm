@@ -410,6 +410,15 @@ final class TerminalTabManager: ObservableObject {
         paneStates[paneId]?.workingDirectory = normalized
     }
 
+    func workingDirectory(for paneId: UUID) -> String? {
+        paneStates[paneId]?.workingDirectory
+    }
+
+    func shouldApplyWorkingDirectory(for paneId: UUID) -> Bool {
+        guard let status = paneStates[paneId]?.tmuxStatus else { return false }
+        return status == .off || status == .missing
+    }
+
     func updatePaneTmuxStatus(_ paneId: UUID, status: TmuxStatus) {
         paneStates[paneId]?.tmuxStatus = status
     }

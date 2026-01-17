@@ -773,6 +773,10 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             self.shellId = shell.id
                         }
 
+                        if let paneId = paneId {
+                            await self.applyWorkingDirectoryIfNeeded(paneId: paneId, shellId: shell.id, sshClient: sshClient)
+                        }
+
                         guard !Task.isCancelled else { return }
 
                         // Read data in background, feed to terminal
@@ -837,6 +841,18 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                 terminal.cleanup()
             }
             terminal = nil
+        }
+
+        private func applyWorkingDirectoryIfNeeded(paneId: UUID, shellId: UUID, sshClient: SSHClient) async {
+            guard TerminalTabManager.shared.shouldApplyWorkingDirectory(for: paneId) else { return }
+            guard let cwd = TerminalTabManager.shared.workingDirectory(for: paneId) else { return }
+            guard let payload = cdCommand(for: cwd).data(using: .utf8) else { return }
+            try? await sshClient.write(payload, to: shellId)
+        }
+
+        private func cdCommand(for path: String) -> String {
+            let escaped = path.replacingOccurrences(of: "'", with: "'\"'\"'")
+            return "cd -- '\(escaped)'\n"
         }
 
         deinit {
