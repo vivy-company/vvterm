@@ -110,6 +110,10 @@ final class TerminalTabManager: ObservableObject {
     func openTab(for server: Server) -> TerminalTab {
         let tab = TerminalTab(serverId: server.id, title: server.name)
 
+        let sourcePaneId = selectedTab(for: server.id)?.focusedPaneId
+        let sourceWorkingDirectory = sourcePaneId
+            .flatMap { paneStates[$0]?.workingDirectory }
+
         // Create pane state FIRST (before any @Published updates)
         // This ensures the view has state when it renders
         var rootState = TerminalPaneState(
@@ -117,6 +121,8 @@ final class TerminalTabManager: ObservableObject {
             tabId: tab.id,
             serverId: server.id
         )
+        rootState.workingDirectory = sourceWorkingDirectory
+        rootState.seedPaneId = sourcePaneId
         rootState.tmuxStatus = isTmuxEnabled(for: server.id) ? .unknown : .off
         paneStates[tab.rootPaneId] = rootState
 
@@ -192,6 +198,7 @@ final class TerminalTabManager: ObservableObject {
             serverId: tab.serverId
         )
         newState.workingDirectory = paneStates[paneId]?.workingDirectory
+        newState.seedPaneId = paneId
         newState.tmuxStatus = isTmuxEnabled(for: tab.serverId) ? .unknown : .off
         paneStates[newPaneId] = newState
 
@@ -446,11 +453,29 @@ final class TerminalTabManager: ObservableObject {
         "vvterm_\(DeviceIdentity.id)_\(paneId.uuidString)"
     }
 
-    private func tmuxWorkingDirectory(for paneId: UUID) -> String {
-        let candidate = paneStates[paneId]?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let candidate, !candidate.isEmpty {
+    private func resolveTmuxWorkingDirectory(for paneId: UUID, using client: SSHClient) async -> String {
+        if let candidate = paneStates[paneId]?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !candidate.isEmpty {
             return candidate
         }
+
+        if let seedPaneId = paneStates[paneId]?.seedPaneId,
+           let path = await RemoteTmuxManager.shared.currentPath(
+               sessionName: tmuxSessionName(for: seedPaneId),
+               using: client
+           ) {
+            paneStates[paneId]?.workingDirectory = path
+            return path
+        }
+
+        if let path = await RemoteTmuxManager.shared.currentPath(
+            sessionName: tmuxSessionName(for: paneId),
+            using: client
+        ) {
+            paneStates[paneId]?.workingDirectory = path
+            return path
+        }
+
         return "~"
     }
 
@@ -532,9 +557,10 @@ final class TerminalTabManager: ObservableObject {
         }
 
         await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: paneId, using: client)
         let command = RemoteTmuxManager.shared.attachCommand(
             sessionName: tmuxSessionName(for: paneId),
-            workingDirectory: tmuxWorkingDirectory(for: paneId)
+            workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
     }
@@ -546,9 +572,10 @@ final class TerminalTabManager: ObservableObject {
 
         updatePaneTmuxStatus(paneId, status: .installing)
 
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: paneId, using: registration.client)
         let script = RemoteTmuxManager.shared.installAndAttachScript(
             sessionName: tmuxSessionName(for: paneId),
-            workingDirectory: tmuxWorkingDirectory(for: paneId)
+            workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
 

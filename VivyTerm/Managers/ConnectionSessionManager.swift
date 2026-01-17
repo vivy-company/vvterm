@@ -137,12 +137,28 @@ final class ConnectionSessionManager: ObservableObject {
             throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for multiple connections"))
         }
 
+        let preferredSessionId = selectedSessionByServer[server.id] ?? selectedSessionId
+        var sourceWorkingDirectory = sessions.first(where: { $0.id == preferredSessionId })?.workingDirectory
+            ?? sessions.first(where: { $0.serverId == server.id })?.workingDirectory
+        if sourceWorkingDirectory == nil,
+           isTmuxEnabled(for: server.id),
+           let sourceSessionId = preferredSessionId,
+           let sourceSession = sessions.first(where: { $0.id == sourceSessionId }),
+           let client = sshClient(for: sourceSession),
+           let path = await RemoteTmuxManager.shared.currentPath(
+               sessionName: tmuxSessionName(for: sourceSessionId),
+               using: client
+           ) {
+            sourceWorkingDirectory = path
+        }
+
         // Create new session - actual SSH connection happens in SSHTerminalWrapper
         let session = ConnectionSession(
             serverId: server.id,
             title: server.name,
             connectionState: .connecting,  // Will connect when terminal view appears
-            tmuxStatus: isTmuxEnabled(for: server.id) ? .unknown : .off
+            tmuxStatus: isTmuxEnabled(for: server.id) ? .unknown : .off,
+            workingDirectory: sourceWorkingDirectory
         )
 
         sessions.append(session)
@@ -722,11 +738,22 @@ extension ConnectionSessionManager {
         "vvterm_\(DeviceIdentity.id)_\(sessionId.uuidString)"
     }
 
-    private func tmuxWorkingDirectory(for sessionId: UUID) -> String {
-        let candidate = sessions.first(where: { $0.id == sessionId })?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let candidate, !candidate.isEmpty {
+    private func resolveTmuxWorkingDirectory(for sessionId: UUID, using client: SSHClient) async -> String {
+        if let candidate = sessions.first(where: { $0.id == sessionId })?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !candidate.isEmpty {
             return candidate
         }
+
+        if let path = await RemoteTmuxManager.shared.currentPath(
+            sessionName: tmuxSessionName(for: sessionId),
+            using: client
+        ) {
+            if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
+                sessions[index].workingDirectory = path
+            }
+            return path
+        }
+
         return "~"
     }
 
@@ -808,9 +835,10 @@ extension ConnectionSessionManager {
         }
 
         await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: sessionId, using: client)
         let command = RemoteTmuxManager.shared.attachCommand(
             sessionName: tmuxSessionName(for: sessionId),
-            workingDirectory: tmuxWorkingDirectory(for: sessionId)
+            workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
     }
@@ -822,9 +850,10 @@ extension ConnectionSessionManager {
 
         updateTmuxStatus(sessionId, status: .installing)
 
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: sessionId, using: registration.client)
         let script = RemoteTmuxManager.shared.installAndAttachScript(
             sessionName: tmuxSessionName(for: sessionId),
-            workingDirectory: tmuxWorkingDirectory(for: sessionId)
+            workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
 
