@@ -204,6 +204,7 @@ struct iOSWorkspacePickerView: View {
 
     @State private var lockedWorkspaceAlert: Workspace?
     @State private var showingCreateWorkspace = false
+    @State private var workspaceToEdit: Workspace?
 
     var body: some View {
         List {
@@ -243,12 +244,38 @@ struct iOSWorkspacePickerView: View {
                                     .foregroundStyle(.blue)
                             }
 
-                        Text(serverManager.servers(in: workspace, environment: nil).count, format: .number)
+                            Text(serverManager.servers(in: workspace, environment: nil).count, format: .number)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
                     .opacity(isLocked ? 0.7 : 1.0)
+                }
+                .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                    if isLocked {
+                        Button {
+                            lockedWorkspaceAlert = workspace
+                        } label: {
+                            Label("Unlock with Pro", systemImage: "lock.open.fill")
+                        }
+                        .tint(.orange)
+                    } else {
+                        Button {
+                            workspaceToEdit = workspace
+                        } label: {
+                            Label("Edit Workspace", systemImage: "pencil")
+                        }
+                        .tint(.blue)
+                    }
+                }
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    if !isLocked {
+                        Button(role: .destructive) {
+                            deleteWorkspace(workspace)
+                        } label: {
+                            Label("Delete Workspace", systemImage: "trash")
+                        }
+                    }
                 }
             }
         }
@@ -279,6 +306,17 @@ struct iOSWorkspacePickerView: View {
                 }
             )
         }
+        .sheet(item: $workspaceToEdit) { workspace in
+            WorkspaceFormSheet(
+                serverManager: serverManager,
+                workspace: workspace,
+                onSave: { updatedWorkspace in
+                    if selectedWorkspace?.id == updatedWorkspace.id {
+                        selectedWorkspace = updatedWorkspace
+                    }
+                }
+            )
+        }
         .lockedItemAlert(
             .workspace,
             itemName: lockedWorkspaceAlert?.name ?? "",
@@ -287,6 +325,15 @@ struct iOSWorkspacePickerView: View {
                 set: { if !$0 { lockedWorkspaceAlert = nil } }
             )
         )
+    }
+
+    private func deleteWorkspace(_ workspace: Workspace) {
+        Task {
+            try? await serverManager.deleteWorkspace(workspace)
+            if selectedWorkspace?.id == workspace.id {
+                selectedWorkspace = serverManager.workspaces.first
+            }
+        }
     }
 }
 #endif
