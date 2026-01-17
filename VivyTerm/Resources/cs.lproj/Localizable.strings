@@ -20,6 +20,10 @@
 "Manage subscription" = "Spravovat předplatné";
 "Manage your subscription" = "Spravujte své předplatné";
 "Restore Purchases" = "Obnovit nákupy";
+"Restoring..." = "Obnovuje se...";
+"Restore Failed" = "Obnovení se nezdařilo";
+"Your purchases have been restored." = "Vaše nákupy byly obnoveny.";
+"No active purchases were found for this Apple ID." = "Pro toto Apple ID nebyly nalezeny žádné aktivní nákupy.";
 "Renew" = "Obnovit";
 "Renew Pro" = "Obnovit Pro";
 "Close" = "Zavřít";

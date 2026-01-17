@@ -20,6 +20,10 @@
 "Manage subscription" = "Quản lý đăng ký";
 "Manage your subscription" = "Quản lý đăng ký của bạn";
 "Restore Purchases" = "Khôi phục mua hàng";
+"Restoring..." = "Đang khôi phục...";
+"Restore Failed" = "Khôi phục thất bại";
+"Your purchases have been restored." = "Mua hàng của bạn đã được khôi phục.";
+"No active purchases were found for this Apple ID." = "Không tìm thấy mua hàng đang hoạt động cho Apple ID này.";
 "Renew" = "Gia hạn";
 "Renew Pro" = "Gia hạn Pro";
 "Close" = "Đóng";

@@ -20,6 +20,10 @@
 "Manage subscription" = "จัดการการสมัครสมาชิก";
 "Manage your subscription" = "จัดการการสมัครสมาชิกของคุณ";
 "Restore Purchases" = "กู้คืนการซื้อ";
+"Restoring..." = "กำลังกู้คืน...";
+"Restore Failed" = "กู้คืนไม่สำเร็จ";
+"Your purchases have been restored." = "กู้คืนการซื้อของคุณเรียบร้อยแล้ว";
+"No active purchases were found for this Apple ID." = "ไม่พบการซื้อที่ยังใช้งานอยู่สำหรับ Apple ID นี้";
 "Renew" = "ต่ออายุ";
 "Renew Pro" = "ต่ออายุ Pro";
 "Close" = "ปิด";

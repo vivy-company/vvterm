@@ -20,6 +20,10 @@
 "Manage subscription" = "サブスクリプション管理";
 "Manage your subscription" = "サブスクリプションを管理";
 "Restore Purchases" = "購入を復元";
+"Restoring..." = "復元中...";
+"Restore Failed" = "復元に失敗しました";
+"Your purchases have been restored." = "購入内容を復元しました。";
+"No active purchases were found for this Apple ID." = "このApple IDには有効な購入が見つかりませんでした。";
 "Renew" = "更新";
 "Renew Pro" = "Proを更新";
 "Close" = "閉じる";

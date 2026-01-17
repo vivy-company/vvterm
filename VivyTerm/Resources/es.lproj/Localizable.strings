@@ -20,6 +20,10 @@
 "Manage subscription" = "Gestionar suscripción";
 "Manage your subscription" = "Gestiona tu suscripción";
 "Restore Purchases" = "Restaurar compras";
+"Restoring..." = "Restaurando...";
+"Restore Failed" = "Restauración fallida";
+"Your purchases have been restored." = "Tus compras se han restaurado.";
+"No active purchases were found for this Apple ID." = "No se encontraron compras activas para este Apple ID.";
 "Renew" = "Renovar";
 "Renew Pro" = "Renovar Pro";
 "Close" = "Cerrar";

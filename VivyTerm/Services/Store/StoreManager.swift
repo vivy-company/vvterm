@@ -14,6 +14,7 @@ final class StoreManager: ObservableObject {
     @Published var subscriptionStatus: Product.SubscriptionInfo.Status?
     @Published var products: [Product] = []
     @Published var purchaseState: PurchaseState = .idle
+    @Published var restoreState: RestoreState = .idle
 
     private var updateListenerTask: Task<Void, Error>?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Store")
@@ -28,6 +29,26 @@ final class StoreManager: ObservableObject {
             switch (lhs, rhs) {
             case (.idle, .idle), (.purchasing, .purchasing), (.purchased, .purchased):
                 return true
+            case (.failed(let l), .failed(let r)):
+                return l == r
+            default:
+                return false
+            }
+        }
+    }
+
+    enum RestoreState: Equatable {
+        case idle
+        case restoring
+        case restored(hasAccess: Bool)
+        case failed(String)
+
+        static func == (lhs: RestoreState, rhs: RestoreState) -> Bool {
+            switch (lhs, rhs) {
+            case (.idle, .idle), (.restoring, .restoring):
+                return true
+            case (.restored(let l), .restored(let r)):
+                return l == r
             case (.failed(let l), .failed(let r)):
                 return l == r
             default:
@@ -112,12 +133,15 @@ final class StoreManager: ObservableObject {
     // MARK: - Restore Purchases
 
     func restorePurchases() async {
+        restoreState = .restoring
         logger.info("Restoring purchases")
         do {
             try await AppStore.sync()
             await checkEntitlements()
+            restoreState = .restored(hasAccess: isPro)
             logger.info("Purchases restored")
         } catch {
+            restoreState = .failed(error.localizedDescription)
             logger.error("Failed to restore purchases: \(error.localizedDescription)")
         }
     }
