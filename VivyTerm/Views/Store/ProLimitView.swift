@@ -109,7 +109,6 @@ struct LimitReachedAlert: ViewModifier {
             } message: {
                 Text(limitType.message)
             }
-            .tint(.accentColor)
             .sheet(isPresented: $showUpgrade) {
                 ProUpgradeSheet()
             }
@@ -141,7 +140,6 @@ struct ProFeatureAlert: ViewModifier {
             } message: {
                 Text(message)
             }
-            .tint(.accentColor)
             .sheet(isPresented: $showUpgrade) {
                 ProUpgradeSheet()
             }
