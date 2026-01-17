@@ -104,10 +104,12 @@ struct LimitReachedAlert: ViewModifier {
                 Button("Upgrade to Pro") {
                     showUpgrade = true
                 }
+                .keyboardShortcut(.defaultAction)
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text(limitType.message)
             }
+            .tint(.accentColor)
             .sheet(isPresented: $showUpgrade) {
                 ProUpgradeSheet()
             }
@@ -134,10 +136,12 @@ struct ProFeatureAlert: ViewModifier {
                 Button("Upgrade to Pro") {
                     showUpgrade = true
                 }
+                .keyboardShortcut(.defaultAction)
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text(message)
             }
+            .tint(.accentColor)
             .sheet(isPresented: $showUpgrade) {
                 ProUpgradeSheet()
             }
