@@ -559,6 +559,9 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                     }
                 }
             }
+            existingTerminal.onPwdChange = { [paneId] rawDirectory in
+                TerminalTabManager.shared.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
+            }
             existingTerminal.writeCallback = { [paneId] data in
                 if let client = TerminalTabManager.shared.getSSHClient(for: paneId),
                    let shellId = TerminalTabManager.shared.shellId(for: paneId) {
@@ -601,6 +604,9 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             }
         }
         terminalView.onProcessExit = onProcessExit
+        terminalView.onPwdChange = { [paneId] rawDirectory in
+            TerminalTabManager.shared.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
+        }
 
         // Store terminal reference
         coordinator.terminal = terminalView

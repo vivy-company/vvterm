@@ -37,6 +37,9 @@ class GhosttyTerminalView: UIView {
     /// Callback invoked when the terminal title changes
     var onTitleChange: ((String) -> Void)?
 
+    /// Callback invoked when the terminal reports working directory changes (OSC 7)
+    var onPwdChange: ((String) -> Void)?
+
     /// Callback when the surface has produced its first layout/draw (used to hide loading UI)
     var onReady: (() -> Void)?
 
@@ -286,6 +289,7 @@ class GhosttyTerminalView: UIView {
         onReady = nil
         onProcessExit = nil
         onTitleChange = nil
+        onPwdChange = nil
         onProgressReport = nil
         onResize = nil
         writeCallback = nil

@@ -191,6 +191,7 @@ final class TerminalTabManager: ObservableObject {
             tabId: tab.id,
             serverId: tab.serverId
         )
+        newState.workingDirectory = paneStates[paneId]?.workingDirectory
         newState.tmuxStatus = isTmuxEnabled(for: tab.serverId) ? .unknown : .off
         paneStates[newPaneId] = newState
 
@@ -404,6 +405,11 @@ final class TerminalTabManager: ObservableObject {
         }
     }
 
+    func updatePaneWorkingDirectory(_ paneId: UUID, rawDirectory: String) {
+        guard let normalized = normalizeWorkingDirectory(rawDirectory) else { return }
+        paneStates[paneId]?.workingDirectory = normalized
+    }
+
     func updatePaneTmuxStatus(_ paneId: UUID, status: TmuxStatus) {
         paneStates[paneId]?.tmuxStatus = status
     }
@@ -429,6 +435,28 @@ final class TerminalTabManager: ObservableObject {
 
     private func tmuxSessionName(for paneId: UUID) -> String {
         "vvterm_\(DeviceIdentity.id)_\(paneId.uuidString)"
+    }
+
+    private func tmuxWorkingDirectory(for paneId: UUID) -> String {
+        let candidate = paneStates[paneId]?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let candidate, !candidate.isEmpty {
+            return candidate
+        }
+        return "~"
+    }
+
+    private func normalizeWorkingDirectory(_ raw: String) -> String? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        if let schemeRange = trimmed.range(of: "://") {
+            let afterScheme = trimmed[schemeRange.upperBound...]
+            guard let pathStart = afterScheme.firstIndex(of: "/") else { return nil }
+            let path = String(afterScheme[pathStart...])
+            return path.removingPercentEncoding ?? path
+        }
+
+        return trimmed
     }
 
     private func updateTmuxSelectionStatuses() {
@@ -497,7 +525,7 @@ final class TerminalTabManager: ObservableObject {
         await RemoteTmuxManager.shared.prepareConfig(using: client)
         let command = RemoteTmuxManager.shared.attachCommand(
             sessionName: tmuxSessionName(for: paneId),
-            workingDirectory: "~"
+            workingDirectory: tmuxWorkingDirectory(for: paneId)
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
     }
@@ -511,7 +539,7 @@ final class TerminalTabManager: ObservableObject {
 
         let script = RemoteTmuxManager.shared.installAndAttachScript(
             sessionName: tmuxSessionName(for: paneId),
-            workingDirectory: "~"
+            workingDirectory: tmuxWorkingDirectory(for: paneId)
         )
         await RemoteTmuxManager.shared.sendScript(script, using: registration.client, shellId: registration.shellId)
 

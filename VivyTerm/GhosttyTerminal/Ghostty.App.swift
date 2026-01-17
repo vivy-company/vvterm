@@ -495,6 +495,9 @@ extension Ghostty {
                 if let pwdPtr = action.action.pwd.pwd {
                     let pwd = String(cString: pwdPtr)
                     Ghostty.logger.info("PWD changed: \(pwd)")
+                    DispatchQueue.main.async {
+                        terminalView?.onPwdChange?(pwd)
+                    }
                 }
                 return true
 
