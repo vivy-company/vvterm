@@ -249,6 +249,7 @@ struct ServerSidebarView: View {
                 }
             }
             .listStyle(.plain)
+            .selectionDisabledIfAvailable(true)
             .scrollContentBackground(.hidden)
         }
         .lockedItemAlert(
@@ -507,5 +508,20 @@ struct EnvironmentMenu: View {
                 }
             }
         }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func selectionDisabledIfAvailable(_ disabled: Bool) -> some View {
+        #if os(macOS)
+        if #available(macOS 14.0, *) {
+            self.selectionDisabled(disabled)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
     }
 }

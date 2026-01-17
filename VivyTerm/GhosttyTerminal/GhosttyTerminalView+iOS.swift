@@ -1429,11 +1429,7 @@ private class TerminalInputAccessoryView: UIInputView {
             stack.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor, constant: -16)
         ])
 
-        // Common keys (prioritize frequent terminal actions)
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
-
-        // Modifier buttons (toggle style)
+        // Modifier buttons (always first, separated)
         let ctrl = makeModifierButton(title: String(localized: "Ctrl"), action: #selector(toggleCtrl))
         let alt = makeModifierButton(title: String(localized: "Alt"), action: #selector(toggleAlt))
         ctrlButton = ctrl
@@ -1441,6 +1437,10 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(ctrl)
         stack.addArrangedSubview(alt)
         stack.addArrangedSubview(makeSeparator())
+
+        // Common keys (prioritize frequent terminal actions)
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
+        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
 
         // Arrow keys + backspace
         stack.addArrangedSubview(makeIconButton(icon: "arrow.up", action: #selector(tapUp)))

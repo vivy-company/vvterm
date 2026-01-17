@@ -454,11 +454,6 @@ final class TerminalTabManager: ObservableObject {
     }
 
     private func resolveTmuxWorkingDirectory(for paneId: UUID, using client: SSHClient) async -> String {
-        if let candidate = paneStates[paneId]?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
-           !candidate.isEmpty {
-            return candidate
-        }
-
         if let seedPaneId = paneStates[paneId]?.seedPaneId,
            let path = await RemoteTmuxManager.shared.currentPath(
                sessionName: tmuxSessionName(for: seedPaneId),
@@ -474,6 +469,11 @@ final class TerminalTabManager: ObservableObject {
         ) {
             paneStates[paneId]?.workingDirectory = path
             return path
+        }
+
+        if let candidate = paneStates[paneId]?.workingDirectory?.trimmingCharacters(in: .whitespacesAndNewlines),
+           !candidate.isEmpty {
+            return candidate
         }
 
         return "~"

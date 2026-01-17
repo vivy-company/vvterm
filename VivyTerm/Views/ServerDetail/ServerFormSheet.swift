@@ -184,16 +184,32 @@ struct ServerFormSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                         .disabled(isSaving)
+                        .tint(.secondary)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    if isSaving {
-                        ProgressView()
-                    } else {
-                        Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
-                            saveServer()
+                    Button {
+                        saveServer()
+                    } label: {
+                        #if os(macOS)
+                        if isSaving {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text(String(localized: "Saving..."))
+                            }
+                        } else {
+                            Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
                         }
-                        .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
+                        #else
+                        if isSaving {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
+                        }
+                        #endif
                     }
+                    .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
                 }
             }
             .sheet(isPresented: $showingAddKeySheet) {
@@ -330,6 +346,7 @@ struct ServerFormSheet: View {
                     }
             }
             .buttonStyle(.bordered)
+            .tint(.secondary)
             .controlSize(.regular)
             .disabled(!isValid || isTestingConnection)
         } header: {
