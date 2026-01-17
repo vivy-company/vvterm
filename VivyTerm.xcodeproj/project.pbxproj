@@ -583,6 +583,7 @@
 				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PRODUCT_NAME[sdk=macosx*]" = VVTerm;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -722,6 +723,7 @@
 				OTHER_MTLFLAGS = "-Wno-c++17-extensions";
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"PRODUCT_NAME[sdk=macosx*]" = VVTerm;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
