@@ -760,10 +760,29 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             self.lastSize = (cols, rows)
                         }
 
-                        let shell = try await sshClient.startShell(cols: cols, rows: rows)
+                        var tmuxStartup: (command: String?, skipTmuxLifecycle: Bool) = (nil, false)
+                        if let paneId = paneId {
+                            tmuxStartup = await TerminalTabManager.shared.tmuxStartupPlan(
+                                for: paneId,
+                                serverId: server.id,
+                                client: sshClient
+                            )
+                        }
+
+                        let shell = try await sshClient.startShell(
+                            cols: cols,
+                            rows: rows,
+                            startupCommand: tmuxStartup.command
+                        )
 
                         if let paneId = paneId {
-                            await TerminalTabManager.shared.registerSSHClient(sshClient, shellId: shell.id, for: paneId, serverId: server.id)
+                            await TerminalTabManager.shared.registerSSHClient(
+                                sshClient,
+                                shellId: shell.id,
+                                for: paneId,
+                                serverId: server.id,
+                                skipTmuxLifecycle: tmuxStartup.skipTmuxLifecycle
+                            )
                             await MainActor.run {
                                 TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                             }

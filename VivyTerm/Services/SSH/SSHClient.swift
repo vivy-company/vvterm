@@ -114,11 +114,11 @@ actor SSHClient {
 
     // MARK: - Shell
 
-    func startShell(cols: Int = 80, rows: Int = 24) async throws -> ShellHandle {
+    func startShell(cols: Int = 80, rows: Int = 24, startupCommand: String? = nil) async throws -> ShellHandle {
         guard let session = session else {
             throw SSHError.notConnected
         }
-        return try await session.startShell(cols: cols, rows: rows)
+        return try await session.startShell(cols: cols, rows: rows, startupCommand: startupCommand)
     }
 
     func write(_ data: Data, to shellId: UUID) async throws {
@@ -525,7 +525,7 @@ actor SSHSession {
 
     // MARK: - Shell
 
-    func startShell(cols: Int, rows: Int) async throws -> ShellHandle {
+    func startShell(cols: Int, rows: Int, startupCommand: String? = nil) async throws -> ShellHandle {
         guard let session = libssh2Session else {
             throw SSHError.notConnected
         }
@@ -567,11 +567,24 @@ actor SSHSession {
         }
 
         // Start shell (use process_startup since shell macro not available in Swift)
-        let shellResult = libssh2_channel_process_startup(channel, "shell", 5, nil, 0)
-        guard shellResult == 0 else {
-            libssh2_channel_close(channel)
-            libssh2_channel_free(channel)
-            throw SSHError.shellRequestFailed
+        let trimmedCommand = startupCommand?.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let command = trimmedCommand, !command.isEmpty {
+            let commandLength = UInt32(command.utf8.count)
+            let execResult: Int32 = command.withCString { ptr in
+                libssh2_channel_process_startup(channel, "exec", 4, ptr, commandLength)
+            }
+            guard execResult == 0 else {
+                libssh2_channel_close(channel)
+                libssh2_channel_free(channel)
+                throw SSHError.shellRequestFailed
+            }
+        } else {
+            let shellResult = libssh2_channel_process_startup(channel, "shell", 5, nil, 0)
+            guard shellResult == 0 else {
+                libssh2_channel_close(channel)
+                libssh2_channel_free(channel)
+                throw SSHError.shellRequestFailed
+            }
         }
 
         logger.info("Shell started (\(cols)x\(rows))")

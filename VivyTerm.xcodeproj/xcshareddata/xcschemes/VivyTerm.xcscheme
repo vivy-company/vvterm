@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CC83127D2F0CD84D006804BF"
-               BuildableName = "VivyTerm.app"
+               BuildableName = "VVTerm.app"
                BlueprintName = "VivyTerm"
                ReferencedContainer = "container:VivyTerm.xcodeproj">
             </BuildableReference>
@@ -69,7 +69,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CC83127D2F0CD84D006804BF"
-            BuildableName = "VivyTerm.app"
+            BuildableName = "VVTerm.app"
             BlueprintName = "VivyTerm"
             ReferencedContainer = "container:VivyTerm.xcodeproj">
          </BuildableReference>
@@ -89,7 +89,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CC83127D2F0CD84D006804BF"
-            BuildableName = "VivyTerm.app"
+            BuildableName = "VVTerm.app"
             BlueprintName = "VivyTerm"
             ReferencedContainer = "container:VivyTerm.xcodeproj">
          </BuildableReference>
