@@ -8,9 +8,6 @@ import Foundation
 
 /// Parses terminal theme files to extract colors
 struct ThemeColorParser {
-    private static let fallbackForegroundHex = "cdd6f4"
-    private static let fallbackSelectionBackgroundHex = "45475a"
-
     /// Extracts background color from a Ghostty theme file
     /// - Parameter themeName: The name of the theme (e.g., "Aizen Dark")
     /// - Returns: The background Color if found, nil otherwise
@@ -53,6 +50,8 @@ struct ThemeColorParser {
     /// Returns tmux mode-style string for selection highlighting.
     /// Format: "fg=#RRGGBB,bg=#RRGGBB"
     nonisolated static func tmuxModeStyle(for themeName: String) -> String {
+        let fallbackForegroundHex = "cdd6f4"
+        let fallbackSelectionBackgroundHex = "45475a"
         guard let content = themeContent(for: themeName) else {
             return "fg=#\(fallbackForegroundHex),bg=#\(fallbackSelectionBackgroundHex)"
         }
