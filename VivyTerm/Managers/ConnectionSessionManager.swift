@@ -127,14 +127,14 @@ final class ConnectionSessionManager: ObservableObject {
             throw VivyTermError.serverLocked(server.name)
         }
 
-        guard canOpenNewTab else {
-            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for multiple connections"))
-        }
-
         // Check if already have a session for this server (unless forcing new)
-        if !forceNew, let existingSession = sessions.first(where: { $0.serverId == server.id && $0.connectionState.isConnected }) {
+        if !forceNew, let existingSession = sessions.first(where: { $0.serverId == server.id }) {
             selectedSessionId = existingSession.id
             return existingSession
+        }
+
+        guard canOpenNewTab else {
+            throw VivyTermError.proRequired(String(localized: "Upgrade to Pro for multiple connections"))
         }
 
         // Create new session - actual SSH connection happens in SSHTerminalWrapper

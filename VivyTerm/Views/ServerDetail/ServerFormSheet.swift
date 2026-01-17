@@ -135,14 +135,15 @@ struct ServerFormSheet: View {
         .environment(\.defaultMinListRowHeight, 34)
         .modifier(CompactListSectionSpacingModifier())
         .modifier(TransparentNavigationBarModifier())
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarAppearance(
-            backgroundColor: .clear,
-            isTranslucent: true,
-            shadowColor: .clear
-        )
+            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarAppearance(
+                backgroundColor: .clear,
+                isTranslucent: true,
+                shadowColor: .clear
+            )
         #endif
         .navigationTitle(isEditing ? String(localized: "Edit Server") : String(localized: "Add Server"))
+        .interactiveDismissDisabled(isSaving)
         .task {
             // Load credentials from keychain when editing
             guard let server = server else { return }
@@ -182,12 +183,22 @@ struct ServerFormSheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .disabled(isSaving)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
-                        saveServer()
+                    if isSaving {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text(String(localized: "Saving..."))
+                        }
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                    } else {
+                        Button(isEditing ? String(localized: "Save") : String(localized: "Add")) {
+                            saveServer()
+                        }
+                        .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
                     }
-                    .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
                 }
             }
             .sheet(isPresented: $showingAddKeySheet) {
