@@ -1443,10 +1443,10 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
 
         // Arrow keys + backspace
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.up", action: #selector(tapUp)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.down", action: #selector(tapDown)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.left", action: #selector(tapLeft)))
-        stack.addArrangedSubview(makeIconButton(icon: "arrow.right", action: #selector(tapRight)))
+        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.up", key: .arrowUp))
+        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.down", key: .arrowDown))
+        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.left", key: .arrowLeft))
+        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.right", key: .arrowRight))
         stack.addArrangedSubview(makeRepeatablePillButton(title: "Bksp", key: .backspace))
         stack.addArrangedSubview(makeSeparator())
 
@@ -1458,10 +1458,10 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.addArrangedSubview(makeSeparator())
 
         // Navigation
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Home"), action: #selector(tapHome)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "End"), action: #selector(tapEnd)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "PgUp"), action: #selector(tapPgUp)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "PgDn"), action: #selector(tapPgDn)))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "Home"), key: .home))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "End"), key: .end))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "PgUp"), key: .pageUp))
+        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "PgDn"), key: .pageDown))
 
         updateVoiceButtonState()
     }
@@ -1602,6 +1602,34 @@ private class TerminalInputAccessoryView: UIInputView {
         }
         button.layer.cornerRadius = 16
         button.addTarget(self, action: action, for: .touchUpInside)
+
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 36),
+            button.heightAnchor.constraint(equalToConstant: 32)
+        ])
+
+        return button
+    }
+
+    private func makeRepeatableIconButton(icon: String, key: TerminalKey) -> UIButton {
+        let button = RepeatableKeyButton(type: .system)
+        button.key = key
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
+        button.setImage(UIImage(systemName: icon, withConfiguration: config), for: .normal)
+        button.tintColor = .label
+        button.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor.white.withAlphaComponent(0.12)
+                : UIColor.black.withAlphaComponent(0.06)
+        }
+        button.layer.cornerRadius = 16
+
+        button.addTarget(self, action: #selector(repeatButtonDown(_:)), for: .touchDown)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchUpInside)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchUpOutside)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchCancel)
+        button.addTarget(self, action: #selector(repeatButtonUp(_:)), for: .touchDragExit)
 
         NSLayoutConstraint.activate([
             button.widthAnchor.constraint(equalToConstant: 36),
