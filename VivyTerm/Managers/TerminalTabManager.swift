@@ -315,7 +315,13 @@ final class TerminalTabManager: ObservableObject {
     }
 
     /// Register SSH shell for a pane
-    func registerSSHClient(_ client: SSHClient, shellId: UUID, for paneId: UUID, serverId: UUID) {
+    func registerSSHClient(
+        _ client: SSHClient,
+        shellId: UUID,
+        for paneId: UUID,
+        serverId: UUID,
+        skipTmuxLifecycle: Bool = false
+    ) {
         if let existing = sshShells[paneId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
                 await client.closeShell(shellId)
@@ -327,8 +333,10 @@ final class TerminalTabManager: ObservableObject {
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
 
-        Task { [weak self] in
-            await self?.handleTmuxLifecycle(paneId: paneId, serverId: serverId, client: client, shellId: shellId)
+        if !skipTmuxLifecycle {
+            Task { [weak self] in
+                await self?.handleTmuxLifecycle(paneId: paneId, serverId: serverId, client: client, shellId: shellId)
+            }
         }
     }
 
@@ -563,6 +571,50 @@ final class TerminalTabManager: ObservableObject {
             workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
+    }
+
+    func tmuxStartupPlan(
+        for paneId: UUID,
+        serverId: UUID,
+        client: SSHClient
+    ) async -> (command: String?, skipTmuxLifecycle: Bool) {
+        guard isTmuxEnabled(for: serverId) else {
+            updatePaneTmuxStatus(paneId, status: .off)
+            return (nil, true)
+        }
+
+        let tmuxAvailable = await RemoteTmuxManager.shared.isTmuxAvailable(using: client)
+        guard tmuxAvailable else {
+            updatePaneTmuxStatus(paneId, status: .missing)
+            return (nil, true)
+        }
+
+        if !tmuxCleanupServers.contains(serverId) {
+            tmuxCleanupServers.insert(serverId)
+            let keepNames = Set(tabs(for: serverId).flatMap { tab in
+                tab.allPaneIds.map { tmuxSessionName(for: $0) }
+            })
+            await RemoteTmuxManager.shared.cleanupLegacySessions(using: client)
+            await RemoteTmuxManager.shared.cleanupDetachedSessions(
+                deviceId: DeviceIdentity.id,
+                keeping: keepNames,
+                using: client
+            )
+        }
+
+        let status = { () -> TmuxStatus in
+            guard let tab = self.selectedTab(for: serverId) else { return .background }
+            return (tab.id == self.selectedTabByServer[serverId] && tab.focusedPaneId == paneId) ? .foreground : .background
+        }()
+        updatePaneTmuxStatus(paneId, status: status)
+
+        await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: paneId, using: client)
+        let command = RemoteTmuxManager.shared.attachExecCommand(
+            sessionName: tmuxSessionName(for: paneId),
+            workingDirectory: workingDirectory
+        )
+        return (command, true)
     }
 
     func startTmuxInstall(for paneId: UUID) async {

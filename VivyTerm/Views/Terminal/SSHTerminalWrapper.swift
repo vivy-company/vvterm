@@ -113,10 +113,26 @@ extension SSHTerminalCoordinator {
                     // Platform-specific hook before shell start
                     await self.onBeforeShellStart(cols: cols, rows: rows)
 
-                    let shell = try await sshClient.startShell(cols: cols, rows: rows)
+                    let tmuxStartup = await ConnectionSessionManager.shared.tmuxStartupPlan(
+                        for: sessionId,
+                        serverId: server.id,
+                        client: sshClient
+                    )
 
-                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id] in
-                        ConnectionSessionManager.shared.registerSSHClient(sshClient, shellId: shellId, for: sessionId, serverId: serverId)
+                    let shell = try await sshClient.startShell(
+                        cols: cols,
+                        rows: rows,
+                        startupCommand: tmuxStartup.command
+                    )
+
+                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id, skipTmuxLifecycle = tmuxStartup.skipTmuxLifecycle] in
+                        ConnectionSessionManager.shared.registerSSHClient(
+                            sshClient,
+                            shellId: shellId,
+                            for: sessionId,
+                            serverId: serverId,
+                            skipTmuxLifecycle: skipTmuxLifecycle
+                        )
                         ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
                     }
 

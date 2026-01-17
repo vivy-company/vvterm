@@ -28,6 +28,11 @@ actor RemoteTmuxManager {
         return "\(shellPathPrefix()) exec tmux -u -f \(configPath) new-session -A -s \(escapedSession) -c \(escapedDir)"
     }
 
+    nonisolated func attachExecCommand(sessionName: String, workingDirectory: String) -> String {
+        let body = attachCommand(sessionName: sessionName, workingDirectory: workingDirectory)
+        return "sh -lc \(shellQuoted(body))"
+    }
+
     nonisolated func installAndAttachScript(sessionName: String, workingDirectory: String) -> String {
         let escapedDir = shellDirectoryArgument(workingDirectory)
         let escapedSession = shellQuoted(sessionName)

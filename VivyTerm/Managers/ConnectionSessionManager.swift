@@ -428,7 +428,13 @@ final class ConnectionSessionManager: ObservableObject {
         return client
     }
 
-    func registerSSHClient(_ client: SSHClient, shellId: UUID, for sessionId: UUID, serverId: UUID) {
+    func registerSSHClient(
+        _ client: SSHClient,
+        shellId: UUID,
+        for sessionId: UUID,
+        serverId: UUID,
+        skipTmuxLifecycle: Bool = false
+    ) {
         if let existing = sshShells[sessionId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
                 await client.closeShell(shellId)
@@ -440,8 +446,10 @@ final class ConnectionSessionManager: ObservableObject {
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
 
-        Task { [weak self] in
-            await self?.handleTmuxLifecycle(sessionId: sessionId, serverId: serverId, client: client, shellId: shellId)
+        if !skipTmuxLifecycle {
+            Task { [weak self] in
+                await self?.handleTmuxLifecycle(sessionId: sessionId, serverId: serverId, client: client, shellId: shellId)
+            }
         }
     }
 
@@ -845,6 +853,45 @@ extension ConnectionSessionManager {
             workingDirectory: workingDirectory
         )
         await RemoteTmuxManager.shared.sendScript(command, using: client, shellId: shellId)
+    }
+
+    func tmuxStartupPlan(
+        for sessionId: UUID,
+        serverId: UUID,
+        client: SSHClient
+    ) async -> (command: String?, skipTmuxLifecycle: Bool) {
+        guard isTmuxEnabled(for: serverId) else {
+            updateTmuxStatus(sessionId, status: .off)
+            return (nil, true)
+        }
+
+        let tmuxAvailable = await RemoteTmuxManager.shared.isTmuxAvailable(using: client)
+        guard tmuxAvailable else {
+            updateTmuxStatus(sessionId, status: .missing)
+            return (nil, true)
+        }
+
+        if !tmuxCleanupServers.contains(serverId) {
+            tmuxCleanupServers.insert(serverId)
+            let keepNames = Set(sessions.filter { $0.serverId == serverId }.map { tmuxSessionName(for: $0.id) })
+            await RemoteTmuxManager.shared.cleanupLegacySessions(using: client)
+            await RemoteTmuxManager.shared.cleanupDetachedSessions(
+                deviceId: DeviceIdentity.id,
+                keeping: keepNames,
+                using: client
+            )
+        }
+
+        let status: TmuxStatus = (selectedSessionId == sessionId) ? .foreground : .background
+        updateTmuxStatus(sessionId, status: status)
+
+        await RemoteTmuxManager.shared.prepareConfig(using: client)
+        let workingDirectory = await resolveTmuxWorkingDirectory(for: sessionId, using: client)
+        let command = RemoteTmuxManager.shared.attachExecCommand(
+            sessionName: tmuxSessionName(for: sessionId),
+            workingDirectory: workingDirectory
+        )
+        return (command, true)
     }
 
     func startTmuxInstall(for sessionId: UUID) async {
