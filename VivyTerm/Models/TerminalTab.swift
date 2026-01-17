@@ -72,6 +72,7 @@ struct TerminalPaneState {
     var lastActivity: Date
     var tmuxStatus: TmuxStatus
     var workingDirectory: String?
+    var seedPaneId: UUID?
 
     init(paneId: UUID, tabId: UUID, serverId: UUID) {
         self.paneId = paneId
@@ -81,5 +82,6 @@ struct TerminalPaneState {
         self.lastActivity = Date()
         self.tmuxStatus = .unknown
         self.workingDirectory = nil
+        self.seedPaneId = nil
     }
 }
