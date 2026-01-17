@@ -127,7 +127,7 @@ actor RemoteTmuxManager {
 
     func currentPath(sessionName: String, using client: SSHClient) async -> String? {
         let quotedSession = shellQuoted(sessionName)
-        let body = "\(shellPathExport()); tmux display-message -p -t \(quotedSession) '#{pane_current_path}' 2>/dev/null"
+        let body = "\(shellPathExport()); tmux list-panes -t \(quotedSession) -F '#{pane_current_path}' 2>/dev/null | head -n 1"
         let command = "sh -lc \(shellQuoted(body))"
         guard let output = try? await client.execute(command) else { return nil }
         let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
