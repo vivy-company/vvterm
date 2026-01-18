@@ -250,13 +250,10 @@ struct TerminalContainerView: View {
             #endif
         }
         .task {
-            // Load credentials from keychain when view appears
-            guard let server = server else { return }
-            do {
-                credentials = try KeychainManager.shared.getCredentials(for: server)
-            } catch {
-                errorMessage = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
-            }
+            loadCredentialsIfNeeded(force: true)
+        }
+        .onChange(of: server?.id) { _ in
+            loadCredentialsIfNeeded(force: true)
         }
         .onAppear {
             updateTerminalBackgroundColor()
@@ -359,8 +356,23 @@ struct TerminalContainerView: View {
     @MainActor
     private func retryConnection() async {
         isReady = false
+        loadCredentialsIfNeeded(force: false)
+        guard credentials != nil else { return }
+        ghosttyApp.startIfNeeded()
         try? await ConnectionSessionManager.shared.reconnect(session: session)
         reconnectToken = UUID()
+    }
+
+    @MainActor
+    private func loadCredentialsIfNeeded(force: Bool) {
+        guard let server else { return }
+        if !force, credentials != nil { return }
+        do {
+            credentials = try KeychainManager.shared.getCredentials(for: server)
+            errorMessage = nil
+        } catch {
+            errorMessage = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
+        }
     }
 
     // MARK: - Voice Input (macOS / iOS)
