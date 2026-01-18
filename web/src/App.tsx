@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import logo from "./logo.png";
 import appStoreBadge from "./app-store-badge.svg";
-import macScreenshot from "./mac.png";
-import iosScreenshot from "./ios.png";
+import previewScreenshot from "./preview.png";
 import { useLanguage, LanguageProvider } from "./i18n/LanguageContext";
 import type { Language } from "./i18n/i18n";
 
@@ -29,8 +28,6 @@ declare global {
 const APP_STORE_URL = "https://apps.apple.com/app/vvterm/id6757482822";
 
 const FAQSection = lazy(() => import("./components/FAQSection"));
-
-type ShowcaseTab = "mac" | "ios";
 
 type BillingCycle = "monthly" | "yearly";
 
@@ -58,7 +55,6 @@ function LanguageSwitcher({ onLanguageChange }: { onLanguageChange?: (lang: stri
 
 function AppContent() {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<ShowcaseTab>("mac");
   const [billingCycle, setBillingCycle] = useState<BillingCycle>("yearly");
   const currentYear = new Date().getFullYear();
 
@@ -67,13 +63,6 @@ function AppContent() {
       window.umami.track(eventName);
     }
   };
-
-  const screenshots: Record<ShowcaseTab, string> = {
-    mac: macScreenshot,
-    ios: iosScreenshot,
-  };
-
-  const showcaseTabs: ShowcaseTab[] = ["mac", "ios"];
 
   const features = [
     { icon: Server, bg: "rgba(0,122,255,0.1)", color: "#007aff", key: "servers", span: true },
@@ -129,26 +118,11 @@ function AppContent() {
       {/* Visual Showcase */}
       <section className="py-12 px-6 pb-20">
         <div className="max-w-[1200px] mx-auto">
-          <div className="flex gap-2 justify-center mb-2 flex-wrap">
-            {showcaseTabs.map((tab) => (
-              <button
-                key={tab}
-                onClick={() => { trackEvent(`showcase_tab_${tab}`); setActiveTab(tab); }}
-                className={`px-4 py-2 rounded-full text-[17px] cursor-pointer transition-all duration-200 border-none ${
-                  activeTab === tab
-                    ? "bg-[#1d1d1f] text-[#f5f5f7]"
-                    : "bg-transparent text-[#86868b] hover:text-[#f5f5f7]"
-                }`}
-              >
-                {t(`showcase.${tab}`)}
-              </button>
-            ))}
-          </div>
-          <div className="rounded-[18px] overflow-hidden bg-[#1d1d1f] min-h-[400px] flex items-center justify-center">
+          <div className="min-h-[520px] flex items-center justify-center">
             <img
-              src={screenshots[activeTab]}
-              alt={`${activeTab} example`}
-              className="w-full block"
+              src={previewScreenshot}
+              alt="VVTerm app preview"
+              className="w-full block scale-115"
               fetchPriority="high"
               loading="eager"
               onError={(e) => {
