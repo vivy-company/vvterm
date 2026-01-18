@@ -9,7 +9,6 @@ import {
   Layers,
   Key,
   Check,
-  Globe,
 } from "lucide-react";
 import logo from "./logo.png";
 import appStoreBadge from "./app-store-badge.svg";
@@ -97,16 +96,6 @@ function AppContent() {
               className="transition-opacity duration-200 hover:opacity-80"
             >
               <img src={appStoreBadge} alt="Download on the App Store" className="h-[52px] block rounded-[8px]" />
-            </a>
-            <a
-              href="https://github.com/vivy-company/vvterm"
-              className="inline-flex items-center gap-2 px-6 py-3 text-[17px] font-normal text-blue-500 hover:underline transition-all duration-200"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackEvent("github_click")}
-            >
-              <Globe size={18} />
-              {t("hero.viewOnGithub")}
             </a>
           </div>
           <p className="text-sm text-[#86868b]">
@@ -298,9 +287,6 @@ function AppContent() {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
             <a href="https://discord.gg/zemMZtrkSb" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.discord")}
-            </a>
-            <a href="https://github.com/vivy-company/vvterm" onClick={() => trackEvent("footer_github_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
-              {t("footer.github")}
             </a>
             <span className="text-zinc-700 hidden sm:inline">|</span>
             <a href="/privacy" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">
