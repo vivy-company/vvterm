@@ -2,7 +2,7 @@
 
 ## Individual Contributor License Agreement
 
-Thank you for your interest in contributing to VivyTerm ("the Project"), owned by Vivy Technologies Co., Limited ("Vivy").
+Thank you for your interest in contributing to VVTerm ("the Project"), owned by Vivy Technologies Co., Limited ("Vivy").
 
 This Contributor License Agreement ("Agreement") documents the rights granted by contributors to Vivy.
 
