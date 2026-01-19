@@ -62,7 +62,6 @@ extension Server {
         self.tmuxEnabledOverride = record["tmuxEnabledOverride"] as? Bool
         self.createdAt = record["createdAt"] as? Date ?? Date()
         self.updatedAt = record["updatedAt"] as? Date ?? Date()
-        self.keychainCredentialId = record["keychainCredentialId"] as? String ?? id.uuidString
 
         // Decode environment
         if let envData = record["environment"] as? Data,
@@ -93,7 +92,6 @@ extension Server {
         record["tmuxEnabledOverride"] = tmuxEnabledOverride
         record["createdAt"] = createdAt
         record["updatedAt"] = Date()
-        record["keychainCredentialId"] = keychainCredentialId
 
         if let envData = try? JSONEncoder().encode(environment) {
             record["environment"] = envData

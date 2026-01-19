@@ -20,9 +20,6 @@ struct Server: Identifiable, Codable, Hashable {
     var createdAt: Date
     var updatedAt: Date
 
-    // Keychain reference (not synced to CloudKit)
-    var keychainCredentialId: String
-
     init(
         id: UUID = UUID(),
         workspaceId: UUID,
@@ -38,8 +35,7 @@ struct Server: Identifiable, Codable, Hashable {
         isFavorite: Bool = false,
         tmuxEnabledOverride: Bool? = nil,
         createdAt: Date = Date(),
-        updatedAt: Date = Date(),
-        keychainCredentialId: String? = nil
+        updatedAt: Date = Date()
     ) {
         self.id = id
         self.workspaceId = workspaceId
@@ -56,7 +52,6 @@ struct Server: Identifiable, Codable, Hashable {
         self.tmuxEnabledOverride = tmuxEnabledOverride
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.keychainCredentialId = keychainCredentialId ?? id.uuidString
     }
 
     var displayAddress: String {
