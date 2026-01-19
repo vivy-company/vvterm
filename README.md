@@ -4,6 +4,7 @@
 [![iOS](https://img.shields.io/badge/iOS-16.0+-black?style=flat-square&logo=apple)](https://vvterm.com)
 [![Swift](https://img.shields.io/badge/Swift-5.0+-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
 [![License](https://img.shields.io/badge/License-GPL%203.0-blue?style=flat-square)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ff69b4?style=flat-square&logo=github)](https://github.com/sponsors/vivy-company)
 
 Your servers. Everywhere.
 
