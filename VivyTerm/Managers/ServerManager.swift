@@ -321,7 +321,12 @@ final class ServerManager: ObservableObject {
             try keychain.storePassword(for: newServer.id, password: password)
         }
         if let sshKey = credentials.sshKey {
-            try keychain.storeSSHKey(for: newServer.id, privateKey: sshKey, passphrase: credentials.sshPassphrase)
+            try keychain.storeSSHKey(
+                for: newServer.id,
+                privateKey: sshKey,
+                passphrase: credentials.sshPassphrase,
+                publicKey: credentials.publicKey
+            )
         }
 
         // Save to CloudKit (ignore errors, local is primary)

@@ -94,6 +94,7 @@ struct ServerCredentials {
     let serverId: UUID
     var password: String?
     var privateKey: Data?
+    var publicKey: Data?
     var passphrase: String?
 
     var sshKey: Data? {
