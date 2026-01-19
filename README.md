@@ -109,6 +109,10 @@ VivyTerm/
 - [libssh2](https://github.com/libssh2/libssh2) — SSH protocol
 - [OpenSSL](https://github.com/openssl/openssl) — Cryptography
 
+## Third-Party Notices
+
+See `THIRD_PARTY_NOTICES.md`.
+
 ## License
 
 GNU General Public License v3.0

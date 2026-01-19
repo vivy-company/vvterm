@@ -15,7 +15,7 @@ LIBSSH2_VERSION="1.11.0"
 MACOS_DEPLOYMENT_TARGET="13.3"
 IOS_DEPLOYMENT_TARGET="16.0"
 
-GHOSTTY_REPO="git@github.com:wiedymi/ghostty.git"
+GHOSTTY_REPO="https://github.com/wiedymi/ghostty.git"
 GHOSTTY_REF="${GHOSTTY_REF:-custom-io}"
 BUNDLE_ID="app.vivy.VivyTerm"
 
