@@ -7,7 +7,7 @@
 
 Your servers. Everywhere.
 
-![VVTerm macOS](web/src/mac.png)
+![VVTerm macOS](https://github.com/user-attachments/assets/e33c7fff-1f18-4658-aaa9-964bab160544)
 
 ## What is VVTerm?
 
