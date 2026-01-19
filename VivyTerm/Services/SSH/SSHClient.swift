@@ -438,11 +438,30 @@ actor SSHSession {
                 throw SSHError.authenticationFailed
             }
             let passphrase = config.credentials.passphrase
+            let publicKeyData = config.credentials.publicKey
             logger.info("Attempting publickey auth for user: \(username)")
 
             authResult = keyData.withUnsafeBytes { rawBuffer -> Int32 in
                 guard let baseAddress = rawBuffer.bindMemory(to: CChar.self).baseAddress else {
                     return LIBSSH2_ERROR_ALLOC
+                }
+
+                if let publicKeyData, !publicKeyData.isEmpty {
+                    return publicKeyData.withUnsafeBytes { publicBuffer -> Int32 in
+                        guard let publicBase = publicBuffer.bindMemory(to: CChar.self).baseAddress else {
+                            return LIBSSH2_ERROR_ALLOC
+                        }
+                        return libssh2_userauth_publickey_frommemory(
+                            session,
+                            username,
+                            UInt(username.utf8.count),
+                            publicBase,
+                            UInt(publicKeyData.count),
+                            baseAddress,
+                            UInt(keyData.count),
+                            passphrase
+                        )
+                    }
                 }
 
                 return libssh2_userauth_publickey_frommemory(

@@ -22,6 +22,7 @@ struct ServerFormSheet: View {
     @State private var password: String = ""
     @State private var sshKey: String = ""
     @State private var sshPassphrase: String = ""
+    @State private var sshPublicKey: String = ""
     @State private var selectedEnvironment: ServerEnvironment = .production
     @State private var notes: String = ""
     @State private var tmuxEnabled: Bool = true
@@ -33,6 +34,7 @@ struct ServerFormSheet: View {
     @State private var error: String?
     @State private var storedKeys: [SSHKeyEntry] = []
     @State private var selectedStoredKey: SSHKeyEntry?
+    @State private var isApplyingStoredKey = false
     @State private var isTestingConnection = false
     @State private var connectionTestError: String?
     @State private var connectionTestSucceeded = false
@@ -82,6 +84,7 @@ struct ServerFormSheet: View {
         let password: String
         let sshKey: String
         let sshPassphrase: String
+        let sshPublicKey: String
     }
 
     private var connectionSnapshot: ConnectionTestSnapshot {
@@ -92,7 +95,8 @@ struct ServerFormSheet: View {
             authMethod: authMethod,
             password: password,
             sshKey: sshKey,
-            sshPassphrase: sshPassphrase
+            sshPassphrase: sshPassphrase,
+            sshPublicKey: sshPublicKey
         )
     }
 
@@ -172,6 +176,12 @@ struct ServerFormSheet: View {
                         sshPassphrase = phrase
                     }
                 }
+                if let publicKeyData = credentials.publicKey,
+                   let publicKeyString = String(data: publicKeyData, encoding: .utf8) {
+                    sshPublicKey = publicKeyString
+                } else {
+                    sshPublicKey = ""
+                }
             } catch {
                 self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
             }
@@ -231,7 +241,13 @@ struct ServerFormSheet: View {
             .onChange(of: username) { _ in resetConnectionTestState() }
             .onChange(of: authMethod) { _ in resetConnectionTestState() }
             .onChange(of: password) { _ in resetConnectionTestState() }
-            .onChange(of: sshKey) { _ in resetConnectionTestState() }
+            .onChange(of: sshKey) { _ in
+                if !isLoadingCredentials && !isApplyingStoredKey {
+                    selectedStoredKey = nil
+                    sshPublicKey = ""
+                }
+                resetConnectionTestState()
+            }
             .onChange(of: sshPassphrase) { _ in resetConnectionTestState() }
     }
 
@@ -474,6 +490,8 @@ struct ServerFormSheet: View {
 
     private func loadStoredKey(_ entry: SSHKeyEntry) {
         do {
+            isApplyingStoredKey = true
+            defer { isApplyingStoredKey = false }
             if let keyData = try KeychainManager.shared.getStoredSSHKeyData(for: entry.id) {
                 if let keyString = String(data: keyData.key, encoding: .utf8) {
                     sshKey = keyString
@@ -482,6 +500,7 @@ struct ServerFormSheet: View {
                     sshPassphrase = passphrase
                 }
             }
+            sshPublicKey = entry.publicKey ?? ""
         } catch {
             self.error = String(format: String(localized: "Failed to load key: %@"), error.localizedDescription)
         }
@@ -563,9 +582,15 @@ struct ServerFormSheet: View {
             credentials.password = password
         case .sshKey:
             credentials.sshKey = sshKey.data(using: .utf8)
+            if !sshPublicKey.isEmpty {
+                credentials.publicKey = sshPublicKey.data(using: .utf8)
+            }
         case .sshKeyWithPassphrase:
             credentials.sshKey = sshKey.data(using: .utf8)
             credentials.sshPassphrase = sshPassphrase
+            if !sshPublicKey.isEmpty {
+                credentials.publicKey = sshPublicKey.data(using: .utf8)
+            }
         }
         return credentials
     }
@@ -646,6 +671,7 @@ struct ServerFormSheet: View {
                 if isEditing {
                     try await serverManager.updateServer(newServer)
                     // Store credentials based on auth method
+                    let publicKeyData = sshPublicKey.isEmpty ? nil : sshPublicKey.data(using: .utf8)
                     switch authMethod {
                     case .password:
                         if !password.isEmpty {
@@ -653,11 +679,11 @@ struct ServerFormSheet: View {
                         }
                     case .sshKey:
                         if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
-                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: nil)
+                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: nil, publicKey: publicKeyData)
                         }
                     case .sshKeyWithPassphrase:
                         if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
-                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase)
+                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase, publicKey: publicKeyData)
                         }
                     }
                 } else {

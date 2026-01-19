@@ -56,7 +56,7 @@ final class KeychainManager {
 
     // MARK: - SSH Key Operations
 
-    func storeSSHKey(for serverId: UUID, privateKey: Data, passphrase: String?) throws {
+    func storeSSHKey(for serverId: UUID, privateKey: Data, passphrase: String?, publicKey: Data? = nil) throws {
         let keyKey = sshKeyKey(for: serverId)
         try store.set(privateKey, forKey: keyKey, iCloudSync: isSyncEnabled)
 
@@ -68,12 +68,20 @@ final class KeychainManager {
             try store.set(passphraseData, forKey: passphraseKey, iCloudSync: isSyncEnabled)
         }
 
+        let publicKeyKey = sshPublicKeyKey(for: serverId)
+        if let publicKey, !publicKey.isEmpty {
+            try store.set(publicKey, forKey: publicKeyKey, iCloudSync: isSyncEnabled)
+        } else {
+            try? store.delete(publicKeyKey)
+        }
+
         logger.info("Stored SSH key for server \(serverId.uuidString)")
     }
 
-    func getSSHKey(for serverId: UUID) throws -> (key: Data, passphrase: String?)? {
+    func getSSHKey(for serverId: UUID) throws -> (key: Data, passphrase: String?, publicKey: Data?)? {
         let keyKey = sshKeyKey(for: serverId)
         let passphraseKey = sshPassphraseKey(for: serverId)
+        let publicKeyKey = sshPublicKeyKey(for: serverId)
 
         // Try new store first
         if let keyData = try store.get(keyKey) {
@@ -81,7 +89,8 @@ final class KeychainManager {
             if let passphraseData = try store.get(passphraseKey) {
                 passphrase = String(data: passphraseData, encoding: .utf8)
             }
-            return (key: keyData, passphrase: passphrase)
+            let publicKeyData = try store.get(publicKeyKey)
+            return (key: keyData, passphrase: passphrase, publicKey: publicKeyData)
         }
 
         // Fall back to legacy store for migration
@@ -95,7 +104,7 @@ final class KeychainManager {
             // Migrate key
             try? store.set(keyData, forKey: keyKey, iCloudSync: isSyncEnabled)
             logger.info("Migrated SSH key from legacy keychain")
-            return (key: keyData, passphrase: passphrase)
+            return (key: keyData, passphrase: passphrase, publicKey: nil)
         }
 
         return nil
@@ -115,11 +124,13 @@ final class KeychainManager {
         case .sshKey:
             if let sshData = try getSSHKey(for: server.id) {
                 credentials.privateKey = sshData.key
+                credentials.publicKey = sshData.publicKey
             }
         case .sshKeyWithPassphrase:
             if let sshData = try getSSHKey(for: server.id) {
                 credentials.privateKey = sshData.key
                 credentials.passphrase = sshData.passphrase
+                credentials.publicKey = sshData.publicKey
             }
         }
 
@@ -132,10 +143,12 @@ final class KeychainManager {
         let passwordKey = passwordKey(for: serverId)
         let keyKey = sshKeyKey(for: serverId)
         let passphraseKey = sshPassphraseKey(for: serverId)
+        let publicKeyKey = sshPublicKeyKey(for: serverId)
 
         try? store.delete(passwordKey)
         try? store.delete(keyKey)
         try? store.delete(passphraseKey)
+        try? store.delete(publicKeyKey)
 
         logger.info("Deleted credentials for server \(serverId.uuidString)")
     }
@@ -159,6 +172,10 @@ final class KeychainManager {
 
     private func sshPassphraseKey(for serverId: UUID) -> String {
         "server.\(serverId.uuidString).passphrase"
+    }
+
+    private func sshPublicKeyKey(for serverId: UUID) -> String {
+        "server.\(serverId.uuidString).publickey"
     }
 
     // MARK: - Reusable SSH Keys (Keychain Library)
