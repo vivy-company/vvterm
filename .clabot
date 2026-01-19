@@ -1,0 +1,5 @@
+{
+  "contributors": "https://raw.githubusercontent.com/vivy-company/aizen/main/.contributors",
+  "message": "Thank you for your contribution! Before we can merge your pull request, we need you to sign our Contributor License Agreement (CLA).\n\nPlease read and sign the CLA at: https://github.com/vivy-company/aizen/blob/main/CLA.md\n\nOnce signed, comment on this PR with:\n`I have read the CLA Document and I hereby sign the CLA`",
+  "label": "cla-signed"
+}
