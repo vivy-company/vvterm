@@ -26,7 +26,7 @@ Violations may result in:
 
 ## Reporting
 
-Report issues to: aizen@vivy.company
+Report issues to: vvterm@vivy.company
 
 This project is maintained by a solo developer. Responses may take time - please be patient.
 
