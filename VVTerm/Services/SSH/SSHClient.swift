@@ -366,6 +366,13 @@ actor SSHSession {
             throw SSHError.connectionFailed("SSH handshake failed: \(handshakeResult)")
         }
 
+        do {
+            try verifyHostKey()
+        } catch {
+            cleanup()
+            throw error
+        }
+
         // Authenticate
         try authenticate()
 
@@ -488,6 +495,53 @@ actor SSHSession {
         }
 
         logger.info("Authentication successful")
+    }
+
+    private func verifyHostKey() throws {
+        guard let session = libssh2Session else {
+            throw SSHError.notConnected
+        }
+
+        let (fingerprint, keyType) = try hostKeyFingerprint(for: session)
+        let host = config.host
+        let port = config.port
+
+        if let entry = KnownHostsManager.shared.entry(for: host, port: port) {
+            if entry.fingerprint != fingerprint {
+                logger.error("Host key mismatch for \(host):\(port). Known: \(entry.fingerprint), Presented: \(fingerprint)")
+                throw SSHError.hostKeyVerificationFailed
+            }
+            KnownHostsManager.shared.updateSeen(host: host, port: port)
+            logger.info("Host key verified for \(host):\(port)")
+            return
+        }
+
+        let entry = KnownHostsManager.Entry(
+            host: host,
+            port: port,
+            fingerprint: fingerprint,
+            keyType: keyType,
+            addedAt: Date(),
+            lastSeenAt: Date()
+        )
+        KnownHostsManager.shared.save(entry: entry)
+        logger.info("Trusted new host key for \(host):\(port) (\(fingerprint))")
+    }
+
+    private func hostKeyFingerprint(for session: OpaquePointer) throws -> (String, Int) {
+        guard let hashPtr = libssh2_hostkey_hash(session, Int32(LIBSSH2_HOSTKEY_HASH_SHA256)) else {
+            throw SSHError.hostKeyVerificationFailed
+        }
+
+        let hash = Data(bytes: hashPtr, count: 32)
+        let base64 = hash.base64EncodedString().trimmingCharacters(in: CharacterSet(charactersIn: "="))
+        let fingerprint = "SHA256:\(base64)"
+
+        var keyLen: size_t = 0
+        var keyType: Int32 = 0
+        _ = libssh2_session_hostkey(session, &keyLen, &keyType)
+
+        return (fingerprint, Int(keyType))
     }
 
     func disconnect() async {
