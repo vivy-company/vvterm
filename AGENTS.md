@@ -11,7 +11,7 @@ Cross-platform (iOS/macOS) SSH terminal app with iCloud sync and Keychain creden
 ## Architecture
 
 ```
-VivyTerm/
+VVTerm/
 ├── Models/
 │   ├── Server.swift              # Server entity (CloudKit synced)
 │   ├── Workspace.swift           # Workspace grouping

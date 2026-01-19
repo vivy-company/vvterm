@@ -57,7 +57,7 @@ cd vvterm
 ./scripts/build.sh all
 
 # Open in Xcode and build
-open VivyTerm.xcodeproj
+open VVTerm.xcodeproj
 ```
 
 ## Installation
@@ -78,7 +78,7 @@ open VivyTerm.xcodeproj
 ## Architecture
 
 ```
-VivyTerm/
+VVTerm/
 ├── Models/                 # Server, Workspace, Environment
 ├── Managers/
 │   ├── ServerManager       # Server/Workspace CRUD + sync

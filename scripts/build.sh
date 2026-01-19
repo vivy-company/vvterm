@@ -1,5 +1,5 @@
 #!/bin/bash
-# VivyTerm vendor build (GhosttyKit + libssh2/OpenSSL)
+# VVTerm vendor build (GhosttyKit + libssh2/OpenSSL)
 
 set -euo pipefail
 
@@ -35,7 +35,7 @@ log_section() { echo -e "\n${BLUE}==== $1 ====${NC}\n"; }
 
 print_usage() {
     cat << EOF
-VivyTerm Build Script
+VVTerm Build Script
 
 Usage: $0 [command]
 
@@ -156,7 +156,7 @@ PY
 
     # IOSurfaceLayer fixes live in the Ghostty fork; no local patching here.
 
-    # Patch bundle ID to use VivyTerm's instead of Ghostty's
+    # Patch bundle ID to use VVTerm's instead of Ghostty's
     sed -i '' "s/com\\.mitchellh\\.ghostty/${BUNDLE_ID}/g" "${workdir}/ghostty/src/build_config.zig"
 
     # Lower iOS minimum to match app deployment target
