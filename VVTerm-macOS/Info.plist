@@ -42,5 +42,9 @@
     <!-- App category -->
     <key>LSApplicationCategoryType</key>
     <string>public.app-category.developer-tools</string>
+
+    <!-- Export compliance (encryption) -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>

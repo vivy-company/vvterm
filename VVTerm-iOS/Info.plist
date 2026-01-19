@@ -73,5 +73,9 @@
         <string>FiraCodeNerdFont-Regular.ttf</string>
         <string>MesloLGSNerdFont-Regular.ttf</string>
     </array>
+
+    <!-- Export compliance (encryption) -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
 </dict>
 </plist>
