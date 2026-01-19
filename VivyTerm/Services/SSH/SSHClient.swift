@@ -438,24 +438,24 @@ actor SSHSession {
                 throw SSHError.authenticationFailed
             }
             let passphrase = config.credentials.passphrase
-
-            // Write key to temp file (libssh2 requires file path)
-            let tempKeyPath = NSTemporaryDirectory() + UUID().uuidString + ".key"
-            try keyData.write(to: URL(fileURLWithPath: tempKeyPath))
-            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: tempKeyPath)
-            defer { try? FileManager.default.removeItem(atPath: tempKeyPath) }
-
             logger.info("Attempting publickey auth for user: \(username)")
 
-            // Use _ex variant since macros not available in Swift
-            authResult = libssh2_userauth_publickey_fromfile_ex(
-                session,
-                username,
-                UInt32(username.utf8.count),
-                nil, // public key (auto-derived)
-                tempKeyPath,
-                passphrase
-            )
+            authResult = keyData.withUnsafeBytes { rawBuffer -> Int32 in
+                guard let baseAddress = rawBuffer.bindMemory(to: CChar.self).baseAddress else {
+                    return LIBSSH2_ERROR_ALLOC
+                }
+
+                return libssh2_userauth_publickey_frommemory(
+                    session,
+                    username,
+                    UInt(username.utf8.count),
+                    nil,
+                    0,
+                    baseAddress,
+                    UInt(keyData.count),
+                    passphrase
+                )
+            }
         }
 
         if authResult != 0 {

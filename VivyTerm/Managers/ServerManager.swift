@@ -245,8 +245,7 @@ final class ServerManager: ObservableObject {
                     isFavorite: servers[i].isFavorite,
                     tmuxEnabledOverride: servers[i].tmuxEnabledOverride,
                     createdAt: servers[i].createdAt,
-                    updatedAt: Date(),
-                    keychainCredentialId: servers[i].keychainCredentialId
+                    updatedAt: Date()
                 )
                 logger.info("Reassigned server '\(self.servers[i].name)' from \(oldWorkspaceId) to \(defaultWorkspace.id)")
 
