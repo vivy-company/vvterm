@@ -298,6 +298,9 @@ function AppContent() {
             <a href="/refund" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">
               Refunds
             </a>
+            <a href="/support" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">
+              Support
+            </a>
             <span className="text-zinc-700 hidden sm:inline">|</span>
             <LanguageSwitcher onLanguageChange={(lang) => trackEvent(`language_change_${lang}`)} />
           </div>
