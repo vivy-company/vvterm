@@ -126,18 +126,24 @@ struct TerminalContainerView: View {
                     }
 
                     if ghosttyApp.readiness == .error {
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                            Text("Terminal initialization failed")
-                                .foregroundStyle(.red)
+                        TerminalStatusCard {
+                            VStack(spacing: 12) {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text("Terminal initialization failed")
+                                    .foregroundStyle(.red)
+                            }
+                            .multilineTextAlignment(.center)
                         }
                     } else if shouldShowInitializingOverlay {
-                        VStack(spacing: 12) {
-                            ProgressView()
-                                .progressViewStyle(.circular)
-                            Text("Initializing terminal...")
-                                .foregroundStyle(.secondary)
+                        TerminalStatusCard {
+                            VStack(spacing: 12) {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text("Initializing terminal...")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .multilineTextAlignment(.center)
                         }
                     }
                 }
@@ -146,54 +152,64 @@ struct TerminalContainerView: View {
             if ghosttyApp.readiness != .error && !shouldShowInitializingOverlay {
                 switch state {
                 case .connecting:
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text("Connecting...")
-                            .foregroundStyle(.secondary)
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text("Connecting...")
+                                .foregroundStyle(.secondary)
+                        }
+                        .multilineTextAlignment(.center)
                     }
                 case .reconnecting(let attempt):
-                    VStack(spacing: 16) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text(String(format: String(localized: "Reconnecting (attempt %lld)..."), Int64(attempt)))
-                            .foregroundStyle(.orange)
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text(String(format: String(localized: "Reconnecting (attempt %lld)..."), Int64(attempt)))
+                                .foregroundStyle(.orange)
+                        }
+                        .multilineTextAlignment(.center)
                     }
                 case .disconnected:
-                    VStack(spacing: 16) {
-                        Image(systemName: "bolt.slash")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                        Text("Disconnected")
-                            .foregroundStyle(.secondary)
-                        if session.tmuxStatus.indicatesTmux {
-                            Text("tmux session is still running on the server.")
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            Image(systemName: "bolt.slash")
+                                .font(.largeTitle)
+                                .foregroundStyle(.secondary)
+                            Text("Disconnected")
+                                .foregroundStyle(.secondary)
+                            if session.tmuxStatus.indicatesTmux {
+                                Text("tmux session is still running on the server.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            Button("Reconnect") {
+                                Task { await retryConnection() }
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .multilineTextAlignment(.center)
+                    }
+                case .failed(let error):
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundStyle(.red)
+                            Text("Connection Failed")
+                                .font(.headline)
+                            Text(error)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
+                            Button("Retry") {
+                                Task { await retryConnection() }
+                            }
+                            .buttonStyle(.bordered)
                         }
-                        Button("Reconnect") {
-                            Task { await retryConnection() }
-                        }
-                        .buttonStyle(.bordered)
-                    }
-                case .failed(let error):
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle")
-                            .font(.largeTitle)
-                            .foregroundStyle(.red)
-                        Text("Connection Failed")
-                            .font(.headline)
-                        Text(error)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        Button("Retry") {
-                            Task { await retryConnection() }
-                        }
-                        .buttonStyle(.bordered)
+                        .multilineTextAlignment(.center)
                     }
                 case .connected, .idle:
                     EmptyView()
@@ -201,11 +217,14 @@ struct TerminalContainerView: View {
             }
 
             if session.tmuxStatus == .installing {
-                VStack(spacing: 12) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Installing tmux...")
-                        .foregroundStyle(.secondary)
+                TerminalStatusCard {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Installing tmux...")
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
                 }
             }
 

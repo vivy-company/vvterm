@@ -420,35 +420,44 @@ struct TerminalPaneView: View {
 
             let displayError = connectionError ?? paneConnectionError
             if let error = displayError {
-                VStack(spacing: 16) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.largeTitle)
-                        .foregroundStyle(.red)
-                    Text("Connection Failed")
-                        .font(.headline)
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Button("Retry") {
-                        retryConnection()
+                TerminalStatusCard {
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle")
+                            .font(.largeTitle)
+                            .foregroundStyle(.red)
+                        Text("Connection Failed")
+                            .font(.headline)
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Button("Retry") {
+                            retryConnection()
+                        }
+                        .buttonStyle(.bordered)
                     }
-                    .buttonStyle(.bordered)
+                    .multilineTextAlignment(.center)
                 }
             } else if !isReady && !terminalExists {
-                VStack(spacing: 12) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text(String(format: String(localized: "Connecting to %@..."), server.name))
-                        .foregroundStyle(.secondary)
+                TerminalStatusCard {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text(String(format: String(localized: "Connecting to %@..."), server.name))
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
                 }
             }
 
             if paneState?.tmuxStatus == .installing {
-                VStack(spacing: 12) {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                    Text("Installing tmux...")
-                        .foregroundStyle(.secondary)
+                TerminalStatusCard {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Installing tmux...")
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
                 }
             }
 
