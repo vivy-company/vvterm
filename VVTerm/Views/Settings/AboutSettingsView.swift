@@ -32,6 +32,9 @@ private let contactOptions: [ContactOption] = [
 // MARK: - About Settings View
 
 struct AboutSettingsView: View {
+    @StateObject private var storeManager = StoreManager.shared
+    @State private var showingReviewSheet = false
+
     private var appVersion: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
@@ -97,6 +100,9 @@ struct AboutSettingsView: View {
                     Text(verbatim: "Version \(appVersion) (\(buildNumber))")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                        .onTapGesture(count: 7) {
+                            showingReviewSheet = true
+                        }
 
                     Text("Professional SSH client\nfor macOS & iOS")
                         .font(.footnote)
@@ -116,6 +122,12 @@ struct AboutSettingsView: View {
 
                 Link(destination: URL(string: "https://vvterm.com/privacy")!) {
                     Label("Privacy Policy", systemImage: "hand.raised")
+                }
+                .tint(.primary)
+                .foregroundStyle(.primary)
+
+                Link(destination: URL(string: "https://vvterm.com/terms")!) {
+                    Label("Terms of Use (EULA)", systemImage: "doc.text")
                 }
                 .tint(.primary)
                 .foregroundStyle(.primary)
@@ -192,6 +204,9 @@ struct AboutSettingsView: View {
             }
         }
         .formStyle(.grouped)
+        .sheet(isPresented: $showingReviewSheet) {
+            ReviewModeSheet()
+        }
     }
 
     #if os(iOS)
@@ -200,4 +215,152 @@ struct AboutSettingsView: View {
         UIApplication.shared.open(url)
     }
     #endif
+}
+
+// MARK: - Review Mode Sheet
+
+private struct ReviewModeSheet: View {
+    @ObservedObject private var storeManager = StoreManager.shared
+    @State private var reviewCode = ""
+    @State private var reviewError: String?
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    header
+                    statusCard
+                    if storeManager.isReviewModeEnabled {
+                        enabledSection
+                    } else {
+                        codeSection
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(24)
+                #if os(macOS)
+                .frame(minWidth: 420, maxWidth: 520)
+                #endif
+            }
+            .navigationTitle("App Review")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(Color.green.opacity(0.16))
+                    .frame(width: 44, height: 44)
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(.green)
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Review Mode")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                Text("Unlocks Pro features and loads demo servers for App Review.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var statusCard: some View {
+        HStack {
+            Text("Status")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
+            Text(storeManager.isReviewModeEnabled ? "Enabled" : "Disabled")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(storeManager.isReviewModeEnabled ? Color.green.opacity(0.18) : Color.secondary.opacity(0.12))
+                )
+                .foregroundStyle(storeManager.isReviewModeEnabled ? .green : .secondary)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+    }
+
+    private var enabledSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Review mode is active on this device.")
+                .font(.subheadline)
+            Text("Pro features are unlocked. Review mode expires after 5 hours or when the app restarts.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            Button("Disable Review Mode") {
+                storeManager.setReviewModeEnabled(false)
+            }
+            .buttonStyle(.bordered)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+    }
+
+    private var codeSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Enter the review code to enable Pro access for App Review.")
+                .font(.subheadline)
+            #if os(iOS)
+            TextField("Review Code", text: $reviewCode)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .textFieldStyle(.roundedBorder)
+            #else
+            TextField("Review Code", text: $reviewCode)
+                .textFieldStyle(.roundedBorder)
+            #endif
+
+            Button("Enable Review Mode") {
+                let success = storeManager.enableReviewMode(code: reviewCode)
+                if success {
+                    reviewError = nil
+                    reviewCode = ""
+                } else {
+                    reviewError = "Invalid review code."
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(reviewCode.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+            if let reviewError {
+                Text(reviewError)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
+
+            Text("Review mode is local-only and expires after 5 hours or when the app restarts.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(Color.primary.opacity(0.04))
+        )
+    }
 }
