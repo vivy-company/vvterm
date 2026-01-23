@@ -61,6 +61,54 @@ final class ServerManager: ObservableObject {
         }
     }
 
+    func seedReviewDataIfNeeded() {
+        guard servers.isEmpty else { return }
+
+        let workspace: Workspace
+        if let firstWorkspace = workspaces.first {
+            workspace = firstWorkspace
+        } else {
+            workspace = Workspace(name: "Review Workspace", colorHex: "#FF9500", order: 0)
+            workspaces = [workspace]
+        }
+
+        let now = Date()
+        servers = [
+            Server(
+                workspaceId: workspace.id,
+                environment: .production,
+                name: "Demo - Production",
+                host: "example.com",
+                username: "demo",
+                tags: ["demo", "review"],
+                notes: "Demo server for App Review. Replace with your test server if needed.",
+                lastConnected: now,
+                isFavorite: true
+            ),
+            Server(
+                workspaceId: workspace.id,
+                environment: .staging,
+                name: "Demo - Staging",
+                host: "staging.example.com",
+                username: "demo",
+                tags: ["demo"],
+                notes: "Sample staging entry for App Review."
+            ),
+            Server(
+                workspaceId: workspace.id,
+                environment: .development,
+                name: "Demo - Development",
+                host: "dev.example.com",
+                username: "demo",
+                tags: ["demo"],
+                notes: "Sample development entry for App Review."
+            )
+        ]
+
+        saveLocalData()
+        logger.info("Seeded App Review demo data (\(self.servers.count) servers)")
+    }
+
     /// Clear all local data and re-download from CloudKit
     func clearLocalDataAndResync() async {
         logger.info("Clearing local data and re-syncing from CloudKit...")

@@ -8,6 +8,7 @@ import os.log
 @MainActor
 final class StoreManager: ObservableObject {
     static let shared = StoreManager()
+    static let reviewModeCode = ReviewModeCode.value
 
     @Published var isPro: Bool = false
     @Published var isLifetime: Bool = false
@@ -15,9 +16,13 @@ final class StoreManager: ObservableObject {
     @Published var products: [Product] = []
     @Published var purchaseState: PurchaseState = .idle
     @Published var restoreState: RestoreState = .idle
+    @Published private(set) var isReviewModeEnabled: Bool = false
 
     private var updateListenerTask: Task<Void, Error>?
+    private var reviewModeExpiryTask: Task<Void, Never>?
+    private var reviewModeExpiresAt: Date?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Store")
+    private let reviewModeDuration: TimeInterval = 60 * 60 * 5
 
     enum PurchaseState: Equatable {
         case idle
@@ -149,6 +154,7 @@ final class StoreManager: ObservableObject {
     // MARK: - Check Entitlements
 
     func checkEntitlements() async {
+        refreshReviewModeState()
         var hasAccess = false
         var hasLifetime = false
 
@@ -167,7 +173,7 @@ final class StoreManager: ObservableObject {
             }
         }
 
-        isPro = hasAccess
+        isPro = hasAccess || isReviewModeEnabled
         isLifetime = hasLifetime
 
         // Get subscription status for UI
@@ -175,7 +181,7 @@ final class StoreManager: ObservableObject {
             subscriptionStatus = try? await product.subscription?.status.first
         }
 
-        logger.info("Entitlements checked: isPro=\(hasAccess), isLifetime=\(hasLifetime)")
+        logger.info("Entitlements checked: isPro=\(hasAccess), isLifetime=\(hasLifetime), reviewMode=\(self.isReviewModeEnabled)")
     }
 
     // MARK: - Transaction Listener
@@ -213,6 +219,58 @@ final class StoreManager: ObservableObject {
     var isSubscriptionActive: Bool {
         guard let status = subscriptionStatus else { return isLifetime }
         return status.state == .subscribed || status.state == .inGracePeriod
+    }
+
+    // MARK: - Review Mode
+
+    @discardableResult
+    func enableReviewMode(code: String) -> Bool {
+        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.caseInsensitiveCompare(Self.reviewModeCode) == .orderedSame else {
+            logger.warning("Review mode activation failed (invalid code)")
+            return false
+        }
+        setReviewModeEnabled(true)
+        return true
+    }
+
+    func setReviewModeEnabled(_ enabled: Bool) {
+        guard isReviewModeEnabled != enabled else { return }
+        isReviewModeEnabled = enabled
+
+        if enabled {
+            isPro = true
+            isLifetime = false
+            subscriptionStatus = nil
+            reviewModeExpiresAt = Date().addingTimeInterval(reviewModeDuration)
+            scheduleReviewModeExpiry()
+            logger.info("Review mode enabled")
+        } else {
+            reviewModeExpiresAt = nil
+            reviewModeExpiryTask?.cancel()
+            reviewModeExpiryTask = nil
+            logger.info("Review mode disabled")
+            Task { await checkEntitlements() }
+        }
+    }
+
+    private func scheduleReviewModeExpiry() {
+        reviewModeExpiryTask?.cancel()
+        guard let expiresAt = reviewModeExpiresAt else { return }
+        let delay = max(0, expiresAt.timeIntervalSinceNow)
+        reviewModeExpiryTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            await MainActor.run {
+                self?.refreshReviewModeState()
+            }
+        }
+    }
+
+    private func refreshReviewModeState() {
+        guard isReviewModeEnabled else { return }
+        if let expiresAt = reviewModeExpiresAt, Date() >= expiresAt {
+            setReviewModeEnabled(false)
+        }
     }
 }
 
