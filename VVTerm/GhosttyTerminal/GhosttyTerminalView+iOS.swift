@@ -130,6 +130,14 @@ class GhosttyTerminalView: UIView {
     /// Observer for config reload notifications
     private var configReloadObserver: NSObjectProtocol?
 
+    // MARK: - Text Input (for spacebar cursor control)
+    private lazy var textInputTokenizer = UITextInputStringTokenizer(textInput: self)
+    private weak var textInputDelegate: UITextInputDelegate?
+    private var markedText: String = ""
+    private var markedTextRangeInternal: TerminalTextRange?
+    private var selectedTextRangeInternal: TerminalTextRange?
+    private var textInputCursorIndex: Int = 0
+
     // MARK: - Rendering Components
 
     private let renderingSetup = GhosttyRenderingSetup()
@@ -464,6 +472,99 @@ class GhosttyTerminalView: UIView {
         guard cols != lastReportedGrid.cols || rows != lastReportedGrid.rows else { return }
         lastReportedGrid = (cols, rows)
         onResize?(cols, rows)
+        clampTextInputCursorToBounds()
+    }
+
+    // MARK: - Text Input Helpers
+
+    private func textInputGridMetrics() -> (cols: Int, rows: Int, cellSize: CGSize, length: Int) {
+        let cols = max(lastReportedGrid.cols, 1)
+        let rows = max(lastReportedGrid.rows, 1)
+        let cellWidth: CGFloat
+        let cellHeight: CGFloat
+        if cellSize.width > 0 {
+            cellWidth = cellSize.width
+        } else if bounds.width > 0 {
+            cellWidth = bounds.width / CGFloat(cols)
+        } else {
+            cellWidth = 1
+        }
+        if cellSize.height > 0 {
+            cellHeight = cellSize.height
+        } else if bounds.height > 0 {
+            cellHeight = bounds.height / CGFloat(rows)
+        } else {
+            cellHeight = 1
+        }
+        let size = CGSize(width: max(cellWidth, 1), height: max(cellHeight, 1))
+        let length = max(cols * rows, 1)
+        return (cols, rows, size, length)
+    }
+
+    private func clampTextInputIndex(_ index: Int) -> Int {
+        let length = textInputGridMetrics().length
+        return min(max(index, 0), length)
+    }
+
+    private func clampTextInputCursorToBounds() {
+        let clamped = clampTextInputIndex(textInputCursorIndex)
+        textInputCursorIndex = clamped
+        if selectedTextRangeInternal == nil {
+            selectedTextRangeInternal = TerminalTextRange(
+                start: TerminalTextPosition(clamped),
+                end: TerminalTextPosition(clamped)
+            )
+        }
+    }
+
+    private func resetTextInputCursorIfNeeded() {
+        guard selectedTextRangeInternal == nil else {
+            clampTextInputCursorToBounds()
+            return
+        }
+        let length = textInputGridMetrics().length
+        let mid = max(length / 2, 0)
+        textInputCursorIndex = mid
+        selectedTextRangeInternal = TerminalTextRange(
+            start: TerminalTextPosition(mid),
+            end: TerminalTextPosition(mid)
+        )
+    }
+
+    private func textInputCaretRect(for index: Int) -> CGRect {
+        let metrics = textInputGridMetrics()
+        let safeIndex = min(max(index, 0), metrics.length - 1)
+        let row = safeIndex / metrics.cols
+        let col = safeIndex % metrics.cols
+        let x = CGFloat(col) * metrics.cellSize.width
+        let y = CGFloat(row) * metrics.cellSize.height
+        return CGRect(x: x, y: y, width: metrics.cellSize.width, height: metrics.cellSize.height)
+    }
+
+    private func sendCursorMovement(from oldIndex: Int, to newIndex: Int) {
+        let metrics = textInputGridMetrics()
+        let oldSafe = min(max(oldIndex, 0), metrics.length - 1)
+        let newSafe = min(max(newIndex, 0), metrics.length - 1)
+        let oldRow = oldSafe / metrics.cols
+        let oldCol = oldSafe % metrics.cols
+        let newRow = newSafe / metrics.cols
+        let newCol = newSafe % metrics.cols
+
+        let rowDelta = newRow - oldRow
+        let colDelta = newCol - oldCol
+
+        if rowDelta != 0 {
+            let key: Ghostty.Input.Key = rowDelta > 0 ? .arrowDown : .arrowUp
+            for _ in 0..<abs(rowDelta) {
+                sendKeyPress(key)
+            }
+        }
+        if colDelta != 0 {
+            let key: Ghostty.Input.Key = colDelta > 0 ? .arrowRight : .arrowLeft
+            for _ in 0..<abs(colDelta) {
+                sendKeyPress(key)
+            }
+        }
     }
 
     // MARK: - UIView Overrides
@@ -476,6 +577,9 @@ class GhosttyTerminalView: UIView {
         let result = super.becomeFirstResponder()
         if result, let surface = surface?.unsafeCValue {
             ghostty_surface_set_focus(surface, true)
+        }
+        if result {
+            resetTextInputCursorIfNeeded()
         }
         return result
     }
@@ -1480,8 +1584,16 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func updateBackgroundEffect() {
         guard let backgroundEffectView else { return }
+        updateInterfaceStyle()
         backgroundEffectView.effect = nil
         backgroundEffectView.backgroundColor = resolveThemeBackgroundColor()
+    }
+
+    private func updateInterfaceStyle() {
+        if #available(iOS 13.0, *) {
+            let style = window?.traitCollection.userInterfaceStyle ?? traitCollection.userInterfaceStyle
+            overrideUserInterfaceStyle = style == .unspecified ? .unspecified : style
+        }
     }
 
     private func observeThemeChanges() {
@@ -1882,6 +1994,16 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
         set { }
     }
 
+    var keyboardAppearance: UIKeyboardAppearance {
+        get {
+            if #available(iOS 13.0, *) {
+                return traitCollection.userInterfaceStyle == .dark ? .dark : .light
+            }
+            return .default
+        }
+        set { }
+    }
+
     var autocorrectionType: UITextAutocorrectionType {
         get { .no }
         set { }
@@ -1920,6 +2042,241 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
     var returnKeyType: UIReturnKeyType {
         get { .default }
         set { }
+    }
+}
+
+// MARK: - UITextInput (spacebar cursor control)
+
+private final class TerminalTextPosition: UITextPosition {
+    let index: Int
+
+    init(_ index: Int) {
+        self.index = index
+    }
+}
+
+private final class TerminalTextRange: UITextRange {
+    let startPosition: TerminalTextPosition
+    let endPosition: TerminalTextPosition
+
+    init(start: TerminalTextPosition, end: TerminalTextPosition) {
+        self.startPosition = start
+        self.endPosition = end
+    }
+
+    override var start: UITextPosition { startPosition }
+    override var end: UITextPosition { endPosition }
+    override var isEmpty: Bool { startPosition.index == endPosition.index }
+}
+
+extension GhosttyTerminalView: UITextInput {
+    var selectedTextRange: UITextRange? {
+        get {
+            if let selectedTextRangeInternal {
+                return selectedTextRangeInternal
+            }
+            resetTextInputCursorIfNeeded()
+            return selectedTextRangeInternal
+        }
+        set {
+            guard let range = newValue as? TerminalTextRange else { return }
+            textInputDelegate?.selectionWillChange(self)
+            let oldIndex = textInputCursorIndex
+            let newIndex = clampTextInputIndex(min(range.startPosition.index, range.endPosition.index))
+            textInputCursorIndex = newIndex
+            selectedTextRangeInternal = TerminalTextRange(
+                start: TerminalTextPosition(newIndex),
+                end: TerminalTextPosition(newIndex)
+            )
+            if oldIndex != newIndex {
+                sendCursorMovement(from: oldIndex, to: newIndex)
+            }
+            textInputDelegate?.selectionDidChange(self)
+        }
+    }
+
+    var markedTextRange: UITextRange? {
+        markedTextRangeInternal
+    }
+
+    var markedTextStyle: [NSAttributedString.Key: Any]? {
+        get { nil }
+        set { }
+    }
+
+    var inputDelegate: UITextInputDelegate? {
+        get { textInputDelegate }
+        set { textInputDelegate = newValue }
+    }
+
+    var tokenizer: UITextInputTokenizer {
+        textInputTokenizer
+    }
+
+    var beginningOfDocument: UITextPosition {
+        TerminalTextPosition(0)
+    }
+
+    var endOfDocument: UITextPosition {
+        TerminalTextPosition(textInputGridMetrics().length)
+    }
+
+    func text(in range: UITextRange) -> String? {
+        guard let range = range as? TerminalTextRange else { return nil }
+        let length = max(0, range.endPosition.index - range.startPosition.index)
+        return String(repeating: " ", count: length)
+    }
+
+    func replace(_ range: UITextRange, withText text: String) {
+        sendText(text)
+        let delta = text.count
+        if delta > 0 {
+            let newIndex = clampTextInputIndex(textInputCursorIndex + delta)
+            textInputCursorIndex = newIndex
+            selectedTextRangeInternal = TerminalTextRange(
+                start: TerminalTextPosition(newIndex),
+                end: TerminalTextPosition(newIndex)
+            )
+        }
+        textInputDelegate?.textDidChange(self)
+    }
+
+    func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
+        if let markedText {
+            self.markedText = markedText
+            let start = clampTextInputIndex(textInputCursorIndex)
+            let end = clampTextInputIndex(start + selectedRange.length)
+            markedTextRangeInternal = TerminalTextRange(
+                start: TerminalTextPosition(start),
+                end: TerminalTextPosition(end)
+            )
+        } else {
+            self.markedText = ""
+            markedTextRangeInternal = nil
+        }
+        textInputDelegate?.textDidChange(self)
+    }
+
+    func unmarkText() {
+        markedText = ""
+        markedTextRangeInternal = nil
+    }
+
+    func textRange(from fromPosition: UITextPosition, to toPosition: UITextPosition) -> UITextRange? {
+        guard let from = fromPosition as? TerminalTextPosition,
+              let to = toPosition as? TerminalTextPosition else { return nil }
+        return TerminalTextRange(start: from, end: to)
+    }
+
+    func position(from position: UITextPosition, offset: Int) -> UITextPosition? {
+        guard let position = position as? TerminalTextPosition else { return nil }
+        let newIndex = clampTextInputIndex(position.index + offset)
+        return TerminalTextPosition(newIndex)
+    }
+
+    func position(from position: UITextPosition, in direction: UITextLayoutDirection, offset: Int) -> UITextPosition? {
+        guard let position = position as? TerminalTextPosition else { return nil }
+        let metrics = textInputGridMetrics()
+        let delta: Int
+        switch direction {
+        case .left:
+            delta = -offset
+        case .right:
+            delta = offset
+        case .up:
+            delta = -offset * metrics.cols
+        case .down:
+            delta = offset * metrics.cols
+        @unknown default:
+            delta = 0
+        }
+        let newIndex = clampTextInputIndex(position.index + delta)
+        return TerminalTextPosition(newIndex)
+    }
+
+    func compare(_ position: UITextPosition, to other: UITextPosition) -> ComparisonResult {
+        guard let left = position as? TerminalTextPosition,
+              let right = other as? TerminalTextPosition else { return .orderedSame }
+        if left.index < right.index { return .orderedAscending }
+        if left.index > right.index { return .orderedDescending }
+        return .orderedSame
+    }
+
+    func offset(from: UITextPosition, to other: UITextPosition) -> Int {
+        guard let from = from as? TerminalTextPosition,
+              let to = other as? TerminalTextPosition else { return 0 }
+        return to.index - from.index
+    }
+
+    func position(within range: UITextRange, farthestIn direction: UITextLayoutDirection) -> UITextPosition? {
+        guard let range = range as? TerminalTextRange else { return nil }
+        switch direction {
+        case .left, .up:
+            return range.start
+        case .right, .down:
+            return range.end
+        @unknown default:
+            return range.start
+        }
+    }
+
+    func characterRange(byExtending position: UITextPosition, in direction: UITextLayoutDirection) -> UITextRange? {
+        guard let position = position as? TerminalTextPosition else { return nil }
+        let start = TerminalTextPosition(position.index)
+        let endIndex: Int
+        switch direction {
+        case .left, .up:
+            endIndex = clampTextInputIndex(position.index - 1)
+        case .right, .down:
+            endIndex = clampTextInputIndex(position.index + 1)
+        @unknown default:
+            endIndex = position.index
+        }
+        let end = TerminalTextPosition(endIndex)
+        return TerminalTextRange(start: start, end: end)
+    }
+
+    func baseWritingDirection(for position: UITextPosition, in direction: UITextStorageDirection) -> UITextWritingDirection {
+        return .leftToRight
+    }
+
+    func setBaseWritingDirection(_ writingDirection: UITextWritingDirection, for range: UITextRange) {
+        // No-op.
+    }
+
+    func firstRect(for range: UITextRange) -> CGRect {
+        guard let range = range as? TerminalTextRange else { return .zero }
+        return textInputCaretRect(for: range.startPosition.index)
+    }
+
+    func caretRect(for position: UITextPosition) -> CGRect {
+        guard let position = position as? TerminalTextPosition else { return .zero }
+        return textInputCaretRect(for: position.index)
+    }
+
+    func selectionRects(for range: UITextRange) -> [UITextSelectionRect] {
+        return []
+    }
+
+    func closestPosition(to point: CGPoint) -> UITextPosition? {
+        let metrics = textInputGridMetrics()
+        let col = min(max(Int(point.x / metrics.cellSize.width), 0), metrics.cols - 1)
+        let row = min(max(Int(point.y / metrics.cellSize.height), 0), metrics.rows - 1)
+        let index = clampTextInputIndex(row * metrics.cols + col)
+        return TerminalTextPosition(index)
+    }
+
+    func closestPosition(to point: CGPoint, within range: UITextRange) -> UITextPosition? {
+        guard let range = range as? TerminalTextRange else { return closestPosition(to: point) }
+        let position = closestPosition(to: point) as? TerminalTextPosition
+        let index = position?.index ?? range.startPosition.index
+        let clamped = min(max(index, range.startPosition.index), range.endPosition.index)
+        return TerminalTextPosition(clamped)
+    }
+
+    func characterRange(at point: CGPoint) -> UITextRange? {
+        guard let position = closestPosition(to: point) as? TerminalTextPosition else { return nil }
+        return TerminalTextRange(start: position, end: position)
     }
 }
 
