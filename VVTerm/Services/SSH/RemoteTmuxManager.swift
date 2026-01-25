@@ -3,14 +3,14 @@ import Foundation
 actor RemoteTmuxManager {
     static let shared = RemoteTmuxManager()
 
-    private let configDirectory = "~/.vivyterm"
-    private let configPath = "~/.vivyterm/tmux.conf"
+    private let configDirectory = "~/.vvterm"
+    private let configPath = "~/.vvterm/tmux.conf"
 
     private init() {}
 
     func isTmuxAvailable(using client: SSHClient) async -> Bool {
-        let okMarker = "__VIVYTERM_TMUX_OK__"
-        let body = "\(shellPathExport()); if command -v tmux >/dev/null 2>&1; then printf '\(okMarker)'; else printf '__VIVYTERM_TMUX_NO__'; fi"
+        let okMarker = "__VVTERM_TMUX_OK__"
+        let body = "\(shellPathExport()); if command -v tmux >/dev/null 2>&1; then printf '\(okMarker)'; else printf '__VVTERM_TMUX_NO__'; fi"
         let command = "sh -lc \(shellQuoted(body))"
         let output = try? await client.execute(command)
         return output?.contains(okMarker) == true
@@ -101,7 +101,7 @@ actor RemoteTmuxManager {
         let body = """
         \(shellPathExport());
         if command -v tmux >/dev/null 2>&1; then
-          tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null | awk '$1 ~ /^vivyterm_[0-9a-fA-F-]+$/ && $2 == 0 { print $1 }' | while IFS= read -r name; do
+          tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null | awk '$1 ~ /^vvterm_[0-9a-fA-F-]+$/ && $2 == 0 { print $1 }' | while IFS= read -r name; do
             tmux kill-session -t "$name" 2>/dev/null || true;
           done;
         fi
@@ -115,7 +115,7 @@ actor RemoteTmuxManager {
         let command = "sh -lc \(shellQuoted(body))"
         guard let output = try? await client.execute(command) else { return }
 
-        let prefix = "vivyterm_\(deviceId)_"
+        let prefix = "vvterm_\(deviceId)_"
         let keep = sessionNames
 
         for line in output.split(separator: "\n") {

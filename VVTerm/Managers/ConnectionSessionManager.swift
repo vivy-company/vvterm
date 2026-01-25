@@ -747,7 +747,7 @@ extension ConnectionSessionManager {
     }
 
     private func tmuxSessionName(for sessionId: UUID) -> String {
-        "vivyterm_\(DeviceIdentity.id)_\(sessionId.uuidString)"
+        "vvterm_\(DeviceIdentity.id)_\(sessionId.uuidString)"
     }
 
     private func resolveTmuxWorkingDirectory(for sessionId: UUID, using client: SSHClient) async -> String {

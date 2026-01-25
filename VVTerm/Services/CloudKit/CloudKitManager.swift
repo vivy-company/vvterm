@@ -25,10 +25,10 @@ final class CloudKitManager: ObservableObject {
     private let container: CKContainer
     private let database: CKDatabase
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CloudKit")
-    private let recordZoneName = "VivyTermZone"
+    private let recordZoneName = "VVTermZone"
     private lazy var recordZone = CKRecordZone(zoneName: recordZoneName)
     private var recordZoneID: CKRecordZone.ID { recordZone.zoneID }
-    private lazy var changeTokenKey = "com.vivy.vivyterm.cloudkit.\(recordZoneName).token"
+    private lazy var changeTokenKey = "com.vivy.vvterm.cloudkit.\(recordZoneName).token"
 
     // Record types
     private enum RecordType {

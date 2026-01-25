@@ -458,7 +458,7 @@ final class TerminalTabManager: ObservableObject {
     }
 
     private func tmuxSessionName(for paneId: UUID) -> String {
-        "vivyterm_\(DeviceIdentity.id)_\(paneId.uuidString)"
+        "vvterm_\(DeviceIdentity.id)_\(paneId.uuidString)"
     }
 
     private func resolveTmuxWorkingDirectory(for paneId: UUID, using client: SSHClient) async -> String {

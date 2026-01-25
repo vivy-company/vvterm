@@ -18,7 +18,7 @@ class ViewTabConfigurationManager: ObservableObject {
     private let defaults: UserDefaults
     private let orderKey = "connectionViewTabOrder"
     private let defaultTabKey = "connectionDefaultViewTab"
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.vivy.vivyterm", category: "ViewTabConfigurationManager")
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.vivy.vvterm", category: "ViewTabConfigurationManager")
 
     @Published private(set) var tabOrder: [ConnectionViewTab] = ConnectionViewTab.defaultOrder
     @Published private(set) var defaultTab: String = "stats"
