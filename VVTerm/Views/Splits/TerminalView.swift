@@ -91,12 +91,6 @@ struct TerminalTabView: View {
         .focusedValue(\.activeServerId, isSelected ? server.id : nil)
         .focusedValue(\.activePaneId, isSelected ? tab.focusedPaneId : nil)
         .focusedSceneValue(\.terminalSplitActions, splitActions)
-        .onReceive(NotificationCenter.default.publisher(for: .closeTerminalPane)) { _ in
-            // Only handle if this tab is selected
-            if isSelected {
-                requestClosePane()
-            }
-        }
         .confirmationDialog(
             "Close this terminal?",
             isPresented: $showingCloseConfirmation,

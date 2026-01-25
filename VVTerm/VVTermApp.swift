@@ -8,13 +8,6 @@ import SwiftUI
 import AppKit
 #endif
 
-// MARK: - Notification Names
-
-extension Notification.Name {
-    static let newTerminalTab = Notification.Name("newTerminalTab")
-    static let closeTerminalPane = Notification.Name("closeTerminalPane")
-}
-
 @main
 struct VVTermApp: App {
     #if os(macOS)
@@ -43,7 +36,7 @@ struct VVTermApp: App {
     @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "main") {
             let appLocale = AppLanguage(rawValue: appLanguage)?.locale ?? Locale.current
             Group {
                 #if os(iOS)
@@ -89,46 +82,7 @@ struct VVTermApp: App {
         .windowToolbarStyle(.unified)
         .defaultSize(width: 1100, height: 700)
         .commands {
-            CommandGroup(replacing: .appInfo) {
-                Button("About VVTerm") {
-                    AboutWindowController.shared.show()
-                }
-            }
-
-            CommandGroup(replacing: .newItem) {
-                Button("New Tab") {
-                    // Open new tab handled by focused value
-                    NotificationCenter.default.post(name: .newTerminalTab, object: nil)
-                }
-                .keyboardShortcut("t", modifiers: .command)
-
-                Button("Close Tab") {
-                    NotificationCenter.default.post(name: .closeTerminalPane, object: nil)
-                }
-                .keyboardShortcut("w", modifiers: .command)
-            }
-
-            CommandGroup(replacing: .appSettings) {
-                Button("Settings...") {
-                    SettingsWindowManager.shared.show()
-                }
-                .keyboardShortcut(",", modifiers: .command)
-            }
-
-            CommandGroup(after: .windowArrangement) {
-                Button("Previous Tab") {
-                    ConnectionSessionManager.shared.selectPreviousSession()
-                }
-                .keyboardShortcut("[", modifiers: [.command, .shift])
-
-                Button("Next Tab") {
-                    ConnectionSessionManager.shared.selectNextSession()
-                }
-                .keyboardShortcut("]", modifiers: [.command, .shift])
-            }
-
-            // Split commands (Pro feature)
-            SplitCommands()
+            VVTermCommands()
         }
         #endif
     }
@@ -137,6 +91,64 @@ struct VVTermApp: App {
 // MARK: - macOS App Delegate
 
 #if os(macOS)
+struct VVTermCommands: Commands {
+    @Environment(\.openWindow) private var openWindow
+    @FocusedValue(\.openTerminalTab) private var openTerminalTab
+    @FocusedValue(\.terminalSplitActions) private var terminalSplitActions
+
+    var body: some Commands {
+        CommandGroup(replacing: .appInfo) {
+            Button("About VVTerm") {
+                AboutWindowController.shared.show()
+            }
+        }
+
+        CommandGroup(replacing: .newItem) {
+            Button("New Window") {
+                openWindow(id: "main")
+                NSApp.activate(ignoringOtherApps: true)
+            }
+            .keyboardShortcut("n", modifiers: .command)
+
+            Divider()
+
+            Button("New Tab") {
+                openTerminalTab?()
+            }
+            .keyboardShortcut("t", modifiers: .command)
+            .disabled(openTerminalTab == nil)
+
+            Button("Close Tab") {
+                terminalSplitActions?.closePane()
+            }
+            .keyboardShortcut("w", modifiers: .command)
+            .disabled(terminalSplitActions == nil)
+        }
+
+        CommandGroup(replacing: .appSettings) {
+            Button("Settings...") {
+                SettingsWindowManager.shared.show()
+            }
+            .keyboardShortcut(",", modifiers: .command)
+        }
+
+        CommandGroup(after: .windowArrangement) {
+            Button("Previous Tab") {
+                ConnectionSessionManager.shared.selectPreviousSession()
+            }
+            .keyboardShortcut("[", modifiers: [.command, .shift])
+
+            Button("Next Tab") {
+                ConnectionSessionManager.shared.selectNextSession()
+            }
+            .keyboardShortcut("]", modifiers: [.command, .shift])
+        }
+
+        // Split commands (Pro feature)
+        SplitCommands()
+    }
+}
+
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Subscribe to CloudKit changes

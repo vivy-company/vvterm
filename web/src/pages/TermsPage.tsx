@@ -7,14 +7,14 @@ export function TermsPage() {
         <a href="/" className="inline-block mb-8">
           <img src="/logo.png" alt="VVTerm" className="w-12 h-12 rounded-xl" />
         </a>
-        <h1 className="text-4xl font-semibold tracking-tight mb-2">Terms of Service</h1>
+        <h1 className="text-4xl font-semibold tracking-tight mb-2">Terms of Use (EULA)</h1>
         <p className="text-[#86868b] mb-8">Last updated: January 15, 2026</p>
 
         <div className="prose prose-invert max-w-none space-y-6 text-[#86868b]">
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h2>
             <p>
-              By downloading, installing, or using VVTerm ("the App"), you agree to be bound by these Terms of Service.
+              By downloading, installing, or using VVTerm ("the App"), you agree to be bound by these Terms of Use (EULA).
               If you do not agree to these terms, do not use the App.
             </p>
           </section>

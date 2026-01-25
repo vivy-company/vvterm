@@ -293,7 +293,7 @@ function AppContent() {
               Privacy
             </a>
             <a href="/terms" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">
-              Terms
+              Terms of Use (EULA)
             </a>
             <a href="/refund" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">
               Refunds
