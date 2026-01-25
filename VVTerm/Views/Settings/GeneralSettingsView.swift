@@ -8,6 +8,9 @@ import os.log
 #if os(macOS)
 import AppKit
 #endif
+#if os(iOS)
+import UIKit
+#endif
 
 enum AppearanceMode: String, CaseIterable {
     case system = "system"
@@ -44,12 +47,116 @@ struct AppearanceModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
+        let mode = AppearanceMode(rawValue: appearanceMode) ?? .system
+        #if os(iOS)
         content
-            .preferredColorScheme(colorScheme)
+            .background(
+                AppearanceWindowBridge(mode: mode)
+                    .frame(width: 0, height: 0)
+            )
+        #else
+        content
+            .preferredColorScheme(mode.colorScheme)
+            .background(
+                AppearanceWindowBridge(mode: mode)
+                    .frame(width: 0, height: 0)
+            )
+        #endif
     }
 }
 
 // MARK: - Appearance Picker View
+
+#if os(macOS)
+struct AppearanceWindowBridge: NSViewRepresentable {
+    let mode: AppearanceMode
+
+    func makeNSView(context: Context) -> NSView {
+        NSView(frame: .zero)
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {
+        guard let window = nsView.window else { return }
+
+        let targetName: NSAppearance.Name? = {
+            switch mode {
+            case .system:
+                return nil
+            case .light:
+                return .aqua
+            case .dark:
+                return .darkAqua
+            }
+        }()
+
+        if window.appearance?.name != targetName {
+            window.appearance = targetName.flatMap(NSAppearance.init(named:))
+        }
+    }
+}
+#endif
+
+#if os(iOS)
+final class AppearanceWindowController: UIViewController {
+    var mode: AppearanceMode = .system
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        applyAppearance()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        applyAppearance()
+    }
+
+    func applyAppearance() {
+        let targetStyle: UIUserInterfaceStyle = {
+            switch mode {
+            case .system:
+                return .unspecified
+            case .light:
+                return .light
+            case .dark:
+                return .dark
+            }
+        }()
+
+        if let controller = topHostingController(),
+           controller.overrideUserInterfaceStyle != targetStyle {
+            controller.overrideUserInterfaceStyle = targetStyle
+            return
+        }
+
+        if let window = view.window, window.overrideUserInterfaceStyle != targetStyle {
+            window.overrideUserInterfaceStyle = targetStyle
+        }
+    }
+
+    private func topHostingController() -> UIViewController? {
+        var controller: UIViewController? = self
+        while let parent = controller?.parent {
+            controller = parent
+        }
+        return controller
+    }
+}
+
+struct AppearanceWindowBridge: UIViewControllerRepresentable {
+    let mode: AppearanceMode
+
+    func makeUIViewController(context: Context) -> AppearanceWindowController {
+        let controller = AppearanceWindowController()
+        controller.view.isHidden = true
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: AppearanceWindowController, context: Context) {
+        uiViewController.mode = mode
+        uiViewController.applyAppearance()
+    }
+}
+#endif
 
 struct AppearancePickerView: View {
     @Binding var selection: String

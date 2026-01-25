@@ -11,6 +11,7 @@ import Metal
 import OSLog
 import SwiftUI
 import IOSurface
+import CoreImage
 
 /// UIView that embeds a Ghostty terminal surface with Metal rendering
 ///
@@ -1584,16 +1585,41 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func updateBackgroundEffect() {
         guard let backgroundEffectView else { return }
-        updateInterfaceStyle()
+        let backgroundColor = resolveThemeBackgroundColor()
+        updateInterfaceStyle(for: backgroundColor)
         backgroundEffectView.effect = nil
-        backgroundEffectView.backgroundColor = resolveThemeBackgroundColor()
+        backgroundEffectView.backgroundColor = backgroundColor
     }
 
-    private func updateInterfaceStyle() {
+    private func updateInterfaceStyle(for backgroundColor: UIColor) {
         if #available(iOS 13.0, *) {
-            let style = window?.traitCollection.userInterfaceStyle ?? traitCollection.userInterfaceStyle
-            overrideUserInterfaceStyle = style == .unspecified ? .unspecified : style
+            let resolved = backgroundColor.resolvedColor(with: traitCollection)
+            if let isDark = isDarkBackgroundColor(resolved) {
+                overrideUserInterfaceStyle = isDark ? .dark : .light
+            } else {
+                let style = window?.traitCollection.userInterfaceStyle ?? traitCollection.userInterfaceStyle
+                overrideUserInterfaceStyle = style == .unspecified ? .unspecified : style
+            }
         }
+    }
+
+    private func isDarkBackgroundColor(_ color: UIColor) -> Bool? {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        if color.getRed(&red, green: &green, blue: &blue, alpha: &alpha) {
+            let luminance = (0.2126 * red) + (0.7152 * green) + (0.0722 * blue)
+            return luminance < 0.55
+        }
+
+        if #available(iOS 13.0, *) {
+            let ciColor = CIColor(color: color)
+            let luminance = (0.2126 * ciColor.red) + (0.7152 * ciColor.green) + (0.0722 * ciColor.blue)
+            return luminance < 0.55
+        }
+
+        return nil
     }
 
     private func observeThemeChanges() {

@@ -6,6 +6,8 @@
 import SwiftUI
 #if os(macOS)
 import AppKit
+#elseif os(iOS)
+import UIKit
 #endif
 
 // MARK: - Connection Terminal Container
@@ -16,12 +18,15 @@ struct ConnectionTerminalContainer: View {
     let server: Server
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
+    @Environment(\.colorScheme) private var colorScheme
 
     /// Cached terminal background color from theme
-    @State private var terminalBackgroundColor: Color?
+    @State private var terminalBackgroundColor: Color = .black
 
     /// Theme name from settings
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
 
     /// Disconnect confirmation
     @State private var showingDisconnectConfirmation = false
@@ -32,6 +37,11 @@ struct ConnectionTerminalContainer: View {
     /// Selected view type - persisted per server
     private var selectedView: String {
         tabManager.selectedViewByServer[server.id] ?? "stats"
+    }
+
+    private var effectiveThemeName: String {
+        guard usePerAppearanceTheme else { return terminalThemeName }
+        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
     }
 
     private var selectedViewBinding: Binding<String> {
@@ -121,14 +131,23 @@ struct ConnectionTerminalContainer: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(selectedView == "terminal" ? terminalBackgroundColor : nil)
         .onAppear {
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName)
+            updateTerminalBackgroundColor()
             // Select first tab if none selected
             if selectedTabId == nil {
                 selectedTabIdBinding.wrappedValue = serverTabs.first?.id
             }
         }
         .onChange(of: terminalThemeName) { _ in
-            terminalBackgroundColor = ThemeColorParser.backgroundColor(for: terminalThemeName)
+            updateTerminalBackgroundColor()
+        }
+        .onChange(of: terminalThemeNameLight) { _ in
+            updateTerminalBackgroundColor()
+        }
+        .onChange(of: usePerAppearanceTheme) { _ in
+            updateTerminalBackgroundColor()
+        }
+        .onChange(of: colorScheme) { _ in
+            updateTerminalBackgroundColor()
         }
         .onChange(of: serverTabs.count) { _ in
             // Auto-select if current selection is invalid
@@ -162,6 +181,27 @@ struct ConnectionTerminalContainer: View {
         }
         let tab = tabManager.openTab(for: server)
         selectedTabIdBinding.wrappedValue = tab.id
+    }
+
+    private func updateTerminalBackgroundColor() {
+        let themeName = effectiveThemeName
+        Task.detached(priority: .utility) {
+            let resolved = ThemeColorParser.backgroundColor(for: themeName)
+            await MainActor.run {
+                if let color = resolved {
+                    terminalBackgroundColor = color
+                    UserDefaults.standard.set(color.toHex(), forKey: "terminalBackgroundColor")
+                } else {
+                    #if os(macOS)
+                    terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
+                    #elseif os(iOS)
+                    terminalBackgroundColor = Color(UIColor.systemBackground)
+                    #else
+                    terminalBackgroundColor = .black
+                    #endif
+                }
+            }
+        }
     }
 
     // MARK: - Toolbar Items (macOS)
