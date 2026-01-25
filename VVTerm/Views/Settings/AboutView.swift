@@ -102,6 +102,13 @@ struct AboutView: View {
                     isSystemImage: true,
                     url: "https://vvterm.com/privacy"
                 )
+
+                LinkButton(
+                    title: String(localized: "Terms of Use (EULA)"),
+                    icon: "doc.text",
+                    isSystemImage: true,
+                    url: "https://vvterm.com/terms"
+                )
             }
             .padding(.horizontal, 32)
             .padding(.bottom, 24)

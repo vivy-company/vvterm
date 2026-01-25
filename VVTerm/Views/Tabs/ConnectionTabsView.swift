@@ -137,6 +137,7 @@ struct ConnectionTerminalContainer: View {
             }
         }
         #if os(macOS)
+        .focusedValue(\.openTerminalTab, handleNewTabCommand)
         .toolbar {
             viewPickerToolbarItem
             if selectedView == "terminal" && !serverTabs.isEmpty {
@@ -147,6 +148,11 @@ struct ConnectionTerminalContainer: View {
         }
         #endif
         .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
+    }
+
+    private func handleNewTabCommand() {
+        tabManager.selectedViewByServer[server.id] = "terminal"
+        openNewTab()
     }
 
     private func openNewTab() {

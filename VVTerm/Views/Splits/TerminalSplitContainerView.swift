@@ -75,6 +75,10 @@ struct TerminalSplitActionsKey: FocusedValueKey {
     typealias Value = TerminalSplitActions
 }
 
+struct OpenTerminalTabActionKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+
 extension FocusedValues {
     var activeServerId: UUID? {
         get { self[ActiveServerIdKey.self] }
@@ -89,6 +93,11 @@ extension FocusedValues {
     var terminalSplitActions: TerminalSplitActions? {
         get { self[TerminalSplitActionsKey.self] }
         set { self[TerminalSplitActionsKey.self] = newValue }
+    }
+
+    var openTerminalTab: (() -> Void)? {
+        get { self[OpenTerminalTabActionKey.self] }
+        set { self[OpenTerminalTabActionKey.self] = newValue }
     }
 }
 

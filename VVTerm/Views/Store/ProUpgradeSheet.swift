@@ -428,7 +428,7 @@ struct ProUpgradeSheet: View {
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 10) {
-                legalLink(title: "Terms of Service", url: "https://vvterm.com/terms")
+                legalLink(title: "Terms of Use (EULA)", url: "https://vvterm.com/terms")
                 Text(verbatim: "•")
                     .foregroundStyle(.tertiary)
                 legalLink(title: "Privacy Policy", url: "https://vvterm.com/privacy")
