@@ -1,8 +1,8 @@
 import Foundation
 
 enum DeviceIdentity {
-    private static let storageKey = "vivyterm.deviceId"
-    private static let keychain = KeychainStore(service: "app.vivy.VivyTerm")
+    private static let storageKey = "vvterm.deviceId"
+    private static let keychain = KeychainStore(service: "app.vivy.vvterm")
 
     static let id: String = {
         let storedValue = (try? keychain.getString(storageKey)) ?? nil

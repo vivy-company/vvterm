@@ -86,7 +86,7 @@ class SpeechRecognitionService: ObservableObject {
         recognitionTask = nil
 
         let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("vivyterm-transcription-\(UUID().uuidString)")
+            .appendingPathComponent("vvterm-transcription-\(UUID().uuidString)")
             .appendingPathExtension("caf")
 
         let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1)!

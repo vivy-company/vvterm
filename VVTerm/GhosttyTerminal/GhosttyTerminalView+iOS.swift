@@ -83,7 +83,7 @@ class GhosttyTerminalView: UIView {
     /// Current scrollbar state from Ghostty core
     var scrollbar: Ghostty.Action.Scrollbar?
 
-    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm", category: "GhosttyTerminal")
+    private static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.vvterm", category: "GhosttyTerminal")
 
     private var isSelecting = false
     private var isScrolling = false

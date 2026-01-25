@@ -18,7 +18,7 @@ import SwiftUI
 // MARK: - Ghostty Namespace
 
 enum Ghostty {
-    static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm", category: "Ghostty")
+    static let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.vvterm", category: "Ghostty")
 
     /// Notification posted when terminal config is reloaded and views should refresh
     static let configDidReloadNotification = Notification.Name("GhosttyConfigDidReload")

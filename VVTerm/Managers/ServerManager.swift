@@ -20,8 +20,8 @@ final class ServerManager: ObservableObject {
     private var isSyncEnabled: Bool { SyncSettings.isEnabled }
 
     // Local storage keys
-    private let serversKey = "com.vivy.vivyterm.servers"
-    private let workspacesKey = "com.vivy.vivyterm.workspaces"
+    private let serversKey = "com.vivy.vvterm.servers"
+    private let workspacesKey = "com.vivy.vvterm.workspaces"
 
     private init() {
         // Load local data first (fast)

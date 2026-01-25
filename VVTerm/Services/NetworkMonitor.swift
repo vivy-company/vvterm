@@ -15,7 +15,7 @@ final class NetworkMonitor: ObservableObject {
     @Published private(set) var isConstrained: Bool = false
 
     private let monitor: NWPathMonitor
-    private let queue = DispatchQueue(label: "com.vivy.vivyterm.networkmonitor")
+    private let queue = DispatchQueue(label: "com.vivy.vvterm.networkmonitor")
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Network")
 
     enum ConnectionType: String {

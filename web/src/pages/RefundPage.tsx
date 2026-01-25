@@ -12,42 +12,25 @@ export function RefundPage() {
 
         <div className="prose prose-invert max-w-none space-y-6 text-[#86868b]">
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">30-Day Money-Back Guarantee</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">Refunds for App Store Purchases</h2>
             <p>
-              We want you to be completely satisfied with VVTerm Pro. If you're not happy with your purchase
-              for any reason, you can request a full refund within 30 days of your purchase date.
+              VVTerm Pro is sold through Apple’s App Store. Apple handles billing and refunds, and eligibility is
+              determined by Apple’s policies.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">How to Request a Refund</h2>
-            <p>Since VVTerm is distributed through the App Store, you have two options:</p>
-
-            <h3 className="text-lg font-medium text-white mb-2 mt-4">Option 1: Through Apple</h3>
+            <p>To request a refund, use Apple’s official process:</p>
             <ol className="list-decimal list-inside space-y-2 mt-2">
               <li>Go to <a href="https://reportaproblem.apple.com" className="text-blue-500 hover:underline">reportaproblem.apple.com</a></li>
               <li>Sign in with your Apple ID</li>
               <li>Find your VVTerm Pro purchase</li>
               <li>Select "Request a refund" and follow the prompts</li>
             </ol>
-
-            <h3 className="text-lg font-medium text-white mb-2 mt-4">Option 2: Contact Us</h3>
-            <ol className="list-decimal list-inside space-y-2 mt-2">
-              <li>Email us at <a href="mailto:vvterm@vivy.company" className="text-blue-500 hover:underline">vvterm@vivy.company</a></li>
-              <li>Include your Apple ID email and approximate purchase date</li>
-              <li>Let us know why you're requesting a refund (optional, but helps us improve)</li>
-            </ol>
             <p className="mt-4">
-              We'll work with Apple to process your refund within 5-7 business days.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-semibold text-white mb-3">After the 30-Day Period</h2>
-            <p>
-              Refunds are generally not available after the 30-day period. However, if you experience technical issues
-              that prevent you from using the app, please contact our support team and we'll do our best
-              to resolve the issue or assist with a refund request to Apple.
+              We’re unable to issue refunds directly, but if you’re having trouble using the app,
+              contact us and we’ll do our best to help.
             </p>
           </section>
 
@@ -74,14 +57,14 @@ export function RefundPage() {
             <h2 className="text-xl font-semibold text-white mb-3">Lifetime Purchases</h2>
             <p>
               Lifetime Pro purchases are one-time and do not require cancellation.
-              Refunds for lifetime purchases follow the same 30-day policy above.
+              Refunds are handled by Apple using the same process above.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">Contact Us</h2>
             <p>
-              Questions about our refund policy? Contact us at:{" "}
+              Questions or technical issues? Contact us at:{" "}
               <a href="mailto:vvterm@vivy.company" className="text-blue-500 hover:underline">vvterm@vivy.company</a>
             </p>
           </section>

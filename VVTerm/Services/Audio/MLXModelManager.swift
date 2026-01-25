@@ -109,9 +109,10 @@ final class MLXModelManager: NSObject, ObservableObject {
             .appendingPathComponent("vvterm", isDirectory: true)
             .appendingPathComponent("models", isDirectory: true)
         #else
-        let home = FileManager.default.homeDirectoryForCurrentUser
-        return home
-            .appendingPathComponent(".vivyterm", isDirectory: true)
+        // On macOS App Store builds, keep models inside the sandbox container.
+        let appSupportDir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+        return appSupportDir
+            .appendingPathComponent("VVTerm", isDirectory: true)
             .appendingPathComponent("models", isDirectory: true)
         #endif
     }
