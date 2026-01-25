@@ -31,7 +31,7 @@ struct TerminalStatusCard<Content: View>: View {
             content
                 .frame(maxWidth: maxWidth)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .padding(.vertical, contentVerticalPadding)
                 .background(cardBackground)
                 .overlay(cardBorder)
                 .shadow(color: shadowColor, radius: 18, x: 0, y: 10)
@@ -73,6 +73,14 @@ struct TerminalStatusCard<Content: View>: View {
 
     private var shadowColor: Color {
         Color.black.opacity(colorScheme == .dark ? 0.45 : 0.2)
+    }
+
+    private var contentVerticalPadding: CGFloat {
+        #if os(iOS)
+        return 22
+        #else
+        return 16
+        #endif
     }
 }
 

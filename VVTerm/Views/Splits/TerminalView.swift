@@ -25,7 +25,10 @@ struct TerminalTabView: View {
     @State private var showingCloseConfirmation = false
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
+    @Environment(\.colorScheme) private var colorScheme
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
     @AppStorage("terminalVoiceButtonEnabled") private var voiceButtonEnabled = true
 
     @StateObject private var audioService = AudioService()
@@ -36,7 +39,12 @@ struct TerminalTabView: View {
     @State private var keyMonitor: Any?
 
     private var dividerColor: Color {
-        ThemeColorParser.splitDividerColor(for: terminalThemeName)
+        ThemeColorParser.splitDividerColor(for: effectiveThemeName)
+    }
+
+    private var effectiveThemeName: String {
+        guard usePerAppearanceTheme else { return terminalThemeName }
+        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
     }
 
     private var focusedTerminal: GhosttyTerminalView? {
@@ -363,12 +371,18 @@ struct TerminalPaneView: View {
     let onVoiceTrigger: () -> Void
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var isReady = false
     @State private var credentials: ServerCredentials?
     @State private var connectionError: String?
     @State private var reconnectToken = UUID()
     @State private var showingTmuxInstallPrompt = false
+    @State private var terminalBackgroundColor: Color = .black
+
+    @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
+    @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
+    @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
 
     private var paneState: TerminalPaneState? {
         TerminalTabManager.shared.paneStates[paneId]
@@ -392,9 +406,14 @@ struct TerminalPaneView: View {
         TerminalTabManager.shared.getTerminal(for: paneId) != nil
     }
 
+    private var effectiveThemeName: String {
+        guard usePerAppearanceTheme else { return terminalThemeName }
+        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    }
+
     var body: some View {
         ZStack {
-            Color.black
+            terminalBackgroundColor
 
             // Always render terminal when ready - no complex state checks
             // Terminal wrapper handles existence check internally
@@ -463,6 +482,7 @@ struct TerminalPaneView: View {
         }
         .opacity(isFocused ? 1.0 : 0.7)
         .task {
+            updateTerminalBackgroundColor()
             // If terminal exists, mark ready immediately
             if terminalExists {
                 isReady = true
@@ -477,6 +497,10 @@ struct TerminalPaneView: View {
                 showingTmuxInstallPrompt = true
             }
         }
+        .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
         .onChange(of: paneState?.tmuxStatus) { status in
             if status == .missing {
                 showingTmuxInstallPrompt = true
@@ -507,6 +531,21 @@ struct TerminalPaneView: View {
         reconnectToken = UUID()
         Task {
             await TerminalTabManager.shared.unregisterSSHClient(for: paneId)
+        }
+    }
+
+    private func updateTerminalBackgroundColor() {
+        let themeName = effectiveThemeName
+        Task.detached(priority: .utility) {
+            let resolved = ThemeColorParser.backgroundColor(for: themeName)
+            await MainActor.run {
+                if let color = resolved {
+                    terminalBackgroundColor = color
+                    UserDefaults.standard.set(color.toHex(), forKey: "terminalBackgroundColor")
+                } else {
+                    terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
+                }
+            }
         }
     }
 

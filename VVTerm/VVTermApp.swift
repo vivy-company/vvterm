@@ -10,6 +10,10 @@ import AppKit
 
 @main
 struct VVTermApp: App {
+    init() {
+        TerminalDefaults.applyIfNeeded()
+    }
+
     #if os(macOS)
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #else

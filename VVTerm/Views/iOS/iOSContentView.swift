@@ -132,6 +132,7 @@ struct iOSServerListView: View {
     @State private var lockedServerAlert: Server?
     @State private var navigationBarAppearanceToken = UUID()
     @State private var showingCustomEnvironmentAlert = false
+    @AppStorage("appearanceMode") private var appearanceMode = AppearanceMode.system.rawValue
 
     var body: some View {
         List {
