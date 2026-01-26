@@ -211,7 +211,7 @@ struct TerminalTabView: View {
     }
 
     private func handlePaneExit(paneId: UUID) {
-        tabManager.updatePaneState(paneId, connectionState: .failed(String(localized: "Disconnected")))
+        tabManager.updatePaneState(paneId, connectionState: .disconnected)
         Task {
             await tabManager.unregisterSSHClient(for: paneId)
         }
@@ -391,12 +391,8 @@ struct TerminalPaneView: View {
         TerminalTabManager.shared.paneStates[paneId]
     }
 
-    private var paneConnectionError: String? {
-        guard let state = paneState?.connectionState else { return nil }
-        if case .failed(let message) = state {
-            return message
-        }
-        return nil
+    private var connectionState: ConnectionState {
+        paneState?.connectionState ?? .idle
     }
 
     /// Should this pane actually have focus (both tab selected AND pane focused)
@@ -434,7 +430,7 @@ struct TerminalPaneView: View {
                 .onTapGesture { onFocus() }
             }
 
-            let displayError = connectionError ?? paneConnectionError
+            let displayError = connectionError
             if let error = displayError {
                 TerminalStatusCard {
                     VStack(spacing: 16) {
@@ -453,15 +449,79 @@ struct TerminalPaneView: View {
                     }
                     .multilineTextAlignment(.center)
                 }
-            } else if !isReady && !terminalExists {
-                TerminalStatusCard {
-                    VStack(spacing: 12) {
-                        ProgressView()
-                            .progressViewStyle(.circular)
-                        Text(String(format: String(localized: "Connecting to %@..."), server.name))
-                            .foregroundStyle(.secondary)
+            } else {
+                switch connectionState {
+                case .connecting:
+                    TerminalStatusCard {
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text(String(format: String(localized: "Connecting to %@..."), server.name))
+                                .foregroundStyle(.secondary)
+                        }
+                        .multilineTextAlignment(.center)
                     }
-                    .multilineTextAlignment(.center)
+                case .reconnecting(let attempt):
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(.circular)
+                            Text(String(format: String(localized: "Reconnecting (attempt %lld)..."), Int64(attempt)))
+                                .foregroundStyle(.orange)
+                        }
+                        .multilineTextAlignment(.center)
+                    }
+                case .disconnected:
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            Image(systemName: "bolt.slash")
+                                .font(.largeTitle)
+                                .foregroundStyle(.secondary)
+                            Text("Disconnected")
+                                .foregroundStyle(.secondary)
+                            if paneState?.tmuxStatus.indicatesTmux == true {
+                                Text("tmux session is still running on the server.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            }
+                            Button("Reconnect") {
+                                retryConnection()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .multilineTextAlignment(.center)
+                    }
+                case .failed(let error):
+                    TerminalStatusCard {
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.largeTitle)
+                                .foregroundStyle(.red)
+                            Text("Connection Failed")
+                                .font(.headline)
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Button("Retry") {
+                                retryConnection()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .multilineTextAlignment(.center)
+                    }
+                case .connected, .idle:
+                    if !isReady && !terminalExists {
+                        TerminalStatusCard {
+                            VStack(spacing: 12) {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                Text(String(format: String(localized: "Connecting to %@..."), server.name))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .multilineTextAlignment(.center)
+                        }
+                    }
                 }
             }
 
@@ -477,7 +537,7 @@ struct TerminalPaneView: View {
                 }
             }
 
-            if showsVoiceButton && isFocused && isTabSelected {
+            if showsVoiceButton && isFocused && isTabSelected && connectionState.isConnected {
                 voiceTriggerButton
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                     .transition(.opacity)
