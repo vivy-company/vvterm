@@ -707,16 +707,13 @@ struct iOSTerminalView: View {
             .onAppear {
                 updateTerminalBackgroundColor()
                 if currentServerId == nil {
-                    if let session = sessionManager.selectedSession {
-                        currentServerId = session.serverId
-                    } else if let connectingServer {
-                        currentServerId = connectingServer.id
-                    }
+                    currentServerId = connectingServer?.id ?? sessionManager.selectedSession?.serverId
                 }
                 if currentServerId != nil,
                    let selectedId = sessionManager.selectedSessionId,
-                   !serverSessions.contains(where: { $0.id == selectedId }) {
-                    sessionManager.selectedSessionId = serverSessions.first?.id
+                   !serverSessions.contains(where: { $0.id == selectedId }),
+                   let fallbackId = serverSessions.first?.id {
+                    sessionManager.selectedSessionId = fallbackId
                 }
             }
             .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
@@ -735,8 +732,14 @@ struct iOSTerminalView: View {
                 }
             }
             .onChange(of: connectingServer?.id) { newValue in
-                if currentServerId == nil {
-                    currentServerId = newValue
+                guard let newValue else { return }
+                currentServerId = newValue
+            }
+            .onChange(of: sessionManager.selectedSessionId) { newValue in
+                guard let newValue,
+                      let session = sessionManager.sessions.first(where: { $0.id == newValue }) else { return }
+                if currentServerId != session.serverId {
+                    currentServerId = session.serverId
                 }
             }
             .onChange(of: selectedView) { newValue in
@@ -753,8 +756,9 @@ struct iOSTerminalView: View {
                 reconnectTokenBySession = reconnectTokenBySession.filter { activeIds.contains($0.key) }
                 if currentServerId != nil,
                    let selectedId = sessionManager.selectedSessionId,
-                   !serverSessions.contains(where: { $0.id == selectedId }) {
-                    sessionManager.selectedSessionId = serverSessions.first?.id
+                   !serverSessions.contains(where: { $0.id == selectedId }),
+                   let fallbackId = serverSessions.first?.id {
+                    sessionManager.selectedSessionId = fallbackId
                 }
                 if selectedView == "terminal",
                    let selectedId = effectiveSelectedSessionId,
