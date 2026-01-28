@@ -209,6 +209,14 @@ final class ConnectionSessionManager: ObservableObject {
         sessions.first(where: { $0.id == sessionId })?.connectionState
     }
 
+    func hasOtherActiveSessions(for serverId: UUID, excluding sessionId: UUID) -> Bool {
+        sessions.contains {
+            $0.serverId == serverId
+                && $0.id != sessionId
+                && ($0.connectionState.isConnected || $0.connectionState.isConnecting)
+        }
+    }
+
     func updateTmuxStatus(_ sessionId: UUID, status: TmuxStatus) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else { return }
         sessions[index].tmuxStatus = status
@@ -597,6 +605,9 @@ final class ConnectionSessionManager: ObservableObject {
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {
             sessions[index].connectionState = .reconnecting(attempt: 1)
         }
+
+        // Cancel in-flight shell work but keep the terminal surface for reuse
+        shellSuspendHandlers[session.id]?()
 
         // Disconnect existing SSH client
         await unregisterSSHClient(for: session.id)
