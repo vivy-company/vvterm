@@ -95,6 +95,20 @@ struct ProSettingsView: View {
                 }
             }
 
+            Section("Legal") {
+                Link(destination: URL(string: "https://vvterm.com/privacy/")!) {
+                    Label("Privacy Policy", systemImage: "hand.raised")
+                }
+                .tint(.primary)
+                .foregroundStyle(.primary)
+
+                Link(destination: URL(string: "https://vvterm.com/terms/")!) {
+                    Label("Terms of Use (EULA)", systemImage: "doc.text")
+                }
+                .tint(.primary)
+                .foregroundStyle(.primary)
+            }
+
             Section {
                 Button("Restore Purchases") {
                     Task { await storeManager.restorePurchases() }
