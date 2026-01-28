@@ -173,6 +173,31 @@ extension SSHTerminalCoordinator {
                     lastError = error
                     logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
 
+                    if attempt < maxAttempts, let sshError = error as? SSHError {
+                        var shouldResetClient = false
+                        switch sshError {
+                        case .notConnected, .connectionFailed, .socketError, .timeout:
+                            shouldResetClient = true
+                        case .channelOpenFailed, .shellRequestFailed:
+                            let hasOtherActiveSessions = await MainActor.run {
+                                ConnectionSessionManager.shared.hasOtherActiveSessions(
+                                    for: server.id,
+                                    excluding: sessionId
+                                )
+                            }
+                            shouldResetClient = !hasOtherActiveSessions
+                        case .authenticationFailed, .hostKeyVerificationFailed:
+                            break
+                        case .unknown:
+                            break
+                        }
+
+                        if shouldResetClient {
+                            logger.warning("Resetting SSH client before retrying connection")
+                            await sshClient.disconnect()
+                        }
+                    }
+
                     if attempt < maxAttempts {
                         let delay = pow(2.0, Double(attempt - 1))
                         try? await Task.sleep(for: .seconds(delay))

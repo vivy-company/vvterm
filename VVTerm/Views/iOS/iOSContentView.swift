@@ -1044,8 +1044,29 @@ struct iOSTerminalView: View {
         // Resume rendering if paused
         terminal.resumeRendering()
 
-        // Force refresh display
+        // Force layout + refresh after a brief delay to ensure the view is attached.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let container = terminal.superview {
+                container.setNeedsLayout()
+                container.layoutIfNeeded()
+
+                let targetBounds: CGRect
+                if let terminalContainer = container as? TerminalContainerUIView {
+                    let clampedInset = min(max(0, terminalContainer.keyboardInset), terminalContainer.bounds.height)
+                    targetBounds = terminalContainer.bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: clampedInset, right: 0))
+                    terminalContainer.requestRefresh()
+                } else {
+                    targetBounds = container.bounds
+                }
+
+                if targetBounds.width > 0, targetBounds.height > 0 {
+                    if terminal.frame != targetBounds {
+                        terminal.frame = targetBounds
+                    }
+                    terminal.sizeDidChange(targetBounds.size)
+                }
+            }
+
             terminal.forceRefresh()
 
             // Send resize to force server to redraw prompt
