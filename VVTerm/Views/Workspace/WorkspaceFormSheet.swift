@@ -12,7 +12,7 @@ struct WorkspaceFormSheet: View {
 
     @State private var name: String = ""
     @State private var selectedColor: Color = .blue
-    @State private var showingWorkspaceLimitAlert = false
+    @State private var showingUpgradeSheet = false
     @State private var workspaceToDelete: Workspace?
     @State private var isSaving = false
     @State private var error: String?
@@ -52,7 +52,7 @@ struct WorkspaceFormSheet: View {
                             title: String(localized: "Workspace Limit Reached"),
                             message: String(localized: "Upgrade to Pro for unlimited workspaces.")
                         ) {
-                            showingWorkspaceLimitAlert = true
+                            showingUpgradeSheet = true
                         }
                     }
                 }
@@ -130,7 +130,9 @@ struct WorkspaceFormSheet: View {
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)
                 }
             }
-            .limitReachedAlert(.workspaces, isPresented: $showingWorkspaceLimitAlert)
+            .sheet(isPresented: $showingUpgradeSheet) {
+                ProUpgradeSheet()
+            }
             .alert("Delete Workspace?", isPresented: Binding(
                 get: { workspaceToDelete != nil },
                 set: { if !$0 { workspaceToDelete = nil } }
@@ -180,7 +182,7 @@ struct WorkspaceFormSheet: View {
             } catch let error as VVTermError {
                 await MainActor.run {
                     if case .proRequired = error {
-                        self.showingWorkspaceLimitAlert = true
+                        self.showingUpgradeSheet = true
                     } else {
                         self.error = error.localizedDescription
                     }

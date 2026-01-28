@@ -53,45 +53,46 @@ struct ProUpgradeSheet: View {
     }
 
     private var iosSheetContent: some View {
-        VStack(spacing: 0) {
-            #if os(macOS)
-            // Header with close button (macOS only)
-            header
+        ScrollView {
+            VStack(spacing: 0) {
+                #if os(macOS)
+                // Header with close button (macOS only)
+                header
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .padding(.bottom, 16)
+                #else
+                // iOS: Add some top padding since NavigationStack provides the header
+                Spacer().frame(height: 8)
+                #endif
+
+                // Features
+                featuresSection
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
+
+                // Plan Options
+                planOptionsSection
                 .padding(.horizontal, 20)
-                .padding(.top, 20)
+                .padding(.bottom, 24)
+
+                subscribeButton
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+
+                // Restore Purchases
+                restoreButton
                 .padding(.bottom, 16)
-            #else
-            // iOS: Add some top padding since NavigationStack provides the header
-            Spacer().frame(height: 8)
-            #endif
 
-            // Features
-            featuresSection
-                .padding(.horizontal, 20)
-                .padding(.bottom, 16)
-
-            // Plan Options
-            planOptionsSection
-            .padding(.horizontal, 20)
-            .padding(.bottom, 24)
-
-            subscribeButton
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-
-            // Restore Purchases
-            restoreButton
-            .padding(.bottom, 16)
-
-            // Legal links
-            legalFooter
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-
-            #if os(iOS)
-            Spacer()
-            #endif
+                // Legal links
+                legalFooter
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.bottom, 8)
         }
+        .scrollIndicators(.visible)
         .task {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
