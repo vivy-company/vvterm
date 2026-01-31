@@ -36,7 +36,7 @@ struct AboutSettingsView: View {
     @State private var showingReviewSheet = false
 
     private var appVersion: String {
-        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1"
     }
 
     private var buildNumber: String {
