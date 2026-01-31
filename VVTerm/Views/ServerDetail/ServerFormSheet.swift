@@ -39,7 +39,6 @@ struct ServerFormSheet: View {
     @State private var connectionTestError: String?
     @State private var connectionTestSucceeded = false
     @State private var lastTestSnapshot: ConnectionTestSnapshot?
-    @State private var initialConnectionSnapshot: ConnectionTestSnapshot?
 
     private var isEditing: Bool { server != nil }
 
@@ -98,15 +97,6 @@ struct ServerFormSheet: View {
             sshPassphrase: sshPassphrase,
             sshPublicKey: sshPublicKey
         )
-    }
-
-    private var shouldRequireConnectionTest: Bool {
-        guard isValid else { return false }
-        guard isEditing else { return true }
-        if let initialConnectionSnapshot {
-            return initialConnectionSnapshot != connectionSnapshot
-        }
-        return true
     }
 
     private var hasValidConnectionTest: Bool {
@@ -186,9 +176,6 @@ struct ServerFormSheet: View {
                 self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
             }
 
-            if initialConnectionSnapshot == nil {
-                initialConnectionSnapshot = connectionSnapshot
-            }
         }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -232,9 +219,6 @@ struct ServerFormSheet: View {
             .limitReachedAlert(.servers, isPresented: $showingServerLimitAlert)
             .onAppear {
                 storedKeys = KeychainManager.shared.getStoredSSHKeys()
-                if !isEditing && initialConnectionSnapshot == nil {
-                    initialConnectionSnapshot = connectionSnapshot
-                }
             }
             .onChange(of: host) { _ in resetConnectionTestState() }
             .onChange(of: port) { _ in resetConnectionTestState() }
@@ -654,18 +638,6 @@ struct ServerFormSheet: View {
                     let server = buildServer(id: serverId, createdAt: server?.createdAt ?? Date())
                     let credentials = buildCredentials(for: serverId)
                     return (server, credentials)
-                }
-
-                let needsConnectionTest = await MainActor.run { shouldRequireConnectionTest && !hasValidConnectionTest }
-                if needsConnectionTest {
-                    let success = await runConnectionTest(force: false)
-                    guard success else {
-                        await MainActor.run {
-                            error = connectionTestError ?? String(localized: "Connection test failed")
-                            isSaving = false
-                        }
-                        return
-                    }
                 }
 
                 if isEditing {
