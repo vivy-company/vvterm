@@ -260,13 +260,13 @@ struct ServerFormSheet: View {
 
     private var serverSection: some View {
         Section {
-            TextField("Name", text: $name)
+            TextField("Name", text: $name, prompt: Text(String(localized: "My Server")))
                 #if os(iOS)
                 .textContentType(.name)
                 #endif
 
             HStack(spacing: 12) {
-                TextField("Host", text: $host)
+                TextField("Host", text: $host, prompt: Text(String(localized: "203.0.113.10")))
                     #if os(iOS)
                     .textContentType(.URL)
                     #endif
@@ -276,7 +276,7 @@ struct ServerFormSheet: View {
                     .keyboardType(.URL)
                     #endif
 
-                TextField("Port", text: $port)
+                TextField("Port", text: $port, prompt: Text(String(localized: "22")))
                     #if os(iOS)
                     .keyboardType(.numberPad)
                     #endif
@@ -284,7 +284,7 @@ struct ServerFormSheet: View {
                     .frame(width: 76)
             }
 
-            TextField("Username", text: $username, prompt: Text("root"))
+            TextField("Username", text: $username, prompt: Text(String(localized: "root")))
                 #if os(iOS)
                 .textContentType(.username)
                 #endif
@@ -309,7 +309,7 @@ struct ServerFormSheet: View {
 
             switch authMethod {
             case .password:
-                SecureField("Password", text: $password)
+                SecureField("Password", text: $password, prompt: Text(String(localized: "Required")))
                     #if os(iOS)
                     .textContentType(.password)
                     #endif
@@ -319,7 +319,7 @@ struct ServerFormSheet: View {
 
             case .sshKeyWithPassphrase:
                 keyInputView
-                SecureField("Key Passphrase", text: $sshPassphrase)
+                SecureField("Key Passphrase", text: $sshPassphrase, prompt: Text(String(localized: "Optional")))
             }
         } header: {
             sectionHeader("Authentication")

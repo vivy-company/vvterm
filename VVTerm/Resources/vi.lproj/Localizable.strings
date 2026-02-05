@@ -747,3 +747,11 @@
 "Medium (8-bit)" = "Trung bình (8-bit)";
 "Medium (FP32)" = "Trung bình (FP32)";
 "Medium (Q4)" = "Trung bình (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "Máy chủ của tôi";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "Bắt buộc";
+"Optional" = "Tùy chọn";

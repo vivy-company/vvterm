@@ -702,3 +702,11 @@
 "Medium (8-bit)" = "Mittel (8 Bit)";
 "Medium (FP32)" = "Mittel (FP32)";
 "Medium (Q4)" = "Mittel (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "Mein Server";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "Erforderlich";
+"Optional" = "Optional";
