@@ -682,3 +682,11 @@
 "Medium (8-bit)" = "中等 (8 位)";
 "Medium (FP32)" = "中等 (FP32)";
 "Medium (Q4)" = "中等 (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "我的服务器";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "必填";
+"Optional" = "可选";

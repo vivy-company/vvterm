@@ -702,3 +702,11 @@
 "Medium (8-bit)" = "中 (8ビット)";
 "Medium (FP32)" = "中 (FP32)";
 "Medium (Q4)" = "中 (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "マイサーバー";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "必須";
+"Optional" = "任意";

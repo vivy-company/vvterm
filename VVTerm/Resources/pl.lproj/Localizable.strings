@@ -704,3 +704,11 @@
 "Medium (8-bit)" = "Średni (8 bitów)";
 "Medium (FP32)" = "Średni (FP32)";
 "Medium (Q4)" = "Średni (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "Mój serwer";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "Wymagane";
+"Optional" = "Opcjonalne";
