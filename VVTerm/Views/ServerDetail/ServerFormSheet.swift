@@ -3,6 +3,113 @@ import SwiftUI
 import UIKit
 #endif
 
+enum ServerAuthSelection: String, CaseIterable, Identifiable, Equatable {
+    case password
+    case sshKey
+    case sshKeyWithPassphrase
+    case tailscale
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .password:
+            return String(localized: "Password")
+        case .sshKey:
+            return String(localized: "SSH Key")
+        case .sshKeyWithPassphrase:
+            return String(localized: "SSH Key + Passphrase")
+        case .tailscale:
+            return String(localized: "Tailscale SSH")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .password:
+            return "key.fill"
+        case .sshKey:
+            return "lock.doc.fill"
+        case .sshKeyWithPassphrase:
+            return "lock.shield.fill"
+        case .tailscale:
+            return "network"
+        }
+    }
+
+    var connectionMode: SSHConnectionMode {
+        switch self {
+        case .tailscale:
+            return .tailscale
+        case .password, .sshKey, .sshKeyWithPassphrase:
+            return .standard
+        }
+    }
+
+    var authMethod: AuthMethod {
+        switch self {
+        case .password:
+            return .password
+        case .sshKey:
+            return .sshKey
+        case .sshKeyWithPassphrase:
+            return .sshKeyWithPassphrase
+        case .tailscale:
+            // Keep legacy-compatible authMethod value for older app versions.
+            return .password
+        }
+    }
+
+    init(server: Server) {
+        if server.connectionMode == .tailscale {
+            self = .tailscale
+            return
+        }
+
+        switch server.authMethod {
+        case .password:
+            self = .password
+        case .sshKey:
+            self = .sshKey
+        case .sshKeyWithPassphrase:
+            self = .sshKeyWithPassphrase
+        }
+    }
+}
+
+struct ServerFormCredentialBuilder {
+    static func build(
+        serverId: UUID,
+        authSelection: ServerAuthSelection,
+        password: String,
+        sshKey: String,
+        sshPassphrase: String,
+        sshPublicKey: String
+    ) -> ServerCredentials {
+        var credentials = ServerCredentials(serverId: serverId)
+
+        switch authSelection {
+        case .password:
+            credentials.password = password
+        case .sshKey:
+            credentials.sshKey = sshKey.data(using: .utf8)
+            if !sshPublicKey.isEmpty {
+                credentials.publicKey = sshPublicKey.data(using: .utf8)
+            }
+        case .sshKeyWithPassphrase:
+            credentials.sshKey = sshKey.data(using: .utf8)
+            credentials.sshPassphrase = sshPassphrase
+            if !sshPublicKey.isEmpty {
+                credentials.publicKey = sshPublicKey.data(using: .utf8)
+            }
+        case .tailscale:
+            break
+        }
+
+        return credentials
+    }
+}
+
 // MARK: - Server Form Sheet
 
 struct ServerFormSheet: View {
@@ -18,7 +125,7 @@ struct ServerFormSheet: View {
     @State private var host: String = ""
     @State private var port: String = "22"
     @State private var username: String = ""
-    @State private var authMethod: AuthMethod = .password
+    @State private var authSelection: ServerAuthSelection = .password
     @State private var password: String = ""
     @State private var sshKey: String = ""
     @State private var sshPassphrase: String = ""
@@ -58,7 +165,7 @@ struct ServerFormSheet: View {
             _host = State(initialValue: server.host)
             _port = State(initialValue: String(server.port))
             _username = State(initialValue: server.username)
-            _authMethod = State(initialValue: server.authMethod)
+            _authSelection = State(initialValue: ServerAuthSelection(server: server))
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
@@ -79,7 +186,7 @@ struct ServerFormSheet: View {
         let host: String
         let port: String
         let username: String
-        let authMethod: AuthMethod
+        let authSelection: ServerAuthSelection
         let password: String
         let sshKey: String
         let sshPassphrase: String
@@ -91,7 +198,7 @@ struct ServerFormSheet: View {
             host: host,
             port: port,
             username: effectiveUsername,
-            authMethod: authMethod,
+            authSelection: authSelection,
             password: password,
             sshKey: sshKey,
             sshPassphrase: sshPassphrase,
@@ -147,23 +254,25 @@ struct ServerFormSheet: View {
             do {
                 let credentials = try KeychainManager.shared.getCredentials(for: server)
 
-                switch server.authMethod {
-                case .password:
-                    if let pwd = credentials.password {
-                        password = pwd
-                    }
-                case .sshKey:
-                    if let keyData = credentials.privateKey,
-                       let keyString = String(data: keyData, encoding: .utf8) {
-                        sshKey = keyString
-                    }
-                case .sshKeyWithPassphrase:
-                    if let keyData = credentials.privateKey,
-                       let keyString = String(data: keyData, encoding: .utf8) {
-                        sshKey = keyString
-                    }
-                    if let phrase = credentials.passphrase {
-                        sshPassphrase = phrase
+                if server.connectionMode != .tailscale {
+                    switch server.authMethod {
+                    case .password:
+                        if let pwd = credentials.password {
+                            password = pwd
+                        }
+                    case .sshKey:
+                        if let keyData = credentials.privateKey,
+                           let keyString = String(data: keyData, encoding: .utf8) {
+                            sshKey = keyString
+                        }
+                    case .sshKeyWithPassphrase:
+                        if let keyData = credentials.privateKey,
+                           let keyString = String(data: keyData, encoding: .utf8) {
+                            sshKey = keyString
+                        }
+                        if let phrase = credentials.passphrase {
+                            sshPassphrase = phrase
+                        }
                     }
                 }
                 if let publicKeyData = credentials.publicKey,
@@ -223,7 +332,7 @@ struct ServerFormSheet: View {
             .onChange(of: host) { _ in resetConnectionTestState() }
             .onChange(of: port) { _ in resetConnectionTestState() }
             .onChange(of: username) { _ in resetConnectionTestState() }
-            .onChange(of: authMethod) { _ in resetConnectionTestState() }
+            .onChange(of: authSelection) { _ in resetConnectionTestState() }
             .onChange(of: password) { _ in resetConnectionTestState() }
             .onChange(of: sshKey) { _ in
                 if !isLoadingCredentials && !isApplyingStoredKey {
@@ -300,14 +409,14 @@ struct ServerFormSheet: View {
     @ViewBuilder
     private var authSection: some View {
         Section {
-            Picker("Method", selection: $authMethod) {
-                ForEach(AuthMethod.allCases) { method in
+            Picker("Method", selection: $authSelection) {
+                ForEach(ServerAuthSelection.allCases) { method in
                     Label(method.displayName, systemImage: method.icon)
                         .tag(method)
                 }
             }
 
-            switch authMethod {
+            switch authSelection {
             case .password:
                 SecureField("Password", text: $password, prompt: Text(String(localized: "Required")))
                     #if os(iOS)
@@ -320,6 +429,11 @@ struct ServerFormSheet: View {
             case .sshKeyWithPassphrase:
                 keyInputView
                 SecureField("Key Passphrase", text: $sshPassphrase, prompt: Text(String(localized: "Optional")))
+
+            case .tailscale:
+                Text(String(localized: "Uses server-side Tailscale SSH policy. No password or SSH key is required."))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         } header: {
             sectionHeader("Authentication")
@@ -500,13 +614,15 @@ struct ServerFormSheet: View {
     }
 
     private var hasValidCredentials: Bool {
-        switch authMethod {
+        switch authSelection {
         case .password:
             return !password.isEmpty
         case .sshKey:
             return !sshKey.isEmpty
         case .sshKeyWithPassphrase:
             return !sshKey.isEmpty && !sshPassphrase.isEmpty
+        case .tailscale:
+            return true
         }
     }
 
@@ -528,7 +644,8 @@ struct ServerFormSheet: View {
             host: host,
             port: portNum,
             username: effectiveUsername,
-            authMethod: authMethod,
+            connectionMode: authSelection.connectionMode,
+            authMethod: authSelection.authMethod,
             notes: notes.isEmpty ? nil : notes,
             tmuxEnabledOverride: tmuxEnabled,
             createdAt: createdAt
@@ -560,23 +677,14 @@ struct ServerFormSheet: View {
     }
 
     private func buildCredentials(for serverId: UUID) -> ServerCredentials {
-        var credentials = ServerCredentials(serverId: serverId)
-        switch authMethod {
-        case .password:
-            credentials.password = password
-        case .sshKey:
-            credentials.sshKey = sshKey.data(using: .utf8)
-            if !sshPublicKey.isEmpty {
-                credentials.publicKey = sshPublicKey.data(using: .utf8)
-            }
-        case .sshKeyWithPassphrase:
-            credentials.sshKey = sshKey.data(using: .utf8)
-            credentials.sshPassphrase = sshPassphrase
-            if !sshPublicKey.isEmpty {
-                credentials.publicKey = sshPublicKey.data(using: .utf8)
-            }
-        }
-        return credentials
+        ServerFormCredentialBuilder.build(
+            serverId: serverId,
+            authSelection: authSelection,
+            password: password,
+            sshKey: sshKey,
+            sshPassphrase: sshPassphrase,
+            sshPublicKey: sshPublicKey
+        )
     }
 
     private func runConnectionTest(force: Bool) async -> Bool {
@@ -618,7 +726,17 @@ struct ServerFormSheet: View {
                 connectionTestSucceeded = true
                 success = true
             case .failure(let error):
-                connectionTestError = error.localizedDescription
+                let baseMessage = error.localizedDescription
+                if testServer.connectionMode == .tailscale {
+                    let reminder = String(localized: "This app currently supports direct tailnet connections only (no userspace proxy fallback).")
+                    if baseMessage.contains(reminder) {
+                        connectionTestError = baseMessage
+                    } else {
+                        connectionTestError = "\(baseMessage)\n\(reminder)"
+                    }
+                } else {
+                    connectionTestError = baseMessage
+                }
                 connectionTestSucceeded = false
                 success = false
             }
@@ -644,7 +762,7 @@ struct ServerFormSheet: View {
                     try await serverManager.updateServer(newServer)
                     // Store credentials based on auth method
                     let publicKeyData = sshPublicKey.isEmpty ? nil : sshPublicKey.data(using: .utf8)
-                    switch authMethod {
+                    switch authSelection {
                     case .password:
                         if !password.isEmpty {
                             try KeychainManager.shared.storePassword(for: newServer.id, password: password)
@@ -657,6 +775,8 @@ struct ServerFormSheet: View {
                         if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
                             try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase, publicKey: publicKeyData)
                         }
+                    case .tailscale:
+                        break
                     }
                 } else {
                     try await serverManager.addServer(newServer, credentials: credentials)

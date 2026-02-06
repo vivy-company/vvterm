@@ -186,7 +186,7 @@ extension SSHTerminalCoordinator {
                                 )
                             }
                             shouldResetClient = !hasOtherActiveSessions
-                        case .authenticationFailed, .hostKeyVerificationFailed:
+                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .hostKeyVerificationFailed:
                             break
                         case .unknown:
                             break

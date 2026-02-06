@@ -711,3 +711,7 @@
 "root" = "root";
 "Required" = "Абавязкова";
 "Optional" = "Неабавязкова";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Выкарыстоўваецца серверная палітыка Tailscale SSH. Пароль або SSH-ключ не патрабуецца.";
+"Tailscale SSH authentication was not accepted by the server." = "Сервер не прыняў аўтэнтыфікацыю Tailscale SSH.";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Гэта праграма цяпер падтрымлівае толькі прамыя падключэнні tailnet (без рэзервовага userspace-праксі).";

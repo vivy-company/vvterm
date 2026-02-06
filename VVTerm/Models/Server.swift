@@ -10,6 +10,7 @@ struct Server: Identifiable, Codable, Hashable {
     var host: String
     var port: Int
     var username: String
+    var connectionMode: SSHConnectionMode
     var authMethod: AuthMethod
     var tags: [String]
     var notes: String?
@@ -28,6 +29,7 @@ struct Server: Identifiable, Codable, Hashable {
         host: String,
         port: Int = 22,
         username: String,
+        connectionMode: SSHConnectionMode = .standard,
         authMethod: AuthMethod = .password,
         tags: [String] = [],
         notes: String? = nil,
@@ -44,6 +46,7 @@ struct Server: Identifiable, Codable, Hashable {
         self.host = host
         self.port = port
         self.username = username
+        self.connectionMode = connectionMode
         self.authMethod = authMethod
         self.tags = tags
         self.notes = notes
@@ -59,6 +62,83 @@ struct Server: Identifiable, Codable, Hashable {
             return "\(username)@\(host)"
         }
         return "\(username)@\(host):\(port)"
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case workspaceId
+        case environment
+        case name
+        case host
+        case port
+        case username
+        case connectionMode
+        case authMethod
+        case tags
+        case notes
+        case lastConnected
+        case isFavorite
+        case tmuxEnabledOverride
+        case createdAt
+        case updatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        workspaceId = try container.decode(UUID.self, forKey: .workspaceId)
+        environment = try container.decodeIfPresent(ServerEnvironment.self, forKey: .environment) ?? .production
+        name = try container.decode(String.self, forKey: .name)
+        host = try container.decode(String.self, forKey: .host)
+        port = try container.decodeIfPresent(Int.self, forKey: .port) ?? 22
+        username = try container.decode(String.self, forKey: .username)
+        connectionMode = try container.decodeIfPresent(SSHConnectionMode.self, forKey: .connectionMode) ?? .standard
+        authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .password
+        tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        lastConnected = try container.decodeIfPresent(Date.self, forKey: .lastConnected)
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        tmuxEnabledOverride = try container.decodeIfPresent(Bool.self, forKey: .tmuxEnabledOverride)
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(workspaceId, forKey: .workspaceId)
+        try container.encode(environment, forKey: .environment)
+        try container.encode(name, forKey: .name)
+        try container.encode(host, forKey: .host)
+        try container.encode(port, forKey: .port)
+        try container.encode(username, forKey: .username)
+        try container.encode(connectionMode, forKey: .connectionMode)
+        try container.encode(authMethod, forKey: .authMethod)
+        try container.encode(tags, forKey: .tags)
+        try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encodeIfPresent(lastConnected, forKey: .lastConnected)
+        try container.encode(isFavorite, forKey: .isFavorite)
+        try container.encodeIfPresent(tmuxEnabledOverride, forKey: .tmuxEnabledOverride)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(updatedAt, forKey: .updatedAt)
+    }
+}
+
+enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
+    case standard
+    case tailscale
+
+    var id: String { rawValue }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        let rawValue = (try? container.decode(String.self)) ?? Self.standard.rawValue
+        self = Self(rawValue: rawValue) ?? .standard
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.singleValueContainer()
+        try container.encode(rawValue)
     }
 }
 
