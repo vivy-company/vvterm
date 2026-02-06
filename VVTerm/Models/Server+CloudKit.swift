@@ -46,6 +46,9 @@ extension Server {
             return nil
         }
 
+        let connectionModeRaw = record["connectionMode"] as? String
+        let connectionMode = connectionModeRaw.flatMap(SSHConnectionMode.init(rawValue:)) ?? .standard
+
         logger.info("Successfully decoded server: \(name) (id: \(id), workspaceId: \(workspaceId))")
 
         self.id = id
@@ -54,6 +57,7 @@ extension Server {
         self.host = host
         self.port = port
         self.username = username
+        self.connectionMode = connectionMode
         self.authMethod = authMethod
         self.tags = record["tags"] as? [String] ?? []
         self.notes = record["notes"] as? String
@@ -81,6 +85,11 @@ extension Server {
         record["host"] = host
         record["port"] = port
         record["username"] = username
+        if connectionMode == .tailscale {
+            record["connectionMode"] = connectionMode.rawValue
+        } else {
+            record["connectionMode"] = nil
+        }
         record["authMethod"] = authMethod.rawValue
         // CloudKit rejects empty arrays for new fields - only set if non-empty
         if !tags.isEmpty {

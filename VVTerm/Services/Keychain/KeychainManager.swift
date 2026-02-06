@@ -90,6 +90,11 @@ final class KeychainManager {
 
         logger.info("Getting credentials for server \(server.id.uuidString), authMethod: \(String(describing: server.authMethod))")
 
+        if server.connectionMode == .tailscale {
+            logger.info("Server \(server.id.uuidString) uses tailscale mode; skipping keychain credential lookup")
+            return credentials
+        }
+
         switch server.authMethod {
         case .password:
             credentials.password = try getPassword(for: server.id)

@@ -710,3 +710,7 @@
 "root" = "root";
 "Required" = "Obligatorio";
 "Optional" = "Opcional";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Usa la política de Tailscale SSH del lado del servidor. No se requiere contraseña ni clave SSH.";
+"Tailscale SSH authentication was not accepted by the server." = "La autenticación de Tailscale SSH no fue aceptada por el servidor.";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Esta app actualmente solo admite conexiones directas de tailnet (sin alternativa mediante proxy en espacio de usuario).";

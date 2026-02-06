@@ -35,7 +35,7 @@ actor SSHClient {
     // MARK: - Connection
 
     func connect(to server: Server, credentials: ServerCredentials) async throws -> SSHSession {
-        let key = "\(server.host):\(server.port):\(server.username):\(server.authMethod)"
+        let key = "\(server.host):\(server.port):\(server.username):\(server.connectionMode):\(server.authMethod)"
 
         if let session = session, await session.isConnected, connectionKey == key {
             return session
@@ -49,13 +49,14 @@ actor SSHClient {
             throw SSHError.connectionFailed("SSH client already connected")
         }
 
-        logger.info("Connecting to \(server.host):\(server.port)")
+        logger.info("Connecting to \(server.host):\(server.port) [mode: \(server.connectionMode.rawValue)]")
         logger.info("Auth method: \(String(describing: server.authMethod)), password present: \(credentials.password != nil)")
 
         let config = SSHSessionConfig(
             host: server.host,
             port: server.port,
             username: server.username,
+            connectionMode: server.connectionMode,
             authMethod: server.authMethod,
             credentials: credentials
         )
@@ -290,32 +291,52 @@ actor SSHSession {
             throw SSHError.unknown("libssh2_init failed: \(rc)")
         }
         libssh2Initialized = true
-
-        // Create socket
-        socket = Darwin.socket(AF_INET, SOCK_STREAM, 0)
-        guard socket >= 0 else {
-            throw SSHError.socketError("Failed to create socket")
-        }
+        socket = -1
 
         // Resolve host
         var hints = addrinfo()
-        hints.ai_family = AF_INET
+        hints.ai_family = AF_UNSPEC
         hints.ai_socktype = SOCK_STREAM
+        hints.ai_protocol = IPPROTO_TCP
         var result: UnsafeMutablePointer<addrinfo>?
 
         let portString = String(config.port)
         let resolveResult = getaddrinfo(config.host, portString, &hints, &result)
         guard resolveResult == 0, let addrInfo = result else {
-            Darwin.close(socket)
             throw SSHError.connectionFailed("Failed to resolve host: \(config.host)")
         }
         defer { freeaddrinfo(result) }
 
-        // Connect socket
-        let connectResult = Darwin.connect(socket, addrInfo.pointee.ai_addr, addrInfo.pointee.ai_addrlen)
-        guard connectResult == 0 else {
-            Darwin.close(socket)
-            throw SSHError.connectionFailed("Failed to connect: \(String(cString: strerror(errno)))")
+        // Connect socket (try all resolved addresses so IPv6-only MagicDNS hosts work)
+        var lastConnectError: Int32 = 0
+        var candidate: UnsafeMutablePointer<addrinfo>? = addrInfo
+
+        while let current = candidate {
+            let family = current.pointee.ai_family
+            let sockType = current.pointee.ai_socktype == 0 ? SOCK_STREAM : current.pointee.ai_socktype
+            let protocolNumber = current.pointee.ai_protocol
+
+            let candidateSocket = Darwin.socket(family, sockType, protocolNumber)
+            if candidateSocket < 0 {
+                lastConnectError = errno
+                candidate = current.pointee.ai_next
+                continue
+            }
+
+            let connectResult = Darwin.connect(candidateSocket, current.pointee.ai_addr, current.pointee.ai_addrlen)
+            if connectResult == 0 {
+                socket = candidateSocket
+                break
+            }
+
+            lastConnectError = errno
+            Darwin.close(candidateSocket)
+            candidate = current.pointee.ai_next
+        }
+
+        guard socket >= 0 else {
+            let message = lastConnectError == 0 ? "Unknown connect failure" : String(cString: strerror(lastConnectError))
+            throw SSHError.connectionFailed("Failed to connect: \(message)")
         }
 
         // Disable Nagle's algorithm for low-latency interactive typing
@@ -395,14 +416,24 @@ actor SSHSession {
         let authList = libssh2_userauth_list(session, username, UInt32(username.utf8.count))
         if let authListPtr = authList {
             let methods = String(cString: authListPtr)
-            logger.info("Server auth methods: \(methods)")
+            logger.info("Server auth methods [mode: \(self.config.connectionMode.rawValue)]: \(methods)")
         } else {
-            // If authList is nil, check if already authenticated
+            logger.warning("Could not get auth methods list")
+        }
+
+        if config.connectionMode == .tailscale {
             if libssh2_userauth_authenticated(session) != 0 {
-                logger.info("Already authenticated")
+                logger.info("Tailscale SSH authentication accepted by server policy")
                 return
             }
-            logger.warning("Could not get auth methods list")
+            logger.error("Tailscale SSH auth not accepted by server")
+            throw SSHError.tailscaleAuthenticationNotAccepted
+        }
+
+        // If authList is nil, check if already authenticated
+        if authList == nil, libssh2_userauth_authenticated(session) != 0 {
+            logger.info("Already authenticated")
+            return
         }
 
         switch config.authMethod {
@@ -1034,6 +1065,7 @@ struct SSHSessionConfig {
     let host: String
     let port: Int
     let username: String
+    let connectionMode: SSHConnectionMode
     let authMethod: AuthMethod
     let credentials: ServerCredentials
 
@@ -1047,6 +1079,7 @@ enum SSHError: LocalizedError {
     case notConnected
     case connectionFailed(String)
     case authenticationFailed
+    case tailscaleAuthenticationNotAccepted
     case timeout
     case channelOpenFailed
     case shellRequestFailed
@@ -1059,6 +1092,8 @@ enum SSHError: LocalizedError {
         case .notConnected: return "Not connected to server"
         case .connectionFailed(let msg): return "Connection failed: \(msg)"
         case .authenticationFailed: return "Authentication failed"
+        case .tailscaleAuthenticationNotAccepted:
+            return "\(String(localized: "Tailscale SSH authentication was not accepted by the server.")) \(String(localized: "This app currently supports direct tailnet connections only (no userspace proxy fallback)."))"
         case .timeout: return "Connection timed out"
         case .channelOpenFailed: return "Failed to open channel"
         case .shellRequestFailed: return "Failed to request shell"

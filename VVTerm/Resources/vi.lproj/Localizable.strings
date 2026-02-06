@@ -755,3 +755,7 @@
 "root" = "root";
 "Required" = "Bắt buộc";
 "Optional" = "Tùy chọn";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Sử dụng chính sách Tailscale SSH phía máy chủ. Không cần mật khẩu hoặc khóa SSH.";
+"Tailscale SSH authentication was not accepted by the server." = "Máy chủ không chấp nhận xác thực Tailscale SSH.";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Hiện tại ứng dụng này chỉ hỗ trợ kết nối tailnet trực tiếp (không có phương án dự phòng userspace proxy).";

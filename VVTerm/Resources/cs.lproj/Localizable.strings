@@ -711,3 +711,7 @@
 "root" = "root";
 "Required" = "Povinné";
 "Optional" = "Volitelné";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Používá zásady Tailscale SSH na straně serveru. Heslo ani SSH klíč nejsou vyžadovány.";
+"Tailscale SSH authentication was not accepted by the server." = "Ověření Tailscale SSH nebylo serverem přijato.";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Tato aplikace momentálně podporuje pouze přímá tailnet připojení (bez náhradního userspace proxy).";

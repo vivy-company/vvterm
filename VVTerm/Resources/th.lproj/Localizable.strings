@@ -710,3 +710,7 @@
 "root" = "root";
 "Required" = "จำเป็น";
 "Optional" = "ไม่จำเป็น";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "ใช้นโยบาย Tailscale SSH ฝั่งเซิร์ฟเวอร์ ไม่ต้องใช้รหัสผ่านหรือคีย์ SSH";
+"Tailscale SSH authentication was not accepted by the server." = "เซิร์ฟเวอร์ไม่ยอมรับการยืนยันตัวตน Tailscale SSH";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "ขณะนี้แอปรองรับเฉพาะการเชื่อมต่อ tailnet โดยตรงเท่านั้น (ไม่มีการ fallback ผ่าน userspace proxy)";

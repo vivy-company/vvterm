@@ -690,3 +690,7 @@
 "root" = "root";
 "Required" = "必填";
 "Optional" = "可选";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "使用服务器端 Tailscale SSH 策略。无需密码或 SSH 密钥。";
+"Tailscale SSH authentication was not accepted by the server." = "服务器未接受 Tailscale SSH 身份验证。";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "此应用目前仅支持直接 tailnet 连接（不支持 userspace 代理回退）。";

@@ -870,6 +870,18 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(SRCROOT)/Vendor/libghostty/ios/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(SRCROOT)/Vendor/libghostty/ios-simulator/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(SRCROOT)/Vendor/libghostty/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.1;
@@ -896,6 +908,18 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(SRCROOT)/Vendor/libghostty/ios/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(SRCROOT)/Vendor/libghostty/ios-simulator/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
+					"$(SRCROOT)/Vendor/libghostty/include",
+					"$(SRCROOT)/Vendor/libssh2/include",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 1.1;
