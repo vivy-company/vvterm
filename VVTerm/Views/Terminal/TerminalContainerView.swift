@@ -26,6 +26,7 @@ struct TerminalContainerView: View {
     @State private var showingTmuxInstallPrompt = false
     @State private var showingMoshInstallPrompt = false
     @State private var isInstallingMosh = false
+    @State private var dismissFallbackBanner = false
     @State private var didAutoReconnect = false
     @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
@@ -63,6 +64,7 @@ struct TerminalContainerView: View {
 
     private var fallbackBannerMessage: String? {
         guard session.activeTransport == .sshFallback else { return nil }
+        guard !dismissFallbackBanner else { return nil }
         return session.moshFallbackReason?.bannerMessage ?? String(localized: "Using SSH fallback for this session.")
     }
 
@@ -262,6 +264,14 @@ struct TerminalContainerView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer(minLength: 0)
+                        Button {
+                            dismissFallbackBanner = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Dismiss fallback message")
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -343,14 +353,25 @@ struct TerminalContainerView: View {
             }
         }
         .onChange(of: session.moshFallbackReason) { _ in
+            if session.activeTransport == .sshFallback {
+                dismissFallbackBanner = false
+            }
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
         }
-        .onChange(of: session.activeTransport) { _ in
+        .onChange(of: session.activeTransport) { transport in
+            dismissFallbackBanner = transport != .sshFallback ? false : dismissFallbackBanner
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
+        }
+        .task(id: session.activeTransport == .sshFallback ? session.moshFallbackReason : nil) {
+            guard session.activeTransport == .sshFallback else { return }
+            dismissFallbackBanner = false
+            try? await Task.sleep(for: .seconds(8))
+            guard !Task.isCancelled else { return }
+            dismissFallbackBanner = true
         }
         #if os(macOS) || os(iOS)
         .alert("Voice Input Unavailable", isPresented: $showingPermissionError) {

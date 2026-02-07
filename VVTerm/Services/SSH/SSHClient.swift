@@ -48,6 +48,8 @@ struct ShellHandle {
 actor SSHClient {
     private struct MoshShellRuntime {
         let session: MoshClientSession
+        var lastKeystrokePayload: Data?
+        var lastKeystrokeAtNanos: UInt64 = 0
     }
 
     private var session: SSHSession?
@@ -217,7 +219,14 @@ actor SSHClient {
             throw SSHError.notConnected
         }
 
-        if let runtime = moshShells[shellId] {
+        if var runtime = moshShells[shellId] {
+            let now = DispatchTime.now().uptimeNanoseconds
+            if shouldSuppressDuplicateMoshKeystroke(data, now: now, runtime: runtime) {
+                return
+            }
+            runtime.lastKeystrokePayload = data
+            runtime.lastKeystrokeAtNanos = now
+            moshShells[shellId] = runtime
             do {
                 try await runtime.session.enqueue(.keystrokes(data))
                 return
@@ -285,9 +294,21 @@ actor SSHClient {
         rows: Int,
         startupCommand: String?
     ) async throws -> ShellHandle {
-        let serverHost = connectedServer?.host.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        guard !serverHost.isEmpty else {
+        let configuredHost = connectedServer?.host.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !configuredHost.isEmpty else {
             throw SSHError.moshBootstrapFailed("Missing server host for Mosh endpoint")
+        }
+
+        var endpointHost = configuredHost
+        if let sshSession = session,
+           let peerHost = await sshSession.remoteEndpointHost() {
+            let trimmedPeerHost = peerHost.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedPeerHost.isEmpty {
+                endpointHost = trimmedPeerHost
+                if trimmedPeerHost != configuredHost {
+                    logger.info("Using SSH peer endpoint for Mosh: \(trimmedPeerHost, privacy: .public)")
+                }
+            }
         }
 
         let connectInfo = try await RemoteMoshManager.shared.bootstrapConnectInfo(
@@ -297,11 +318,19 @@ actor SSHClient {
         )
 
         let endpoint = MoshEndpoint(
-            host: serverHost,
+            host: endpointHost,
             port: connectInfo.port,
             keyBase64_22: connectInfo.key
         )
-        let moshSession = MoshClientSession(endpoint: endpoint)
+        let moshConfig = MoshClientConfig(
+            sendMinDelayMs: 1,
+            ackDelayMs: 25,
+            networkTimeoutMs: 20_000,
+            initialRtoMs: 250,
+            maxRtoMs: 1_500,
+            heartbeatIntervalMs: 2_000
+        )
+        let moshSession = MoshClientSession(endpoint: endpoint, config: moshConfig)
         do {
             try await runWithTimeout(moshStartupTimeout) {
                 try await moshSession.start()
@@ -347,6 +376,19 @@ actor SSHClient {
             stream: stream,
             transport: .mosh
         )
+    }
+
+    private func shouldSuppressDuplicateMoshKeystroke(
+        _ data: Data,
+        now: UInt64,
+        runtime: MoshShellRuntime
+    ) -> Bool {
+        guard let previous = runtime.lastKeystrokePayload else { return false }
+        guard previous == data else { return false }
+        let elapsed = now >= runtime.lastKeystrokeAtNanos ? now - runtime.lastKeystrokeAtNanos : 0
+        // Ghostty can occasionally emit the same key payload twice in the same frame.
+        // Suppress only ultra-near duplicates to avoid dropping intentional repeated typing.
+        return elapsed <= 4_000_000
     }
 
     private func runWithTimeout<T: Sendable>(
@@ -481,6 +523,7 @@ actor SSHSession {
     private var isActive = false
     private var ioTask: Task<Void, Never>?
     private var execRequests: [UUID: ExecRequest] = [:]
+    private var connectedPeerAddress: String?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "SSHSession")
 
     /// Atomic socket storage for emergency abort from any thread
@@ -515,6 +558,7 @@ actor SSHSession {
         }
         libssh2Initialized = true
         socket = -1
+        connectedPeerAddress = nil
 
         // Resolve host
         var hints = addrinfo()
@@ -581,6 +625,7 @@ actor SSHSession {
 
         // Store in atomic storage for emergency abort
         atomicSocket.socket = socket
+        connectedPeerAddress = resolveNumericPeerAddress(for: socket)
 
         // Create libssh2 session (use _ex variant since macros not available in Swift)
         libssh2Session = libssh2_session_init_ex(nil, nil, nil, nil)
@@ -801,6 +846,7 @@ actor SSHSession {
     func disconnect() async {
         // Mark as inactive first to stop any pending operations
         isActive = false
+        connectedPeerAddress = nil
 
         // Finish shell streams first to unblock any waiting consumers
         closeAllShellChannels()
@@ -847,7 +893,12 @@ actor SSHSession {
         // Close socket first to abort any blocking I/O
         atomicSocket.closeImmediately()
         socket = -1
+        connectedPeerAddress = nil
         cleanupLibssh2()
+    }
+
+    func remoteEndpointHost() -> String? {
+        connectedPeerAddress
     }
 
     // MARK: - Shell
@@ -1208,6 +1259,35 @@ actor SSHSession {
 
         // Poll with 5ms timeout - short enough for responsiveness, long enough to avoid busy spinning
         _ = poll(&pfd, 1, 5)
+    }
+
+    private func resolveNumericPeerAddress(for socket: Int32) -> String? {
+        var storage = sockaddr_storage()
+        var storageLen = socklen_t(MemoryLayout<sockaddr_storage>.size)
+
+        let peerResult = withUnsafeMutablePointer(to: &storage) { storagePtr in
+            storagePtr.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockaddrPtr in
+                getpeername(socket, sockaddrPtr, &storageLen)
+            }
+        }
+        guard peerResult == 0 else { return nil }
+
+        var hostBuffer = [CChar](repeating: 0, count: Int(NI_MAXHOST))
+        let nameResult = withUnsafePointer(to: &storage) { storagePtr in
+            storagePtr.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockaddrPtr in
+                getnameinfo(
+                    sockaddrPtr,
+                    storageLen,
+                    &hostBuffer,
+                    socklen_t(hostBuffer.count),
+                    nil,
+                    0,
+                    NI_NUMERICHOST
+                )
+            }
+        }
+        guard nameResult == 0 else { return nil }
+        return String(cString: hostBuffer)
     }
 
     // MARK: - Write
