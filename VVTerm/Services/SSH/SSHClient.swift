@@ -314,7 +314,7 @@ actor SSHClient {
         let connectInfo = try await RemoteMoshManager.shared.bootstrapConnectInfo(
             using: self,
             startCommand: startupCommand,
-            portRange: 60000...61000
+            portRange: 60001...61000
         )
 
         let endpoint = MoshEndpoint(

@@ -710,7 +710,7 @@ struct ServerFormSheet: View {
                     _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
                         using: client,
                         startCommand: "exec true",
-                        portRange: 60000...61000
+                        portRange: 60001...61000
                     )
                 }
                 await client.disconnect()
