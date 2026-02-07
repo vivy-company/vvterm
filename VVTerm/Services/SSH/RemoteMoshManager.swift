@@ -23,6 +23,7 @@ actor RemoteMoshManager {
         let resolvedStartup = resolveStartupCommand(startCommand)
         let body = """
         \(shellPathExport());
+        \(utf8LocaleExportScript());
         mosh-server new -p \(portRange.lowerBound):\(portRange.upperBound) -- /bin/sh -lc \(shellQuoted(resolvedStartup)) 2>&1
         """
         let command = "sh -lc \(shellQuoted(body))"
@@ -134,6 +135,19 @@ actor RemoteMoshManager {
 
     nonisolated private func shellPathExport() -> String {
         "export PATH=\"\(shellPathValue())\""
+    }
+
+    nonisolated func utf8LocaleExportScript() -> String {
+        """
+        VVTERM_UTF8_LOCALE="";
+        if command -v locale >/dev/null 2>&1; then
+          VVTERM_UTF8_LOCALE="$(locale -a 2>/dev/null | awk 'BEGIN { IGNORECASE = 1 } /^(C\\\\.UTF-8|C\\\\.utf8|en_US\\\\.UTF-8|en_US\\\\.utf8|UTF-8|utf8)$/ { print; exit }')";
+        fi;
+        if [ -z "$VVTERM_UTF8_LOCALE" ]; then VVTERM_UTF8_LOCALE="C.UTF-8"; fi;
+        export LANG="$VVTERM_UTF8_LOCALE";
+        export LC_ALL="$VVTERM_UTF8_LOCALE";
+        export LC_CTYPE="$VVTERM_UTF8_LOCALE"
+        """
     }
 
     nonisolated private func shellPathValue() -> String {

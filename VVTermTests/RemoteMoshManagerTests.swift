@@ -55,4 +55,14 @@ struct RemoteMoshManagerTests {
         #expect(script.contains("brew"))
         #expect(script.contains("mosh-server"))
     }
+
+    @Test
+    func utf8LocaleExportScriptSetsUtf8LocaleVars() {
+        let script = RemoteMoshManager.shared.utf8LocaleExportScript()
+        #expect(script.contains("locale -a"))
+        #expect(script.contains("C.UTF-8"))
+        #expect(script.contains("export LANG="))
+        #expect(script.contains("export LC_ALL="))
+        #expect(script.contains("export LC_CTYPE="))
+    }
 }
