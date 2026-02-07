@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wiedymi/swift-mosh",
       "state" : {
-        "revision" : "e16e1680072201c7925adc6b40aaa443d2eda597",
-        "version" : "0.1.0"
+        "revision" : "985dcd2ee3504c61ae2eccfee4212d947fda6334",
+        "version" : "0.1.1"
       }
     },
     {
