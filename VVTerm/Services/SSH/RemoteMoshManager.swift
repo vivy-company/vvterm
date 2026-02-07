@@ -18,13 +18,13 @@ actor RemoteMoshManager {
     func bootstrapConnectInfo(
         using client: SSHClient,
         startCommand: String?,
-        portRange: ClosedRange<Int> = 60000...61000
+        portRange: ClosedRange<Int> = 60001...61000
     ) async throws -> MoshServerConnectInfo {
         let resolvedStartup = resolveStartupCommand(startCommand)
         let body = """
         \(shellPathExport());
         \(utf8LocaleExportScript());
-        mosh-server new -p \(portRange.lowerBound):\(portRange.upperBound) -- /bin/sh -lc \(shellQuoted(resolvedStartup)) 2>&1
+        mosh-server new -s -c 256 -p \(portRange.lowerBound):\(portRange.upperBound) -- /bin/sh -lc \(shellQuoted(resolvedStartup)) 2>&1
         """
         let command = "sh -lc \(shellQuoted(body))"
         let output = try await client.execute(command)
