@@ -932,21 +932,37 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                 return
             }
 
+            guard let paneId = self.paneId else {
+                logger.error("Cannot start SSH connection without paneId")
+                return
+            }
+
+            if let existingShellId = TerminalTabManager.shared.shellId(for: paneId) {
+                shellId = existingShellId
+                logger.debug("Reusing existing shell for pane \(paneId.uuidString, privacy: .public)")
+                return
+            }
+
             if shellId != nil {
                 logger.debug("Shell already active for pane")
+                return
+            }
+
+            guard TerminalTabManager.shared.tryBeginShellStart(for: paneId) else {
+                logger.debug("Shell start already in progress for pane \(paneId.uuidString, privacy: .public)")
                 return
             }
 
             let sshClient = self.sshClient
             let server = self.server
             let credentials = self.credentials
-            let paneId = self.paneId
             let onProcessExit = self.onProcessExit
             let logger = self.logger
 
             shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, paneId, onProcessExit, logger] in
                 defer {
                     Task { @MainActor [weak self] in
+                        TerminalTabManager.shared.finishShellStart(for: paneId)
                         self?.shellTask = nil
                     }
                 }
@@ -959,16 +975,13 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                 for attempt in 1...maxAttempts {
                     guard !Task.isCancelled else { return }
 
-                    if let paneId = paneId {
-                        await MainActor.run {
-                            if attempt == 1 {
-                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
-                            } else {
-                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .reconnecting(attempt: attempt))
-                            }
+                    await MainActor.run {
+                        if attempt == 1 {
+                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
+                        } else {
+                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .reconnecting(attempt: attempt))
                         }
                     }
-
                     do {
                         logger.info("Connecting to \(server.host)... (attempt \(attempt))")
                         _ = try await sshClient.connect(to: server, credentials: credentials)
@@ -984,14 +997,11 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             self.lastSize = (cols, rows)
                         }
 
-                        var tmuxStartup: (command: String?, skipTmuxLifecycle: Bool) = (nil, false)
-                        if let paneId = paneId {
-                            tmuxStartup = await TerminalTabManager.shared.tmuxStartupPlan(
-                                for: paneId,
-                                serverId: server.id,
-                                client: sshClient
-                            )
-                        }
+                        let tmuxStartup = await TerminalTabManager.shared.tmuxStartupPlan(
+                            for: paneId,
+                            serverId: server.id,
+                            client: sshClient
+                        )
 
                         let shell = try await sshClient.startShell(
                             cols: cols,
@@ -1004,28 +1014,21 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             return
                         }
 
-                        if let paneId = paneId {
-                            await TerminalTabManager.shared.registerSSHClient(
-                                sshClient,
-                                shellId: shell.id,
-                                for: paneId,
-                                serverId: server.id,
-                                transport: shell.transport,
-                                fallbackReason: shell.fallbackReason,
-                                skipTmuxLifecycle: tmuxStartup.skipTmuxLifecycle
-                            )
-                            await MainActor.run {
-                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
-                            }
-                        }
-
+                        await TerminalTabManager.shared.registerSSHClient(
+                            sshClient,
+                            shellId: shell.id,
+                            for: paneId,
+                            serverId: server.id,
+                            transport: shell.transport,
+                            fallbackReason: shell.fallbackReason,
+                            skipTmuxLifecycle: tmuxStartup.skipTmuxLifecycle
+                        )
                         await MainActor.run {
+                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                             self.shellId = shell.id
                         }
 
-                        if let paneId = paneId {
-                            await self.applyWorkingDirectoryIfNeeded(paneId: paneId, shellId: shell.id, sshClient: sshClient)
-                        }
+                        await self.applyWorkingDirectoryIfNeeded(paneId: paneId, shellId: shell.id, sshClient: sshClient)
 
                         guard !Task.isCancelled else { return }
 
@@ -1067,10 +1070,8 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             terminal.feedData(data)
                         }
                     }
-                    if let paneId = paneId {
-                        await MainActor.run {
-                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .failed(lastError.localizedDescription))
-                        }
+                    await MainActor.run {
+                        TerminalTabManager.shared.updatePaneState(paneId, connectionState: .failed(lastError.localizedDescription))
                     }
                 }
             }

@@ -79,8 +79,19 @@ extension SSHTerminalCoordinator {
             return
         }
 
+        if let existingShellId = ConnectionSessionManager.shared.shellId(for: sessionId) {
+            shellId = existingShellId
+            logger.debug("Reusing existing shell for session \(self.sessionId)")
+            return
+        }
+
         if shellId != nil {
             logger.debug("Shell already active for session \(self.sessionId)")
+            return
+        }
+
+        guard ConnectionSessionManager.shared.tryBeginShellStart(for: sessionId) else {
+            logger.debug("Shell start already in progress for session \(self.sessionId)")
             return
         }
 
@@ -96,6 +107,7 @@ extension SSHTerminalCoordinator {
         shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
             defer {
                 Task { @MainActor [weak self] in
+                    ConnectionSessionManager.shared.finishShellStart(for: sessionId)
                     self?.shellTask = nil
                 }
             }

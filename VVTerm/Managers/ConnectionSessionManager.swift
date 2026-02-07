@@ -80,6 +80,8 @@ final class ConnectionSessionManager: ObservableObject {
     private var shellCancelHandlers: [UUID: () -> Void] = [:]
     /// Shell suspend handlers indexed by session ID - cancel in-flight connects without destroying terminals
     private var shellSuspendHandlers: [UUID: () -> Void] = [:]
+    /// Session IDs currently starting a shell (global single-flight guard).
+    private var shellStartsInFlight: Set<UUID> = []
 
     /// Servers that already ran tmux cleanup (per app launch)
     private var tmuxCleanupServers: Set<UUID> = []
@@ -266,6 +268,7 @@ final class ConnectionSessionManager: ObservableObject {
         shellCancelHandlers[sessionId]?()
         shellCancelHandlers.removeValue(forKey: sessionId)
         shellSuspendHandlers.removeValue(forKey: sessionId)
+        shellStartsInFlight.remove(sessionId)
 
         // Remove from UI immediately
         sessions.removeAll { $0.id == sessionId }
@@ -450,6 +453,8 @@ final class ConnectionSessionManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
+        shellStartsInFlight.remove(sessionId)
+
         if let existing = sshShells[sessionId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
                 await client.closeShell(shellId)
@@ -480,6 +485,7 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
+        shellStartsInFlight.remove(sessionId)
         guard let registration = sshShells.removeValue(forKey: sessionId) else { return }
 
         await registration.client.closeShell(registration.shellId)
@@ -504,6 +510,22 @@ final class ConnectionSessionManager: ObservableObject {
 
     func shellId(for session: ConnectionSession) -> UUID? {
         sshShells[session.id]?.shellId
+    }
+
+    func shellId(for sessionId: UUID) -> UUID? {
+        sshShells[sessionId]?.shellId
+    }
+
+    /// Returns true only for the first caller while no live shell exists for the session.
+    func tryBeginShellStart(for sessionId: UUID) -> Bool {
+        if sshShells[sessionId] != nil {
+            return false
+        }
+        return shellStartsInFlight.insert(sessionId).inserted
+    }
+
+    func finishShellStart(for sessionId: UUID) {
+        shellStartsInFlight.remove(sessionId)
     }
 
     func sshClient(for serverId: UUID) -> SSHClient? {

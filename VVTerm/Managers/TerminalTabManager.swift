@@ -65,6 +65,8 @@ final class TerminalTabManager: ObservableObject {
 
     /// Shell counts per server for shared client lifecycle
     private var serverShellCounts: [UUID: Int] = [:]
+    /// Pane IDs currently starting a shell (global single-flight guard).
+    private var shellStartsInFlight: Set<UUID> = []
 
     /// Pane state keyed by pane ID
     @Published var paneStates: [UUID: TerminalPaneState] = [:]
@@ -326,6 +328,8 @@ final class TerminalTabManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
+        shellStartsInFlight.remove(paneId)
+
         if let existing = sshShells[paneId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
                 await client.closeShell(shellId)
@@ -355,6 +359,7 @@ final class TerminalTabManager: ObservableObject {
 
     /// Unregister SSH shell
     func unregisterSSHClient(for paneId: UUID) async {
+        shellStartsInFlight.remove(paneId)
         guard let registration = sshShells.removeValue(forKey: paneId) else { return }
 
         await registration.client.closeShell(registration.shellId)
@@ -378,6 +383,18 @@ final class TerminalTabManager: ObservableObject {
 
     func shellId(for paneId: UUID) -> UUID? {
         sshShells[paneId]?.shellId
+    }
+
+    /// Returns true only for the first caller while no live shell exists for the pane.
+    func tryBeginShellStart(for paneId: UUID) -> Bool {
+        if sshShells[paneId] != nil {
+            return false
+        }
+        return shellStartsInFlight.insert(paneId).inserted
+    }
+
+    func finishShellStart(for paneId: UUID) {
+        shellStartsInFlight.remove(paneId)
     }
 
     func sshClient(for serverId: UUID) -> SSHClient? {
@@ -432,6 +449,7 @@ final class TerminalTabManager: ObservableObject {
 
     /// Clean up a pane (terminal + SSH)
     private func cleanupPane(_ paneId: UUID) {
+        shellStartsInFlight.remove(paneId)
         if let status = paneStates[paneId]?.tmuxStatus,
            status == .foreground || status == .background || status == .installing {
             killTmuxIfNeeded(for: paneId)
