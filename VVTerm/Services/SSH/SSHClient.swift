@@ -1,19 +1,62 @@
 import Foundation
 import os.log
+import MoshCore
+import MoshBootstrap
 
 // MARK: - SSH Client using libssh2
+
+enum ShellTransport: String, Codable, Hashable, Sendable {
+    case ssh
+    case mosh
+    case sshFallback
+}
+
+enum MoshFallbackReason: String, Codable, Hashable, Sendable {
+    case serverMissing
+    case bootstrapFailed
+    case sessionFailed
+
+    var bannerMessage: String {
+        switch self {
+        case .serverMissing:
+            return String(localized: "Using SSH fallback for this session (mosh-server is missing).")
+        case .bootstrapFailed, .sessionFailed:
+            return String(localized: "Using SSH fallback for this session.")
+        }
+    }
+}
 
 struct ShellHandle {
     let id: UUID
     let stream: AsyncStream<Data>
+    let transport: ShellTransport
+    let fallbackReason: MoshFallbackReason?
+
+    init(
+        id: UUID,
+        stream: AsyncStream<Data>,
+        transport: ShellTransport = .ssh,
+        fallbackReason: MoshFallbackReason? = nil
+    ) {
+        self.id = id
+        self.stream = stream
+        self.transport = transport
+        self.fallbackReason = fallbackReason
+    }
 }
 
 actor SSHClient {
+    private struct MoshShellRuntime {
+        let session: MoshClientSession
+    }
+
     private var session: SSHSession?
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "SSH")
     private var keepAliveTask: Task<Void, Never>?
     private var connectTask: Task<SSHSession, Error>?
     private var connectionKey: String?
+    private var connectedServer: Server?
+    private var moshShells: [UUID: MoshShellRuntime] = [:]
 
     /// Stored session reference for nonisolated abort access
     private nonisolated(unsafe) var _sessionForAbort: SSHSession?
@@ -38,11 +81,14 @@ actor SSHClient {
         let key = "\(server.host):\(server.port):\(server.username):\(server.connectionMode):\(server.authMethod)"
 
         if let session = session, await session.isConnected, connectionKey == key {
+            connectedServer = server
             return session
         }
 
         if let task = connectTask, connectionKey == key {
-            return try await task.value
+            let connected = try await task.value
+            connectedServer = server
+            return connected
         }
 
         if let session = session, await session.isConnected, connectionKey != key {
@@ -74,6 +120,7 @@ actor SSHClient {
             let session = try await task.value
             self.session = session
             self._sessionForAbort = session
+            self.connectedServer = server
             startKeepAlive()
             connectTask = nil
             logger.info("Connected to \(server.host)")
@@ -83,11 +130,18 @@ actor SSHClient {
             connectionKey = nil
             self.session = nil
             self._sessionForAbort = nil
+            self.connectedServer = nil
             throw error
         }
     }
 
     func disconnect() async {
+        let activeMoshShells = Array(moshShells.values)
+        moshShells.removeAll()
+        for runtime in activeMoshShells {
+            await runtime.session.stop()
+        }
+
         keepAliveTask?.cancel()
         keepAliveTask = nil
         connectTask?.cancel()
@@ -97,6 +151,7 @@ actor SSHClient {
         await session?.disconnect()
         session = nil
         _sessionForAbort = nil
+        connectedServer = nil
 
         logger.info("Disconnected")
     }
@@ -119,13 +174,57 @@ actor SSHClient {
         guard let session = session else {
             throw SSHError.notConnected
         }
-        return try await session.startShell(cols: cols, rows: rows, startupCommand: startupCommand)
+
+        let connectionMode = connectedServer?.connectionMode ?? .standard
+        if connectionMode != .mosh {
+            let sshShell = try await session.startShell(cols: cols, rows: rows, startupCommand: startupCommand)
+            return ShellHandle(
+                id: sshShell.id,
+                stream: sshShell.stream,
+                transport: .ssh
+            )
+        }
+
+        do {
+            return try await startMoshShell(cols: cols, rows: rows, startupCommand: startupCommand)
+        } catch {
+            if error is CancellationError || Task.isCancelled {
+                throw CancellationError()
+            }
+            let moshError = error
+            let fallbackReason = fallbackReason(for: moshError)
+            logger.warning("Mosh startup failed, using SSH fallback: \(moshError.localizedDescription)")
+
+            do {
+                let fallbackShell = try await session.startShell(cols: cols, rows: rows, startupCommand: startupCommand)
+                return ShellHandle(
+                    id: fallbackShell.id,
+                    stream: fallbackShell.stream,
+                    transport: .sshFallback,
+                    fallbackReason: fallbackReason
+                )
+            } catch {
+                throw SSHError.moshSessionFailed(
+                    "Mosh startup failed (\(moshError.localizedDescription)); SSH fallback failed (\(error.localizedDescription))"
+                )
+            }
+        }
     }
 
     func write(_ data: Data, to shellId: UUID) async throws {
         guard !_isAborted else {
             throw SSHError.notConnected
         }
+
+        if let runtime = moshShells[shellId] {
+            do {
+                try await runtime.session.enqueue(.keystrokes(data))
+                return
+            } catch {
+                throw SSHError.moshSessionFailed(error.localizedDescription)
+            }
+        }
+
         guard let session = session else {
             throw SSHError.notConnected
         }
@@ -133,6 +232,15 @@ actor SSHClient {
     }
 
     func resize(cols: Int, rows: Int, for shellId: UUID) async throws {
+        if let runtime = moshShells[shellId] {
+            do {
+                try await runtime.session.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
+                return
+            } catch {
+                throw SSHError.moshSessionFailed(error.localizedDescription)
+            }
+        }
+
         guard let session = session else {
             throw SSHError.notConnected
         }
@@ -140,6 +248,11 @@ actor SSHClient {
     }
 
     func closeShell(_ shellId: UUID) async {
+        if let runtime = moshShells.removeValue(forKey: shellId) {
+            await runtime.session.stop()
+            return
+        }
+
         guard let session = session else { return }
         await session.closeShell(shellId)
     }
@@ -161,6 +274,92 @@ actor SSHClient {
     var isConnected: Bool {
         get async {
             await session?.isConnected ?? false
+        }
+    }
+
+    // MARK: - Mosh
+
+    private func startMoshShell(
+        cols: Int,
+        rows: Int,
+        startupCommand: String?
+    ) async throws -> ShellHandle {
+        let serverHost = connectedServer?.host.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !serverHost.isEmpty else {
+            throw SSHError.moshBootstrapFailed("Missing server host for Mosh endpoint")
+        }
+
+        let connectInfo = try await RemoteMoshManager.shared.bootstrapConnectInfo(
+            using: self,
+            startCommand: startupCommand,
+            portRange: 60000...61000
+        )
+
+        let endpoint = MoshEndpoint(
+            host: serverHost,
+            port: connectInfo.port,
+            keyBase64_22: connectInfo.key
+        )
+        let moshSession = MoshClientSession(endpoint: endpoint)
+        var sessionStarted = false
+        do {
+            try await moshSession.start()
+            sessionStarted = true
+            try await moshSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
+        } catch {
+            if sessionStarted {
+                await moshSession.stop()
+            }
+            if error is CancellationError || Task.isCancelled {
+                throw CancellationError()
+            }
+            throw SSHError.moshSessionFailed(error.localizedDescription)
+        }
+
+        let shellId = UUID()
+        let hostOpStream = await moshSession.hostOpStream()
+        let stream = AsyncStream<Data> { continuation in
+            let streamTask = Task { [weak self] in
+                for await hostOp in hostOpStream {
+                    guard !Task.isCancelled else { break }
+                    if case .hostBytes(let bytes) = hostOp {
+                        continuation.yield(bytes)
+                    }
+                }
+                continuation.finish()
+                await self?.closeShell(shellId)
+            }
+
+            continuation.onTermination = { [weak self] _ in
+                streamTask.cancel()
+                Task { [weak self] in
+                    await self?.closeShell(shellId)
+                }
+            }
+        }
+
+        moshShells[shellId] = MoshShellRuntime(session: moshSession)
+        return ShellHandle(
+            id: shellId,
+            stream: stream,
+            transport: .mosh
+        )
+    }
+
+    private func fallbackReason(for error: Error) -> MoshFallbackReason {
+        guard let sshError = error as? SSHError else {
+            return .sessionFailed
+        }
+
+        switch sshError {
+        case .moshServerMissing:
+            return .serverMissing
+        case .moshBootstrapFailed:
+            return .bootstrapFailed
+        case .moshSessionFailed:
+            return .sessionFailed
+        default:
+            return .sessionFailed
         }
     }
 }
@@ -1080,6 +1279,9 @@ enum SSHError: LocalizedError {
     case connectionFailed(String)
     case authenticationFailed
     case tailscaleAuthenticationNotAccepted
+    case moshServerMissing
+    case moshBootstrapFailed(String)
+    case moshSessionFailed(String)
     case timeout
     case channelOpenFailed
     case shellRequestFailed
@@ -1094,6 +1296,12 @@ enum SSHError: LocalizedError {
         case .authenticationFailed: return "Authentication failed"
         case .tailscaleAuthenticationNotAccepted:
             return "\(String(localized: "Tailscale SSH authentication was not accepted by the server.")) \(String(localized: "This app currently supports direct tailnet connections only (no userspace proxy fallback)."))"
+        case .moshServerMissing:
+            return String(localized: "mosh-server is not installed on the remote host")
+        case .moshBootstrapFailed(let msg):
+            return "Mosh bootstrap failed: \(msg)"
+        case .moshSessionFailed(let msg):
+            return "Mosh session failed: \(msg)"
         case .timeout: return "Connection timed out"
         case .channelOpenFailed: return "Failed to open channel"
         case .shellRequestFailed: return "Failed to request shell"

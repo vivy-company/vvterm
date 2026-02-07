@@ -125,12 +125,19 @@ extension SSHTerminalCoordinator {
                         startupCommand: tmuxStartup.command
                     )
 
-                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id, skipTmuxLifecycle = tmuxStartup.skipTmuxLifecycle] in
+                    guard !Task.isCancelled else {
+                        await sshClient.closeShell(shell.id)
+                        return
+                    }
+
+                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id, transport = shell.transport, fallbackReason = shell.fallbackReason, skipTmuxLifecycle = tmuxStartup.skipTmuxLifecycle] in
                         ConnectionSessionManager.shared.registerSSHClient(
                             sshClient,
                             shellId: shellId,
                             for: sessionId,
                             serverId: serverId,
+                            transport: transport,
+                            fallbackReason: fallbackReason,
                             skipTmuxLifecycle: skipTmuxLifecycle
                         )
                         ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
@@ -186,7 +193,7 @@ extension SSHTerminalCoordinator {
                                 )
                             }
                             shouldResetClient = !hasOtherActiveSessions
-                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .hostKeyVerificationFailed:
+                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
                             break
                         case .unknown:
                             break

@@ -85,7 +85,7 @@ extension Server {
         record["host"] = host
         record["port"] = port
         record["username"] = username
-        if connectionMode == .tailscale {
+        if connectionMode != .standard {
             record["connectionMode"] = connectionMode.rawValue
         } else {
             record["connectionMode"] = nil

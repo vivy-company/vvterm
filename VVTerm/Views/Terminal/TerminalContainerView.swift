@@ -24,6 +24,8 @@ struct TerminalContainerView: View {
     @State private var credentials: ServerCredentials?
     @State private var reconnectToken = UUID()
     @State private var showingTmuxInstallPrompt = false
+    @State private var showingMoshInstallPrompt = false
+    @State private var isInstallingMosh = false
     @State private var didAutoReconnect = false
     @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
@@ -57,6 +59,17 @@ struct TerminalContainerView: View {
     private var effectiveThemeName: String {
         guard usePerAppearanceTheme else { return terminalThemeName }
         return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    }
+
+    private var fallbackBannerMessage: String? {
+        guard session.activeTransport == .sshFallback else { return nil }
+        return session.moshFallbackReason?.bannerMessage ?? String(localized: "Using SSH fallback for this session.")
+    }
+
+    private var shouldPromptMoshInstall: Bool {
+        guard server?.connectionMode == .mosh else { return false }
+        guard session.activeTransport == .sshFallback else { return false }
+        return session.moshFallbackReason == .serverMissing
     }
 
     #if os(macOS) || os(iOS)
@@ -228,6 +241,37 @@ struct TerminalContainerView: View {
                 }
             }
 
+            if isInstallingMosh {
+                TerminalStatusCard {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Installing mosh-server...")
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
+                }
+            }
+
+            if let fallbackBannerMessage {
+                VStack {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.trianglehead.2.clockwise")
+                            .foregroundStyle(.orange)
+                        Text(fallbackBannerMessage)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    Spacer()
+                }
+            }
+
             // Error overlay
             if let error = errorMessage {
                 VStack {
@@ -279,6 +323,9 @@ struct TerminalContainerView: View {
             if session.tmuxStatus == .missing {
                 showingTmuxInstallPrompt = true
             }
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
+            }
             attemptAutoReconnectIfNeeded()
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
@@ -293,6 +340,16 @@ struct TerminalContainerView: View {
         .onChange(of: session.tmuxStatus) { status in
             if status == .missing {
                 showingTmuxInstallPrompt = true
+            }
+        }
+        .onChange(of: session.moshFallbackReason) { _ in
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
+            }
+        }
+        .onChange(of: session.activeTransport) { _ in
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
             }
         }
         #if os(macOS) || os(iOS)
@@ -313,6 +370,16 @@ struct TerminalContainerView: View {
             }
         } message: {
             Text("tmux keeps your terminal session alive across app restarts and disconnects.")
+        }
+        .alert("Install mosh-server?", isPresented: $showingMoshInstallPrompt) {
+            Button("Install") {
+                Task {
+                    await installMoshServerAndReconnect()
+                }
+            }
+            Button("Continue with SSH", role: .cancel) {}
+        } message: {
+            Text("Mosh is selected for this server, but mosh-server is missing on the host.")
         }
         #if os(macOS)
         .onAppear {
@@ -380,6 +447,21 @@ struct TerminalContainerView: View {
         ghosttyApp.startIfNeeded()
         try? await ConnectionSessionManager.shared.reconnect(session: session)
         reconnectToken = UUID()
+    }
+
+    @MainActor
+    private func installMoshServerAndReconnect() async {
+        guard !isInstallingMosh else { return }
+        isInstallingMosh = true
+        defer { isInstallingMosh = false }
+
+        do {
+            try await ConnectionSessionManager.shared.installMoshServer(for: session.id)
+            errorMessage = nil
+            await retryConnection()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
     }
 
     @MainActor

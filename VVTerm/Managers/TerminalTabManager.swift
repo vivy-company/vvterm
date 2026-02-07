@@ -53,6 +53,8 @@ final class TerminalTabManager: ObservableObject {
         let serverId: UUID
         let client: SSHClient
         let shellId: UUID
+        let transport: ShellTransport
+        let fallbackReason: MoshFallbackReason?
     }
 
     /// Shell handles keyed by pane ID
@@ -320,6 +322,8 @@ final class TerminalTabManager: ObservableObject {
         shellId: UUID,
         for paneId: UUID,
         serverId: UUID,
+        transport: ShellTransport = .ssh,
+        fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
         if let existing = sshShells[paneId] {
@@ -329,9 +333,18 @@ final class TerminalTabManager: ObservableObject {
             serverShellCounts[existing.serverId] = max((serverShellCounts[existing.serverId] ?? 1) - 1, 0)
         }
 
-        sshShells[paneId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
+        sshShells[paneId] = SSHShellRegistration(
+            serverId: serverId,
+            client: client,
+            shellId: shellId,
+            transport: transport,
+            fallbackReason: fallbackReason
+        )
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
+
+        paneStates[paneId]?.activeTransport = transport
+        paneStates[paneId]?.moshFallbackReason = fallbackReason
 
         if !skipTmuxLifecycle {
             Task { [weak self] in
@@ -353,6 +366,9 @@ final class TerminalTabManager: ObservableObject {
         if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
             await client.disconnect()
         }
+
+        paneStates[paneId]?.activeTransport = .ssh
+        paneStates[paneId]?.moshFallbackReason = nil
     }
 
     /// Get SSH client for a pane
@@ -390,6 +406,30 @@ final class TerminalTabManager: ObservableObject {
         return nil
     }
 
+    func activeTransport(for paneId: UUID) -> ShellTransport {
+        paneStates[paneId]?.activeTransport ?? .ssh
+    }
+
+    func sharedStatsClient(for serverId: UUID) -> SSHClient? {
+        if selectedTransport(for: serverId) == .mosh {
+            return nil
+        }
+        return sshClient(for: serverId)
+    }
+
+    private func selectedTransport(for serverId: UUID) -> ShellTransport {
+        if let selectedTab = selectedTab(for: serverId),
+           let state = paneStates[selectedTab.focusedPaneId] {
+            return state.activeTransport
+        }
+
+        if let connectedPane = paneStates.values.first(where: { $0.serverId == serverId && $0.connectionState.isConnected }) {
+            return connectedPane.activeTransport
+        }
+
+        return paneStates.values.first(where: { $0.serverId == serverId })?.activeTransport ?? .ssh
+    }
+
     /// Clean up a pane (terminal + SSH)
     private func cleanupPane(_ paneId: UUID) {
         if let status = paneStates[paneId]?.tmuxStatus,
@@ -411,11 +451,14 @@ final class TerminalTabManager: ObservableObject {
     func updatePaneState(_ paneId: UUID, connectionState: ConnectionState) {
         paneStates[paneId]?.connectionState = connectionState
         switch connectionState {
+        case .connecting, .reconnecting:
+            paneStates[paneId]?.activeTransport = .ssh
+            paneStates[paneId]?.moshFallbackReason = nil
         case .disconnected, .failed:
             if paneStates[paneId]?.tmuxStatus == .foreground {
                 paneStates[paneId]?.tmuxStatus = .background
             }
-        default:
+        case .connected, .idle:
             break
         }
     }
@@ -651,6 +694,13 @@ final class TerminalTabManager: ObservableObject {
                 self.updatePaneTmuxStatus(paneId, status: .missing)
             }
         }
+    }
+
+    func installMoshServer(for paneId: UUID) async throws {
+        guard let registration = sshShells[paneId] else {
+            throw SSHError.notConnected
+        }
+        try await RemoteMoshManager.shared.installMoshServer(using: registration.client)
     }
 
     func killTmuxIfNeeded(for paneId: UUID) {
