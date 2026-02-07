@@ -3,76 +3,54 @@ import SwiftUI
 import UIKit
 #endif
 
-enum ServerAuthSelection: String, CaseIterable, Identifiable, Equatable {
-    case password
-    case sshKey
-    case sshKeyWithPassphrase
+enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
+    case standard
     case tailscale
+    case mosh
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .password:
-            return String(localized: "Password")
-        case .sshKey:
-            return String(localized: "SSH Key")
-        case .sshKeyWithPassphrase:
-            return String(localized: "SSH Key + Passphrase")
+        case .standard:
+            return String(localized: "SSH")
         case .tailscale:
-            return String(localized: "Tailscale SSH")
+            return String(localized: "Tailscale")
+        case .mosh:
+            return String(localized: "Mosh")
         }
     }
 
     var icon: String {
         switch self {
-        case .password:
-            return "key.fill"
-        case .sshKey:
-            return "lock.doc.fill"
-        case .sshKeyWithPassphrase:
-            return "lock.shield.fill"
+        case .standard:
+            return "terminal"
         case .tailscale:
             return "network"
+        case .mosh:
+            return "antenna.radiowaves.left.and.right"
         }
     }
 
     var connectionMode: SSHConnectionMode {
         switch self {
+        case .standard:
+            return .standard
         case .tailscale:
             return .tailscale
-        case .password, .sshKey, .sshKeyWithPassphrase:
-            return .standard
-        }
-    }
-
-    var authMethod: AuthMethod {
-        switch self {
-        case .password:
-            return .password
-        case .sshKey:
-            return .sshKey
-        case .sshKeyWithPassphrase:
-            return .sshKeyWithPassphrase
-        case .tailscale:
-            // Keep legacy-compatible authMethod value for older app versions.
-            return .password
+        case .mosh:
+            return .mosh
         }
     }
 
     init(server: Server) {
-        if server.connectionMode == .tailscale {
+        switch server.connectionMode {
+        case .tailscale:
             self = .tailscale
-            return
-        }
-
-        switch server.authMethod {
-        case .password:
-            self = .password
-        case .sshKey:
-            self = .sshKey
-        case .sshKeyWithPassphrase:
-            self = .sshKeyWithPassphrase
+        case .mosh:
+            self = .mosh
+        case .standard:
+            self = .standard
         }
     }
 }
@@ -80,7 +58,8 @@ enum ServerAuthSelection: String, CaseIterable, Identifiable, Equatable {
 struct ServerFormCredentialBuilder {
     static func build(
         serverId: UUID,
-        authSelection: ServerAuthSelection,
+        transportSelection: ServerTransportSelection,
+        authMethod: AuthMethod,
         password: String,
         sshKey: String,
         sshPassphrase: String,
@@ -88,7 +67,11 @@ struct ServerFormCredentialBuilder {
     ) -> ServerCredentials {
         var credentials = ServerCredentials(serverId: serverId)
 
-        switch authSelection {
+        guard transportSelection != .tailscale else {
+            return credentials
+        }
+
+        switch authMethod {
         case .password:
             credentials.password = password
         case .sshKey:
@@ -102,8 +85,6 @@ struct ServerFormCredentialBuilder {
             if !sshPublicKey.isEmpty {
                 credentials.publicKey = sshPublicKey.data(using: .utf8)
             }
-        case .tailscale:
-            break
         }
 
         return credentials
@@ -125,7 +106,8 @@ struct ServerFormSheet: View {
     @State private var host: String = ""
     @State private var port: String = "22"
     @State private var username: String = ""
-    @State private var authSelection: ServerAuthSelection = .password
+    @State private var transportSelection: ServerTransportSelection = .standard
+    @State private var selectedAuthMethod: AuthMethod = .password
     @State private var password: String = ""
     @State private var sshKey: String = ""
     @State private var sshPassphrase: String = ""
@@ -165,7 +147,8 @@ struct ServerFormSheet: View {
             _host = State(initialValue: server.host)
             _port = State(initialValue: String(server.port))
             _username = State(initialValue: server.username)
-            _authSelection = State(initialValue: ServerAuthSelection(server: server))
+            _transportSelection = State(initialValue: ServerTransportSelection(server: server))
+            _selectedAuthMethod = State(initialValue: server.authMethod)
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
@@ -186,7 +169,8 @@ struct ServerFormSheet: View {
         let host: String
         let port: String
         let username: String
-        let authSelection: ServerAuthSelection
+        let transportSelection: ServerTransportSelection
+        let authMethod: AuthMethod
         let password: String
         let sshKey: String
         let sshPassphrase: String
@@ -198,7 +182,8 @@ struct ServerFormSheet: View {
             host: host,
             port: port,
             username: effectiveUsername,
-            authSelection: authSelection,
+            transportSelection: transportSelection,
+            authMethod: selectedAuthMethod,
             password: password,
             sshKey: sshKey,
             sshPassphrase: sshPassphrase,
@@ -332,7 +317,8 @@ struct ServerFormSheet: View {
             .onChange(of: host) { _ in resetConnectionTestState() }
             .onChange(of: port) { _ in resetConnectionTestState() }
             .onChange(of: username) { _ in resetConnectionTestState() }
-            .onChange(of: authSelection) { _ in resetConnectionTestState() }
+            .onChange(of: transportSelection) { _ in resetConnectionTestState() }
+            .onChange(of: selectedAuthMethod) { _ in resetConnectionTestState() }
             .onChange(of: password) { _ in resetConnectionTestState() }
             .onChange(of: sshKey) { _ in
                 if !isLoadingCredentials && !isApplyingStoredKey {
@@ -409,28 +395,36 @@ struct ServerFormSheet: View {
     @ViewBuilder
     private var authSection: some View {
         Section {
-            Picker("Method", selection: $authSelection) {
-                ForEach(ServerAuthSelection.allCases) { method in
-                    Label(method.displayName, systemImage: method.icon)
-                        .tag(method)
+            Picker("Transport", selection: $transportSelection) {
+                ForEach(ServerTransportSelection.allCases) { transport in
+                    Label(transport.displayName, systemImage: transport.icon)
+                        .tag(transport)
                 }
             }
 
-            switch authSelection {
-            case .password:
-                SecureField("Password", text: $password, prompt: Text(String(localized: "Required")))
-                    #if os(iOS)
-                    .textContentType(.password)
-                    #endif
+            if transportSelection != .tailscale {
+                Picker("Method", selection: $selectedAuthMethod) {
+                    ForEach(AuthMethod.allCases) { method in
+                        Label(method.displayName, systemImage: method.icon)
+                            .tag(method)
+                    }
+                }
 
-            case .sshKey:
-                keyInputView
+                switch selectedAuthMethod {
+                case .password:
+                    SecureField("Password", text: $password, prompt: Text(String(localized: "Required")))
+                        #if os(iOS)
+                        .textContentType(.password)
+                        #endif
 
-            case .sshKeyWithPassphrase:
-                keyInputView
-                SecureField("Key Passphrase", text: $sshPassphrase, prompt: Text(String(localized: "Optional")))
+                case .sshKey:
+                    keyInputView
 
-            case .tailscale:
+                case .sshKeyWithPassphrase:
+                    keyInputView
+                    SecureField("Key Passphrase", text: $sshPassphrase, prompt: Text(String(localized: "Optional")))
+                }
+            } else {
                 Text(String(localized: "Uses server-side Tailscale SSH policy. No password or SSH key is required."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -614,15 +608,17 @@ struct ServerFormSheet: View {
     }
 
     private var hasValidCredentials: Bool {
-        switch authSelection {
+        guard transportSelection != .tailscale else {
+            return true
+        }
+
+        switch selectedAuthMethod {
         case .password:
             return !password.isEmpty
         case .sshKey:
             return !sshKey.isEmpty
         case .sshKeyWithPassphrase:
             return !sshKey.isEmpty && !sshPassphrase.isEmpty
-        case .tailscale:
-            return true
         }
     }
 
@@ -644,8 +640,8 @@ struct ServerFormSheet: View {
             host: host,
             port: portNum,
             username: effectiveUsername,
-            connectionMode: authSelection.connectionMode,
-            authMethod: authSelection.authMethod,
+            connectionMode: transportSelection.connectionMode,
+            authMethod: transportSelection == .tailscale ? .password : selectedAuthMethod,
             notes: notes.isEmpty ? nil : notes,
             tmuxEnabledOverride: tmuxEnabled,
             createdAt: createdAt
@@ -679,7 +675,8 @@ struct ServerFormSheet: View {
     private func buildCredentials(for serverId: UUID) -> ServerCredentials {
         ServerFormCredentialBuilder.build(
             serverId: serverId,
-            authSelection: authSelection,
+            transportSelection: transportSelection,
+            authMethod: selectedAuthMethod,
             password: password,
             sshKey: sshKey,
             sshPassphrase: sshPassphrase,
@@ -709,6 +706,13 @@ struct ServerFormSheet: View {
             let client = SSHClient()
             do {
                 _ = try await client.connect(to: testServer, credentials: credentials)
+                if testServer.connectionMode == .mosh {
+                    _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
+                        using: client,
+                        startCommand: "exec true",
+                        portRange: 60000...61000
+                    )
+                }
                 await client.disconnect()
                 return .success(())
             } catch {
@@ -762,21 +766,21 @@ struct ServerFormSheet: View {
                     try await serverManager.updateServer(newServer)
                     // Store credentials based on auth method
                     let publicKeyData = sshPublicKey.isEmpty ? nil : sshPublicKey.data(using: .utf8)
-                    switch authSelection {
-                    case .password:
-                        if !password.isEmpty {
-                            try KeychainManager.shared.storePassword(for: newServer.id, password: password)
+                    if transportSelection != .tailscale {
+                        switch selectedAuthMethod {
+                        case .password:
+                            if !password.isEmpty {
+                                try KeychainManager.shared.storePassword(for: newServer.id, password: password)
+                            }
+                        case .sshKey:
+                            if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
+                                try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: nil, publicKey: publicKeyData)
+                            }
+                        case .sshKeyWithPassphrase:
+                            if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
+                                try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase, publicKey: publicKeyData)
+                            }
                         }
-                    case .sshKey:
-                        if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
-                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: nil, publicKey: publicKeyData)
-                        }
-                    case .sshKeyWithPassphrase:
-                        if !sshKey.isEmpty, let keyData = sshKey.data(using: .utf8) {
-                            try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase, publicKey: publicKeyData)
-                        }
-                    case .tailscale:
-                        break
                     }
                 } else {
                     try await serverManager.addServer(newServer, credentials: credentials)

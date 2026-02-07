@@ -127,6 +127,7 @@ struct Server: Identifiable, Codable, Hashable {
 enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
     case standard
     case tailscale
+    case mosh
 
     var id: String { rawValue }
 

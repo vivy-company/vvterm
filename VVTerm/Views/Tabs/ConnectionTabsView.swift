@@ -93,7 +93,7 @@ struct ConnectionTerminalContainer: View {
             ServerStatsView(
                 server: server,
                 isVisible: selectedView == "stats",
-                sharedClientProvider: { tabManager.sshClient(for: server.id) }
+                sharedClientProvider: { tabManager.sharedStatsClient(for: server.id) }
             )
                 .opacity(selectedView == "stats" ? 1 : 0)
                 .allowsHitTesting(selectedView == "stats")

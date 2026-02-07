@@ -57,15 +57,23 @@ struct ServerConnectionModeTests {
     }
 
     @Test
+    func decodeMoshConnectionMode() throws {
+        let server = makeServer(connectionMode: .mosh, authMethod: .sshKey)
+        let data = try JSONEncoder().encode(server)
+        let decoded = try JSONDecoder().decode(Server.self, from: data)
+        #expect(decoded.connectionMode == .mosh)
+    }
+
+    @Test
     func tailscaleSelectionMapsToTailscaleModeAndEmptyCredentials() {
         let server = makeServer(connectionMode: .tailscale, authMethod: .sshKeyWithPassphrase)
-        #expect(ServerAuthSelection(server: server) == .tailscale)
-        #expect(ServerAuthSelection.tailscale.connectionMode == .tailscale)
-        #expect(ServerAuthSelection.tailscale.authMethod == .password)
+        #expect(ServerTransportSelection(server: server) == .tailscale)
+        #expect(ServerTransportSelection.tailscale.connectionMode == .tailscale)
 
         let credentials = ServerFormCredentialBuilder.build(
             serverId: UUID(),
-            authSelection: .tailscale,
+            transportSelection: .tailscale,
+            authMethod: .password,
             password: "secret",
             sshKey: "PRIVATE",
             sshPassphrase: "phrase",
@@ -79,20 +87,26 @@ struct ServerConnectionModeTests {
     }
 
     @Test
-    func standardSelectionsPreserveCredentials() {
+    func moshPasswordSelectionPreservesPasswordCredentials() {
         let passwordCredentials = ServerFormCredentialBuilder.build(
             serverId: UUID(),
-            authSelection: .password,
+            transportSelection: .mosh,
+            authMethod: .password,
             password: "secret",
             sshKey: "",
             sshPassphrase: "",
             sshPublicKey: ""
         )
         #expect(passwordCredentials.password == "secret")
+        #expect(passwordCredentials.privateKey == nil)
+    }
 
+    @Test
+    func moshKeySelectionPreservesKeyCredentials() {
         let keyCredentials = ServerFormCredentialBuilder.build(
             serverId: UUID(),
-            authSelection: .sshKeyWithPassphrase,
+            transportSelection: .mosh,
+            authMethod: .sshKeyWithPassphrase,
             password: "",
             sshKey: "PRIVATE_KEY",
             sshPassphrase: "phrase",

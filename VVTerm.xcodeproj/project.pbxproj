@@ -13,6 +13,8 @@
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
 		CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B22F0CD851006804BF /* MLXNN */; };
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
+		D1A7B0C12EAB100100A00001 /* MoshCore in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00011 /* MoshCore */; };
+		D1A7B0C12EAB100100A00002 /* MoshBootstrap in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00012 /* MoshBootstrap */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -130,6 +132,8 @@
 				CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */,
 				CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */,
 				CC83449F2F0D18CF006804BF /* MLX in Frameworks */,
+				D1A7B0C12EAB100100A00001 /* MoshCore in Frameworks */,
+				D1A7B0C12EAB100100A00002 /* MoshBootstrap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,6 +235,8 @@
 				CC8312B12F0CD850006804BF /* MLX */,
 				CC8312B22F0CD851006804BF /* MLXNN */,
 				CC8312B32F0CD852006804BF /* MLXFFT */,
+				D1A7B0C12EAB100100A00011 /* MoshCore */,
+				D1A7B0C12EAB100100A00012 /* MoshBootstrap */,
 			);
 			productName = VVTerm;
 			productReference = CC83127E2F0CD84D006804BF /* VVTerm.app */;
@@ -332,6 +338,7 @@
 			packageReferences = (
 				CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CC83127F2F0CD84D006804BF /* Products */;
@@ -1055,6 +1062,14 @@
 				minimumVersion = 0.21.0;
 			};
 		};
+		D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wiedymi/swift-mosh";
+			requirement = {
+				kind = exactVersion;
+				version = 0.1.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1077,6 +1092,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */;
 			productName = MLXFFT;
+		};
+		D1A7B0C12EAB100100A00011 /* MoshCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */;
+			productName = MoshCore;
+		};
+		D1A7B0C12EAB100100A00012 /* MoshBootstrap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */;
+			productName = MoshBootstrap;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

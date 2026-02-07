@@ -853,7 +853,7 @@ struct iOSTerminalView: View {
             ServerStatsView(
                 server: server,
                 isVisible: true,
-                sharedClientProvider: { sessionManager.sshClient(for: server.id) }
+                sharedClientProvider: { sessionManager.sharedStatsClient(for: server.id) }
             )
         }
     }
@@ -864,7 +864,7 @@ struct iOSTerminalView: View {
                 ServerStatsView(
                     server: server,
                     isVisible: true,
-                    sharedClientProvider: { sessionManager.sshClient(for: server.id) }
+                    sharedClientProvider: { sessionManager.sharedStatsClient(for: server.id) }
                 )
                 .zIndex(1)
             }

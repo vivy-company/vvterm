@@ -381,6 +381,8 @@ struct TerminalPaneView: View {
     @State private var connectionError: String?
     @State private var reconnectToken = UUID()
     @State private var showingTmuxInstallPrompt = false
+    @State private var showingMoshInstallPrompt = false
+    @State private var isInstallingMosh = false
     @State private var terminalBackgroundColor: Color = .black
 
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
@@ -408,6 +410,17 @@ struct TerminalPaneView: View {
     private var effectiveThemeName: String {
         guard usePerAppearanceTheme else { return terminalThemeName }
         return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    }
+
+    private var fallbackBannerMessage: String? {
+        guard paneState?.activeTransport == .sshFallback else { return nil }
+        return paneState?.moshFallbackReason?.bannerMessage ?? String(localized: "Using SSH fallback for this session.")
+    }
+
+    private var shouldPromptMoshInstall: Bool {
+        guard server.connectionMode == .mosh else { return false }
+        guard paneState?.activeTransport == .sshFallback else { return false }
+        return paneState?.moshFallbackReason == .serverMissing
     }
 
     var body: some View {
@@ -537,6 +550,37 @@ struct TerminalPaneView: View {
                 }
             }
 
+            if isInstallingMosh {
+                TerminalStatusCard {
+                    VStack(spacing: 12) {
+                        ProgressView()
+                            .progressViewStyle(.circular)
+                        Text("Installing mosh-server...")
+                            .foregroundStyle(.secondary)
+                    }
+                    .multilineTextAlignment(.center)
+                }
+            }
+
+            if let fallbackBannerMessage {
+                VStack {
+                    HStack(spacing: 8) {
+                        Image(systemName: "arrow.trianglehead.2.clockwise")
+                            .foregroundStyle(.orange)
+                        Text(fallbackBannerMessage)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 12)
+                    .padding(.top, 8)
+                    Spacer()
+                }
+            }
+
             if showsVoiceButton && isFocused && isTabSelected && connectionState.isConnected {
                 voiceTriggerButton
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -559,6 +603,9 @@ struct TerminalPaneView: View {
             if paneState?.tmuxStatus == .missing {
                 showingTmuxInstallPrompt = true
             }
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
+            }
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
         .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
@@ -567,6 +614,16 @@ struct TerminalPaneView: View {
         .onChange(of: paneState?.tmuxStatus) { status in
             if status == .missing {
                 showingTmuxInstallPrompt = true
+            }
+        }
+        .onChange(of: paneState?.moshFallbackReason) { _ in
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
+            }
+        }
+        .onChange(of: paneState?.activeTransport) { _ in
+            if shouldPromptMoshInstall {
+                showingMoshInstallPrompt = true
             }
         }
         .alert("Install tmux?", isPresented: $showingTmuxInstallPrompt) {
@@ -581,6 +638,16 @@ struct TerminalPaneView: View {
         } message: {
             Text("tmux keeps your terminal session alive across app restarts and disconnects.")
         }
+        .alert("Install mosh-server?", isPresented: $showingMoshInstallPrompt) {
+            Button("Install") {
+                Task {
+                    await installMoshServerAndReconnect()
+                }
+            }
+            Button("Continue with SSH", role: .cancel) {}
+        } message: {
+            Text("Mosh is selected for this server, but mosh-server is missing on the host.")
+        }
     }
 
     private func disableTmuxForServer() {
@@ -594,6 +661,21 @@ struct TerminalPaneView: View {
         reconnectToken = UUID()
         Task {
             await TerminalTabManager.shared.unregisterSSHClient(for: paneId)
+        }
+    }
+
+    @MainActor
+    private func installMoshServerAndReconnect() async {
+        guard !isInstallingMosh else { return }
+        isInstallingMosh = true
+        defer { isInstallingMosh = false }
+
+        do {
+            try await TerminalTabManager.shared.installMoshServer(for: paneId)
+            connectionError = nil
+            retryConnection()
+        } catch {
+            connectionError = error.localizedDescription
         }
     }
 
@@ -880,12 +962,19 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             startupCommand: tmuxStartup.command
                         )
 
+                        guard !Task.isCancelled else {
+                            await sshClient.closeShell(shell.id)
+                            return
+                        }
+
                         if let paneId = paneId {
                             await TerminalTabManager.shared.registerSSHClient(
                                 sshClient,
                                 shellId: shell.id,
                                 for: paneId,
                                 serverId: server.id,
+                                transport: shell.transport,
+                                fallbackReason: shell.fallbackReason,
                                 skipTmuxLifecycle: tmuxStartup.skipTmuxLifecycle
                             )
                             await MainActor.run {

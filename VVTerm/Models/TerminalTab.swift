@@ -73,6 +73,10 @@ struct TerminalPaneState {
     var tmuxStatus: TmuxStatus
     var workingDirectory: String?
     var seedPaneId: UUID?
+    /// Runtime transport for this pane (never persisted).
+    var activeTransport: ShellTransport
+    /// Set only when this pane is running over SSH fallback from Mosh.
+    var moshFallbackReason: MoshFallbackReason?
 
     init(paneId: UUID, tabId: UUID, serverId: UUID) {
         self.paneId = paneId
@@ -83,5 +87,7 @@ struct TerminalPaneState {
         self.tmuxStatus = .unknown
         self.workingDirectory = nil
         self.seedPaneId = nil
+        self.activeTransport = .ssh
+        self.moshFallbackReason = nil
     }
 }

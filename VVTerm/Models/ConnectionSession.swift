@@ -51,6 +51,10 @@ struct ConnectionSession: Identifiable, Hashable {
     var autoReconnect: Bool
     var tmuxStatus: TmuxStatus
     var workingDirectory: String?
+    /// Runtime transport for this session (never persisted).
+    var activeTransport: ShellTransport
+    /// Set only when this session is running over SSH fallback from Mosh.
+    var moshFallbackReason: MoshFallbackReason?
     /// If set, this session is a split child of the parent session (not shown in tabs)
     var parentSessionId: UUID?
 
@@ -65,6 +69,8 @@ struct ConnectionSession: Identifiable, Hashable {
         autoReconnect: Bool = true,
         tmuxStatus: TmuxStatus = .unknown,
         workingDirectory: String? = nil,
+        activeTransport: ShellTransport = .ssh,
+        moshFallbackReason: MoshFallbackReason? = nil,
         parentSessionId: UUID? = nil
     ) {
         self.id = id
@@ -77,6 +83,8 @@ struct ConnectionSession: Identifiable, Hashable {
         self.autoReconnect = autoReconnect
         self.tmuxStatus = tmuxStatus
         self.workingDirectory = workingDirectory
+        self.activeTransport = activeTransport
+        self.moshFallbackReason = moshFallbackReason
         self.parentSessionId = parentSessionId
     }
 

@@ -1,5 +1,5 @@
 {
-  "originHash" : "64e3756857b39b7abbb5fde3e26bb0ccda16ee350b6934cd124464e1ad5d1379",
+  "originHash" : "ae140baec38313f4cd1bd487eb164a56b583d64ce81038fcd7805a5ceee81e32",
   "pins" : [
     {
       "identity" : "mlx-swift",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "072b684acaae80b6a463abab3a103732f33774bf",
         "version" : "0.29.1"
+      }
+    },
+    {
+      "identity" : "swift-mosh",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/wiedymi/swift-mosh",
+      "state" : {
+        "revision" : "e16e1680072201c7925adc6b40aaa443d2eda597",
+        "version" : "0.1.0"
       }
     },
     {

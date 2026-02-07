@@ -60,6 +60,8 @@ final class ConnectionSessionManager: ObservableObject {
         let serverId: UUID
         let client: SSHClient
         let shellId: UUID
+        let transport: ShellTransport
+        let fallbackReason: MoshFallbackReason?
     }
 
     /// Shell handles indexed by session ID
@@ -200,7 +202,10 @@ final class ConnectionSessionManager: ObservableObject {
             if !hasOtherConnections {
                 connectedServerIds.remove(serverId)
             }
-        case .connecting, .reconnecting, .idle:
+        case .connecting, .reconnecting:
+            sessions[index].activeTransport = .ssh
+            sessions[index].moshFallbackReason = nil
+        case .idle:
             break
         }
     }
@@ -441,6 +446,8 @@ final class ConnectionSessionManager: ObservableObject {
         shellId: UUID,
         for sessionId: UUID,
         serverId: UUID,
+        transport: ShellTransport = .ssh,
+        fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
         if let existing = sshShells[sessionId] {
@@ -450,9 +457,20 @@ final class ConnectionSessionManager: ObservableObject {
             serverShellCounts[existing.serverId] = max((serverShellCounts[existing.serverId] ?? 1) - 1, 0)
         }
 
-        sshShells[sessionId] = SSHShellRegistration(serverId: serverId, client: client, shellId: shellId)
+        sshShells[sessionId] = SSHShellRegistration(
+            serverId: serverId,
+            client: client,
+            shellId: shellId,
+            transport: transport,
+            fallbackReason: fallbackReason
+        )
         serverShellCounts[serverId, default: 0] += 1
         sharedSSHClients[serverId] = client
+
+        if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
+            sessions[index].activeTransport = transport
+            sessions[index].moshFallbackReason = fallbackReason
+        }
 
         if !skipTmuxLifecycle {
             Task { [weak self] in
@@ -472,6 +490,11 @@ final class ConnectionSessionManager: ObservableObject {
 
         if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
             await client.disconnect()
+        }
+
+        if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
+            sessions[index].activeTransport = .ssh
+            sessions[index].moshFallbackReason = nil
         }
     }
 
@@ -500,6 +523,35 @@ final class ConnectionSessionManager: ObservableObject {
         }
 
         return nil
+    }
+
+    func activeTransport(for sessionId: UUID) -> ShellTransport {
+        sessions.first(where: { $0.id == sessionId })?.activeTransport ?? .ssh
+    }
+
+    func sharedStatsClient(for serverId: UUID) -> SSHClient? {
+        if selectedTransport(for: serverId) == .mosh {
+            return nil
+        }
+        return sshClient(for: serverId)
+    }
+
+    private func selectedTransport(for serverId: UUID) -> ShellTransport {
+        if let selectedSessionId = selectedSessionByServer[serverId],
+           let session = sessions.first(where: { $0.id == selectedSessionId }) {
+            return session.activeTransport
+        }
+
+        if let selectedSessionId,
+           let session = sessions.first(where: { $0.id == selectedSessionId && $0.serverId == serverId }) {
+            return session.activeTransport
+        }
+
+        if let connected = sessions.first(where: { $0.serverId == serverId && $0.connectionState.isConnected }) {
+            return connected.activeTransport
+        }
+
+        return sessions.first(where: { $0.serverId == serverId })?.activeTransport ?? .ssh
     }
 
     // MARK: - Terminal Registration (with LRU caching)
@@ -936,6 +988,13 @@ extension ConnectionSessionManager {
                 self.updateTmuxStatus(sessionId, status: .missing)
             }
         }
+    }
+
+    func installMoshServer(for sessionId: UUID) async throws {
+        guard let registration = sshShells[sessionId] else {
+            throw SSHError.notConnected
+        }
+        try await RemoteMoshManager.shared.installMoshServer(using: registration.client)
     }
 
     func killTmuxIfNeeded(for sessionId: UUID) {
