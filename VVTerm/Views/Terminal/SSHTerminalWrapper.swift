@@ -74,6 +74,16 @@ extension SSHTerminalCoordinator {
     }
 
     func startSSHConnection(terminal: GhosttyTerminalView) {
+        if shellTask != nil {
+            logger.debug("Ignoring duplicate start request for session \(self.sessionId)")
+            return
+        }
+
+        if shellId != nil {
+            logger.debug("Shell already active for session \(self.sessionId)")
+            return
+        }
+
         // Capture all values needed in the detached task before creating it
         // to avoid accessing main actor-isolated properties from detached context
         let sshClient = self.sshClient
@@ -84,6 +94,12 @@ extension SSHTerminalCoordinator {
         let logger = self.logger
 
         shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
+            defer {
+                Task { @MainActor [weak self] in
+                    self?.shellTask = nil
+                }
+            }
+
             guard let self = self, let terminal = terminal else { return }
 
             let maxAttempts = 3
