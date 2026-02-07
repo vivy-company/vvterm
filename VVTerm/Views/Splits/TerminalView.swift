@@ -927,6 +927,16 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
         }
 
         func startSSHConnection(terminal: GhosttyTerminalView) {
+            if shellTask != nil {
+                logger.debug("Ignoring duplicate start request for pane")
+                return
+            }
+
+            if shellId != nil {
+                logger.debug("Shell already active for pane")
+                return
+            }
+
             let sshClient = self.sshClient
             let server = self.server
             let credentials = self.credentials
@@ -935,6 +945,12 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             let logger = self.logger
 
             shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, paneId, onProcessExit, logger] in
+                defer {
+                    Task { @MainActor [weak self] in
+                        self?.shellTask = nil
+                    }
+                }
+
                 guard let self = self, let terminal = terminal else { return }
 
                 let maxAttempts = 3
