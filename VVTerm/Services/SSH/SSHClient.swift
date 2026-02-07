@@ -50,6 +50,9 @@ actor SSHClient {
         let session: MoshClientSession
         var lastKeystrokePayload: Data?
         var lastKeystrokeAtNanos: UInt64 = 0
+        var pendingInputBytes = Data()
+        var pendingEchoDropBudget = 0
+        var lastEchoAckValue: UInt64 = 0
     }
 
     private var session: SSHSession?
@@ -227,10 +230,12 @@ actor SSHClient {
             runtime.lastKeystrokePayload = data
             runtime.lastKeystrokeAtNanos = now
             moshShells[shellId] = runtime
+            noteMoshInputBytes(data, for: shellId)
             do {
                 try await runtime.session.enqueue(.keystrokes(data))
                 return
             } catch {
+                rollbackTrackedMoshInputBytes(data, for: shellId)
                 throw SSHError.moshSessionFailed(error.localizedDescription)
             }
         }
@@ -354,7 +359,8 @@ actor SSHClient {
             let streamTask = Task { [weak self] in
                 for await hostOp in hostOpStream {
                     guard !Task.isCancelled else { break }
-                    if case .hostBytes(let bytes) = hostOp {
+                    guard let self else { break }
+                    if let bytes = await self.consumeMoshHostOp(hostOp, for: shellId) {
                         continuation.yield(bytes)
                     }
                 }
@@ -389,6 +395,90 @@ actor SSHClient {
         // Ghostty can occasionally emit the same key payload twice in the same frame.
         // Suppress only ultra-near duplicates to avoid dropping intentional repeated typing.
         return elapsed <= 4_000_000
+    }
+
+    private func noteMoshInputBytes(_ data: Data, for shellId: UUID) {
+        guard !data.isEmpty else { return }
+        guard var runtime = moshShells[shellId] else { return }
+
+        runtime.pendingInputBytes.append(data)
+
+        // Keep the reconciliation window bounded to avoid unbounded memory growth.
+        let maxTrackedBytes = 16_384
+        if runtime.pendingInputBytes.count > maxTrackedBytes {
+            let overflow = runtime.pendingInputBytes.count - maxTrackedBytes
+            runtime.pendingInputBytes.removeFirst(overflow)
+            runtime.pendingEchoDropBudget = max(0, runtime.pendingEchoDropBudget - overflow)
+        }
+
+        moshShells[shellId] = runtime
+    }
+
+    private func rollbackTrackedMoshInputBytes(_ data: Data, for shellId: UUID) {
+        guard !data.isEmpty else { return }
+        guard var runtime = moshShells[shellId] else { return }
+        guard runtime.pendingInputBytes.count >= data.count else { return }
+
+        runtime.pendingInputBytes.removeLast(data.count)
+        runtime.pendingEchoDropBudget = min(runtime.pendingEchoDropBudget, runtime.pendingInputBytes.count)
+        moshShells[shellId] = runtime
+    }
+
+    private func consumeMoshHostOp(_ hostOp: MoshHostOp, for shellId: UUID) -> Data? {
+        guard var runtime = moshShells[shellId] else { return nil }
+
+        switch hostOp {
+        case .echoAck(let ackValue):
+            applyMoshEchoAck(ackValue, runtime: &runtime)
+            moshShells[shellId] = runtime
+            return nil
+        case .resize:
+            moshShells[shellId] = runtime
+            return nil
+        case .hostBytes(let bytes):
+            let filtered = filterEchoedInput(from: bytes, runtime: &runtime)
+            moshShells[shellId] = runtime
+            return filtered.isEmpty ? nil : filtered
+        }
+    }
+
+    private func applyMoshEchoAck(_ ackValue: UInt64, runtime: inout MoshShellRuntime) {
+        guard ackValue >= runtime.lastEchoAckValue else {
+            return
+        }
+
+        let delta = ackValue - runtime.lastEchoAckValue
+        runtime.lastEchoAckValue = ackValue
+        guard delta > 0 else { return }
+
+        let maxAdditional = runtime.pendingInputBytes.count - runtime.pendingEchoDropBudget
+        guard maxAdditional > 0 else { return }
+        let additional = min(maxAdditional, Int(min(delta, UInt64(Int.max))))
+        runtime.pendingEchoDropBudget += additional
+    }
+
+    private func filterEchoedInput(from bytes: Data, runtime: inout MoshShellRuntime) -> Data {
+        guard runtime.pendingEchoDropBudget > 0 else { return bytes }
+        guard !runtime.pendingInputBytes.isEmpty else {
+            runtime.pendingEchoDropBudget = 0
+            return bytes
+        }
+
+        var output = bytes
+
+        while runtime.pendingEchoDropBudget > 0 && !runtime.pendingInputBytes.isEmpty {
+            let expected = runtime.pendingInputBytes.removeFirst()
+            runtime.pendingEchoDropBudget -= 1
+
+            guard let first = output.first else { continue }
+            if first == expected {
+                output.removeFirst()
+            } else {
+                break
+            }
+        }
+
+        return output
     }
 
     private func runWithTimeout<T: Sendable>(
