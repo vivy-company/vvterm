@@ -383,6 +383,7 @@ struct TerminalPaneView: View {
     @State private var showingTmuxInstallPrompt = false
     @State private var showingMoshInstallPrompt = false
     @State private var isInstallingMosh = false
+    @State private var dismissFallbackBanner = false
     @State private var terminalBackgroundColor: Color = .black
 
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
@@ -414,6 +415,7 @@ struct TerminalPaneView: View {
 
     private var fallbackBannerMessage: String? {
         guard paneState?.activeTransport == .sshFallback else { return nil }
+        guard !dismissFallbackBanner else { return nil }
         return paneState?.moshFallbackReason?.bannerMessage ?? String(localized: "Using SSH fallback for this session.")
     }
 
@@ -571,6 +573,14 @@ struct TerminalPaneView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         Spacer(minLength: 0)
+                        Button {
+                            dismissFallbackBanner = true
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Dismiss fallback message")
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -617,14 +627,25 @@ struct TerminalPaneView: View {
             }
         }
         .onChange(of: paneState?.moshFallbackReason) { _ in
+            if paneState?.activeTransport == .sshFallback {
+                dismissFallbackBanner = false
+            }
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
         }
-        .onChange(of: paneState?.activeTransport) { _ in
+        .onChange(of: paneState?.activeTransport) { transport in
+            dismissFallbackBanner = transport != .sshFallback ? false : dismissFallbackBanner
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
+        }
+        .task(id: paneState?.activeTransport == .sshFallback ? paneState?.moshFallbackReason : nil) {
+            guard paneState?.activeTransport == .sshFallback else { return }
+            dismissFallbackBanner = false
+            try? await Task.sleep(for: .seconds(8))
+            guard !Task.isCancelled else { return }
+            dismissFallbackBanner = true
         }
         .alert("Install tmux?", isPresented: $showingTmuxInstallPrompt) {
             Button("Install") {
