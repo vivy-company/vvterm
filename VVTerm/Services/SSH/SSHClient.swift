@@ -57,6 +57,7 @@ actor SSHClient {
     private var connectionKey: String?
     private var connectedServer: Server?
     private var moshShells: [UUID: MoshShellRuntime] = [:]
+    private let moshStartupTimeout: Duration = .seconds(8)
 
     /// Stored session reference for nonisolated abort access
     private nonisolated(unsafe) var _sessionForAbort: SSHSession?
@@ -301,17 +302,19 @@ actor SSHClient {
             keyBase64_22: connectInfo.key
         )
         let moshSession = MoshClientSession(endpoint: endpoint)
-        var sessionStarted = false
         do {
-            try await moshSession.start()
-            sessionStarted = true
-            try await moshSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
-        } catch {
-            if sessionStarted {
-                await moshSession.stop()
+            try await runWithTimeout(moshStartupTimeout) {
+                try await moshSession.start()
+                try await moshSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
             }
+        } catch {
+            await moshSession.stop()
             if error is CancellationError || Task.isCancelled {
                 throw CancellationError()
+            }
+            if let sshError = error as? SSHError,
+               case .timeout = sshError {
+                throw SSHError.moshSessionFailed("Timed out waiting for Mosh UDP session startup")
             }
             throw SSHError.moshSessionFailed(error.localizedDescription)
         }
@@ -344,6 +347,27 @@ actor SSHClient {
             stream: stream,
             transport: .mosh
         )
+    }
+
+    private func runWithTimeout<T: Sendable>(
+        _ timeout: Duration,
+        operation: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask {
+                try await operation()
+            }
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw SSHError.timeout
+            }
+
+            guard let result = try await group.next() else {
+                throw SSHError.timeout
+            }
+            group.cancelAll()
+            return result
+        }
     }
 
     private func fallbackReason(for error: Error) -> MoshFallbackReason {
