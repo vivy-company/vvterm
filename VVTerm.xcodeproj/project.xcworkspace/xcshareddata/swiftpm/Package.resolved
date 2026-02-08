@@ -1,5 +1,5 @@
 {
-  "originHash" : "ae140baec38313f4cd1bd487eb164a56b583d64ce81038fcd7805a5ceee81e32",
+  "originHash" : "b27e3ae7b028de5dc5c2d0aa228b8a55da336e36a60616f96444150b8f3f071a",
   "pins" : [
     {
       "identity" : "mlx-swift",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "072b684acaae80b6a463abab3a103732f33774bf",
         "version" : "0.29.1"
+      }
+    },
+    {
+      "identity" : "swift-cloudflared",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/wiedymi/swift-cloudflared.git",
+      "state" : {
+        "revision" : "d66b4b54d7df42a1995997e5ad6e5d08fd58a734",
+        "version" : "0.1.1"
       }
     },
     {
@@ -26,6 +35,15 @@
       "state" : {
         "revision" : "0c0290ff6b24942dadb83a929ffaaa1481df04a2",
         "version" : "1.1.1"
+      }
+    },
+    {
+      "identity" : "tweetnacl-swiftwrap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bitmark-inc/tweetnacl-swiftwrap.git",
+      "state" : {
+        "revision" : "f8fd111642bf2336b11ef9ea828510693106e954",
+        "version" : "1.1.0"
       }
     },
     {
