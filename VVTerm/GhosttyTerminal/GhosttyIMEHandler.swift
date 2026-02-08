@@ -104,12 +104,9 @@ class GhosttyIMEHandler {
     }
 
     func unmarkText() {
-        // Commit any pending marked text
-        if !markedText.isEmpty {
-            surface?.sendText(markedText)
-            markedText = ""
-            view?.needsDisplay = true
-        }
+        // NSTextInputClient commits through insertText; unmarkText only ends composition.
+        // Sending marked text here can emit partial Jamo/phonetic fragments.
+        clearMarkedText()
     }
 
     func selectedRange() -> NSRange {
@@ -191,9 +188,9 @@ class GhosttyIMEHandler {
     private func anyToString(_ string: Any) -> String? {
         switch string {
         case let string as NSString:
-            return string as String
+            return (string as String).precomposedStringWithCanonicalMapping
         case let string as NSAttributedString:
-            return string.string
+            return string.string.precomposedStringWithCanonicalMapping
         default:
             return nil
         }
