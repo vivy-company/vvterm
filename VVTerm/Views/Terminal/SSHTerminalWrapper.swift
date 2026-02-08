@@ -541,12 +541,16 @@ final class TerminalContainerUIView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func availableBoundsForTerminal() -> CGRect {
+        let clampedInset = min(max(0, effectiveKeyboardInset()), bounds.height)
+        return bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: clampedInset, right: 0))
+    }
+
     override func layoutSubviews() {
         super.layoutSubviews()
 
         guard let terminalView = terminalView else { return }
-        let clampedInset = min(max(0, keyboardInset), bounds.height)
-        let availableBounds = bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: clampedInset, right: 0))
+        let availableBounds = availableBoundsForTerminal()
         if terminalView.frame != availableBounds {
             terminalView.frame = availableBounds
         }
@@ -567,6 +571,16 @@ final class TerminalContainerUIView: UIView {
     func requestRefresh() {
         pendingRefresh = true
         setNeedsLayout()
+    }
+
+    private func effectiveKeyboardInset() -> CGFloat {
+        // Prefer iOS keyboard layout guide because notification ordering can be stale
+        // when the app backgrounds/foregrounds with keyboard still visible.
+        if window != nil {
+            let guideOverlap = bounds.intersection(keyboardLayoutGuide.layoutFrame).height
+            return guideOverlap
+        }
+        return keyboardInset
     }
 }
 

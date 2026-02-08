@@ -1052,8 +1052,7 @@ struct iOSTerminalView: View {
 
                 let targetBounds: CGRect
                 if let terminalContainer = container as? TerminalContainerUIView {
-                    let clampedInset = min(max(0, terminalContainer.keyboardInset), terminalContainer.bounds.height)
-                    targetBounds = terminalContainer.bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: clampedInset, right: 0))
+                    targetBounds = terminalContainer.availableBoundsForTerminal()
                     terminalContainer.requestRefresh()
                 } else {
                     targetBounds = container.bounds
