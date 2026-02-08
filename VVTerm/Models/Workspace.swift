@@ -118,7 +118,7 @@ struct ServerEnvironment: Identifiable, Codable, Hashable {
         id: UUID(uuidString: "00000000-0000-0000-0000-000000000001")!,
         name: "Production",
         shortName: "Prod",
-        colorHex: "#FF3B30",
+        colorHex: "#34C759",
         isBuiltIn: true
     )
 

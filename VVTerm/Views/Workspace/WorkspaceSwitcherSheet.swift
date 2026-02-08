@@ -31,7 +31,7 @@ struct WorkspaceSwitcherSheet: View {
 
             // Workspace list
             ScrollView {
-                VStack(spacing: 4) {
+                VStack(spacing: 2) {
                     ForEach(serverManager.workspaces) { workspace in
                         WorkspaceSwitcherRow(
                             workspace: workspace,
@@ -58,8 +58,8 @@ struct WorkspaceSwitcherSheet: View {
                         }
                     }
                 }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
             }
 
             Divider()
@@ -151,6 +151,20 @@ struct WorkspaceSwitcherRow: View {
     var onLockedTap: (() -> Void)? = nil
     let onDeleteRequest: () -> Void
 
+    #if os(macOS)
+    @Environment(\.controlActiveState) private var controlActiveState
+
+    private var selectionFillColor: Color {
+        let base = NSColor.unemphasizedSelectedContentBackgroundColor
+        let alpha: Double = controlActiveState == .key ? 0.26 : 0.18
+        return Color(nsColor: base).opacity(alpha)
+    }
+
+    private var selectedTextColor: Color {
+        Color(nsColor: .selectedTextColor)
+    }
+    #endif
+
     var body: some View {
         HStack(spacing: 12) {
             // Icon or color indicator
@@ -167,8 +181,12 @@ struct WorkspaceSwitcherRow: View {
 
             Text(workspace.name)
                 .font(.body)
-                .fontWeight(isSelected ? .semibold : .regular)
+                .fontWeight(.semibold)
+                #if os(macOS)
+                .foregroundStyle(isLocked ? .secondary : (isSelected ? selectedTextColor : .primary))
+                #else
                 .foregroundStyle(isLocked ? .secondary : (isSelected ? Color.accentColor : .primary))
+                #endif
                 .lineLimit(1)
 
             Spacer(minLength: 8)
@@ -183,7 +201,11 @@ struct WorkspaceSwitcherRow: View {
                         onEdit()
                     } label: {
                         Image(systemName: "pencil.circle.fill")
+                            #if os(macOS)
+                            .foregroundStyle(isSelected ? selectedTextColor.opacity(0.9) : .secondary)
+                            #else
                             .foregroundStyle(.secondary)
+                            #endif
                             .imageScale(.medium)
                     }
                     .buttonStyle(.plain)
@@ -192,7 +214,11 @@ struct WorkspaceSwitcherRow: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
+        #if os(macOS)
+        .background(isSelected ? selectionFillColor : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+        #else
         .background(isSelected ? Color.primary.opacity(0.08) : Color.clear, in: RoundedRectangle(cornerRadius: 6))
+        #endif
         .contentShape(Rectangle())
         .opacity(isLocked ? 0.7 : 1.0)
         .onTapGesture {

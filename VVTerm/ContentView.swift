@@ -12,7 +12,6 @@ struct ContentView: View {
 
     @State private var selectedWorkspace: Workspace?
     @State private var selectedServer: Server?
-    @State private var selectedEnvironment: ServerEnvironment?
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     /// Whether the selected server is connected
@@ -68,8 +67,7 @@ struct ContentView: View {
             ServerSidebarView(
                 serverManager: serverManager,
                 selectedWorkspace: $selectedWorkspace,
-                selectedServer: $selectedServer,
-                selectedEnvironment: $selectedEnvironment
+                selectedServer: $selectedServer
             )
             .navigationSplitViewColumnWidth(min: 200, ideal: 250, max: 300)
         } detail: {
