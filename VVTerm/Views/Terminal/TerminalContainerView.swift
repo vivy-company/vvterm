@@ -27,7 +27,7 @@ struct TerminalContainerView: View {
     @State private var showingMoshInstallPrompt = false
     @State private var isInstallingMosh = false
     @State private var dismissFallbackBanner = false
-    @State private var didAutoReconnect = false
+    @State private var reconnectInFlight = false
     @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
     /// Check if terminal already exists (was previously created)
@@ -72,6 +72,11 @@ struct TerminalContainerView: View {
         guard server?.connectionMode == .mosh else { return false }
         guard session.activeTransport == .sshFallback else { return false }
         return session.moshFallbackReason == .serverMissing
+    }
+
+    private var shouldShowMoshDurabilityHint: Bool {
+        guard server?.connectionMode == .mosh else { return false }
+        return session.tmuxStatus == .off
     }
 
     #if os(macOS) || os(iOS)
@@ -196,6 +201,11 @@ struct TerminalContainerView: View {
                                 .foregroundStyle(.secondary)
                             if session.tmuxStatus.indicatesTmux {
                                 Text("tmux session is still running on the server.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            } else if shouldShowMoshDurabilityHint {
+                                Text("Without tmux, app backgrounding can interrupt running commands.")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
@@ -345,6 +355,14 @@ struct TerminalContainerView: View {
         .onChange(of: scenePhase) { newPhase in
             if newPhase == .active {
                 updateTerminalBackgroundColor()
+                attemptAutoReconnectIfNeeded()
+            }
+        }
+        .onChange(of: session.connectionState) { state in
+            if state.isConnecting || state.isConnected {
+                reconnectInFlight = false
+            } else if case .disconnected = state {
+                attemptAutoReconnectIfNeeded()
             }
         }
         .onChange(of: session.tmuxStatus) { status in
@@ -453,15 +471,19 @@ struct TerminalContainerView: View {
     }
 
     private func attemptAutoReconnectIfNeeded() {
-        guard !didAutoReconnect else { return }
+        guard scenePhase == .active else { return }
+        guard !reconnectInFlight else { return }
         guard autoReconnectEnabled else { return }
         guard session.connectionState == .disconnected else { return }
-        didAutoReconnect = true
         Task { await retryConnection() }
     }
 
     @MainActor
     private func retryConnection() async {
+        guard !reconnectInFlight else { return }
+        guard !session.connectionState.isConnecting else { return }
+        reconnectInFlight = true
+        defer { reconnectInFlight = false }
         isReady = false
         loadCredentialsIfNeeded(force: false)
         guard credentials != nil else { return }

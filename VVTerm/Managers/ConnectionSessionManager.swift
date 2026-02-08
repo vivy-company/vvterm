@@ -675,6 +675,11 @@ final class ConnectionSessionManager: ObservableObject {
             throw SSHError.connectionFailed("Server not found")
         }
 
+        if let current = sessions.first(where: { $0.id == session.id }),
+           current.connectionState.isConnecting {
+            return
+        }
+
         // Update state
         if let index = sessions.firstIndex(where: { $0.id == session.id }) {
             sessions[index].connectionState = .reconnecting(attempt: 1)
@@ -969,6 +974,15 @@ extension ConnectionSessionManager {
 
         let status: TmuxStatus = (selectedSessionId == sessionId) ? .foreground : .background
         updateTmuxStatus(sessionId, status: status)
+
+        let connectionMode = ServerManager.shared.servers
+            .first(where: { $0.id == serverId })?
+            .connectionMode ?? .standard
+        if connectionMode == .mosh {
+            // For mosh transport, attach tmux after the UDP session is established.
+            // This avoids nested shell startup quoting in mosh-server bootstrap.
+            return (nil, false)
+        }
 
         await RemoteTmuxManager.shared.prepareConfig(using: client)
         let workingDirectory = await resolveTmuxWorkingDirectory(for: sessionId, using: client)

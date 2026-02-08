@@ -120,12 +120,40 @@ actor RemoteMoshManager {
         """
     }
 
-    nonisolated private func resolveStartupCommand(_ command: String?) -> String {
+    nonisolated func resolveStartupCommand(_ command: String?) -> String {
         let trimmed = command?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         if trimmed.isEmpty {
             return "exec \"${SHELL:-/bin/sh}\" -l"
         }
-        return trimmed
+        return unwrapShellLaunchIfNeeded(trimmed) ?? trimmed
+    }
+
+    nonisolated private func unwrapShellLaunchIfNeeded(_ command: String) -> String? {
+        let prefixes = ["sh -lc ", "/bin/sh -lc "]
+        guard let prefix = prefixes.first(where: { command.hasPrefix($0) }) else {
+            return nil
+        }
+
+        let payload = String(command.dropFirst(prefix.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !payload.isEmpty else { return nil }
+
+        if payload.hasPrefix("'"), payload.hasSuffix("'"), payload.count >= 2 {
+            let start = payload.index(after: payload.startIndex)
+            let end = payload.index(before: payload.endIndex)
+            let quoted = String(payload[start..<end])
+            return quoted.replacingOccurrences(of: "'\\''", with: "'")
+        }
+
+        if payload.hasPrefix("\""), payload.hasSuffix("\""), payload.count >= 2 {
+            let start = payload.index(after: payload.startIndex)
+            let end = payload.index(before: payload.endIndex)
+            let quoted = String(payload[start..<end])
+            let step1 = quoted.replacingOccurrences(of: "\\\"", with: "\"")
+            let step2 = step1.replacingOccurrences(of: "\\\\", with: "\\")
+            return step2
+        }
+
+        return payload
     }
 
     nonisolated private func shellQuoted(_ value: String) -> String {

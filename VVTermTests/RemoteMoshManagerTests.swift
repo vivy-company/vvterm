@@ -65,4 +65,19 @@ struct RemoteMoshManagerTests {
         #expect(script.contains("export LC_ALL="))
         #expect(script.contains("export LC_CTYPE="))
     }
+
+    @Test
+    func resolveStartupCommandUnwrapsShellLaunchWrapper() {
+        let wrapped = "sh -lc 'PATH=\"/usr/bin:$PATH\" exec tmux -u -f ~/.vvterm/tmux.conf new-session -A -s '\\''vvterm_test'\\'''"
+        let resolved = RemoteMoshManager.shared.resolveStartupCommand(wrapped)
+        #expect(!resolved.hasPrefix("sh -lc "))
+        #expect(resolved.contains("exec tmux -u -f ~/.vvterm/tmux.conf"))
+        #expect(resolved.contains("-s 'vvterm_test'"))
+    }
+
+    @Test
+    func resolveStartupCommandDefaultsToLoginShell() {
+        let resolved = RemoteMoshManager.shared.resolveStartupCommand(nil)
+        #expect(resolved == "exec \"${SHELL:-/bin/sh}\" -l")
+    }
 }
