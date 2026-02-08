@@ -14,6 +14,17 @@
     <string>6.0</string>
     <key>CFBundleName</key>
     <string>$(PRODUCT_NAME)</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>app.vivy.VivyTerm.cloudflare</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>vvterm-cfaccess</string>
+            </array>
+        </dict>
+    </array>
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
     <key>CFBundleShortVersionString</key>

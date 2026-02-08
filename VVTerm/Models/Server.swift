@@ -12,6 +12,9 @@ struct Server: Identifiable, Codable, Hashable {
     var username: String
     var connectionMode: SSHConnectionMode
     var authMethod: AuthMethod
+    var cloudflareAccessMode: CloudflareAccessMode?
+    var cloudflareTeamDomainOverride: String?
+    var cloudflareAppDomainOverride: String?
     var tags: [String]
     var notes: String?
     var lastConnected: Date?
@@ -31,6 +34,9 @@ struct Server: Identifiable, Codable, Hashable {
         username: String,
         connectionMode: SSHConnectionMode = .standard,
         authMethod: AuthMethod = .password,
+        cloudflareAccessMode: CloudflareAccessMode? = nil,
+        cloudflareTeamDomainOverride: String? = nil,
+        cloudflareAppDomainOverride: String? = nil,
         tags: [String] = [],
         notes: String? = nil,
         lastConnected: Date? = nil,
@@ -48,6 +54,9 @@ struct Server: Identifiable, Codable, Hashable {
         self.username = username
         self.connectionMode = connectionMode
         self.authMethod = authMethod
+        self.cloudflareAccessMode = cloudflareAccessMode
+        self.cloudflareTeamDomainOverride = cloudflareTeamDomainOverride
+        self.cloudflareAppDomainOverride = cloudflareAppDomainOverride
         self.tags = tags
         self.notes = notes
         self.lastConnected = lastConnected
@@ -74,6 +83,9 @@ struct Server: Identifiable, Codable, Hashable {
         case username
         case connectionMode
         case authMethod
+        case cloudflareAccessMode
+        case cloudflareTeamDomainOverride
+        case cloudflareAppDomainOverride
         case tags
         case notes
         case lastConnected
@@ -94,6 +106,13 @@ struct Server: Identifiable, Codable, Hashable {
         username = try container.decode(String.self, forKey: .username)
         connectionMode = try container.decodeIfPresent(SSHConnectionMode.self, forKey: .connectionMode) ?? .standard
         authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .password
+        if let rawCloudflareMode = try container.decodeIfPresent(String.self, forKey: .cloudflareAccessMode) {
+            cloudflareAccessMode = CloudflareAccessMode(rawValue: rawCloudflareMode)
+        } else {
+            cloudflareAccessMode = nil
+        }
+        cloudflareTeamDomainOverride = try container.decodeIfPresent(String.self, forKey: .cloudflareTeamDomainOverride)
+        cloudflareAppDomainOverride = try container.decodeIfPresent(String.self, forKey: .cloudflareAppDomainOverride)
         tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         lastConnected = try container.decodeIfPresent(Date.self, forKey: .lastConnected)
@@ -114,6 +133,9 @@ struct Server: Identifiable, Codable, Hashable {
         try container.encode(username, forKey: .username)
         try container.encode(connectionMode, forKey: .connectionMode)
         try container.encode(authMethod, forKey: .authMethod)
+        try container.encodeIfPresent(cloudflareAccessMode, forKey: .cloudflareAccessMode)
+        try container.encodeIfPresent(cloudflareTeamDomainOverride, forKey: .cloudflareTeamDomainOverride)
+        try container.encodeIfPresent(cloudflareAppDomainOverride, forKey: .cloudflareAppDomainOverride)
         try container.encode(tags, forKey: .tags)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(lastConnected, forKey: .lastConnected)
@@ -128,6 +150,7 @@ enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
     case standard
     case tailscale
     case mosh
+    case cloudflare
 
     var id: String { rawValue }
 
@@ -140,6 +163,22 @@ enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         try container.encode(rawValue)
+    }
+}
+
+enum CloudflareAccessMode: String, Codable, CaseIterable, Identifiable {
+    case oauth
+    case serviceToken
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .oauth:
+            return String(localized: "OAuth")
+        case .serviceToken:
+            return String(localized: "Service Token")
+        }
     }
 }
 
@@ -177,6 +216,8 @@ struct ServerCredentials {
     var privateKey: Data?
     var publicKey: Data?
     var passphrase: String?
+    var cloudflareClientID: String?
+    var cloudflareClientSecret: String?
 
     var sshKey: Data? {
         get { privateKey }

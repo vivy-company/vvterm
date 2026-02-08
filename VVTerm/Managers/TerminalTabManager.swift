@@ -66,7 +66,11 @@ final class TerminalTabManager: ObservableObject {
     /// Shell counts per server for shared client lifecycle
     private var serverShellCounts: [UUID: Int] = [:]
     /// Pane IDs currently starting a shell (global single-flight guard).
-    private var shellStartsInFlight: Set<UUID> = []
+    /// Value is start time for stale-guard recovery.
+    private var shellStartsInFlight: [UUID: Date] = [:]
+    /// Keep shell-start locks alive for the full SSH retry window:
+    /// 3 attempts × 30s connect timeout + backoff + safety margin.
+    private let shellStartStaleThreshold: TimeInterval = 120
 
     /// Pane state keyed by pane ID
     @Published var paneStates: [UUID: TerminalPaneState] = [:]
@@ -310,6 +314,11 @@ final class TerminalTabManager: ObservableObject {
 
     /// Register SSH client for a pane
     func sharedSSHClient(for server: Server) -> SSHClient {
+        if server.connectionMode == .cloudflare {
+            // Cloudflare transport is more stable with an isolated SSH client
+            // per pane/session lifecycle.
+            return SSHClient()
+        }
         if let client = sharedSSHClients[server.id] {
             return client
         }
@@ -328,7 +337,7 @@ final class TerminalTabManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
-        shellStartsInFlight.remove(paneId)
+        shellStartsInFlight.removeValue(forKey: paneId)
 
         if let existing = sshShells[paneId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
@@ -345,7 +354,9 @@ final class TerminalTabManager: ObservableObject {
             fallbackReason: fallbackReason
         )
         serverShellCounts[serverId, default: 0] += 1
-        sharedSSHClients[serverId] = client
+        if !isCloudflareServer(serverId) {
+            sharedSSHClients[serverId] = client
+        }
 
         paneStates[paneId]?.activeTransport = transport
         paneStates[paneId]?.moshFallbackReason = fallbackReason
@@ -359,8 +370,18 @@ final class TerminalTabManager: ObservableObject {
 
     /// Unregister SSH shell
     func unregisterSSHClient(for paneId: UUID) async {
-        shellStartsInFlight.remove(paneId)
-        guard let registration = sshShells.removeValue(forKey: paneId) else { return }
+        shellStartsInFlight.removeValue(forKey: paneId)
+
+        guard let registration = sshShells.removeValue(forKey: paneId) else {
+            // No shell was registered for this pane yet. If the shared client has no
+            // active shells, reset it so any stale/hung connect task is cancelled.
+            guard let serverId = paneStates[paneId]?.serverId else { return }
+            if (serverShellCounts[serverId] ?? 0) == 0,
+               let client = sharedSSHClients.removeValue(forKey: serverId) {
+                await client.disconnect()
+            }
+            return
+        }
 
         await registration.client.closeShell(registration.shellId)
 
@@ -368,8 +389,17 @@ final class TerminalTabManager: ObservableObject {
         let newCount = max((serverShellCounts[serverId] ?? 1) - 1, 0)
         serverShellCounts[serverId] = newCount
 
-        if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
-            await client.disconnect()
+        if let mapped = sharedSSHClients[serverId],
+           ObjectIdentifier(mapped) == ObjectIdentifier(registration.client) {
+            if let replacement = sshShells.values.first(where: { $0.serverId == serverId })?.client {
+                sharedSSHClients[serverId] = replacement
+            } else {
+                sharedSSHClients.removeValue(forKey: serverId)
+            }
+        }
+
+        if !hasActiveRegistration(using: registration.client) {
+            await registration.client.disconnect()
         }
 
         paneStates[paneId]?.activeTransport = .ssh
@@ -390,11 +420,29 @@ final class TerminalTabManager: ObservableObject {
         if sshShells[paneId] != nil {
             return false
         }
-        return shellStartsInFlight.insert(paneId).inserted
+        if let startedAt = shellStartsInFlight[paneId] {
+            if Date().timeIntervalSince(startedAt) < shellStartStaleThreshold {
+                return false
+            }
+            shellStartsInFlight.removeValue(forKey: paneId)
+            logger.warning("Recovered stale pane shell-start lock for \(paneId.uuidString, privacy: .public)")
+        }
+        shellStartsInFlight[paneId] = Date()
+        return true
     }
 
     func finishShellStart(for paneId: UUID) {
-        shellStartsInFlight.remove(paneId)
+        shellStartsInFlight.removeValue(forKey: paneId)
+    }
+
+    func isShellStartInFlight(for paneId: UUID) -> Bool {
+        guard let startedAt = shellStartsInFlight[paneId] else { return false }
+        if Date().timeIntervalSince(startedAt) >= shellStartStaleThreshold {
+            shellStartsInFlight.removeValue(forKey: paneId)
+            logger.warning("Cleared stale pane shell-start in-flight flag for \(paneId.uuidString, privacy: .public)")
+            return false
+        }
+        return true
     }
 
     func sshClient(for serverId: UUID) -> SSHClient? {
@@ -423,6 +471,12 @@ final class TerminalTabManager: ObservableObject {
         return nil
     }
 
+    func hasOtherActivePanes(for serverId: UUID, excluding paneId: UUID) -> Bool {
+        paneStates.contains { entry in
+            entry.key != paneId && entry.value.serverId == serverId && entry.value.connectionState.isConnected
+        }
+    }
+
     func activeTransport(for paneId: UUID) -> ShellTransport {
         paneStates[paneId]?.activeTransport ?? .ssh
     }
@@ -432,6 +486,15 @@ final class TerminalTabManager: ObservableObject {
             return nil
         }
         return sshClient(for: serverId)
+    }
+
+    private func isCloudflareServer(_ serverId: UUID) -> Bool {
+        ServerManager.shared.servers.first(where: { $0.id == serverId })?.connectionMode == .cloudflare
+    }
+
+    private func hasActiveRegistration(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return sshShells.values.contains { ObjectIdentifier($0.client) == identifier }
     }
 
     private func selectedTransport(for serverId: UUID) -> ShellTransport {
@@ -449,7 +512,7 @@ final class TerminalTabManager: ObservableObject {
 
     /// Clean up a pane (terminal + SSH)
     private func cleanupPane(_ paneId: UUID) {
-        shellStartsInFlight.remove(paneId)
+        shellStartsInFlight.removeValue(forKey: paneId)
         if let status = paneStates[paneId]?.tmuxStatus,
            status == .foreground || status == .background || status == .installing {
             killTmuxIfNeeded(for: paneId)

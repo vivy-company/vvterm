@@ -81,16 +81,21 @@ extension SSHTerminalCoordinator {
 
         if let existingShellId = ConnectionSessionManager.shared.shellId(for: sessionId) {
             shellId = existingShellId
+            ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
             logger.debug("Reusing existing shell for session \(self.sessionId)")
             return
         }
 
         if shellId != nil {
+            ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
             logger.debug("Shell already active for session \(self.sessionId)")
             return
         }
 
         guard ConnectionSessionManager.shared.tryBeginShellStart(for: sessionId) else {
+            if ConnectionSessionManager.shared.shellId(for: sessionId) != nil {
+                ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
+            }
             logger.debug("Shell start already in progress for session \(self.sessionId)")
             return
         }
@@ -221,7 +226,7 @@ extension SSHTerminalCoordinator {
                                 )
                             }
                             shouldResetClient = !hasOtherActiveSessions
-                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
+                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
                             break
                         case .unknown:
                             break

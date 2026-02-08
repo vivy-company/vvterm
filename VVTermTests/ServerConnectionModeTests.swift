@@ -65,6 +65,14 @@ struct ServerConnectionModeTests {
     }
 
     @Test
+    func decodeCloudflareConnectionMode() throws {
+        let server = makeServer(connectionMode: .cloudflare, authMethod: .password)
+        let data = try JSONEncoder().encode(server)
+        let decoded = try JSONDecoder().decode(Server.self, from: data)
+        #expect(decoded.connectionMode == .cloudflare)
+    }
+
+    @Test
     func tailscaleSelectionMapsToTailscaleModeAndEmptyCredentials() {
         let server = makeServer(connectionMode: .tailscale, authMethod: .sshKeyWithPassphrase)
         #expect(ServerTransportSelection(server: server) == .tailscale)
@@ -77,7 +85,10 @@ struct ServerConnectionModeTests {
             password: "secret",
             sshKey: "PRIVATE",
             sshPassphrase: "phrase",
-            sshPublicKey: "PUBLIC"
+            sshPublicKey: "PUBLIC",
+            cloudflareAccessMode: nil,
+            cloudflareClientID: "",
+            cloudflareClientSecret: ""
         )
 
         #expect(credentials.password == nil)
@@ -95,7 +106,10 @@ struct ServerConnectionModeTests {
             password: "secret",
             sshKey: "",
             sshPassphrase: "",
-            sshPublicKey: ""
+            sshPublicKey: "",
+            cloudflareAccessMode: nil,
+            cloudflareClientID: "",
+            cloudflareClientSecret: ""
         )
         #expect(passwordCredentials.password == "secret")
         #expect(passwordCredentials.privateKey == nil)
@@ -110,10 +124,33 @@ struct ServerConnectionModeTests {
             password: "",
             sshKey: "PRIVATE_KEY",
             sshPassphrase: "phrase",
-            sshPublicKey: "PUBLIC_KEY"
+            sshPublicKey: "PUBLIC_KEY",
+            cloudflareAccessMode: nil,
+            cloudflareClientID: "",
+            cloudflareClientSecret: ""
         )
         #expect(String(data: keyCredentials.privateKey ?? Data(), encoding: .utf8) == "PRIVATE_KEY")
         #expect(keyCredentials.passphrase == "phrase")
         #expect(String(data: keyCredentials.publicKey ?? Data(), encoding: .utf8) == "PUBLIC_KEY")
+    }
+
+    @Test
+    func cloudflareServiceTokenPreservesSSHAndAccessCredentials() {
+        let credentials = ServerFormCredentialBuilder.build(
+            serverId: UUID(),
+            transportSelection: .cloudflare,
+            authMethod: .password,
+            password: "ssh-password",
+            sshKey: "",
+            sshPassphrase: "",
+            sshPublicKey: "",
+            cloudflareAccessMode: .serviceToken,
+            cloudflareClientID: "cf-id",
+            cloudflareClientSecret: "cf-secret"
+        )
+
+        #expect(credentials.password == "ssh-password")
+        #expect(credentials.cloudflareClientID == "cf-id")
+        #expect(credentials.cloudflareClientSecret == "cf-secret")
     }
 }

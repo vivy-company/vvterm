@@ -7,6 +7,7 @@ enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
     case standard
     case tailscale
     case mosh
+    case cloudflare
 
     var id: String { rawValue }
 
@@ -18,6 +19,8 @@ enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
             return String(localized: "Tailscale")
         case .mosh:
             return String(localized: "Mosh")
+        case .cloudflare:
+            return String(localized: "Cloudflare")
         }
     }
 
@@ -29,6 +32,8 @@ enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
             return "network"
         case .mosh:
             return "antenna.radiowaves.left.and.right"
+        case .cloudflare:
+            return "shield.lefthalf.filled"
         }
     }
 
@@ -40,6 +45,8 @@ enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
             return .tailscale
         case .mosh:
             return .mosh
+        case .cloudflare:
+            return .cloudflare
         }
     }
 
@@ -49,6 +56,8 @@ enum ServerTransportSelection: String, CaseIterable, Identifiable, Equatable {
             self = .tailscale
         case .mosh:
             self = .mosh
+        case .cloudflare:
+            self = .cloudflare
         case .standard:
             self = .standard
         }
@@ -63,7 +72,10 @@ struct ServerFormCredentialBuilder {
         password: String,
         sshKey: String,
         sshPassphrase: String,
-        sshPublicKey: String
+        sshPublicKey: String,
+        cloudflareAccessMode: CloudflareAccessMode?,
+        cloudflareClientID: String,
+        cloudflareClientSecret: String
     ) -> ServerCredentials {
         var credentials = ServerCredentials(serverId: serverId)
 
@@ -85,6 +97,13 @@ struct ServerFormCredentialBuilder {
             if !sshPublicKey.isEmpty {
                 credentials.publicKey = sshPublicKey.data(using: .utf8)
             }
+        }
+
+        if transportSelection == .cloudflare, cloudflareAccessMode == .serviceToken {
+            let clientID = cloudflareClientID.trimmingCharacters(in: .whitespacesAndNewlines)
+            let clientSecret = cloudflareClientSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+            credentials.cloudflareClientID = clientID.isEmpty ? nil : clientID
+            credentials.cloudflareClientSecret = clientSecret.isEmpty ? nil : clientSecret
         }
 
         return credentials
@@ -112,6 +131,11 @@ struct ServerFormSheet: View {
     @State private var sshKey: String = ""
     @State private var sshPassphrase: String = ""
     @State private var sshPublicKey: String = ""
+    @State private var selectedCloudflareAccessMode: CloudflareAccessMode = .oauth
+    @State private var cloudflareClientID: String = ""
+    @State private var cloudflareClientSecret: String = ""
+    @State private var cloudflareTeamDomainOverride: String = ""
+    @State private var showCloudflareOverrides: Bool = false
     @State private var selectedEnvironment: ServerEnvironment = .production
     @State private var notes: String = ""
     @State private var tmuxEnabled: Bool = true
@@ -149,6 +173,11 @@ struct ServerFormSheet: View {
             _username = State(initialValue: server.username)
             _transportSelection = State(initialValue: ServerTransportSelection(server: server))
             _selectedAuthMethod = State(initialValue: server.authMethod)
+            _selectedCloudflareAccessMode = State(initialValue: server.cloudflareAccessMode ?? .oauth)
+            _cloudflareTeamDomainOverride = State(initialValue: server.cloudflareTeamDomainOverride ?? "")
+            _showCloudflareOverrides = State(
+                initialValue: !(server.cloudflareTeamDomainOverride ?? "").isEmpty
+            )
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
@@ -175,6 +204,10 @@ struct ServerFormSheet: View {
         let sshKey: String
         let sshPassphrase: String
         let sshPublicKey: String
+        let cloudflareAccessMode: CloudflareAccessMode
+        let cloudflareClientID: String
+        let cloudflareClientSecret: String
+        let cloudflareTeamDomainOverride: String
     }
 
     private var connectionSnapshot: ConnectionTestSnapshot {
@@ -187,7 +220,11 @@ struct ServerFormSheet: View {
             password: password,
             sshKey: sshKey,
             sshPassphrase: sshPassphrase,
-            sshPublicKey: sshPublicKey
+            sshPublicKey: sshPublicKey,
+            cloudflareAccessMode: selectedCloudflareAccessMode,
+            cloudflareClientID: cloudflareClientID,
+            cloudflareClientSecret: cloudflareClientSecret,
+            cloudflareTeamDomainOverride: cloudflareTeamDomainOverride
         )
     }
 
@@ -266,6 +303,9 @@ struct ServerFormSheet: View {
                 } else {
                     sshPublicKey = ""
                 }
+
+                cloudflareClientID = credentials.cloudflareClientID ?? ""
+                cloudflareClientSecret = credentials.cloudflareClientSecret ?? ""
             } catch {
                 self.error = String(format: String(localized: "Failed to load credentials: %@"), error.localizedDescription)
             }
@@ -328,6 +368,11 @@ struct ServerFormSheet: View {
                 resetConnectionTestState()
             }
             .onChange(of: sshPassphrase) { _ in resetConnectionTestState() }
+            .onChange(of: sshPublicKey) { _ in resetConnectionTestState() }
+            .onChange(of: selectedCloudflareAccessMode) { _ in resetConnectionTestState() }
+            .onChange(of: cloudflareClientID) { _ in resetConnectionTestState() }
+            .onChange(of: cloudflareClientSecret) { _ in resetConnectionTestState() }
+            .onChange(of: cloudflareTeamDomainOverride) { _ in resetConnectionTestState() }
     }
 
     @ViewBuilder
@@ -399,6 +444,45 @@ struct ServerFormSheet: View {
                 ForEach(ServerTransportSelection.allCases) { transport in
                     Label(transport.displayName, systemImage: transport.icon)
                         .tag(transport)
+                }
+            }
+
+            if transportSelection == .cloudflare {
+                Picker("Cloudflare Access", selection: $selectedCloudflareAccessMode) {
+                    ForEach(CloudflareAccessMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+
+                switch selectedCloudflareAccessMode {
+                case .oauth:
+                    Text(String(localized: "OAuth login will open in browser. Team/App domain values are auto-discovered from host."))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if showCloudflareOverrides {
+                        TextField("Team Domain Override", text: $cloudflareTeamDomainOverride, prompt: Text("team.cloudflareaccess.com"))
+                            .autocorrectionDisabled()
+                            #if os(iOS)
+                            .textInputAutocapitalization(.never)
+                            #endif
+
+                        Button("Hide Overrides") {
+                            showCloudflareOverrides = false
+                        }
+                    } else {
+                        Button("Set Team Domain Override") {
+                            showCloudflareOverrides = true
+                        }
+                    }
+
+                case .serviceToken:
+                    TextField("Service Token Client ID", text: $cloudflareClientID, prompt: Text(String(localized: "Required")))
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                    SecureField("Service Token Client Secret", text: $cloudflareClientSecret, prompt: Text(String(localized: "Required")))
                 }
             }
 
@@ -612,6 +696,18 @@ struct ServerFormSheet: View {
             return true
         }
 
+        if transportSelection == .cloudflare {
+            switch selectedCloudflareAccessMode {
+            case .oauth:
+                break
+            case .serviceToken:
+                guard !cloudflareClientID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                      !cloudflareClientSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                    return false
+                }
+            }
+        }
+
         switch selectedAuthMethod {
         case .password:
             return !password.isEmpty
@@ -642,6 +738,9 @@ struct ServerFormSheet: View {
             username: effectiveUsername,
             connectionMode: transportSelection.connectionMode,
             authMethod: transportSelection == .tailscale ? .password : selectedAuthMethod,
+            cloudflareAccessMode: transportSelection == .cloudflare ? selectedCloudflareAccessMode : nil,
+            cloudflareTeamDomainOverride: transportSelection == .cloudflare ? normalizedCloudflareOverride(cloudflareTeamDomainOverride) : nil,
+            cloudflareAppDomainOverride: nil,
             notes: notes.isEmpty ? nil : notes,
             tmuxEnabledOverride: tmuxEnabled,
             createdAt: createdAt
@@ -680,8 +779,16 @@ struct ServerFormSheet: View {
             password: password,
             sshKey: sshKey,
             sshPassphrase: sshPassphrase,
-            sshPublicKey: sshPublicKey
+            sshPublicKey: sshPublicKey,
+            cloudflareAccessMode: transportSelection == .cloudflare ? selectedCloudflareAccessMode : nil,
+            cloudflareClientID: cloudflareClientID,
+            cloudflareClientSecret: cloudflareClientSecret
         )
+    }
+
+    private func normalizedCloudflareOverride(_ value: String) -> String? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 
     private func runConnectionTest(force: Bool) async -> Bool {
@@ -741,6 +848,9 @@ struct ServerFormSheet: View {
                 } else {
                     connectionTestError = baseMessage
                 }
+                if let sshError = error as? SSHError, case .cloudflareConfigurationRequired = sshError {
+                    showCloudflareOverrides = true
+                }
                 connectionTestSucceeded = false
                 success = false
             }
@@ -781,6 +891,16 @@ struct ServerFormSheet: View {
                                 try KeychainManager.shared.storeSSHKey(for: newServer.id, privateKey: keyData, passphrase: sshPassphrase.isEmpty ? nil : sshPassphrase, publicKey: publicKeyData)
                             }
                         }
+                    }
+
+                    if transportSelection == .cloudflare, selectedCloudflareAccessMode == .serviceToken {
+                        try KeychainManager.shared.storeCloudflareServiceToken(
+                            for: newServer.id,
+                            clientID: cloudflareClientID,
+                            clientSecret: cloudflareClientSecret
+                        )
+                    } else {
+                        KeychainManager.shared.deleteCloudflareServiceToken(for: newServer.id)
                     }
                 } else {
                     try await serverManager.addServer(newServer, credentials: credentials)

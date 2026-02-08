@@ -28,6 +28,7 @@ struct TerminalContainerView: View {
     @State private var isInstallingMosh = false
     @State private var dismissFallbackBanner = false
     @State private var reconnectInFlight = false
+    @State private var connectWatchdogToken = UUID()
     @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
     /// Check if terminal already exists (was previously created)
@@ -346,6 +347,7 @@ struct TerminalContainerView: View {
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
+            startConnectWatchdog()
             attemptAutoReconnectIfNeeded()
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
@@ -358,9 +360,15 @@ struct TerminalContainerView: View {
                 attemptAutoReconnectIfNeeded()
             }
         }
+        .onChange(of: isReady) { _ in
+            connectWatchdogToken = UUID()
+            startConnectWatchdog()
+        }
         .onChange(of: session.connectionState) { state in
             if state.isConnecting || state.isConnected {
                 reconnectInFlight = false
+                connectWatchdogToken = UUID()
+                startConnectWatchdog()
             } else if case .disconnected = state {
                 attemptAutoReconnectIfNeeded()
             }
@@ -478,6 +486,50 @@ struct TerminalContainerView: View {
         Task { await retryConnection() }
     }
 
+    private func startConnectWatchdog() {
+        let shouldWatchConnecting = session.connectionState.isConnecting
+        let shouldWatchConnectedNoTerminal = session.connectionState.isConnected && !isReady && !terminalAlreadyExists
+        guard shouldWatchConnecting || shouldWatchConnectedNoTerminal else { return }
+        let token = connectWatchdogToken
+
+        Task {
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled else { return }
+
+            await MainActor.run {
+                guard token == connectWatchdogToken else { return }
+
+                let stillConnecting = session.connectionState.isConnecting
+                let stillConnectedNoTerminal = session.connectionState.isConnected && !isReady && !terminalAlreadyExists
+                guard stillConnecting || stillConnectedNoTerminal else { return }
+
+                if stillConnectedNoTerminal {
+                    ConnectionSessionManager.shared.updateSessionState(session.id, to: .disconnected)
+                    Task { await retryConnection() }
+                    return
+                }
+
+                if ConnectionSessionManager.shared.shellId(for: session.id) != nil {
+                    ConnectionSessionManager.shared.updateSessionState(session.id, to: .connected)
+                    return
+                }
+
+                let inFlight = ConnectionSessionManager.shared.isShellStartInFlight(for: session.id)
+                if inFlight {
+                    // Keep polling while shell start is in-flight so a hung start cannot
+                    // leave the UI stuck in "Connecting...".
+                    startConnectWatchdog()
+                    return
+                }
+
+                ConnectionSessionManager.shared.updateSessionState(
+                    session.id,
+                    to: .failed(String(localized: "Connection timed out. Please retry."))
+                )
+            }
+        }
+    }
+
     @MainActor
     private func retryConnection() async {
         guard !reconnectInFlight else { return }
@@ -489,6 +541,8 @@ struct TerminalContainerView: View {
         guard credentials != nil else { return }
         ghosttyApp.startIfNeeded()
         try? await ConnectionSessionManager.shared.reconnect(session: session)
+        connectWatchdogToken = UUID()
+        startConnectWatchdog()
         reconnectToken = UUID()
     }
 

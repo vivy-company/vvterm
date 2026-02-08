@@ -383,47 +383,49 @@ struct ServerSidebarView: View {
                     storedEnvironmentFilters = ""
                 } label: {
                     HStack(spacing: 7) {
-                        Circle()
-                            .fill(Color.secondary)
-                            .frame(width: 9, height: 9)
+                        if !isEnvironmentFiltering {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.primary)
+                                .frame(width: 9, height: 9)
+                        } else {
+                            Circle()
+                                .fill(Color.secondary)
+                                .frame(width: 9, height: 9)
+                        }
                         Text("All Environments")
                             .font(.caption)
                             .lineLimit(1)
-                        Spacer(minLength: 8)
-                        if !isEnvironmentFiltering {
-                            Image(systemName: "checkmark")
-                                .font(.system(size: 11, weight: .semibold))
-                        }
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .fill(!isEnvironmentFiltering ? Color.primary.opacity(0.12) : Color.clear)
-                    )
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.primary)
 
                 // Individual environments
                 ForEach(environments) { env in
+                    let isChecked = selectedEnvironmentIds.contains(env.id)
                     HStack(spacing: 0) {
                         Button {
                             toggleEnvironmentFilter(env)
                         } label: {
                             HStack(spacing: 7) {
-                                Circle()
-                                    .fill(env.color)
-                                    .frame(width: 9, height: 9)
+                                if isChecked {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 9, weight: .bold))
+                                        .foregroundStyle(env.color)
+                                        .frame(width: 9, height: 9)
+                                } else {
+                                    Circle()
+                                        .fill(env.color)
+                                        .frame(width: 9, height: 9)
+                                }
                                 Text(env.displayName)
                                     .font(.caption)
                                     .lineLimit(1)
                                 Spacer(minLength: 8)
-                                if selectedEnvironmentIds.contains(env.id) {
-                                    Image(systemName: "checkmark")
-                                        .font(.system(size: 11, weight: .semibold))
-                                }
                             }
                         }
                         .buttonStyle(.plain)
@@ -464,10 +466,6 @@ struct ServerSidebarView: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .fill(selectedEnvironmentIds.contains(env.id) ? Color.primary.opacity(0.12) : Color.clear)
-                    )
                 }
 
                 // Divider before custom actions

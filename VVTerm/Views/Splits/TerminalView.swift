@@ -387,6 +387,7 @@ struct TerminalPaneView: View {
     @State private var dismissFallbackBanner = false
     @State private var reconnectInFlight = false
     @State private var terminalBackgroundColor: Color = .black
+    @State private var connectWatchdogToken = UUID()
 
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
     @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
@@ -629,6 +630,7 @@ struct TerminalPaneView: View {
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
+            startConnectWatchdog()
             attemptAutoReconnectIfNeeded()
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
@@ -640,9 +642,15 @@ struct TerminalPaneView: View {
                 attemptAutoReconnectIfNeeded()
             }
         }
+        .onChange(of: isReady) { _ in
+            connectWatchdogToken = UUID()
+            startConnectWatchdog()
+        }
         .onChange(of: connectionState) { state in
             if state.isConnecting || state.isConnected {
                 reconnectInFlight = false
+                connectWatchdogToken = UUID()
+                startConnectWatchdog()
             } else if case .disconnected = state {
                 attemptAutoReconnectIfNeeded()
             }
@@ -724,11 +732,54 @@ struct TerminalPaneView: View {
         }
         reconnectInFlight = true
         TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
+        connectWatchdogToken = UUID()
+        startConnectWatchdog()
         reconnectToken = UUID()
         Task {
             await TerminalTabManager.shared.unregisterSSHClient(for: paneId)
             await MainActor.run {
                 reconnectInFlight = false
+            }
+        }
+    }
+
+    private func startConnectWatchdog() {
+        let shouldWatchConnecting = connectionState.isConnecting
+        let shouldWatchConnectedNoTerminal = connectionState.isConnected && !isReady && !terminalExists
+        guard shouldWatchConnecting || shouldWatchConnectedNoTerminal else { return }
+        let token = connectWatchdogToken
+        Task {
+            try? await Task.sleep(for: .seconds(20))
+            guard !Task.isCancelled else { return }
+            await MainActor.run {
+                guard token == connectWatchdogToken else { return }
+                let stillConnecting = connectionState.isConnecting
+                let stillConnectedWithoutTerminal = connectionState.isConnected && !isReady && !terminalExists
+                guard stillConnecting || stillConnectedWithoutTerminal else { return }
+
+                if stillConnectedWithoutTerminal {
+                    TerminalTabManager.shared.updatePaneState(paneId, connectionState: .disconnected)
+                    retryConnection()
+                    return
+                }
+
+                if TerminalTabManager.shared.shellId(for: paneId) != nil {
+                    TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
+                    return
+                }
+
+                let inFlight = TerminalTabManager.shared.isShellStartInFlight(for: paneId)
+                if inFlight {
+                    // Keep polling while a shell start is still in flight so stale locks
+                    // and hung attempts are eventually surfaced to the user.
+                    startConnectWatchdog()
+                    return
+                }
+
+                TerminalTabManager.shared.updatePaneState(
+                    paneId,
+                    connectionState: .failed(String(localized: "Connection timed out. Please retry."))
+                )
             }
         }
     }
@@ -987,16 +1038,21 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
 
             if let existingShellId = TerminalTabManager.shared.shellId(for: paneId) {
                 shellId = existingShellId
+                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                 logger.debug("Reusing existing shell for pane \(paneId.uuidString, privacy: .public)")
                 return
             }
 
             if shellId != nil {
+                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                 logger.debug("Shell already active for pane")
                 return
             }
 
             guard TerminalTabManager.shared.tryBeginShellStart(for: paneId) else {
+                if TerminalTabManager.shared.shellId(for: paneId) != nil {
+                    TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
+                }
                 logger.debug("Shell start already in progress for pane \(paneId.uuidString, privacy: .public)")
                 return
             }
@@ -1102,6 +1158,28 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                         guard !Task.isCancelled else { return }
                         lastError = error
                         logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
+
+                        if attempt < maxAttempts, let sshError = error as? SSHError {
+                            var shouldResetClient = false
+                            switch sshError {
+                            case .notConnected, .connectionFailed, .socketError, .timeout:
+                                shouldResetClient = true
+                            case .channelOpenFailed, .shellRequestFailed:
+                                let hasOtherActivePanes = await MainActor.run {
+                                    TerminalTabManager.shared.hasOtherActivePanes(for: server.id, excluding: paneId)
+                                }
+                                shouldResetClient = !hasOtherActivePanes
+                            case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
+                                break
+                            case .unknown:
+                                break
+                            }
+
+                            if shouldResetClient {
+                                logger.warning("Resetting SSH client before retrying pane connection")
+                                await sshClient.disconnect()
+                            }
+                        }
 
                         if attempt < maxAttempts {
                             let delay = pow(2.0, Double(attempt - 1))

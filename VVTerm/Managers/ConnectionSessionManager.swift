@@ -81,7 +81,11 @@ final class ConnectionSessionManager: ObservableObject {
     /// Shell suspend handlers indexed by session ID - cancel in-flight connects without destroying terminals
     private var shellSuspendHandlers: [UUID: () -> Void] = [:]
     /// Session IDs currently starting a shell (global single-flight guard).
-    private var shellStartsInFlight: Set<UUID> = []
+    /// Value is start time for stale-guard recovery.
+    private var shellStartsInFlight: [UUID: Date] = [:]
+    /// Keep shell-start locks alive for the full SSH retry window:
+    /// 3 attempts × 30s connect timeout + backoff + safety margin.
+    private let shellStartStaleThreshold: TimeInterval = 120
 
     /// Servers that already ran tmux cleanup (per app launch)
     private var tmuxCleanupServers: Set<UUID> = []
@@ -220,7 +224,7 @@ final class ConnectionSessionManager: ObservableObject {
         sessions.contains {
             $0.serverId == serverId
                 && $0.id != sessionId
-                && ($0.connectionState.isConnected || $0.connectionState.isConnecting)
+                && $0.connectionState.isConnected
         }
     }
 
@@ -268,7 +272,7 @@ final class ConnectionSessionManager: ObservableObject {
         shellCancelHandlers[sessionId]?()
         shellCancelHandlers.removeValue(forKey: sessionId)
         shellSuspendHandlers.removeValue(forKey: sessionId)
-        shellStartsInFlight.remove(sessionId)
+        shellStartsInFlight.removeValue(forKey: sessionId)
 
         // Remove from UI immediately
         sessions.removeAll { $0.id == sessionId }
@@ -436,6 +440,11 @@ final class ConnectionSessionManager: ObservableObject {
     // MARK: - SSH Client Registration
 
     func sharedSSHClient(for server: Server) -> SSHClient {
+        if server.connectionMode == .cloudflare {
+            // Cloudflare transport is more stable with an isolated SSH client
+            // per pane/session lifecycle.
+            return SSHClient()
+        }
         if let client = sharedSSHClients[server.id] {
             return client
         }
@@ -453,7 +462,7 @@ final class ConnectionSessionManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
-        shellStartsInFlight.remove(sessionId)
+        shellStartsInFlight.removeValue(forKey: sessionId)
 
         if let existing = sshShells[sessionId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
@@ -470,7 +479,9 @@ final class ConnectionSessionManager: ObservableObject {
             fallbackReason: fallbackReason
         )
         serverShellCounts[serverId, default: 0] += 1
-        sharedSSHClients[serverId] = client
+        if !isCloudflareServer(serverId) {
+            sharedSSHClients[serverId] = client
+        }
 
         if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
             sessions[index].activeTransport = transport
@@ -485,8 +496,18 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
-        shellStartsInFlight.remove(sessionId)
-        guard let registration = sshShells.removeValue(forKey: sessionId) else { return }
+        shellStartsInFlight.removeValue(forKey: sessionId)
+
+        guard let registration = sshShells.removeValue(forKey: sessionId) else {
+            // No shell was registered yet for this session. If no other shells are
+            // active on this server, reset the shared client to clear hung connects.
+            guard let serverId = sessions.first(where: { $0.id == sessionId })?.serverId else { return }
+            if (serverShellCounts[serverId] ?? 0) == 0,
+               let client = sharedSSHClients.removeValue(forKey: serverId) {
+                await client.disconnect()
+            }
+            return
+        }
 
         await registration.client.closeShell(registration.shellId)
 
@@ -494,8 +515,17 @@ final class ConnectionSessionManager: ObservableObject {
         let newCount = max((serverShellCounts[serverId] ?? 1) - 1, 0)
         serverShellCounts[serverId] = newCount
 
-        if newCount == 0, let client = sharedSSHClients.removeValue(forKey: serverId) {
-            await client.disconnect()
+        if let mapped = sharedSSHClients[serverId],
+           ObjectIdentifier(mapped) == ObjectIdentifier(registration.client) {
+            if let replacement = sshShells.values.first(where: { $0.serverId == serverId })?.client {
+                sharedSSHClients[serverId] = replacement
+            } else {
+                sharedSSHClients.removeValue(forKey: serverId)
+            }
+        }
+
+        if !hasActiveRegistration(using: registration.client) {
+            await registration.client.disconnect()
         }
 
         if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
@@ -521,11 +551,29 @@ final class ConnectionSessionManager: ObservableObject {
         if sshShells[sessionId] != nil {
             return false
         }
-        return shellStartsInFlight.insert(sessionId).inserted
+        if let startedAt = shellStartsInFlight[sessionId] {
+            if Date().timeIntervalSince(startedAt) < shellStartStaleThreshold {
+                return false
+            }
+            shellStartsInFlight.removeValue(forKey: sessionId)
+            logger.warning("Recovered stale session shell-start lock for \(sessionId.uuidString, privacy: .public)")
+        }
+        shellStartsInFlight[sessionId] = Date()
+        return true
     }
 
     func finishShellStart(for sessionId: UUID) {
-        shellStartsInFlight.remove(sessionId)
+        shellStartsInFlight.removeValue(forKey: sessionId)
+    }
+
+    func isShellStartInFlight(for sessionId: UUID) -> Bool {
+        guard let startedAt = shellStartsInFlight[sessionId] else { return false }
+        if Date().timeIntervalSince(startedAt) >= shellStartStaleThreshold {
+            shellStartsInFlight.removeValue(forKey: sessionId)
+            logger.warning("Cleared stale session shell-start in-flight flag for \(sessionId.uuidString, privacy: .public)")
+            return false
+        }
+        return true
     }
 
     func sshClient(for serverId: UUID) -> SSHClient? {
@@ -556,6 +604,15 @@ final class ConnectionSessionManager: ObservableObject {
             return nil
         }
         return sshClient(for: serverId)
+    }
+
+    private func isCloudflareServer(_ serverId: UUID) -> Bool {
+        ServerManager.shared.servers.first(where: { $0.id == serverId })?.connectionMode == .cloudflare
+    }
+
+    private func hasActiveRegistration(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return sshShells.values.contains { ObjectIdentifier($0.client) == identifier }
     }
 
     private func selectedTransport(for serverId: UUID) -> ShellTransport {

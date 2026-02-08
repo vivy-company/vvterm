@@ -13,6 +13,8 @@
     <!-- Network: Outgoing connections (SSH) -->
     <key>com.apple.security.network.client</key>
     <true/>
+    <key>com.apple.security.network.server</key>
+    <true/>
 
     <!-- iCloud/CloudKit -->
     <key>com.apple.developer.icloud-container-identifiers</key>

@@ -288,6 +288,9 @@ final class ServerManager: ObservableObject {
                     username: servers[i].username,
                     connectionMode: servers[i].connectionMode,
                     authMethod: servers[i].authMethod,
+                    cloudflareAccessMode: servers[i].cloudflareAccessMode,
+                    cloudflareTeamDomainOverride: servers[i].cloudflareTeamDomainOverride,
+                    cloudflareAppDomainOverride: servers[i].cloudflareAppDomainOverride,
                     tags: servers[i].tags,
                     notes: servers[i].notes,
                     lastConnected: servers[i].lastConnected,
@@ -359,6 +362,9 @@ final class ServerManager: ObservableObject {
             username: server.username,
             connectionMode: server.connectionMode,
             authMethod: server.authMethod,
+            cloudflareAccessMode: server.cloudflareAccessMode,
+            cloudflareTeamDomainOverride: server.cloudflareTeamDomainOverride,
+            cloudflareAppDomainOverride: server.cloudflareAppDomainOverride,
             tags: server.tags,
             notes: server.notes,
             tmuxEnabledOverride: server.tmuxEnabledOverride,
@@ -376,6 +382,14 @@ final class ServerManager: ObservableObject {
                 privateKey: sshKey,
                 passphrase: credentials.sshPassphrase,
                 publicKey: credentials.publicKey
+            )
+        }
+        if let cloudflareClientID = credentials.cloudflareClientID,
+           let cloudflareClientSecret = credentials.cloudflareClientSecret {
+            try keychain.storeCloudflareServiceToken(
+                for: newServer.id,
+                clientID: cloudflareClientID,
+                clientSecret: cloudflareClientSecret
             )
         }
 
@@ -405,6 +419,9 @@ final class ServerManager: ObservableObject {
             username: server.username,
             connectionMode: server.connectionMode,
             authMethod: server.authMethod,
+            cloudflareAccessMode: server.cloudflareAccessMode,
+            cloudflareTeamDomainOverride: server.cloudflareTeamDomainOverride,
+            cloudflareAppDomainOverride: server.cloudflareAppDomainOverride,
             tags: server.tags,
             notes: server.notes,
             lastConnected: server.lastConnected,
@@ -458,6 +475,9 @@ final class ServerManager: ObservableObject {
             username: server.username,
             connectionMode: server.connectionMode,
             authMethod: server.authMethod,
+            cloudflareAccessMode: server.cloudflareAccessMode,
+            cloudflareTeamDomainOverride: server.cloudflareTeamDomainOverride,
+            cloudflareAppDomainOverride: server.cloudflareAppDomainOverride,
             tags: server.tags,
             notes: server.notes,
             lastConnected: Date(),
