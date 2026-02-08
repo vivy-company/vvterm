@@ -17,6 +17,7 @@ final class StoreManager: ObservableObject {
     @Published var purchaseState: PurchaseState = .idle
     @Published var restoreState: RestoreState = .idle
     @Published private(set) var isReviewModeEnabled: Bool = false
+    @Published private(set) var lastPurchasedProductId: String?
 
     private var updateListenerTask: Task<Void, Error>?
     private var reviewModeExpiryTask: Task<Void, Never>?
@@ -93,11 +94,18 @@ final class StoreManager: ObservableObject {
     // MARK: - Load Products
 
     func loadProducts() async {
-        do {
-            products = try await Product.products(for: VVTermProducts.allProducts)
-            logger.info("Loaded \(self.products.count) products")
-        } catch {
-            logger.error("Failed to load products: \(error.localizedDescription)")
+        let maxRetries = 3
+        for attempt in 0..<maxRetries {
+            do {
+                products = try await Product.products(for: VVTermProducts.allProducts)
+                logger.info("Loaded \(self.products.count) products")
+                return
+            } catch {
+                logger.error("Failed to load products (attempt \(attempt + 1)/\(maxRetries)): \(error.localizedDescription)")
+                if attempt < maxRetries - 1 {
+                    try? await Task.sleep(nanoseconds: UInt64(pow(2.0, Double(attempt))) * 1_000_000_000)
+                }
+            }
         }
     }
 
@@ -105,6 +113,7 @@ final class StoreManager: ObservableObject {
 
     func purchase(_ product: Product) async {
         purchaseState = .purchasing
+        lastPurchasedProductId = nil
         logger.info("Purchasing \(product.id)")
 
         do {
@@ -115,6 +124,7 @@ final class StoreManager: ObservableObject {
                 let transaction = try checkVerified(verification)
                 await transaction.finish()
                 await checkEntitlements()
+                lastPurchasedProductId = product.id
                 purchaseState = .purchased
                 logger.info("Purchase successful: \(product.id)")
 
@@ -173,13 +183,28 @@ final class StoreManager: ObservableObject {
             }
         }
 
+        // Check subscription status for billing retry / grace period
+        var activeStatus: Product.SubscriptionInfo.Status?
+        if let product = monthlyProduct ?? yearlyProduct,
+           let statuses = try? await product.subscription?.status {
+            activeStatus = statuses.first {
+                $0.state == .subscribed || $0.state == .inGracePeriod
+            } ?? statuses.first
+
+            if !hasAccess {
+                for status in statuses {
+                    if case .verified = status.transaction,
+                       status.state == .inBillingRetryPeriod || status.state == .inGracePeriod {
+                        hasAccess = true
+                        break
+                    }
+                }
+            }
+        }
+
         isPro = hasAccess || isReviewModeEnabled
         isLifetime = hasLifetime
-
-        // Get subscription status for UI
-        if let product = monthlyProduct ?? yearlyProduct {
-            subscriptionStatus = try? await product.subscription?.status.first
-        }
+        subscriptionStatus = activeStatus
 
         logger.info("Entitlements checked: isPro=\(hasAccess), isLifetime=\(hasLifetime), reviewMode=\(self.isReviewModeEnabled)")
     }
@@ -218,6 +243,11 @@ final class StoreManager: ObservableObject {
 
     var isSubscriptionActive: Bool {
         guard let status = subscriptionStatus else { return isLifetime }
+        return status.state == .subscribed || status.state == .inGracePeriod
+    }
+
+    var hasActiveSubscriptionWithLifetime: Bool {
+        guard isLifetime, let status = subscriptionStatus else { return false }
         return status.state == .subscribed || status.state == .inGracePeriod
     }
 

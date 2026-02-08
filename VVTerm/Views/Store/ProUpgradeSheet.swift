@@ -10,6 +10,8 @@ struct ProUpgradeSheet: View {
     @State private var selectedProduct: Product?
     @State private var showSuccess = false
     @State private var alertInfo: AlertInfo?
+    @State private var showCancelSubscriptionAlert = false
+    @State private var showManageSubscription = false
 
     private var features: [(icon: String, title: String, description: String, color: Color)] {
         [
@@ -97,44 +99,11 @@ struct ProUpgradeSheet: View {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
         }
-        .onChange(of: storeManager.purchaseState) { newState in
-            switch newState {
-            case .purchased:
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    showSuccess = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    dismiss()
-                }
-            case .failed(let message):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Purchase Failed"),
-                    message: message,
-                    isRestore: false
-                )
-            default:
-                break
-            }
+        .onChangeCompat(of: storeManager.purchaseState) { newState in
+            handlePurchaseStateChange(newState)
         }
-        .onChange(of: storeManager.restoreState) { newState in
-            switch newState {
-            case .restored(let hasAccess):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Restore Purchases"),
-                    message: hasAccess
-                    ? String(localized: "Your purchases have been restored.")
-                    : String(localized: "No active purchases were found for this Apple ID."),
-                    isRestore: true
-                )
-            case .failed(let message):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Restore Failed"),
-                    message: message,
-                    isRestore: true
-                )
-            default:
-                break
-            }
+        .onChangeCompat(of: storeManager.restoreState) { newState in
+            handleRestoreStateChange(newState)
         }
         .overlay {
             if showSuccess {
@@ -161,6 +130,31 @@ struct ProUpgradeSheet: View {
         } message: { info in
             Text(info.message)
         }
+        .alert(String(localized: "Cancel Subscription?"), isPresented: $showCancelSubscriptionAlert) {
+            Button(String(localized: "Manage Subscription")) {
+                #if os(iOS)
+                showManageSubscription = true
+                #else
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    NSWorkspace.shared.open(url)
+                }
+                #endif
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                }
+            }
+            Button(String(localized: "Later"), role: .cancel) {
+                dismiss()
+            }
+        } message: {
+            Text("You now have lifetime access. You should cancel your existing subscription to avoid being charged.")
+        }
+        #if os(iOS)
+        .manageSubscriptionsSheetCompat(
+            isPresented: $showManageSubscription,
+            subscriptionGroupID: VVTermProducts.subscriptionGroupId
+        )
+        #endif
     }
 
     #if os(macOS)
@@ -199,44 +193,11 @@ struct ProUpgradeSheet: View {
             await storeManager.loadProducts()
             selectedProduct = storeManager.yearlyProduct
         }
-        .onChange(of: storeManager.purchaseState) { newState in
-            switch newState {
-            case .purchased:
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    showSuccess = true
-                }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    dismiss()
-                }
-            case .failed(let message):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Purchase Failed"),
-                    message: message,
-                    isRestore: false
-                )
-            default:
-                break
-            }
+        .onChangeCompat(of: storeManager.purchaseState) { newState in
+            handlePurchaseStateChange(newState)
         }
-        .onChange(of: storeManager.restoreState) { newState in
-            switch newState {
-            case .restored(let hasAccess):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Restore Purchases"),
-                    message: hasAccess
-                    ? String(localized: "Your purchases have been restored.")
-                    : String(localized: "No active purchases were found for this Apple ID."),
-                    isRestore: true
-                )
-            case .failed(let message):
-                alertInfo = AlertInfo(
-                    title: String(localized: "Restore Failed"),
-                    message: message,
-                    isRestore: true
-                )
-            default:
-                break
-            }
+        .onChangeCompat(of: storeManager.restoreState) { newState in
+            handleRestoreStateChange(newState)
         }
         .overlay {
             if showSuccess {
@@ -262,6 +223,21 @@ struct ProUpgradeSheet: View {
             }
         } message: { info in
             Text(info.message)
+        }
+        .alert(String(localized: "Cancel Subscription?"), isPresented: $showCancelSubscriptionAlert) {
+            Button(String(localized: "Manage Subscription")) {
+                if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
+                    NSWorkspace.shared.open(url)
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    dismiss()
+                }
+            }
+            Button(String(localized: "Later"), role: .cancel) {
+                dismiss()
+            }
+        } message: {
+            Text("You now have lifetime access. You should cancel your existing subscription to avoid being charged.")
         }
     }
     #endif
@@ -450,6 +426,57 @@ struct ProUpgradeSheet: View {
             return String(format: String(localized: "Buy - %@"), product.displayPrice)
         }
         return String(format: String(localized: "Subscribe - %@"), product.displayPrice)
+    }
+
+    // MARK: - State Change Handlers
+
+    private func handlePurchaseStateChange(_ newState: StoreManager.PurchaseState) {
+        switch newState {
+        case .purchased:
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showSuccess = true
+            }
+            if storeManager.lastPurchasedProductId == VVTermProducts.proLifetime,
+               storeManager.hasActiveSubscriptionWithLifetime {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    showSuccess = false
+                    showCancelSubscriptionAlert = true
+                }
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
+            }
+        case .failed(let message):
+            alertInfo = AlertInfo(
+                title: String(localized: "Purchase Failed"),
+                message: message,
+                isRestore: false
+            )
+        default:
+            break
+        }
+    }
+
+    private func handleRestoreStateChange(_ newState: StoreManager.RestoreState) {
+        switch newState {
+        case .restored(let hasAccess):
+            alertInfo = AlertInfo(
+                title: String(localized: "Restore Purchases"),
+                message: hasAccess
+                ? String(localized: "Your purchases have been restored.")
+                : String(localized: "No active purchases were found for this Apple ID."),
+                isRestore: true
+            )
+        case .failed(let message):
+            alertInfo = AlertInfo(
+                title: String(localized: "Restore Failed"),
+                message: message,
+                isRestore: true
+            )
+        default:
+            break
+        }
     }
 }
 

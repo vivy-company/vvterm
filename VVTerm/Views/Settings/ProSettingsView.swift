@@ -227,7 +227,7 @@ struct ProSettingsView: View {
 }
 
 #if os(iOS)
-private extension View {
+extension View {
     @ViewBuilder
     func manageSubscriptionsSheetCompat(
         isPresented: Binding<Bool>,
