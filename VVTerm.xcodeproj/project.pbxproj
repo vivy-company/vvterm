@@ -15,6 +15,7 @@
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
 		D1A7B0C12EAB100100A00001 /* MoshCore in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00011 /* MoshCore */; };
 		D1A7B0C12EAB100100A00002 /* MoshBootstrap in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00012 /* MoshBootstrap */; };
+		D2C4F00131AA100100B00001 /* Cloudflared in Frameworks */ = {isa = PBXBuildFile; productRef = D2C4F00131AA100100B00011 /* Cloudflared */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -132,6 +133,7 @@
 				CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */,
 				CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */,
 				CC83449F2F0D18CF006804BF /* MLX in Frameworks */,
+				D2C4F00131AA100100B00001 /* Cloudflared in Frameworks */,
 				D1A7B0C12EAB100100A00001 /* MoshCore in Frameworks */,
 				D1A7B0C12EAB100100A00002 /* MoshBootstrap in Frameworks */,
 			);
@@ -235,6 +237,7 @@
 				CC8312B12F0CD850006804BF /* MLX */,
 				CC8312B22F0CD851006804BF /* MLXNN */,
 				CC8312B32F0CD852006804BF /* MLXFFT */,
+				D2C4F00131AA100100B00011 /* Cloudflared */,
 				D1A7B0C12EAB100100A00011 /* MoshCore */,
 				D1A7B0C12EAB100100A00012 /* MoshBootstrap */,
 			);
@@ -338,6 +341,7 @@
 			packageReferences = (
 				CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				D2C4F00131AA100100B00021 /* XCRemoteSwiftPackageReference "swift-cloudflared" */,
 				D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -439,12 +443,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VVTermLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.2;
-				CURRENT_PROJECT_VERSION = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -458,12 +462,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VVTermLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				MARKETING_VERSION = 1.2;
-				CURRENT_PROJECT_VERSION = 1;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1070,6 +1074,14 @@
 				version = 0.1.1;
 			};
 		};
+		D2C4F00131AA100100B00021 /* XCRemoteSwiftPackageReference "swift-cloudflared" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wiedymi/swift-cloudflared.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1102,6 +1114,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D1A7B0C12EAB100100A00021 /* XCRemoteSwiftPackageReference "swift-mosh" */;
 			productName = MoshBootstrap;
+		};
+		D2C4F00131AA100100B00011 /* Cloudflared */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D2C4F00131AA100100B00021 /* XCRemoteSwiftPackageReference "swift-cloudflared" */;
+			productName = Cloudflared;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
