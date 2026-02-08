@@ -1954,6 +1954,8 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
     var hasText: Bool { true }
 
     func insertText(_ text: String) {
+        let text = text.precomposedStringWithCanonicalMapping
+
         if let toolbar = keyboardToolbar {
             let mods = toolbar.consumeModifiers()
             if mods.ctrl || mods.alt {
@@ -2016,7 +2018,7 @@ extension GhosttyTerminalView: UIKeyInput, UITextInputTraits {
     }
 
     var keyboardType: UIKeyboardType {
-        get { .asciiCapable }
+        get { .default }
         set { }
     }
 
@@ -2169,9 +2171,10 @@ extension GhosttyTerminalView: UITextInput {
 
     func setMarkedText(_ markedText: String?, selectedRange: NSRange) {
         if let markedText {
-            self.markedText = markedText
+            let composedText = markedText.precomposedStringWithCanonicalMapping
+            self.markedText = composedText
             let start = clampTextInputIndex(textInputCursorIndex)
-            let end = clampTextInputIndex(start + selectedRange.length)
+            let end = clampTextInputIndex(start + composedText.utf16.count)
             markedTextRangeInternal = TerminalTextRange(
                 start: TerminalTextPosition(start),
                 end: TerminalTextPosition(end)
