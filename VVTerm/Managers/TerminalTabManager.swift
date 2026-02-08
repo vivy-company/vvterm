@@ -669,6 +669,15 @@ final class TerminalTabManager: ObservableObject {
         }()
         updatePaneTmuxStatus(paneId, status: status)
 
+        let connectionMode = ServerManager.shared.servers
+            .first(where: { $0.id == serverId })?
+            .connectionMode ?? .standard
+        if connectionMode == .mosh {
+            // For mosh transport, attach tmux after the UDP session is established.
+            // This avoids nested shell startup quoting in mosh-server bootstrap.
+            return (nil, false)
+        }
+
         await RemoteTmuxManager.shared.prepareConfig(using: client)
         let workingDirectory = await resolveTmuxWorkingDirectory(for: paneId, using: client)
         let command = RemoteTmuxManager.shared.attachExecCommand(

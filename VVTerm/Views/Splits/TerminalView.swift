@@ -375,6 +375,7 @@ struct TerminalPaneView: View {
 
     @EnvironmentObject var ghosttyApp: Ghostty.App
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var isReady = false
     @State private var credentials: ServerCredentials?
@@ -384,11 +385,13 @@ struct TerminalPaneView: View {
     @State private var showingMoshInstallPrompt = false
     @State private var isInstallingMosh = false
     @State private var dismissFallbackBanner = false
+    @State private var reconnectInFlight = false
     @State private var terminalBackgroundColor: Color = .black
 
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
     @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
     @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
+    @AppStorage("sshAutoReconnect") private var autoReconnectEnabled = true
 
     private var paneState: TerminalPaneState? {
         TerminalTabManager.shared.paneStates[paneId]
@@ -423,6 +426,11 @@ struct TerminalPaneView: View {
         guard server.connectionMode == .mosh else { return false }
         guard paneState?.activeTransport == .sshFallback else { return false }
         return paneState?.moshFallbackReason == .serverMissing
+    }
+
+    private var shouldShowMoshDurabilityHint: Bool {
+        guard server.connectionMode == .mosh else { return false }
+        return paneState?.tmuxStatus == .off
     }
 
     var body: some View {
@@ -496,6 +504,11 @@ struct TerminalPaneView: View {
                                 .foregroundStyle(.secondary)
                             if paneState?.tmuxStatus.indicatesTmux == true {
                                 Text("tmux session is still running on the server.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .multilineTextAlignment(.center)
+                            } else if shouldShowMoshDurabilityHint {
+                                Text("Without tmux, app backgrounding can interrupt running commands.")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
@@ -616,11 +629,24 @@ struct TerminalPaneView: View {
             if shouldPromptMoshInstall {
                 showingMoshInstallPrompt = true
             }
+            attemptAutoReconnectIfNeeded()
         }
         .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
         .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
         .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
         .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active {
+                attemptAutoReconnectIfNeeded()
+            }
+        }
+        .onChange(of: connectionState) { state in
+            if state.isConnecting || state.isConnected {
+                reconnectInFlight = false
+            } else if case .disconnected = state {
+                attemptAutoReconnectIfNeeded()
+            }
+        }
         .onChange(of: paneState?.tmuxStatus) { status in
             if status == .missing {
                 showingTmuxInstallPrompt = true
@@ -675,13 +701,35 @@ struct TerminalPaneView: View {
         TerminalTabManager.shared.disableTmux(for: server.id)
     }
 
+    private func attemptAutoReconnectIfNeeded() {
+        guard scenePhase == .active else { return }
+        guard autoReconnectEnabled else { return }
+        guard !reconnectInFlight else { return }
+        guard connectionState == .disconnected else { return }
+        retryConnection()
+    }
+
     private func retryConnection() {
+        guard !reconnectInFlight else { return }
+        guard !connectionState.isConnecting else { return }
         connectionError = nil
         isReady = false
+        if credentials == nil {
+            do {
+                credentials = try KeychainManager.shared.getCredentials(for: server)
+            } catch {
+                connectionError = String(localized: "Failed to load credentials")
+                return
+            }
+        }
+        reconnectInFlight = true
         TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
         reconnectToken = UUID()
         Task {
             await TerminalTabManager.shared.unregisterSSHClient(for: paneId)
+            await MainActor.run {
+                reconnectInFlight = false
+            }
         }
     }
 
