@@ -22,8 +22,8 @@
       "desc": "Powered by libghostty. GPU-accelerated rendering, custom themes, and full terminal emulation."
     },
     "ssh": {
-      "title": "SSH Connections",
-      "desc": "Password, SSH key, or key with passphrase. Secure authentication stored in Keychain."
+      "title": "Flexible SSH Transport",
+      "desc": "Use standard SSH, Mosh (with automatic SSH fallback), Tailscale SSH, or Cloudflare Tunnel SSH."
     },
     "sync": {
       "title": "iCloud Sync",
@@ -73,6 +73,7 @@
         "1 workspace",
         "3 servers",
         "1 connection tab",
+        "SSH, Mosh, Tailscale, and Cloudflare Tunnel modes",
         "GPU terminal (libghostty)",
         "iCloud sync",
         "Voice-to-command",
@@ -130,7 +131,7 @@
     },
     "q3": {
       "question": "Which authentication methods are supported?",
-      "answer": "Password, SSH key, and SSH key with passphrase. All credentials are stored securely in Apple Keychain."
+      "answer": "Standard SSH auth supports password, SSH key, and SSH key with passphrase. VVTerm also supports Mosh, Tailscale SSH, and Cloudflare Tunnel SSH. Credentials are stored securely in Apple Keychain when required."
     },
     "q4": {
       "question": "Does VVTerm work on iPad?",

@@ -22,8 +22,8 @@
       "desc": "基于 libghostty。GPU 加速渲染，自定义主题，完整终端模拟。"
     },
     "ssh": {
-      "title": "SSH 连接",
-      "desc": "密码、SSH 密钥或带密码短语的密钥。凭据安全存储在钥匙串中。"
+      "title": "多种 SSH 传输",
+      "desc": "支持标准 SSH、Mosh（可自动回退到 SSH）、Tailscale SSH 和 Cloudflare Tunnel SSH。"
     },
     "sync": {
       "title": "iCloud 同步",
@@ -73,6 +73,7 @@
         "1 个工作区",
         "3 台服务器",
         "1 个连接标签",
+        "支持 SSH、Mosh、Tailscale 与 Cloudflare Tunnel 模式",
         "GPU 终端 (libghostty)",
         "iCloud 同步",
         "语音转命令",
@@ -130,7 +131,7 @@
     },
     "q3": {
       "question": "支持哪些认证方式？",
-      "answer": "密码、SSH 密钥、带密码短语的 SSH 密钥。所有凭据安全存储在 Apple 钥匙串中。"
+      "answer": "标准 SSH 认证支持密码、SSH 密钥和带密码短语的 SSH 密钥。VVTerm 也支持 Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH。需要时，凭据会安全存储在 Apple 钥匙串中。"
     },
     "q4": {
       "question": "VVTerm 在 iPad 上能用吗？",
