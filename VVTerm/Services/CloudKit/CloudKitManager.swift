@@ -75,7 +75,8 @@ final class CloudKitManager: ObservableObject {
             accountStatusChecked = true
             return
         }
-        guard !accountStatusChecked else { return }
+        // Re-check when unavailable so transient account/network states can recover
+        guard !accountStatusChecked || !isAvailable else { return }
         await checkAccountStatus()
     }
 
@@ -110,7 +111,11 @@ final class CloudKitManager: ObservableObject {
             isAvailable = status == .available
             accountStatusDetail = statusDescription
             accountStatusChecked = true
-            if !isAvailable {
+            if isAvailable {
+                if case .offline = syncStatus {
+                    syncStatus = .idle
+                }
+            } else {
                 syncStatus = .offline
                 logger.warning("CloudKit not available. Status: \(statusDescription)")
             }
@@ -259,6 +264,7 @@ final class CloudKitManager: ObservableObject {
     // MARK: - Server Operations
 
     func saveServer(_ server: Server) async throws {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
@@ -282,6 +288,7 @@ final class CloudKitManager: ObservableObject {
     }
 
     func deleteServer(_ server: Server) async throws {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
@@ -307,6 +314,7 @@ final class CloudKitManager: ObservableObject {
     // MARK: - Workspace Operations
 
     func saveWorkspace(_ workspace: Workspace) async throws {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
@@ -330,6 +338,7 @@ final class CloudKitManager: ObservableObject {
     }
 
     func deleteWorkspace(_ workspace: Workspace) async throws {
+        await ensureAccountStatusChecked()
         guard isAvailable else {
             throw CloudKitError.notAvailable
         }
@@ -355,6 +364,7 @@ final class CloudKitManager: ObservableObject {
     // MARK: - Subscriptions
 
     func subscribeToChanges() async {
+        await ensureAccountStatusChecked()
         guard isSyncEnabled, isAvailable else { return }
 
         let notification = CKSubscription.NotificationInfo()

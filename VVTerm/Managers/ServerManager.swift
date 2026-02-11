@@ -141,7 +141,8 @@ final class ServerManager: ObservableObject {
         }
 
         do {
-            let changes = try await cloudKit.fetchChanges()
+            let fetchedChanges = try await cloudKit.fetchChanges()
+            let changes = await backfillMissingLocalRecordsIfNeeded(for: fetchedChanges)
 
             // Merge CloudKit data with local (CloudKit wins for conflicts, dedupe by ID)
             logger.info(
@@ -179,6 +180,64 @@ final class ServerManager: ObservableObject {
                 await initializeCloudKitSchema()
             }
         }
+    }
+
+    /// If a full fetch is missing local records (common after schema was unavailable),
+    /// push the missing records to CloudKit so users don't need to edit each item manually.
+    private func backfillMissingLocalRecordsIfNeeded(for changes: CloudKitChanges) async -> CloudKitChanges {
+        guard changes.isFullFetch, isSyncEnabled, cloudKit.isAvailable else {
+            return changes
+        }
+
+        let cloudWorkspaceIDs = Set(changes.workspaces.map(\.id))
+        let cloudServerIDs = Set(changes.servers.map(\.id))
+
+        let missingWorkspaces = workspaces.filter { !cloudWorkspaceIDs.contains($0.id) }
+        let missingServers = servers.filter { !cloudServerIDs.contains($0.id) }
+
+        guard !missingWorkspaces.isEmpty || !missingServers.isEmpty else {
+            return changes
+        }
+
+        logger.warning(
+            "Detected \(missingWorkspaces.count) local workspaces and \(missingServers.count) local servers missing from CloudKit full fetch; attempting backfill"
+        )
+
+        var uploadedWorkspaces: [Workspace] = []
+        for workspace in missingWorkspaces {
+            do {
+                try await cloudKit.saveWorkspace(workspace)
+                uploadedWorkspaces.append(workspace)
+            } catch {
+                logger.warning("Failed to backfill workspace \(workspace.name): \(error.localizedDescription)")
+            }
+        }
+
+        var knownWorkspaceIDs = cloudWorkspaceIDs
+        knownWorkspaceIDs.formUnion(uploadedWorkspaces.map(\.id))
+
+        var uploadedServers: [Server] = []
+        for server in missingServers {
+            guard knownWorkspaceIDs.contains(server.workspaceId) else {
+                logger.warning("Skipping server backfill for \(server.name) because workspace \(server.workspaceId) is unavailable in CloudKit")
+                continue
+            }
+
+            do {
+                try await cloudKit.saveServer(server)
+                uploadedServers.append(server)
+            } catch {
+                logger.warning("Failed to backfill server \(server.name): \(error.localizedDescription)")
+            }
+        }
+
+        return CloudKitChanges(
+            servers: changes.servers + uploadedServers,
+            workspaces: changes.workspaces + uploadedWorkspaces,
+            deletedServerIDs: changes.deletedServerIDs,
+            deletedWorkspaceIDs: changes.deletedWorkspaceIDs,
+            isFullFetch: changes.isFullFetch
+        )
     }
 
     private func createDefaultWorkspace() -> Workspace {

@@ -154,12 +154,27 @@ struct VVTermCommands: Commands {
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private var lastForegroundSyncAt: Date = .distantPast
+    private let foregroundSyncMinimumInterval: TimeInterval = 20
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Subscribe to CloudKit changes
         Task {
             await CloudKitManager.shared.subscribeToChanges()
         }
         NSApplication.shared.registerForRemoteNotifications()
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        guard SyncSettings.isEnabled else { return }
+
+        let now = Date()
+        guard now.timeIntervalSince(lastForegroundSyncAt) >= foregroundSyncMinimumInterval else { return }
+        lastForegroundSyncAt = now
+
+        Task {
+            await ServerManager.shared.loadData()
+        }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
@@ -188,6 +203,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 // MARK: - iOS App Delegate
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private var lastForegroundSyncAt: Date = .distantPast
+    private let foregroundSyncMinimumInterval: TimeInterval = 20
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -199,6 +217,18 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         application.registerForRemoteNotifications()
 
         return true
+    }
+
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        guard SyncSettings.isEnabled else { return }
+
+        let now = Date()
+        guard now.timeIntervalSince(lastForegroundSyncAt) >= foregroundSyncMinimumInterval else { return }
+        lastForegroundSyncAt = now
+
+        Task {
+            await ServerManager.shared.loadData()
+        }
     }
 
     func application(
