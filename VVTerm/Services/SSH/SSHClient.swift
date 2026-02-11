@@ -48,8 +48,7 @@ struct ShellHandle {
 actor SSHClient {
     private struct MoshShellRuntime {
         let session: MoshClientSession
-        var lastKeystrokePayload: Data?
-        var lastKeystrokeAtNanos: UInt64 = 0
+        var writeChain: Task<Void, Never>?
     }
 
     private var session: SSHSession?
@@ -248,15 +247,19 @@ actor SSHClient {
         }
 
         if var runtime = moshShells[shellId] {
-            let now = DispatchTime.now().uptimeNanoseconds
-            if shouldSuppressDuplicateMoshKeystroke(data, now: now, runtime: runtime) {
-                return
+            let previousWrite = runtime.writeChain
+            let moshSession = runtime.session
+            let writeTask = Task(priority: .userInitiated) {
+                await previousWrite?.value
+                try Task.checkCancellation()
+                try await moshSession.enqueue(.keystrokes(data))
             }
-            runtime.lastKeystrokePayload = data
-            runtime.lastKeystrokeAtNanos = now
+            runtime.writeChain = Task(priority: .userInitiated) {
+                _ = try? await writeTask.value
+            }
             moshShells[shellId] = runtime
             do {
-                try await runtime.session.enqueue(.keystrokes(data))
+                try await writeTask.value
                 return
             } catch {
                 throw SSHError.moshSessionFailed(error.localizedDescription)
@@ -327,15 +330,12 @@ actor SSHClient {
             throw SSHError.moshBootstrapFailed("Missing server host for Mosh endpoint")
         }
 
-        var endpointHost = configuredHost
+        var candidateHosts: [String] = [configuredHost]
         if let sshSession = session,
            let peerHost = await sshSession.remoteEndpointHost() {
             let trimmedPeerHost = peerHost.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmedPeerHost.isEmpty {
-                endpointHost = trimmedPeerHost
-                if trimmedPeerHost != configuredHost {
-                    logger.info("Using SSH peer endpoint for Mosh: \(trimmedPeerHost, privacy: .public)")
-                }
+            if !trimmedPeerHost.isEmpty && trimmedPeerHost != configuredHost {
+                candidateHosts.append(trimmedPeerHost)
             }
         }
 
@@ -345,35 +345,49 @@ actor SSHClient {
             portRange: 60001...61000
         )
 
-        let endpoint = MoshEndpoint(
-            host: endpointHost,
-            port: connectInfo.port,
-            keyBase64_22: connectInfo.key
-        )
-        let moshConfig = MoshClientConfig(
-            sendMinDelayMs: 1,
-            ackDelayMs: 25,
-            networkTimeoutMs: 20_000,
-            initialRtoMs: 250,
-            maxRtoMs: 1_500,
-            heartbeatIntervalMs: 2_000
-        )
-        let moshSession = MoshClientSession(endpoint: endpoint, config: moshConfig)
-        do {
-            try await runWithTimeout(moshStartupTimeout) {
-                try await moshSession.start()
-                try await moshSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
+        let startupTimeout = candidateHosts.count > 1 ? Duration.seconds(4) : moshStartupTimeout
+        var lastStartupError: Error?
+        var moshSession: MoshClientSession?
+
+        for host in candidateHosts {
+            let endpoint = MoshEndpoint(
+                host: host,
+                port: connectInfo.port,
+                keyBase64_22: connectInfo.key
+            )
+            let candidateSession = MoshClientSession(endpoint: endpoint)
+
+            do {
+                try await runWithTimeout(startupTimeout) {
+                    try await candidateSession.start()
+                    try await candidateSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
+                }
+                moshSession = candidateSession
+                if host != configuredHost {
+                    logger.info("Using SSH peer endpoint for Mosh: \(host, privacy: .public)")
+                }
+                break
+            } catch {
+                await candidateSession.stop()
+                if error is CancellationError || Task.isCancelled {
+                    throw CancellationError()
+                }
+                lastStartupError = error
+                if host != candidateHosts.last {
+                    logger.warning("Mosh startup failed for endpoint \(host, privacy: .public), trying next candidate")
+                }
             }
-        } catch {
-            await moshSession.stop()
-            if error is CancellationError || Task.isCancelled {
-                throw CancellationError()
-            }
-            if let sshError = error as? SSHError,
+        }
+
+        guard let moshSession else {
+            if let sshError = lastStartupError as? SSHError,
                case .timeout = sshError {
                 throw SSHError.moshSessionFailed("Timed out waiting for Mosh UDP session startup")
             }
-            throw SSHError.moshSessionFailed(error.localizedDescription)
+            if let lastStartupError {
+                throw SSHError.moshSessionFailed(lastStartupError.localizedDescription)
+            }
+            throw SSHError.moshSessionFailed("Failed to start Mosh session")
         }
 
         let shellId = UUID()
@@ -407,23 +421,10 @@ actor SSHClient {
         )
     }
 
-    private func shouldSuppressDuplicateMoshKeystroke(
-        _ data: Data,
-        now: UInt64,
-        runtime: MoshShellRuntime
-    ) -> Bool {
-        guard let previous = runtime.lastKeystrokePayload else { return false }
-        guard previous == data else { return false }
-        let elapsed = now >= runtime.lastKeystrokeAtNanos ? now - runtime.lastKeystrokeAtNanos : 0
-        // Ghostty can occasionally emit the same key payload twice in the same frame.
-        // Suppress only ultra-near duplicates to avoid dropping intentional repeated typing.
-        return elapsed <= 4_000_000
-    }
-
     private func consumeMoshHostOp(_ hostOp: MoshHostOp, for shellId: UUID) -> Data? {
         guard moshShells[shellId] != nil else { return nil }
         switch hostOp {
-        case .echoAck:
+        case .echoAck(_):
             return nil
         case .resize:
             return nil

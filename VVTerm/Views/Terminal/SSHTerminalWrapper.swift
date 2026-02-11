@@ -32,10 +32,9 @@ protocol SSHTerminalCoordinator: AnyObject {
 
 extension SSHTerminalCoordinator {
     func sendToSSH(_ data: Data) {
-        // Use high-priority detached task to minimize latency
-        // Task.detached avoids inheriting actor context, reducing overhead
+        // Preserve task ordering from the caller to avoid input reordering under high throughput.
         guard let shellId else { return }
-        Task.detached(priority: .userInitiated) { [sshClient, logger, shellId] in
+        Task(priority: .userInitiated) { [sshClient, logger, shellId] in
             do {
                 try await sshClient.write(data, to: shellId)
             } catch {
@@ -315,13 +314,8 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             existingTerminal.onPwdChange = { [sessionId = session.id] rawDirectory in
                 ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
             }
-            existingTerminal.writeCallback = { data in
-                if let client = ConnectionSessionManager.shared.sshClient(for: session),
-                   let shellId = ConnectionSessionManager.shared.shellId(for: session) {
-                    Task.detached(priority: .userInitiated) {
-                        try? await client.write(data, to: shellId)
-                    }
-                }
+            existingTerminal.writeCallback = { [weak coordinator] data in
+                coordinator?.sendToSSH(data)
             }
 
             // Re-wrap in scroll view
@@ -642,15 +636,9 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
                 ConnectionSessionManager.shared.updateSessionWorkingDirectory(sessionId, rawDirectory: rawDirectory)
             }
 
-            // Update write callback to use this coordinator (which will use session manager's SSH client)
-            existingTerminal.writeCallback = { data in
-                // Use SSH client from session manager, not coordinator's client
-                if let sshClient = ConnectionSessionManager.shared.sshClient(for: session),
-                   let shellId = ConnectionSessionManager.shared.shellId(for: session) {
-                    Task.detached(priority: .userInitiated) {
-                        try? await sshClient.write(data, to: shellId)
-                    }
-                }
+            // Route through coordinator to preserve write ordering and transport behavior.
+            existingTerminal.writeCallback = { [weak coordinator] data in
+                coordinator?.sendToSSH(data)
             }
             existingTerminal.onResize = { [session] cols, rows in
                 guard cols > 0 && rows > 0 else { return }

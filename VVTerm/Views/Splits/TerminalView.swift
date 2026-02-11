@@ -999,7 +999,7 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
 
         func sendToSSH(_ data: Data) {
             guard let shellId else { return }
-            Task.detached(priority: .userInitiated) { [sshClient, logger, shellId] in
+            Task(priority: .userInitiated) { [sshClient, logger, shellId] in
                 do {
                     try await sshClient.write(data, to: shellId)
                 } catch {
