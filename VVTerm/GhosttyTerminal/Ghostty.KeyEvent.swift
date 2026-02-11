@@ -67,18 +67,31 @@ extension Ghostty.Input {
         #if os(iOS)
         /// Create a KeyEvent from a UIKey (iOS hardware keyboard)
         init?(uiKey: UIKey, action: Action) {
+            let mods = Mods(uiKeyModifiers: uiKey.modifierFlags)
+            let hasModifierShortcut = mods.contains(.ctrl) || mods.contains(.alt) || mods.contains(.super)
+
+            let characters = uiKey.characters.precomposedStringWithCanonicalMapping
+            let filteredCharacters: String? = {
+                guard !characters.isEmpty else { return nil }
+                if characters.count == 1, let scalar = characters.unicodeScalars.first {
+                    // Skip control characters and PUA function-key scalars.
+                    if scalar.value < 0x20 { return nil }
+                    if scalar.value >= 0xF700 && scalar.value <= 0xF8FF { return nil }
+                }
+                return characters
+            }()
+
             // Map UIKey to Ghostty key
             guard let key = Key(uiKeyCode: uiKey.keyCode) else {
                 // If we can't map the key but have characters, create a text-based event
-                let chars = uiKey.characters
-                if !chars.isEmpty {
+                if !hasModifierShortcut, let text = filteredCharacters {
                     self.key = .space  // Fallback key
                     self.action = action
-                    self.text = chars
+                    self.text = text
                     self.composing = false
-                    self.mods = Mods(uiKeyModifiers: uiKey.modifierFlags)
+                    self.mods = mods
                     self.consumedMods = []
-                    self.unshiftedCodepoint = chars.unicodeScalars.first?.value ?? 0
+                    self.unshiftedCodepoint = text.unicodeScalars.first?.value ?? 0
                     return
                 }
                 return nil
@@ -86,15 +99,22 @@ extension Ghostty.Input {
 
             self.key = key
             self.action = action
-            let chars = uiKey.characters
-            self.text = chars.isEmpty ? nil : chars
+            // For modifier shortcuts (Ctrl/Alt/Cmd), pass pure key+mods through
+            // and avoid injecting text payload that can confuse terminal handling.
+            if hasModifierShortcut {
+                self.text = nil
+            } else {
+                self.text = filteredCharacters
+            }
             self.composing = false
-            self.mods = Mods(uiKeyModifiers: uiKey.modifierFlags)
+            self.mods = mods
             self.consumedMods = []
 
             // Get unshifted codepoint from charactersIgnoringModifiers if available
-            let unshiftedChars = uiKey.charactersIgnoringModifiers
-            if let scalar = unshiftedChars.unicodeScalars.first {
+            let unshiftedChars = uiKey.charactersIgnoringModifiers.precomposedStringWithCanonicalMapping
+            if let scalar = unshiftedChars.unicodeScalars.first,
+               scalar.value >= 0x20,
+               !(scalar.value >= 0xF700 && scalar.value <= 0xF8FF) {
                 self.unshiftedCodepoint = scalar.value
             } else {
                 self.unshiftedCodepoint = 0
