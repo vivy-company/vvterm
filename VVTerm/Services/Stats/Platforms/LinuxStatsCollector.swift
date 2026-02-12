@@ -4,6 +4,8 @@ import Foundation
 
 /// Stats collector for Linux systems using /proc filesystem
 struct LinuxStatsCollector: PlatformStatsCollector {
+    private let bytesPerKiB: UInt64 = 1_024
+    private let bytesPerMiB: UInt64 = 1_048_576
 
     func getSystemInfo(client: SSHClient) async throws -> (hostname: String, osInfo: String, cpuCores: Int) {
         let cmd = "uname -srm; echo '---SEP---'; hostname; echo '---SEP---'; nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo 2>/dev/null || echo 1"
@@ -273,11 +275,16 @@ struct LinuxStatsCollector: PlatformStatsCollector {
         )
 
         if let prev = prevValues {
-            let dUser = Double(current.user - prev.user + current.nice - prev.nice)
-            let dSystem = Double(current.system - prev.system + current.irq - prev.irq + current.softirq - prev.softirq)
-            let dIdle = Double(current.idle - prev.idle)
-            let dIowait = Double(current.iowait - prev.iowait)
-            let dSteal = Double(current.steal - prev.steal)
+            let dUser = Double(clampedAdd(clampedSubtract(current.user, prev.user), clampedSubtract(current.nice, prev.nice)))
+            let dSystem = Double(
+                clampedAdd(
+                    clampedAdd(clampedSubtract(current.system, prev.system), clampedSubtract(current.irq, prev.irq)),
+                    clampedSubtract(current.softirq, prev.softirq)
+                )
+            )
+            let dIdle = Double(clampedSubtract(current.idle, prev.idle))
+            let dIowait = Double(clampedSubtract(current.iowait, prev.iowait))
+            let dSteal = Double(clampedSubtract(current.steal, prev.steal))
 
             let total = dUser + dSystem + dIdle + dIowait + dSteal
             if total > 0 {
@@ -339,18 +346,18 @@ struct LinuxStatsCollector: PlatformStatsCollector {
             let value = UInt64(valueStr) ?? 0
 
             switch parts[0] {
-            case "MemTotal": total = value * 1024
-            case "MemFree": free = value * 1024
-            case "MemAvailable": available = value * 1024
-            case "Buffers": buffers = value * 1024
-            case "Cached": cached = value * 1024
-            case "SReclaimable": sReclaimable = value * 1024
+            case "MemTotal": total = bytesFromKiB(value) ?? 0
+            case "MemFree": free = bytesFromKiB(value) ?? 0
+            case "MemAvailable": available = bytesFromKiB(value) ?? 0
+            case "Buffers": buffers = bytesFromKiB(value) ?? 0
+            case "Cached": cached = bytesFromKiB(value) ?? 0
+            case "SReclaimable": sReclaimable = bytesFromKiB(value) ?? 0
             default: break
             }
         }
 
-        let actualCached = cached + sReclaimable
-        let used = total - available
+        let actualCached = clampedAdd(cached, sReclaimable)
+        let used = clampedSubtract(total, available)
         return (total, used, free, actualCached, buffers)
     }
 
@@ -462,8 +469,8 @@ struct LinuxStatsCollector: PlatformStatsCollector {
 
             guard parts.count >= 9 else { continue }
 
-            totalRx += UInt64(parts[0]) ?? 0
-            totalTx += UInt64(parts[8]) ?? 0
+            totalRx = clampedAdd(totalRx, UInt64(parts[0]) ?? 0)
+            totalTx = clampedAdd(totalTx, UInt64(parts[8]) ?? 0)
         }
 
         return (totalRx, totalTx)
@@ -479,8 +486,8 @@ struct LinuxStatsCollector: PlatformStatsCollector {
             guard parts.count >= 3 else { continue }
             let rx = UInt64(parts[1]) ?? 0
             let tx = UInt64(parts[2]) ?? 0
-            totalRx += rx
-            totalTx += tx
+            totalRx = clampedAdd(totalRx, rx)
+            totalTx = clampedAdd(totalTx, tx)
             found = true
         }
 
@@ -518,7 +525,7 @@ struct LinuxStatsCollector: PlatformStatsCollector {
             if expectRx {
                 let parts = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
                 if let iface = currentIface, iface != "lo", parts.count > 0, let rx = UInt64(parts[0]) {
-                    totalRx += rx
+                    totalRx = clampedAdd(totalRx, rx)
                     found = true
                 }
                 expectRx = false
@@ -528,7 +535,7 @@ struct LinuxStatsCollector: PlatformStatsCollector {
             if expectTx {
                 let parts = trimmed.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
                 if let iface = currentIface, iface != "lo", parts.count > 0, let tx = UInt64(parts[0]) {
-                    totalTx += tx
+                    totalTx = clampedAdd(totalTx, tx)
                     found = true
                 }
                 expectTx = false
@@ -548,13 +555,13 @@ struct LinuxStatsCollector: PlatformStatsCollector {
             if let match = rxRegex?.firstMatch(in: line, options: [], range: range),
                let valueRange = Range(match.range(at: 1), in: line),
                let rx = UInt64(line[valueRange]) {
-                totalRx += rx
+                totalRx = clampedAdd(totalRx, rx)
                 found = true
             }
             if let match = txRegex?.firstMatch(in: line, options: [], range: range),
                let valueRange = Range(match.range(at: 1), in: line),
                let tx = UInt64(line[valueRange]) {
-                totalTx += tx
+                totalTx = clampedAdd(totalTx, tx)
                 found = true
             }
         }
@@ -571,17 +578,21 @@ struct LinuxStatsCollector: PlatformStatsCollector {
 
             let totalStr = parts[1].replacingOccurrences(of: "M", with: "")
             let usedStr = parts[2].replacingOccurrences(of: "M", with: "")
-            let mountPoint = parts[5]
+            let mountPoint = parts[5...].joined(separator: " ")
 
             let total = UInt64(totalStr) ?? 0
             let used = UInt64(usedStr) ?? 0
 
             if total < 100 { continue }
+            guard
+                let usedBytes = bytesFromMiB(used),
+                let totalBytes = bytesFromMiB(total)
+            else { continue }
 
             volumes.append(VolumeInfo(
                 mountPoint: mountPoint,
-                used: used * 1024 * 1024,
-                total: total * 1024 * 1024
+                used: usedBytes,
+                total: totalBytes
             ))
         }
 
@@ -605,6 +616,25 @@ struct LinuxStatsCollector: PlatformStatsCollector {
         }
 
         return processes
+    }
+
+    private func clampedAdd(_ lhs: UInt64, _ rhs: UInt64) -> UInt64 {
+        let result = lhs.addingReportingOverflow(rhs)
+        return result.overflow ? UInt64.max : result.partialValue
+    }
+
+    private func clampedSubtract(_ lhs: UInt64, _ rhs: UInt64) -> UInt64 {
+        lhs >= rhs ? lhs - rhs : 0
+    }
+
+    private func bytesFromKiB(_ value: UInt64) -> UInt64? {
+        let result = value.multipliedReportingOverflow(by: bytesPerKiB)
+        return result.overflow ? nil : result.partialValue
+    }
+
+    private func bytesFromMiB(_ value: UInt64) -> UInt64? {
+        let result = value.multipliedReportingOverflow(by: bytesPerMiB)
+        return result.overflow ? nil : result.partialValue
     }
 }
 
