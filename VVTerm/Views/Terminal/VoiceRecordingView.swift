@@ -25,7 +25,7 @@ struct VoiceRecordingView: View {
     }
 
     private var recordingView: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 10) {
             // Transcription preview
             if !audioService.partialTranscription.isEmpty || !audioService.transcribedText.isEmpty {
                 Text(audioService.transcribedText.isEmpty ? audioService.partialTranscription : audioService.transcribedText)
@@ -33,6 +33,9 @@ struct VoiceRecordingView: View {
                     .foregroundColor(.secondary)
                     .lineLimit(2)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
+                    .padding(.leading, 12)
+                    .padding(.trailing, 10)
                     .padding(.bottom, 4)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -50,7 +53,8 @@ struct VoiceRecordingView: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .padding(.trailing, 8)
+                .padding(.leading, 2)
+                .padding(.trailing, 10)
 
                 // Recording indicator + Timer
                 HStack(spacing: 6) {
@@ -60,7 +64,7 @@ struct VoiceRecordingView: View {
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundColor(.secondary)
                 }
-                .padding(.trailing, 8)
+                .padding(.trailing, 10)
 
                 // Responsive waveform
                 GeometryReader { geometry in
@@ -92,10 +96,14 @@ struct VoiceRecordingView: View {
                         .foregroundColor(.blue)
                 }
                 .buttonStyle(.plain)
-                .padding(.leading, 8)
+                .padding(.leading, 10)
+                .padding(.trailing, 2)
             }
-            .frame(height: 40)
+            .padding(.leading, 12)
+            .padding(.trailing, 10)
+            .frame(height: 46)
         }
+        .padding(.top, 4)
     }
 
     private var processingView: some View {
@@ -110,6 +118,8 @@ struct VoiceRecordingView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
         .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
         .transition(.opacity.combined(with: .scale(scale: 0.98)))
     }

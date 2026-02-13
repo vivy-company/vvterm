@@ -86,6 +86,21 @@ struct ConnectionTerminalContainer: View {
         return serverTabs.first { $0.id == id } ?? serverTabs.first
     }
 
+    private var tmuxAttachPromptBinding: Binding<TmuxAttachPrompt?> {
+        Binding(
+            get: {
+                guard let prompt = tabManager.tmuxAttachPrompt else { return nil }
+                guard tabManager.paneStates[prompt.id]?.serverId == server.id else { return nil }
+                return prompt
+            },
+            set: { newValue in
+                guard newValue == nil, let prompt = tabManager.tmuxAttachPrompt else { return }
+                guard tabManager.paneStates[prompt.id]?.serverId == server.id else { return }
+                tabManager.cancelTmuxAttachPrompt(paneId: prompt.id)
+            }
+        )
+    }
+
     var body: some View {
         ZStack {
             // Stats view - always in hierarchy, visibility controlled by opacity
@@ -167,6 +182,14 @@ struct ConnectionTerminalContainer: View {
         }
         #endif
         .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
+        .sheet(item: tmuxAttachPromptBinding) { prompt in
+            TmuxAttachPromptSheet(
+                prompt: prompt,
+                onConfirm: { selection in
+                    tabManager.resolveTmuxAttachPrompt(paneId: prompt.id, selection: selection)
+                }
+            )
+        }
     }
 
     private func handleNewTabCommand() {

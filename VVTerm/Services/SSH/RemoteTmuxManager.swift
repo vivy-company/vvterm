@@ -1,5 +1,10 @@
 import Foundation
 
+struct RemoteTmuxSession: Hashable {
+    let name: String
+    let attachedClients: Int
+}
+
 actor RemoteTmuxManager {
     static let shared = RemoteTmuxManager()
 
@@ -16,6 +21,35 @@ actor RemoteTmuxManager {
         return output?.contains(okMarker) == true
     }
 
+    func listSessions(using client: SSHClient) async -> [RemoteTmuxSession] {
+        let body = "\(shellPathExport()); tmux list-sessions -F '#{session_name}\t#{session_attached}' 2>/dev/null"
+        let command = "sh -lc \(shellQuoted(body))"
+        guard let output = try? await client.execute(command) else { return [] }
+
+        var sessions: [RemoteTmuxSession] = []
+        for rawLine in output.split(separator: "\n") {
+            let line = String(rawLine)
+            let parts = line.split(separator: "\t", maxSplits: 1, omittingEmptySubsequences: false)
+            guard !parts.isEmpty else { continue }
+            let name = String(parts[0]).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { continue }
+            let attachedClients: Int
+            if parts.count == 2 {
+                attachedClients = Int(parts[1].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+            } else {
+                attachedClients = 0
+            }
+            sessions.append(RemoteTmuxSession(name: name, attachedClients: attachedClients))
+        }
+
+        return sessions.sorted { lhs, rhs in
+            if lhs.attachedClients != rhs.attachedClients {
+                return lhs.attachedClients > rhs.attachedClients
+            }
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
+    }
+
     func prepareConfig(using client: SSHClient) async {
         let body = configWriteCommand()
         let command = "sh -lc \(shellQuoted(body))"
@@ -26,6 +60,16 @@ actor RemoteTmuxManager {
         let escapedDir = shellDirectoryArgument(workingDirectory)
         let escapedSession = shellQuoted(sessionName)
         return "\(shellPathPrefix()) exec tmux -u -f \(configPath) new-session -A -s \(escapedSession) -c \(escapedDir)"
+    }
+
+    nonisolated func attachExistingCommand(sessionName: String) -> String {
+        let escapedSession = shellQuoted(sessionName)
+        return "\(shellPathExport()); if tmux has-session -t \(escapedSession) 2>/dev/null; then exec tmux -u -f \(configPath) attach-session -t \(escapedSession); else exec \"${SHELL:-/bin/sh}\" -l; fi"
+    }
+
+    nonisolated func attachExistingExecCommand(sessionName: String) -> String {
+        let body = attachExistingCommand(sessionName: sessionName)
+        return "sh -lc \(shellQuoted(body))"
     }
 
     nonisolated func attachExecCommand(sessionName: String, workingDirectory: String) -> String {

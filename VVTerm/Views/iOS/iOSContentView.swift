@@ -676,6 +676,21 @@ struct iOSTerminalView: View {
         )
     }
 
+    private var tmuxAttachPromptBinding: Binding<TmuxAttachPrompt?> {
+        Binding(
+            get: {
+                guard let prompt = sessionManager.tmuxAttachPrompt else { return nil }
+                return serverSessions.contains(where: { $0.id == prompt.id }) ? prompt : nil
+            },
+            set: { newValue in
+                guard newValue == nil, let prompt = sessionManager.tmuxAttachPrompt else { return }
+                if serverSessions.contains(where: { $0.id == prompt.id }) {
+                    sessionManager.cancelTmuxAttachPrompt(sessionId: prompt.id)
+                }
+            }
+        )
+    }
+
     private func updateTerminalBackgroundColor() {
         let themeName = effectiveThemeName
         let fallback = colorScheme == .dark ? Color.black : Color(UIColor.systemBackground)
@@ -795,6 +810,14 @@ struct iOSTerminalView: View {
                         onSave: { _ in serverToEdit = nil }
                     )
                 }
+            }
+            .sheet(item: tmuxAttachPromptBinding) { prompt in
+                TmuxAttachPromptSheet(
+                    prompt: prompt,
+                    onConfirm: { selection in
+                        sessionManager.resolveTmuxAttachPrompt(sessionId: prompt.id, selection: selection)
+                    }
+                )
             }
     }
 

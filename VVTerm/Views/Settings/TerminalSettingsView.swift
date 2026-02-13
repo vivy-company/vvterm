@@ -21,6 +21,7 @@ struct TerminalSettingsView: View {
     @AppStorage("terminalProgressEnabled") private var terminalProgressEnabled = true
     @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true
     @AppStorage("terminalTmuxEnabledDefault") private var tmuxEnabledDefault = true
+    @AppStorage("terminalTmuxStartupBehaviorDefault") private var tmuxStartupBehaviorDefaultRaw = TmuxStartupBehavior.askEveryTime.rawValue
 
     // Copy settings
     @AppStorage("terminalCopyTrimTrailingWhitespace") private var copyTrimTrailingWhitespace = true
@@ -37,6 +38,13 @@ struct TerminalSettingsView: View {
 
     @State private var availableFonts: [String] = []
     @State private var themeNames: [String] = []
+
+    private var tmuxStartupBehaviorDefaultBinding: Binding<TmuxStartupBehavior> {
+        Binding(
+            get: { TmuxStartupBehavior(rawValue: tmuxStartupBehaviorDefaultRaw) ?? .askEveryTime },
+            set: { tmuxStartupBehaviorDefaultRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         Form {
@@ -95,10 +103,18 @@ struct TerminalSettingsView: View {
 
             Section {
                 Toggle("Enable tmux by default", isOn: $tmuxEnabledDefault)
+
+                if tmuxEnabledDefault {
+                    Picker("On connect", selection: tmuxStartupBehaviorDefaultBinding) {
+                        ForEach(TmuxStartupBehavior.globalConfigCases) { behavior in
+                            Text(behavior.displayName).tag(behavior)
+                        }
+                    }
+                }
             } header: {
                 Text("Session Persistence")
             } footer: {
-                Text("When enabled, sessions run inside tmux and survive app restarts or disconnects.")
+                Text("Choose the default behavior for new servers. You can still override per server in server settings.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

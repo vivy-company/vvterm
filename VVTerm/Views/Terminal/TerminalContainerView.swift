@@ -180,6 +180,7 @@ struct TerminalContainerView: View {
                             Text("Connecting...")
                                 .foregroundStyle(.secondary)
                         }
+                        .padding(.vertical, 6)
                         .multilineTextAlignment(.center)
                     }
                 case .reconnecting(let attempt):
@@ -590,7 +591,8 @@ struct TerminalContainerView: View {
             },
             isProcessing: $voiceProcessing
         )
-        .padding(12)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 18)
         .frame(maxWidth: 520)
         .adaptiveGlass()
         .overlay(

@@ -21,6 +21,10 @@ struct Server: Identifiable, Codable, Hashable {
     var isFavorite: Bool
     /// Override for tmux persistence (nil = use global default)
     var tmuxEnabledOverride: Bool?
+    /// Override for tmux startup behavior (nil = use global default)
+    var tmuxStartupBehaviorOverride: TmuxStartupBehavior?
+    /// Remembered remote tmux session name when startup behavior is rememberedSession
+    var tmuxRememberedSessionName: String?
     var createdAt: Date
     var updatedAt: Date
 
@@ -42,6 +46,8 @@ struct Server: Identifiable, Codable, Hashable {
         lastConnected: Date? = nil,
         isFavorite: Bool = false,
         tmuxEnabledOverride: Bool? = nil,
+        tmuxStartupBehaviorOverride: TmuxStartupBehavior? = nil,
+        tmuxRememberedSessionName: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -62,6 +68,8 @@ struct Server: Identifiable, Codable, Hashable {
         self.lastConnected = lastConnected
         self.isFavorite = isFavorite
         self.tmuxEnabledOverride = tmuxEnabledOverride
+        self.tmuxStartupBehaviorOverride = tmuxStartupBehaviorOverride
+        self.tmuxRememberedSessionName = tmuxRememberedSessionName
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -91,6 +99,8 @@ struct Server: Identifiable, Codable, Hashable {
         case lastConnected
         case isFavorite
         case tmuxEnabledOverride
+        case tmuxStartupBehaviorOverride
+        case tmuxRememberedSessionName
         case createdAt
         case updatedAt
     }
@@ -118,6 +128,8 @@ struct Server: Identifiable, Codable, Hashable {
         lastConnected = try container.decodeIfPresent(Date.self, forKey: .lastConnected)
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         tmuxEnabledOverride = try container.decodeIfPresent(Bool.self, forKey: .tmuxEnabledOverride)
+        tmuxStartupBehaviorOverride = try container.decodeIfPresent(TmuxStartupBehavior.self, forKey: .tmuxStartupBehaviorOverride)
+        tmuxRememberedSessionName = try container.decodeIfPresent(String.self, forKey: .tmuxRememberedSessionName)
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? Date()
     }
@@ -141,6 +153,8 @@ struct Server: Identifiable, Codable, Hashable {
         try container.encodeIfPresent(lastConnected, forKey: .lastConnected)
         try container.encode(isFavorite, forKey: .isFavorite)
         try container.encodeIfPresent(tmuxEnabledOverride, forKey: .tmuxEnabledOverride)
+        try container.encodeIfPresent(tmuxStartupBehaviorOverride, forKey: .tmuxStartupBehaviorOverride)
+        try container.encodeIfPresent(tmuxRememberedSessionName, forKey: .tmuxRememberedSessionName)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(updatedAt, forKey: .updatedAt)
     }

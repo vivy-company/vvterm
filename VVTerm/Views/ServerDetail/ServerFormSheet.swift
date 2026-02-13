@@ -139,6 +139,7 @@ struct ServerFormSheet: View {
     @State private var selectedEnvironment: ServerEnvironment = .production
     @State private var notes: String = ""
     @State private var tmuxEnabled: Bool = true
+    @State private var tmuxStartupBehavior: TmuxStartupBehavior = .vvtermManaged
 
     @State private var showingServerLimitAlert = false
     @State private var showingAddKeySheet = false
@@ -181,8 +182,10 @@ struct ServerFormSheet: View {
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
+            _tmuxStartupBehavior = State(initialValue: server.tmuxStartupBehaviorOverride ?? Self.defaultTmuxStartupBehavior())
         } else {
             _tmuxEnabled = State(initialValue: Self.defaultTmuxEnabled())
+            _tmuxStartupBehavior = State(initialValue: Self.defaultTmuxStartupBehavior())
         }
     }
 
@@ -551,6 +554,14 @@ struct ServerFormSheet: View {
     private var sessionSection: some View {
         Section {
             Toggle("Use tmux to preserve sessions", isOn: $tmuxEnabled)
+
+            if tmuxEnabled {
+                Picker("On connect", selection: $tmuxStartupBehavior) {
+                    ForEach(TmuxStartupBehavior.serverConfigCases) { behavior in
+                        Text(behavior.displayName).tag(behavior)
+                    }
+                }
+            }
         } header: {
             sectionHeader("Session")
         } footer: {
@@ -743,6 +754,8 @@ struct ServerFormSheet: View {
             cloudflareAppDomainOverride: nil,
             notes: notes.isEmpty ? nil : notes,
             tmuxEnabledOverride: tmuxEnabled,
+            tmuxStartupBehaviorOverride: tmuxStartupBehavior,
+            tmuxRememberedSessionName: server?.tmuxRememberedSessionName,
             createdAt: createdAt
         )
     }
@@ -769,6 +782,14 @@ struct ServerFormSheet: View {
             return true
         }
         return defaults.bool(forKey: "terminalTmuxEnabledDefault")
+    }
+
+    private static func defaultTmuxStartupBehavior() -> TmuxStartupBehavior {
+        let defaults = UserDefaults.standard
+        guard let rawValue = defaults.string(forKey: "terminalTmuxStartupBehaviorDefault") else {
+            return .askEveryTime
+        }
+        return TmuxStartupBehavior(rawValue: rawValue) ?? .askEveryTime
     }
 
     private func buildCredentials(for serverId: UUID) -> ServerCredentials {

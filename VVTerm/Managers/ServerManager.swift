@@ -355,6 +355,8 @@ final class ServerManager: ObservableObject {
                     lastConnected: servers[i].lastConnected,
                     isFavorite: servers[i].isFavorite,
                     tmuxEnabledOverride: servers[i].tmuxEnabledOverride,
+                    tmuxStartupBehaviorOverride: servers[i].tmuxStartupBehaviorOverride,
+                    tmuxRememberedSessionName: servers[i].tmuxRememberedSessionName,
                     createdAt: servers[i].createdAt,
                     updatedAt: Date()
                 )
@@ -427,6 +429,8 @@ final class ServerManager: ObservableObject {
             tags: server.tags,
             notes: server.notes,
             tmuxEnabledOverride: server.tmuxEnabledOverride,
+            tmuxStartupBehaviorOverride: server.tmuxStartupBehaviorOverride,
+            tmuxRememberedSessionName: server.tmuxRememberedSessionName,
             createdAt: Date(),
             updatedAt: Date()
         )
@@ -486,6 +490,8 @@ final class ServerManager: ObservableObject {
             lastConnected: server.lastConnected,
             isFavorite: server.isFavorite,
             tmuxEnabledOverride: server.tmuxEnabledOverride,
+            tmuxStartupBehaviorOverride: server.tmuxStartupBehaviorOverride,
+            tmuxRememberedSessionName: server.tmuxRememberedSessionName,
             createdAt: server.createdAt,
             updatedAt: Date()
         )
@@ -542,6 +548,8 @@ final class ServerManager: ObservableObject {
             lastConnected: Date(),
             isFavorite: server.isFavorite,
             tmuxEnabledOverride: server.tmuxEnabledOverride,
+            tmuxStartupBehaviorOverride: server.tmuxStartupBehaviorOverride,
+            tmuxRememberedSessionName: server.tmuxRememberedSessionName,
             createdAt: server.createdAt,
             updatedAt: Date()
         )

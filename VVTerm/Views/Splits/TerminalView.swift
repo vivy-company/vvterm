@@ -249,7 +249,8 @@ struct TerminalTabView: View {
             },
             isProcessing: $voiceProcessing
         )
-        .padding(12)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 18)
         .frame(maxWidth: 520)
         .adaptiveGlass()
         .overlay(
@@ -483,6 +484,7 @@ struct TerminalPaneView: View {
                             Text(String(format: String(localized: "Connecting to %@..."), server.name))
                                 .foregroundStyle(.secondary)
                         }
+                        .padding(.vertical, 6)
                         .multilineTextAlignment(.center)
                     }
                 case .reconnecting(let attempt):
@@ -548,6 +550,7 @@ struct TerminalPaneView: View {
                                 Text(String(format: String(localized: "Connecting to %@..."), server.name))
                                     .foregroundStyle(.secondary)
                             }
+                            .padding(.vertical, 6)
                             .multilineTextAlignment(.center)
                         }
                     }
