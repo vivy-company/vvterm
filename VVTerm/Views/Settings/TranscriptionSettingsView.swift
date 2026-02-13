@@ -16,6 +16,8 @@ struct TranscriptionSettingsView: View {
     @StateObject private var whisperManager: MLXModelManager
     @StateObject private var parakeetManager: MLXModelManager
 
+    private let mlxAvailable = MLXAudioSupport.isSupported
+
     private let languages = [
         ("en", String(localized: "English")),
         ("es", String(localized: "Spanish")),
@@ -42,8 +44,10 @@ struct TranscriptionSettingsView: View {
                 Picker("Engine", selection: $provider) {
                     Text("System (Apple)").tag(TranscriptionProvider.system.rawValue)
                     #if arch(arm64)
-                    Text("Whisper (MLX)").tag(TranscriptionProvider.mlxWhisper.rawValue)
-                    Text("Parakeet (MLX)").tag(TranscriptionProvider.mlxParakeet.rawValue)
+                    if mlxAvailable {
+                        Text("Whisper (MLX)").tag(TranscriptionProvider.mlxWhisper.rawValue)
+                        Text("Parakeet (MLX)").tag(TranscriptionProvider.mlxParakeet.rawValue)
+                    }
                     #endif
                 }
             } header: {
@@ -63,7 +67,7 @@ struct TranscriptionSettingsView: View {
             }
 
             #if arch(arm64)
-            if provider == TranscriptionProvider.mlxWhisper.rawValue {
+            if mlxAvailable && provider == TranscriptionProvider.mlxWhisper.rawValue {
                 modelSection(
                     manager: whisperManager,
                     modelBinding: $whisperModelId,
@@ -78,7 +82,7 @@ struct TranscriptionSettingsView: View {
                 )
             }
 
-            if provider == TranscriptionProvider.mlxParakeet.rawValue {
+            if mlxAvailable && provider == TranscriptionProvider.mlxParakeet.rawValue {
                 modelSection(
                     manager: parakeetManager,
                     modelBinding: $parakeetModelId,
@@ -221,25 +225,27 @@ struct TranscriptionSettingsView: View {
     @ViewBuilder
     private var storageSection: some View {
         #if arch(arm64)
-        let activeManager = provider == TranscriptionProvider.mlxWhisper.rawValue ? whisperManager : parakeetManager
-        if activeManager.totalStorageBytes > 0 {
-            Section("Storage") {
-                HStack {
-                    Text("Model Storage")
-                    Spacer()
-                    Text(ByteCountFormatter.string(fromByteCount: activeManager.localStorageBytes, countStyle: .file))
-                        .foregroundStyle(.secondary)
-                }
-                HStack {
-                    Text("Total MLX Models")
-                    Spacer()
-                    Text(ByteCountFormatter.string(fromByteCount: activeManager.totalStorageBytes, countStyle: .file))
-                        .foregroundStyle(.secondary)
-                }
-                Button("Clear All Storage", role: .destructive) {
-                    MLXModelManager.clearAllStorage()
-                    whisperManager.refreshStatus()
-                    parakeetManager.refreshStatus()
+        if mlxAvailable {
+            let activeManager = provider == TranscriptionProvider.mlxWhisper.rawValue ? whisperManager : parakeetManager
+            if activeManager.totalStorageBytes > 0 {
+                Section("Storage") {
+                    HStack {
+                        Text("Model Storage")
+                        Spacer()
+                        Text(ByteCountFormatter.string(fromByteCount: activeManager.localStorageBytes, countStyle: .file))
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("Total MLX Models")
+                        Spacer()
+                        Text(ByteCountFormatter.string(fromByteCount: activeManager.totalStorageBytes, countStyle: .file))
+                            .foregroundStyle(.secondary)
+                    }
+                    Button("Clear All Storage", role: .destructive) {
+                        MLXModelManager.clearAllStorage()
+                        whisperManager.refreshStatus()
+                        parakeetManager.refreshStatus()
+                    }
                 }
             }
         }
@@ -292,6 +298,12 @@ struct TranscriptionSettingsView: View {
            let legacy = defaults.string(forKey: "parakeetModelId") {
             defaults.set(legacy, forKey: TranscriptionSettingsKeys.mlxParakeetModelId)
             parakeetModelId = legacy
+        }
+
+        if !mlxAvailable,
+           provider != TranscriptionProvider.system.rawValue {
+            provider = TranscriptionProvider.system.rawValue
+            defaults.set(provider, forKey: TranscriptionSettingsKeys.provider)
         }
     }
 }
