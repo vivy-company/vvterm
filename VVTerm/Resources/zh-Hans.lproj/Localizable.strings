@@ -694,3 +694,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "使用服务器端 Tailscale SSH 策略。无需密码或 SSH 密钥。";
 "Tailscale SSH authentication was not accepted by the server." = "服务器未接受 Tailscale SSH 身份验证。";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "此应用目前仅支持直接 tailnet 连接（不支持 userspace 代理回退）。";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "选择 tmux 会话";
+"Existing sessions" = "现有会话";
+"Select a session to attach immediately." = "选择一个会话以立即附加。";
+"No tmux sessions found" = "未找到 tmux 会话";
+"Create a new session, or continue without tmux." = "创建新会话，或不使用 tmux 继续。";
+"Attached" = "已附加";
+"Detached" = "已分离";
+"1 client" = "1 个客户端";
+"%lld clients" = "%lld 个客户端";
+"1 window" = "1 个窗口";
+"%lld windows" = "%lld 个窗口";
+"New session" = "新建会话";
+"Skip tmux" = "跳过 tmux";
+"Create VVTerm session" = "创建 VVTerm 会话";
+"Ask every time" = "每次都询问";
+"Use remembered session" = "使用记住的会话";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "此连接始终创建或附加到由 VVTerm 管理的 tmux 会话。";
+"Show a prompt on each new tab or split so you can choose a session." = "每次新建标签页或分屏时显示提示，让你选择会话。";
+"Start a normal shell without tmux session persistence." = "启动普通 Shell，不使用 tmux 会话持久化。";
+"Automatically attach to the last tmux session you selected." = "自动附加到你上次选择的 tmux 会话。";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "当 tmux 可用时，会话会在应用重启和断开连接后继续保持。";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "为新服务器选择默认行为。你仍可在服务器设置中按服务器覆盖。";

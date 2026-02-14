@@ -714,3 +714,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "サーバー側の Tailscale SSH ポリシーを使用します。パスワードや SSH キーは不要です。";
 "Tailscale SSH authentication was not accepted by the server." = "サーバーは Tailscale SSH 認証を受け入れませんでした。";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "このアプリは現在、直接の tailnet 接続のみをサポートしています（userspace プロキシへのフォールバックはありません）。";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "tmuxセッションを選択";
+"Existing sessions" = "既存のセッション";
+"Select a session to attach immediately." = "すぐにアタッチするセッションを選択してください。";
+"No tmux sessions found" = "tmuxセッションが見つかりません";
+"Create a new session, or continue without tmux." = "新しいセッションを作成するか、tmuxなしで続行してください。";
+"Attached" = "アタッチ済み";
+"Detached" = "デタッチ";
+"1 client" = "1 クライアント";
+"%lld clients" = "%lld クライアント";
+"1 window" = "1 ウィンドウ";
+"%lld windows" = "%lld ウィンドウ";
+"New session" = "新しいセッション";
+"Skip tmux" = "tmuxをスキップ";
+"Create VVTerm session" = "VVTermセッションを作成";
+"Ask every time" = "毎回確認する";
+"Use remembered session" = "記憶したセッションを使用";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "この接続では、VVTerm が管理する tmux セッションを常に作成またはアタッチします。";
+"Show a prompt on each new tab or split so you can choose a session." = "新しいタブや分割を開くたびにプロンプトを表示し、セッションを選べるようにします。";
+"Start a normal shell without tmux session persistence." = "tmux のセッション保持を使わずに通常のシェルを開始します。";
+"Automatically attach to the last tmux session you selected." = "最後に選択した tmux セッションに自動でアタッチします。";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "tmux が利用可能な場合、アプリ再起動や切断後もセッションは維持されます。";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "新しいサーバーの既定動作を選択します。サーバー設定でサーバーごとに上書きできます。";

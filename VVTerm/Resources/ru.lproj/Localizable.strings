@@ -714,3 +714,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Использует серверную политику Tailscale SSH. Пароль или SSH-ключ не требуются.";
 "Tailscale SSH authentication was not accepted by the server." = "Аутентификация Tailscale SSH не была принята сервером.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Сейчас это приложение поддерживает только прямые подключения tailnet (без резервного userspace-прокси).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Выбрать сессию tmux";
+"Existing sessions" = "Существующие сессии";
+"Select a session to attach immediately." = "Выберите сессию для немедленного подключения.";
+"No tmux sessions found" = "Сессии tmux не найдены";
+"Create a new session, or continue without tmux." = "Создайте новую сессию или продолжайте без tmux.";
+"Attached" = "Подключена";
+"Detached" = "Отсоединена";
+"1 client" = "1 клиент";
+"%lld clients" = "%lld клиентов";
+"1 window" = "1 окно";
+"%lld windows" = "%lld окон";
+"New session" = "Новая сессия";
+"Skip tmux" = "Пропустить tmux";
+"Create VVTerm session" = "Создать сессию VVTerm";
+"Ask every time" = "Спрашивать каждый раз";
+"Use remembered session" = "Использовать запомненную сессию";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Для этого подключения всегда создавайте или подключайте tmux-сессию, управляемую VVTerm.";
+"Show a prompt on each new tab or split so you can choose a session." = "Показывать запрос на каждой новой вкладке или разделении, чтобы можно было выбрать сессию.";
+"Start a normal shell without tmux session persistence." = "Запускать обычную оболочку без сохранения сессии tmux.";
+"Automatically attach to the last tmux session you selected." = "Автоматически подключаться к последней выбранной tmux-сессии.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Когда tmux доступен, сессии сохраняются между перезапусками приложения и отключениями.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Выберите поведение по умолчанию для новых серверов. Его можно переопределить для каждого сервера в настройках сервера.";

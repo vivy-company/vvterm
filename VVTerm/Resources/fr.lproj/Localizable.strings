@@ -716,3 +716,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Utilise la politique Tailscale SSH côté serveur. Aucun mot de passe ni clé SSH n'est requis.";
 "Tailscale SSH authentication was not accepted by the server." = "L'authentification Tailscale SSH n'a pas été acceptée par le serveur.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Cette app ne prend actuellement en charge que les connexions tailnet directes (sans solution de secours via proxy userspace).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Choisir une session tmux";
+"Existing sessions" = "Sessions existantes";
+"Select a session to attach immediately." = "Sélectionnez une session à attacher immédiatement.";
+"No tmux sessions found" = "Aucune session tmux trouvée";
+"Create a new session, or continue without tmux." = "Créez une nouvelle session ou continuez sans tmux.";
+"Attached" = "Attachée";
+"Detached" = "Détachée";
+"1 client" = "1 client";
+"%lld clients" = "%lld clients";
+"1 window" = "1 fenêtre";
+"%lld windows" = "%lld fenêtres";
+"New session" = "Nouvelle session";
+"Skip tmux" = "Ignorer tmux";
+"Create VVTerm session" = "Créer une session VVTerm";
+"Ask every time" = "Demander à chaque fois";
+"Use remembered session" = "Utiliser la session mémorisée";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Toujours créer ou attacher une session tmux gérée par VVTerm pour cette connexion.";
+"Show a prompt on each new tab or split so you can choose a session." = "Afficher une invite à chaque nouvel onglet ou division pour vous laisser choisir une session.";
+"Start a normal shell without tmux session persistence." = "Démarrer un shell normal sans persistance de session tmux.";
+"Automatically attach to the last tmux session you selected." = "Attacher automatiquement la dernière session tmux que vous avez sélectionnée.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Les sessions restent actives entre les redémarrages de l'application et les déconnexions lorsque tmux est disponible.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Choisissez le comportement par défaut pour les nouveaux serveurs. Vous pouvez toujours le remplacer serveur par serveur dans les réglages du serveur.";

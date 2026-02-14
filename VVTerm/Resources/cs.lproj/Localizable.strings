@@ -715,3 +715,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Používá zásady Tailscale SSH na straně serveru. Heslo ani SSH klíč nejsou vyžadovány.";
 "Tailscale SSH authentication was not accepted by the server." = "Ověření Tailscale SSH nebylo serverem přijato.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Tato aplikace momentálně podporuje pouze přímá tailnet připojení (bez náhradního userspace proxy).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Vybrat relaci tmux";
+"Existing sessions" = "Existující relace";
+"Select a session to attach immediately." = "Vyberte relaci pro okamžité připojení.";
+"No tmux sessions found" = "Nebyly nalezeny žádné relace tmux";
+"Create a new session, or continue without tmux." = "Vytvořte novou relaci nebo pokračujte bez tmux.";
+"Attached" = "Připojeno";
+"Detached" = "Odpojeno";
+"1 client" = "1 klient";
+"%lld clients" = "%lld klientů";
+"1 window" = "1 okno";
+"%lld windows" = "%lld oken";
+"New session" = "Nová relace";
+"Skip tmux" = "Přeskočit tmux";
+"Create VVTerm session" = "Vytvořit relaci VVTerm";
+"Ask every time" = "Ptát se pokaždé";
+"Use remembered session" = "Použít zapamatovanou relaci";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Pro toto připojení vždy vytvořte nebo připojte relaci tmux spravovanou aplikací VVTerm.";
+"Show a prompt on each new tab or split so you can choose a session." = "Při každé nové kartě nebo rozdělení zobrazit výzvu, abyste si mohli vybrat relaci.";
+"Start a normal shell without tmux session persistence." = "Spustit běžný shell bez perzistence relace tmux.";
+"Automatically attach to the last tmux session you selected." = "Automaticky připojit poslední vybranou relaci tmux.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Pokud je tmux dostupný, relace zůstávají aktivní i po restartu aplikace a odpojení.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Zvolte výchozí chování pro nové servery. V nastavení serveru jej můžete stále přepsat pro každý server.";

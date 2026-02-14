@@ -714,3 +714,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "ใช้นโยบาย Tailscale SSH ฝั่งเซิร์ฟเวอร์ ไม่ต้องใช้รหัสผ่านหรือคีย์ SSH";
 "Tailscale SSH authentication was not accepted by the server." = "เซิร์ฟเวอร์ไม่ยอมรับการยืนยันตัวตน Tailscale SSH";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "ขณะนี้แอปรองรับเฉพาะการเชื่อมต่อ tailnet โดยตรงเท่านั้น (ไม่มีการ fallback ผ่าน userspace proxy)";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "เลือกเซสชัน tmux";
+"Existing sessions" = "เซสชันที่มีอยู่";
+"Select a session to attach immediately." = "เลือกเซสชันเพื่อเชื่อมต่อทันที";
+"No tmux sessions found" = "ไม่พบเซสชัน tmux";
+"Create a new session, or continue without tmux." = "สร้างเซสชันใหม่ หรือดำเนินการต่อโดยไม่ใช้ tmux";
+"Attached" = "เชื่อมต่ออยู่";
+"Detached" = "แยกออก";
+"1 client" = "1 ไคลเอนต์";
+"%lld clients" = "%lld ไคลเอนต์";
+"1 window" = "1 หน้าต่าง";
+"%lld windows" = "%lld หน้าต่าง";
+"New session" = "เซสชันใหม่";
+"Skip tmux" = "ข้าม tmux";
+"Create VVTerm session" = "สร้างเซสชัน VVTerm";
+"Ask every time" = "ถามทุกครั้ง";
+"Use remembered session" = "ใช้เซสชันที่จดจำไว้";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "สำหรับการเชื่อมต่อนี้ ให้สร้างหรือเชื่อมต่อกับเซสชัน tmux ที่ VVTerm จัดการเสมอ";
+"Show a prompt on each new tab or split so you can choose a session." = "แสดงพรอมต์ทุกครั้งที่เปิดแท็บใหม่หรือแบ่งหน้าจอ เพื่อให้คุณเลือกเซสชันได้";
+"Start a normal shell without tmux session persistence." = "เริ่มเชลล์ปกติโดยไม่ใช้การคงอยู่ของเซสชัน tmux";
+"Automatically attach to the last tmux session you selected." = "เชื่อมต่ออัตโนมัติกับเซสชัน tmux ล่าสุดที่คุณเลือก";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "เซสชันจะยังคงอยู่แม้แอปเริ่มใหม่หรือหลุดการเชื่อมต่อ เมื่อมี tmux ให้ใช้งาน";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "เลือกพฤติกรรมเริ่มต้นสำหรับเซิร์ฟเวอร์ใหม่ คุณยังสามารถกำหนดแยกต่อเซิร์ฟเวอร์ได้ในตั้งค่าเซิร์ฟเวอร์";

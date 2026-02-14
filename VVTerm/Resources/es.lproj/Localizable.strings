@@ -714,3 +714,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Usa la política de Tailscale SSH del lado del servidor. No se requiere contraseña ni clave SSH.";
 "Tailscale SSH authentication was not accepted by the server." = "La autenticación de Tailscale SSH no fue aceptada por el servidor.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Esta app actualmente solo admite conexiones directas de tailnet (sin alternativa mediante proxy en espacio de usuario).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Elegir sesión de tmux";
+"Existing sessions" = "Sesiones existentes";
+"Select a session to attach immediately." = "Selecciona una sesión para adjuntarte de inmediato.";
+"No tmux sessions found" = "No se encontraron sesiones de tmux";
+"Create a new session, or continue without tmux." = "Crea una sesión nueva o continúa sin tmux.";
+"Attached" = "Adjunta";
+"Detached" = "Desconectada";
+"1 client" = "1 cliente";
+"%lld clients" = "%lld clientes";
+"1 window" = "1 ventana";
+"%lld windows" = "%lld ventanas";
+"New session" = "Nueva sesión";
+"Skip tmux" = "Omitir tmux";
+"Create VVTerm session" = "Crear sesión de VVTerm";
+"Ask every time" = "Preguntar siempre";
+"Use remembered session" = "Usar sesión recordada";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Crear o adjuntar siempre una sesión de tmux administrada por VVTerm para esta conexión.";
+"Show a prompt on each new tab or split so you can choose a session." = "Mostrar un aviso en cada pestaña nueva o división para que puedas elegir una sesión.";
+"Start a normal shell without tmux session persistence." = "Iniciar una shell normal sin persistencia de sesión de tmux.";
+"Automatically attach to the last tmux session you selected." = "Adjuntarse automáticamente a la última sesión de tmux que seleccionaste.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Las sesiones se mantienen activas entre reinicios de la app y desconexiones cuando tmux está disponible.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Elige el comportamiento predeterminado para servidores nuevos. Puedes cambiarlo por servidor en la configuración del servidor.";

@@ -759,3 +759,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Sử dụng chính sách Tailscale SSH phía máy chủ. Không cần mật khẩu hoặc khóa SSH.";
 "Tailscale SSH authentication was not accepted by the server." = "Máy chủ không chấp nhận xác thực Tailscale SSH.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Hiện tại ứng dụng này chỉ hỗ trợ kết nối tailnet trực tiếp (không có phương án dự phòng userspace proxy).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Chọn phiên tmux";
+"Existing sessions" = "Các phiên hiện có";
+"Select a session to attach immediately." = "Chọn một phiên để gắn ngay lập tức.";
+"No tmux sessions found" = "Không tìm thấy phiên tmux";
+"Create a new session, or continue without tmux." = "Tạo phiên mới hoặc tiếp tục không dùng tmux.";
+"Attached" = "Đang gắn";
+"Detached" = "Đã tách";
+"1 client" = "1 máy khách";
+"%lld clients" = "%lld máy khách";
+"1 window" = "1 cửa sổ";
+"%lld windows" = "%lld cửa sổ";
+"New session" = "Phiên mới";
+"Skip tmux" = "Bỏ qua tmux";
+"Create VVTerm session" = "Tạo phiên VVTerm";
+"Ask every time" = "Hỏi mỗi lần";
+"Use remembered session" = "Dùng phiên đã ghi nhớ";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Luôn tạo hoặc gắn vào phiên tmux do VVTerm quản lý cho kết nối này.";
+"Show a prompt on each new tab or split so you can choose a session." = "Hiển thị lời nhắc ở mỗi tab mới hoặc khi chia màn hình để bạn có thể chọn phiên.";
+"Start a normal shell without tmux session persistence." = "Bắt đầu shell bình thường mà không dùng cơ chế lưu phiên tmux.";
+"Automatically attach to the last tmux session you selected." = "Tự động gắn vào phiên tmux gần nhất bạn đã chọn.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Phiên vẫn được giữ qua các lần khởi động lại ứng dụng và mất kết nối khi có tmux.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Chọn hành vi mặc định cho máy chủ mới. Bạn vẫn có thể ghi đè theo từng máy chủ trong cài đặt máy chủ.";

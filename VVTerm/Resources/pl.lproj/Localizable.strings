@@ -716,3 +716,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Używa zasad Tailscale SSH po stronie serwera. Hasło ani klucz SSH nie są wymagane.";
 "Tailscale SSH authentication was not accepted by the server." = "Uwierzytelnianie Tailscale SSH nie zostało zaakceptowane przez serwer.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Ta aplikacja obecnie obsługuje tylko bezpośrednie połączenia tailnet (bez awaryjnego przejścia na userspace proxy).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Wybierz sesję tmux";
+"Existing sessions" = "Istniejące sesje";
+"Select a session to attach immediately." = "Wybierz sesję, aby dołączyć natychmiast.";
+"No tmux sessions found" = "Nie znaleziono sesji tmux";
+"Create a new session, or continue without tmux." = "Utwórz nową sesję lub kontynuuj bez tmux.";
+"Attached" = "Dołączona";
+"Detached" = "Odłączona";
+"1 client" = "1 klient";
+"%lld clients" = "%lld klientów";
+"1 window" = "1 okno";
+"%lld windows" = "%lld okien";
+"New session" = "Nowa sesja";
+"Skip tmux" = "Pomiń tmux";
+"Create VVTerm session" = "Utwórz sesję VVTerm";
+"Ask every time" = "Pytaj za każdym razem";
+"Use remembered session" = "Użyj zapamiętanej sesji";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Dla tego połączenia zawsze twórz lub dołączaj sesję tmux zarządzaną przez VVTerm.";
+"Show a prompt on each new tab or split so you can choose a session." = "Pokazuj monit przy każdej nowej karcie lub podziale, aby można było wybrać sesję.";
+"Start a normal shell without tmux session persistence." = "Uruchom zwykłą powłokę bez trwałości sesji tmux.";
+"Automatically attach to the last tmux session you selected." = "Automatycznie dołącz do ostatniej wybranej sesji tmux.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Gdy tmux jest dostępny, sesje pozostają aktywne po restarcie aplikacji i rozłączeniach.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Wybierz domyślne zachowanie dla nowych serwerów. Nadal możesz je nadpisać dla każdego serwera w ustawieniach serwera.";

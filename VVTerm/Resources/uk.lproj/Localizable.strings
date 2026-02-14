@@ -721,3 +721,27 @@
 "Uses server-side Tailscale SSH policy. No password or SSH key is required." = "Використовується серверна політика Tailscale SSH. Пароль або SSH-ключ не потрібні.";
 "Tailscale SSH authentication was not accepted by the server." = "Сервер не прийняв автентифікацію Tailscale SSH.";
 "This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "Наразі цей застосунок підтримує лише прямі підключення tailnet (без резервного userspace-проксі).";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "Вибрати сесію tmux";
+"Existing sessions" = "Наявні сесії";
+"Select a session to attach immediately." = "Виберіть сесію для негайного підключення.";
+"No tmux sessions found" = "Сесій tmux не знайдено";
+"Create a new session, or continue without tmux." = "Створіть нову сесію або продовжуйте без tmux.";
+"Attached" = "Підключена";
+"Detached" = "Від'єднана";
+"1 client" = "1 клієнт";
+"%lld clients" = "%lld клієнтів";
+"1 window" = "1 вікно";
+"%lld windows" = "%lld вікон";
+"New session" = "Нова сесія";
+"Skip tmux" = "Пропустити tmux";
+"Create VVTerm session" = "Створити сесію VVTerm";
+"Ask every time" = "Питати щоразу";
+"Use remembered session" = "Використовувати запам'ятану сесію";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "Для цього підключення завжди створювати або підключати сесію tmux, керовану VVTerm.";
+"Show a prompt on each new tab or split so you can choose a session." = "Показувати запит на кожній новій вкладці або поділі, щоб ви могли вибрати сесію.";
+"Start a normal shell without tmux session persistence." = "Запускати звичайну оболонку без збереження сесії tmux.";
+"Automatically attach to the last tmux session you selected." = "Автоматично підключатися до останньої вибраної сесії tmux.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "Коли tmux доступний, сесії зберігаються між перезапусками застосунку та відключеннями.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "Виберіть поведінку за замовчуванням для нових серверів. Її можна перевизначити для кожного сервера в налаштуваннях сервера.";

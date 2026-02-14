@@ -141,9 +141,30 @@ struct TmuxAttachPromptSheet: View {
     }
 
     private func sessionDetailsText(for session: TmuxAttachSessionInfo) -> String {
-        let attachment = session.attachedClients > 0 ? "Attached" : "Detached"
-        let clients = session.attachedClients == 1 ? "1 client" : "\(session.attachedClients) clients"
-        let windows = session.windowCount == 1 ? "1 window" : "\(session.windowCount) windows"
+        let attachment = session.attachedClients > 0
+            ? String(localized: "Attached")
+            : String(localized: "Detached")
+
+        let clients: String
+        if session.attachedClients == 1 {
+            clients = String(localized: "1 client")
+        } else {
+            clients = String(
+                format: String(localized: "%lld clients"),
+                Int64(session.attachedClients)
+            )
+        }
+
+        let windows: String
+        if session.windowCount == 1 {
+            windows = String(localized: "1 window")
+        } else {
+            windows = String(
+                format: String(localized: "%lld windows"),
+                Int64(session.windowCount)
+            )
+        }
+
         return "\(attachment) • \(clients) • \(windows)"
     }
 
