@@ -90,6 +90,13 @@ struct AboutView: View {
                 )
 
                 LinkButton(
+                    title: String(localized: "GitHub"),
+                    icon: "chevron.left.forwardslash.chevron.right",
+                    isSystemImage: true,
+                    url: "https://github.com/vivy-company/vvterm"
+                )
+
+                LinkButton(
                     title: String(localized: "Report an Issue"),
                     icon: "exclamationmark.bubble",
                     isSystemImage: true,

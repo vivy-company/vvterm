@@ -120,6 +120,18 @@ struct AboutSettingsView: View {
                 .tint(.primary)
                 .foregroundStyle(.primary)
 
+                Link(destination: URL(string: "https://github.com/vivy-company/vvterm")!) {
+                    Label("GitHub", systemImage: "chevron.left.forwardslash.chevron.right")
+                }
+                .tint(.primary)
+                .foregroundStyle(.primary)
+
+                Link(destination: URL(string: "https://github.com/vivy-company/vvterm/issues")!) {
+                    Label("Report an Issue", systemImage: "exclamationmark.bubble")
+                }
+                .tint(.primary)
+                .foregroundStyle(.primary)
+
                 Link(destination: URL(string: "https://vvterm.com/privacy")!) {
                     Label("Privacy Policy", systemImage: "hand.raised")
                 }
