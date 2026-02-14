@@ -158,7 +158,7 @@ final class ConnectionSessionManager: ObservableObject {
            let sourceSession = sessions.first(where: { $0.id == sourceSessionId }),
            let client = sshClient(for: sourceSession),
            let path = await RemoteTmuxManager.shared.currentPath(
-               sessionName: tmuxSessionName(for: sourceSessionId),
+               sessionName: tmuxResolver.sessionName(for: sourceSessionId),
                using: client
            ) {
             sourceWorkingDirectory = path
