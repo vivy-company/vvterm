@@ -156,8 +156,16 @@ enum StatsParsingUtils {
         let elapsed = now.timeIntervalSince(prevTime)
         guard elapsed > 0 else { return (0, 0) }
 
-        let rxSpeed = UInt64(Double(currentRx - prevRx) / elapsed)
-        let txSpeed = UInt64(Double(currentTx - prevTx) / elapsed)
+        let (rxDelta, rxUnderflow) = currentRx.subtractingReportingOverflow(prevRx)
+        let (txDelta, txUnderflow) = currentTx.subtractingReportingOverflow(prevTx)
+
+        // Network counters can reset (interface restart, host reboot).
+        // Treat underflow as no reliable delta for this interval.
+        let safeRxDelta = rxUnderflow ? 0 : rxDelta
+        let safeTxDelta = txUnderflow ? 0 : txDelta
+
+        let rxSpeed = UInt64(Double(safeRxDelta) / elapsed)
+        let txSpeed = UInt64(Double(safeTxDelta) / elapsed)
 
         return (rxSpeed, txSpeed)
     }
