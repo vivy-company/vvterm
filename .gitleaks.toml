@@ -1,0 +1,11 @@
+title = "VVTerm Gitleaks Config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "False positive: PEM boundary literals in SSH key template generator."
+paths = [
+  '''^VivyTerm/Services/SSH/SSHKeyGenerator\.swift$''',
+  '''^VVTerm/Services/SSH/SSHKeyGenerator\.swift$''',
+]
