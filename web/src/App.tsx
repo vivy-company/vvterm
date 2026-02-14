@@ -25,6 +25,7 @@ declare global {
 }
 
 const APP_STORE_URL = "https://apps.apple.com/app/vvterm/id6757482822";
+const GITHUB_REPO_URL = "https://github.com/vivy-company/vvterm";
 
 const FAQSection = lazy(() => import("./components/FAQSection"));
 
@@ -96,6 +97,15 @@ function AppContent() {
               className="transition-opacity duration-200 hover:opacity-80"
             >
               <img src={appStoreBadge} alt="Download on the App Store" className="h-[52px] block rounded-[8px]" />
+            </a>
+            <a
+              href={GITHUB_REPO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackEvent("github_click_hero")}
+              className="inline-flex items-center justify-center h-[52px] px-6 text-[17px] font-medium border border-white/20 text-white rounded-full hover:bg-white/5 transition-all duration-200"
+            >
+              {t("hero.viewOnGithub")}
             </a>
           </div>
           <p className="text-sm text-[#86868b]">
@@ -287,6 +297,9 @@ function AppContent() {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center">
             <a href="https://discord.gg/zemMZtrkSb" onClick={() => trackEvent("discord_click")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
               {t("footer.discord")}
+            </a>
+            <a href={GITHUB_REPO_URL} onClick={() => trackEvent("github_click_footer")} className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200" target="_blank" rel="noopener noreferrer">
+              {t("hero.viewOnGithub")}
             </a>
             <span className="text-zinc-700 hidden sm:inline">|</span>
             <a href="/privacy" className="text-sm text-zinc-500 hover:text-blue-500 transition-colors duration-200">

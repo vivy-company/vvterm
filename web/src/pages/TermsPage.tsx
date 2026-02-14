@@ -8,7 +8,7 @@ export function TermsPage() {
           <img src="/logo.png" alt="VVTerm" className="w-12 h-12 rounded-xl" />
         </a>
         <h1 className="text-4xl font-semibold tracking-tight mb-2">Terms of Use (EULA)</h1>
-        <p className="text-[#86868b] mb-8">Last updated: January 15, 2026</p>
+        <p className="text-[#86868b] mb-8">Last updated: February 14, 2026</p>
 
         <div className="prose prose-invert max-w-none space-y-6 text-[#86868b]">
           <section>
@@ -24,6 +24,14 @@ export function TermsPage() {
             <p>
               Vivy Technologies Co., Limited grants you a limited, non-exclusive, non-transferable license to use VVTerm
               for personal or commercial purposes, subject to these terms.
+            </p>
+            <p className="mt-3">
+              These Terms apply to official VVTerm binaries distributed through Apple's App Store.
+              Source code published at{" "}
+              <a href="https://github.com/vivy-company/vvterm" className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                github.com/vivy-company/vvterm
+              </a>{" "}
+              is licensed separately under GPL-3.0.
             </p>
             <h3 className="text-lg font-medium text-white mb-2 mt-4">Free Version</h3>
             <p>

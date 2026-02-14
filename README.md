@@ -3,7 +3,8 @@
 [![macOS](https://img.shields.io/badge/macOS-13.0+-black?style=flat-square&logo=apple)](https://vvterm.com)
 [![iOS](https://img.shields.io/badge/iOS-16.0+-black?style=flat-square&logo=apple)](https://vvterm.com)
 [![Swift](https://img.shields.io/badge/Swift-5.0+-F05138?style=flat-square&logo=swift&logoColor=white)](https://swift.org)
-[![License](https://img.shields.io/badge/License-GPL%203.0-blue?style=flat-square)](LICENSE)
+[![Source License](https://img.shields.io/badge/Source-GPL%203.0-blue?style=flat-square)](LICENSE)
+[![Binary License](https://img.shields.io/badge/Binary-App%20Store%20EULA-6e7681?style=flat-square)](LICENSE-APPSTORE.md)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-ff69b4?style=flat-square&logo=github)](https://github.com/sponsors/vivy-company)
 
 Your servers. Everywhere.
@@ -114,7 +115,23 @@ VVTerm/
 
 See `THIRD_PARTY_NOTICES.md`.
 
+## Contributing
+
+See `CONTRIBUTING.md` for contribution workflow and `CLA.md` for the required CLA process.
+
+## Security
+
+See `SECURITY.md` for vulnerability reporting guidelines.
+
 ## License
+
+VVTerm uses a dual-license model:
+
+- **Source code (this repository):** GNU General Public License v3.0 (`LICENSE`)
+- **Official App Store binaries:** App Store EULA + VVTerm Terms (`LICENSE-APPSTORE.md`, https://vvterm.com/terms)
+
+If you obtain VVTerm from source and build it yourself, GPL-3.0 applies.
+If you obtain VVTerm via Apple's App Store, App Store EULA terms apply to that binary distribution.
 
 GNU General Public License v3.0
 
