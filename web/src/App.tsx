@@ -9,6 +9,7 @@ import {
   Layers,
   Key,
   Check,
+  Github,
 } from "lucide-react";
 import logo from "./logo.png";
 import appStoreBadge from "./app-store-badge.svg";
@@ -103,8 +104,9 @@ function AppContent() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => trackEvent("github_click_hero")}
-              className="inline-flex items-center justify-center h-[52px] px-6 text-[17px] font-medium border border-white/20 text-white rounded-full hover:bg-white/5 transition-all duration-200"
+              className="inline-flex items-center gap-2 px-6 py-3 text-[17px] font-normal text-blue-500 hover:underline transition-all duration-200"
             >
+              <Github size={18} />
               {t("hero.viewOnGithub")}
             </a>
           </div>
