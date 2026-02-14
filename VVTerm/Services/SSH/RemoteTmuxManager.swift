@@ -3,6 +3,7 @@ import Foundation
 struct RemoteTmuxSession: Hashable {
     let name: String
     let attachedClients: Int
+    let windowCount: Int
 }
 
 actor RemoteTmuxManager {
@@ -22,32 +23,24 @@ actor RemoteTmuxManager {
     }
 
     func listSessions(using client: SSHClient) async -> [RemoteTmuxSession] {
-        let body = "\(shellPathExport()); tmux list-sessions -F '#{session_name}\t#{session_attached}' 2>/dev/null"
-        let command = "sh -lc \(shellQuoted(body))"
-        guard let output = try? await client.execute(command) else { return [] }
+        // Try richer format first, then fall back for older tmux versions.
+        let candidates = [
+            "\(shellPathExport()); tmux list-sessions -F '#{session_name} #{session_attached} #{session_windows}' 2>/dev/null",
+            "\(shellPathExport()); tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null",
+            "\(shellPathExport()); tmux list-sessions 2>/dev/null"
+        ]
 
-        var sessions: [RemoteTmuxSession] = []
-        for rawLine in output.split(separator: "\n") {
-            let line = String(rawLine)
-            let parts = line.split(separator: "\t", maxSplits: 1, omittingEmptySubsequences: false)
-            guard !parts.isEmpty else { continue }
-            let name = String(parts[0]).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !name.isEmpty else { continue }
-            let attachedClients: Int
-            if parts.count == 2 {
-                attachedClients = Int(parts[1].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-            } else {
-                attachedClients = 0
+        for (index, body) in candidates.enumerated() {
+            let command = "sh -lc \(shellQuoted(body))"
+            guard let output = try? await client.execute(command) else { continue }
+            let sessions = parseSessionListOutput(output, allowLegacy: index == candidates.count - 1)
+
+            if !sessions.isEmpty {
+                return sessions
             }
-            sessions.append(RemoteTmuxSession(name: name, attachedClients: attachedClients))
         }
 
-        return sessions.sorted { lhs, rhs in
-            if lhs.attachedClients != rhs.attachedClients {
-                return lhs.attachedClients > rhs.attachedClients
-            }
-            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
-        }
+        return []
     }
 
     func prepareConfig(using client: SSHClient) async {
@@ -63,8 +56,9 @@ actor RemoteTmuxManager {
     }
 
     nonisolated func attachExistingCommand(sessionName: String) -> String {
-        let escapedSession = shellQuoted(sessionName)
-        return "\(shellPathExport()); if tmux has-session -t \(escapedSession) 2>/dev/null; then exec tmux -u -f \(configPath) attach-session -t \(escapedSession); else exec \"${SHELL:-/bin/sh}\" -l; fi"
+        let exactSession = shellQuoted("=\(sessionName)")
+        let plainSession = shellQuoted(sessionName)
+        return "\(shellPathExport()); if tmux has-session -t \(exactSession) 2>/dev/null; then exec tmux -u -f \(configPath) attach-session -t \(exactSession); elif tmux has-session -t \(plainSession) 2>/dev/null; then exec tmux -u -f \(configPath) attach-session -t \(plainSession); else exec \"${SHELL:-/bin/sh}\" -l; fi"
     }
 
     nonisolated func attachExistingExecCommand(sessionName: String) -> String {
@@ -220,6 +214,118 @@ actor RemoteTmuxManager {
             "/sbin"
         ]
         return paths.joined(separator: ":") + ":$PATH"
+    }
+
+    nonisolated func parseSessionListOutput(_ output: String, allowLegacy: Bool) -> [RemoteTmuxSession] {
+        var sessions: [RemoteTmuxSession] = []
+        for rawLine in output.split(separator: "\n") {
+            let line = String(rawLine)
+            if let parsed = parseSessionLine(line) {
+                sessions.append(
+                    RemoteTmuxSession(
+                        name: parsed.name,
+                        attachedClients: parsed.attachedClients,
+                        windowCount: parsed.windowCount
+                    )
+                )
+                continue
+            }
+            if allowLegacy, let parsed = parseLegacySessionLine(line) {
+                sessions.append(parsed)
+            }
+        }
+        return sortSessions(sessions)
+    }
+
+    nonisolated private func parseSessionLine(_ line: String) -> (name: String, attachedClients: Int, windowCount: Int)? {
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+
+        // Handle both real tabs and literal "\t" output formats.
+        let normalized = trimmed.replacingOccurrences(of: "\\t", with: "\t")
+        if let parsed = parseTabSeparatedSessionLine(normalized) {
+            return parsed
+        }
+
+        // Parse rightmost numeric fields; name may contain spaces.
+        let parts = trimmed.split(whereSeparator: { $0.isWhitespace })
+        guard !parts.isEmpty else { return nil }
+
+        if parts.count >= 3,
+           let attached = Int(parts[parts.count - 2]),
+           let windows = Int(parts[parts.count - 1]) {
+            let name = parts[0..<(parts.count - 2)].map(String.init).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { return nil }
+            return (name, max(0, attached), max(1, windows))
+        }
+
+        if parts.count >= 2,
+           let attached = Int(parts[parts.count - 1]) {
+            let name = parts[0..<(parts.count - 1)].map(String.init).joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !name.isEmpty else { return nil }
+            return (name, max(0, attached), 1)
+        }
+
+        return nil
+    }
+
+    nonisolated private func parseTabSeparatedSessionLine(_ line: String) -> (name: String, attachedClients: Int, windowCount: Int)? {
+        guard line.contains("\t") else { return nil }
+        let parts = line.split(separator: "\t", omittingEmptySubsequences: false)
+        guard !parts.isEmpty else { return nil }
+        let name = String(parts[0]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return nil }
+
+        let attachedClients: Int
+        if parts.count >= 2 {
+            attachedClients = Int(parts[1].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
+        } else {
+            attachedClients = 0
+        }
+
+        let windowCount: Int
+        if parts.count >= 3 {
+            windowCount = Int(parts[2].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 1
+        } else {
+            windowCount = 1
+        }
+
+        return (name, max(0, attachedClients), max(1, windowCount))
+    }
+
+    nonisolated private func parseLegacySessionLine(_ line: String) -> RemoteTmuxSession? {
+        // Example legacy output:
+        // "name: 1 windows (created ...) [80x24] (attached)"
+        let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        guard let colonIndex = trimmed.firstIndex(of: ":") else { return nil }
+
+        let name = String(trimmed[..<colonIndex]).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return nil }
+
+        let remainder = trimmed[trimmed.index(after: colonIndex)...]
+        let tokens = remainder.split(whereSeparator: { $0.isWhitespace || $0 == ":" })
+        let firstNumericToken = tokens.first(where: { Int($0) != nil })
+        let windows = firstNumericToken.flatMap { Int($0) } ?? 1
+        let attached = trimmed.contains("(attached)") ? 1 : 0
+
+        return RemoteTmuxSession(
+            name: name,
+            attachedClients: max(0, attached),
+            windowCount: max(1, windows)
+        )
+    }
+
+    nonisolated private func sortSessions(_ sessions: [RemoteTmuxSession]) -> [RemoteTmuxSession] {
+        sessions.sorted { lhs, rhs in
+            if lhs.attachedClients != rhs.attachedClients {
+                return lhs.attachedClients > rhs.attachedClients
+            }
+            if lhs.windowCount != rhs.windowCount {
+                return lhs.windowCount > rhs.windowCount
+            }
+            return lhs.name.localizedCaseInsensitiveCompare(rhs.name) == .orderedAscending
+        }
     }
 
     nonisolated private func configWriteCommand() -> String {

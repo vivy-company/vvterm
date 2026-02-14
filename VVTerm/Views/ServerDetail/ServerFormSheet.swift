@@ -561,6 +561,10 @@ struct ServerFormSheet: View {
                         Text(behavior.displayName).tag(behavior)
                     }
                 }
+
+                Text(tmuxStartupBehavior.descriptionText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         } header: {
             sectionHeader("Session")

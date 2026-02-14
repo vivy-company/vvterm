@@ -754,7 +754,6 @@ final class TerminalTabManager: ObservableObject {
         let selection = await tmuxResolver.resolveSelection(
             for: paneId, serverId: serverId, client: client, setPrompt: setTmuxAttachPrompt
         )
-        tmuxResolver.persistSelectionIfNeeded(serverId: serverId, selection: selection)
         tmuxResolver.updateAttachmentState(for: paneId, selection: selection, setPrompt: setTmuxAttachPrompt)
 
         if case .skipTmux = selection {

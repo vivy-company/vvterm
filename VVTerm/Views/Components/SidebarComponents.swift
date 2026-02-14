@@ -70,6 +70,7 @@ struct ServerRow: View {
                     }
                 } else {
                     Button("Connect") {
+                        tabManager.selectedViewByServer[server.id] = "stats"
                         tabManager.connectedServerIds.insert(server.id)
                     }
                     Button("Edit") { onEdit(server) }

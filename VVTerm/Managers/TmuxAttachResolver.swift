@@ -96,31 +96,6 @@ final class TmuxAttachResolver {
         }
     }
 
-    // MARK: - Persist Selection
-
-    func persistSelectionIfNeeded(serverId: UUID, selection: TmuxAttachSelection) {
-        let behavior = tmuxStartupBehavior(for: serverId)
-        guard behavior == .askEveryTime else { return }
-        guard let server = ServerManager.shared.servers.first(where: { $0.id == serverId }) else { return }
-        var updated = server
-
-        switch selection {
-        case .createManaged:
-            updated.tmuxStartupBehaviorOverride = .vvtermManaged
-            updated.tmuxRememberedSessionName = nil
-        case .attachExisting(let name):
-            updated.tmuxStartupBehaviorOverride = .rememberedSession
-            updated.tmuxRememberedSessionName = name
-        case .skipTmux:
-            updated.tmuxStartupBehaviorOverride = .skipTmux
-            updated.tmuxRememberedSessionName = nil
-        }
-
-        Task {
-            try? await ServerManager.shared.updateServer(updated)
-        }
-    }
-
     // MARK: - Selection Resolution
 
     func resolveSelection(
@@ -152,7 +127,7 @@ final class TmuxAttachResolver {
             return await requestSelection(
                 entityId: entityId,
                 serverId: serverId,
-                availableSessionNames: sessionNamesForPrompt(from: sessions),
+                availableSessions: sessionInfosForPrompt(from: sessions),
                 setPrompt: setPrompt
             )
         }
@@ -236,10 +211,16 @@ final class TmuxAttachResolver {
 
     // MARK: - Filtering
 
-    func sessionNamesForPrompt(from sessions: [RemoteTmuxSession]) -> [String] {
-        let names = sessions.map(\.name)
-        let filtered = names.filter { !isInternalSessionName($0) }
-        return filtered.isEmpty ? names : filtered
+    func sessionInfosForPrompt(from sessions: [RemoteTmuxSession]) -> [TmuxAttachSessionInfo] {
+        let filtered = sessions.filter { !isInternalSessionName($0.name) || $0.attachedClients > 0 }
+        let source = filtered.isEmpty ? sessions : filtered
+        return source.map {
+            TmuxAttachSessionInfo(
+                name: $0.name,
+                attachedClients: max(0, $0.attachedClients),
+                windowCount: max(1, $0.windowCount)
+            )
+        }
     }
 
     func isInternalSessionName(_ name: String) -> Bool {
@@ -255,7 +236,7 @@ final class TmuxAttachResolver {
     private func requestSelection(
         entityId: UUID,
         serverId: UUID,
-        availableSessionNames: [String],
+        availableSessions: [TmuxAttachSessionInfo],
         setPrompt: @escaping (TmuxAttachPrompt?) -> Void
     ) async -> TmuxAttachSelection {
         let serverName = ServerManager.shared.servers.first(where: { $0.id == serverId })?.name ?? String(localized: "Server")
@@ -263,7 +244,7 @@ final class TmuxAttachResolver {
             id: entityId,
             serverId: serverId,
             serverName: serverName,
-            existingSessionNames: availableSessionNames
+            existingSessions: availableSessions
         )
 
         return await withCheckedContinuation { continuation in

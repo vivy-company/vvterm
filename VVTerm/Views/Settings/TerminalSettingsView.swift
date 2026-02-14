@@ -46,6 +46,10 @@ struct TerminalSettingsView: View {
         )
     }
 
+    private var tmuxStartupBehaviorDefault: TmuxStartupBehavior {
+        TmuxStartupBehavior(rawValue: tmuxStartupBehaviorDefaultRaw) ?? .askEveryTime
+    }
+
     var body: some View {
         Form {
             Section("Font") {
@@ -110,6 +114,10 @@ struct TerminalSettingsView: View {
                             Text(behavior.displayName).tag(behavior)
                         }
                     }
+
+                    Text(tmuxStartupBehaviorDefault.descriptionText)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             } header: {
                 Text("Session Persistence")

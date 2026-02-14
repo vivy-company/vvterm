@@ -1059,7 +1059,6 @@ extension ConnectionSessionManager {
         let selection = await tmuxResolver.resolveSelection(
             for: sessionId, serverId: serverId, client: client, setPrompt: setTmuxAttachPrompt
         )
-        tmuxResolver.persistSelectionIfNeeded(serverId: serverId, selection: selection)
         tmuxResolver.updateAttachmentState(for: sessionId, selection: selection, setPrompt: setTmuxAttachPrompt)
 
         if case .skipTmux = selection {
