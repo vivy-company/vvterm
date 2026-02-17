@@ -693,9 +693,11 @@ private struct ManageCustomThemesSheet: View {
             .navigationTitle("Custom Themes")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
                         dismiss()
+                    } label: {
+                        Label("Back", systemImage: "chevron.backward")
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {

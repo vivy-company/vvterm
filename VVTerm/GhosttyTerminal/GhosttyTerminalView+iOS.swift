@@ -1516,7 +1516,7 @@ extension GhosttyTerminalView {
     private func handleToolbarSnippet(_ snippet: TerminalSnippet) {
         sendText(snippet.content)
         if snippet.sendMode == .insertAndEnter {
-            sendText("\r")
+            sendKeyPress(.enter)
         }
     }
 }
@@ -1653,8 +1653,9 @@ private class TerminalInputAccessoryView: UIInputView {
         dynamicStack.axis = .horizontal
         dynamicStack.spacing = 8
         dynamicStack.alignment = .center
-        dynamicStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        dynamicStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        // Keep intrinsic widths for text buttons and let UIScrollView handle overflow.
+        dynamicStack.setContentHuggingPriority(.required, for: .horizontal)
+        dynamicStack.setContentCompressionResistancePriority(.required, for: .horizontal)
         stack.addArrangedSubview(dynamicStack)
         dynamicItemsStack = dynamicStack
 
@@ -1857,6 +1858,10 @@ private class TerminalInputAccessoryView: UIInputView {
     private func makePillButton(title: String, onTap: @escaping () -> Void) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.contentHorizontalAlignment = .center
+        button.clipsToBounds = true
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
         if #available(iOS 15.0, *) {
             var config = UIButton.Configuration.plain()
             config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 14)
@@ -1893,6 +1898,10 @@ private class TerminalInputAccessoryView: UIInputView {
         let button = RepeatableKeyButton(type: .system)
         button.key = key
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.contentHorizontalAlignment = .center
+        button.clipsToBounds = true
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
         if #available(iOS 15.0, *) {
             var config = UIButton.Configuration.plain()
             config.contentInsets = NSDirectionalEdgeInsets(top: 6, leading: 14, bottom: 6, trailing: 14)
