@@ -7,6 +7,7 @@ struct ServerRow: View {
     let isSelected: Bool
     let onSelect: () -> Void
     let onEdit: (Server) -> Void
+    var onConnect: ((Server) -> Void)? = nil
     var onLockedTap: (() -> Void)? = nil
 
     @ObservedObject private var tabManager = TerminalTabManager.shared
@@ -70,8 +71,12 @@ struct ServerRow: View {
                     }
                 } else {
                     Button("Connect") {
-                        tabManager.selectedViewByServer[server.id] = "stats"
-                        tabManager.connectedServerIds.insert(server.id)
+                        if let onConnect {
+                            onConnect(server)
+                        } else {
+                            tabManager.selectedViewByServer[server.id] = "stats"
+                            tabManager.connectedServerIds.insert(server.id)
+                        }
                     }
                     Button("Edit") { onEdit(server) }
                     Divider()

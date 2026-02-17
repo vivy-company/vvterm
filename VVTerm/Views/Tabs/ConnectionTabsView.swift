@@ -193,17 +193,28 @@ struct ConnectionTerminalContainer: View {
     }
 
     private func handleNewTabCommand() {
-        tabManager.selectedViewByServer[server.id] = "terminal"
-        openNewTab()
+        openNewTab(selectTerminalViewOnSuccess: true)
     }
 
-    private func openNewTab() {
+    private func openNewTab(selectTerminalViewOnSuccess: Bool = false) {
         guard tabManager.canOpenNewTab else {
             showingTabLimitAlert = true
             return
         }
-        let tab = tabManager.openTab(for: server)
-        selectedTabIdBinding.wrappedValue = tab.id
+
+        Task {
+            do {
+                let tab = try await tabManager.openTab(for: server)
+                await MainActor.run {
+                    if selectTerminalViewOnSuccess {
+                        tabManager.selectedViewByServer[server.id] = "terminal"
+                    }
+                    selectedTabIdBinding.wrappedValue = tab.id
+                }
+            } catch {
+                // No-op: user cancelled biometric auth or open failed.
+            }
+        }
     }
 
     private func updateTerminalBackgroundColor() {

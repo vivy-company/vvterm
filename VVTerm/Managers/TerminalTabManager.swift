@@ -119,7 +119,11 @@ final class TerminalTabManager: ObservableObject {
 
     /// Open a new tab for a server
     @discardableResult
-    func openTab(for server: Server) -> TerminalTab {
+    func openTab(for server: Server) async throws -> TerminalTab {
+        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
+            throw VVTermError.authenticationFailed
+        }
+
         let tab = TerminalTab(serverId: server.id, title: server.name)
 
         let sourcePaneId = selectedTab(for: server.id)?.focusedPaneId

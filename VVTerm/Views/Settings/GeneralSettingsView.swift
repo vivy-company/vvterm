@@ -267,6 +267,9 @@ struct AppearancePreviewCard: View {
 struct GeneralSettingsView: View {
     @AppStorage("appearanceMode") private var appearanceMode: String = AppearanceMode.system.rawValue
     @AppStorage("appLanguage") private var appLanguage = AppLanguage.system.rawValue
+    @StateObject private var appLockManager = AppLockManager.shared
+
+    private let authGraceOptions = [0, 15, 30, 60, 120, 300]
 
     var body: some View {
         Form {
@@ -289,8 +292,61 @@ struct GeneralSettingsView: View {
                 AppearancePickerView(selection: $appearanceMode)
                     .frame(maxWidth: .infinity)
             }
+
+            Section {
+                Toggle(
+                    String(format: String(localized: "Require %@ to open VVTerm"), appLockManager.biometryDisplayName),
+                    isOn: Binding(
+                        get: { appLockManager.fullAppLockEnabled },
+                        set: { newValue in
+                            Task {
+                                await appLockManager.requestSetFullAppLockEnabled(newValue)
+                            }
+                        }
+                    )
+                )
+                .disabled(appLockManager.isAuthenticating || (!appLockManager.isBiometryAvailable && !appLockManager.fullAppLockEnabled))
+
+                if appLockManager.fullAppLockEnabled {
+                    Toggle("Lock when app goes to background", isOn: $appLockManager.lockOnBackground)
+
+                    Picker("Re-auth grace period", selection: $appLockManager.authGraceSeconds) {
+                        ForEach(authGraceOptions, id: \.self) { seconds in
+                            if seconds == 0 {
+                                Text("Always")
+                                    .tag(seconds)
+                            } else {
+                                Text(String(format: String(localized: "%lld seconds"), Int64(seconds)))
+                                    .tag(seconds)
+                            }
+                        }
+                    }
+                }
+
+                if let message = appLockManager.biometryAvailabilityMessage,
+                   !appLockManager.isBiometryAvailable {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let error = appLockManager.lastErrorMessage, !error.isEmpty {
+                    Text(error)
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+            } header: {
+                Text("Security")
+            } footer: {
+                Text("Biometric lock protects app and server access on this device.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
+        .onAppear {
+            appLockManager.refreshBiometryAvailability()
+        }
         .onChange(of: appLanguage) { newValue in
             AppLanguage.applySelection(newValue)
         }

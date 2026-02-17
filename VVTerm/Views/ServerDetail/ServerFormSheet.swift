@@ -115,6 +115,7 @@ struct ServerFormCredentialBuilder {
 struct ServerFormSheet: View {
     @ObservedObject var serverManager: ServerManager
     @ObservedObject private var storeManager = StoreManager.shared
+    @StateObject private var appLockManager = AppLockManager.shared
     let workspace: Workspace?
     let server: Server?
     let onSave: (Server) -> Void
@@ -138,6 +139,7 @@ struct ServerFormSheet: View {
     @State private var showCloudflareOverrides: Bool = false
     @State private var selectedEnvironment: ServerEnvironment = .production
     @State private var notes: String = ""
+    @State private var requiresBiometricUnlock: Bool = false
     @State private var tmuxEnabled: Bool = true
     @State private var tmuxStartupBehavior: TmuxStartupBehavior = .vvtermManaged
 
@@ -181,6 +183,7 @@ struct ServerFormSheet: View {
             )
             _selectedEnvironment = State(initialValue: server.environment)
             _notes = State(initialValue: server.notes ?? "")
+            _requiresBiometricUnlock = State(initialValue: server.requiresBiometricUnlock)
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
             _tmuxStartupBehavior = State(initialValue: server.tmuxStartupBehaviorOverride ?? Self.defaultTmuxStartupBehavior())
         } else {
@@ -269,6 +272,7 @@ struct ServerFormSheet: View {
             authSection
             connectionSection
             sessionSection
+            securitySection
             environmentSection
             notesSection
             errorSection
@@ -613,6 +617,25 @@ struct ServerFormSheet: View {
         }
     }
 
+    private var securitySection: some View {
+        Section {
+            Toggle(
+                String(format: String(localized: "Require %@ to open this server"), appLockManager.biometryDisplayName),
+                isOn: $requiresBiometricUnlock
+            )
+            .disabled(!appLockManager.isBiometryAvailable && !requiresBiometricUnlock)
+
+            if !appLockManager.isBiometryAvailable,
+               let message = appLockManager.biometryAvailabilityMessage {
+                Text(message)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            sectionHeader("Security")
+        }
+    }
+
     private var environmentSection: some View {
         Section {
             Picker("Environment", selection: $selectedEnvironment) {
@@ -795,6 +818,7 @@ struct ServerFormSheet: View {
             cloudflareTeamDomainOverride: transportSelection == .cloudflare ? normalizedCloudflareOverride(cloudflareTeamDomainOverride) : nil,
             cloudflareAppDomainOverride: nil,
             notes: notes.isEmpty ? nil : notes,
+            requiresBiometricUnlock: requiresBiometricUnlock,
             tmuxEnabledOverride: tmuxEnabled,
             tmuxStartupBehaviorOverride: tmuxStartupBehavior,
             tmuxRememberedSessionName: server?.tmuxRememberedSessionName,

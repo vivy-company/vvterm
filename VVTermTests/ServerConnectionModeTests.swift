@@ -46,6 +46,27 @@ struct ServerConnectionModeTests {
     }
 
     @Test
+    func decodeWithoutBiometricFlagDefaultsToFalse() throws {
+        let server = makeServer(connectionMode: .standard, authMethod: .password)
+        let data = try mutateJSON(server) { object in
+            object.removeValue(forKey: "requiresBiometricUnlock")
+        }
+
+        let decoded = try JSONDecoder().decode(Server.self, from: data)
+        #expect(decoded.requiresBiometricUnlock == false)
+    }
+
+    @Test
+    func encodeDecodePreservesBiometricFlag() throws {
+        var server = makeServer(connectionMode: .standard, authMethod: .password)
+        server.requiresBiometricUnlock = true
+
+        let data = try JSONEncoder().encode(server)
+        let decoded = try JSONDecoder().decode(Server.self, from: data)
+        #expect(decoded.requiresBiometricUnlock == true)
+    }
+
+    @Test
     func decodeWithUnknownConnectionModeDefaultsToStandard() throws {
         let server = makeServer(connectionMode: .standard, authMethod: .password)
         let data = try mutateJSON(server) { object in

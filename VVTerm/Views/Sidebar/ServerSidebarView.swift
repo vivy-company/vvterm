@@ -154,8 +154,9 @@ struct ServerSidebarView: View {
                             ServerRow(
                                 server: server,
                                 isSelected: selectedServer?.id == server.id,
-                                onSelect: { selectedServer = server },
+                                onSelect: { selectServer(server) },
                                 onEdit: { serverToEdit = $0 },
+                                onConnect: { connectToServer($0) },
                                 onLockedTap: { lockedServerAlert = server }
                             )
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -561,6 +562,22 @@ struct ServerSidebarView: View {
     }
 
     // MARK: - Empty States
+
+    private func selectServer(_ server: Server) {
+        Task { @MainActor in
+            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            selectedServer = server
+        }
+    }
+
+    private func connectToServer(_ server: Server) {
+        Task { @MainActor in
+            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            selectedServer = server
+            tabManager.selectedViewByServer[server.id] = "stats"
+            tabManager.connectedServerIds.insert(server.id)
+        }
+    }
 
     @ViewBuilder
     private var emptyState: some View {

@@ -62,6 +62,10 @@
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>VVTerm uses speech recognition to convert voice to terminal commands.</string>
 
+    <!-- Face ID -->
+    <key>NSFaceIDUsageDescription</key>
+    <string>VVTerm uses Face ID to unlock the app and protected servers.</string>
+
     <!-- Live Activities -->
     <key>NSSupportsLiveActivities</key>
     <true/>

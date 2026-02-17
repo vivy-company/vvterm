@@ -63,47 +63,49 @@ struct VVTermApp: App {
     var body: some Scene {
         WindowGroup(id: "main") {
             let appLocale = AppLanguage(rawValue: appLanguage)?.locale ?? Locale.current
-            Group {
-                #if os(iOS)
-                iOSContentView()
-                    .environmentObject(ghosttyApp)
-                    .environmentObject(terminalThemeManager)
-                    .environmentObject(terminalAccessoryPreferencesManager)
-                    .modifier(AppearanceModifier())
-                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
-                        ghosttyApp.reloadConfig()
-                    }
-                    .sheet(isPresented: .init(
-                        get: { !hasSeenWelcome },
-                        set: { if !$0 { hasSeenWelcome = true } }
-                    )) {
-                        WelcomeView(hasSeenWelcome: $hasSeenWelcome)
-                            .interactiveDismissDisabled()
-                    }
-                #else
-                ContentView()
-                    .environmentObject(ghosttyApp)
-                    .environmentObject(terminalThemeManager)
-                    .environmentObject(terminalAccessoryPreferencesManager)
-                    .modifier(AppearanceModifier())
-                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
-                        ghosttyApp.reloadConfig()
-                    }
-                    .sheet(isPresented: .init(
-                        get: { !hasSeenWelcome },
-                        set: { if !$0 { hasSeenWelcome = true } }
-                    )) {
-                        WelcomeView(hasSeenWelcome: $hasSeenWelcome)
-                            .interactiveDismissDisabled()
-                    }
-                #endif
-            }
-            .environment(\.locale, appLocale)
-            .onAppear {
-                AppLanguage.applySelection(appLanguage)
-            }
-            .onChange(of: appLanguage) { newValue in
-                AppLanguage.applySelection(newValue)
+            AppLockContainer {
+                Group {
+                    #if os(iOS)
+                    iOSContentView()
+                        .environmentObject(ghosttyApp)
+                        .environmentObject(terminalThemeManager)
+                        .environmentObject(terminalAccessoryPreferencesManager)
+                        .modifier(AppearanceModifier())
+                        .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
+                            ghosttyApp.reloadConfig()
+                        }
+                        .sheet(isPresented: .init(
+                            get: { !hasSeenWelcome },
+                            set: { if !$0 { hasSeenWelcome = true } }
+                        )) {
+                            WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+                                .interactiveDismissDisabled()
+                        }
+                    #else
+                    ContentView()
+                        .environmentObject(ghosttyApp)
+                        .environmentObject(terminalThemeManager)
+                        .environmentObject(terminalAccessoryPreferencesManager)
+                        .modifier(AppearanceModifier())
+                        .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
+                            ghosttyApp.reloadConfig()
+                        }
+                        .sheet(isPresented: .init(
+                            get: { !hasSeenWelcome },
+                            set: { if !$0 { hasSeenWelcome = true } }
+                        )) {
+                            WelcomeView(hasSeenWelcome: $hasSeenWelcome)
+                                .interactiveDismissDisabled()
+                        }
+                    #endif
+                }
+                .environment(\.locale, appLocale)
+                .onAppear {
+                    AppLanguage.applySelection(appLanguage)
+                }
+                .onChange(of: appLanguage) { newValue in
+                    AppLanguage.applySelection(newValue)
+                }
             }
         }
         #if os(macOS)
@@ -202,6 +204,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    func applicationDidResignActive(_ notification: Notification) {
+        Task { @MainActor in
+            AppLockManager.shared.lockIfNeededForBackground()
+        }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         // Close all connections synchronously to ensure cleanup before exit
         let semaphore = DispatchSemaphore(value: 0)
@@ -285,8 +293,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     // Handle app going to background - suspend connections to save resources
     func applicationDidEnterBackground(_ application: UIApplication) {
-        Task {
+        Task { @MainActor in
             ConnectionSessionManager.shared.suspendAllForBackground()
+            AppLockManager.shared.lockIfNeededForBackground()
         }
     }
 }

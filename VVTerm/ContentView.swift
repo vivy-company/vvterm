@@ -58,8 +58,11 @@ struct ContentView: View {
     }
 
     private func connectToServer(_ server: Server) {
-        tabManager.selectedViewByServer[server.id] = "stats"
-        tabManager.connectedServerIds.insert(server.id)
+        Task { @MainActor in
+            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            tabManager.selectedViewByServer[server.id] = "stats"
+            tabManager.connectedServerIds.insert(server.id)
+        }
     }
 
     var body: some View {

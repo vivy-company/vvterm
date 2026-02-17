@@ -19,6 +19,7 @@ struct Server: Identifiable, Codable, Hashable {
     var notes: String?
     var lastConnected: Date?
     var isFavorite: Bool
+    var requiresBiometricUnlock: Bool
     /// Override for tmux persistence (nil = use global default)
     var tmuxEnabledOverride: Bool?
     /// Override for tmux startup behavior (nil = use global default)
@@ -45,6 +46,7 @@ struct Server: Identifiable, Codable, Hashable {
         notes: String? = nil,
         lastConnected: Date? = nil,
         isFavorite: Bool = false,
+        requiresBiometricUnlock: Bool = false,
         tmuxEnabledOverride: Bool? = nil,
         tmuxStartupBehaviorOverride: TmuxStartupBehavior? = nil,
         tmuxRememberedSessionName: String? = nil,
@@ -67,6 +69,7 @@ struct Server: Identifiable, Codable, Hashable {
         self.notes = notes
         self.lastConnected = lastConnected
         self.isFavorite = isFavorite
+        self.requiresBiometricUnlock = requiresBiometricUnlock
         self.tmuxEnabledOverride = tmuxEnabledOverride
         self.tmuxStartupBehaviorOverride = tmuxStartupBehaviorOverride
         self.tmuxRememberedSessionName = tmuxRememberedSessionName
@@ -98,6 +101,7 @@ struct Server: Identifiable, Codable, Hashable {
         case notes
         case lastConnected
         case isFavorite
+        case requiresBiometricUnlock
         case tmuxEnabledOverride
         case tmuxStartupBehaviorOverride
         case tmuxRememberedSessionName
@@ -127,6 +131,7 @@ struct Server: Identifiable, Codable, Hashable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         lastConnected = try container.decodeIfPresent(Date.self, forKey: .lastConnected)
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        requiresBiometricUnlock = try container.decodeIfPresent(Bool.self, forKey: .requiresBiometricUnlock) ?? false
         tmuxEnabledOverride = try container.decodeIfPresent(Bool.self, forKey: .tmuxEnabledOverride)
         tmuxStartupBehaviorOverride = try container.decodeIfPresent(TmuxStartupBehavior.self, forKey: .tmuxStartupBehaviorOverride)
         tmuxRememberedSessionName = try container.decodeIfPresent(String.self, forKey: .tmuxRememberedSessionName)
@@ -152,6 +157,7 @@ struct Server: Identifiable, Codable, Hashable {
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encodeIfPresent(lastConnected, forKey: .lastConnected)
         try container.encode(isFavorite, forKey: .isFavorite)
+        try container.encode(requiresBiometricUnlock, forKey: .requiresBiometricUnlock)
         try container.encodeIfPresent(tmuxEnabledOverride, forKey: .tmuxEnabledOverride)
         try container.encodeIfPresent(tmuxStartupBehaviorOverride, forKey: .tmuxStartupBehaviorOverride)
         try container.encodeIfPresent(tmuxRememberedSessionName, forKey: .tmuxRememberedSessionName)

@@ -70,6 +70,7 @@ extension Server {
         self.notes = record["notes"] as? String
         self.lastConnected = record["lastConnected"] as? Date
         self.isFavorite = record["isFavorite"] as? Bool ?? false
+        self.requiresBiometricUnlock = record["requiresBiometricUnlock"] as? Bool ?? false
         self.tmuxEnabledOverride = record["tmuxEnabledOverride"] as? Bool
         if let rawTmuxBehavior = record["tmuxStartupBehaviorOverride"] as? String {
             self.tmuxStartupBehaviorOverride = TmuxStartupBehavior(rawValue: rawTmuxBehavior)
@@ -126,6 +127,7 @@ extension Server {
         record["notes"] = notes
         record["lastConnected"] = lastConnected
         record["isFavorite"] = isFavorite
+        record["requiresBiometricUnlock"] = requiresBiometricUnlock
         record["tmuxEnabledOverride"] = tmuxEnabledOverride
         if let tmuxStartupBehaviorOverride {
             record["tmuxStartupBehaviorOverride"] = tmuxStartupBehaviorOverride.rawValue

@@ -229,8 +229,14 @@ struct iOSServerListView: View {
                             session: connection.session,
                             tabCount: connection.tabCount,
                             onOpen: {
-                                sessionManager.selectSession(connection.session)
-                                showingTerminal = true
+                                Task {
+                                    guard let server = serverManager.servers.first(where: { $0.id == connection.id }) else { return }
+                                    guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+                                    await MainActor.run {
+                                        sessionManager.selectSession(connection.session)
+                                        showingTerminal = true
+                                    }
+                                }
                             },
                             onDisconnect: {
                                 sessionManager.disconnectServer(connection.id)

@@ -138,6 +138,10 @@ final class ConnectionSessionManager: ObservableObject {
             throw VVTermError.serverLocked(server.name)
         }
 
+        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
+            throw VVTermError.authenticationFailed
+        }
+
         // Check if already have a session for this server (unless forcing new)
         if !forceNew, let existingSession = sessions.first(where: { $0.serverId == server.id }) {
             selectedSessionId = existingSession.id
