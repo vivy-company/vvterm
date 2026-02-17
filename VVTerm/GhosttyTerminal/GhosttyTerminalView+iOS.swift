@@ -1429,6 +1429,8 @@ extension GhosttyTerminalView {
         if keyboardToolbar == nil {
             let toolbar = TerminalInputAccessoryView(onKey: { [weak self] key in
                 self?.handleToolbarKey(key)
+            }, onSnippet: { [weak self] snippet in
+                self?.handleToolbarSnippet(snippet)
             }, onVoice: onVoiceButtonTapped)
             keyboardToolbar = toolbar
         } else {
@@ -1510,12 +1512,20 @@ extension GhosttyTerminalView {
             sendAnsiSequence(key.ansiSequence)
         }
     }
+
+    private func handleToolbarSnippet(_ snippet: TerminalSnippet) {
+        sendText(snippet.content)
+        if snippet.sendMode == .insertAndEnter {
+            sendText("\r")
+        }
+    }
 }
 
 // MARK: - Native UIKit Input Accessory View with Glass Effect
 
 private class TerminalInputAccessoryView: UIInputView {
     private let onKey: (TerminalKey) -> Void
+    private let onSnippet: (TerminalSnippet) -> Void
     var onVoice: (() -> Void)? {
         didSet {
             updateVoiceButtonState()
@@ -1527,16 +1537,24 @@ private class TerminalInputAccessoryView: UIInputView {
     private weak var altButton: UIButton?
     private weak var voiceButton: UIButton?
     private weak var backgroundEffectView: UIVisualEffectView?
+    private weak var dynamicItemsStack: UIStackView?
     private var defaultsObserver: NSObjectProtocol?
+    private var accessoryProfileObserver: NSObjectProtocol?
     private var keyRepeatTimer: DispatchSourceTimer?
     private var repeatingKey: TerminalKey?
 
-    init(onKey: @escaping (TerminalKey) -> Void, onVoice: (() -> Void)? = nil) {
+    init(
+        onKey: @escaping (TerminalKey) -> Void,
+        onSnippet: @escaping (TerminalSnippet) -> Void,
+        onVoice: (() -> Void)? = nil
+    ) {
         self.onKey = onKey
+        self.onSnippet = onSnippet
         self.onVoice = onVoice
         super.init(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 48), inputViewStyle: .keyboard)
         setupView()
         observeThemeChanges()
+        observeAccessoryProfileChanges()
     }
 
     required init?(coder: NSCoder) {
@@ -1545,6 +1563,9 @@ private class TerminalInputAccessoryView: UIInputView {
 
     deinit {
         if let observer = defaultsObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        if let observer = accessoryProfileObserver {
             NotificationCenter.default.removeObserver(observer)
         }
         stopKeyRepeat()
@@ -1572,7 +1593,9 @@ private class TerminalInputAccessoryView: UIInputView {
         scrollView.alwaysBounceHorizontal = true
         addSubview(scrollView)
 
-        let voice = makeIconButton(icon: "mic.fill", action: #selector(tapVoice))
+        let voice = makeIconButton(icon: "mic.fill") { [weak self] in
+            self?.onVoice?()
+        }
         voice.accessibilityLabel = String(localized: "Voice input")
         voiceButton = voice
         voice.translatesAutoresizingMaskIntoConstraints = false
@@ -1599,6 +1622,7 @@ private class TerminalInputAccessoryView: UIInputView {
         stack.axis = .horizontal
         stack.spacing = 8
         stack.alignment = .center
+        stack.distribution = .fill
         stack.isLayoutMarginsRelativeArrangement = false
         scrollView.addSubview(stack)
         NSLayoutConstraint.activate([
@@ -1610,39 +1634,31 @@ private class TerminalInputAccessoryView: UIInputView {
         ])
 
         // Modifier buttons (always first, separated)
-        let ctrl = makeModifierButton(title: String(localized: "Ctrl"), action: #selector(toggleCtrl))
-        let alt = makeModifierButton(title: String(localized: "Alt"), action: #selector(toggleAlt))
+        let ctrl = makeModifierButton(title: String(localized: "Ctrl")) { [weak self] in
+            self?.ctrlActive.toggle()
+            self?.updateModifierState()
+        }
+        let alt = makeModifierButton(title: String(localized: "Alt")) { [weak self] in
+            self?.altActive.toggle()
+            self?.updateModifierState()
+        }
         ctrlButton = ctrl
         altButton = alt
         stack.addArrangedSubview(ctrl)
         stack.addArrangedSubview(alt)
         stack.addArrangedSubview(makeSeparator())
 
-        // Common keys (prioritize frequent terminal actions)
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Esc"), action: #selector(tapEsc)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "Tab"), action: #selector(tapTab)))
+        let dynamicStack = UIStackView()
+        dynamicStack.translatesAutoresizingMaskIntoConstraints = false
+        dynamicStack.axis = .horizontal
+        dynamicStack.spacing = 8
+        dynamicStack.alignment = .center
+        dynamicStack.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        dynamicStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        stack.addArrangedSubview(dynamicStack)
+        dynamicItemsStack = dynamicStack
 
-        // Arrow keys + backspace
-        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.up", key: .arrowUp))
-        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.down", key: .arrowDown))
-        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.left", key: .arrowLeft))
-        stack.addArrangedSubview(makeRepeatableIconButton(icon: "arrow.right", key: .arrowRight))
-        stack.addArrangedSubview(makeRepeatablePillButton(title: "Bksp", key: .backspace))
-        stack.addArrangedSubview(makeSeparator())
-
-        // Control sequences
-        stack.addArrangedSubview(makePillButton(title: String(localized: "^C"), action: #selector(tapCtrlC)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "^D"), action: #selector(tapCtrlD)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "^Z"), action: #selector(tapCtrlZ)))
-        stack.addArrangedSubview(makePillButton(title: String(localized: "^L"), action: #selector(tapCtrlL)))
-        stack.addArrangedSubview(makeSeparator())
-
-        // Navigation
-        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "Home"), key: .home))
-        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "End"), key: .end))
-        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "PgUp"), key: .pageUp))
-        stack.addArrangedSubview(makeRepeatablePillButton(title: String(localized: "PgDn"), key: .pageDown))
-
+        rebuildAccessoryItems()
         updateVoiceButtonState()
     }
 
@@ -1707,6 +1723,114 @@ private class TerminalInputAccessoryView: UIInputView {
         }
     }
 
+    private func observeAccessoryProfileChanges() {
+        accessoryProfileObserver = NotificationCenter.default.addObserver(
+            forName: .terminalAccessoryProfileDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.rebuildAccessoryItems()
+        }
+    }
+
+    private func rebuildAccessoryItems() {
+        guard let dynamicItemsStack else { return }
+
+        for arrangedSubview in dynamicItemsStack.arrangedSubviews {
+            dynamicItemsStack.removeArrangedSubview(arrangedSubview)
+            arrangedSubview.removeFromSuperview()
+        }
+
+        let profile = TerminalAccessoryPreferencesManager.shared.profile
+        let snippetsByID = Dictionary(uniqueKeysWithValues: profile.snippets.filter { !$0.isDeleted }.map { ($0.id, $0) })
+
+        for item in profile.layout.activeItems {
+            switch item {
+            case .system(let actionID):
+                guard let button = makeSystemActionButton(for: actionID) else { continue }
+                dynamicItemsStack.addArrangedSubview(button)
+            case .snippet(let snippetID):
+                guard let snippet = snippetsByID[snippetID] else { continue }
+                let button = makeSnippetButton(for: snippet)
+                dynamicItemsStack.addArrangedSubview(button)
+            }
+        }
+    }
+
+    private func makeSystemActionButton(for actionID: TerminalAccessorySystemActionID) -> UIButton? {
+        guard let terminalKey = terminalKey(for: actionID) else { return nil }
+
+        let button: UIButton
+        if let iconName = actionID.iconName {
+            if actionID.isRepeatable {
+                button = makeRepeatableIconButton(icon: iconName, key: terminalKey)
+            } else {
+                button = makeIconButton(icon: iconName) { [weak self] in
+                    self?.sendKey(terminalKey)
+                }
+            }
+        } else if actionID.isRepeatable {
+            button = makeRepeatablePillButton(title: actionID.toolbarTitle, key: terminalKey)
+        } else {
+            button = makePillButton(title: actionID.toolbarTitle) { [weak self] in
+                self?.sendKey(terminalKey)
+            }
+        }
+
+        button.accessibilityLabel = actionID.listTitle
+        return button
+    }
+
+    private func makeSnippetButton(for snippet: TerminalSnippet) -> UIButton {
+        let visibleTitle = String(snippet.title.prefix(12))
+        let title = visibleTitle.isEmpty ? String(localized: "Snippet") : visibleTitle
+        let button = makePillButton(title: title) { [weak self] in
+            self?.sendSnippet(snippet)
+        }
+        button.accessibilityLabel = snippet.title
+        return button
+    }
+
+    private func terminalKey(for actionID: TerminalAccessorySystemActionID) -> TerminalKey? {
+        switch actionID {
+        case .escape: return .escape
+        case .tab: return .tab
+        case .enter: return .enter
+        case .backspace: return .backspace
+        case .delete: return .delete
+        case .insert: return .insert
+        case .home: return .home
+        case .end: return .end
+        case .pageUp: return .pageUp
+        case .pageDown: return .pageDown
+        case .arrowUp: return .arrowUp
+        case .arrowDown: return .arrowDown
+        case .arrowLeft: return .arrowLeft
+        case .arrowRight: return .arrowRight
+        case .f1: return .f1
+        case .f2: return .f2
+        case .f3: return .f3
+        case .f4: return .f4
+        case .f5: return .f5
+        case .f6: return .f6
+        case .f7: return .f7
+        case .f8: return .f8
+        case .f9: return .f9
+        case .f10: return .f10
+        case .f11: return .f11
+        case .f12: return .f12
+        case .ctrlC: return .ctrlC
+        case .ctrlD: return .ctrlD
+        case .ctrlZ: return .ctrlZ
+        case .ctrlL: return .ctrlL
+        case .ctrlA: return .ctrlA
+        case .ctrlE: return .ctrlE
+        case .ctrlK: return .ctrlK
+        case .ctrlU: return .ctrlU
+        case .unknown: return nil
+        }
+    }
+
     private func resolveThemeBackgroundColor() -> UIColor {
         let defaults = UserDefaults.standard
         let usePerAppearance = defaults.object(forKey: "terminalUsePerAppearanceTheme") as? Bool ?? true
@@ -1730,7 +1854,7 @@ private class TerminalInputAccessoryView: UIInputView {
         }
     }
 
-    private func makePillButton(title: String, action: Selector) -> UIButton {
+    private func makePillButton(title: String, onTap: @escaping () -> Void) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         if #available(iOS 15.0, *) {
@@ -1754,7 +1878,9 @@ private class TerminalInputAccessoryView: UIInputView {
                 : UIColor.black.withAlphaComponent(0.06)
         }
         button.layer.cornerRadius = 16
-        button.addTarget(self, action: action, for: .touchUpInside)
+        button.addAction(UIAction { _ in
+            onTap()
+        }, for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             button.heightAnchor.constraint(equalToConstant: 32)
@@ -1802,7 +1928,7 @@ private class TerminalInputAccessoryView: UIInputView {
         return button
     }
 
-    private func makeIconButton(icon: String, action: Selector) -> UIButton {
+    private func makeIconButton(icon: String, onTap: @escaping () -> Void) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
         let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .semibold)
@@ -1814,7 +1940,9 @@ private class TerminalInputAccessoryView: UIInputView {
                 : UIColor.black.withAlphaComponent(0.06)
         }
         button.layer.cornerRadius = 16
-        button.addTarget(self, action: action, for: .touchUpInside)
+        button.addAction(UIAction { _ in
+            onTap()
+        }, for: .touchUpInside)
 
         NSLayoutConstraint.activate([
             button.widthAnchor.constraint(equalToConstant: 36),
@@ -1852,23 +1980,26 @@ private class TerminalInputAccessoryView: UIInputView {
         return button
     }
 
-    private func makeModifierButton(title: String, action: Selector) -> UIButton {
+    private func makeModifierButton(title: String, onTap: @escaping () -> Void) -> UIButton {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.contentHorizontalAlignment = .center
+        button.setContentHuggingPriority(.required, for: .horizontal)
+        button.setContentCompressionResistancePriority(.required, for: .horizontal)
         if #available(iOS 15.0, *) {
             var config = UIButton.Configuration.plain()
-            config.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)
+            config.contentInsets = NSDirectionalEdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8)
             config.attributedTitle = AttributedString(
                 title,
-                attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 14, weight: .semibold)])
+                attributes: AttributeContainer([.font: UIFont.systemFont(ofSize: 13, weight: .semibold)])
             )
             config.baseForegroundColor = .secondaryLabel
             button.configuration = config
         } else {
             button.setTitle(title, for: .normal)
-            button.titleLabel?.font = .systemFont(ofSize: 14, weight: .semibold)
+            button.titleLabel?.font = .systemFont(ofSize: 13, weight: .semibold)
             button.setTitleColor(.secondaryLabel, for: .normal)
-            button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 10, bottom: 4, right: 10)
+            button.contentEdgeInsets = UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8)
         }
         button.backgroundColor = UIColor { traits in
             traits.userInterfaceStyle == .dark
@@ -1878,10 +2009,13 @@ private class TerminalInputAccessoryView: UIInputView {
         button.layer.cornerRadius = 14
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor.separator.withAlphaComponent(0.3).cgColor
-        button.addTarget(self, action: action, for: .touchUpInside)
+        button.addAction(UIAction { _ in
+            onTap()
+        }, for: .touchUpInside)
 
         NSLayoutConstraint.activate([
-            button.heightAnchor.constraint(equalToConstant: 28)
+            button.heightAnchor.constraint(equalToConstant: 28),
+            button.widthAnchor.constraint(greaterThanOrEqualToConstant: 40)
         ])
 
         return button
@@ -1911,6 +2045,15 @@ private class TerminalInputAccessoryView: UIInputView {
             updateModifierState()
         }
         onKey(modifiedKey)
+    }
+
+    private func sendSnippet(_ snippet: TerminalSnippet) {
+        if ctrlActive || altActive {
+            ctrlActive = false
+            altActive = false
+            updateModifierState()
+        }
+        onSnippet(snippet)
     }
 
     @objc private func repeatButtonDown(_ sender: RepeatableKeyButton) {
@@ -1991,32 +2134,6 @@ private class TerminalInputAccessoryView: UIInputView {
         voiceButton?.isEnabled = enabled
         voiceButton?.alpha = enabled ? 1.0 : 0.35
     }
-
-    @objc private func toggleCtrl() {
-        ctrlActive.toggle()
-        updateModifierState()
-    }
-
-    @objc private func toggleAlt() {
-        altActive.toggle()
-        updateModifierState()
-    }
-
-    @objc private func tapEsc() { sendKey(.escape) }
-    @objc private func tapTab() { sendKey(.tab) }
-    @objc private func tapUp() { sendKey(.arrowUp) }
-    @objc private func tapDown() { sendKey(.arrowDown) }
-    @objc private func tapLeft() { sendKey(.arrowLeft) }
-    @objc private func tapRight() { sendKey(.arrowRight) }
-    @objc private func tapCtrlC() { sendKey(.ctrlC) }
-    @objc private func tapCtrlD() { sendKey(.ctrlD) }
-    @objc private func tapCtrlZ() { sendKey(.ctrlZ) }
-    @objc private func tapCtrlL() { sendKey(.ctrlL) }
-    @objc private func tapHome() { sendKey(.home) }
-    @objc private func tapEnd() { sendKey(.end) }
-    @objc private func tapPgUp() { sendKey(.pageUp) }
-    @objc private func tapPgDn() { sendKey(.pageDown) }
-    @objc private func tapVoice() { onVoice?() }
 }
 
 private final class RepeatableKeyButton: UIButton {

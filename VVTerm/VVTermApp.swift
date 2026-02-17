@@ -26,6 +26,7 @@ struct VVTermApp: App {
     @StateObject private var ghosttyApp = Ghostty.App()
     #endif
     @StateObject private var terminalThemeManager = TerminalThemeManager.shared
+    @StateObject private var terminalAccessoryPreferencesManager = TerminalAccessoryPreferencesManager.shared
 
     // Welcome screen flag
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
@@ -67,6 +68,7 @@ struct VVTermApp: App {
                 iOSContentView()
                     .environmentObject(ghosttyApp)
                     .environmentObject(terminalThemeManager)
+                    .environmentObject(terminalAccessoryPreferencesManager)
                     .modifier(AppearanceModifier())
                     .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
                         ghosttyApp.reloadConfig()
@@ -82,6 +84,7 @@ struct VVTermApp: App {
                 ContentView()
                     .environmentObject(ghosttyApp)
                     .environmentObject(terminalThemeManager)
+                    .environmentObject(terminalAccessoryPreferencesManager)
                     .modifier(AppearanceModifier())
                     .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
                         ghosttyApp.reloadConfig()

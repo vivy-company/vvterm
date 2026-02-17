@@ -41,6 +41,16 @@ Inside `TerminalSettingsView`, add section `Keyboard Accessory`:
 - `Manage Snippets` -> `TerminalSnippetLibraryView`
 - Keep `Show voice input button` unchanged
 
+### Sheet Consistency (iOS)
+All new iOS customization/snippet sheets should match existing VVTerm sheet patterns:
+- Use `NavigationStack` as sheet root.
+- Use `Form` with `.formStyle(.grouped)` for primary content.
+- Use `.navigationBarTitleDisplayMode(.inline)`.
+- Use toolbar actions with `ToolbarItem(placement: .cancellationAction)` and `ToolbarItem(placement: .confirmationAction)` for create/edit flows.
+- Disable save actions when input is invalid.
+- Keep helper text in section footers (`.font(.caption)`, `.foregroundStyle(.secondary)`).
+- Place destructive actions in their own section and confirm with alert.
+
 ### Customize Accessory Screen
 Sections:
 1. `Preview` (horizontal chips mirroring runtime order)
@@ -55,6 +65,7 @@ Behavior:
 - No duplicate items.
 - If active items become invalid/empty, normalize back to defaults.
 - Changes apply immediately to currently open terminal accessory bars.
+- Screen layout uses grouped form sections (consistent with other iOS settings sheets).
 
 ### Snippet Library Screen
 Each snippet:
@@ -65,6 +76,14 @@ Each snippet:
 Actions:
 - Create, edit, delete snippets
 - Optional test send from terminal context (future toggle)
+
+UI shape:
+- `TerminalSnippetLibraryView` uses grouped form/list sections in a `NavigationStack`.
+- `TerminalSnippetFormView` is a grouped form sheet with:
+  - `Snippet` section (`title`, `content`)
+  - `Send Behavior` section (`insert`, `insertAndEnter`)
+  - footer warning to avoid storing secrets
+  - inline title and Cancel/Save toolbar actions
 
 ### Default Active Layout (V1)
 `Esc`, `Tab`, `Arrow Up`, `Arrow Down`, `Arrow Left`, `Arrow Right`, `Backspace`, `Ctrl+C`, `Ctrl+D`, `Ctrl+Z`, `Ctrl+L`, `Home`, `End`, `Page Up`, `Page Down`

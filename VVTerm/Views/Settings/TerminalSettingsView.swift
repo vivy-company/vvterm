@@ -43,6 +43,7 @@ struct TerminalSettingsView: View {
     @AppStorage("terminalNotificationsEnabled") private var terminalNotificationsEnabled = true
     @AppStorage("terminalProgressEnabled") private var terminalProgressEnabled = true
     @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true
+    @AppStorage("terminalAccessoryCustomizationEnabled") private var terminalAccessoryCustomizationEnabled = true
     @AppStorage("terminalTmuxEnabledDefault") private var tmuxEnabledDefault = true
     @AppStorage("terminalTmuxStartupBehaviorDefault") private var tmuxStartupBehaviorDefaultRaw = TmuxStartupBehavior.askEveryTime.rawValue
 
@@ -134,117 +135,164 @@ struct TerminalSettingsView: View {
         }
     }
 
+    private var fontSection: some View {
+        Section("Font") {
+            Picker("Font Family", selection: $fontName) {
+                ForEach(availableFonts, id: \.self) { font in
+                    Text(font).tag(font)
+                }
+            }
+            .disabled(availableFonts.isEmpty)
+
+            HStack {
+                Text(String(format: String(localized: "Size: %lldpt"), Int64(fontSize)))
+                    .frame(width: 80, alignment: .leading)
+                Slider(value: Binding(
+                    get: { fontSize },
+                    set: { fontSize = $0.rounded() }
+                ), in: 4...32, step: 1)
+                Stepper("", value: $fontSize, in: 4...32, step: 1)
+                    .labelsHidden()
+            }
+        }
+    }
+
+    private var themeSection: some View {
+        Section("Theme") {
+            Toggle("Use different themes for Light/Dark mode", isOn: $usePerAppearanceTheme)
+
+            if usePerAppearanceTheme {
+                Picker("Dark Mode Theme", selection: $themeName) {
+                    themePickerRows
+                }
+                .disabled(allThemeNames.isEmpty)
+
+                Picker("Light Mode Theme", selection: $themeNameLight) {
+                    themePickerRows
+                }
+                .disabled(allThemeNames.isEmpty)
+            } else {
+                Picker("Theme", selection: $themeName) {
+                    themePickerRows
+                }
+                .disabled(allThemeNames.isEmpty)
+            }
+
+            HStack(spacing: 10) {
+                Button("Manage custom themes") {
+                    showingCustomThemeManager = true
+                }
+                .buttonStyle(.bordered)
+
+                Spacer(minLength: 0)
+
+                Text(customThemeCountLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Text("Clipboard content or imported files must be Ghostty-compatible theme text.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var terminalBehaviorSection: some View {
+        Section("Terminal Behavior") {
+            Toggle("Enable terminal notifications", isOn: $terminalNotificationsEnabled)
+            Toggle("Show progress overlays", isOn: $terminalProgressEnabled)
+            Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
+        }
+    }
+
+    @ViewBuilder
+    private var keyboardAccessorySection: some View {
+        #if os(iOS)
+        if terminalAccessoryCustomizationEnabled {
+            Section {
+                NavigationLink {
+                    TerminalAccessoryCustomizationView()
+                } label: {
+                    Text("Customize Accessory Bar")
+                }
+
+                NavigationLink {
+                    TerminalSnippetLibraryView()
+                } label: {
+                    Text("Manage Snippets")
+                }
+            } header: {
+                Text("Keyboard Accessory")
+            } footer: {
+                Text("Reorder actions, add snippets, and sync your accessory bar across devices.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        #endif
+    }
+
+    private var sessionPersistenceSection: some View {
+        Section {
+            Toggle("Enable tmux by default", isOn: $tmuxEnabledDefault)
+
+            if tmuxEnabledDefault {
+                Picker("On connect", selection: tmuxStartupBehaviorDefaultBinding) {
+                    ForEach(TmuxStartupBehavior.globalConfigCases) { behavior in
+                        Text(behavior.displayName).tag(behavior)
+                    }
+                }
+
+                Text(tmuxStartupBehaviorDefault.descriptionText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        } header: {
+            Text("Session Persistence")
+        } footer: {
+            Text("Choose the default behavior for new servers. You can still override per server in server settings.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var copyProcessingSection: some View {
+        Section {
+            Toggle("Trim trailing whitespace", isOn: $copyTrimTrailingWhitespace)
+            Toggle("Collapse multiple blank lines", isOn: $copyCollapseBlankLines)
+            Toggle("Strip shell prompts ($ #)", isOn: $copyStripShellPrompts)
+            Toggle("Flatten multi-line commands", isOn: $copyFlattenCommands)
+            Toggle("Remove box-drawing characters", isOn: $copyRemoveBoxDrawing)
+            Toggle("Strip ANSI escape codes", isOn: $copyStripAnsiCodes)
+        } header: {
+            Text("Copy Text Processing")
+        } footer: {
+            Text("Transformations applied when copying text from terminal")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var sshConnectionSection: some View {
+        Section("SSH Connection") {
+            Toggle("Auto-reconnect on disconnect", isOn: $autoReconnect)
+            Toggle("Send keep-alive packets", isOn: $keepAliveEnabled)
+
+            if keepAliveEnabled {
+                Stepper("Interval: \(keepAliveInterval)s", value: $keepAliveInterval, in: 10...120, step: 10)
+            }
+        }
+    }
+
     var body: some View {
         Form {
-            Section("Font") {
-                Picker("Font Family", selection: $fontName) {
-                    ForEach(availableFonts, id: \.self) { font in
-                        Text(font).tag(font)
-                    }
-                }
-                .disabled(availableFonts.isEmpty)
-
-                HStack {
-                    Text(String(format: String(localized: "Size: %lldpt"), Int64(fontSize)))
-                        .frame(width: 80, alignment: .leading)
-                    Slider(value: Binding(
-                        get: { fontSize },
-                        set: { fontSize = $0.rounded() }
-                    ), in: 4...32, step: 1)
-                    Stepper("", value: $fontSize, in: 4...32, step: 1)
-                        .labelsHidden()
-                }
-            }
-
-            Section("Theme") {
-                Toggle("Use different themes for Light/Dark mode", isOn: $usePerAppearanceTheme)
-
-                if usePerAppearanceTheme {
-                    Picker("Dark Mode Theme", selection: $themeName) {
-                        themePickerRows
-                    }
-                    .disabled(allThemeNames.isEmpty)
-
-                    Picker("Light Mode Theme", selection: $themeNameLight) {
-                        themePickerRows
-                    }
-                    .disabled(allThemeNames.isEmpty)
-                } else {
-                    Picker("Theme", selection: $themeName) {
-                        themePickerRows
-                    }
-                    .disabled(allThemeNames.isEmpty)
-                }
-
-                HStack(spacing: 10) {
-                    Button("Manage custom themes") {
-                        showingCustomThemeManager = true
-                    }
-                    .buttonStyle(.bordered)
-
-                    Spacer(minLength: 0)
-
-                    Text(customThemeCountLabel)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Text("Clipboard content or imported files must be Ghostty-compatible theme text.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Terminal Behavior") {
-                Toggle("Enable terminal notifications", isOn: $terminalNotificationsEnabled)
-                Toggle("Show progress overlays", isOn: $terminalProgressEnabled)
-                Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
-            }
-
-            Section {
-                Toggle("Enable tmux by default", isOn: $tmuxEnabledDefault)
-
-                if tmuxEnabledDefault {
-                    Picker("On connect", selection: tmuxStartupBehaviorDefaultBinding) {
-                        ForEach(TmuxStartupBehavior.globalConfigCases) { behavior in
-                            Text(behavior.displayName).tag(behavior)
-                        }
-                    }
-
-                    Text(tmuxStartupBehaviorDefault.descriptionText)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            } header: {
-                Text("Session Persistence")
-            } footer: {
-                Text("Choose the default behavior for new servers. You can still override per server in server settings.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section {
-                Toggle("Trim trailing whitespace", isOn: $copyTrimTrailingWhitespace)
-                Toggle("Collapse multiple blank lines", isOn: $copyCollapseBlankLines)
-                Toggle("Strip shell prompts ($ #)", isOn: $copyStripShellPrompts)
-                Toggle("Flatten multi-line commands", isOn: $copyFlattenCommands)
-                Toggle("Remove box-drawing characters", isOn: $copyRemoveBoxDrawing)
-                Toggle("Strip ANSI escape codes", isOn: $copyStripAnsiCodes)
-            } header: {
-                Text("Copy Text Processing")
-            } footer: {
-                Text("Transformations applied when copying text from terminal")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("SSH Connection") {
-                Toggle("Auto-reconnect on disconnect", isOn: $autoReconnect)
-                Toggle("Send keep-alive packets", isOn: $keepAliveEnabled)
-
-                if keepAliveEnabled {
-                    Stepper("Interval: \(keepAliveInterval)s", value: $keepAliveInterval, in: 10...120, step: 10)
-                }
-            }
+            fontSection
+            themeSection
+            terminalBehaviorSection
+            keyboardAccessorySection
+            sessionPersistenceSection
+            copyProcessingSection
+            sshConnectionSection
         }
         .formStyle(.grouped)
         .sheet(isPresented: $showingCustomThemeManager) {

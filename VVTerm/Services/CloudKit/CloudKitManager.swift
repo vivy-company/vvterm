@@ -36,6 +36,7 @@ final class CloudKitManager: ObservableObject {
         static let workspace = "Workspace"
         static let terminalTheme = "TerminalTheme"
         static let terminalThemePreference = "TerminalThemePreference"
+        static let userPreference = "UserPreference"
     }
 
     enum SyncStatus: Equatable {
@@ -441,6 +442,136 @@ final class CloudKitManager: ObservableObject {
         }
     }
 
+    // MARK: - Terminal Accessory Preference Operations
+
+    func fetchTerminalAccessoryProfile() async throws -> TerminalAccessoryProfile? {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+        let recordID = terminalAccessoryRecordID()
+
+        do {
+            let record = try await database.record(for: recordID)
+            guard let profile = decodeTerminalAccessoryProfile(from: record) else {
+                logger.warning("Terminal accessory profile payload was invalid; ignoring remote value")
+                return nil
+            }
+            return profile
+        } catch let ckError as CKError where ckError.code == .unknownItem || ckError.code == .zoneNotFound {
+            return nil
+        } catch {
+            throw error
+        }
+    }
+
+    func saveTerminalAccessoryProfile(_ profile: TerminalAccessoryProfile) async throws {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+
+        syncStatus = .syncing
+        defer { syncStatus = .idle }
+
+        let recordID = terminalAccessoryRecordID()
+        let record = try makeTerminalAccessoryRecord(from: profile.normalized(), recordID: recordID)
+
+        do {
+            try await saveRecordWithUpsert(record)
+            lastSyncDate = Date()
+            logger.info("Saved terminal accessory profile to CloudKit")
+        } catch {
+            logger.error("Failed to save terminal accessory profile: \(error.localizedDescription)")
+            syncStatus = .error(error.localizedDescription)
+            throw error
+        }
+    }
+
+    func syncTerminalAccessoryProfile(_ localProfile: TerminalAccessoryProfile) async throws -> TerminalAccessoryProfile {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+
+        syncStatus = .syncing
+        defer { syncStatus = .idle }
+
+        let recordID = terminalAccessoryRecordID()
+        let normalizedLocal = localProfile.normalized()
+
+        var baseRecord: CKRecord?
+        var mergedProfile = normalizedLocal
+
+        do {
+            let remoteRecord = try await database.record(for: recordID)
+            baseRecord = remoteRecord
+            if let remoteProfile = decodeTerminalAccessoryProfile(from: remoteRecord) {
+                let normalizedRemote = remoteProfile.normalized()
+                mergedProfile = TerminalAccessoryProfile.merged(local: normalizedLocal, remote: normalizedRemote).normalized()
+                if mergedProfile == normalizedRemote {
+                    lastSyncDate = Date()
+                    return normalizedRemote
+                }
+            } else {
+                logger.warning("Terminal accessory remote payload was invalid; keeping local profile")
+            }
+        } catch let ckError as CKError where ckError.code == .unknownItem || ckError.code == .zoneNotFound {
+            baseRecord = nil
+            mergedProfile = normalizedLocal
+        }
+
+        var attempts = 0
+        while attempts < 4 {
+            attempts += 1
+
+            let candidateRecord = try makeTerminalAccessoryRecord(
+                from: mergedProfile,
+                recordID: recordID,
+                existingRecord: baseRecord
+            )
+
+            do {
+                try await saveRecord(candidateRecord, savePolicy: .ifServerRecordUnchanged)
+                lastSyncDate = Date()
+                return mergedProfile
+            } catch {
+                if let serverRecord = extractServerRecord(from: error),
+                   let serverProfile = decodeTerminalAccessoryProfile(from: serverRecord) {
+                    let normalizedRemote = serverProfile.normalized()
+                    let conflictResolved = TerminalAccessoryProfile.merged(local: mergedProfile, remote: normalizedRemote).normalized()
+
+                    if conflictResolved == normalizedRemote {
+                        lastSyncDate = Date()
+                        return normalizedRemote
+                    }
+
+                    mergedProfile = conflictResolved
+                    baseRecord = serverRecord
+                    continue
+                }
+
+                if isUnknownItemError(error) {
+                    baseRecord = nil
+                    continue
+                }
+
+                logger.error("Failed to sync terminal accessory profile: \(error.localizedDescription)")
+                syncStatus = .error(error.localizedDescription)
+                throw error
+            }
+        }
+
+        logger.error("Failed to sync terminal accessory profile after retries")
+        throw CloudKitError.recordNotFound
+    }
+
     // MARK: - Subscriptions
 
     func subscribeToChanges() async {
@@ -635,14 +766,104 @@ final class CloudKitManager: ObservableObject {
         }
     }
 
+    private func terminalAccessoryRecordID() -> CKRecord.ID {
+        CKRecord.ID(recordName: TerminalAccessoryProfile.recordName, zoneID: recordZoneID)
+    }
+
+    private func decodeTerminalAccessoryProfile(from record: CKRecord) -> TerminalAccessoryProfile? {
+        guard let payload = record["payload"] as? Data else {
+            return nil
+        }
+
+        guard var profile = try? JSONDecoder().decode(TerminalAccessoryProfile.self, from: payload) else {
+            return nil
+        }
+
+        if let schemaVersion = record["schemaVersion"] as? Int, schemaVersion > 0 {
+            profile.schemaVersion = schemaVersion
+        }
+
+        if let updatedAt = record["updatedAt"] as? Date, updatedAt > profile.updatedAt {
+            profile.updatedAt = updatedAt
+        }
+
+        if let writerDeviceID = record["lastWriterDeviceId"] as? String, !writerDeviceID.isEmpty {
+            profile.lastWriterDeviceId = writerDeviceID
+        }
+
+        return profile.normalized()
+    }
+
+    private func makeTerminalAccessoryRecord(
+        from profile: TerminalAccessoryProfile,
+        recordID: CKRecord.ID,
+        existingRecord: CKRecord? = nil
+    ) throws -> CKRecord {
+        let normalizedProfile = profile.normalized()
+        let payload: Data
+        do {
+            payload = try JSONEncoder().encode(normalizedProfile)
+        } catch {
+            throw CloudKitError.encodingFailed
+        }
+
+        let record = existingRecord ?? CKRecord(recordType: RecordType.userPreference, recordID: recordID)
+        record["schemaVersion"] = normalizedProfile.schemaVersion
+        record["payload"] = payload
+        record["updatedAt"] = normalizedProfile.updatedAt
+        record["lastWriterDeviceId"] = normalizedProfile.lastWriterDeviceId
+        return record
+    }
+
+    private func extractServerRecord(from error: Error) -> CKRecord? {
+        guard let ckError = error as? CKError else { return nil }
+
+        if ckError.code == .serverRecordChanged {
+            return ckError.userInfo[CKRecordChangedErrorServerRecordKey] as? CKRecord
+        }
+
+        if ckError.code == .partialFailure,
+           let partialErrors = ckError.userInfo[CKPartialErrorsByItemIDKey] as? [AnyHashable: Error] {
+            for partialError in partialErrors.values {
+                if let serverRecord = extractServerRecord(from: partialError) {
+                    return serverRecord
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func isUnknownItemError(_ error: Error) -> Bool {
+        guard let ckError = error as? CKError else { return false }
+
+        if ckError.code == .unknownItem || ckError.code == .zoneNotFound {
+            return true
+        }
+
+        if ckError.code == .partialFailure,
+           let partialErrors = ckError.userInfo[CKPartialErrorsByItemIDKey] as? [AnyHashable: Error] {
+            return partialErrors.values.contains { isUnknownItemError($0) }
+        }
+
+        return false
+    }
+
     // MARK: - Upsert Helper
 
     /// Save a record using CKModifyRecordsOperation with changedKeys policy
     /// This handles both insert (new record) and update (existing record)
     private func saveRecordWithUpsert(_ record: CKRecord) async throws {
+        try await saveRecord(record, savePolicy: .changedKeys)
+    }
+
+    private func saveRecord(
+        _ record: CKRecord,
+        savePolicy: CKModifyRecordsOperation.RecordSavePolicy
+    ) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             let operation = CKModifyRecordsOperation(recordsToSave: [record], recordIDsToDelete: nil)
-            operation.savePolicy = .changedKeys  // Insert if new, update if exists
+            operation.savePolicy = savePolicy
             operation.qualityOfService = .userInitiated
 
             operation.modifyRecordsResultBlock = { result in
@@ -686,7 +907,8 @@ final class CloudKitManager: ObservableObject {
                 $0.recordType == RecordType.server ||
                 $0.recordType == RecordType.workspace ||
                 $0.recordType == RecordType.terminalTheme ||
-                $0.recordType == RecordType.terminalThemePreference
+                $0.recordType == RecordType.terminalThemePreference ||
+                $0.recordType == RecordType.userPreference
             }
             .map(\.recordID)
 
@@ -713,8 +935,9 @@ final class CloudKitManager: ObservableObject {
         let deletedWorkspaces = records.filter { $0.recordType == RecordType.workspace }.count
         let deletedThemes = records.filter { $0.recordType == RecordType.terminalTheme }.count
         let deletedThemePreferences = records.filter { $0.recordType == RecordType.terminalThemePreference }.count
+        let deletedUserPreferences = records.filter { $0.recordType == RecordType.userPreference }.count
         logger.info(
-            "Deleted \(deletedServers) servers, \(deletedWorkspaces) workspaces, \(deletedThemes) themes, \(deletedThemePreferences) theme preferences from CloudKit"
+            "Deleted \(deletedServers) servers, \(deletedWorkspaces) workspaces, \(deletedThemes) themes, \(deletedThemePreferences) theme preferences, \(deletedUserPreferences) user preferences from CloudKit"
         )
         lastSyncDate = Date()
     }

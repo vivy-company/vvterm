@@ -113,7 +113,10 @@ struct SyncSettingsView: View {
         .onChangeCompat(of: syncEnabled) { enabled in
             cloudKit.handleSyncToggle(enabled)
             if enabled {
-                Task { await serverManager.loadData() }
+                Task {
+                    await serverManager.loadData()
+                    await TerminalAccessoryPreferencesManager.shared.refreshFromCloud()
+                }
             }
         }
     }
