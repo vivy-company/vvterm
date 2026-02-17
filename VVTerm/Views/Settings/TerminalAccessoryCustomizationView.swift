@@ -48,8 +48,8 @@ struct TerminalAccessoryCustomizationView: View {
             Section("Preview") {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        previewChip("Ctrl")
-                        previewChip("Alt")
+                        previewChip(String(localized: "Ctrl"))
+                        previewChip(String(localized: "Alt"))
                         ForEach(activeItems, id: \.self) { item in
                             previewChip(label(for: item))
                         }
@@ -76,7 +76,11 @@ struct TerminalAccessoryCustomizationView: View {
                 Text("Active Items")
             } footer: {
                 Text(
-                    "Ctrl and Alt stay fixed. \(activeItems.count)/\(TerminalAccessoryProfile.maxActiveItems) active items."
+                    String(
+                        format: String(localized: "Ctrl and Alt stay fixed. %lld/%lld active items."),
+                        Int64(activeItems.count),
+                        Int64(TerminalAccessoryProfile.maxActiveItems)
+                    )
                 )
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -103,7 +107,11 @@ struct TerminalAccessoryCustomizationView: View {
             Section {
                 if availableSnippets.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(hasAnySnippets ? "All snippets are already added." : "No snippets yet.")
+                        Text(
+                            hasAnySnippets
+                                ? String(localized: "All snippets are already added.")
+                                : String(localized: "No snippets yet.")
+                        )
                             .foregroundStyle(.secondary)
                     }
                 } else {
@@ -174,7 +182,7 @@ struct TerminalAccessoryCustomizationView: View {
         case .system(let actionID):
             return actionID.listTitle
         case .snippet(let id):
-            return activeSnippetsByID[id]?.title ?? "Snippet"
+            return activeSnippetsByID[id]?.title ?? String(localized: "Snippet")
         }
     }
 }

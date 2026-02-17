@@ -44,19 +44,31 @@ enum TerminalThemeValidationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .emptyContent:
-            return "Theme content is empty."
+            return String(localized: "Theme content is empty.")
         case .invalidLine(let line):
-            return "Invalid theme line \(line). Expected key/value format."
+            return String(
+                format: String(localized: "Invalid theme line %lld. Expected key/value format."),
+                Int64(line)
+            )
         case .invalidHex(let line):
-            return "Invalid hex color at line \(line). Use #RRGGBB."
+            return String(
+                format: String(localized: "Invalid hex color at line %lld. Use #RRGGBB."),
+                Int64(line)
+            )
         case .invalidPalette(let line):
-            return "Invalid palette value at line \(line). Expected N=#RRGGBB where N is 0...15."
+            return String(
+                format: String(localized: "Invalid palette value at line %lld. Expected N=#RRGGBB where N is 0...15."),
+                Int64(line)
+            )
         case .missingRequiredKey(let key):
-            return "Theme is missing required key: \(key)."
+            return String(
+                format: String(localized: "Theme is missing required key: %@."),
+                key
+            )
         case .invalidName:
-            return "Theme name contains invalid characters."
+            return String(localized: "Theme name contains invalid characters.")
         case .themeNotFound:
-            return "Theme no longer exists."
+            return String(localized: "Theme no longer exists.")
         }
     }
 }

@@ -94,7 +94,11 @@ struct TerminalSnippetFormView: View {
                 }
             }
             .formStyle(.grouped)
-            .navigationTitle(isEditing ? "Edit Snippet" : "New Snippet")
+            .navigationTitle(
+                isEditing
+                    ? String(localized: "Edit Snippet")
+                    : String(localized: "New Snippet")
+            )
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif

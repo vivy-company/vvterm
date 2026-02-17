@@ -68,78 +68,78 @@ enum TerminalAccessorySystemActionID: String, Codable, CaseIterable, Hashable, I
 
     var listTitle: String {
         switch self {
-        case .escape: return "Esc"
-        case .tab: return "Tab"
-        case .enter: return "Enter"
-        case .backspace: return "Backspace"
-        case .delete: return "Delete"
-        case .insert: return "Insert"
-        case .home: return "Home"
-        case .end: return "End"
-        case .pageUp: return "Page Up"
-        case .pageDown: return "Page Down"
-        case .arrowUp: return "Arrow Up"
-        case .arrowDown: return "Arrow Down"
-        case .arrowLeft: return "Arrow Left"
-        case .arrowRight: return "Arrow Right"
-        case .f1: return "F1"
-        case .f2: return "F2"
-        case .f3: return "F3"
-        case .f4: return "F4"
-        case .f5: return "F5"
-        case .f6: return "F6"
-        case .f7: return "F7"
-        case .f8: return "F8"
-        case .f9: return "F9"
-        case .f10: return "F10"
-        case .f11: return "F11"
-        case .f12: return "F12"
-        case .ctrlC: return "Ctrl+C"
-        case .ctrlD: return "Ctrl+D"
-        case .ctrlZ: return "Ctrl+Z"
-        case .ctrlL: return "Ctrl+L"
-        case .ctrlA: return "Ctrl+A"
-        case .ctrlE: return "Ctrl+E"
-        case .ctrlK: return "Ctrl+K"
-        case .ctrlU: return "Ctrl+U"
-        case .unknown: return "Unknown"
+        case .escape: return String(localized: "Esc")
+        case .tab: return String(localized: "Tab")
+        case .enter: return String(localized: "Enter")
+        case .backspace: return String(localized: "Backspace")
+        case .delete: return String(localized: "Delete")
+        case .insert: return String(localized: "Insert")
+        case .home: return String(localized: "Home")
+        case .end: return String(localized: "End")
+        case .pageUp: return String(localized: "Page Up")
+        case .pageDown: return String(localized: "Page Down")
+        case .arrowUp: return String(localized: "Arrow Up")
+        case .arrowDown: return String(localized: "Arrow Down")
+        case .arrowLeft: return String(localized: "Arrow Left")
+        case .arrowRight: return String(localized: "Arrow Right")
+        case .f1: return String(localized: "F1")
+        case .f2: return String(localized: "F2")
+        case .f3: return String(localized: "F3")
+        case .f4: return String(localized: "F4")
+        case .f5: return String(localized: "F5")
+        case .f6: return String(localized: "F6")
+        case .f7: return String(localized: "F7")
+        case .f8: return String(localized: "F8")
+        case .f9: return String(localized: "F9")
+        case .f10: return String(localized: "F10")
+        case .f11: return String(localized: "F11")
+        case .f12: return String(localized: "F12")
+        case .ctrlC: return String(localized: "Ctrl+C")
+        case .ctrlD: return String(localized: "Ctrl+D")
+        case .ctrlZ: return String(localized: "Ctrl+Z")
+        case .ctrlL: return String(localized: "Ctrl+L")
+        case .ctrlA: return String(localized: "Ctrl+A")
+        case .ctrlE: return String(localized: "Ctrl+E")
+        case .ctrlK: return String(localized: "Ctrl+K")
+        case .ctrlU: return String(localized: "Ctrl+U")
+        case .unknown: return String(localized: "Unknown")
         }
     }
 
     var toolbarTitle: String {
         switch self {
-        case .escape: return "Esc"
-        case .tab: return "Tab"
-        case .enter: return "Enter"
-        case .backspace: return "Bksp"
-        case .delete: return "Del"
-        case .insert: return "Ins"
-        case .home: return "Home"
-        case .end: return "End"
-        case .pageUp: return "PgUp"
-        case .pageDown: return "PgDn"
+        case .escape: return String(localized: "Esc")
+        case .tab: return String(localized: "Tab")
+        case .enter: return String(localized: "Enter")
+        case .backspace: return String(localized: "Bksp")
+        case .delete: return String(localized: "Del")
+        case .insert: return String(localized: "Ins")
+        case .home: return String(localized: "Home")
+        case .end: return String(localized: "End")
+        case .pageUp: return String(localized: "PgUp")
+        case .pageDown: return String(localized: "PgDn")
         case .arrowUp, .arrowDown, .arrowLeft, .arrowRight: return ""
-        case .f1: return "F1"
-        case .f2: return "F2"
-        case .f3: return "F3"
-        case .f4: return "F4"
-        case .f5: return "F5"
-        case .f6: return "F6"
-        case .f7: return "F7"
-        case .f8: return "F8"
-        case .f9: return "F9"
-        case .f10: return "F10"
-        case .f11: return "F11"
-        case .f12: return "F12"
-        case .ctrlC: return "^C"
-        case .ctrlD: return "^D"
-        case .ctrlZ: return "^Z"
-        case .ctrlL: return "^L"
-        case .ctrlA: return "^A"
-        case .ctrlE: return "^E"
-        case .ctrlK: return "^K"
-        case .ctrlU: return "^U"
-        case .unknown: return "?"
+        case .f1: return String(localized: "F1")
+        case .f2: return String(localized: "F2")
+        case .f3: return String(localized: "F3")
+        case .f4: return String(localized: "F4")
+        case .f5: return String(localized: "F5")
+        case .f6: return String(localized: "F6")
+        case .f7: return String(localized: "F7")
+        case .f8: return String(localized: "F8")
+        case .f9: return String(localized: "F9")
+        case .f10: return String(localized: "F10")
+        case .f11: return String(localized: "F11")
+        case .f12: return String(localized: "F12")
+        case .ctrlC: return String(localized: "^C")
+        case .ctrlD: return String(localized: "^D")
+        case .ctrlZ: return String(localized: "^Z")
+        case .ctrlL: return String(localized: "^L")
+        case .ctrlA: return String(localized: "^A")
+        case .ctrlE: return String(localized: "^E")
+        case .ctrlK: return String(localized: "^K")
+        case .ctrlU: return String(localized: "^U")
+        case .unknown: return String(localized: "?")
         }
     }
 

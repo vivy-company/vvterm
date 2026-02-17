@@ -18,9 +18,9 @@ private enum CustomThemeApplyTarget: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .dark: return "Dark"
-        case .light: return "Light"
-        case .both: return "Both"
+        case .dark: return String(localized: "Dark")
+        case .light: return String(localized: "Light")
+        case .both: return String(localized: "Both")
         }
     }
 }
@@ -619,7 +619,10 @@ private struct ManageCustomThemesSheet: View {
             ThemeBuilderSheet(
                 usePerAppearanceTheme: false,
                 showApplyTarget: false,
-                title: "Edit \"\(theme.name)\"",
+                title: String(
+                    format: String(localized: "Edit \"%@\""),
+                    theme.name
+                ),
                 initialName: theme.name,
                 initialContent: theme.content,
                 onDeleteRequest: {
@@ -844,17 +847,17 @@ private struct ManageCustomThemesSheet: View {
 
             switch (usesDark, usesLight) {
             case (true, true):
-                return "Dark + Light"
+                return String(localized: "Dark + Light")
             case (true, false):
-                return "Dark"
+                return String(localized: "Dark")
             case (false, true):
-                return "Light"
+                return String(localized: "Light")
             case (false, false):
                 return nil
             }
         }
 
-        return darkThemeName == theme ? "Active" : nil
+        return darkThemeName == theme ? String(localized: "Active") : nil
     }
 
     @ViewBuilder
@@ -892,20 +895,20 @@ private struct ManageCustomThemesSheet: View {
     private func importThemeFromClipboard() {
         #if os(iOS)
         guard let text = UIPasteboard.general.string else {
-            customThemeErrorMessage = "Clipboard does not contain text."
+            customThemeErrorMessage = String(localized: "Clipboard does not contain text.")
             return
         }
         #elseif os(macOS)
         guard let text = NSPasteboard.general.string(forType: .string) else {
-            customThemeErrorMessage = "Clipboard does not contain text."
+            customThemeErrorMessage = String(localized: "Clipboard does not contain text.")
             return
         }
         #else
-        customThemeErrorMessage = "Clipboard import is not supported on this platform."
+        customThemeErrorMessage = String(localized: "Clipboard import is not supported on this platform.")
         return
         #endif
 
-        preparePendingCustomTheme(content: text, suggestedName: "Pasted Theme")
+        preparePendingCustomTheme(content: text, suggestedName: String(localized: "Pasted Theme"))
     }
 
     private func handleThemeImport(_ result: Result<[URL], Error>) {
@@ -913,7 +916,7 @@ private struct ManageCustomThemesSheet: View {
         case .success(let urls):
             guard let url = urls.first else { return }
             guard url.startAccessingSecurityScopedResource() else {
-                customThemeErrorMessage = "Cannot access selected file."
+                customThemeErrorMessage = String(localized: "Cannot access selected file.")
                 return
             }
             defer { url.stopAccessingSecurityScopedResource() }
@@ -923,10 +926,16 @@ private struct ManageCustomThemesSheet: View {
                 let suggestedName = url.deletingPathExtension().lastPathComponent
                 preparePendingCustomTheme(content: content, suggestedName: suggestedName)
             } catch {
-                customThemeErrorMessage = "Failed to import theme file: \(error.localizedDescription)"
+                customThemeErrorMessage = String(
+                    format: String(localized: "Failed to import theme file: %@"),
+                    error.localizedDescription
+                )
             }
         case .failure(let error):
-            customThemeErrorMessage = "Failed to import theme file: \(error.localizedDescription)"
+            customThemeErrorMessage = String(
+                format: String(localized: "Failed to import theme file: %@"),
+                error.localizedDescription
+            )
         }
     }
 
@@ -1243,17 +1252,17 @@ private struct ThemeBuilderSheet: View {
                 }
 
                 Section {
-                    colorField("Background", text: $background, placeholder: "#101418", fallback: Color.fromHex("#101418"))
-                    colorField("Foreground", text: $foreground, placeholder: "#D8E0EA", fallback: Color.fromHex("#D8E0EA"))
+                    colorField(String(localized: "Background"), text: $background, placeholder: "#101418", fallback: Color.fromHex("#101418"))
+                    colorField(String(localized: "Foreground"), text: $foreground, placeholder: "#D8E0EA", fallback: Color.fromHex("#D8E0EA"))
                 } header: {
                     sectionHeader("Required Colors")
                 }
 
                 Section {
-                    colorField("Cursor", text: $cursorColor, placeholder: "#F8B26A", fallback: Color.fromHex("#F8B26A"))
-                    colorField("Cursor Text", text: $cursorText, placeholder: "#101418", fallback: previewBackground)
-                    colorField("Selection Background", text: $selectionBackground, placeholder: "#2E3A46", fallback: Color.fromHex("#2E3A46"))
-                    colorField("Selection Foreground", text: $selectionForeground, placeholder: "#D8E0EA", fallback: Color.fromHex("#D8E0EA"))
+                    colorField(String(localized: "Cursor"), text: $cursorColor, placeholder: "#F8B26A", fallback: Color.fromHex("#F8B26A"))
+                    colorField(String(localized: "Cursor Text"), text: $cursorText, placeholder: "#101418", fallback: previewBackground)
+                    colorField(String(localized: "Selection Background"), text: $selectionBackground, placeholder: "#2E3A46", fallback: Color.fromHex("#2E3A46"))
+                    colorField(String(localized: "Selection Foreground"), text: $selectionForeground, placeholder: "#D8E0EA", fallback: Color.fromHex("#D8E0EA"))
                 } header: {
                     sectionHeader("Optional Colors")
                 } footer: {
@@ -1265,7 +1274,10 @@ private struct ThemeBuilderSheet: View {
                 Section {
                     ForEach(0..<16, id: \.self) { index in
                         colorField(
-                            "Palette \(index)",
+                            String(
+                                format: String(localized: "Palette %lld"),
+                                Int64(index)
+                            ),
                             text: paletteColorBinding(index),
                             placeholder: paletteFallbackHex(index),
                             fallback: Color.fromHex(paletteFallbackHex(index))
@@ -1625,8 +1637,13 @@ private struct ThemeBuilderColorSwatchPicker: View {
     }
 
     var body: some View {
+        let pickColorLabel = String(
+            format: String(localized: "Pick %@ color"),
+            label
+        )
+
         ColorPicker(
-            "Pick \(label) color",
+            pickColorLabel,
             selection: Binding(
                 get: { swatchColor },
                 set: { selectedColor in
@@ -1636,6 +1653,6 @@ private struct ThemeBuilderColorSwatchPicker: View {
             supportsOpacity: false
         )
         .labelsHidden()
-        .accessibilityLabel("Pick \(label) color")
+        .accessibilityLabel(pickColorLabel)
     }
 }
