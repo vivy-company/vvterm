@@ -742,3 +742,28 @@
 
 "%lld custom theme" = "%lld карыстальніцкая тэма";
 "%lld custom themes" = "%lld карыстальніцкіх тэм";
+
+/* Біяметрычная блакіроўка */
+"Biometric Authentication" = "Біяметрычная аўтэнтыфікацыя";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Адсутнічае прычына аўтэнтыфікацыі.";
+"Biometric authentication is unavailable on this device." = "Біяметрычная аўтэнтыфікацыя недаступная на гэтай прыладзе.";
+"Biometric authentication is not set up on this device." = "Біяметрычная аўтэнтыфікацыя не наладжаная на гэтай прыладзе.";
+"Biometric authentication is locked. Unlock the device to try again." = "Біяметрычная аўтэнтыфікацыя заблакаваная. Разблакіруйце прыладу і паспрабуйце зноў.";
+"Set a device passcode before using biometric authentication." = "Перад выкарыстаннем біяметрычнай аўтэнтыфікацыі ўсталюйце код-пароль прылады.";
+"Biometric authentication is locked. Unlock the device and try again." = "Біяметрычная аўтэнтыфікацыя заблакаваная. Разблакіруйце прыладу і паспрабуйце яшчэ раз.";
+"Authentication failed." = "Аўтэнтыфікацыя не ўдалася.";
+"Enable %@ for VVTerm" = "Уключыць %@ для VVTerm";
+"Unlock VVTerm with %@" = "Разблакіраваць VVTerm з дапамогай %@";
+"Unlock server %@" = "Разблакіраваць сервер %@";
+"Unlock with %@" = "Разблакіраваць з дапамогай %@";
+"VVTerm is locked" = "VVTerm заблакаваны";
+"Require %@ to open this server" = "Патрабаваць %@, каб адкрыць гэты сервер";
+"Require %@ to open VVTerm" = "Патрабаваць %@, каб адкрыць VVTerm";
+"Lock when app goes to background" = "Блакіраваць, калі праграма пераходзіць у фон";
+"Re-auth grace period" = "Перыяд адтэрміноўкі паўторнай аўтэнтыфікацыі";
+"Always" = "Заўсёды";
+"%lld seconds" = "%lld секунд";
+"Security" = "Бяспека";
+"Biometric lock protects app and server access on this device." = "Біяметрычная блакіроўка абараняе доступ да праграмы і сервераў на гэтай прыладзе.";

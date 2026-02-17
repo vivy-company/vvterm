@@ -741,3 +741,28 @@
 
 "%lld custom theme" = "%lld ธีมกำหนดเอง";
 "%lld custom themes" = "%lld ธีมกำหนดเอง";
+
+/* การล็อกด้วยชีวมิติ */
+"Biometric Authentication" = "การยืนยันตัวตนด้วยชีวมิติ";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "ไม่มีเหตุผลสำหรับการยืนยันตัวตน";
+"Biometric authentication is unavailable on this device." = "การยืนยันตัวตนด้วยชีวมิติไม่พร้อมใช้งานบนอุปกรณ์นี้";
+"Biometric authentication is not set up on this device." = "ยังไม่ได้ตั้งค่าการยืนยันตัวตนด้วยชีวมิติบนอุปกรณ์นี้";
+"Biometric authentication is locked. Unlock the device to try again." = "การยืนยันตัวตนด้วยชีวมิติถูกล็อก ปลดล็อกอุปกรณ์แล้วลองอีกครั้ง";
+"Set a device passcode before using biometric authentication." = "ตั้งรหัสผ่านอุปกรณ์ก่อนใช้การยืนยันตัวตนด้วยชีวมิติ";
+"Biometric authentication is locked. Unlock the device and try again." = "การยืนยันตัวตนด้วยชีวมิติถูกล็อก ปลดล็อกอุปกรณ์แล้วลองใหม่อีกครั้ง";
+"Authentication failed." = "การยืนยันตัวตนล้มเหลว";
+"Enable %@ for VVTerm" = "เปิดใช้ %@ สำหรับ VVTerm";
+"Unlock VVTerm with %@" = "ปลดล็อก VVTerm ด้วย %@";
+"Unlock server %@" = "ปลดล็อกเซิร์ฟเวอร์ %@";
+"Unlock with %@" = "ปลดล็อกด้วย %@";
+"VVTerm is locked" = "VVTerm ถูกล็อก";
+"Require %@ to open this server" = "ต้องใช้ %@ เพื่อเปิดเซิร์ฟเวอร์นี้";
+"Require %@ to open VVTerm" = "ต้องใช้ %@ เพื่อเปิด VVTerm";
+"Lock when app goes to background" = "ล็อกเมื่อแอปไปทำงานเบื้องหลัง";
+"Re-auth grace period" = "ช่วงผ่อนผันการยืนยันตัวตนใหม่";
+"Always" = "เสมอ";
+"%lld seconds" = "%lld วินาที";
+"Security" = "ความปลอดภัย";
+"Biometric lock protects app and server access on this device." = "การล็อกด้วยชีวมิติช่วยปกป้องการเข้าถึงแอปและเซิร์ฟเวอร์บนอุปกรณ์นี้";

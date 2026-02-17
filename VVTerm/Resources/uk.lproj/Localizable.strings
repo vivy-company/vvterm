@@ -748,3 +748,28 @@
 
 "%lld custom theme" = "%lld користувацька тема";
 "%lld custom themes" = "%lld користувацьких тем";
+
+/* Біометричне блокування */
+"Biometric Authentication" = "Біометрична автентифікація";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Відсутня причина автентифікації.";
+"Biometric authentication is unavailable on this device." = "Біометрична автентифікація недоступна на цьому пристрої.";
+"Biometric authentication is not set up on this device." = "Біометрична автентифікація не налаштована на цьому пристрої.";
+"Biometric authentication is locked. Unlock the device to try again." = "Біометричну автентифікацію заблоковано. Розблокуйте пристрій, щоб спробувати знову.";
+"Set a device passcode before using biometric authentication." = "Установіть код-пароль пристрою перед використанням біометричної автентифікації.";
+"Biometric authentication is locked. Unlock the device and try again." = "Біометричну автентифікацію заблоковано. Розблокуйте пристрій і спробуйте ще раз.";
+"Authentication failed." = "Помилка автентифікації.";
+"Enable %@ for VVTerm" = "Увімкнути %@ для VVTerm";
+"Unlock VVTerm with %@" = "Розблокувати VVTerm за допомогою %@";
+"Unlock server %@" = "Розблокувати сервер %@";
+"Unlock with %@" = "Розблокувати за допомогою %@";
+"VVTerm is locked" = "VVTerm заблоковано";
+"Require %@ to open this server" = "Потрібно %@, щоб відкрити цей сервер";
+"Require %@ to open VVTerm" = "Потрібно %@, щоб відкрити VVTerm";
+"Lock when app goes to background" = "Блокувати, коли застосунок переходить у тло";
+"Re-auth grace period" = "Пільговий період повторної автентифікації";
+"Always" = "Завжди";
+"%lld seconds" = "%lld секунд";
+"Security" = "Безпека";
+"Biometric lock protects app and server access on this device." = "Біометричне блокування захищає доступ до застосунку та серверів на цьому пристрої.";

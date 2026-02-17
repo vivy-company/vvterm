@@ -741,3 +741,28 @@
 
 "%lld custom theme" = "%lld 個のカスタムテーマ";
 "%lld custom themes" = "%lld 個のカスタムテーマ";
+
+/* 生体認証ロック */
+"Biometric Authentication" = "生体認証";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "認証理由が設定されていません。";
+"Biometric authentication is unavailable on this device." = "このデバイスでは生体認証を利用できません。";
+"Biometric authentication is not set up on this device." = "このデバイスでは生体認証が設定されていません。";
+"Biometric authentication is locked. Unlock the device to try again." = "生体認証はロックされています。再試行するにはデバイスのロックを解除してください。";
+"Set a device passcode before using biometric authentication." = "生体認証を使用する前にデバイスのパスコードを設定してください。";
+"Biometric authentication is locked. Unlock the device and try again." = "生体認証はロックされています。デバイスのロックを解除してもう一度お試しください。";
+"Authentication failed." = "認証に失敗しました。";
+"Enable %@ for VVTerm" = "VVTermで%@を有効にする";
+"Unlock VVTerm with %@" = "%@でVVTermをロック解除";
+"Unlock server %@" = "サーバー%@をロック解除";
+"Unlock with %@" = "%@でロック解除";
+"VVTerm is locked" = "VVTermはロックされています";
+"Require %@ to open this server" = "このサーバーを開くには%@が必要です";
+"Require %@ to open VVTerm" = "VVTermを開くには%@が必要です";
+"Lock when app goes to background" = "アプリがバックグラウンドに移行したらロックする";
+"Re-auth grace period" = "再認証の猶予時間";
+"Always" = "常に";
+"%lld seconds" = "%lld秒";
+"Security" = "セキュリティ";
+"Biometric lock protects app and server access on this device." = "生体認証ロックは、このデバイスでのアプリとサーバーへのアクセスを保護します。";

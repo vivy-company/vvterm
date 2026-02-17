@@ -786,3 +786,28 @@
 
 "%lld custom theme" = "%lld chủ đề tùy chỉnh";
 "%lld custom themes" = "%lld chủ đề tùy chỉnh";
+
+/* Khóa sinh trắc học */
+"Biometric Authentication" = "Xác thực sinh trắc học";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Thiếu lý do xác thực.";
+"Biometric authentication is unavailable on this device." = "Xác thực sinh trắc học không khả dụng trên thiết bị này.";
+"Biometric authentication is not set up on this device." = "Xác thực sinh trắc học chưa được thiết lập trên thiết bị này.";
+"Biometric authentication is locked. Unlock the device to try again." = "Xác thực sinh trắc học đang bị khóa. Hãy mở khóa thiết bị để thử lại.";
+"Set a device passcode before using biometric authentication." = "Hãy đặt mật mã thiết bị trước khi dùng xác thực sinh trắc học.";
+"Biometric authentication is locked. Unlock the device and try again." = "Xác thực sinh trắc học đang bị khóa. Hãy mở khóa thiết bị và thử lại.";
+"Authentication failed." = "Xác thực thất bại.";
+"Enable %@ for VVTerm" = "Bật %@ cho VVTerm";
+"Unlock VVTerm with %@" = "Mở khóa VVTerm bằng %@";
+"Unlock server %@" = "Mở khóa máy chủ %@";
+"Unlock with %@" = "Mở khóa bằng %@";
+"VVTerm is locked" = "VVTerm đã bị khóa";
+"Require %@ to open this server" = "Yêu cầu %@ để mở máy chủ này";
+"Require %@ to open VVTerm" = "Yêu cầu %@ để mở VVTerm";
+"Lock when app goes to background" = "Khóa khi ứng dụng vào nền";
+"Re-auth grace period" = "Thời gian gia hạn xác thực lại";
+"Always" = "Luôn luôn";
+"%lld seconds" = "%lld giây";
+"Security" = "Bảo mật";
+"Biometric lock protects app and server access on this device." = "Khóa sinh trắc học bảo vệ quyền truy cập ứng dụng và máy chủ trên thiết bị này.";

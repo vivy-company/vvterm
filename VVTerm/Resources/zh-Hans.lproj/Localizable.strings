@@ -721,3 +721,28 @@
 
 "%lld custom theme" = "%lld 个自定义主题";
 "%lld custom themes" = "%lld 个自定义主题";
+
+/* 生物认证锁 */
+"Biometric Authentication" = "生物认证";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "缺少认证原因。";
+"Biometric authentication is unavailable on this device." = "此设备不支持生物认证。";
+"Biometric authentication is not set up on this device." = "此设备尚未设置生物认证。";
+"Biometric authentication is locked. Unlock the device to try again." = "生物认证已锁定。请先解锁设备后重试。";
+"Set a device passcode before using biometric authentication." = "使用生物认证前，请先设置设备密码。";
+"Biometric authentication is locked. Unlock the device and try again." = "生物认证已锁定。请解锁设备后再试一次。";
+"Authentication failed." = "认证失败。";
+"Enable %@ for VVTerm" = "为 VVTerm 启用%@";
+"Unlock VVTerm with %@" = "使用%@解锁 VVTerm";
+"Unlock server %@" = "解锁服务器%@";
+"Unlock with %@" = "使用%@解锁";
+"VVTerm is locked" = "VVTerm 已锁定";
+"Require %@ to open this server" = "打开此服务器需要%@";
+"Require %@ to open VVTerm" = "打开 VVTerm 需要%@";
+"Lock when app goes to background" = "应用进入后台时锁定";
+"Re-auth grace period" = "重新认证宽限期";
+"Always" = "始终";
+"%lld seconds" = "%lld 秒";
+"Security" = "安全";
+"Biometric lock protects app and server access on this device." = "生物认证锁可保护此设备上的应用和服务器访问。";

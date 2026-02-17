@@ -759,3 +759,28 @@
 
 "%lld custom theme" = "%lld custom theme";
 "%lld custom themes" = "%lld custom themes";
+
+/* Biometric Lock */
+"Biometric Authentication" = "Biometric Authentication";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Authentication reason is missing.";
+"Biometric authentication is unavailable on this device." = "Biometric authentication is unavailable on this device.";
+"Biometric authentication is not set up on this device." = "Biometric authentication is not set up on this device.";
+"Biometric authentication is locked. Unlock the device to try again." = "Biometric authentication is locked. Unlock the device to try again.";
+"Set a device passcode before using biometric authentication." = "Set a device passcode before using biometric authentication.";
+"Biometric authentication is locked. Unlock the device and try again." = "Biometric authentication is locked. Unlock the device and try again.";
+"Authentication failed." = "Authentication failed.";
+"Enable %@ for VVTerm" = "Enable %@ for VVTerm";
+"Unlock VVTerm with %@" = "Unlock VVTerm with %@";
+"Unlock server %@" = "Unlock server %@";
+"Unlock with %@" = "Unlock with %@";
+"VVTerm is locked" = "VVTerm is locked";
+"Require %@ to open this server" = "Require %@ to open this server";
+"Require %@ to open VVTerm" = "Require %@ to open VVTerm";
+"Lock when app goes to background" = "Lock when app goes to background";
+"Re-auth grace period" = "Re-auth grace period";
+"Always" = "Always";
+"%lld seconds" = "%lld seconds";
+"Security" = "Security";
+"Biometric lock protects app and server access on this device." = "Biometric lock protects app and server access on this device.";

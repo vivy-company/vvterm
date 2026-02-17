@@ -742,3 +742,28 @@
 
 "%lld custom theme" = "%lld vlastní motiv";
 "%lld custom themes" = "%lld vlastních motivů";
+
+/* Biometrický zámek */
+"Biometric Authentication" = "Biometrické ověřování";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Chybí důvod ověření.";
+"Biometric authentication is unavailable on this device." = "Biometrické ověřování není na tomto zařízení k dispozici.";
+"Biometric authentication is not set up on this device." = "Biometrické ověřování není na tomto zařízení nastaveno.";
+"Biometric authentication is locked. Unlock the device to try again." = "Biometrické ověřování je uzamčeno. Odemkněte zařízení a zkuste to znovu.";
+"Set a device passcode before using biometric authentication." = "Před použitím biometrického ověřování nastavte kód zařízení.";
+"Biometric authentication is locked. Unlock the device and try again." = "Biometrické ověřování je uzamčeno. Odemkněte zařízení a zkuste to znovu.";
+"Authentication failed." = "Ověření se nezdařilo.";
+"Enable %@ for VVTerm" = "Povolit %@ pro VVTerm";
+"Unlock VVTerm with %@" = "Odemknout VVTerm pomocí %@";
+"Unlock server %@" = "Odemknout server %@";
+"Unlock with %@" = "Odemknout pomocí %@";
+"VVTerm is locked" = "VVTerm je zamčený";
+"Require %@ to open this server" = "Vyžadovat %@ pro otevření tohoto serveru";
+"Require %@ to open VVTerm" = "Vyžadovat %@ pro otevření VVTerm";
+"Lock when app goes to background" = "Uzamknout při přechodu aplikace na pozadí";
+"Re-auth grace period" = "Doba odkladu opětovného ověření";
+"Always" = "Vždy";
+"%lld seconds" = "%lld sekund";
+"Security" = "Zabezpečení";
+"Biometric lock protects app and server access on this device." = "Biometrický zámek chrání přístup k aplikaci a serverům na tomto zařízení.";

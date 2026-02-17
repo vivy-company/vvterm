@@ -741,3 +741,28 @@
 
 "%lld custom theme" = "%lld пользовательская тема";
 "%lld custom themes" = "%lld пользовательских тем";
+
+/* Биометрическая блокировка */
+"Biometric Authentication" = "Биометрическая аутентификация";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "Отсутствует причина аутентификации.";
+"Biometric authentication is unavailable on this device." = "Биометрическая аутентификация недоступна на этом устройстве.";
+"Biometric authentication is not set up on this device." = "Биометрическая аутентификация не настроена на этом устройстве.";
+"Biometric authentication is locked. Unlock the device to try again." = "Биометрическая аутентификация заблокирована. Разблокируйте устройство, чтобы попробовать снова.";
+"Set a device passcode before using biometric authentication." = "Установите код-пароль устройства перед использованием биометрической аутентификации.";
+"Biometric authentication is locked. Unlock the device and try again." = "Биометрическая аутентификация заблокирована. Разблокируйте устройство и попробуйте снова.";
+"Authentication failed." = "Ошибка аутентификации.";
+"Enable %@ for VVTerm" = "Включить %@ для VVTerm";
+"Unlock VVTerm with %@" = "Разблокировать VVTerm с помощью %@";
+"Unlock server %@" = "Разблокировать сервер %@";
+"Unlock with %@" = "Разблокировать с помощью %@";
+"VVTerm is locked" = "VVTerm заблокирован";
+"Require %@ to open this server" = "Требуется %@, чтобы открыть этот сервер";
+"Require %@ to open VVTerm" = "Требуется %@, чтобы открыть VVTerm";
+"Lock when app goes to background" = "Блокировать при переходе приложения в фон";
+"Re-auth grace period" = "Льготный период повторной аутентификации";
+"Always" = "Всегда";
+"%lld seconds" = "%lld секунд";
+"Security" = "Безопасность";
+"Biometric lock protects app and server access on this device." = "Биометрическая блокировка защищает доступ к приложению и серверам на этом устройстве.";
