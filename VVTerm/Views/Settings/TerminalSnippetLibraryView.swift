@@ -66,7 +66,9 @@ struct TerminalSnippetLibraryView: View {
         }
         .formStyle(.grouped)
         .navigationTitle("Manage Snippets")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {

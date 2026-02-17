@@ -95,7 +95,9 @@ struct TerminalSnippetFormView: View {
             }
             .formStyle(.grouped)
             .navigationTitle(isEditing ? "Edit Snippet" : "New Snippet")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
