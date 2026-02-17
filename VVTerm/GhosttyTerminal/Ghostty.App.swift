@@ -430,6 +430,7 @@ extension Ghostty {
                 }
             }
 
+            copyCustomThemes(to: tempThemesDir)
             Ghostty.logger.info("Copied themes from flattened resources to \(tempThemesDir)")
         }
 
@@ -452,7 +453,30 @@ extension Ghostty {
                 }
             }
 
+            copyCustomThemes(to: destPath)
             Ghostty.logger.info("Copied themes from \(sourcePath) to \(destPath)")
+        }
+
+        private func copyCustomThemes(to tempThemesDir: String) {
+            let fm = FileManager.default
+            let customThemesDir = TerminalThemeStoragePaths.customThemesDirectoryPath()
+            guard fm.fileExists(atPath: customThemesDir) else { return }
+            guard let files = try? fm.contentsOfDirectory(atPath: customThemesDir) else { return }
+
+            for file in files {
+                guard !file.hasPrefix(".") else { continue }
+                let src = (customThemesDir as NSString).appendingPathComponent(file)
+                let dst = (tempThemesDir as NSString).appendingPathComponent(file)
+
+                var isDir: ObjCBool = false
+                fm.fileExists(atPath: src, isDirectory: &isDir)
+                guard !isDir.boolValue else { continue }
+
+                if fm.fileExists(atPath: dst) {
+                    try? fm.removeItem(atPath: dst)
+                }
+                try? fm.copyItem(atPath: src, toPath: dst)
+            }
         }
 
         // MARK: - Callbacks (macOS)

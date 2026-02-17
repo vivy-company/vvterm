@@ -740,3 +740,6 @@
 "Automatically attach to the last tmux session you selected." = "Attacher automatiquement la dernière session tmux que vous avez sélectionnée.";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "Les sessions restent actives entre les redémarrages de l'application et les déconnexions lorsque tmux est disponible.";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "Choisissez le comportement par défaut pour les nouveaux serveurs. Vous pouvez toujours le remplacer serveur par serveur dans les réglages du serveur.";
+
+"%lld custom theme" = "%lld thème personnalisé";
+"%lld custom themes" = "%lld thèmes personnalisés";

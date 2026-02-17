@@ -783,3 +783,6 @@
 "Automatically attach to the last tmux session you selected." = "Tự động gắn vào phiên tmux gần nhất bạn đã chọn.";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "Phiên vẫn được giữ qua các lần khởi động lại ứng dụng và mất kết nối khi có tmux.";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "Chọn hành vi mặc định cho máy chủ mới. Bạn vẫn có thể ghi đè theo từng máy chủ trong cài đặt máy chủ.";
+
+"%lld custom theme" = "%lld chủ đề tùy chỉnh";
+"%lld custom themes" = "%lld chủ đề tùy chỉnh";

@@ -15,16 +15,8 @@ struct WorkspaceSwitcherSheet: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            DetailHeaderBar(
-                showsBackground: false,
-                padding: EdgeInsets(top: 20, leading: 20, bottom: 16, trailing: 20)
-            ) {
-                Text("Workspaces")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-            } trailing: {
-                DetailCloseButton { dismiss() }
+            DialogSheetHeader(title: "Workspaces") {
+                dismiss()
             }
 
             Divider()

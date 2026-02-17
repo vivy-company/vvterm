@@ -738,3 +738,6 @@
 "Automatically attach to the last tmux session you selected." = "最後に選択した tmux セッションに自動でアタッチします。";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "tmux が利用可能な場合、アプリ再起動や切断後もセッションは維持されます。";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "新しいサーバーの既定動作を選択します。サーバー設定でサーバーごとに上書きできます。";
+
+"%lld custom theme" = "%lld 個のカスタムテーマ";
+"%lld custom themes" = "%lld 個のカスタムテーマ";

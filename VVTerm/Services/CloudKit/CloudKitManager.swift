@@ -34,6 +34,8 @@ final class CloudKitManager: ObservableObject {
     private enum RecordType {
         static let server = "Server"
         static let workspace = "Workspace"
+        static let terminalTheme = "TerminalTheme"
+        static let terminalThemePreference = "TerminalThemePreference"
     }
 
     enum SyncStatus: Equatable {
@@ -361,6 +363,84 @@ final class CloudKitManager: ObservableObject {
         }
     }
 
+    // MARK: - Terminal Theme Operations
+
+    func fetchTerminalThemes() async throws -> [TerminalTheme] {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+        let records = try await fetchQueryRecords(recordType: RecordType.terminalTheme, zoneID: recordZoneID)
+        return records.compactMap(TerminalTheme.init(from:))
+    }
+
+    func saveTerminalTheme(_ theme: TerminalTheme) async throws {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+
+        syncStatus = .syncing
+        defer { syncStatus = .idle }
+
+        let record = theme.toRecord(in: recordZoneID)
+        do {
+            try await saveRecordWithUpsert(record)
+            lastSyncDate = Date()
+            logger.info("Saved terminal theme \(theme.name) to CloudKit")
+        } catch {
+            logger.error("Failed to save terminal theme: \(error.localizedDescription)")
+            syncStatus = .error(error.localizedDescription)
+            throw error
+        }
+    }
+
+    func fetchTerminalThemePreference() async throws -> TerminalThemePreference? {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+        let recordID = CKRecord.ID(recordName: TerminalThemePreference.recordName, zoneID: recordZoneID)
+
+        do {
+            let record = try await database.record(for: recordID)
+            return TerminalThemePreference(from: record)
+        } catch let ckError as CKError where ckError.code == .unknownItem || ckError.code == .zoneNotFound {
+            return nil
+        } catch {
+            throw error
+        }
+    }
+
+    func saveTerminalThemePreference(_ preference: TerminalThemePreference) async throws {
+        await ensureAccountStatusChecked()
+        guard isAvailable else {
+            throw CloudKitError.notAvailable
+        }
+
+        try await ensureCustomZone()
+
+        syncStatus = .syncing
+        defer { syncStatus = .idle }
+
+        let record = preference.toRecord(in: recordZoneID)
+        do {
+            try await saveRecordWithUpsert(record)
+            lastSyncDate = Date()
+            logger.info("Saved terminal theme preference to CloudKit")
+        } catch {
+            logger.error("Failed to save terminal theme preference: \(error.localizedDescription)")
+            syncStatus = .error(error.localizedDescription)
+            throw error
+        }
+    }
+
     // MARK: - Subscriptions
 
     func subscribeToChanges() async {
@@ -440,6 +520,47 @@ final class CloudKitManager: ObservableObject {
         }
 
         return records
+    }
+
+    private func fetchQueryRecords(recordType: String, zoneID: CKRecordZone.ID) async throws -> [CKRecord] {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<[CKRecord], Error>) in
+            var records: [CKRecord] = []
+
+            func runQuery(cursor: CKQueryOperation.Cursor?) {
+                let operation: CKQueryOperation
+                if let cursor {
+                    operation = CKQueryOperation(cursor: cursor)
+                } else {
+                    let query = CKQuery(recordType: recordType, predicate: NSPredicate(value: true))
+                    operation = CKQueryOperation(query: query)
+                    operation.zoneID = zoneID
+                }
+
+                operation.qualityOfService = .userInitiated
+                operation.recordMatchedBlock = { _, result in
+                    if case .success(let record) = result {
+                        records.append(record)
+                    }
+                }
+
+                operation.queryResultBlock = { result in
+                    switch result {
+                    case .success(let cursor):
+                        if let cursor {
+                            runQuery(cursor: cursor)
+                        } else {
+                            continuation.resume(returning: records)
+                        }
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+
+                self.database.add(operation)
+            }
+
+            runQuery(cursor: nil)
+        }
     }
 
     private func fetchZoneChanges(
@@ -561,7 +682,12 @@ final class CloudKitManager: ObservableObject {
 
         let records = try await fetchAllRecordsFromCloudKit()
         let recordIDs = records
-            .filter { $0.recordType == RecordType.server || $0.recordType == RecordType.workspace }
+            .filter {
+                $0.recordType == RecordType.server ||
+                $0.recordType == RecordType.workspace ||
+                $0.recordType == RecordType.terminalTheme ||
+                $0.recordType == RecordType.terminalThemePreference
+            }
             .map(\.recordID)
 
         // Batch delete
@@ -585,7 +711,11 @@ final class CloudKitManager: ObservableObject {
 
         let deletedServers = records.filter { $0.recordType == RecordType.server }.count
         let deletedWorkspaces = records.filter { $0.recordType == RecordType.workspace }.count
-        logger.info("Deleted \(deletedServers) servers and \(deletedWorkspaces) workspaces from CloudKit")
+        let deletedThemes = records.filter { $0.recordType == RecordType.terminalTheme }.count
+        let deletedThemePreferences = records.filter { $0.recordType == RecordType.terminalThemePreference }.count
+        logger.info(
+            "Deleted \(deletedServers) servers, \(deletedWorkspaces) workspaces, \(deletedThemes) themes, \(deletedThemePreferences) theme preferences from CloudKit"
+        )
         lastSyncDate = Date()
     }
 

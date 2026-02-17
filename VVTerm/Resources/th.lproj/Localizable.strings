@@ -738,3 +738,6 @@
 "Automatically attach to the last tmux session you selected." = "เชื่อมต่ออัตโนมัติกับเซสชัน tmux ล่าสุดที่คุณเลือก";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "เซสชันจะยังคงอยู่แม้แอปเริ่มใหม่หรือหลุดการเชื่อมต่อ เมื่อมี tmux ให้ใช้งาน";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "เลือกพฤติกรรมเริ่มต้นสำหรับเซิร์ฟเวอร์ใหม่ คุณยังสามารถกำหนดแยกต่อเซิร์ฟเวอร์ได้ในตั้งค่าเซิร์ฟเวอร์";
+
+"%lld custom theme" = "%lld ธีมกำหนดเอง";
+"%lld custom themes" = "%lld ธีมกำหนดเอง";

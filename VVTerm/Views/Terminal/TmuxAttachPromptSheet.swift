@@ -43,15 +43,9 @@ struct TmuxAttachPromptSheet: View {
 
     #if os(macOS)
     private var macHeader: some View {
-        HStack(spacing: 12) {
-            Text("Choose tmux session")
-                .font(.title3.weight(.semibold))
-            Spacer(minLength: 0)
-            closeButton
+        DialogSheetHeader(title: "Choose tmux session") {
+            dismiss()
         }
-        .padding(.horizontal, 16)
-        .padding(.top, 14)
-        .padding(.bottom, 10)
     }
     #endif
 

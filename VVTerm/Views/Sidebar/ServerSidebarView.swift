@@ -187,6 +187,16 @@ struct ServerSidebarView: View {
                 workspace: selectedWorkspace,
                 onSave: { _ in showingAddServer = false }
             )
+            #if os(macOS)
+            .frame(
+                minWidth: 640,
+                idealWidth: 700,
+                maxWidth: 760,
+                minHeight: 520,
+                idealHeight: 620,
+                maxHeight: 680
+            )
+            #endif
         }
         .sheet(item: $serverToEdit) { server in
             ServerFormSheet(
@@ -195,6 +205,16 @@ struct ServerSidebarView: View {
                 server: server,
                 onSave: { _ in serverToEdit = nil }
             )
+            #if os(macOS)
+            .frame(
+                minWidth: 640,
+                idealWidth: 700,
+                maxWidth: 760,
+                minHeight: 520,
+                idealHeight: 620,
+                maxHeight: 680
+            )
+            #endif
         }
         .sheet(isPresented: $showingSupport) {
             SupportSheet()

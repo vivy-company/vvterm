@@ -739,3 +739,6 @@
 "Automatically attach to the last tmux session you selected." = "Automaticky připojit poslední vybranou relaci tmux.";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "Pokud je tmux dostupný, relace zůstávají aktivní i po restartu aplikace a odpojení.";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "Zvolte výchozí chování pro nové servery. V nastavení serveru jej můžete stále přepsat pro každý server.";
+
+"%lld custom theme" = "%lld vlastní motiv";
+"%lld custom themes" = "%lld vlastních motivů";

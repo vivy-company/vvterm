@@ -235,12 +235,29 @@ struct ServerFormSheet: View {
         connectionTestSucceeded && lastTestSnapshot == connectionSnapshot
     }
 
+    private var saveButtonDisabled: Bool {
+        !isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection
+    }
+
     var body: some View {
         #if os(iOS)
         formContent
         #else
-        NavigationStack {
+        VStack(spacing: 0) {
+            DialogSheetHeader(
+                title: isEditing ? "Edit Server" : "Add Server",
+                onClose: { dismiss() },
+                isCloseDisabled: isSaving
+            )
+
+            Divider()
+
             formContent
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            Divider()
+
+            macActionRow
         }
         #endif
     }
@@ -267,8 +284,8 @@ struct ServerFormSheet: View {
                 isTranslucent: true,
                 shadowColor: .clear
             )
-        #endif
         .navigationTitle(isEditing ? String(localized: "Edit Server") : String(localized: "Add Server"))
+        #endif
         .interactiveDismissDisabled(isSaving)
         .task {
             // Load credentials from keychain when editing
@@ -314,6 +331,7 @@ struct ServerFormSheet: View {
             }
 
         }
+        #if os(iOS)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -324,28 +342,17 @@ struct ServerFormSheet: View {
                     Button {
                         saveServer()
                     } label: {
-                        #if os(macOS)
-                        if isSaving {
-                            HStack(spacing: 8) {
-                                ProgressView()
-                                    .controlSize(.small)
-                                Text(String(localized: "Saving..."))
-                            }
-                        } else {
-                            Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
-                        }
-                        #else
                         if isSaving {
                             ProgressView()
                                 .controlSize(.small)
                         } else {
                             Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
                         }
-                        #endif
                     }
-                    .disabled(!isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection)
+                    .disabled(saveButtonDisabled)
                 }
             }
+        #endif
             .sheet(isPresented: $showingAddKeySheet) {
                 AddSSHKeySheet(onSave: { entry in
                     storedKeys = KeychainManager.shared.getStoredSSHKeys()
@@ -377,6 +384,37 @@ struct ServerFormSheet: View {
             .onChange(of: cloudflareClientSecret) { _ in resetConnectionTestState() }
             .onChange(of: cloudflareTeamDomainOverride) { _ in resetConnectionTestState() }
     }
+
+    #if os(macOS)
+    private var macActionRow: some View {
+        HStack(spacing: 10) {
+            Spacer(minLength: 0)
+
+            Button("Cancel") {
+                dismiss()
+            }
+            .disabled(isSaving)
+
+            Button {
+                saveServer()
+            } label: {
+                if isSaving {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .controlSize(.small)
+                        Text(String(localized: "Saving..."))
+                    }
+                } else {
+                    Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(saveButtonDisabled)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+    #endif
 
     @ViewBuilder
     private var limitSection: some View {

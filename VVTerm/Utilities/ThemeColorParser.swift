@@ -71,6 +71,12 @@ struct ThemeColorParser {
     }
 
     private nonisolated static func themeFilePath(for themeName: String) -> String? {
+        // Try custom themes first.
+        let customThemeFile = TerminalThemeStoragePaths.customThemeFilePath(for: themeName)
+        if FileManager.default.fileExists(atPath: customThemeFile) {
+            return customThemeFile
+        }
+
         guard let resourcePath = Bundle.main.resourcePath else { return nil }
 
         // Try structured path first

@@ -756,3 +756,6 @@
 "Automatically attach to the last tmux session you selected." = "Automatically attach to the last tmux session you selected.";
 "Sessions stay alive across app restarts and disconnects when tmux is available." = "Sessions stay alive across app restarts and disconnects when tmux is available.";
 "Choose the default behavior for new servers. You can still override per server in server settings." = "Choose the default behavior for new servers. You can still override per server in server settings.";
+
+"%lld custom theme" = "%lld custom theme";
+"%lld custom themes" = "%lld custom themes";

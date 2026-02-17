@@ -13,7 +13,7 @@ The current accessory bar is hard-coded in `GhosttyTerminalView+iOS.swift` and s
 - Let users reorder, add, and remove accessory actions.
 - Support custom text snippets/macros that can be added to the accessory bar.
 - Persist locally and sync through CloudKit (private database).
-- Apply changes immediately to active/new terminal views.
+- Apply changes immediately to active/new terminal views (no reconnect/restart required).
 - Keep modifier behavior (`Ctrl`, `Alt`) stable and predictable.
 
 ## Non-Goals (V1)
@@ -54,6 +54,7 @@ Behavior:
 - Active item count bounds: min 4, max 28.
 - No duplicate items.
 - If active items become invalid/empty, normalize back to defaults.
+- Changes apply immediately to currently open terminal accessory bars.
 
 ### Snippet Library Screen
 Each snippet:
@@ -116,7 +117,9 @@ Normalization rules:
 ### Managers / Services
 Create:
 - `VVTerm/Managers/TerminalAccessoryPreferencesManager.swift` (`@MainActor`, `ObservableObject`)
-- `VVTerm/Services/CloudKit/TerminalAccessorySyncService.swift`
+
+Update:
+- `VVTerm/Services/CloudKit/CloudKitManager.swift`
 
 Responsibilities:
 - Preferences manager:
@@ -124,13 +127,15 @@ Responsibilities:
   - reorder/add/remove active items
   - normalize and persist profile
   - publish profile changes for UI + runtime accessory rebuild
-- Sync service:
-  - pull remote profile
-  - push local profile
+  - trigger debounced sync requests via `CloudKitManager`
+- CloudKit manager additions:
+  - pull remote accessory profile
+  - push local accessory profile
   - merge local/remote on conflicts
 
 ### CloudKit Sync Design (V1)
 Use existing private container `iCloud.app.vivy.VivyTerm` and same custom zone.
+Accessory preference sync is implemented through `CloudKitManager` (centralized CloudKit ownership).
 
 Record:
 - `recordType`: `UserPreference`
@@ -153,6 +158,7 @@ Conflict strategy:
   - Layout: pick newer `layout.updatedAt`.
   - Snippets: merge by snippet `id`; keep newer by `updatedAt`; honor `deletedAt` tombstones.
   - Re-normalize `activeItems` against merged snippets.
+- `updatedAt` is the only conflict winner signal in V1.
 - If merge changed result, write merged profile back to CloudKit.
 
 ## Runtime Rendering Refactor
@@ -164,10 +170,13 @@ Changes:
 - Keep leading `Ctrl` / `Alt` fixed.
 - Render system actions and snippet buttons from `activeItems`.
 - Snippet tap behavior:
-  - `insert`: send snippet text
-  - `insertAndEnter`: send snippet text + `\r`
+  - snippets are independent actions (not modifier-aware)
+  - if `Ctrl`/`Alt` is active, ignore and clear both modifier latches
+  - `insert`: send snippet text exactly as stored
+  - `insertAndEnter`: send snippet text exactly as stored, then `\r`
 - Keep repeatable behavior for supported system actions.
 - Rebuild accessory stack on profile updates without restarting SSH session.
+- Open/reused terminal views subscribe to profile updates and rebuild accessory UI in place.
 
 ## Settings Integration
 Update:
@@ -205,10 +214,11 @@ Update:
   - normalization and constraints
   - snippet CRUD
   - active item validation
-- `TerminalAccessorySyncServiceTests`
+- `TerminalAccessoryCloudSyncTests`
   - conflict merge correctness
   - tombstone delete propagation
   - corrupt payload recovery
+  - CloudKit record read/write through `CloudKitManager`
 
 ### UI Tests (iOS)
 - Settings navigation to customization + snippet screens.
@@ -221,6 +231,7 @@ Update:
 - `Ctrl`/`Alt` latch behavior unchanged.
 - Repeatable keys still auto-repeat.
 - Voice button toggle behavior unchanged.
+- Snippet taps always ignore `Ctrl`/`Alt` and send raw snippet payload.
 
 ## Rollout
 - Optional flag for one internal build: `terminalAccessoryCustomizationEnabled`.

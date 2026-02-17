@@ -25,6 +25,7 @@ struct VVTermApp: App {
     #else
     @StateObject private var ghosttyApp = Ghostty.App()
     #endif
+    @StateObject private var terminalThemeManager = TerminalThemeManager.shared
 
     // Welcome screen flag
     @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
@@ -39,6 +40,25 @@ struct VVTermApp: App {
     @AppStorage("terminalThemeNameLight") private var terminalThemeNameLight = "Aizen Light"
     @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
 
+    private var activeCustomThemeVersionToken: String {
+        let activeThemes = terminalThemeManager.customThemes.filter { !$0.isDeleted }
+        let byName = Dictionary(
+            activeThemes.map { ($0.name, $0) },
+            uniquingKeysWith: { current, candidate in
+                current.updatedAt >= candidate.updatedAt ? current : candidate
+            }
+        )
+
+        let darkVersion = byName[terminalThemeName]?.updatedAt.timeIntervalSince1970 ?? 0
+        let lightVersion = byName[terminalThemeNameLight]?.updatedAt.timeIntervalSince1970 ?? 0
+
+        if usePerAppearanceTheme {
+            return "\(darkVersion):\(lightVersion)"
+        }
+
+        return "\(darkVersion)"
+    }
+
     var body: some Scene {
         WindowGroup(id: "main") {
             let appLocale = AppLanguage(rawValue: appLanguage)?.locale ?? Locale.current
@@ -46,8 +66,9 @@ struct VVTermApp: App {
                 #if os(iOS)
                 iOSContentView()
                     .environmentObject(ghosttyApp)
+                    .environmentObject(terminalThemeManager)
                     .modifier(AppearanceModifier())
-                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
+                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
                         ghosttyApp.reloadConfig()
                     }
                     .sheet(isPresented: .init(
@@ -60,8 +81,9 @@ struct VVTermApp: App {
                 #else
                 ContentView()
                     .environmentObject(ghosttyApp)
+                    .environmentObject(terminalThemeManager)
                     .modifier(AppearanceModifier())
-                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)") {
+                    .task(id: "\(terminalFontName)\(terminalFontSize)\(terminalThemeName)\(terminalThemeNameLight)\(usePerAppearanceTheme)\(activeCustomThemeVersionToken)") {
                         ghosttyApp.reloadConfig()
                     }
                     .sheet(isPresented: .init(
