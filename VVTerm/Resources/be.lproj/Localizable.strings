@@ -767,3 +767,32 @@
 "%lld seconds" = "%lld секунд";
 "Security" = "Бяспека";
 "Biometric lock protects app and server access on this device." = "Біяметрычная блакіроўка абараняе доступ да праграмы і сервераў на гэтай прыладзе.";
+
+/* Local Discovery */
+"Discover Local Devices" = "Выявіць лакальныя прылады";
+"Discover Local Devices..." = "Выявіць лакальныя прылады...";
+"Pick from Local Discovery..." = "Выбраць з лакальнага выяўлення...";
+"Ready to scan your local network." = "Гатова да сканавання вашай лакальнай сеткі.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "Падключыцеся да Wi-Fi або Ethernet, каб выявіць лакальныя SSH-хосты.";
+"Scanning with Bonjour and SSH port probe..." = "Сканаванне праз Bonjour і праверку порта SSH...";
+"Scanning Bonjour services..." = "Сканаванне службаў Bonjour...";
+"Scanning local subnet for SSH port 22..." = "Сканаванне лакальнай падсеткі на порт SSH 22...";
+"Scanning..." = "Сканаванне...";
+"No SSH hosts found." = "SSH-хосты не знойдзены.";
+"%lld SSH host(s) found." = "Знойдзена SSH-хостаў: %lld.";
+"Nearby SSH Hosts" = "Бліжэйшыя SSH-хосты";
+"Scanning Status" = "Стан сканавання";
+"Rescan" = "Сканаваць зноў";
+"Use Selected" = "Выкарыстаць выбранае";
+"Open Settings" = "Адкрыць Налады";
+"Add Manually" = "Дадаць уручную";
+"No Results Help" = "Дапамога пры адсутнасці вынікаў";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "Выяўленне толькі папярэдне запаўняе даныя хаста. Уліковыя даныя па-ранейшаму наладжваюцца ў «Дадаць сервер».";
+"No SSH Hosts" = "Няма SSH-хостаў";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "Праскануйце лакальную сетку, каб выявіць SSH-прылады, затым папярэдне запоўніце «Дадаць сервер».";
+"No SSH hosts discovered yet." = "Пакуль SSH-хосты не выяўлены.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "Сканаванне портаў";
+"Port 22" = "Порт 22";
+"%lldms" = "%lld мс";
+"Use" = "Выкарыстаць";

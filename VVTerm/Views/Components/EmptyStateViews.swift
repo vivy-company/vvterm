@@ -135,6 +135,7 @@ struct MultiConnectionUpgradeEmptyState: View {
 
 struct NoServersEmptyState: View {
     let onAddServer: () -> Void
+    var onDiscoverLocalDevices: (() -> Void)? = nil
 
     var body: some View {
         VStack(spacing: 24) {
@@ -166,6 +167,21 @@ struct NoServersEmptyState: View {
                 .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
+
+            if let onDiscoverLocalDevices {
+                Button(action: onDiscoverLocalDevices) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "dot.radiowaves.left.and.right")
+                        Text(String(localized: "Discover Local Devices"))
+                            .fontWeight(.medium)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                    .foregroundStyle(.primary)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 32)

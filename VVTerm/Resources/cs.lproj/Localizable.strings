@@ -767,3 +767,32 @@
 "%lld seconds" = "%lld sekund";
 "Security" = "Zabezpečení";
 "Biometric lock protects app and server access on this device." = "Biometrický zámek chrání přístup k aplikaci a serverům na tomto zařízení.";
+
+/* Local Discovery */
+"Discover Local Devices" = "Objevit místní zařízení";
+"Discover Local Devices..." = "Objevit místní zařízení...";
+"Pick from Local Discovery..." = "Vybrat z místního zjišťování...";
+"Ready to scan your local network." = "Připraveno skenovat vaši místní síť.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "Připojte se k Wi-Fi nebo ethernetu, abyste objevili místní SSH hostitele.";
+"Scanning with Bonjour and SSH port probe..." = "Skenování pomocí Bonjour a kontroly portu SSH...";
+"Scanning Bonjour services..." = "Skenování služeb Bonjour...";
+"Scanning local subnet for SSH port 22..." = "Skenování místní podsítě na port SSH 22...";
+"Scanning..." = "Skenování...";
+"No SSH hosts found." = "Nebyli nalezeni žádní SSH hostitelé.";
+"%lld SSH host(s) found." = "Nalezeno SSH hostitelů: %lld.";
+"Nearby SSH Hosts" = "Blízké SSH hostitele";
+"Scanning Status" = "Stav skenování";
+"Rescan" = "Skenovat znovu";
+"Use Selected" = "Použít vybrané";
+"Open Settings" = "Otevřít Nastavení";
+"Add Manually" = "Přidat ručně";
+"No Results Help" = "Nápověda bez výsledků";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "Zjišťování pouze předvyplní údaje hostitele. Přihlašovací údaje se stále nastavují v Přidat server.";
+"No SSH Hosts" = "Žádní SSH hostitelé";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "Prohledejte místní síť a objevte SSH zařízení, pak předvyplňte Přidat server.";
+"No SSH hosts discovered yet." = "Zatím nebyli objeveni žádní SSH hostitelé.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "Skenování portů";
+"Port 22" = "Port 22";
+"%lldms" = "%lld ms";
+"Use" = "Použít";

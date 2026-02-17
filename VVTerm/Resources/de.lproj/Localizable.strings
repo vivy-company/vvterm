@@ -766,3 +766,32 @@
 "%lld seconds" = "%lld Sekunden";
 "Security" = "Sicherheit";
 "Biometric lock protects app and server access on this device." = "Die biometrische Sperre schützt den App- und Serverzugriff auf diesem Gerät.";
+
+/* Local Discovery */
+"Discover Local Devices" = "Lokale Geräte entdecken";
+"Discover Local Devices..." = "Lokale Geräte entdecken...";
+"Pick from Local Discovery..." = "Aus lokaler Erkennung auswählen...";
+"Ready to scan your local network." = "Bereit, Ihr lokales Netzwerk zu scannen.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "Verbinden Sie sich mit WLAN oder Ethernet, um lokale SSH-Hosts zu entdecken.";
+"Scanning with Bonjour and SSH port probe..." = "Scannen mit Bonjour und SSH-Portprüfung...";
+"Scanning Bonjour services..." = "Bonjour-Dienste werden gescannt...";
+"Scanning local subnet for SSH port 22..." = "Lokales Subnetz wird auf SSH-Port 22 gescannt...";
+"Scanning..." = "Scannen...";
+"No SSH hosts found." = "Keine SSH-Hosts gefunden.";
+"%lld SSH host(s) found." = "%lld SSH-Hosts gefunden.";
+"Nearby SSH Hosts" = "SSH-Hosts in der Nähe";
+"Scanning Status" = "Scan-Status";
+"Rescan" = "Erneut scannen";
+"Use Selected" = "Ausgewählte verwenden";
+"Open Settings" = "Einstellungen öffnen";
+"Add Manually" = "Manuell hinzufügen";
+"No Results Help" = "Hilfe bei keinen Ergebnissen";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "Die Erkennung füllt nur Hostdetails vor. Anmeldedaten werden weiterhin unter „Server hinzufügen“ konfiguriert.";
+"No SSH Hosts" = "Keine SSH-Hosts";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "Scannen Sie Ihr lokales Netzwerk, um SSH-Geräte zu entdecken, und füllen Sie dann „Server hinzufügen“ vor.";
+"No SSH hosts discovered yet." = "Noch keine SSH-Hosts entdeckt.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "Port-Scan";
+"Port 22" = "Port 22";
+"%lldms" = "%lld ms";
+"Use" = "Verwenden";

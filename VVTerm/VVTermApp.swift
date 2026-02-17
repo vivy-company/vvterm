@@ -125,6 +125,7 @@ struct VVTermApp: App {
 struct VVTermCommands: Commands {
     @Environment(\.openWindow) private var openWindow
     @FocusedValue(\.openTerminalTab) private var openTerminalTab
+    @FocusedValue(\.openLocalSSHDiscovery) private var openLocalSSHDiscovery
     @FocusedValue(\.terminalSplitActions) private var terminalSplitActions
 
     var body: some Commands {
@@ -148,6 +149,12 @@ struct VVTermCommands: Commands {
             }
             .keyboardShortcut("t", modifiers: .command)
             .disabled(openTerminalTab == nil)
+
+            Button(String(localized: "Discover Local Devices...")) {
+                openLocalSSHDiscovery?()
+            }
+            .keyboardShortcut("d", modifiers: [.command, .shift])
+            .disabled(openLocalSSHDiscovery == nil)
 
             Button("Close Tab") {
                 terminalSplitActions?.closePane()

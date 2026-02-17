@@ -811,3 +811,32 @@
 "%lld seconds" = "%lld giây";
 "Security" = "Bảo mật";
 "Biometric lock protects app and server access on this device." = "Khóa sinh trắc học bảo vệ quyền truy cập ứng dụng và máy chủ trên thiết bị này.";
+
+/* Local Discovery */
+"Discover Local Devices" = "Khám phá thiết bị cục bộ";
+"Discover Local Devices..." = "Khám phá thiết bị cục bộ...";
+"Pick from Local Discovery..." = "Chọn từ khám phá cục bộ...";
+"Ready to scan your local network." = "Sẵn sàng quét mạng cục bộ của bạn.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "Kết nối Wi-Fi hoặc Ethernet để khám phá các máy chủ SSH cục bộ.";
+"Scanning with Bonjour and SSH port probe..." = "Đang quét bằng Bonjour và dò cổng SSH...";
+"Scanning Bonjour services..." = "Đang quét dịch vụ Bonjour...";
+"Scanning local subnet for SSH port 22..." = "Đang quét subnet cục bộ để tìm cổng SSH 22...";
+"Scanning..." = "Đang quét...";
+"No SSH hosts found." = "Không tìm thấy máy chủ SSH.";
+"%lld SSH host(s) found." = "Đã tìm thấy %lld máy chủ SSH.";
+"Nearby SSH Hosts" = "Máy chủ SSH lân cận";
+"Scanning Status" = "Trạng thái quét";
+"Rescan" = "Quét lại";
+"Use Selected" = "Dùng mục đã chọn";
+"Open Settings" = "Mở Cài đặt";
+"Add Manually" = "Thêm thủ công";
+"No Results Help" = "Trợ giúp khi không có kết quả";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "Khám phá chỉ điền sẵn thông tin máy chủ. Thông tin đăng nhập vẫn được cấu hình trong Thêm máy chủ.";
+"No SSH Hosts" = "Không có máy chủ SSH";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "Quét mạng cục bộ để khám phá thiết bị SSH, sau đó điền sẵn Thêm máy chủ.";
+"No SSH hosts discovered yet." = "Chưa phát hiện máy chủ SSH nào.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "Quét cổng";
+"Port 22" = "Cổng 22";
+"%lldms" = "%lld mili giây";
+"Use" = "Dùng";

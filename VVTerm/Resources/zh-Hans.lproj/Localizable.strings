@@ -746,3 +746,32 @@
 "%lld seconds" = "%lld 秒";
 "Security" = "安全";
 "Biometric lock protects app and server access on this device." = "生物认证锁可保护此设备上的应用和服务器访问。";
+
+/* Local Discovery */
+"Discover Local Devices" = "发现本地设备";
+"Discover Local Devices..." = "发现本地设备...";
+"Pick from Local Discovery..." = "从本地发现中选择...";
+"Ready to scan your local network." = "已准备好扫描你的本地网络。";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "连接到 Wi-Fi 或以太网以发现本地 SSH 主机。";
+"Scanning with Bonjour and SSH port probe..." = "正在使用 Bonjour 和 SSH 端口探测进行扫描...";
+"Scanning Bonjour services..." = "正在扫描 Bonjour 服务...";
+"Scanning local subnet for SSH port 22..." = "正在扫描本地子网中的 SSH 22 端口...";
+"Scanning..." = "正在扫描...";
+"No SSH hosts found." = "未找到 SSH 主机。";
+"%lld SSH host(s) found." = "已找到 %lld 个 SSH 主机。";
+"Nearby SSH Hosts" = "附近的 SSH 主机";
+"Scanning Status" = "扫描状态";
+"Rescan" = "重新扫描";
+"Use Selected" = "使用所选项";
+"Open Settings" = "打开设置";
+"Add Manually" = "手动添加";
+"No Results Help" = "无结果帮助";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "发现仅会预填主机详情。凭据仍需在“添加服务器”中配置。";
+"No SSH Hosts" = "没有 SSH 主机";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "扫描你的本地网络以发现 SSH 设备，然后预填“添加服务器”。";
+"No SSH hosts discovered yet." = "尚未发现 SSH 主机。";
+"Bonjour" = "Bonjour";
+"Port Scan" = "端口扫描";
+"Port 22" = "端口 22";
+"%lldms" = "%lld毫秒";
+"Use" = "使用";

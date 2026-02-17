@@ -766,3 +766,32 @@
 "%lld seconds" = "%lld秒";
 "Security" = "セキュリティ";
 "Biometric lock protects app and server access on this device." = "生体認証ロックは、このデバイスでのアプリとサーバーへのアクセスを保護します。";
+
+/* Local Discovery */
+"Discover Local Devices" = "ローカルデバイスを検出";
+"Discover Local Devices..." = "ローカルデバイスを検出...";
+"Pick from Local Discovery..." = "ローカル検出から選択...";
+"Ready to scan your local network." = "ローカルネットワークをスキャンする準備ができました。";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "ローカルのSSHホストを検出するには、Wi-FiまたはEthernetに接続してください。";
+"Scanning with Bonjour and SSH port probe..." = "Bonjour と SSH ポートのプローブでスキャン中...";
+"Scanning Bonjour services..." = "Bonjour サービスをスキャン中...";
+"Scanning local subnet for SSH port 22..." = "ローカルサブネットで SSH ポート 22 をスキャン中...";
+"Scanning..." = "スキャン中...";
+"No SSH hosts found." = "SSHホストが見つかりません。";
+"%lld SSH host(s) found." = "SSHホストが %lld 件見つかりました。";
+"Nearby SSH Hosts" = "近くのSSHホスト";
+"Scanning Status" = "スキャン状態";
+"Rescan" = "再スキャン";
+"Use Selected" = "選択項目を使用";
+"Open Settings" = "設定を開く";
+"Add Manually" = "手動で追加";
+"No Results Help" = "結果がない場合のヘルプ";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "検出ではホスト情報のみを事前入力します。認証情報は「サーバーを追加」で引き続き設定します。";
+"No SSH Hosts" = "SSHホストがありません";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "ローカルネットワークをスキャンして SSH デバイスを検出し、「サーバーを追加」を事前入力します。";
+"No SSH hosts discovered yet." = "まだ SSH ホストは検出されていません。";
+"Bonjour" = "Bonjour";
+"Port Scan" = "ポートスキャン";
+"Port 22" = "ポート 22";
+"%lldms" = "%lldミリ秒";
+"Use" = "使用";

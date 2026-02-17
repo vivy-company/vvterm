@@ -31,31 +31,41 @@ struct iOSContentView: View {
                 selectedEnvironment: $selectedEnvironment,
                 showingTerminal: $showingTerminal,
                 onServerSelected: { server in
-                    selectedServer = server
-                    connectingServer = server
-                    isConnecting = true
-                    showingTerminal = true
                     Task {
+                        await MainActor.run {
+                            selectedServer = server
+                            connectingServer = server
+                            isConnecting = true
+                            showingTerminal = true
+                        }
+
                         do {
                             _ = try await sessionManager.openConnection(to: server)
-                            isConnecting = false
-                            connectingServer = nil
+                            await MainActor.run {
+                                isConnecting = false
+                                connectingServer = nil
+                            }
                         } catch let error as VVTermError {
-                            isConnecting = false
-                            connectingServer = nil
-                            showingTerminal = false
-                            switch error {
-                            case .proRequired:
-                                showingTabLimitAlert = true
-                            case .serverLocked(let name):
-                                lockedServerName = name
-                            default:
-                                break
+                            await MainActor.run {
+                                isConnecting = false
+                                connectingServer = nil
+                                showingTerminal = false
+
+                                switch error {
+                                case .proRequired:
+                                    showingTabLimitAlert = true
+                                case .serverLocked(let name):
+                                    lockedServerName = name
+                                default:
+                                    break
+                                }
                             }
                         } catch {
-                            isConnecting = false
-                            connectingServer = nil
-                            showingTerminal = false
+                            await MainActor.run {
+                                isConnecting = false
+                                connectingServer = nil
+                                showingTerminal = false
+                            }
                         }
                     }
                 }
@@ -121,6 +131,7 @@ struct iOSServerListView: View {
     @ObservedObject private var storeManager = StoreManager.shared
 
     @State private var showingAddServer = false
+    @State private var showingLocalDiscovery = false
     @State private var showingAddWorkspace = false
     @State private var showingSettings = false
     @State private var showingWorkspacePicker = false
@@ -132,6 +143,8 @@ struct iOSServerListView: View {
     @State private var lockedServerAlert: Server?
     @State private var navigationBarAppearanceToken = UUID()
     @State private var showingCustomEnvironmentAlert = false
+    @State private var addServerPrefill: ServerFormPrefill?
+    @State private var queuedDiscoveryPrefill: ServerFormPrefill?
     @AppStorage("appearanceMode") private var appearanceMode = AppearanceMode.system.rawValue
 
     var body: some View {
@@ -251,7 +264,9 @@ struct iOSServerListView: View {
         .overlay(alignment: .center) {
             if filteredServers.isEmpty {
                 NoServersEmptyState {
-                    showingAddServer = true
+                    presentAddServer()
+                } onDiscoverLocalDevices: {
+                    showingLocalDiscovery = true
                 }
             }
         }
@@ -263,7 +278,13 @@ struct iOSServerListView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button {
-                        showingAddServer = true
+                        showingLocalDiscovery = true
+                    } label: {
+                        Label(String(localized: "Discover Local Devices"), systemImage: "dot.radiowaves.left.and.right")
+                    }
+
+                    Button {
+                        presentAddServer()
                     } label: {
                         Label("Add Server", systemImage: "server.rack")
                     }
@@ -294,8 +315,15 @@ struct iOSServerListView: View {
                 ServerFormSheet(
                     serverManager: serverManager,
                     workspace: selectedWorkspace,
+                    prefill: addServerPrefill,
                     onSave: { _ in showingAddServer = false }
                 )
+            }
+        }
+        .sheet(isPresented: $showingLocalDiscovery) {
+            LocalDeviceDiscoverySheet { discoveredHost in
+                queuedDiscoveryPrefill = ServerFormPrefill(discoveredHost: discoveredHost)
+                showingLocalDiscovery = false
             }
         }
         .sheet(isPresented: $showingAddWorkspace) {
@@ -406,6 +434,16 @@ struct iOSServerListView: View {
             message: String(localized: "Upgrade to Pro for custom environments"),
             isPresented: $showingCustomEnvironmentAlert
         )
+        .onChange(of: showingLocalDiscovery) { isPresented in
+            guard !isPresented, let queued = queuedDiscoveryPrefill else { return }
+            queuedDiscoveryPrefill = nil
+            presentAddServer(prefill: queued)
+        }
+        .onChange(of: showingAddServer) { isPresented in
+            if !isPresented {
+                addServerPrefill = nil
+            }
+        }
     }
 
     private var environmentOptions: [ServerEnvironment] {
@@ -473,6 +511,11 @@ struct iOSServerListView: View {
         }
 
         return counts
+    }
+
+    private func presentAddServer(prefill: ServerFormPrefill? = nil) {
+        addServerPrefill = prefill
+        showingAddServer = true
     }
 }
 

@@ -79,6 +79,10 @@ struct OpenTerminalTabActionKey: FocusedValueKey {
     typealias Value = () -> Void
 }
 
+struct OpenLocalSSHDiscoveryActionKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+
 extension FocusedValues {
     var activeServerId: UUID? {
         get { self[ActiveServerIdKey.self] }
@@ -98,6 +102,11 @@ extension FocusedValues {
     var openTerminalTab: (() -> Void)? {
         get { self[OpenTerminalTabActionKey.self] }
         set { self[OpenTerminalTabActionKey.self] = newValue }
+    }
+
+    var openLocalSSHDiscovery: (() -> Void)? {
+        get { self[OpenLocalSSHDiscoveryActionKey.self] }
+        set { self[OpenLocalSSHDiscoveryActionKey.self] = newValue }
     }
 }
 

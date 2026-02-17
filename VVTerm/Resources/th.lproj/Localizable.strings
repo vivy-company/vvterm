@@ -766,3 +766,32 @@
 "%lld seconds" = "%lld วินาที";
 "Security" = "ความปลอดภัย";
 "Biometric lock protects app and server access on this device." = "การล็อกด้วยชีวมิติช่วยปกป้องการเข้าถึงแอปและเซิร์ฟเวอร์บนอุปกรณ์นี้";
+
+/* Local Discovery */
+"Discover Local Devices" = "ค้นหาอุปกรณ์ภายในเครือข่าย";
+"Discover Local Devices..." = "ค้นหาอุปกรณ์ภายในเครือข่าย...";
+"Pick from Local Discovery..." = "เลือกจากการค้นหาในเครือข่าย...";
+"Ready to scan your local network." = "พร้อมสแกนเครือข่ายภายในของคุณแล้ว";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "เชื่อมต่อ Wi-Fi หรือ Ethernet เพื่อค้นหาโฮสต์ SSH ในเครือข่าย";
+"Scanning with Bonjour and SSH port probe..." = "กำลังสแกนด้วย Bonjour และการตรวจพอร์ต SSH...";
+"Scanning Bonjour services..." = "กำลังสแกนบริการ Bonjour...";
+"Scanning local subnet for SSH port 22..." = "กำลังสแกนซับเน็ตภายในเพื่อหาพอร์ต SSH 22...";
+"Scanning..." = "กำลังสแกน...";
+"No SSH hosts found." = "ไม่พบโฮสต์ SSH";
+"%lld SSH host(s) found." = "พบโฮสต์ SSH %lld รายการ";
+"Nearby SSH Hosts" = "โฮสต์ SSH ใกล้เคียง";
+"Scanning Status" = "สถานะการสแกน";
+"Rescan" = "สแกนอีกครั้ง";
+"Use Selected" = "ใช้รายการที่เลือก";
+"Open Settings" = "เปิดการตั้งค่า";
+"Add Manually" = "เพิ่มด้วยตนเอง";
+"No Results Help" = "ช่วยเหลือเมื่อไม่พบผลลัพธ์";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "การค้นหาจะเติมเฉพาะรายละเอียดโฮสต์ล่วงหน้าเท่านั้น ข้อมูลรับรองยังต้องตั้งค่าใน เพิ่มเซิร์ฟเวอร์";
+"No SSH Hosts" = "ไม่มีโฮสต์ SSH";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "สแกนเครือข่ายภายในเพื่อค้นหาอุปกรณ์ SSH แล้วกรอกข้อมูลใน เพิ่มเซิร์ฟเวอร์ ล่วงหน้า";
+"No SSH hosts discovered yet." = "ยังไม่พบโฮสต์ SSH";
+"Bonjour" = "Bonjour";
+"Port Scan" = "สแกนพอร์ต";
+"Port 22" = "พอร์ต 22";
+"%lldms" = "%lld มิลลิวินาที";
+"Use" = "ใช้";

@@ -12,6 +12,7 @@ struct ServerSidebarView: View {
 
     @State private var showingWorkspaceSwitcher = false
     @State private var showingAddServer = false
+    @State private var showingLocalDiscovery = false
     @State private var showingSupport = false
     @State private var showingProUpgrade = false
     @State private var showingServerSearch = false
@@ -23,6 +24,8 @@ struct ServerSidebarView: View {
     @State private var searchText = ""
     @State private var serverToEdit: Server?
     @State private var lockedServerAlert: Server?
+    @State private var addServerPrefill: ServerFormPrefill?
+    @State private var queuedDiscoveryPrefill: ServerFormPrefill?
 
     @AppStorage("environmentFilters") private var storedEnvironmentFilters: String = ""
 
@@ -186,6 +189,7 @@ struct ServerSidebarView: View {
             ServerFormSheet(
                 serverManager: serverManager,
                 workspace: selectedWorkspace,
+                prefill: addServerPrefill,
                 onSave: { _ in showingAddServer = false }
             )
             #if os(macOS)
@@ -198,6 +202,12 @@ struct ServerSidebarView: View {
                 maxHeight: 680
             )
             #endif
+        }
+        .sheet(isPresented: $showingLocalDiscovery) {
+            LocalDeviceDiscoverySheet { discoveredHost in
+                queuedDiscoveryPrefill = ServerFormPrefill(discoveredHost: discoveredHost)
+                showingLocalDiscovery = false
+            }
         }
         .sheet(item: $serverToEdit) { server in
             ServerFormSheet(
@@ -282,6 +292,21 @@ struct ServerSidebarView: View {
             message: String(localized: "Upgrade to Pro for custom environments"),
             isPresented: $showingCustomEnvironmentAlert
         )
+        .onChange(of: showingLocalDiscovery) { isPresented in
+            guard !isPresented, let queued = queuedDiscoveryPrefill else { return }
+            queuedDiscoveryPrefill = nil
+            presentAddServer(prefill: queued)
+        }
+        .onChange(of: showingAddServer) { isPresented in
+            if !isPresented {
+                addServerPrefill = nil
+            }
+        }
+        #if os(macOS)
+        .focusedValue(\.openLocalSSHDiscovery, {
+            showingLocalDiscovery = true
+        })
+        #endif
         .lockedItemAlert(
             .server,
             itemName: lockedServerAlert?.name ?? "",
@@ -376,7 +401,6 @@ struct ServerSidebarView: View {
     @ViewBuilder
     private var environmentFilterInline: some View {
         let environments = selectedWorkspace?.environments ?? ServerEnvironment.builtInEnvironments
-        let customEnvs = environments.filter { !$0.isBuiltIn }
 
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
@@ -611,11 +635,18 @@ struct ServerSidebarView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Button {
-                    showingAddServer = true
+                    presentAddServer()
                 } label: {
                     Text("Add Server")
                 }
                 .buttonStyle(.bordered)
+
+                Button {
+                    showingLocalDiscovery = true
+                } label: {
+                    Label(String(localized: "Discover Local Devices"), systemImage: "dot.radiowaves.left.and.right")
+                }
+                .buttonStyle(.borderless)
             }
             Spacer()
         }
@@ -654,7 +685,7 @@ struct ServerSidebarView: View {
     private var footerButtons: some View {
         HStack(spacing: 0) {
             Button {
-                showingAddServer = true
+                presentAddServer()
             } label: {
                 Label("Add Server", systemImage: "plus")
             }
@@ -687,5 +718,10 @@ struct ServerSidebarView: View {
             .padding(.vertical, 8)
             .help("Settings")
         }
+    }
+
+    private func presentAddServer(prefill: ServerFormPrefill? = nil) {
+        addServerPrefill = prefill
+        showingAddServer = true
     }
 }

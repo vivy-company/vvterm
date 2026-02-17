@@ -766,3 +766,32 @@
 "%lld seconds" = "%lld секунд";
 "Security" = "Безопасность";
 "Biometric lock protects app and server access on this device." = "Биометрическая блокировка защищает доступ к приложению и серверам на этом устройстве.";
+
+/* Local Discovery */
+"Discover Local Devices" = "Обнаружить локальные устройства";
+"Discover Local Devices..." = "Обнаружить локальные устройства...";
+"Pick from Local Discovery..." = "Выбрать из локального обнаружения...";
+"Ready to scan your local network." = "Готово к сканированию локальной сети.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "Подключитесь к Wi-Fi или Ethernet, чтобы обнаружить локальные SSH-хосты.";
+"Scanning with Bonjour and SSH port probe..." = "Сканирование через Bonjour и проверку SSH-порта...";
+"Scanning Bonjour services..." = "Сканирование сервисов Bonjour...";
+"Scanning local subnet for SSH port 22..." = "Сканирование локальной подсети на SSH-порт 22...";
+"Scanning..." = "Сканирование...";
+"No SSH hosts found." = "SSH-хосты не найдены.";
+"%lld SSH host(s) found." = "Найдено SSH-хостов: %lld.";
+"Nearby SSH Hosts" = "Ближайшие SSH-хосты";
+"Scanning Status" = "Состояние сканирования";
+"Rescan" = "Сканировать снова";
+"Use Selected" = "Использовать выбранное";
+"Open Settings" = "Открыть Настройки";
+"Add Manually" = "Добавить вручную";
+"No Results Help" = "Помощь при отсутствии результатов";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "Обнаружение только предварительно заполняет данные хоста. Учетные данные по-прежнему настраиваются в «Добавить сервер».";
+"No SSH Hosts" = "Нет SSH-хостов";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "Просканируйте локальную сеть, чтобы обнаружить SSH-устройства, затем предварительно заполнить «Добавить сервер».";
+"No SSH hosts discovered yet." = "SSH-хосты пока не обнаружены.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "Сканирование портов";
+"Port 22" = "Порт 22";
+"%lldms" = "%lld мс";
+"Use" = "Использовать";

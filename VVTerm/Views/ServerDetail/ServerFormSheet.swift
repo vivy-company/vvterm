@@ -118,6 +118,7 @@ struct ServerFormSheet: View {
     @StateObject private var appLockManager = AppLockManager.shared
     let workspace: Workspace?
     let server: Server?
+    let prefill: ServerFormPrefill?
     let onSave: (Server) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -155,6 +156,7 @@ struct ServerFormSheet: View {
     @State private var connectionTestError: String?
     @State private var connectionTestSucceeded = false
     @State private var lastTestSnapshot: ConnectionTestSnapshot?
+    @State private var showingLocalDiscoverySheet = false
 
     private var isEditing: Bool { server != nil }
 
@@ -162,11 +164,13 @@ struct ServerFormSheet: View {
         serverManager: ServerManager,
         workspace: Workspace?,
         server: Server? = nil,
+        prefill: ServerFormPrefill? = nil,
         onSave: @escaping (Server) -> Void
     ) {
         self.serverManager = serverManager
         self.workspace = workspace
         self.server = server
+        self.prefill = prefill
         self.onSave = onSave
 
         if let server = server {
@@ -186,6 +190,13 @@ struct ServerFormSheet: View {
             _requiresBiometricUnlock = State(initialValue: server.requiresBiometricUnlock)
             _tmuxEnabled = State(initialValue: server.tmuxEnabledOverride ?? Self.defaultTmuxEnabled())
             _tmuxStartupBehavior = State(initialValue: server.tmuxStartupBehaviorOverride ?? Self.defaultTmuxStartupBehavior())
+        } else if let prefill {
+            _name = State(initialValue: prefill.name)
+            _host = State(initialValue: prefill.host)
+            _port = State(initialValue: String(prefill.port))
+            _username = State(initialValue: prefill.username ?? "")
+            _tmuxEnabled = State(initialValue: Self.defaultTmuxEnabled())
+            _tmuxStartupBehavior = State(initialValue: Self.defaultTmuxStartupBehavior())
         } else {
             _tmuxEnabled = State(initialValue: Self.defaultTmuxEnabled())
             _tmuxStartupBehavior = State(initialValue: Self.defaultTmuxStartupBehavior())
@@ -364,6 +375,11 @@ struct ServerFormSheet: View {
                     loadStoredKey(entry)
                 })
             }
+            .sheet(isPresented: $showingLocalDiscoverySheet) {
+                LocalDeviceDiscoverySheet { discoveredHost in
+                    applyPrefill(ServerFormPrefill(discoveredHost: discoveredHost))
+                }
+            }
             .limitReachedAlert(.servers, isPresented: $showingServerLimitAlert)
             .onAppear {
                 storedKeys = KeychainManager.shared.getStoredSSHKeys()
@@ -477,6 +493,12 @@ struct ServerFormSheet: View {
                 #if os(iOS)
                 .textInputAutocapitalization(.never)
                 #endif
+
+            Button {
+                showingLocalDiscoverySheet = true
+            } label: {
+                Label(String(localized: "Pick from Local Discovery..."), systemImage: "dot.radiowaves.left.and.right")
+            }
         } header: {
             sectionHeader("Server")
         }
@@ -876,6 +898,16 @@ struct ServerFormSheet: View {
     private func normalizedCloudflareOverride(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
+    }
+
+    private func applyPrefill(_ prefill: ServerFormPrefill) {
+        name = prefill.name
+        host = prefill.host
+        port = String(prefill.port)
+        if let username = prefill.username, !username.isEmpty {
+            self.username = username
+        }
+        resetConnectionTestState()
     }
 
     private func runConnectionTest(force: Bool) async -> Bool {
