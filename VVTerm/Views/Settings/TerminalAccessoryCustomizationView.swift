@@ -105,15 +105,6 @@ struct TerminalAccessoryCustomizationView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(hasAnySnippets ? "All snippets are already added." : "No snippets yet.")
                             .foregroundStyle(.secondary)
-                        if hasAnySnippets {
-                            Divider()
-                        }
-                        Button {
-                            showingCreateSnippetSheet = true
-                        } label: {
-                            Label("Create Snippet", systemImage: "plus")
-                        }
-                        .disabled(!preferences.canCreateSnippet)
                     }
                 } else {
                     ForEach(availableSnippets) { snippet in
