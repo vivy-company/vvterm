@@ -10,6 +10,8 @@ import SwiftUI
 struct SyncSettingsView: View {
     @ObservedObject private var cloudKit = CloudKitManager.shared
     @ObservedObject private var serverManager = ServerManager.shared
+    @ObservedObject private var terminalThemeManager = TerminalThemeManager.shared
+    @ObservedObject private var terminalAccessory = TerminalAccessoryPreferencesManager.shared
     @AppStorage(SyncSettings.enabledKey) private var syncEnabled = true
 
     var body: some View {
@@ -25,7 +27,7 @@ struct SyncSettingsView: View {
             } header: {
                 Text("iCloud")
             } footer: {
-                Text("Sync your servers and workspaces across all your Apple devices.")
+                Text("Sync servers, workspaces, themes, and keyboard accessory settings across all your Apple devices.")
             }
 
             if syncEnabled {
@@ -69,6 +71,27 @@ struct SyncSettingsView: View {
                         Label("Servers", systemImage: "server.rack")
                         Spacer()
                         Text(serverManager.servers.count, format: .number)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Label("Custom Themes", systemImage: "paintpalette")
+                        Spacer()
+                        Text(customThemeCount, format: .number)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Label("Accessory Items", systemImage: "keyboard")
+                        Spacer()
+                        Text(terminalAccessory.profile.layout.activeItems.count, format: .number)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    HStack {
+                        Label("Snippets", systemImage: "text.badge.plus")
+                        Spacer()
+                        Text(terminalAccessory.snippets.count, format: .number)
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -119,6 +142,10 @@ struct SyncSettingsView: View {
                 }
             }
         }
+    }
+
+    private var customThemeCount: Int {
+        terminalThemeManager.customThemes.filter { !$0.isDeleted }.count
     }
 
     @ViewBuilder

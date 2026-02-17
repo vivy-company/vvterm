@@ -1619,54 +1619,23 @@ private struct ThemeBuilderColorSwatchPicker: View {
     @Binding var text: String
     let fallback: Color
 
-    @State private var showingPicker = false
-
     private var swatchColor: Color {
         guard TerminalThemeValidator.isValidHexColor(text) else { return fallback }
         return Color.fromHex(text)
     }
 
-    private var normalizedHex: String {
-        if text.isEmpty {
-            return "Using default"
-        }
-        return TerminalThemeValidator.normalizeHexColor(text) ?? text
-    }
-
     var body: some View {
-        Button {
-            showingPicker = true
-        } label: {
-            RoundedRectangle(cornerRadius: 4, style: .continuous)
-                .fill(swatchColor)
-                .frame(width: 14, height: 14)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .stroke(Color.primary.opacity(0.2), lineWidth: 1)
-                )
-                .padding(2)
-        }
-        .buttonStyle(.plain)
+        ColorPicker(
+            "Pick \(label) color",
+            selection: Binding(
+                get: { swatchColor },
+                set: { selectedColor in
+                    text = selectedColor.toHex()
+                }
+            ),
+            supportsOpacity: false
+        )
+        .labelsHidden()
         .accessibilityLabel("Pick \(label) color")
-        .popover(isPresented: $showingPicker) {
-            VStack(alignment: .leading, spacing: 10) {
-                ColorPicker(
-                    label,
-                    selection: Binding(
-                        get: { swatchColor },
-                        set: { selectedColor in
-                            text = selectedColor.toHex()
-                        }
-                    ),
-                    supportsOpacity: false
-                )
-
-                Text(normalizedHex)
-                    .font(.system(.caption, design: .monospaced))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(12)
-            .frame(minWidth: 180)
-        }
     }
 }
