@@ -4,6 +4,9 @@ import MoshBootstrap
 actor RemoteMoshManager {
     static let shared = RemoteMoshManager()
     private static let installSuccessMarker = "__VVTERM_MOSH_INSTALLED__"
+    private let availabilityTimeout: Duration = .seconds(8)
+    private let bootstrapTimeout: Duration = .seconds(25)
+    private let installTimeout: Duration = .seconds(180)
 
     private init() {}
 
@@ -11,7 +14,7 @@ actor RemoteMoshManager {
         let okMarker = "__VVTERM_MOSH_OK__"
         let body = "\(shellPathExport()); if command -v mosh-server >/dev/null 2>&1; then printf '\(okMarker)'; else printf '__VVTERM_MOSH_NO__'; fi"
         let command = "sh -lc \(shellQuoted(body))"
-        let output = try? await client.execute(command)
+        let output = try? await client.execute(command, timeout: availabilityTimeout)
         return output?.contains(okMarker) == true
     }
 
@@ -27,13 +30,13 @@ actor RemoteMoshManager {
         mosh-server new -s -c 256 -p \(portRange.lowerBound):\(portRange.upperBound) -- /bin/sh -lc \(shellQuoted(resolvedStartup)) 2>&1
         """
         let command = "sh -lc \(shellQuoted(body))"
-        let output = try await client.execute(command)
+        let output = try await client.execute(command, timeout: bootstrapTimeout)
         return try parseConnectInfo(from: output)
     }
 
     func installMoshServer(using client: SSHClient) async throws {
         let command = "sh -lc \(shellQuoted(installScript()))"
-        let output = try await client.execute(command)
+        let output = try await client.execute(command, timeout: installTimeout)
         guard output.contains(Self.installSuccessMarker) else {
             let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
             if trimmed.isEmpty {

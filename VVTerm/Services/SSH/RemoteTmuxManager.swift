@@ -11,6 +11,12 @@ actor RemoteTmuxManager {
 
     private let configDirectory = "~/.vvterm"
     private let configPath = "~/.vvterm/tmux.conf"
+    private let availabilityTimeout: Duration = .seconds(8)
+    private let listTimeout: Duration = .seconds(12)
+    private let configTimeout: Duration = .seconds(20)
+    private let killTimeout: Duration = .seconds(10)
+    private let cleanupTimeout: Duration = .seconds(20)
+    private let pathTimeout: Duration = .seconds(10)
 
     private init() {}
 
@@ -18,7 +24,7 @@ actor RemoteTmuxManager {
         let okMarker = "__VVTERM_TMUX_OK__"
         let body = "\(shellPathExport()); if command -v tmux >/dev/null 2>&1; then printf '\(okMarker)'; else printf '__VVTERM_TMUX_NO__'; fi"
         let command = "sh -lc \(shellQuoted(body))"
-        let output = try? await client.execute(command)
+        let output = try? await client.execute(command, timeout: availabilityTimeout)
         return output?.contains(okMarker) == true
     }
 
@@ -32,7 +38,7 @@ actor RemoteTmuxManager {
 
         for (index, body) in candidates.enumerated() {
             let command = "sh -lc \(shellQuoted(body))"
-            guard let output = try? await client.execute(command) else { continue }
+            guard let output = try? await client.execute(command, timeout: listTimeout) else { continue }
             let sessions = parseSessionListOutput(output, allowLegacy: index == candidates.count - 1)
 
             if !sessions.isEmpty {
@@ -46,7 +52,7 @@ actor RemoteTmuxManager {
     func prepareConfig(using client: SSHClient) async {
         let body = configWriteCommand()
         let command = "sh -lc \(shellQuoted(body))"
-        _ = try? await client.execute(command)
+        _ = try? await client.execute(command, timeout: configTimeout)
     }
 
     nonisolated func attachCommand(sessionName: String, workingDirectory: String) -> String {
@@ -132,7 +138,7 @@ actor RemoteTmuxManager {
         let quoted = shellQuoted(sessionName)
         let body = "\(shellPathExport()); tmux kill-session -t \(quoted) 2>/dev/null || true"
         let command = "sh -lc \(shellQuoted(body))"
-        _ = try? await client.execute(command)
+        _ = try? await client.execute(command, timeout: killTimeout)
     }
 
     func cleanupLegacySessions(using client: SSHClient) async {
@@ -145,13 +151,13 @@ actor RemoteTmuxManager {
         fi
         """
         let command = "sh -lc \(shellQuoted(body))"
-        _ = try? await client.execute(command)
+        _ = try? await client.execute(command, timeout: cleanupTimeout)
     }
 
     func cleanupDetachedSessions(deviceId: String, keeping sessionNames: Set<String>, using client: SSHClient) async {
         let body = "\(shellPathExport()); tmux list-sessions -F '#{session_name} #{session_attached}' 2>/dev/null"
         let command = "sh -lc \(shellQuoted(body))"
-        guard let output = try? await client.execute(command) else { return }
+        guard let output = try? await client.execute(command, timeout: listTimeout) else { return }
 
         let prefix = "vvterm_\(deviceId)_"
         let keep = sessionNames
@@ -172,7 +178,7 @@ actor RemoteTmuxManager {
         let quotedSession = shellQuoted(sessionName)
         let body = "\(shellPathExport()); tmux list-panes -t \(quotedSession) -F '#{pane_current_path}' 2>/dev/null | head -n 1"
         let command = "sh -lc \(shellQuoted(body))"
-        guard let output = try? await client.execute(command) else { return nil }
+        guard let output = try? await client.execute(command, timeout: pathTimeout) else { return nil }
         let trimmed = output.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
     }

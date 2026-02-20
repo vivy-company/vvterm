@@ -76,6 +76,7 @@ actor SSHClient {
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "SSH")
     private var keepAliveTask: Task<Void, Never>?
     private var connectTask: Task<SSHSession, Error>?
+    private var pendingConnectSession: SSHSession?
     private var connectionKey: String?
     private var connectedServer: Server?
     private var moshShells: [UUID: MoshShellRuntime] = [:]
@@ -83,6 +84,7 @@ actor SSHClient {
     private let moshStartupTimeout: Duration = .seconds(8)
     private let connectTimeout: Duration = .seconds(30)
     private let disconnectTimeout: Duration = .seconds(4)
+    private let execTimeout: Duration = .seconds(20)
 
     /// Stored session reference for nonisolated abort access
     private nonisolated(unsafe) var _sessionForAbort: SSHSession?
@@ -104,6 +106,9 @@ actor SSHClient {
     // MARK: - Connection
 
     func connect(to server: Server, credentials: ServerCredentials) async throws -> SSHSession {
+        _isAborted = false
+        try Task.checkCancellation()
+
         let key = "\(server.host):\(server.port):\(server.username):\(server.connectionMode):\(server.authMethod):\(server.cloudflareAccessMode?.rawValue ?? "none"):\(server.cloudflareTeamDomainOverride ?? "")"
 
         if let session = session, await session.isConnected, connectionKey == key {
@@ -149,16 +154,20 @@ actor SSHClient {
             credentials: credentials
         )
 
+        let pendingSession = SSHSession(config: config)
+        pendingConnectSession = pendingSession
+
         let task = Task { [connectTimeout] () -> SSHSession in
-            let session = SSHSession(config: config)
+            try Task.checkCancellation()
             do {
                 try await SSHClient.runWithTimeout(connectTimeout) {
-                    try await session.connect()
+                    try await pendingSession.connect()
                 }
-                return session
+                try Task.checkCancellation()
+                return pendingSession
             } catch {
-                session.abort()
-                await session.disconnect()
+                pendingSession.abort()
+                await pendingSession.disconnect()
                 throw error
             }
         }
@@ -168,6 +177,18 @@ actor SSHClient {
 
         do {
             let session = try await task.value
+            pendingConnectSession = nil
+            if _isAborted || Task.isCancelled || task.isCancelled {
+                session.abort()
+                await session.disconnect()
+                connectTask = nil
+                connectionKey = nil
+                self.session = nil
+                self._sessionForAbort = nil
+                self.connectedServer = nil
+                await disconnectCloudflareTransport(reason: "connect cancellation")
+                throw CancellationError()
+            }
             self.session = session
             self._sessionForAbort = session
             self.connectedServer = server
@@ -176,6 +197,7 @@ actor SSHClient {
             logger.info("Connected to \(server.host)")
             return session
         } catch {
+            pendingConnectSession = nil
             connectTask = nil
             connectionKey = nil
             self.session = nil
@@ -196,6 +218,8 @@ actor SSHClient {
     }
 
     func disconnect() async {
+        _isAborted = true
+
         let activeMoshShells = Array(moshShells.values)
         moshShells.removeAll()
         for runtime in activeMoshShells {
@@ -206,12 +230,15 @@ actor SSHClient {
         keepAliveTask = nil
         connectTask?.cancel()
         connectTask = nil
+        pendingConnectSession?.abort()
+        pendingConnectSession = nil
         connectionKey = nil
 
         let activeSession = session
         session = nil
         _sessionForAbort = nil
         connectedServer = nil
+        activeSession?.abort()
         await disconnectSSHSession(activeSession)
         await disconnectCloudflareTransport(reason: "client disconnect")
 
@@ -220,14 +247,18 @@ actor SSHClient {
 
     // MARK: - Command Execution
 
-    func execute(_ command: String) async throws -> String {
+    func execute(_ command: String, timeout: Duration? = nil) async throws -> String {
         guard !_isAborted else {
             throw SSHError.notConnected
         }
         guard let session = session else {
             throw SSHError.notConnected
         }
-        return try await session.execute(command)
+        let effectiveTimeout = timeout ?? execTimeout
+        return try await SSHClient.runWithTimeout(effectiveTimeout) {
+            try Task.checkCancellation()
+            return try await session.execute(command)
+        }
     }
 
     // MARK: - Shell
@@ -526,6 +557,49 @@ actor SSHClient {
     }
 }
 
+actor SSHConnectionOperationService {
+    static let shared = SSHConnectionOperationService()
+
+    private init() {}
+
+    func runWithConnection<T>(
+        using client: SSHClient,
+        server: Server,
+        credentials: ServerCredentials,
+        disconnectWhenDone: Bool = false,
+        operation: @escaping (SSHClient) async throws -> T
+    ) async throws -> T {
+        do {
+            _ = try await client.connect(to: server, credentials: credentials)
+            let result = try await operation(client)
+            if disconnectWhenDone {
+                await client.disconnect()
+            }
+            return result
+        } catch {
+            if disconnectWhenDone {
+                await client.disconnect()
+            }
+            throw error
+        }
+    }
+
+    func withTemporaryConnection<T>(
+        server: Server,
+        credentials: ServerCredentials,
+        operation: @escaping (SSHClient) async throws -> T
+    ) async throws -> T {
+        let client = SSHClient()
+        return try await runWithConnection(
+            using: client,
+            server: server,
+            credentials: credentials,
+            disconnectWhenDone: true,
+            operation: operation
+        )
+    }
+}
+
 // MARK: - Keyboard Interactive Auth Helper
 
 /// Per-session storage for keyboard-interactive password (used by C callback).
@@ -656,6 +730,7 @@ actor SSHSession {
     // MARK: - Connection
 
     func connect() async throws {
+        try Task.checkCancellation()
         try LibSSH2Runtime.ensureInitialized()
         socket = -1
         connectedPeerAddress = nil
@@ -679,6 +754,7 @@ actor SSHSession {
         var candidate: UnsafeMutablePointer<addrinfo>? = addrInfo
 
         while let current = candidate {
+            try Task.checkCancellation()
             let family = current.pointee.ai_family
             let sockType = current.pointee.ai_socktype == 0 ? SOCK_STREAM : current.pointee.ai_socktype
             let protocolNumber = current.pointee.ai_protocol
@@ -750,6 +826,7 @@ actor SSHSession {
         libssh2_session_set_blocking(session, 1)
 
         // Perform SSH handshake
+        try Task.checkCancellation()
         let handshakeResult = libssh2_session_handshake(session, socket)
         guard handshakeResult == 0 else {
             cleanup()
@@ -764,6 +841,7 @@ actor SSHSession {
         }
 
         // Authenticate
+        try Task.checkCancellation()
         try authenticate()
 
         // Set non-blocking for I/O
@@ -1315,6 +1393,11 @@ actor SSHSession {
         return true
     }
 
+    private func cancelExecRequest(_ requestId: UUID, error: Error) {
+        guard execRequests[requestId] != nil else { return }
+        finishExecRequest(requestId, error: error)
+    }
+
     private func finishExecRequest(_ requestId: UUID, error: Error?) {
         guard let request = execRequests.removeValue(forKey: requestId) else { return }
 
@@ -1441,10 +1524,17 @@ actor SSHSession {
         }
         startIOLoop()
 
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = ExecRequest(id: UUID(), command: command, continuation: continuation)
-            execRequests[request.id] = request
-        }
+        let requestId = UUID()
+        return try await withTaskCancellationHandler(operation: {
+            try await withCheckedThrowingContinuation { continuation in
+                let request = ExecRequest(id: requestId, command: command, continuation: continuation)
+                execRequests[request.id] = request
+            }
+        }, onCancel: { [weak self] in
+            Task {
+                await self?.cancelExecRequest(requestId, error: CancellationError())
+            }
+        })
     }
 
     // MARK: - Keep Alive

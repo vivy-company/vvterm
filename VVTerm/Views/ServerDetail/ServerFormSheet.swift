@@ -929,17 +929,19 @@ struct ServerFormSheet: View {
         }
 
         let result = await Task.detached(priority: .userInitiated) { () -> Result<Void, Error> in
-            let client = SSHClient()
             do {
-                _ = try await client.connect(to: testServer, credentials: credentials)
-                if testServer.connectionMode == .mosh {
-                    _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
-                        using: client,
-                        startCommand: "exec true",
-                        portRange: 60001...61000
-                    )
+                try await SSHConnectionOperationService.shared.withTemporaryConnection(
+                    server: testServer,
+                    credentials: credentials
+                ) { client in
+                    if testServer.connectionMode == .mosh {
+                        _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
+                            using: client,
+                            startCommand: "exec true",
+                            portRange: 60001...61000
+                        )
+                    }
                 }
-                await client.disconnect()
                 return .success(())
             } catch {
                 return .failure(error)

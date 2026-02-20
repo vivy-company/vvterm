@@ -65,31 +65,29 @@ final class ServerStatsCollector: ObservableObject {
             guard let self = self else { return }
 
             do {
-                // Connect to server
-                _ = try await client.connect(to: server, credentials: credentials)
+                try await SSHConnectionOperationService.shared.runWithConnection(
+                    using: client,
+                    server: server,
+                    credentials: credentials,
+                    disconnectWhenDone: ownsClient
+                ) { connectedClient in
+                    await MainActor.run {
+                        self.connectionError = nil
+                    }
 
-                await MainActor.run {
-                    self.connectionError = nil
-                }
+                    while !Task.isCancelled {
+                        let shouldContinue = await MainActor.run { self.isCollecting }
+                        guard shouldContinue else { break }
 
-                // Start collection loop
-                while !Task.isCancelled {
-                    let shouldContinue = await MainActor.run { self.isCollecting }
-                    guard shouldContinue else { break }
-
-                    await self.collectStats(client: client)
-                    try? await Task.sleep(for: .seconds(2))
+                        await self.collectStats(client: connectedClient)
+                        try? await Task.sleep(for: .seconds(2))
+                    }
                 }
             } catch {
                 await MainActor.run {
                     self.connectionError = error.localizedDescription
                     self.isCollecting = false
                 }
-            }
-
-            // Cleanup
-            if ownsClient {
-                await client.disconnect()
             }
             await MainActor.run { [weak self] in
                 self?.isCollecting = false
