@@ -68,11 +68,15 @@ extension Ghostty.Input {
         /// Create a KeyEvent from a UIKey (iOS hardware keyboard)
         init?(uiKey: UIKey, action: Action) {
             let mods = Mods(uiKeyModifiers: uiKey.modifierFlags)
+            let consumedMods = Mods(
+                uiKeyModifiers: uiKey.modifierFlags.subtracting([.control, .command])
+            )
             let hasModifierShortcut = mods.contains(.ctrl) || mods.contains(.alt) || mods.contains(.super)
 
             let characters = uiKey.characters.precomposedStringWithCanonicalMapping
             let filteredCharacters: String? = {
                 guard !characters.isEmpty else { return nil }
+                if characters.hasPrefix("UIKeyInput") { return nil }
                 if characters.count == 1, let scalar = characters.unicodeScalars.first {
                     // Skip control characters and PUA function-key scalars.
                     if scalar.value < 0x20 { return nil }
@@ -90,7 +94,7 @@ extension Ghostty.Input {
                     self.text = text
                     self.composing = false
                     self.mods = mods
-                    self.consumedMods = []
+                    self.consumedMods = consumedMods
                     self.unshiftedCodepoint = text.unicodeScalars.first?.value ?? 0
                     return
                 }
@@ -108,11 +112,13 @@ extension Ghostty.Input {
             }
             self.composing = false
             self.mods = mods
-            self.consumedMods = []
+            self.consumedMods = consumedMods
 
             // Get unshifted codepoint from charactersIgnoringModifiers if available
             let unshiftedChars = uiKey.charactersIgnoringModifiers.precomposedStringWithCanonicalMapping
-            if let scalar = unshiftedChars.unicodeScalars.first,
+            if unshiftedChars.hasPrefix("UIKeyInput") {
+                self.unshiftedCodepoint = 0
+            } else if let scalar = unshiftedChars.unicodeScalars.first,
                scalar.value >= 0x20,
                !(scalar.value >= 0xF700 && scalar.value <= 0xF8FF) {
                 self.unshiftedCodepoint = scalar.value
