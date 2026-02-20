@@ -614,7 +614,9 @@ struct TerminalPaneView: View {
                     .transition(.opacity)
             }
         }
+        .ignoresSafeArea(.container, edges: .bottom)
         .opacity(isFocused ? 1.0 : 0.7)
+        .clipped()
         .task {
             updateTerminalBackgroundColor()
             // If terminal exists, mark ready immediately
@@ -1171,10 +1173,13 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             case .notConnected, .connectionFailed, .socketError, .timeout:
                                 shouldResetClient = true
                             case .channelOpenFailed, .shellRequestFailed:
-                                let hasOtherActivePanes = await MainActor.run {
-                                    TerminalTabManager.shared.hasOtherActivePanes(for: server.id, excluding: paneId)
+                                let hasOtherRegistrations = await MainActor.run {
+                                    TerminalTabManager.shared.hasOtherRegistrations(
+                                        using: sshClient,
+                                        excluding: paneId
+                                    )
                                 }
-                                shouldResetClient = !hasOtherActivePanes
+                                shouldResetClient = !hasOtherRegistrations
                             case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
                                 break
                             case .unknown:

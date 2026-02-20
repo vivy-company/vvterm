@@ -470,6 +470,15 @@ final class TerminalTabManager: ObservableObject {
         }
     }
 
+    /// Returns true when the same SSH client instance is registered to another live pane.
+    /// This is used to avoid disconnecting a truly shared client during retry cleanup.
+    func hasOtherRegistrations(using client: SSHClient, excluding paneId: UUID) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return sshShells.contains { registration in
+            registration.key != paneId && ObjectIdentifier(registration.value.client) == identifier
+        }
+    }
+
     func activeTransport(for paneId: UUID) -> ShellTransport {
         paneStates[paneId]?.activeTransport ?? .ssh
     }

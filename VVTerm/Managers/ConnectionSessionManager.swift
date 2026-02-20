@@ -234,6 +234,15 @@ final class ConnectionSessionManager: ObservableObject {
         }
     }
 
+    /// Returns true when the same SSH client instance is registered to another live session.
+    /// This is used to avoid disconnecting a truly shared client during retry cleanup.
+    func hasOtherRegistrations(using client: SSHClient, excluding sessionId: UUID) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return sshShells.contains { registration in
+            registration.key != sessionId && ObjectIdentifier(registration.value.client) == identifier
+        }
+    }
+
     func updateTmuxStatus(_ sessionId: UUID, status: TmuxStatus) {
         guard let index = sessions.firstIndex(where: { $0.id == sessionId }) else { return }
         sessions[index].tmuxStatus = status

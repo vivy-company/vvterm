@@ -32,11 +32,33 @@ protocol SSHTerminalCoordinator: AnyObject {
 
 extension SSHTerminalCoordinator {
     func sendToSSH(_ data: Data) {
-        // Preserve task ordering from the caller to avoid input reordering under high throughput.
-        guard let shellId else { return }
-        Task(priority: .userInitiated) { [sshClient, logger, shellId] in
+        if let shellId {
+            // Preserve task ordering from the caller to avoid input reordering under high throughput.
+            Task(priority: .userInitiated) { [sshClient, logger, shellId] in
+                do {
+                    try await sshClient.write(data, to: shellId)
+                } catch {
+                    logger.error("Failed to send to SSH: \(error.localizedDescription)")
+                }
+            }
+            return
+        }
+
+        // Coordinator can be recreated while an existing shell is still registered.
+        // Fall back to the manager registry so input keeps working after view reattachment.
+        Task(priority: .userInitiated) { [sessionId, logger] in
+            let route = await MainActor.run { () -> (client: SSHClient, shellId: UUID)? in
+                guard let session = ConnectionSessionManager.shared.sessions.first(where: { $0.id == sessionId }),
+                      let client = ConnectionSessionManager.shared.sshClient(for: session),
+                      let shellId = ConnectionSessionManager.shared.shellId(for: session) else {
+                    return nil
+                }
+                return (client: client, shellId: shellId)
+            }
+
+            guard let route else { return }
             do {
-                try await sshClient.write(data, to: shellId)
+                try await route.client.write(data, to: route.shellId)
             } catch {
                 logger.error("Failed to send to SSH: \(error.localizedDescription)")
             }
@@ -221,13 +243,13 @@ extension SSHTerminalCoordinator {
                         case .notConnected, .connectionFailed, .socketError, .timeout:
                             shouldResetClient = true
                         case .channelOpenFailed, .shellRequestFailed:
-                            let hasOtherActiveSessions = await MainActor.run {
-                                ConnectionSessionManager.shared.hasOtherActiveSessions(
-                                    for: server.id,
+                            let hasOtherRegistrations = await MainActor.run {
+                                ConnectionSessionManager.shared.hasOtherRegistrations(
+                                    using: sshClient,
                                     excluding: sessionId
                                 )
                             }
-                            shouldResetClient = !hasOtherActiveSessions
+                            shouldResetClient = !hasOtherRegistrations
                         case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
                             break
                         case .unknown:

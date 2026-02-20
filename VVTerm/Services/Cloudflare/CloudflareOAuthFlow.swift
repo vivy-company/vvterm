@@ -12,7 +12,7 @@ struct CloudflareOAuthFlow: OAuthFlow {
 
     init(userAgent: String = "VVTerm") {
         self.flow = TransferOAuthFlow(
-            webSession: CloudflareWebAuthenticationSessionActor.shared,
+            webSession: CloudflareWebAuthenticationSessionActor(),
             userAgent: userAgent
         )
     }
@@ -33,8 +33,6 @@ struct CloudflareOAuthFlow: OAuthFlow {
 }
 
 actor CloudflareWebAuthenticationSessionActor: OAuthWebSession {
-    static let shared = CloudflareWebAuthenticationSessionActor()
-
     private var currentSession: ASWebAuthenticationSession?
     private var ignoreNextCompletion = false
     private var userDidCancel = false

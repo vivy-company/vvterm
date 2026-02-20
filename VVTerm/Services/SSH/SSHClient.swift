@@ -3,6 +3,27 @@ import os.log
 import MoshCore
 import MoshBootstrap
 
+// MARK: - libssh2 Runtime
+
+/// libssh2 has process-global lifecycle (`libssh2_init`/`libssh2_exit`).
+/// Initialize once and keep alive for the app lifetime to avoid tearing down
+/// the library while other SSH sessions are still active.
+private enum LibSSH2Runtime {
+    private static let lock = NSLock()
+    private static var initialized = false
+
+    static func ensureInitialized() throws {
+        lock.lock()
+        defer { lock.unlock() }
+        guard !initialized else { return }
+        let rc = libssh2_init(0)
+        guard rc == 0 else {
+            throw SSHError.unknown("libssh2_init failed: \(rc)")
+        }
+        initialized = true
+    }
+}
+
 // MARK: - SSH Client using libssh2
 
 enum ShellTransport: String, Codable, Hashable, Sendable {
@@ -507,24 +528,31 @@ actor SSHClient {
 
 // MARK: - Keyboard Interactive Auth Helper
 
-/// Thread-safe storage for keyboard-interactive password (needed for C callback)
-private final class KeyboardInteractivePassword: @unchecked Sendable {
-    nonisolated static let shared = KeyboardInteractivePassword()
+/// Per-session storage for keyboard-interactive password (used by C callback).
+/// This avoids cross-session password races when multiple auth flows run concurrently.
+private final class KeyboardInteractiveContext: @unchecked Sendable {
     private nonisolated(unsafe) var _password: String?
     private let lock = NSLock()
 
-    nonisolated var password: String? {
-        get {
-            lock.lock()
-            defer { lock.unlock() }
-            return _password
-        }
-        set {
-            lock.lock()
-            defer { lock.unlock() }
-            _password = newValue
-        }
+    nonisolated func setPassword(_ password: String?) {
+        lock.lock()
+        defer { lock.unlock() }
+        _password = password
     }
+
+    nonisolated func password() -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+        return _password
+    }
+}
+
+private func keyboardInteractivePassword(
+    from abstract: UnsafeMutablePointer<UnsafeMutableRawPointer?>?
+) -> String? {
+    guard let abstract, let contextPointer = abstract.pointee else { return nil }
+    let context = Unmanaged<KeyboardInteractiveContext>.fromOpaque(contextPointer).takeUnretainedValue()
+    return context.password()
 }
 
 // C callback for keyboard-interactive authentication
@@ -538,7 +566,7 @@ nonisolated(unsafe) private let kbdintCallback: @convention(c) (
     UnsafeMutablePointer<LIBSSH2_USERAUTH_KBDINT_RESPONSE>?,  // responses
     UnsafeMutablePointer<UnsafeMutableRawPointer?>?  // abstract
 ) -> Void = { name, nameLen, instruction, instructionLen, numPrompts, prompts, responses, abstract in
-    guard numPrompts > 0, let responses = responses, let password = KeyboardInteractivePassword.shared.password else {
+    guard numPrompts > 0, let responses = responses, let password = keyboardInteractivePassword(from: abstract) else {
         return
     }
 
@@ -548,10 +576,12 @@ nonisolated(unsafe) private let kbdintCallback: @convention(c) (
         let length = passwordData.count - 1  // exclude null terminator
 
         // Allocate memory for response (libssh2 will free it)
-        let responseBuf = UnsafeMutablePointer<CChar>.allocate(capacity: length)
+        let responseBuf = UnsafeMutablePointer<CChar>.allocate(capacity: length + 1)
         passwordData.withUnsafeBufferPointer { buffer in
-            responseBuf.initialize(from: buffer.baseAddress!, count: length)
+            guard let baseAddress = buffer.baseAddress else { return }
+            responseBuf.initialize(from: baseAddress, count: length)
         }
+        responseBuf[length] = 0
 
         responses[i].text = responseBuf
         responses[i].length = UInt32(length)
@@ -604,8 +634,8 @@ actor SSHSession {
     /// Atomic socket storage for emergency abort from any thread
     private let atomicSocket = AtomicSocket()
 
-    /// Track if libssh2 was initialized to avoid double-exit
-    private var libssh2Initialized = false
+    /// Session-specific auth callback context passed to libssh2 session abstract pointer.
+    private let keyboardInteractiveContext = KeyboardInteractiveContext()
 
     /// Track if cleanup has been performed
     private var hasBeenCleaned = false
@@ -626,12 +656,7 @@ actor SSHSession {
     // MARK: - Connection
 
     func connect() async throws {
-        // Initialize libssh2
-        let rc = libssh2_init(0)
-        guard rc == 0 else {
-            throw SSHError.unknown("libssh2_init failed: \(rc)")
-        }
-        libssh2Initialized = true
+        try LibSSH2Runtime.ensureInitialized()
         socket = -1
         connectedPeerAddress = nil
 
@@ -703,7 +728,8 @@ actor SSHSession {
         connectedPeerAddress = resolveNumericPeerAddress(for: socket)
 
         // Create libssh2 session (use _ex variant since macros not available in Swift)
-        libssh2Session = libssh2_session_init_ex(nil, nil, nil, nil)
+        let sessionAbstract = Unmanaged.passUnretained(keyboardInteractiveContext).toOpaque()
+        libssh2Session = libssh2_session_init_ex(nil, nil, nil, sessionAbstract)
         guard let session = libssh2Session else {
             Darwin.close(socket)
             throw SSHError.unknown("Failed to create libssh2 session")
@@ -801,9 +827,8 @@ actor SSHSession {
             if authResult != 0 {
                 logger.info("Password auth failed, trying keyboard-interactive...")
 
-                // Store password for the callback (thread-safe)
-                KeyboardInteractivePassword.shared.password = password
-                defer { KeyboardInteractivePassword.shared.password = nil }
+                keyboardInteractiveContext.setPassword(password)
+                defer { keyboardInteractiveContext.setPassword(nil) }
 
                 authResult = libssh2_userauth_keyboard_interactive_ex(
                     session,
@@ -955,12 +980,6 @@ actor SSHSession {
             libssh2_session_disconnect_ex(session, 11, "Normal shutdown", "")
             libssh2_session_free(session)
             libssh2Session = nil
-        }
-
-        // Only call exit if we initialized
-        if libssh2Initialized {
-            libssh2_exit()
-            libssh2Initialized = false
         }
     }
 
