@@ -37,11 +37,14 @@ struct iOSContentView: View {
                             connectingServer = server
                             isConnecting = true
                             showingTerminal = true
+                            sessionManager.selectedViewByServer[server.id] = "terminal"
                         }
 
                         do {
-                            _ = try await sessionManager.openConnection(to: server)
+                            let session = try await sessionManager.openConnection(to: server)
                             await MainActor.run {
+                                sessionManager.selectedViewByServer[server.id] = "terminal"
+                                sessionManager.selectedSessionId = session.id
                                 isConnecting = false
                                 connectingServer = nil
                             }
@@ -1102,7 +1105,15 @@ struct iOSTerminalView: View {
             return
         }
         Task {
-            try? await sessionManager.openConnection(to: server, forceNew: true)
+            do {
+                let session = try await sessionManager.openConnection(to: server, forceNew: true)
+                await MainActor.run {
+                    sessionManager.selectedViewByServer[server.id] = "terminal"
+                    sessionManager.selectedSessionId = session.id
+                }
+            } catch {
+                // No-op: user cancelled biometric auth or open failed.
+            }
         }
     }
 
