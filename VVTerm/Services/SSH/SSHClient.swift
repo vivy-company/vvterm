@@ -60,6 +60,8 @@ actor SSHClient {
     private var moshShells: [UUID: MoshShellRuntime] = [:]
     private let cloudflareTransportManager = CloudflareTransportManager()
     private let moshStartupTimeout: Duration = .seconds(8)
+    private let connectTimeout: Duration = .seconds(30)
+    private let disconnectTimeout: Duration = .seconds(4)
 
     /// Stored session reference for nonisolated abort access
     private nonisolated(unsafe) var _sessionForAbort: SSHSession?
@@ -110,7 +112,7 @@ actor SSHClient {
             dialPort = Int(localPort)
             logger.info("Using Cloudflare local tunnel endpoint \(dialHost):\(dialPort)")
         } else {
-            await cloudflareTransportManager.disconnect()
+            await disconnectCloudflareTransport(reason: "pre-connect cleanup")
         }
 
         let config = SSHSessionConfig(
@@ -126,10 +128,18 @@ actor SSHClient {
             credentials: credentials
         )
 
-        let task = Task { () -> SSHSession in
+        let task = Task { [connectTimeout] () -> SSHSession in
             let session = SSHSession(config: config)
-            try await session.connect()
-            return session
+            do {
+                try await SSHClient.runWithTimeout(connectTimeout) {
+                    try await session.connect()
+                }
+                return session
+            } catch {
+                session.abort()
+                await session.disconnect()
+                throw error
+            }
         }
 
         connectTask = task
@@ -150,7 +160,7 @@ actor SSHClient {
             self.session = nil
             self._sessionForAbort = nil
             self.connectedServer = nil
-            await cloudflareTransportManager.disconnect()
+            await disconnectCloudflareTransport(reason: "connect failure")
             if server.connectionMode == .cloudflare,
                case SSHError.connectionFailed(let message) = error,
                message.contains("SSH handshake failed: -13") {
@@ -177,11 +187,12 @@ actor SSHClient {
         connectTask = nil
         connectionKey = nil
 
-        await session?.disconnect()
+        let activeSession = session
         session = nil
         _sessionForAbort = nil
         connectedServer = nil
-        await cloudflareTransportManager.disconnect()
+        await disconnectSSHSession(activeSession)
+        await disconnectCloudflareTransport(reason: "client disconnect")
 
         logger.info("Disconnected")
     }
@@ -310,6 +321,28 @@ actor SSHClient {
         }
     }
 
+    private func disconnectSSHSession(_ activeSession: SSHSession?) async {
+        guard let activeSession else { return }
+        do {
+            try await SSHClient.runWithTimeout(disconnectTimeout) {
+                await activeSession.disconnect()
+            }
+        } catch {
+            logger.warning("Timed out while disconnecting SSH session; aborting socket")
+            activeSession.abort()
+        }
+    }
+
+    private func disconnectCloudflareTransport(reason: String) async {
+        do {
+            try await SSHClient.runWithTimeout(disconnectTimeout) { [cloudflareTransportManager] in
+                await cloudflareTransportManager.disconnect()
+            }
+        } catch {
+            logger.warning("Timed out while disconnecting Cloudflare transport (\(reason, privacy: .public))")
+        }
+    }
+
     // MARK: - State
 
     var isConnected: Bool {
@@ -358,7 +391,7 @@ actor SSHClient {
             let candidateSession = MoshClientSession(endpoint: endpoint)
 
             do {
-                try await runWithTimeout(startupTimeout) {
+                try await SSHClient.runWithTimeout(startupTimeout) {
                     try await candidateSession.start()
                     try await candidateSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
                 }
@@ -433,7 +466,7 @@ actor SSHClient {
         }
     }
 
-    private func runWithTimeout<T: Sendable>(
+    private nonisolated static func runWithTimeout<T: Sendable>(
         _ timeout: Duration,
         operation: @escaping @Sendable () async throws -> T
     ) async throws -> T {

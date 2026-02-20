@@ -975,7 +975,7 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        let client = TerminalTabManager.shared.sharedSSHClient(for: server)
+        let client = SSHClient()
         return Coordinator(server: server, credentials: credentials, onProcessExit: onProcessExit, sshClient: client)
     }
 
@@ -1052,7 +1052,10 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                 return
             }
 
-            guard TerminalTabManager.shared.tryBeginShellStart(for: paneId) else {
+            guard TerminalTabManager.shared.tryBeginShellStart(
+                for: paneId,
+                client: sshClient
+            ) else {
                 if TerminalTabManager.shared.shellId(for: paneId) != nil {
                     TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                 }
@@ -1069,7 +1072,7 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
             shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal, sshClient, server, credentials, paneId, onProcessExit, logger] in
                 defer {
                     Task { @MainActor [weak self] in
-                        TerminalTabManager.shared.finishShellStart(for: paneId)
+                        TerminalTabManager.shared.finishShellStart(for: paneId, client: sshClient)
                         self?.shellTask = nil
                     }
                 }

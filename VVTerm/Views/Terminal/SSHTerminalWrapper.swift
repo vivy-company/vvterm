@@ -91,7 +91,10 @@ extension SSHTerminalCoordinator {
             return
         }
 
-        guard ConnectionSessionManager.shared.tryBeginShellStart(for: sessionId) else {
+        guard ConnectionSessionManager.shared.tryBeginShellStart(
+            for: sessionId,
+            client: sshClient
+        ) else {
             if ConnectionSessionManager.shared.shellId(for: sessionId) != nil {
                 ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
             }
@@ -111,7 +114,7 @@ extension SSHTerminalCoordinator {
         shellTask = Task.detached(priority: .userInitiated) { [weak self, weak terminal] in
             defer {
                 Task { @MainActor [weak self] in
-                    ConnectionSessionManager.shared.finishShellStart(for: sessionId)
+                    ConnectionSessionManager.shared.finishShellStart(for: sessionId, client: sshClient)
                     self?.shellTask = nil
                 }
             }
@@ -281,7 +284,7 @@ struct SSHTerminalWrapper: NSViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        let client = ConnectionSessionManager.shared.sharedSSHClient(for: server)
+        let client = SSHClient()
         return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 
@@ -618,7 +621,7 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        let client = ConnectionSessionManager.shared.sharedSSHClient(for: server)
+        let client = SSHClient()
         return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 

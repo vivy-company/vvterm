@@ -1,5 +1,6 @@
 import Foundation
 import Cloudflared
+import os.log
 
 actor CloudflareTransportManager {
     private struct AccessMetadata: Sendable {
@@ -25,10 +26,12 @@ actor CloudflareTransportManager {
     private let callbackScheme = "vvterm-cfaccess"
     private let userAgent = "VVTerm"
     private let discoveryTimeout: TimeInterval = 12
+    private let disconnectTimeout: Duration = .seconds(4)
     private let metadataKeychain = KeychainStore(service: "app.vivy.vvterm.cloudflare.metadata")
     private let metadataStorageKey = "cache.v1"
     private var activeSession: SessionActor?
     private var metadataCache: [String: AccessMetadata] = [:]
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "CloudflareTransport")
 
     func connect(server: Server, credentials: ServerCredentials) async throws -> UInt16 {
         await disconnect()
@@ -104,8 +107,35 @@ actor CloudflareTransportManager {
 
     func disconnect() async {
         guard let activeSession else { return }
-        await activeSession.disconnect()
         self.activeSession = nil
+        do {
+            try await CloudflareTransportManager.runWithTimeout(disconnectTimeout) {
+                await activeSession.disconnect()
+            }
+        } catch {
+            logger.warning("Timed out while disconnecting Cloudflare transport session")
+        }
+    }
+
+    private nonisolated static func runWithTimeout<T: Sendable>(
+        _ timeout: Duration,
+        operation: @escaping @Sendable () async throws -> T
+    ) async throws -> T {
+        try await withThrowingTaskGroup(of: T.self) { group in
+            group.addTask {
+                try await operation()
+            }
+            group.addTask {
+                try await Task.sleep(for: timeout)
+                throw SSHError.timeout
+            }
+
+            guard let result = try await group.next() else {
+                throw SSHError.timeout
+            }
+            group.cancelAll()
+            return result
+        }
     }
 
     private func resolveAccessMetadata(

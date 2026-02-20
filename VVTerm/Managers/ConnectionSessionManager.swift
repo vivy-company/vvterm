@@ -67,14 +67,13 @@ final class ConnectionSessionManager: ObservableObject {
         let fallbackReason: MoshFallbackReason?
     }
 
+    private struct ShellStartContext {
+        let startedAt: Date
+        let client: SSHClient
+    }
+
     /// Shell handles indexed by session ID
     private var sshShells: [UUID: SSHShellRegistration] = [:]
-
-    /// Shared SSH clients per server
-    private var sharedSSHClients: [UUID: SSHClient] = [:]
-
-    /// Shell counts per server for shared client lifecycle
-    private var serverShellCounts: [UUID: Int] = [:]
 
     /// Terminal views indexed by session ID for voice input and other external interactions
     private var terminalViews: [UUID: GhosttyTerminalView] = [:]
@@ -85,7 +84,7 @@ final class ConnectionSessionManager: ObservableObject {
     private var shellSuspendHandlers: [UUID: () -> Void] = [:]
     /// Session IDs currently starting a shell (global single-flight guard).
     /// Value is start time for stale-guard recovery.
-    private var shellStartsInFlight: [UUID: Date] = [:]
+    private var shellStartsInFlight: [UUID: ShellStartContext] = [:]
     /// Keep shell-start locks alive for the full SSH retry window:
     /// 3 attempts × 30s connect timeout + backoff + safety margin.
     private let shellStartStaleThreshold: TimeInterval = 120
@@ -279,7 +278,6 @@ final class ConnectionSessionManager: ObservableObject {
         shellCancelHandlers[sessionId]?()
         shellCancelHandlers.removeValue(forKey: sessionId)
         shellSuspendHandlers.removeValue(forKey: sessionId)
-        shellStartsInFlight.removeValue(forKey: sessionId)
         tmuxResolver.clearRuntimeState(for: sessionId, setPrompt: setTmuxAttachPrompt)
 
         // Remove from UI immediately
@@ -447,20 +445,6 @@ final class ConnectionSessionManager: ObservableObject {
 
     // MARK: - SSH Client Registration
 
-    func sharedSSHClient(for server: Server) -> SSHClient {
-        if server.connectionMode == .cloudflare {
-            // Cloudflare transport is more stable with an isolated SSH client
-            // per pane/session lifecycle.
-            return SSHClient()
-        }
-        if let client = sharedSSHClients[server.id] {
-            return client
-        }
-        let client = SSHClient()
-        sharedSSHClients[server.id] = client
-        return client
-    }
-
     func registerSSHClient(
         _ client: SSHClient,
         shellId: UUID,
@@ -470,13 +454,21 @@ final class ConnectionSessionManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
+        if let context = shellStartsInFlight[sessionId],
+           ObjectIdentifier(context.client) != ObjectIdentifier(client) {
+            logger.warning("Ignoring stale shell registration for session \(sessionId.uuidString, privacy: .public)")
+            Task.detached(priority: .utility) { [client, shellId] in
+                await client.closeShell(shellId)
+                await client.disconnect()
+            }
+            return
+        }
         shellStartsInFlight.removeValue(forKey: sessionId)
 
         if let existing = sshShells[sessionId] {
             Task.detached { [client = existing.client, shellId = existing.shellId] in
                 await client.closeShell(shellId)
             }
-            serverShellCounts[existing.serverId] = max((serverShellCounts[existing.serverId] ?? 1) - 1, 0)
         }
 
         sshShells[sessionId] = SSHShellRegistration(
@@ -486,10 +478,6 @@ final class ConnectionSessionManager: ObservableObject {
             transport: transport,
             fallbackReason: fallbackReason
         )
-        serverShellCounts[serverId, default: 0] += 1
-        if !isCloudflareServer(serverId) {
-            sharedSSHClients[serverId] = client
-        }
 
         if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
             sessions[index].activeTransport = transport
@@ -504,33 +492,18 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
-        shellStartsInFlight.removeValue(forKey: sessionId)
+        let pendingStart = shellStartsInFlight.removeValue(forKey: sessionId)
 
         guard let registration = sshShells.removeValue(forKey: sessionId) else {
-            // No shell was registered yet for this session. If no other shells are
-            // active on this server, reset the shared client to clear hung connects.
-            guard let serverId = sessions.first(where: { $0.id == sessionId })?.serverId else { return }
-            if (serverShellCounts[serverId] ?? 0) == 0,
-               let client = sharedSSHClients.removeValue(forKey: serverId) {
-                await client.disconnect()
+            if let pendingStart {
+                if !hasActiveRegistration(using: pendingStart.client) {
+                    await pendingStart.client.disconnect()
+                }
             }
             return
         }
 
         await registration.client.closeShell(registration.shellId)
-
-        let serverId = registration.serverId
-        let newCount = max((serverShellCounts[serverId] ?? 1) - 1, 0)
-        serverShellCounts[serverId] = newCount
-
-        if let mapped = sharedSSHClients[serverId],
-           ObjectIdentifier(mapped) == ObjectIdentifier(registration.client) {
-            if let replacement = sshShells.values.first(where: { $0.serverId == serverId })?.client {
-                sharedSSHClients[serverId] = replacement
-            } else {
-                sharedSSHClients.removeValue(forKey: serverId)
-            }
-        }
 
         if !hasActiveRegistration(using: registration.client) {
             await registration.client.disconnect()
@@ -555,40 +528,47 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     /// Returns true only for the first caller while no live shell exists for the session.
-    func tryBeginShellStart(for sessionId: UUID) -> Bool {
+    func tryBeginShellStart(for sessionId: UUID, client: SSHClient) -> Bool {
         if sshShells[sessionId] != nil {
             return false
         }
-        if let startedAt = shellStartsInFlight[sessionId] {
-            if Date().timeIntervalSince(startedAt) < shellStartStaleThreshold {
+        if let context = shellStartsInFlight[sessionId] {
+            if Date().timeIntervalSince(context.startedAt) < shellStartStaleThreshold {
                 return false
             }
             shellStartsInFlight.removeValue(forKey: sessionId)
             logger.warning("Recovered stale session shell-start lock for \(sessionId.uuidString, privacy: .public)")
+            Task.detached(priority: .utility) { [client = context.client] in
+                await client.disconnect()
+            }
         }
-        shellStartsInFlight[sessionId] = Date()
+        shellStartsInFlight[sessionId] = ShellStartContext(
+            startedAt: Date(),
+            client: client
+        )
         return true
     }
 
-    func finishShellStart(for sessionId: UUID) {
+    func finishShellStart(for sessionId: UUID, client: SSHClient) {
+        guard let context = shellStartsInFlight[sessionId] else { return }
+        guard ObjectIdentifier(context.client) == ObjectIdentifier(client) else { return }
         shellStartsInFlight.removeValue(forKey: sessionId)
     }
 
     func isShellStartInFlight(for sessionId: UUID) -> Bool {
-        guard let startedAt = shellStartsInFlight[sessionId] else { return false }
-        if Date().timeIntervalSince(startedAt) >= shellStartStaleThreshold {
+        guard let context = shellStartsInFlight[sessionId] else { return false }
+        if Date().timeIntervalSince(context.startedAt) >= shellStartStaleThreshold {
             shellStartsInFlight.removeValue(forKey: sessionId)
             logger.warning("Cleared stale session shell-start in-flight flag for \(sessionId.uuidString, privacy: .public)")
+            Task.detached(priority: .utility) { [client = context.client] in
+                await client.disconnect()
+            }
             return false
         }
         return true
     }
 
     func sshClient(for serverId: UUID) -> SSHClient? {
-        if let client = sharedSSHClients[serverId] {
-            return client
-        }
-
         if let selectedId = selectedSessionId,
            let selectedSession = sessions.first(where: { $0.id == selectedId && $0.serverId == serverId }),
            let client = sshShells[selectedSession.id]?.client {
@@ -600,6 +580,9 @@ final class ConnectionSessionManager: ObservableObject {
             return client
         }
 
+        if let registration = sshShells.values.first(where: { $0.serverId == serverId }) {
+            return registration.client
+        }
         return nil
     }
 
@@ -612,10 +595,6 @@ final class ConnectionSessionManager: ObservableObject {
             return nil
         }
         return sshClient(for: serverId)
-    }
-
-    private func isCloudflareServer(_ serverId: UUID) -> Bool {
-        ServerManager.shared.servers.first(where: { $0.id == serverId })?.connectionMode == .cloudflare
     }
 
     private func hasActiveRegistration(using client: SSHClient) -> Bool {
@@ -1169,6 +1148,54 @@ extension ConnectionSessionManager {
         }
     }
 }
+
+#if DEBUG
+extension ConnectionSessionManager {
+    /// Resets manager state for deterministic integration tests.
+    func resetForTesting() async {
+        persistTask?.cancel()
+        persistTask = nil
+
+        let allSessionIds = Set(sessions.map(\.id)).union(shellStartsInFlight.keys)
+        for sessionId in allSessionIds {
+            tmuxResolver.clearRuntimeState(for: sessionId, setPrompt: setTmuxAttachPrompt)
+        }
+
+        var uniqueClients: [ObjectIdentifier: SSHClient] = [:]
+        for registration in sshShells.values {
+            uniqueClients[ObjectIdentifier(registration.client)] = registration.client
+        }
+        for context in shellStartsInFlight.values {
+            uniqueClients[ObjectIdentifier(context.client)] = context.client
+        }
+
+        let terminals = Array(terminalViews.values)
+        isRestoring = true
+        sessions = []
+        selectedSessionId = nil
+        connectedServerIds = []
+        selectedViewByServer = [:]
+        selectedSessionByServer = [:]
+        tmuxAttachPrompt = nil
+        sshShells.removeAll()
+        shellCancelHandlers.removeAll()
+        shellSuspendHandlers.removeAll()
+        shellStartsInFlight.removeAll()
+        tmuxCleanupServers.removeAll()
+        terminalViews.removeAll()
+        terminalAccessOrder.removeAll()
+        isRestoring = false
+
+        UserDefaults.standard.removeObject(forKey: persistenceKey)
+        for terminal in terminals {
+            terminal.cleanup()
+        }
+        for client in uniqueClients.values {
+            await client.disconnect()
+        }
+    }
+}
+#endif
 
 actor ConnectionReliabilityManager {
     private var reconnectAttempts = 0
