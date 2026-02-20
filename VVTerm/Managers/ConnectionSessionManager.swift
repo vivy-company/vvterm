@@ -70,6 +70,7 @@ final class ConnectionSessionManager: ObservableObject {
     private struct ShellStartContext {
         let startedAt: Date
         let client: SSHClient
+        let serverId: UUID
     }
 
     /// Shell handles indexed by session ID
@@ -85,6 +86,8 @@ final class ConnectionSessionManager: ObservableObject {
     /// Session IDs currently starting a shell (global single-flight guard).
     /// Value is start time for stale-guard recovery.
     private var shellStartsInFlight: [UUID: ShellStartContext] = [:]
+    /// Server IDs with an in-flight open request, used to collapse repeated clicks.
+    private var sessionOpensInFlight: Set<UUID> = []
     /// Keep shell-start locks alive for the full SSH retry window:
     /// 3 attempts × 30s connect timeout + backoff + safety margin.
     private let shellStartStaleThreshold: TimeInterval = 120
@@ -140,6 +143,14 @@ final class ConnectionSessionManager: ObservableObject {
         guard await AppLockManager.shared.ensureServerUnlocked(server) else {
             throw VVTermError.authenticationFailed
         }
+
+        if sessionOpensInFlight.contains(server.id) {
+            throw VVTermError.connectionFailed(
+                String(localized: "A connection is already opening for this server.")
+            )
+        }
+        sessionOpensInFlight.insert(server.id)
+        defer { sessionOpensInFlight.remove(server.id) }
 
         // Check if already have a session for this server (unless forcing new)
         if !forceNew, let existingSession = sessions.first(where: { $0.serverId == server.id }) {
@@ -505,7 +516,7 @@ final class ConnectionSessionManager: ObservableObject {
 
         guard let registration = sshShells.removeValue(forKey: sessionId) else {
             if let pendingStart {
-                if !hasActiveRegistration(using: pendingStart.client) {
+                if !hasClientReferences(pendingStart.client) {
                     await pendingStart.client.disconnect()
                 }
             }
@@ -514,7 +525,7 @@ final class ConnectionSessionManager: ObservableObject {
 
         await registration.client.closeShell(registration.shellId)
 
-        if !hasActiveRegistration(using: registration.client) {
+        if !hasClientReferences(registration.client) {
             await registration.client.disconnect()
         }
 
@@ -538,6 +549,10 @@ final class ConnectionSessionManager: ObservableObject {
 
     /// Returns true only for the first caller while no live shell exists for the session.
     func tryBeginShellStart(for sessionId: UUID, client: SSHClient) -> Bool {
+        guard let serverId = sessions.first(where: { $0.id == sessionId })?.serverId else {
+            return false
+        }
+
         if sshShells[sessionId] != nil {
             return false
         }
@@ -547,13 +562,16 @@ final class ConnectionSessionManager: ObservableObject {
             }
             shellStartsInFlight.removeValue(forKey: sessionId)
             logger.warning("Recovered stale session shell-start lock for \(sessionId.uuidString, privacy: .public)")
-            Task.detached(priority: .utility) { [client = context.client] in
-                await client.disconnect()
+            if !hasClientReferences(context.client) {
+                Task.detached(priority: .utility) { [client = context.client] in
+                    await client.disconnect()
+                }
             }
         }
         shellStartsInFlight[sessionId] = ShellStartContext(
             startedAt: Date(),
-            client: client
+            client: client,
+            serverId: serverId
         )
         return true
     }
@@ -569,15 +587,17 @@ final class ConnectionSessionManager: ObservableObject {
         if Date().timeIntervalSince(context.startedAt) >= shellStartStaleThreshold {
             shellStartsInFlight.removeValue(forKey: sessionId)
             logger.warning("Cleared stale session shell-start in-flight flag for \(sessionId.uuidString, privacy: .public)")
-            Task.detached(priority: .utility) { [client = context.client] in
-                await client.disconnect()
+            if !hasClientReferences(context.client) {
+                Task.detached(priority: .utility) { [client = context.client] in
+                    await client.disconnect()
+                }
             }
             return false
         }
         return true
     }
 
-    func sshClient(for serverId: UUID) -> SSHClient? {
+    private func preferredSSHClient(for serverId: UUID, allowPendingStart: Bool) -> SSHClient? {
         if let selectedId = selectedSessionId,
            let selectedSession = sessions.first(where: { $0.id == selectedId && $0.serverId == serverId }),
            let client = sshShells[selectedSession.id]?.client {
@@ -592,7 +612,21 @@ final class ConnectionSessionManager: ObservableObject {
         if let registration = sshShells.values.first(where: { $0.serverId == serverId }) {
             return registration.client
         }
+
+        if allowPendingStart,
+           let context = shellStartsInFlight.values.first(where: { $0.serverId == serverId }) {
+            return context.client
+        }
+
         return nil
+    }
+
+    func sshClient(for serverId: UUID) -> SSHClient? {
+        preferredSSHClient(for: serverId, allowPendingStart: true)
+    }
+
+    func activeSSHClient(for serverId: UUID) -> SSHClient? {
+        preferredSSHClient(for: serverId, allowPendingStart: false)
     }
 
     func activeTransport(for sessionId: UUID) -> ShellTransport {
@@ -609,6 +643,15 @@ final class ConnectionSessionManager: ObservableObject {
     private func hasActiveRegistration(using client: SSHClient) -> Bool {
         let identifier = ObjectIdentifier(client)
         return sshShells.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    private func hasPendingStart(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return shellStartsInFlight.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    private func hasClientReferences(_ client: SSHClient) -> Bool {
+        hasActiveRegistration(using: client) || hasPendingStart(using: client)
     }
 
     private func selectedTransport(for serverId: UUID) -> ShellTransport {
@@ -1165,7 +1208,8 @@ extension ConnectionSessionManager {
         persistTask?.cancel()
         persistTask = nil
 
-        let allSessionIds = Set(sessions.map(\.id)).union(shellStartsInFlight.keys)
+        let allSessionIds = Set(sessions.map(\.id))
+            .union(shellStartsInFlight.keys)
         for sessionId in allSessionIds {
             tmuxResolver.clearRuntimeState(for: sessionId, setPrompt: setTmuxAttachPrompt)
         }
@@ -1190,6 +1234,7 @@ extension ConnectionSessionManager {
         shellCancelHandlers.removeAll()
         shellSuspendHandlers.removeAll()
         shellStartsInFlight.removeAll()
+        sessionOpensInFlight.removeAll()
         tmuxCleanupServers.removeAll()
         terminalViews.removeAll()
         terminalAccessOrder.removeAll()

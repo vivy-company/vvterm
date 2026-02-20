@@ -306,7 +306,14 @@ struct SSHTerminalWrapper: NSViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        let client = SSHClient()
+        let client: SSHClient
+        if server.connectionMode == .cloudflare {
+            // Cloudflare-backed SSH can throttle multiplexed channels on one session.
+            // Use a dedicated SSH client per tab/session to avoid channel starvation.
+            client = SSHClient()
+        } else {
+            client = ConnectionSessionManager.shared.activeSSHClient(for: server.id) ?? SSHClient()
+        }
         return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 
@@ -643,7 +650,14 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
     @EnvironmentObject var ghosttyApp: Ghostty.App
 
     func makeCoordinator() -> Coordinator {
-        let client = SSHClient()
+        let client: SSHClient
+        if server.connectionMode == .cloudflare {
+            // Cloudflare-backed SSH can throttle multiplexed channels on one session.
+            // Use a dedicated SSH client per tab/session to avoid channel starvation.
+            client = SSHClient()
+        } else {
+            client = ConnectionSessionManager.shared.activeSSHClient(for: server.id) ?? SSHClient()
+        }
         return Coordinator(server: server, credentials: credentials, sessionId: session.id, onProcessExit: onProcessExit, sshClient: client)
     }
 

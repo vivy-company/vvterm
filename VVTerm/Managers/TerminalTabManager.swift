@@ -60,6 +60,7 @@ final class TerminalTabManager: ObservableObject {
     private struct ShellStartContext {
         let startedAt: Date
         let client: SSHClient
+        let serverId: UUID
     }
 
     /// Shell handles keyed by pane ID
@@ -68,6 +69,8 @@ final class TerminalTabManager: ObservableObject {
     /// Pane IDs currently starting a shell (global single-flight guard).
     /// Value is start time for stale-guard recovery.
     private var shellStartsInFlight: [UUID: ShellStartContext] = [:]
+    /// Server IDs with an in-flight tab-open request to avoid queued duplicates.
+    private var tabOpensInFlight: Set<UUID> = []
     /// Keep shell-start locks alive for the full SSH retry window:
     /// 3 attempts × 30s connect timeout + backoff + safety margin.
     private let shellStartStaleThreshold: TimeInterval = 120
@@ -123,6 +126,14 @@ final class TerminalTabManager: ObservableObject {
         guard await AppLockManager.shared.ensureServerUnlocked(server) else {
             throw VVTermError.authenticationFailed
         }
+
+        if tabOpensInFlight.contains(server.id) {
+            throw VVTermError.connectionFailed(
+                String(localized: "A tab is already opening for this server.")
+            )
+        }
+        tabOpensInFlight.insert(server.id)
+        defer { tabOpensInFlight.remove(server.id) }
 
         let tab = TerminalTab(serverId: server.id, title: server.name)
 
@@ -204,18 +215,35 @@ final class TerminalTabManager: ObservableObject {
     }
 
     private func splitPane(tab: TerminalTab, paneId: UUID, direction: TerminalSplitDirection) -> UUID? {
+        // Resolve the latest tab from manager state since the passed value can be stale.
+        guard let currentTab = tabs(for: tab.serverId).first(where: { $0.id == tab.id }) else {
+            logger.warning("splitPane: tab not found \(tab.id.uuidString, privacy: .public)")
+            return nil
+        }
+
+        let paneExists: Bool
+        if let layout = currentTab.layout {
+            paneExists = layout.findPane(paneId)
+        } else {
+            paneExists = currentTab.rootPaneId == paneId
+        }
+        guard paneExists else {
+            logger.warning("splitPane: pane not found \(paneId.uuidString, privacy: .public)")
+            return nil
+        }
+
         let newPaneId = UUID()
 
         // Create pane state FIRST (before any @Published updates)
         // This ensures the view has state when it renders
         var newState = TerminalPaneState(
             paneId: newPaneId,
-            tabId: tab.id,
-            serverId: tab.serverId
+            tabId: currentTab.id,
+            serverId: currentTab.serverId
         )
         newState.workingDirectory = paneStates[paneId]?.workingDirectory
         newState.seedPaneId = paneId
-        newState.tmuxStatus = tmuxResolver.isTmuxEnabled(for: tab.serverId) ? .unknown : .off
+        newState.tmuxStatus = tmuxResolver.isTmuxEnabled(for: currentTab.serverId) ? .unknown : .off
         paneStates[newPaneId] = newState
 
         // Create the new split node
@@ -227,8 +255,8 @@ final class TerminalTabManager: ObservableObject {
         ))
 
         // Update tab layout
-        var updatedTab = tab
-        if let currentLayout = tab.layout {
+        var updatedTab = currentTab
+        if let currentLayout = currentTab.layout {
             updatedTab.layout = currentLayout.replacingPane(paneId, with: newSplit).equalized()
         } else {
             // No layout yet - create one with the split
@@ -371,7 +399,7 @@ final class TerminalTabManager: ObservableObject {
 
         guard let registration = sshShells.removeValue(forKey: paneId) else {
             if let pendingStart {
-                if !hasActiveRegistration(using: pendingStart.client) {
+                if !hasClientReferences(pendingStart.client) {
                     await pendingStart.client.disconnect()
                 }
             }
@@ -380,7 +408,7 @@ final class TerminalTabManager: ObservableObject {
 
         await registration.client.closeShell(registration.shellId)
 
-        if !hasActiveRegistration(using: registration.client) {
+        if !hasClientReferences(registration.client) {
             await registration.client.disconnect()
         }
 
@@ -399,6 +427,10 @@ final class TerminalTabManager: ObservableObject {
 
     /// Returns true only for the first caller while no live shell exists for the pane.
     func tryBeginShellStart(for paneId: UUID, client: SSHClient) -> Bool {
+        guard let serverId = paneStates[paneId]?.serverId else {
+            return false
+        }
+
         if sshShells[paneId] != nil {
             return false
         }
@@ -408,13 +440,16 @@ final class TerminalTabManager: ObservableObject {
             }
             shellStartsInFlight.removeValue(forKey: paneId)
             logger.warning("Recovered stale pane shell-start lock for \(paneId.uuidString, privacy: .public)")
-            Task.detached(priority: .utility) { [client = context.client] in
-                await client.disconnect()
+            if !hasClientReferences(context.client) {
+                Task.detached(priority: .utility) { [client = context.client] in
+                    await client.disconnect()
+                }
             }
         }
         shellStartsInFlight[paneId] = ShellStartContext(
             startedAt: Date(),
-            client: client
+            client: client,
+            serverId: serverId
         )
         return true
     }
@@ -430,15 +465,17 @@ final class TerminalTabManager: ObservableObject {
         if Date().timeIntervalSince(context.startedAt) >= shellStartStaleThreshold {
             shellStartsInFlight.removeValue(forKey: paneId)
             logger.warning("Cleared stale pane shell-start in-flight flag for \(paneId.uuidString, privacy: .public)")
-            Task.detached(priority: .utility) { [client = context.client] in
-                await client.disconnect()
+            if !hasClientReferences(context.client) {
+                Task.detached(priority: .utility) { [client = context.client] in
+                    await client.disconnect()
+                }
             }
             return false
         }
         return true
     }
 
-    func sshClient(for serverId: UUID) -> SSHClient? {
+    private func preferredSSHClient(for serverId: UUID, allowPendingStart: Bool) -> SSHClient? {
         if let selectedTab = selectedTab(for: serverId) {
             let preferredPaneIds = [selectedTab.focusedPaneId, selectedTab.rootPaneId] + selectedTab.allPaneIds
             for paneId in preferredPaneIds {
@@ -461,7 +498,22 @@ final class TerminalTabManager: ObservableObject {
             return registration.client
         }
 
+        if allowPendingStart,
+           let context = shellStartsInFlight.values.first(where: { $0.serverId == serverId }) {
+            return context.client
+        }
+
         return nil
+    }
+
+    /// Returns the best-known client for this server, including pending shell starts.
+    func sshClient(for serverId: UUID) -> SSHClient? {
+        preferredSSHClient(for: serverId, allowPendingStart: true)
+    }
+
+    /// Returns only clients that already have a registered shell for this server.
+    func activeSSHClient(for serverId: UUID) -> SSHClient? {
+        preferredSSHClient(for: serverId, allowPendingStart: false)
     }
 
     func hasOtherActivePanes(for serverId: UUID, excluding paneId: UUID) -> Bool {
@@ -493,6 +545,15 @@ final class TerminalTabManager: ObservableObject {
     private func hasActiveRegistration(using client: SSHClient) -> Bool {
         let identifier = ObjectIdentifier(client)
         return sshShells.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    private func hasPendingStart(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return shellStartsInFlight.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    private func hasClientReferences(_ client: SSHClient) -> Bool {
+        hasActiveRegistration(using: client) || hasPendingStart(using: client)
     }
 
     private func selectedTransport(for serverId: UUID) -> ShellTransport {
@@ -985,7 +1046,8 @@ extension TerminalTabManager {
         persistTask?.cancel()
         persistTask = nil
 
-        let allPaneIds = Set(paneStates.keys).union(shellStartsInFlight.keys)
+        let allPaneIds = Set(paneStates.keys)
+            .union(shellStartsInFlight.keys)
         for paneId in allPaneIds {
             tmuxResolver.clearRuntimeState(for: paneId, setPrompt: setTmuxAttachPrompt)
         }
@@ -1010,6 +1072,7 @@ extension TerminalTabManager {
         terminalViews.removeAll()
         sshShells.removeAll()
         shellStartsInFlight.removeAll()
+        tabOpensInFlight.removeAll()
         tmuxCleanupServers.removeAll()
         isRestoring = false
 
