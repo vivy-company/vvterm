@@ -42,7 +42,6 @@ struct TerminalSettingsView: View {
     @AppStorage("terminalUsePerAppearanceTheme") private var usePerAppearanceTheme = true
     @AppStorage("terminalNotificationsEnabled") private var terminalNotificationsEnabled = true
     @AppStorage("terminalProgressEnabled") private var terminalProgressEnabled = true
-    @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true
     @AppStorage("terminalAccessoryCustomizationEnabled") private var terminalAccessoryCustomizationEnabled = true
     @AppStorage("terminalTmuxEnabledDefault") private var tmuxEnabledDefault = true
     @AppStorage("terminalTmuxStartupBehaviorDefault") private var tmuxStartupBehaviorDefaultRaw = TmuxStartupBehavior.askEveryTime.rawValue
@@ -201,7 +200,6 @@ struct TerminalSettingsView: View {
         Section("Terminal Behavior") {
             Toggle("Enable terminal notifications", isOn: $terminalNotificationsEnabled)
             Toggle("Show progress overlays", isOn: $terminalProgressEnabled)
-            Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
         }
     }
 

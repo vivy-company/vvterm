@@ -12,6 +12,7 @@ struct TranscriptionSettingsView: View {
     @AppStorage(TranscriptionSettingsKeys.mlxWhisperModelId) private var whisperModelId = TranscriptionSettingsDefaults.mlxWhisperModelId
     @AppStorage(TranscriptionSettingsKeys.mlxParakeetModelId) private var parakeetModelId = TranscriptionSettingsDefaults.mlxParakeetModelId
     @AppStorage("transcriptionLanguage") private var language = "en"
+    @AppStorage("terminalVoiceButtonEnabled") private var terminalVoiceButtonEnabled = true
 
     @StateObject private var whisperManager: MLXModelManager
     @StateObject private var parakeetManager: MLXModelManager
@@ -54,6 +55,10 @@ struct TranscriptionSettingsView: View {
                 Text("Provider")
             } footer: {
                 Text(providerDescription)
+            }
+
+            Section("Terminal") {
+                Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
             }
 
             if provider == TranscriptionProvider.system.rawValue {
