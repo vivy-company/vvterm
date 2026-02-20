@@ -593,7 +593,7 @@ final class TerminalContainerUIView: UIView {
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = .black
+        backgroundColor = .clear
     }
 
     required init?(coder: NSCoder) {
@@ -719,7 +719,6 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
 
             // Rewrap in a fresh container so layout/safe-area changes apply correctly.
             let container = TerminalContainerUIView()
-            container.backgroundColor = .black
             coordinator.containerView = container
             coordinator.startKeyboardMonitoring()
 
@@ -764,7 +763,6 @@ private struct SSHTerminalRepresentable: UIViewRepresentable {
         // Create a container view that will hold the terminal once it's ready
         // This allows the navigation animation to complete smoothly
         let container = TerminalContainerUIView()
-        container.backgroundColor = .black
         coordinator.containerView = container
         coordinator.startKeyboardMonitoring()
 

@@ -51,7 +51,7 @@ struct TerminalContainerView: View {
     #endif
 
     /// Terminal background color from theme
-    @State private var terminalBackgroundColor: Color = .black
+    @State private var terminalBackgroundColor: Color = Self.initialTerminalBackgroundColor()
 
     /// Theme name from settings
     @AppStorage("terminalThemeName") private var terminalThemeName = "Aizen Dark"
@@ -157,7 +157,7 @@ struct TerminalContainerView: View {
                             .multilineTextAlignment(.center)
                         }
                     } else if shouldShowInitializingOverlay {
-                        TerminalStatusCard {
+                        TerminalStatusCard(showsScrim: false) {
                             VStack(spacing: 12) {
                                 ProgressView()
                                     .progressViewStyle(.circular)
@@ -173,7 +173,7 @@ struct TerminalContainerView: View {
             if ghosttyApp.readiness != .error && !shouldShowInitializingOverlay {
                 switch state {
                 case .connecting:
-                    TerminalStatusCard {
+                    TerminalStatusCard(showsScrim: false) {
                         VStack(spacing: 16) {
                             ProgressView()
                                 .progressViewStyle(.circular)
@@ -184,7 +184,7 @@ struct TerminalContainerView: View {
                         .multilineTextAlignment(.center)
                     }
                 case .reconnecting(let attempt):
-                    TerminalStatusCard {
+                    TerminalStatusCard(showsScrim: false) {
                         VStack(spacing: 16) {
                             ProgressView()
                                 .progressViewStyle(.circular)
@@ -244,7 +244,7 @@ struct TerminalContainerView: View {
             }
 
             if session.tmuxStatus == .installing {
-                TerminalStatusCard {
+                TerminalStatusCard(showsScrim: false) {
                     VStack(spacing: 12) {
                         ProgressView()
                             .progressViewStyle(.circular)
@@ -256,7 +256,7 @@ struct TerminalContainerView: View {
             }
 
             if isInstallingMosh {
-                TerminalStatusCard {
+                TerminalStatusCard(showsScrim: false) {
                     VStack(spacing: 12) {
                         ProgressView()
                             .progressViewStyle(.circular)
@@ -454,24 +454,29 @@ struct TerminalContainerView: View {
     }
 
     private func updateTerminalBackgroundColor() {
-        let themeName = effectiveThemeName
-        Task.detached(priority: .utility) {
-            let resolved = ThemeColorParser.backgroundColor(for: themeName)
-            await MainActor.run {
-                if let color = resolved {
-                    terminalBackgroundColor = color
-                    UserDefaults.standard.set(color.toHex(), forKey: "terminalBackgroundColor")
-                } else {
-                    #if os(iOS)
-                    terminalBackgroundColor = Color(UIColor.systemBackground)
-                    #elseif os(macOS)
-                    terminalBackgroundColor = Color(NSColor.windowBackgroundColor)
-                    #else
-                    terminalBackgroundColor = .black
-                    #endif
-                }
-            }
+        if let color = ThemeColorParser.backgroundColor(for: effectiveThemeName) {
+            terminalBackgroundColor = color
+            UserDefaults.standard.set(color.toHex(), forKey: "terminalBackgroundColor")
+        } else {
+            terminalBackgroundColor = Self.platformFallbackBackgroundColor()
         }
+    }
+
+    private static func initialTerminalBackgroundColor() -> Color {
+        if let cachedHex = UserDefaults.standard.string(forKey: "terminalBackgroundColor") {
+            return Color.fromHex(cachedHex)
+        }
+        return platformFallbackBackgroundColor()
+    }
+
+    private static func platformFallbackBackgroundColor() -> Color {
+        #if os(iOS)
+        return Color(UIColor.systemBackground)
+        #elseif os(macOS)
+        return Color(NSColor.windowBackgroundColor)
+        #else
+        return .black
+        #endif
     }
 
     private func disableTmuxForServer() {
