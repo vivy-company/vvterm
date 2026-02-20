@@ -9,6 +9,93 @@ import SwiftUI
 import Foundation
 import os.log
 
+enum SSHConnectionRunner {
+    static func run(
+        server: Server,
+        credentials: ServerCredentials,
+        sshClient: SSHClient,
+        terminal: GhosttyTerminalView,
+        logger: Logger,
+        onAttempt: @escaping (_ attempt: Int) async -> Void,
+        startupPlan: @escaping () async -> (command: String?, skipTmuxLifecycle: Bool),
+        registerShell: @escaping (_ shell: ShellHandle, _ skipTmuxLifecycle: Bool) async -> Void,
+        onBeforeShellStart: @escaping (_ cols: Int, _ rows: Int) async -> Void,
+        onShellStarted: @escaping (_ terminal: GhosttyTerminalView, _ shellId: UUID) async -> Void,
+        shouldContinueStreaming: @escaping (_ data: Data, _ terminal: GhosttyTerminalView) async -> Bool,
+        shouldResetClient: @escaping (_ error: SSHError) async -> Bool,
+        onProcessExit: @escaping () async -> Void,
+        onFailure: @escaping (_ error: Error, _ terminal: GhosttyTerminalView) async -> Void
+    ) async {
+        let maxAttempts = 3
+        var lastError: Error?
+
+        for attempt in 1...maxAttempts {
+            guard !Task.isCancelled else { return }
+            await onAttempt(attempt)
+
+            do {
+                logger.info("Connecting to \(server.host)... (attempt \(attempt))")
+                _ = try await sshClient.connect(to: server, credentials: credentials)
+                guard !Task.isCancelled else { return }
+
+                let size = await terminal.terminalSize()
+                let cols = Int(size?.columns ?? 80)
+                let rows = Int(size?.rows ?? 24)
+
+                await onBeforeShellStart(cols, rows)
+                let startup = await startupPlan()
+                let shell = try await sshClient.startShell(
+                    cols: cols,
+                    rows: rows,
+                    startupCommand: startup.command
+                )
+
+                guard !Task.isCancelled else {
+                    await sshClient.closeShell(shell.id)
+                    return
+                }
+
+                await registerShell(shell, startup.skipTmuxLifecycle)
+                await onShellStarted(terminal, shell.id)
+
+                guard !Task.isCancelled else { return }
+                for await data in shell.stream {
+                    guard !Task.isCancelled else { break }
+                    let shouldContinue = await shouldContinueStreaming(data, terminal)
+                    if !shouldContinue { break }
+                }
+
+                guard !Task.isCancelled else { return }
+                logger.info("SSH shell ended")
+                await onProcessExit()
+                return
+            } catch {
+                guard !Task.isCancelled else { return }
+                lastError = error
+                logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
+
+                if attempt < maxAttempts, let sshError = error as? SSHError {
+                    let shouldReset = await shouldResetClient(sshError)
+                    if shouldReset {
+                        logger.warning("Resetting SSH client before retrying connection")
+                        await sshClient.disconnect()
+                    }
+                }
+
+                if attempt < maxAttempts {
+                    let delay = pow(2.0, Double(attempt - 1))
+                    try? await Task.sleep(for: .seconds(delay))
+                    continue
+                }
+            }
+        }
+
+        if let lastError {
+            await onFailure(lastError, terminal)
+        }
+    }
+}
+
 // MARK: - SSH Terminal Coordinator Protocol
 
 /// Protocol for shared SSH terminal coordinator functionality across platforms
@@ -28,6 +115,9 @@ protocol SSHTerminalCoordinator: AnyObject {
 
     /// Platform-specific hook called before starting shell (after connect, after registering client)
     func onBeforeShellStart(cols: Int, rows: Int) async
+
+    /// Fallback route when local shellId is temporarily unavailable.
+    func fallbackRoute() -> (client: SSHClient, shellId: UUID)?
 }
 
 extension SSHTerminalCoordinator {
@@ -46,14 +136,9 @@ extension SSHTerminalCoordinator {
 
         // Coordinator can be recreated while an existing shell is still registered.
         // Fall back to the manager registry so input keeps working after view reattachment.
-        Task(priority: .userInitiated) { [sessionId, logger] in
-            let route = await MainActor.run { () -> (client: SSHClient, shellId: UUID)? in
-                guard let session = ConnectionSessionManager.shared.sessions.first(where: { $0.id == sessionId }),
-                      let client = ConnectionSessionManager.shared.sshClient(for: session),
-                      let shellId = ConnectionSessionManager.shared.shellId(for: session) else {
-                    return nil
-                }
-                return (client: client, shellId: shellId)
+        Task(priority: .userInitiated) { [logger] in
+            let route = await MainActor.run {
+                self.fallbackRoute()
             }
 
             guard let route else { return }
@@ -142,151 +227,104 @@ extension SSHTerminalCoordinator {
             }
 
             guard let self = self, let terminal = terminal else { return }
-
-            let maxAttempts = 3
-            var lastError: Error?
-
-            for attempt in 1...maxAttempts {
-                guard !Task.isCancelled else { return }
-
-                await MainActor.run {
-                    if attempt == 1 {
-                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connecting)
-                    } else {
-                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .reconnecting(attempt: attempt))
+            await SSHConnectionRunner.run(
+                server: server,
+                credentials: credentials,
+                sshClient: sshClient,
+                terminal: terminal,
+                logger: logger,
+                onAttempt: { attempt in
+                    await MainActor.run {
+                        if attempt == 1 {
+                            ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connecting)
+                        } else {
+                            ConnectionSessionManager.shared.updateSessionState(sessionId, to: .reconnecting(attempt: attempt))
+                        }
                     }
-                }
-
-                do {
-                    logger.info("Connecting to \(server.host)... (attempt \(attempt))")
-                    _ = try await sshClient.connect(to: server, credentials: credentials)
-
-                    guard !Task.isCancelled else { return }
-
-                    let size = await terminal.terminalSize()
-                    let cols = Int(size?.columns ?? 80)
-                    let rows = Int(size?.rows ?? 24)
-
-                    // Platform-specific hook before shell start
-                    await self.onBeforeShellStart(cols: cols, rows: rows)
-
-                    let tmuxStartup = await ConnectionSessionManager.shared.tmuxStartupPlan(
+                },
+                startupPlan: {
+                    await ConnectionSessionManager.shared.tmuxStartupPlan(
                         for: sessionId,
                         serverId: server.id,
                         client: sshClient
                     )
-
-                    let shell = try await sshClient.startShell(
-                        cols: cols,
-                        rows: rows,
-                        startupCommand: tmuxStartup.command
-                    )
-
-                    guard !Task.isCancelled else {
-                        await sshClient.closeShell(shell.id)
-                        return
-                    }
-
-                    await MainActor.run { [sessionId, serverId = server.id, shellId = shell.id, transport = shell.transport, fallbackReason = shell.fallbackReason, skipTmuxLifecycle = tmuxStartup.skipTmuxLifecycle] in
+                },
+                registerShell: { shell, skipTmuxLifecycle in
+                    await MainActor.run {
                         ConnectionSessionManager.shared.registerSSHClient(
                             sshClient,
-                            shellId: shellId,
+                            shellId: shell.id,
                             for: sessionId,
-                            serverId: serverId,
-                            transport: transport,
-                            fallbackReason: fallbackReason,
+                            serverId: server.id,
+                            transport: shell.transport,
+                            fallbackReason: shell.fallbackReason,
                             skipTmuxLifecycle: skipTmuxLifecycle
                         )
                         ConnectionSessionManager.shared.updateSessionState(sessionId, to: .connected)
-                    }
-
-                    await MainActor.run {
                         self.shellId = shell.id
                     }
-
-                    guard !Task.isCancelled else { return }
-
-                    // Platform-specific hook after shell starts
+                },
+                onBeforeShellStart: { cols, rows in
+                    await self.onBeforeShellStart(cols: cols, rows: rows)
+                },
+                onShellStarted: { terminal, _ in
                     await self.onShellStarted(terminal: terminal)
-
-                    // Read data in background, feed to terminal on main thread
-                    // CVDisplayLink in GhosttyTerminalView handles frame-rate batching
-                    for await data in shell.stream {
-                        guard !Task.isCancelled else { break }
-
-                        // Feed data to terminal - display link batches rendering
-                        // Check session manager instead of coordinator to survive view dismantling on iOS
-                        let shouldContinue = await MainActor.run { () -> Bool in
-                            // Session still exists = keep running (even if coordinator was deallocated)
-                            let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
-                            guard sessionExists else { return false }
-                            terminal.feedData(data)
-                            return true
-                        }
-                        if !shouldContinue { break }
+                },
+                shouldContinueStreaming: { data, terminal in
+                    await MainActor.run {
+                        let sessionExists = ConnectionSessionManager.shared.sessions.contains { $0.id == sessionId }
+                        guard sessionExists else { return false }
+                        terminal.feedData(data)
+                        return true
                     }
-
-                    guard !Task.isCancelled else { return }
-                    logger.info("SSH shell ended")
+                },
+                shouldResetClient: { sshError in
+                    switch sshError {
+                    case .notConnected, .connectionFailed, .socketError, .timeout:
+                        return true
+                    case .channelOpenFailed, .shellRequestFailed:
+                        let hasOtherRegistrations = await MainActor.run {
+                            ConnectionSessionManager.shared.hasOtherRegistrations(
+                                using: sshClient,
+                                excluding: sessionId
+                            )
+                        }
+                        return !hasOtherRegistrations
+                    case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed, .unknown:
+                        return false
+                    }
+                },
+                onProcessExit: {
                     await MainActor.run {
                         onProcessExit()
                     }
-                    return
-                } catch {
-                    guard !Task.isCancelled else { return }
-                    lastError = error
-                    logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
-
-                    if attempt < maxAttempts, let sshError = error as? SSHError {
-                        var shouldResetClient = false
-                        switch sshError {
-                        case .notConnected, .connectionFailed, .socketError, .timeout:
-                            shouldResetClient = true
-                        case .channelOpenFailed, .shellRequestFailed:
-                            let hasOtherRegistrations = await MainActor.run {
-                                ConnectionSessionManager.shared.hasOtherRegistrations(
-                                    using: sshClient,
-                                    excluding: sessionId
-                                )
-                            }
-                            shouldResetClient = !hasOtherRegistrations
-                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
-                            break
-                        case .unknown:
-                            break
-                        }
-
-                        if shouldResetClient {
-                            logger.warning("Resetting SSH client before retrying connection")
-                            await sshClient.disconnect()
+                },
+                onFailure: { error, terminal in
+                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
+                    if let data = errorMsg.data(using: .utf8) {
+                        await MainActor.run {
+                            terminal.feedData(data)
                         }
                     }
-
-                    if attempt < maxAttempts {
-                        let delay = pow(2.0, Double(attempt - 1))
-                        try? await Task.sleep(for: .seconds(delay))
-                        continue
-                    }
-                }
-            }
-
-            if let lastError {
-                let errorMsg = "\r\n\u{001B}[31mSSH Error: \(lastError.localizedDescription)\u{001B}[0m\r\n"
-                if let data = errorMsg.data(using: .utf8) {
                     await MainActor.run {
-                        terminal.feedData(data)
+                        ConnectionSessionManager.shared.updateSessionState(sessionId, to: .failed(error.localizedDescription))
                     }
                 }
-                await MainActor.run {
-                    ConnectionSessionManager.shared.updateSessionState(sessionId, to: .failed(lastError.localizedDescription))
-                }
-            }
+            )
         }
     }
 
     // Default no-op implementations for hooks
     func onShellStarted(terminal: GhosttyTerminalView) async {}
     func onBeforeShellStart(cols: Int, rows: Int) async {}
+    func fallbackRoute() -> (client: SSHClient, shellId: UUID)? {
+        guard let session = ConnectionSessionManager.shared.sessions.first(where: { $0.id == sessionId }),
+              let client = ConnectionSessionManager.shared.sshClient(for: session),
+              let shellId = ConnectionSessionManager.shared.shellId(for: session) else {
+            return nil
+        }
+        return (client: client, shellId: shellId)
+    }
 }
 
 #if os(macOS)

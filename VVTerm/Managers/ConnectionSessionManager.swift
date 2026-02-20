@@ -10,6 +10,181 @@ import UIKit
 
 // MARK: - Connection Session Manager
 
+struct SSHShellRegistry {
+    struct Registration {
+        let serverId: UUID
+        let client: SSHClient
+        let shellId: UUID
+        let transport: ShellTransport
+        let fallbackReason: MoshFallbackReason?
+    }
+
+    struct StartContext {
+        let startedAt: Date
+        let client: SSHClient
+        let serverId: UUID
+    }
+
+    struct RegisterResult {
+        let accepted: Bool
+        let staleIncomingShell: (client: SSHClient, shellId: UUID)?
+        let replacedShell: (client: SSHClient, shellId: UUID)?
+    }
+
+    struct StartResult {
+        let started: Bool
+        let staleContext: StartContext?
+    }
+
+    struct InFlightResult {
+        let inFlight: Bool
+        let staleContext: StartContext?
+    }
+
+    private(set) var registrations: [UUID: Registration] = [:]
+    private(set) var startsInFlight: [UUID: StartContext] = [:]
+    private let staleThreshold: TimeInterval
+
+    init(staleThreshold: TimeInterval) {
+        self.staleThreshold = staleThreshold
+    }
+
+    mutating func register(
+        client: SSHClient,
+        shellId: UUID,
+        for entityId: UUID,
+        serverId: UUID,
+        transport: ShellTransport,
+        fallbackReason: MoshFallbackReason?
+    ) -> RegisterResult {
+        if let context = startsInFlight[entityId],
+           ObjectIdentifier(context.client) != ObjectIdentifier(client) {
+            return RegisterResult(
+                accepted: false,
+                staleIncomingShell: (client: client, shellId: shellId),
+                replacedShell: nil
+            )
+        }
+
+        startsInFlight.removeValue(forKey: entityId)
+        let newRegistration = Registration(
+            serverId: serverId,
+            client: client,
+            shellId: shellId,
+            transport: transport,
+            fallbackReason: fallbackReason
+        )
+        let replaced = registrations.updateValue(newRegistration, forKey: entityId)
+        return RegisterResult(
+            accepted: true,
+            staleIncomingShell: nil,
+            replacedShell: replaced.map { (client: $0.client, shellId: $0.shellId) }
+        )
+    }
+
+    mutating func unregister(for entityId: UUID) -> (registration: Registration?, pendingStart: StartContext?) {
+        let pendingStart = startsInFlight.removeValue(forKey: entityId)
+        let registration = registrations.removeValue(forKey: entityId)
+        return (registration, pendingStart)
+    }
+
+    mutating func tryBeginStart(
+        for entityId: UUID,
+        serverId: UUID,
+        client: SSHClient,
+        now: Date = Date()
+    ) -> StartResult {
+        if registrations[entityId] != nil {
+            return StartResult(started: false, staleContext: nil)
+        }
+
+        if let context = startsInFlight[entityId] {
+            if now.timeIntervalSince(context.startedAt) < staleThreshold {
+                return StartResult(started: false, staleContext: nil)
+            }
+            startsInFlight.removeValue(forKey: entityId)
+            startsInFlight[entityId] = StartContext(
+                startedAt: now,
+                client: client,
+                serverId: serverId
+            )
+            return StartResult(started: true, staleContext: context)
+        }
+
+        startsInFlight[entityId] = StartContext(
+            startedAt: now,
+            client: client,
+            serverId: serverId
+        )
+        return StartResult(started: true, staleContext: nil)
+    }
+
+    mutating func finishStart(for entityId: UUID, client: SSHClient) {
+        guard let context = startsInFlight[entityId] else { return }
+        guard ObjectIdentifier(context.client) == ObjectIdentifier(client) else { return }
+        startsInFlight.removeValue(forKey: entityId)
+    }
+
+    mutating func isStartInFlight(for entityId: UUID, now: Date = Date()) -> InFlightResult {
+        guard let context = startsInFlight[entityId] else {
+            return InFlightResult(inFlight: false, staleContext: nil)
+        }
+
+        if now.timeIntervalSince(context.startedAt) >= staleThreshold {
+            startsInFlight.removeValue(forKey: entityId)
+            return InFlightResult(inFlight: false, staleContext: context)
+        }
+
+        return InFlightResult(inFlight: true, staleContext: nil)
+    }
+
+    func registration(for entityId: UUID) -> Registration? {
+        registrations[entityId]
+    }
+
+    func shellId(for entityId: UUID) -> UUID? {
+        registrations[entityId]?.shellId
+    }
+
+    func client(for entityId: UUID) -> SSHClient? {
+        registrations[entityId]?.client
+    }
+
+    func hasOtherRegistrations(using client: SSHClient, excluding entityId: UUID) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return registrations.contains { registration in
+            registration.key != entityId && ObjectIdentifier(registration.value.client) == identifier
+        }
+    }
+
+    func hasClientReferences(_ client: SSHClient) -> Bool {
+        hasActiveRegistration(using: client) || hasPendingStart(using: client)
+    }
+
+    func hasActiveRegistration(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return registrations.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    func hasPendingStart(using client: SSHClient) -> Bool {
+        let identifier = ObjectIdentifier(client)
+        return startsInFlight.values.contains { ObjectIdentifier($0.client) == identifier }
+    }
+
+    func firstRegisteredClient(for serverId: UUID) -> SSHClient? {
+        registrations.values.first(where: { $0.serverId == serverId })?.client
+    }
+
+    func firstPendingClient(for serverId: UUID) -> SSHClient? {
+        startsInFlight.values.first(where: { $0.serverId == serverId })?.client
+    }
+
+    mutating func removeAll() {
+        registrations.removeAll()
+        startsInFlight.removeAll()
+    }
+}
+
 @MainActor
 final class ConnectionSessionManager: ObservableObject {
     static let shared = ConnectionSessionManager()
@@ -58,23 +233,7 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "ConnectionSession")
-
-    private struct SSHShellRegistration {
-        let serverId: UUID
-        let client: SSHClient
-        let shellId: UUID
-        let transport: ShellTransport
-        let fallbackReason: MoshFallbackReason?
-    }
-
-    private struct ShellStartContext {
-        let startedAt: Date
-        let client: SSHClient
-        let serverId: UUID
-    }
-
-    /// Shell handles indexed by session ID
-    private var sshShells: [UUID: SSHShellRegistration] = [:]
+    private var shellRegistry = SSHShellRegistry(staleThreshold: 120)
 
     /// Terminal views indexed by session ID for voice input and other external interactions
     private var terminalViews: [UUID: GhosttyTerminalView] = [:]
@@ -83,14 +242,8 @@ final class ConnectionSessionManager: ObservableObject {
     private var shellCancelHandlers: [UUID: () -> Void] = [:]
     /// Shell suspend handlers indexed by session ID - cancel in-flight connects without destroying terminals
     private var shellSuspendHandlers: [UUID: () -> Void] = [:]
-    /// Session IDs currently starting a shell (global single-flight guard).
-    /// Value is start time for stale-guard recovery.
-    private var shellStartsInFlight: [UUID: ShellStartContext] = [:]
     /// Server IDs with an in-flight open request, used to collapse repeated clicks.
     private var sessionOpensInFlight: Set<UUID> = []
-    /// Keep shell-start locks alive for the full SSH retry window:
-    /// 3 attempts × 30s connect timeout + backoff + safety margin.
-    private let shellStartStaleThreshold: TimeInterval = 120
 
     /// Servers that already ran tmux cleanup (per app launch)
     private var tmuxCleanupServers: Set<UUID> = []
@@ -248,10 +401,7 @@ final class ConnectionSessionManager: ObservableObject {
     /// Returns true when the same SSH client instance is registered to another live session.
     /// This is used to avoid disconnecting a truly shared client during retry cleanup.
     func hasOtherRegistrations(using client: SSHClient, excluding sessionId: UUID) -> Bool {
-        let identifier = ObjectIdentifier(client)
-        return sshShells.contains { registration in
-            registration.key != sessionId && ObjectIdentifier(registration.value.client) == identifier
-        }
+        shellRegistry.hasOtherRegistrations(using: client, excluding: sessionId)
     }
 
     func updateTmuxStatus(_ sessionId: UUID, status: TmuxStatus) {
@@ -474,30 +624,29 @@ final class ConnectionSessionManager: ObservableObject {
         fallbackReason: MoshFallbackReason? = nil,
         skipTmuxLifecycle: Bool = false
     ) {
-        if let context = shellStartsInFlight[sessionId],
-           ObjectIdentifier(context.client) != ObjectIdentifier(client) {
+        let registerResult = shellRegistry.register(
+            client: client,
+            shellId: shellId,
+            for: sessionId,
+            serverId: serverId,
+            transport: transport,
+            fallbackReason: fallbackReason
+        )
+
+        if let stale = registerResult.staleIncomingShell {
             logger.warning("Ignoring stale shell registration for session \(sessionId.uuidString, privacy: .public)")
-            Task.detached(priority: .utility) { [client, shellId] in
+            Task.detached(priority: .utility) { [client = stale.client, shellId = stale.shellId] in
                 await client.closeShell(shellId)
                 await client.disconnect()
             }
             return
         }
-        shellStartsInFlight.removeValue(forKey: sessionId)
 
-        if let existing = sshShells[sessionId] {
-            Task.detached { [client = existing.client, shellId = existing.shellId] in
+        if let replaced = registerResult.replacedShell {
+            Task.detached { [client = replaced.client, shellId = replaced.shellId] in
                 await client.closeShell(shellId)
             }
         }
-
-        sshShells[sessionId] = SSHShellRegistration(
-            serverId: serverId,
-            client: client,
-            shellId: shellId,
-            transport: transport,
-            fallbackReason: fallbackReason
-        )
 
         if let index = sessions.firstIndex(where: { $0.id == sessionId }) {
             sessions[index].activeTransport = transport
@@ -512,11 +661,11 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func unregisterSSHClient(for sessionId: UUID) async {
-        let pendingStart = shellStartsInFlight.removeValue(forKey: sessionId)
+        let unregisterResult = shellRegistry.unregister(for: sessionId)
 
-        guard let registration = sshShells.removeValue(forKey: sessionId) else {
-            if let pendingStart {
-                if !hasClientReferences(pendingStart.client) {
+        guard let registration = unregisterResult.registration else {
+            if let pendingStart = unregisterResult.pendingStart {
+                if !shellRegistry.hasClientReferences(pendingStart.client) {
                     await pendingStart.client.disconnect()
                 }
             }
@@ -525,7 +674,7 @@ final class ConnectionSessionManager: ObservableObject {
 
         await registration.client.closeShell(registration.shellId)
 
-        if !hasClientReferences(registration.client) {
+        if !shellRegistry.hasClientReferences(registration.client) {
             await registration.client.disconnect()
         }
 
@@ -536,15 +685,15 @@ final class ConnectionSessionManager: ObservableObject {
     }
 
     func sshClient(for session: ConnectionSession) -> SSHClient? {
-        sshShells[session.id]?.client
+        shellRegistry.client(for: session.id)
     }
 
     func shellId(for session: ConnectionSession) -> UUID? {
-        sshShells[session.id]?.shellId
+        shellRegistry.shellId(for: session.id)
     }
 
     func shellId(for sessionId: UUID) -> UUID? {
-        sshShells[sessionId]?.shellId
+        shellRegistry.shellId(for: sessionId)
     }
 
     /// Returns true only for the first caller while no live shell exists for the session.
@@ -553,69 +702,58 @@ final class ConnectionSessionManager: ObservableObject {
             return false
         }
 
-        if sshShells[sessionId] != nil {
-            return false
-        }
-        if let context = shellStartsInFlight[sessionId] {
-            if Date().timeIntervalSince(context.startedAt) < shellStartStaleThreshold {
-                return false
-            }
-            shellStartsInFlight.removeValue(forKey: sessionId)
+        let startResult = shellRegistry.tryBeginStart(
+            for: sessionId,
+            serverId: serverId,
+            client: client
+        )
+
+        if let context = startResult.staleContext {
             logger.warning("Recovered stale session shell-start lock for \(sessionId.uuidString, privacy: .public)")
-            if !hasClientReferences(context.client) {
+            if !shellRegistry.hasClientReferences(context.client) {
                 Task.detached(priority: .utility) { [client = context.client] in
                     await client.disconnect()
                 }
             }
         }
-        shellStartsInFlight[sessionId] = ShellStartContext(
-            startedAt: Date(),
-            client: client,
-            serverId: serverId
-        )
-        return true
+        return startResult.started
     }
 
     func finishShellStart(for sessionId: UUID, client: SSHClient) {
-        guard let context = shellStartsInFlight[sessionId] else { return }
-        guard ObjectIdentifier(context.client) == ObjectIdentifier(client) else { return }
-        shellStartsInFlight.removeValue(forKey: sessionId)
+        shellRegistry.finishStart(for: sessionId, client: client)
     }
 
     func isShellStartInFlight(for sessionId: UUID) -> Bool {
-        guard let context = shellStartsInFlight[sessionId] else { return false }
-        if Date().timeIntervalSince(context.startedAt) >= shellStartStaleThreshold {
-            shellStartsInFlight.removeValue(forKey: sessionId)
+        let result = shellRegistry.isStartInFlight(for: sessionId)
+        if let context = result.staleContext {
             logger.warning("Cleared stale session shell-start in-flight flag for \(sessionId.uuidString, privacy: .public)")
-            if !hasClientReferences(context.client) {
+            if !shellRegistry.hasClientReferences(context.client) {
                 Task.detached(priority: .utility) { [client = context.client] in
                     await client.disconnect()
                 }
             }
-            return false
         }
-        return true
+        return result.inFlight
     }
 
     private func preferredSSHClient(for serverId: UUID, allowPendingStart: Bool) -> SSHClient? {
         if let selectedId = selectedSessionId,
            let selectedSession = sessions.first(where: { $0.id == selectedId && $0.serverId == serverId }),
-           let client = sshShells[selectedSession.id]?.client {
+           let client = shellRegistry.client(for: selectedSession.id) {
             return client
         }
 
         if let anySession = sessions.first(where: { $0.serverId == serverId }),
-           let client = sshShells[anySession.id]?.client {
+           let client = shellRegistry.client(for: anySession.id) {
             return client
         }
 
-        if let registration = sshShells.values.first(where: { $0.serverId == serverId }) {
-            return registration.client
+        if let client = shellRegistry.firstRegisteredClient(for: serverId) {
+            return client
         }
 
-        if allowPendingStart,
-           let context = shellStartsInFlight.values.first(where: { $0.serverId == serverId }) {
-            return context.client
+        if allowPendingStart, let client = shellRegistry.firstPendingClient(for: serverId) {
+            return client
         }
 
         return nil
@@ -638,20 +776,6 @@ final class ConnectionSessionManager: ObservableObject {
             return nil
         }
         return sshClient(for: serverId)
-    }
-
-    private func hasActiveRegistration(using client: SSHClient) -> Bool {
-        let identifier = ObjectIdentifier(client)
-        return sshShells.values.contains { ObjectIdentifier($0.client) == identifier }
-    }
-
-    private func hasPendingStart(using client: SSHClient) -> Bool {
-        let identifier = ObjectIdentifier(client)
-        return shellStartsInFlight.values.contains { ObjectIdentifier($0.client) == identifier }
-    }
-
-    private func hasClientReferences(_ client: SSHClient) -> Bool {
-        hasActiveRegistration(using: client) || hasPendingStart(using: client)
     }
 
     private func selectedTransport(for serverId: UUID) -> ShellTransport {
@@ -1141,7 +1265,7 @@ extension ConnectionSessionManager {
     }
 
     func startTmuxInstall(for sessionId: UUID) async {
-        guard let registration = sshShells[sessionId] else { return }
+        guard let registration = shellRegistry.registration(for: sessionId) else { return }
         let serverId = registration.serverId
         guard tmuxResolver.isTmuxEnabled(for: serverId) else { return }
 
@@ -1176,14 +1300,14 @@ extension ConnectionSessionManager {
     }
 
     func installMoshServer(for sessionId: UUID) async throws {
-        guard let registration = sshShells[sessionId] else {
+        guard let registration = shellRegistry.registration(for: sessionId) else {
             throw SSHError.notConnected
         }
         try await RemoteMoshManager.shared.installMoshServer(using: registration.client)
     }
 
     func killTmuxIfNeeded(for sessionId: UUID) {
-        guard let registration = sshShells[sessionId] else { return }
+        guard let registration = shellRegistry.registration(for: sessionId) else { return }
         let ownership = tmuxResolver.sessionOwnership[sessionId] ?? .managed
         guard ownership == .managed else { return }
 
@@ -1209,16 +1333,16 @@ extension ConnectionSessionManager {
         persistTask = nil
 
         let allSessionIds = Set(sessions.map(\.id))
-            .union(shellStartsInFlight.keys)
+            .union(shellRegistry.startsInFlight.keys)
         for sessionId in allSessionIds {
             tmuxResolver.clearRuntimeState(for: sessionId, setPrompt: setTmuxAttachPrompt)
         }
 
         var uniqueClients: [ObjectIdentifier: SSHClient] = [:]
-        for registration in sshShells.values {
+        for registration in shellRegistry.registrations.values {
             uniqueClients[ObjectIdentifier(registration.client)] = registration.client
         }
-        for context in shellStartsInFlight.values {
+        for context in shellRegistry.startsInFlight.values {
             uniqueClients[ObjectIdentifier(context.client)] = context.client
         }
 
@@ -1230,10 +1354,9 @@ extension ConnectionSessionManager {
         selectedViewByServer = [:]
         selectedSessionByServer = [:]
         tmuxAttachPrompt = nil
-        sshShells.removeAll()
+        shellRegistry.removeAll()
         shellCancelHandlers.removeAll()
         shellSuspendHandlers.removeAll()
-        shellStartsInFlight.removeAll()
         sessionOpensInFlight.removeAll()
         tmuxCleanupServers.removeAll()
         terminalViews.removeAll()

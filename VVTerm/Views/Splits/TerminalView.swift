@@ -1079,52 +1079,29 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                 }
 
                 guard let self = self, let terminal = terminal else { return }
-
-                let maxAttempts = 3
-                var lastError: Error?
-
-                for attempt in 1...maxAttempts {
-                    guard !Task.isCancelled else { return }
-
-                    await MainActor.run {
-                        if attempt == 1 {
-                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
-                        } else {
-                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .reconnecting(attempt: attempt))
-                        }
-                    }
-                    do {
-                        logger.info("Connecting to \(server.host)... (attempt \(attempt))")
-                        _ = try await sshClient.connect(to: server, credentials: credentials)
-
-                        guard !Task.isCancelled else { return }
-
-                        let size = await terminal.terminalSize()
-                        let cols = Int(size?.columns ?? 80)
-                        let rows = Int(size?.rows ?? 24)
-
-                        // Store initial size
+                await SSHConnectionRunner.run(
+                    server: server,
+                    credentials: credentials,
+                    sshClient: sshClient,
+                    terminal: terminal,
+                    logger: logger,
+                    onAttempt: { attempt in
                         await MainActor.run {
-                            self.lastSize = (cols, rows)
+                            if attempt == 1 {
+                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connecting)
+                            } else {
+                                TerminalTabManager.shared.updatePaneState(paneId, connectionState: .reconnecting(attempt: attempt))
+                            }
                         }
-
-                        let tmuxStartup = await TerminalTabManager.shared.tmuxStartupPlan(
+                    },
+                    startupPlan: {
+                        await TerminalTabManager.shared.tmuxStartupPlan(
                             for: paneId,
                             serverId: server.id,
                             client: sshClient
                         )
-
-                        let shell = try await sshClient.startShell(
-                            cols: cols,
-                            rows: rows,
-                            startupCommand: tmuxStartup.command
-                        )
-
-                        guard !Task.isCancelled else {
-                            await sshClient.closeShell(shell.id)
-                            return
-                        }
-
+                    },
+                    registerShell: { shell, skipTmuxLifecycle in
                         await TerminalTabManager.shared.registerSSHClient(
                             sshClient,
                             shellId: shell.id,
@@ -1132,84 +1109,60 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                             serverId: server.id,
                             transport: shell.transport,
                             fallbackReason: shell.fallbackReason,
-                            skipTmuxLifecycle: tmuxStartup.skipTmuxLifecycle
+                            skipTmuxLifecycle: skipTmuxLifecycle
                         )
                         await MainActor.run {
                             TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
                             self.shellId = shell.id
                         }
-
                         await self.applyWorkingDirectoryIfNeeded(paneId: paneId, shellId: shell.id, sshClient: sshClient)
-
-                        guard !Task.isCancelled else { return }
-
-                        // Read data in background, feed to terminal
-                        for await data in shell.stream {
-                            guard !Task.isCancelled else { break }
-
-                            let shouldContinue = await MainActor.run { [weak self] () -> Bool in
-                                guard self?.terminal != nil else { return false }
-                                terminal.feedData(data)
-                                return true
-                            }
-                            if !shouldContinue { break }
+                    },
+                    onBeforeShellStart: { cols, rows in
+                        await MainActor.run {
+                            self.lastSize = (cols, rows)
                         }
-
-                        guard !Task.isCancelled else { return }
-                        logger.info("SSH shell ended")
+                    },
+                    onShellStarted: { _, _ in },
+                    shouldContinueStreaming: { data, terminal in
+                        await MainActor.run { [weak self] in
+                            guard self?.terminal != nil else { return false }
+                            terminal.feedData(data)
+                            return true
+                        }
+                    },
+                    shouldResetClient: { sshError in
+                        switch sshError {
+                        case .notConnected, .connectionFailed, .socketError, .timeout:
+                            return true
+                        case .channelOpenFailed, .shellRequestFailed:
+                            let hasOtherRegistrations = await MainActor.run {
+                                TerminalTabManager.shared.hasOtherRegistrations(
+                                    using: sshClient,
+                                    excluding: paneId
+                                )
+                            }
+                            return !hasOtherRegistrations
+                        case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed, .unknown:
+                            return false
+                        }
+                    },
+                    onProcessExit: {
                         await MainActor.run {
                             onProcessExit()
                         }
-                        return
-                    } catch {
-                        guard !Task.isCancelled else { return }
-                        lastError = error
-                        logger.error("SSH connection failed (attempt \(attempt)): \(error.localizedDescription)")
-
-                        if attempt < maxAttempts, let sshError = error as? SSHError {
-                            var shouldResetClient = false
-                            switch sshError {
-                            case .notConnected, .connectionFailed, .socketError, .timeout:
-                                shouldResetClient = true
-                            case .channelOpenFailed, .shellRequestFailed:
-                                let hasOtherRegistrations = await MainActor.run {
-                                    TerminalTabManager.shared.hasOtherRegistrations(
-                                        using: sshClient,
-                                        excluding: paneId
-                                    )
-                                }
-                                shouldResetClient = !hasOtherRegistrations
-                            case .authenticationFailed, .tailscaleAuthenticationNotAccepted, .cloudflareConfigurationRequired, .cloudflareAuthenticationFailed, .cloudflareTunnelFailed, .hostKeyVerificationFailed, .moshServerMissing, .moshBootstrapFailed, .moshSessionFailed:
-                                break
-                            case .unknown:
-                                break
-                            }
-
-                            if shouldResetClient {
-                                logger.warning("Resetting SSH client before retrying pane connection")
-                                await sshClient.disconnect()
+                    },
+                    onFailure: { error, terminal in
+                        let errorMsg = "\r\n\u{001B}[31mSSH Error: \(error.localizedDescription)\u{001B}[0m\r\n"
+                        if let data = errorMsg.data(using: .utf8) {
+                            await MainActor.run {
+                                terminal.feedData(data)
                             }
                         }
-
-                        if attempt < maxAttempts {
-                            let delay = pow(2.0, Double(attempt - 1))
-                            try? await Task.sleep(for: .seconds(delay))
-                            continue
-                        }
-                    }
-                }
-
-                if let lastError {
-                    let errorMsg = "\r\n\u{001B}[31mSSH Error: \(lastError.localizedDescription)\u{001B}[0m\r\n"
-                    if let data = errorMsg.data(using: .utf8) {
                         await MainActor.run {
-                            terminal.feedData(data)
+                            TerminalTabManager.shared.updatePaneState(paneId, connectionState: .failed(error.localizedDescription))
                         }
                     }
-                    await MainActor.run {
-                        TerminalTabManager.shared.updatePaneState(paneId, connectionState: .failed(lastError.localizedDescription))
-                    }
-                }
+                )
             }
         }
 
