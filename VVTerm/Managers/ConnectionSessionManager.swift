@@ -293,10 +293,6 @@ final class ConnectionSessionManager: ObservableObject {
             throw VVTermError.serverLocked(server.name)
         }
 
-        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
-            throw VVTermError.authenticationFailed
-        }
-
         if sessionOpensInFlight.contains(server.id) {
             throw VVTermError.connectionFailed(
                 String(localized: "A connection is already opening for this server.")
@@ -304,6 +300,10 @@ final class ConnectionSessionManager: ObservableObject {
         }
         sessionOpensInFlight.insert(server.id)
         defer { sessionOpensInFlight.remove(server.id) }
+
+        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
+            throw VVTermError.authenticationFailed
+        }
 
         // Check if already have a session for this server (unless forcing new)
         if !forceNew, let existingSession = sessions.first(where: { $0.serverId == server.id }) {

@@ -100,10 +100,6 @@ final class TerminalTabManager: ObservableObject {
     /// Open a new tab for a server
     @discardableResult
     func openTab(for server: Server) async throws -> TerminalTab {
-        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
-            throw VVTermError.authenticationFailed
-        }
-
         if tabOpensInFlight.contains(server.id) {
             throw VVTermError.connectionFailed(
                 String(localized: "A tab is already opening for this server.")
@@ -111,6 +107,10 @@ final class TerminalTabManager: ObservableObject {
         }
         tabOpensInFlight.insert(server.id)
         defer { tabOpensInFlight.remove(server.id) }
+
+        guard await AppLockManager.shared.ensureServerUnlocked(server) else {
+            throw VVTermError.authenticationFailed
+        }
 
         let tab = TerminalTab(serverId: server.id, title: server.name)
 

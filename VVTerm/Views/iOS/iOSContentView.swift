@@ -1101,7 +1101,9 @@ struct iOSTerminalView: View {
             showingTabLimitAlert = true
             return
         }
-        Task { try? await sessionManager.openConnection(to: server, forceNew: true) }
+        Task {
+            try? await sessionManager.openConnection(to: server, forceNew: true)
+        }
     }
 
     private func disconnectAllSessions() {
