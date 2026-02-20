@@ -42,6 +42,14 @@ struct TranscriptionSettingsView: View {
     var body: some View {
         Form {
             Section {
+                Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
+            } header: {
+                Text("Terminal")
+            } footer: {
+                Text("Cmd + Shift + M always works, even when the button is hidden.")
+            }
+
+            Section {
                 Picker("Engine", selection: $provider) {
                     Text("System (Apple)").tag(TranscriptionProvider.system.rawValue)
                     #if arch(arm64)
@@ -55,10 +63,6 @@ struct TranscriptionSettingsView: View {
                 Text("Provider")
             } footer: {
                 Text(providerDescription)
-            }
-
-            Section("Terminal") {
-                Toggle("Show voice input button", isOn: $terminalVoiceButtonEnabled)
             }
 
             if provider == TranscriptionProvider.system.rawValue {
