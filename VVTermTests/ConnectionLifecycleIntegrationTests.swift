@@ -2,6 +2,7 @@ import Foundation
 import Testing
 @testable import VVTerm
 
+@Suite(.serialized)
 @MainActor
 struct ConnectionLifecycleIntegrationTests {
     private func makeServer(
@@ -175,6 +176,80 @@ struct ConnectionLifecycleIntegrationTests {
             let nextClient = SSHClient()
             #expect(manager.tryBeginShellStart(for: paneId, client: nextClient))
             manager.finishShellStart(for: paneId, client: nextClient)
+        }
+    }
+
+    @Test
+    func connectionManagerTryBeginShellStartFailsWhenSessionIsMissing() async {
+        await withCleanConnectionManager { manager in
+            let missingSessionId = UUID()
+            #expect(!manager.tryBeginShellStart(for: missingSessionId, client: SSHClient()))
+            #expect(!manager.isShellStartInFlight(for: missingSessionId))
+        }
+    }
+
+    @Test
+    func tabManagerTryBeginShellStartFailsWhenPaneIsMissing() async {
+        await withCleanTabManager { manager in
+            let missingPaneId = UUID()
+            #expect(!manager.tryBeginShellStart(for: missingPaneId, client: SSHClient()))
+            #expect(!manager.isShellStartInFlight(for: missingPaneId))
+        }
+    }
+
+    @Test
+    func connectionManagerSharedStatsClientSkipsMoshTransport() async {
+        await withCleanConnectionManager { manager in
+            let server = makeServer(connectionMode: .mosh)
+            let session = ConnectionSession(
+                serverId: server.id,
+                title: "Mosh Session",
+                connectionState: .connected
+            )
+            manager.sessions = [session]
+            manager.selectedSessionId = session.id
+            manager.selectedSessionByServer[server.id] = session.id
+
+            let client = SSHClient()
+            manager.registerSSHClient(
+                client,
+                shellId: UUID(),
+                for: session.id,
+                serverId: server.id,
+                transport: .mosh,
+                skipTmuxLifecycle: true
+            )
+
+            #expect(manager.sshClient(for: server.id) != nil)
+            #expect(manager.sharedStatsClient(for: server.id) == nil)
+        }
+    }
+
+    @Test
+    func tabManagerSharedStatsClientSkipsMoshTransport() async {
+        await withCleanTabManager { manager in
+            let server = makeServer(connectionMode: .mosh)
+            let tab = TerminalTab(serverId: server.id, title: server.name)
+            manager.tabsByServer[server.id] = [tab]
+            manager.selectedTabByServer[server.id] = tab.id
+            manager.paneStates[tab.rootPaneId] = TerminalPaneState(
+                paneId: tab.rootPaneId,
+                tabId: tab.id,
+                serverId: server.id
+            )
+
+            let client = SSHClient()
+            manager.registerSSHClient(
+                client,
+                shellId: UUID(),
+                for: tab.rootPaneId,
+                serverId: server.id,
+                transport: .mosh,
+                skipTmuxLifecycle: true
+            )
+
+            #expect(manager.sshClient(for: server.id) != nil)
+            #expect(manager.sharedStatsClient(for: server.id) == nil)
         }
     }
 

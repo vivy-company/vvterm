@@ -80,4 +80,15 @@ struct RemoteMoshManagerTests {
         let resolved = RemoteMoshManager.shared.resolveStartupCommand(nil)
         #expect(resolved == "exec \"${SHELL:-/bin/sh}\" -l")
     }
+
+    @Test
+    func mapBootstrapPermissionDeniedProducesReadableSSHError() {
+        let mapped = RemoteMoshManager.shared.mapBootstrapError(.permissionDenied)
+        switch mapped {
+        case .moshBootstrapFailed(let message):
+            #expect(message.contains("Permission denied"))
+        default:
+            Issue.record("Expected moshBootstrapFailed for permissionDenied")
+        }
+    }
 }

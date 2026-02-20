@@ -67,4 +67,24 @@ struct RemoteTmuxManagerParserTests {
         let sessions = RemoteTmuxManager.shared.parseSessionListOutput(output, allowLegacy: false)
         #expect(sessions.map(\.name) == ["alpha", "beta", "zeta", "gamma"])
     }
+
+    @Test
+    func attachExistingCommandFallsBackToLoginShell() {
+        let command = RemoteTmuxManager.shared.attachExistingCommand(sessionName: "team session")
+        #expect(command.contains("tmux has-session"))
+        #expect(command.contains("attach-session"))
+        #expect(command.contains("exec \"${SHELL:-/bin/sh}\" -l"))
+    }
+
+    @Test
+    func installAndAttachScriptIncludesSessionAndConfig() {
+        let script = RemoteTmuxManager.shared.installAndAttachScript(
+            sessionName: "vvterm_demo",
+            workingDirectory: "/tmp/work dir"
+        )
+        #expect(script.contains("~/.vvterm/tmux.conf"))
+        #expect(script.contains("new-session -A -s"))
+        #expect(script.contains("vvterm_demo"))
+        #expect(script.contains("/tmp/work dir"))
+    }
 }
