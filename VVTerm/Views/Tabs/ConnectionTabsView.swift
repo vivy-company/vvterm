@@ -297,15 +297,14 @@ struct ConnectionTerminalContainer: View {
                     .foregroundStyle(.red)
             }
             .help(Text("Disconnect from server"))
-            .confirmationDialog(
+            .alert(
                 String(format: String(localized: "Disconnect from %@?"), server.name),
                 isPresented: $showingDisconnectConfirmation,
-                titleVisibility: .visible
             ) {
+                Button("Cancel", role: .cancel) {}
                 Button("Disconnect", role: .destructive) {
                     disconnectFromServer()
                 }
-                Button("Cancel", role: .cancel) {}
             } message: {
                 Text(disconnectMessage)
             }

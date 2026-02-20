@@ -110,15 +110,15 @@ struct KeychainSettingsView: View {
         .sheet(item: $keyToShowDetails) { key in
             KeyDetailsSheet(keyEntry: key)
         }
-        .confirmationDialog(
+        .alert(
             "Delete SSH Key",
             isPresented: $showingDeleteConfirmation,
             presenting: keyToDelete
         ) { key in
+            Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
                 deleteKey(key)
             }
-            Button("Cancel", role: .cancel) {}
         } message: { key in
             Text(String(format: String(localized: "Are you sure you want to delete '%@'? This cannot be undone."), key.name))
         }

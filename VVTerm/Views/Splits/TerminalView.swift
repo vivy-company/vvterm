@@ -99,15 +99,12 @@ struct TerminalTabView: View {
         .focusedValue(\.activeServerId, isSelected ? server.id : nil)
         .focusedValue(\.activePaneId, isSelected ? tab.focusedPaneId : nil)
         .focusedSceneValue(\.terminalSplitActions, splitActions)
-        .confirmationDialog(
-            "Close this terminal?",
-            isPresented: $showingCloseConfirmation,
-            titleVisibility: .visible
-        ) {
+        .alert("Close this terminal?", isPresented: $showingCloseConfirmation) {
+            Button("Cancel", role: .cancel) {}
             Button("Close", role: .destructive) {
                 closeCurrentPane()
             }
-            Button("Cancel", role: .cancel) {}
+            .keyboardShortcut(.defaultAction)
         } message: {
             Text("The SSH connection will be terminated.")
         }
