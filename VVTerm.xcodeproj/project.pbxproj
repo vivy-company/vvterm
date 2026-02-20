@@ -1079,7 +1079,7 @@
 			repositoryURL = "https://github.com/wiedymi/swift-cloudflared.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.1.1;
+				version = 0.1.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

@@ -7,16 +7,23 @@ import AppKit
 
 /// A compact, native-looking status card for terminal overlays.
 struct TerminalStatusCard<Content: View>: View {
-    var maxWidth: CGFloat = 320
+    var maxWidth: CGFloat = 300
     var showsScrim: Bool = true
+    var cornerRadius: CGFloat = 12
     let content: Content
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
-    init(maxWidth: CGFloat = 320, showsScrim: Bool = true, @ViewBuilder content: () -> Content) {
+    init(
+        maxWidth: CGFloat = 300,
+        showsScrim: Bool = true,
+        cornerRadius: CGFloat = 12,
+        @ViewBuilder content: () -> Content
+    ) {
         self.maxWidth = maxWidth
         self.showsScrim = showsScrim
+        self.cornerRadius = cornerRadius
         self.content = content()
     }
 
@@ -30,7 +37,7 @@ struct TerminalStatusCard<Content: View>: View {
 
             content
                 .frame(maxWidth: maxWidth)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 28)
                 .padding(.vertical, contentVerticalPadding)
                 .background(cardBackground)
                 .overlay(cardBorder)
@@ -40,12 +47,12 @@ struct TerminalStatusCard<Content: View>: View {
     }
 
     private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(cardFill)
     }
 
     private var cardBorder: some View {
-        RoundedRectangle(cornerRadius: 16, style: .continuous)
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .stroke(borderColor, lineWidth: 1)
     }
 
@@ -77,9 +84,9 @@ struct TerminalStatusCard<Content: View>: View {
 
     private var contentVerticalPadding: CGFloat {
         #if os(iOS)
-        return 22
+        return 26
         #else
-        return 16
+        return 22
         #endif
     }
 }

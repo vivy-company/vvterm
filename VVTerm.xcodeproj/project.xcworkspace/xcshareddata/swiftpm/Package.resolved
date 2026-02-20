@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wiedymi/swift-cloudflared.git",
       "state" : {
-        "revision" : "d66b4b54d7df42a1995997e5ad6e5d08fd58a734",
-        "version" : "0.1.1"
+        "revision" : "1be78afe5dae7a20ce0837ce34085f03a77f7587",
+        "version" : "0.1.2"
       }
     },
     {
