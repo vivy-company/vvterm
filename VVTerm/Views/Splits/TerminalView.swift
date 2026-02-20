@@ -974,14 +974,9 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        let client: SSHClient
-        if server.connectionMode == .cloudflare {
-            // Cloudflare-backed SSH can throttle multiplexed channels on one session.
-            // Use a dedicated SSH client per pane to avoid channel starvation.
-            client = SSHClient()
-        } else {
-            client = TerminalTabManager.shared.activeSSHClient(for: server.id) ?? SSHClient()
-        }
+        // Use a dedicated SSH client per pane to avoid channel contention
+        // and startup races when many panes/tabs are opened quickly.
+        let client = SSHClient()
         return Coordinator(server: server, credentials: credentials, onProcessExit: onProcessExit, sshClient: client)
     }
 

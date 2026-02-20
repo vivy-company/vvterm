@@ -179,7 +179,7 @@ struct ConnectionLifecycleIntegrationTests {
     }
 
     @Test
-    func sessionWrapperReusesExistingSSHClientForSameServer() async {
+    func sessionWrapperUsesIsolatedSSHClientForSameServer() async {
         await withCleanConnectionManager { manager in
             let server = makeServer(connectionMode: .standard)
             let existingSession = ConnectionSession(
@@ -212,7 +212,7 @@ struct ConnectionLifecycleIntegrationTests {
             )
 
             let coordinator = wrapper.makeCoordinator()
-            #expect(ObjectIdentifier(coordinator.sshClient) == ObjectIdentifier(sharedClient))
+            #expect(ObjectIdentifier(coordinator.sshClient) != ObjectIdentifier(sharedClient))
         }
     }
 
@@ -287,7 +287,7 @@ struct ConnectionLifecycleIntegrationTests {
     }
 
     @Test
-    func paneWrapperReusesExistingSSHClientForSameServer() async {
+    func paneWrapperUsesIsolatedSSHClientForSameServer() async {
         await withCleanTabManager { manager in
             let server = makeServer(connectionMode: .standard)
             let tab = TerminalTab(serverId: server.id, title: server.name)
@@ -319,7 +319,7 @@ struct ConnectionLifecycleIntegrationTests {
             )
 
             let coordinator = wrapper.makeCoordinator()
-            #expect(ObjectIdentifier(coordinator.sshClient) == ObjectIdentifier(sharedClient))
+            #expect(ObjectIdentifier(coordinator.sshClient) != ObjectIdentifier(sharedClient))
         }
     }
 
