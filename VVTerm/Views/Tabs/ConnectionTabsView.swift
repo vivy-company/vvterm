@@ -298,15 +298,16 @@ struct ConnectionTerminalContainer: View {
             }
             .help(Text("Disconnect from server"))
             .alert(
-                String(format: String(localized: "Disconnect from %@?"), server.name),
+                disconnectAlertTitle,
                 isPresented: $showingDisconnectConfirmation,
             ) {
                 Button("Cancel", role: .cancel) {}
-                Button("Disconnect", role: .destructive) {
+                Button(disconnectActionTitle, role: .destructive) {
                     disconnectFromServer()
                 }
+                .keyboardShortcut(.defaultAction)
             } message: {
-                Text(disconnectMessage)
+                Text(disconnectAlertMessage)
             }
         }
     }
@@ -330,7 +331,15 @@ private extension ConnectionTerminalContainer {
             : String(format: String(localized: "%lld tabs"), count)
     }
 
-    var disconnectMessage: String {
+    var disconnectAlertTitle: String {
+        String(localized: "Close Tab?")
+    }
+
+    var disconnectActionTitle: String {
+        String(localized: "Close")
+    }
+
+    var disconnectAlertMessage: String {
         serverTabs.isEmpty
             ? String(localized: "This will return to the server list.")
             : String(localized: "All terminal tabs for this server will be closed.")
