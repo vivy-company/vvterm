@@ -1834,6 +1834,11 @@ private class TerminalInputAccessoryView: UIInputView {
 
     private func resolveThemeBackgroundColor() -> UIColor {
         let defaults = UserDefaults.standard
+
+        if let cachedHex = defaults.string(forKey: "terminalBackgroundColor") {
+            return UIColor(Color.fromHex(cachedHex))
+        }
+
         let usePerAppearance = defaults.object(forKey: "terminalUsePerAppearanceTheme") as? Bool ?? true
         let darkTheme = defaults.string(forKey: "terminalThemeName") ?? "Aizen Dark"
         let lightTheme = defaults.string(forKey: "terminalThemeNameLight") ?? "Aizen Light"
@@ -1846,9 +1851,6 @@ private class TerminalInputAccessoryView: UIInputView {
 
         if let color = ThemeColorParser.backgroundColor(for: themeName) {
             return UIColor(color)
-        }
-        if let cachedHex = defaults.string(forKey: "terminalBackgroundColor") {
-            return UIColor(Color.fromHex(cachedHex))
         }
         return UIColor { traits in
             traits.userInterfaceStyle == .dark ? .black : .systemBackground

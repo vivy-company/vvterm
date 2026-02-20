@@ -749,7 +749,12 @@ struct iOSTerminalView: View {
         Task.detached(priority: .utility) {
             let resolved = ThemeColorParser.backgroundColor(for: themeName)
             await MainActor.run {
-                terminalBackgroundColor = resolved ?? fallback
+                let color = resolved ?? fallback
+                terminalBackgroundColor = color
+
+                let fallbackHex = colorScheme == .dark ? "#000000" : "#FFFFFF"
+                let hex = resolved?.toHex() ?? fallbackHex
+                UserDefaults.standard.set(hex, forKey: "terminalBackgroundColor")
             }
         }
     }
