@@ -12,6 +12,7 @@ import OSLog
 import SwiftUI
 import IOSurface
 import CoreImage
+import GameController
 
 /// UIView that embeds a Ghostty terminal surface with Metal rendering
 ///
@@ -133,6 +134,8 @@ class GhosttyTerminalView: UIView {
 
     /// Observer for config reload notifications
     private var configReloadObserver: NSObjectProtocol?
+    private var hardwareKeyboardObservers: [NSObjectProtocol] = []
+    private var hasHardwareKeyboardAttached = false
 
     // MARK: - Text Input (for spacebar cursor control)
     private lazy var textInputTokenizer = UITextInputStringTokenizer(textInput: self)
@@ -272,6 +275,7 @@ class GhosttyTerminalView: UIView {
 
         setupConfigReloadObservation()
         registerColorSchemeObserver()
+        setupHardwareKeyboardObservation()
     }
 
     required init?(coder: NSCoder) {
@@ -279,6 +283,9 @@ class GhosttyTerminalView: UIView {
     }
 
     deinit {
+        for observer in hardwareKeyboardObservers {
+            NotificationCenter.default.removeObserver(observer)
+        }
         let wrapper = self.ghosttyAppWrapper
         let ref = self.surfaceReference
         if let wrapper = wrapper, let ref = ref {
@@ -302,6 +309,7 @@ class GhosttyTerminalView: UIView {
             NotificationCenter.default.removeObserver(observer)
             configReloadObserver = nil
         }
+        removeHardwareKeyboardObservers()
 
         // Clear all callbacks first to prevent any further interactions
         onReady = nil
@@ -564,6 +572,7 @@ class GhosttyTerminalView: UIView {
         }
         if result {
             resetTextInputCursorIfNeeded()
+            updateHardwareKeyboardState(reloadInputViewsIfNeeded: true)
         }
         return result
     }
@@ -597,6 +606,7 @@ class GhosttyTerminalView: UIView {
         }
 
         if isVisible {
+            updateHardwareKeyboardState(reloadInputViewsIfNeeded: true)
             sizeDidChange(frame.size)
             // Note: becomeFirstResponder is now handled by SSHTerminalWrapper.updateUIView
             // based on isActive flag to avoid keyboard showing when terminal is hidden
@@ -624,6 +634,55 @@ class GhosttyTerminalView: UIView {
             ? GHOSTTY_COLOR_SCHEME_DARK
             : GHOSTTY_COLOR_SCHEME_LIGHT
         ghostty_surface_set_color_scheme(surface, scheme)
+    }
+
+    private func setupHardwareKeyboardObservation() {
+        guard hardwareKeyboardObservers.isEmpty else { return }
+        let center = NotificationCenter.default
+        hardwareKeyboardObservers.append(
+            center.addObserver(
+                forName: NSNotification.Name.GCKeyboardDidConnect,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateHardwareKeyboardState(reloadInputViewsIfNeeded: true)
+            }
+        )
+        hardwareKeyboardObservers.append(
+            center.addObserver(
+                forName: NSNotification.Name.GCKeyboardDidDisconnect,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                self?.updateHardwareKeyboardState(reloadInputViewsIfNeeded: true)
+            }
+        )
+        updateHardwareKeyboardState(reloadInputViewsIfNeeded: false)
+    }
+
+    private func removeHardwareKeyboardObservers() {
+        for observer in hardwareKeyboardObservers {
+            NotificationCenter.default.removeObserver(observer)
+        }
+        hardwareKeyboardObservers.removeAll()
+    }
+
+    private func updateHardwareKeyboardState(reloadInputViewsIfNeeded: Bool) {
+        let hasHardwareKeyboard = traitCollection.userInterfaceIdiom == .pad && GCKeyboard.coalesced != nil
+        guard hasHardwareKeyboard != hasHardwareKeyboardAttached else { return }
+        hasHardwareKeyboardAttached = hasHardwareKeyboard
+        if reloadInputViewsIfNeeded, isFirstResponder {
+            reloadInputViews()
+        }
+    }
+
+    private func markHardwareKeyboardDetectedFromKeyPress() {
+        guard traitCollection.userInterfaceIdiom == .pad else { return }
+        guard !hasHardwareKeyboardAttached else { return }
+        hasHardwareKeyboardAttached = true
+        if isFirstResponder {
+            reloadInputViews()
+        }
     }
 
     // MARK: - Touch Input
@@ -1129,6 +1188,7 @@ class GhosttyTerminalView: UIView {
                 forwardedToSystem.insert(press)
                 continue
             }
+            markHardwareKeyboardDetectedFromKeyPress()
             if handleCommandShortcut(key) { continue }
             if shouldRoutePressToSystemTextInput(key) {
                 systemTextInputPresses.insert(UInt16(key.keyCode.rawValue))
@@ -1617,7 +1677,14 @@ extension GhosttyTerminalView {
         set { objc_setAssociatedObject(self, &Self.keyboardToolbarKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 
+    private var shouldHideKeyboardAccessoryBar: Bool {
+        traitCollection.userInterfaceIdiom == .pad && hasHardwareKeyboardAttached
+    }
+
     override var inputAccessoryView: UIView? {
+        guard !shouldHideKeyboardAccessoryBar else {
+            return nil
+        }
         if keyboardToolbar == nil {
             let toolbar = TerminalInputAccessoryView(onKey: { [weak self] key in
                 self?.handleToolbarKey(key)
