@@ -154,7 +154,7 @@ struct ServerFormSheet: View {
     @State private var storedKeys: [SSHKeyEntry] = []
     @State private var selectedStoredKey: SSHKeyEntry?
     @State private var programmaticSSHKeyValue: String?
-    @State private var isTestingConnection = false
+    @StateObject private var connectionTest = ConnectionTestCoordinator()
     @State private var connectionTestError: String?
     @State private var connectionTestSucceeded = false
     @State private var lastTestSnapshot: ConnectionTestSnapshot?
@@ -310,7 +310,7 @@ struct ServerFormSheet: View {
     }
 
     private var saveButtonDisabled: Bool {
-        !isValid || isSaving || isAtLimit || isLoadingCredentials || isTestingConnection
+        !isValid || isSaving || isAtLimit || isLoadingCredentials
     }
 
     var body: some View {
@@ -736,9 +736,9 @@ struct ServerFormSheet: View {
                 }
             } label: {
                 Text(String(localized: "Test Connection"))
-                    .opacity(isTestingConnection ? 0 : 1)
+                    .opacity(connectionTest.isTesting ? 0 : 1)
                     .overlay {
-                        if isTestingConnection {
+                        if connectionTest.isTesting {
                             HStack(spacing: 8) {
                                 ProgressView()
                                     .progressViewStyle(.circular)
@@ -750,7 +750,7 @@ struct ServerFormSheet: View {
             .buttonStyle(.bordered)
             .tint(.secondary)
             .controlSize(.regular)
-            .disabled(!isValid || isTestingConnection)
+            .disabled(!isValid || connectionTest.isTesting)
         } header: {
             sectionHeader("Connection")
         } footer: {
@@ -989,6 +989,7 @@ struct ServerFormSheet: View {
     // MARK: - Connection Test
 
     private func resetConnectionTestState() {
+        connectionTest.cancel()
         connectionTestError = nil
         connectionTestSucceeded = false
         lastTestSnapshot = nil
@@ -1094,76 +1095,65 @@ struct ServerFormSheet: View {
     }
 
     private func runConnectionTest(force: Bool) async -> Bool {
-        let snapshot = await MainActor.run { connectionSnapshot }
-        let shouldSkip = await MainActor.run { !force && hasValidConnectionTest }
-        if shouldSkip {
+        if !force && hasValidConnectionTest {
             return true
         }
 
-        let (testServer, credentials) = await MainActor.run { () -> (Server, ServerCredentials) in
-            isTestingConnection = true
-            connectionTestError = nil
-            connectionTestSucceeded = false
+        let snapshot = connectionSnapshot
+        connectionTestError = nil
+        connectionTestSucceeded = false
 
-            let serverId = server?.id ?? UUID()
-            let server = buildServer(id: serverId, createdAt: server?.createdAt ?? Date())
-            let credentials = buildCredentials(for: serverId)
-            return (server, credentials)
+        let serverId = server?.id ?? UUID()
+        let testServer = buildServer(id: serverId, createdAt: server?.createdAt ?? Date())
+        let credentials = buildCredentials(for: serverId)
+
+        let result = await connectionTest.run {
+            try await SSHConnectionOperationService.shared.withTemporaryConnection(
+                server: testServer,
+                credentials: credentials
+            ) { client in
+                if testServer.connectionMode == .mosh {
+                    _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
+                        using: client,
+                        startCommand: "exec true",
+                        portRange: 60001...61000
+                    )
+                }
+            }
         }
 
-        let result = await Task.detached(priority: .userInitiated) { () -> Result<Void, Error> in
-            do {
-                try await SSHConnectionOperationService.shared.withTemporaryConnection(
-                    server: testServer,
-                    credentials: credentials
-                ) { client in
-                    if testServer.connectionMode == .mosh {
-                        _ = try await RemoteMoshManager.shared.bootstrapConnectInfo(
-                            using: client,
-                            startCommand: "exec true",
-                            portRange: 60001...61000
-                        )
-                    }
-                }
-                return .success(())
-            } catch {
-                return .failure(error)
-            }
-        }.value
+        // Cancelled or superseded by another run/cancel.
+        guard let result else { return false }
 
-        var success = false
-        await MainActor.run {
-            isTestingConnection = false
-            lastTestSnapshot = snapshot
+        lastTestSnapshot = snapshot
 
-            switch result {
-            case .success:
-                connectionTestSucceeded = true
-                success = true
-            case .failure(let error):
-                let baseMessage = error.localizedDescription
-                if testServer.connectionMode == .tailscale {
-                    let reminder = String(localized: "This app currently supports direct tailnet connections only (no userspace proxy fallback).")
-                    if baseMessage.contains(reminder) {
-                        connectionTestError = baseMessage
-                    } else {
-                        connectionTestError = "\(baseMessage)\n\(reminder)"
-                    }
-                } else {
+        switch result {
+        case .success:
+            connectionTestSucceeded = true
+            return true
+        case .failure(let error):
+            if error is CancellationError { return false }
+            let baseMessage = error.localizedDescription
+            if testServer.connectionMode == .tailscale {
+                let reminder = String(localized: "This app currently supports direct tailnet connections only (no userspace proxy fallback).")
+                if baseMessage.contains(reminder) {
                     connectionTestError = baseMessage
+                } else {
+                    connectionTestError = "\(baseMessage)\n\(reminder)"
                 }
-                if let sshError = error as? SSHError, case .cloudflareConfigurationRequired = sshError {
-                    showCloudflareOverrides = true
-                }
-                connectionTestSucceeded = false
-                success = false
+            } else {
+                connectionTestError = baseMessage
             }
+            if let sshError = error as? SSHError, case .cloudflareConfigurationRequired = sshError {
+                showCloudflareOverrides = true
+            }
+            connectionTestSucceeded = false
+            return false
         }
-
-        return success
     }
 
     private func saveServer() {
+        connectionTest.cancel()
         isSaving = true
         error = nil
 
