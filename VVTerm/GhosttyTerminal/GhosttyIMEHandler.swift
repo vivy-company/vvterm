@@ -21,6 +21,12 @@ class GhosttyIMEHandler {
     /// Track marked text for IME composition
     private(set) var markedText: String = ""
 
+    /// Track selected range within marked text (set by IME via setMarkedText)
+    private var markedSelectedRange: NSRange = NSRange(location: 0, length: 0)
+
+    /// Last preedit text sent to Ghostty to avoid redundant updates
+    private var renderedPreeditText: String?
+
     /// Attributes for displaying marked text
     private let markedTextAttributes: [NSAttributedString.Key: Any] = [
         .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -67,8 +73,10 @@ class GhosttyIMEHandler {
     func clearMarkedText() {
         if !markedText.isEmpty {
             markedText = ""
+            markedSelectedRange = NSRange(location: 0, length: 0)
             view?.needsDisplay = true
         }
+        syncPreedit(nil)
     }
 
     // MARK: - NSTextInputClient Methods
@@ -93,12 +101,16 @@ class GhosttyIMEHandler {
     func setMarkedText(_ string: Any, selectedRange: NSRange, replacementRange: NSRange) {
         guard let text = anyToString(string) else { return }
 
-        // Update marked text state
+        // Update marked text and selection state
         markedText = text
+        markedSelectedRange = selectedRange
 
         // Tell system we've handled the marked text
         view?.inputContext?.invalidateCharacterCoordinates()
         view?.needsDisplay = true
+
+        // Render preedit inline in terminal (Korean Hangul, CJK, etc.)
+        syncPreedit(markedText)
 
         Self.logger.debug("IME marked text: \(text)")
     }
@@ -110,8 +122,15 @@ class GhosttyIMEHandler {
     }
 
     func selectedRange() -> NSRange {
-        // Terminals don't have text selection in the traditional sense for IME
-        return NSRange(location: NSNotFound, length: 0)
+        // Return cursor position relative to marked text for proper IME interaction.
+        // NSNotFound can cause some Korean/CJK IMEs to malfunction.
+        if !markedText.isEmpty {
+            return NSRange(
+                location: markedSelectedRange.location,
+                length: markedSelectedRange.length
+            )
+        }
+        return NSRange(location: 0, length: 0)
     }
 
     func markedRange() -> NSRange {
@@ -181,6 +200,61 @@ class GhosttyIMEHandler {
 
     func characterIndex(for point: NSPoint) -> Int {
         return NSNotFound
+    }
+
+    // MARK: - Inline Preedit Rendering
+
+    /// Send preedit text to Ghostty for inline rendering in the terminal.
+    /// Uses TerminalVisiblePreeditPolicy to determine whether the text should be displayed
+    /// (always true for Hangul/CJK scripts, conditionally for romanized Chinese/Japanese).
+    private func syncPreedit(_ text: String?) {
+        let visibleText: String?
+        if let text, !text.isEmpty {
+            let normalized = text.precomposedStringWithCanonicalMapping
+            visibleText = TerminalVisiblePreeditPolicy.shouldDisplay(
+                normalized,
+                inputModePrimaryLanguage: currentInputLanguage
+            ) ? normalized : nil
+        } else {
+            visibleText = nil
+        }
+
+        guard visibleText != renderedPreeditText else { return }
+        renderedPreeditText = visibleText
+
+        guard let cSurface = surface?.unsafeCValue else { return }
+
+        if let visibleText, !visibleText.isEmpty {
+            let len = visibleText.utf8CString.count
+            guard len > 0 else {
+                ghostty_surface_preedit(cSurface, nil, 0)
+                view?.needsDisplay = true
+                return
+            }
+            visibleText.withCString { ptr in
+                ghostty_surface_preedit(cSurface, ptr, UInt(len - 1))
+            }
+        } else {
+            ghostty_surface_preedit(cSurface, nil, 0)
+        }
+
+        view?.needsDisplay = true
+    }
+
+    /// Get current input source language for preedit policy decisions.
+    /// Korean Hangul preedit is always displayed regardless of this value
+    /// (detected by Unicode range), but Chinese/Japanese romanized preedit
+    /// requires language identification.
+    private var currentInputLanguage: String? {
+        guard let sourceID = view?.inputContext?.selectedKeyboardInputSource?.lowercased() else {
+            return nil
+        }
+        if sourceID.contains("korean") || sourceID.contains("hangul") { return "ko" }
+        if sourceID.contains("chinese") || sourceID.contains("scim") || sourceID.contains("tcim")
+            || sourceID.contains("pinyin") || sourceID.contains("wubi")
+            || sourceID.contains("cangjie") || sourceID.contains("zhuyin") { return "zh" }
+        if sourceID.contains("japanese") || sourceID.contains("kotoeri") { return "ja" }
+        return nil
     }
 
     // MARK: - Helper
