@@ -1,0 +1,5 @@
+/* Live Activity */
+"VVTerm" = "VVTerm";
+"active" = "활성";
+"1 active session" = "활성 세션 1개";
+"%lld active sessions" = "활성 세션 %lld개";

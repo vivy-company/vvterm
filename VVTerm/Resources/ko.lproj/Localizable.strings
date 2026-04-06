@@ -1,0 +1,1002 @@
+/* General */
+"OK" = "확인";
+"Cancel" = "취소";
+"Save" = "저장";
+"Add" = "추가";
+"Create" = "생성";
+"Delete" = "삭제";
+"Done" = "완료";
+"Edit" = "편집";
+"Remove" = "제거";
+"Connect" = "연결";
+"Disconnect" = "연결 해제";
+"Reconnect" = "재연결";
+"Retry" = "재시도";
+"Upgrade" = "업그레이드";
+"Upgrade to Pro" = "Pro로 업그레이드";
+"Upgrade to VVTerm Pro" = "VVTerm Pro로 업그레이드";
+"View Plans" = "플랜 보기";
+"Manage Subscription" = "구독 관리";
+"Manage subscription" = "구독 관리";
+"Manage your subscription" = "구독을 관리하세요";
+"Restore Purchases" = "구매 복원";
+"Restoring..." = "복원 중...";
+"Restore Failed" = "복원 실패";
+"Your purchases have been restored." = "구매 내역이 복원되었습니다.";
+"No active purchases were found for this Apple ID." = "이 Apple ID에 대한 활성 구매가 없습니다.";
+"Renew" = "갱신";
+"Renew Pro" = "Pro 갱신";
+"Close" = "닫기";
+"Close Terminal" = "터미널 닫기";
+"Close All to the Left" = "왼쪽 모두 닫기";
+"Close All to the Right" = "오른쪽 모두 닫기";
+"Close Other Tabs" = "다른 탭 닫기";
+"Duplicate Tab" = "탭 복제";
+"New Terminal" = "새 터미널";
+"New terminal tab" = "새 터미널 탭";
+"New connection" = "새 연결";
+"Previous tab" = "이전 탭";
+"Next tab" = "다음 탭";
+"No terminals" = "터미널 없음";
+"%lld tab" = "%lld 탭";
+"%lld tabs" = "%lld 탭";
+"No terminals open" = "열린 터미널이 없습니다";
+"Search servers" = "서버 검색";
+"Search servers..." = "서버 검색...";
+"Search symbols..." = "심볼 검색...";
+"Select Workspace" = "워크스페이스 선택";
+"Select a Server" = "서버 선택";
+"Choose a server from the sidebar to connect" = "사이드바에서 연결할 서버를 선택하세요";
+"Multiple connections require Pro" = "다중 연결에는 Pro가 필요합니다";
+"Upgrade to connect to multiple servers simultaneously" = "여러 서버에 동시에 연결하려면 업그레이드하세요";
+"Disconnected" = "연결 해제됨";
+"Connecting..." = "연결 중...";
+"Connecting to %@..." = "%@에 연결 중...";
+"Reconnecting (attempt %lld)..." = "재연결 중 (%lld번째 시도)...";
+"Connection Failed" = "연결 실패";
+"Connection failed: %@" = "연결 실패: %@";
+"Connection timed out" = "연결 시간 초과";
+"Authentication failed" = "인증 실패";
+"Failed to load credentials" = "자격 증명 로드 실패";
+"Failed to load credentials: %@" = "자격 증명 로드 실패: %@";
+"Failed to load key: %@" = "키 로드 실패: %@";
+"Failed to read key file: %@" = "키 파일 읽기 실패: %@";
+"Failed to import key: %@" = "키 가져오기 실패: %@";
+"Failed to delete key: %@" = "키 삭제 실패: %@";
+"Failed to save key: %@" = "키 저장 실패: %@";
+"Failed to generate key: %@" = "키 생성 실패: %@";
+"Failed to generate SSH key" = "SSH 키 생성 실패";
+"Failed to encode key data" = "키 데이터 인코딩 실패";
+"Failed to export RSA key" = "RSA 키 내보내기 실패";
+"Invalid key data" = "잘못된 키 데이터";
+"Cannot access the selected file" = "선택한 파일에 접근할 수 없습니다";
+"Copy to Clipboard" = "클립보드에 복사";
+"Copied" = "복사됨";
+
+/* App & About */
+"VVTerm" = "VVTerm";
+"About VVTerm" = "VVTerm 정보";
+"Version %@ (%@)" = "버전 %@ (%@)";
+"Professional SSH client\nfor macOS & iOS" = "macOS 및 iOS용\n전문 SSH 클라이언트";
+"Visit Website" = "웹사이트 방문";
+"Report an Issue" = "문제 보고";
+"Privacy Policy" = "개인정보 처리방침";
+"Get in Touch" = "문의하기";
+"Questions, feedback, or issues? Reach out anytime." = "질문, 피드백 또는 문제가 있으시면 언제든지 연락하세요.";
+"Questions, feedback, or issues?\nReach out anytime." = "질문, 피드백 또는 문제가 있으시면\n언제든지 연락하세요.";
+"Vivy Technologies Co., Limited" = "Vivy Technologies Co., Limited";
+
+/* Welcome */
+"Welcome to VVTerm" = "VVTerm에 오신 것을 환영합니다";
+"Your secure SSH terminal" = "안전한 SSH 터미널";
+"Continue" = "계속";
+"SSH Terminal" = "SSH 터미널";
+"Connect to servers with GPU-accelerated terminal emulation." = "GPU 가속 터미널 에뮬레이션으로 서버에 연결합니다.";
+"iCloud Sync" = "iCloud 동기화";
+"Servers and credentials sync across all your devices." = "모든 기기에서 서버와 자격 증명을 동기화합니다.";
+"Session Persistence" = "세션 유지";
+"Keep sessions alive with tmux, even after disconnects." = "연결이 끊긴 후에도 tmux로 세션을 유지합니다.";
+"Secure Storage" = "안전한 저장소";
+"Passwords and SSH keys protected by Keychain." = "키체인으로 보호되는 비밀번호와 SSH 키.";
+"Voice Commands" = "음성 명령";
+"Speak commands with on-device speech recognition." = "기기 내 음성 인식으로 명령을 말하세요.";
+
+/* Settings Navigation */
+"Settings" = "설정";
+"General" = "일반";
+"Terminal" = "터미널";
+"Transcription" = "음성 인식";
+"SSH Keys" = "SSH 키";
+"Sync" = "동기화";
+"About" = "정보";
+"Premium" = "프리미엄";
+"Appearance and preferences" = "외관 및 환경설정";
+"Font, theme, and connection settings" = "폰트, 테마 및 연결 설정";
+"Speech-to-text engine and models" = "음성 인식 엔진 및 모델";
+"Manage stored SSH keys" = "저장된 SSH 키 관리";
+"iCloud sync and data management" = "iCloud 동기화 및 데이터 관리";
+"Version and links" = "버전 및 링크";
+
+/* Appearance */
+"Appearance" = "외관";
+"System" = "시스템";
+"Light" = "라이트";
+"Dark" = "다크";
+
+/* Terminal Settings */
+"Font" = "폰트";
+"Font Family" = "폰트 패밀리";
+"Size: %lldpt" = "크기: %lldpt";
+"Theme" = "테마";
+"Use different themes for Light/Dark mode" = "라이트/다크 모드에 다른 테마 사용";
+"Dark Mode Theme" = "다크 모드 테마";
+"Light Mode Theme" = "라이트 모드 테마";
+"Terminal Behavior" = "터미널 동작";
+"Enable terminal notifications" = "터미널 알림 활성화";
+"Show progress overlays" = "진행 상태 오버레이 표시";
+"Show voice input button" = "음성 입력 버튼 표시";
+"Copy Text Processing" = "텍스트 복사 처리";
+"Transformations applied when copying text from terminal" = "터미널에서 텍스트 복사 시 적용되는 변환";
+"Trim trailing whitespace" = "후행 공백 제거";
+"Collapse multiple blank lines" = "연속된 빈 줄 합치기";
+"Strip shell prompts ($ #)" = "셸 프롬프트($ #) 제거";
+"Flatten multi-line commands" = "여러 줄 명령어 한 줄로 합치기";
+"Remove box-drawing characters" = "테두리 문자 제거";
+"Strip ANSI escape codes" = "ANSI 이스케이프 코드 제거";
+"SSH Connection" = "SSH 연결";
+"Auto-reconnect on disconnect" = "연결 해제 시 자동 재연결";
+"Send keep-alive packets" = "킵얼라이브 패킷 전송";
+"Interval: %llds" = "간격: %lld초";
+
+/* Pro / Store */
+"VVTerm Pro" = "VVTerm Pro";
+"Upgrade for unlimited features" = "무제한 기능을 위해 업그레이드";
+"Unlimited Servers" = "무제한 서버";
+"Add as many servers as you need (free: 3)" = "필요한 만큼 서버를 추가하세요 (무료: 3개)";
+"Unlimited Workspaces" = "무제한 워크스페이스";
+"Organize servers into multiple workspaces (free: 1)" = "여러 워크스페이스로 서버 정리 (무료: 1개)";
+"Multiple Connections" = "다중 연결";
+"Open multiple terminal tabs at once (free: 1)" = "여러 터미널 탭 동시 열기 (무료: 1개)";
+"Custom Environments" = "사용자 정의 환경";
+"Create custom environment labels beyond Prod/Staging/Dev" = "Prod/Staging/Dev 외에 사용자 정의 환경 라벨 생성";
+"All Future Features" = "모든 향후 기능";
+"Get access to every new Pro feature" = "모든 새로운 Pro 기능에 접근";
+"Monthly" = "월간";
+"Billed monthly" = "매월 청구";
+"Yearly" = "연간";
+"Best value - billed yearly" = "최적 가격 - 매년 청구";
+"SAVE 74%" = "74% 절약";
+"Lifetime" = "평생";
+"One-time purchase, forever" = "1회 구매, 영구 사용";
+"FOREVER" = "영구";
+"Processing..." = "처리 중...";
+"Purchase Failed" = "구매 실패";
+"Unknown error" = "알 수 없는 오류";
+"Welcome to Pro!" = "Pro에 오신 것을 환영합니다!";
+"You now have unlimited access" = "이제 무제한으로 이용할 수 있습니다";
+"Cancel anytime. Subscription auto-renews." = "언제든지 취소 가능. 구독은 자동 갱신됩니다.";
+"Terms of Service" = "서비스 약관";
+"Refund Policy" = "환불 정책";
+"Select a Plan" = "플랜 선택";
+"Buy - %@" = "구매 - %@";
+"Subscribe - %@" = "구독 - %@";
+"Purchase verification failed" = "구매 확인 실패";
+"Product not found" = "상품을 찾을 수 없습니다";
+"Purchase failed: %@" = "구매 실패: %@";
+
+/* Pro Settings */
+"Status" = "상태";
+"Subscription" = "구독";
+"Plan" = "플랜";
+"Purchased" = "구매 완료";
+"Renews" = "갱신";
+"Servers" = "서버";
+"%lld of %lld used" = "%lld / %lld 사용";
+"Workspaces" = "워크스페이스";
+"Simultaneous Connections" = "동시 연결";
+"%lld max" = "최대 %lld";
+"Features" = "기능";
+"Billing" = "청구";
+"Active" = "활성";
+"Free Tier" = "무료 플랜";
+"Pro Lifetime" = "Pro 평생";
+"Pro" = "Pro";
+"Pro Monthly" = "Pro 월간";
+"Pro Yearly" = "Pro 연간";
+"PRO" = "PRO";
+"FREE_PLAN" = "무료";
+
+"Unlimited servers & workspaces" = "무제한 서버 및 워크스페이스";
+"View Plans" = "플랜 보기";
+
+/* Pro Limits */
+"Server Limit Reached" = "서버 한도 도달";
+"Workspace Limit Reached" = "워크스페이스 한도 도달";
+"Tab Limit Reached" = "탭 한도 도달";
+"You've reached the limit of %lld servers on the free plan. Upgrade to Pro for unlimited servers." = "무료 플랜의 서버 %lld개 한도에 도달했습니다. 무제한 서버를 위해 Pro로 업그레이드하세요.";
+"You've reached the limit of %lld workspace on the free plan. Upgrade to Pro for unlimited workspaces." = "무료 플랜의 워크스페이스 %lld개 한도에 도달했습니다. 무제한 워크스페이스를 위해 Pro로 업그레이드하세요.";
+"You can only have %lld connection at a time on the free plan. Upgrade to Pro for multiple simultaneous connections." = "무료 플랜에서는 동시에 %lld개 연결만 가능합니다. 다중 동시 연결을 위해 Pro로 업그레이드하세요.";
+"Server Locked" = "서버 잠김";
+"Workspace Locked" = "워크스페이스 잠김";
+"This server exceeds your free plan limit of %lld servers. Renew your Pro subscription to access all your servers." = "이 서버는 무료 플랜의 %lld개 서버 한도를 초과합니다. 모든 서버에 접근하려면 Pro 구독을 갱신하세요.";
+"This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces." = "이 워크스페이스는 무료 플랜의 %lld개 한도를 초과합니다. 모든 워크스페이스에 접근하려면 Pro 구독을 갱신하세요.";
+"\"%@\" %@" = "\"%@\" %@";
+"Subscription Expired" = "구독 만료";
+"%lld server" = "%lld 서버";
+"%lld servers" = "%lld 서버";
+"%lld workspace" = "%lld 워크스페이스";
+"%lld workspaces" = "%lld 워크스페이스";
+" and " = " 및 ";
+"%@ locked" = "%@ 잠김";
+
+/* Server & Workspace */
+"Server Info" = "서버 정보";
+"Name" = "이름";
+"Host" = "호스트";
+"Port" = "포트";
+"Username" = "사용자 이름";
+"Authentication" = "인증";
+"Method" = "방법";
+"Password" = "비밀번호";
+"Key loaded" = "키 로드 완료";
+"Key Passphrase" = "키 암호";
+"Server Environment" = "서버 환경";
+"Environment" = "환경";
+"Notes" = "메모";
+"Edit Server" = "서버 편집";
+"Add Server" = "서버 추가";
+"Use Stored Key" = "저장된 키 사용";
+"Select a key..." = "키 선택...";
+"Import File" = "파일 가져오기";
+"Paste" = "붙여넣기";
+"Add to Keychain" = "키체인에 추가";
+"Select a stored key or import/paste a new one" = "저장된 키를 선택하거나 새로 가져오기/붙여넣기";
+"Using stored key: %@" = "저장된 키 사용 중: %@";
+"Workspace" = "워크스페이스";
+"Workspaces" = "워크스페이스";
+"Workspace name" = "워크스페이스 이름";
+"Color" = "색상";
+"Delete Workspace" = "워크스페이스 삭제";
+"Edit Workspace" = "워크스페이스 편집";
+"New Workspace" = "새 워크스페이스";
+"Workspaces" = "워크스페이스";
+"My Servers" = "내 서버";
+
+/* Sidebar / Lists */
+"WORKSPACE" = "워크스페이스";
+"SERVERS" = "서버";
+"Support VVTerm" = "VVTerm 지원";
+"Upgrade to Pro" = "Pro로 업그레이드";
+"All" = "전체";
+"Custom..." = "사용자 정의...";
+"New Workspace" = "새 워크스페이스";
+"Unlock with Pro" = "Pro로 잠금 해제";
+"Switch to Workspace" = "워크스페이스로 전환";
+"Delete Workspace" = "워크스페이스 삭제";
+
+/* iOS Lists */
+"%lld servers" = "%lld 서버";
+"Servers" = "서버";
+"Active Connections" = "활성 연결";
+"Add Workspace" = "워크스페이스 추가";
+"Workspaces" = "워크스페이스";
+"Done" = "완료";
+
+/* Empty States */
+"No Servers" = "서버 없음";
+"Add a server to get started" = "서버를 추가하여 시작하세요";
+"Multiple connections require Pro" = "다중 연결에는 Pro가 필요합니다";
+"Upgrade to connect to multiple servers simultaneously" = "여러 서버에 동시에 연결하려면 업그레이드하세요";
+"Upgrade to Pro" = "Pro로 업그레이드";
+"Connect" = "연결";
+
+/* Offline */
+"No network connection" = "네트워크 연결 없음";
+"You're currently offline. Some features may not work:" = "현재 오프라인 상태입니다. 일부 기능이 작동하지 않을 수 있습니다:";
+"Cannot connect to servers" = "서버에 연결할 수 없습니다";
+"iCloud sync paused" = "iCloud 동기화 일시 중지";
+"Saved servers still accessible" = "저장된 서버는 계속 접근 가능";
+"Offline" = "오프라인";
+
+/* Terminal */
+"Initializing terminal..." = "터미널 초기화 중...";
+"Terminal initialization failed" = "터미널 초기화 실패";
+"Connecting..." = "연결 중...";
+"Reconnecting (attempt %lld)..." = "재연결 중 (%lld번째 시도)...";
+"Disconnected" = "연결 해제됨";
+"Connection Failed" = "연결 실패";
+"Reconnect" = "재연결";
+"Retry" = "재시도";
+"Voice Input Unavailable" = "음성 입력 사용 불가";
+"Voice input (Command+Shift+M)" = "음성 입력 (Command+Shift+M)";
+"Enable Microphone and Speech Recognition in System Settings." = "시스템 설정에서 마이크 및 음성 인식을 활성화하세요.";
+"Terminal" = "터미널";
+"No terminals open" = "열린 터미널이 없습니다";
+"New Terminal" = "새 터미널";
+"Close this terminal?" = "이 터미널을 닫으시겠습니까?";
+"The SSH connection will be terminated." = "SSH 연결이 종료됩니다.";
+
+/* Keychain */
+"No Keys Stored" = "저장된 키 없음";
+"Add keys to quickly use them when creating new servers" = "새 서버 생성 시 빠르게 사용할 수 있도록 키를 추가하세요";
+"Generate New Key" = "새 키 생성";
+"Import Key" = "키 가져오기";
+"Keys are stored securely in your device's Keychain. Passphrases are stored separately." = "키는 기기의 키체인에 안전하게 저장됩니다. 암호는 별도로 저장됩니다.";
+"Delete SSH Key" = "SSH 키 삭제";
+"Are you sure you want to delete '%@'? This cannot be undone." = "'%@'을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.";
+"Protected" = "보호됨";
+"Added %@ ago" = "%@ 전에 추가됨";
+"Copy public key" = "공개 키 복사";
+"Key Name" = "키 이름";
+"e.g., Personal MacBook, Work Key" = "예: 개인 MacBook, 업무용 키";
+"Private Key" = "개인 키";
+"Import Key File" = "키 파일 가져오기";
+"Import your private key file (id_rsa, id_ed25519, etc.) or paste the contents" = "개인 키 파일(id_rsa, id_ed25519 등)을 가져오거나 내용을 붙여넣으세요";
+"Key loaded (%lld characters)" = "키 로드 완료 (%lld자)";
+"Key passphrase" = "키 암호";
+"Passphrase (Optional)" = "암호 (선택사항)";
+"If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase." = "키가 암호로 암호화된 경우 여기에 입력하세요. 암호가 없는 키는 비워두세요.";
+"Add SSH Key" = "SSH 키 추가";
+"Algorithm" = "알고리즘";
+"Key Type" = "키 유형";
+"Confirm passphrase" = "암호 확인";
+"Protect your key with a passphrase. Leave empty for no protection." = "암호로 키를 보호합니다. 보호하지 않으려면 비워두세요.";
+"Generated Key" = "생성된 키";
+"Key generated successfully" = "키가 성공적으로 생성되었습니다";
+"Fingerprint:" = "지문:";
+"View Public Key" = "공개 키 보기";
+"Generate SSH Key" = "SSH 키 생성";
+"Generate" = "생성";
+"Add this to your server's ~/.ssh/authorized_keys file:" = "서버의 ~/.ssh/authorized_keys 파일에 다음을 추가하세요:";
+"No Public Key" = "공개 키 없음";
+"This key was imported without a public key." = "이 키는 공개 키 없이 가져왔습니다.";
+"Public Key" = "공개 키";
+
+/* Transcription */
+"Engine" = "엔진";
+"System (Apple)" = "시스템 (Apple)";
+"Whisper (MLX)" = "Whisper (MLX)";
+"Parakeet (MLX)" = "Parakeet (MLX)";
+"Provider" = "제공자";
+"Language" = "언어";
+"Model" = "모델";
+"Downloading..." = "다운로드 중...";
+"Delete Model" = "모델 삭제";
+"Download size: %@" = "다운로드 크기: %@";
+"Status" = "상태";
+"Download" = "다운로드";
+"Ready" = "준비 완료";
+"Failed" = "실패";
+"Storage" = "저장소";
+"Model Storage" = "모델 저장소";
+"Total MLX Models" = "MLX 모델 합계";
+"Uses Apple's built-in speech recognition. Requires network for best results." = "Apple 내장 음성 인식을 사용합니다. 최상의 결과를 위해 네트워크가 필요합니다.";
+"OpenAI Whisper runs locally using MLX. Works offline after download." = "OpenAI Whisper는 MLX를 사용하여 로컬에서 실행됩니다. 다운로드 후 오프라인 작동.";
+"NVIDIA Parakeet runs locally using MLX. Optimized for real-time transcription." = "NVIDIA Parakeet는 MLX를 사용하여 로컬에서 실행됩니다. 실시간 음성 인식에 최적화.";
+"English" = "영어";
+"Spanish" = "스페인어";
+"French" = "프랑스어";
+"German" = "독일어";
+"Japanese" = "일본어";
+"Chinese" = "중국어";
+"Korean" = "한국어";
+"Portuguese" = "포르투갈어";
+"Russian" = "러시아어";
+"Auto-detect" = "자동 감지";
+
+/* MLX Models */
+"Tiny" = "초소형";
+"Fastest, smallest" = "가장 빠르고 가장 작음";
+"Full precision" = "전체 정밀도";
+"Tiny (EN)" = "초소형 (EN)";
+"English-only, smaller" = "영어 전용, 더 작음";
+"English-only" = "영어 전용";
+"Base" = "기본";
+"Balanced speed/quality" = "속도와 품질의 균형";
+"Small" = "소형";
+"Better accuracy" = "더 나은 정확도";
+"Medium" = "중형";
+"Higher accuracy, heavier" = "높은 정확도, 더 무거움";
+"Large v3" = "대형 v3";
+"Latest large model" = "최신 대형 모델";
+"Large" = "대형";
+"Large v3 4-bit" = "대형 v3 4비트";
+"Smaller download" = "더 작은 다운로드";
+"4-bit quantized" = "4비트 양자화";
+"Parakeet TDT 0.6B v2" = "Parakeet TDT 0.6B v2";
+"Large, high-accuracy model" = "대형 고정확도 모델";
+"Parakeet TDT 0.6B" = "Parakeet TDT 0.6B";
+
+/* Network */
+"WiFi" = "Wi-Fi";
+"Cellular" = "셀룰러";
+"Ethernet" = "이더넷";
+"Unknown" = "알 수 없음";
+"No Connection" = "연결 없음";
+" (Metered)" = " (데이터 요금제)";
+" (Low Data)" = " (데이터 절약)";
+
+/* CloudKit & Sync */
+"Enable iCloud Sync" = "iCloud 동기화 활성화";
+"iCloud Account" = "iCloud 계정";
+"iCloud" = "iCloud";
+"Sync your servers and workspaces across all your Apple devices." = "모든 Apple 기기에서 서버와 워크스페이스를 동기화합니다.";
+"Sync Status" = "동기화 상태";
+"Last Synced" = "마지막 동기화";
+"Error" = "오류";
+"Data" = "데이터";
+"Force Sync Now" = "지금 강제 동기화";
+"Clear Local Data & Re-sync" = "로컬 데이터 삭제 후 재동기화";
+"Reset iCloud (Delete All & Re-upload)" = "iCloud 초기화 (전체 삭제 후 재업로드)";
+"Force sync fetches latest data from iCloud. Clear & re-sync removes local data and downloads fresh. Reset iCloud deletes ALL cloud data and uploads your local data fresh (fixes duplicates)." = "강제 동기화는 iCloud에서 최신 데이터를 가져옵니다. 삭제 후 재동기화는 로컬 데이터를 삭제하고 새로 다운로드합니다. iCloud 초기화는 모든 클라우드 데이터를 삭제하고 로컬 데이터를 새로 업로드합니다(중복 수정).";
+"Account Status" = "계정 상태";
+"Container" = "컨테이너";
+"Re-check iCloud Status" = "iCloud 상태 재확인";
+"Troubleshooting" = "문제 해결";
+"Make sure you are signed into iCloud in Settings and iCloud Drive is enabled. Check Console.app for 'CloudKit' logs for more details." = "설정에서 iCloud에 로그인하고 iCloud Drive가 활성화되어 있는지 확인하세요. 자세한 내용은 Console.app에서 'CloudKit' 로그를 확인하세요.";
+"Force Sync" = "강제 동기화";
+"Sync Now" = "지금 동기화";
+"This will fetch the latest data from iCloud and may take a moment." = "iCloud에서 최신 데이터를 가져옵니다. 잠시 시간이 걸릴 수 있습니다.";
+"Clear Local Data" = "로컬 데이터 삭제";
+"Clear & Re-sync" = "삭제 후 재동기화";
+"This will delete all local data and download fresh from iCloud. Any unsynced local changes will be lost." = "모든 로컬 데이터를 삭제하고 iCloud에서 새로 다운로드합니다. 동기화되지 않은 로컬 변경사항은 손실됩니다.";
+"Reset iCloud Data" = "iCloud 데이터 초기화";
+"Delete All & Re-upload" = "전체 삭제 후 재업로드";
+"This will DELETE ALL data from iCloud and upload your current local data. Use this to fix duplicate records." = "iCloud의 모든 데이터를 삭제하고 현재 로컬 데이터를 업로드합니다. 중복 레코드를 수정할 때 사용하세요.";
+"Connected" = "연결됨";
+"Not Available" = "사용 불가";
+"Synced" = "동기화 완료";
+"Syncing..." = "동기화 중...";
+"available" = "사용 가능";
+"noAccount - User not signed into iCloud" = "noAccount - iCloud에 로그인하지 않았습니다";
+"restricted - iCloud access restricted (parental controls, MDM, etc.)" = "restricted - iCloud 접근이 제한되어 있습니다 (자녀 보호, MDM 등)";
+"couldNotDetermine - Unable to determine iCloud status" = "couldNotDetermine - iCloud 상태를 확인할 수 없습니다";
+"temporarilyUnavailable - iCloud temporarily unavailable" = "temporarilyUnavailable - iCloud를 일시적으로 사용할 수 없습니다";
+"unknown status: %@" = "알 수 없는 상태: %@";
+"Error: %@" = "오류: %@";
+"Checking..." = "확인 중...";
+
+/* Split View Accessibility */
+"Horizontal split view" = "가로 분할 보기";
+"Vertical split view" = "세로 분할 보기";
+"Left pane" = "왼쪽 패널";
+"Top pane" = "상단 패널";
+"Right pane" = "오른쪽 패널";
+"Bottom pane" = "하단 패널";
+"Horizontal split divider" = "가로 분할 구분선";
+"Vertical split divider" = "세로 분할 구분선";
+"Drag to resize the left and right panes" = "드래그하여 좌우 패널 크기 조절";
+"Drag to resize the top and bottom panes" = "드래그하여 상하 패널 크기 조절";
+
+/* Stats */
+"SYS" = "SYS";
+"USER" = "USER";
+"IOWAIT" = "IOWAIT";
+"STEAL" = "STEAL";
+"CORES" = "코어";
+"IDLE" = "유휴";
+"UPTIME" = "가동 시간";
+"LOAD" = "부하";
+"FREE_MEMORY" = "여유";
+
+"USED" = "사용 중";
+"CACHED" = "캐시";
+"TOTAL" = "전체";
+"Volumes" = "볼륨";
+"Top Processes" = "상위 프로세스";
+"CPU" = "CPU";
+"MEM" = "MEM";
+"↑/S" = "↑/S";
+"↓/S" = "↓/S";
+"↑ TOTAL" = "↑ 전체";
+"↓ TOTAL" = "↓ 전체";
+"%lld D" = "%lld일";
+"%lld H" = "%lld시간";
+
+/* SFSymbol Picker */
+"Recent" = "최근";
+"Load more (%lld remaining)" = "더 보기 (나머지 %lld개)";
+"%lld symbols" = "%lld 심볼";
+"What's New" = "새로운 기능";
+"Draw" = "그리기";
+"Variable" = "가변";
+"Multicolor" = "멀티컬러";
+"Communication" = "커뮤니케이션";
+"Weather" = "날씨";
+"Maps" = "지도";
+"Objects & Tools" = "사물 및 도구";
+"Devices" = "기기";
+"Camera & Photos" = "카메라 및 사진";
+"Gaming" = "게임";
+"Connectivity" = "연결";
+"Transportation" = "교통";
+"Automotive" = "자동차";
+"Accessibility" = "손쉬운 사용";
+"Privacy & Security" = "개인정보 및 보안";
+"Human" = "사람";
+"Home" = "홈";
+"Fitness" = "피트니스";
+"Nature" = "자연";
+"Editing" = "편집";
+"Text Formatting" = "텍스트 서식";
+"Media" = "미디어";
+"Keyboard" = "키보드";
+"Commerce" = "상거래";
+"Time" = "시간";
+"Health" = "건강";
+"Shapes" = "도형";
+"Arrows" = "화살표";
+"Indices" = "인덱스";
+"Math" = "수학";
+
+/* Auth Methods */
+"SSH Key" = "SSH 키";
+"SSH Key + Passphrase" = "SSH 키 + 암호";
+
+/* Environments */
+"Production" = "프로덕션";
+"Staging" = "스테이징";
+"Development" = "개발";
+"Prod" = "운영";
+"Stag" = "스테이징";
+"Dev" = "개발";
+"New Environment" = "새 환경";
+"Edit Environment" = "환경 편집";
+"Environment name" = "환경 이름";
+"An environment with this name already exists." = "같은 이름의 환경이 이미 존재합니다.";
+"Delete Environment?" = "환경을 삭제하시겠습니까?";
+"Servers in '%@' will be moved to Production." = "'%@'의 서버가 프로덕션으로 이동됩니다.";
+"Edit \"%@\"..." = "\"%@\" 편집...";
+"Delete \"%@\"..." = "\"%@\" 삭제...";
+"Custom" = "사용자 정의";
+
+/* Errors (Voice) */
+"Microphone permission is required. The microphone will be automatically requested when recording starts." = "마이크 권한이 필요합니다. 녹음 시작 시 자동으로 요청됩니다.";
+"Speech recognition is not available. Please enable Siri in System Settings > Siri & Spotlight." = "음성 인식을 사용할 수 없습니다. 시스템 설정 > Siri 및 Spotlight에서 Siri를 활성화하세요.";
+"Failed to start recording. Please check microphone permissions in System Settings > Privacy & Security > Microphone." = "녹음 시작에 실패했습니다. 시스템 설정 > 개인정보 보호 및 보안 > 마이크에서 권한을 확인하세요.";
+"MLX transcription is not available on this Mac. Switching to Apple Speech." = "이 Mac에서는 MLX 음성 인식을 사용할 수 없습니다. Apple Speech로 전환합니다.";
+
+/* Pro Required Errors */
+"Upgrade to Pro for unlimited servers" = "무제한 서버를 위해 Pro로 업그레이드";
+"Upgrade to Pro for unlimited workspaces" = "무제한 워크스페이스를 위해 Pro로 업그레이드";
+"Upgrade to Pro for multiple connections" = "다중 연결을 위해 Pro로 업그레이드";
+"Upgrade to Pro for custom environments" = "사용자 정의 환경을 위해 Pro로 업그레이드";
+
+/* Misc */
+"Terminal initialization failed" = "터미널 초기화 실패";
+"Voice Input Unavailable" = "음성 입력 사용 불가";
+"Disconnect from server" = "서버에서 연결 해제";
+"Disconnect from %@?" = "%@에서 연결을 해제하시겠습니까?";
+"This will return to the server list." = "서버 목록으로 돌아갑니다.";
+"All terminal tabs for this server will be closed." = "이 서버의 모든 터미널 탭이 닫힙니다.";
+"Add Terminal Preset" = "터미널 프리셋 추가";
+"Edit Preset" = "프리셋 편집";
+"Basic Information" = "기본 정보";
+"Display name for the preset (e.g., Claude, Helix, Vim)" = "프리셋 표시 이름 (예: Claude, Helix, Vim)";
+"Command" = "명령어";
+"Command to run when preset is selected (e.g., claude, hx, nvim)" = "프리셋 선택 시 실행할 명령어 (예: claude, hx, nvim)";
+"Icon" = "아이콘";
+"Choose Symbol..." = "심볼 선택...";
+
+/* Contact Labels */
+"Developer" = "개발자";
+"Discord" = "Discord";
+"Join Community" = "커뮤니티 참여";
+"Email" = "이메일";
+"GitHub" = "GitHub";
+"Report Issue" = "문제 보고";
+"Support VVTerm" = "VVTerm 지원";
+
+
+/* Auth Provider */
+"System (Apple Speech)" = "시스템 (Apple Speech)";
+"MLX Whisper" = "MLX Whisper";
+"MLX Parakeet" = "MLX Parakeet";
+
+/* Model Errors */
+"Failed to remove model" = "모델 제거 실패";
+"Model ID is required" = "모델 ID가 필요합니다";
+
+/* Lock Errors */
+"Server '%@' is locked" = "서버 '%@'이(가) 잠겨 있습니다";
+"Workspace '%@' is locked" = "워크스페이스 '%@'이(가) 잠겨 있습니다";
+
+
+/* Additional */
+"You've reached the limit of %lld servers. Upgrade to Pro for unlimited servers." = "서버 %lld개 한도에 도달했습니다. 무제한 서버를 위해 Pro로 업그레이드하세요.";
+
+/* SSH Key Types */
+"Ed25519" = "Ed25519";
+"RSA 4096" = "RSA 4096";
+"Modern, fast, and secure. Recommended for most uses." = "현대적이고 빠르며 안전합니다. 대부분의 용도에 권장됩니다.";
+"Wide compatibility with older systems." = "이전 시스템과의 높은 호환성.";
+
+
+/* Split Commands */
+"Split Right" = "오른쪽으로 분할";
+"Split Down" = "아래로 분할";
+"Close Pane" = "패널 닫기";
+
+/* Tabs */
+"View" = "보기";
+"Stats" = "통계";
+
+/* Help */
+"Support & Feedback" = "지원 및 피드백";
+
+"Upgrade to Pro for unlimited workspaces." = "무제한 워크스페이스를 위해 Pro로 업그레이드하세요.";
+
+"Fingerprint" = "지문";
+
+"Links" = "링크";
+
+"Passphrase" = "암호";
+
+"%@ is a Pro feature" = "%@은(는) Pro 기능입니다";
+
+"System (Default)" = "시스템 (기본값)";
+
+"Some changes may require restarting the app." = "일부 변경사항은 앱 재시작이 필요할 수 있습니다.";
+
+/* Download Progress */
+"%llds remaining" = "%lld초 남음";
+"%lldm remaining" = "%lld분 남음";
+"%lldh %lldm remaining" = "%lld시간 %lld분 남음";
+"Clear All Storage" = "전체 저장소 삭제";
+
+/* Preview */
+"Server 1" = "서버 1";
+"Server 2" = "서버 2";
+"Server 3" = "서버 3";
+
+"Added" = "추가됨";
+
+"Details" = "상세";
+
+/* Added for localization coverage */
+"Close Tab" = "탭 닫기";
+"New Tab" = "새 탭";
+"Previous Tab" = "이전 탭";
+"Next Tab" = "다음 탭";
+"Settings..." = "설정...";
+"Disabled" = "비활성화";
+"Close Tab?" = "탭을 닫으시겠습니까?";
+"This will disconnect \"%@\"." = "\"%@\" 연결이 해제됩니다.";
+"Preparing server details..." = "서버 상세 정보 준비 중...";
+"Connection successful" = "연결 성공";
+"Testing connection..." = "연결 테스트 중...";
+"Test Connection" = "연결 테스트";
+"Connection will be verified before saving." = "저장 전에 연결이 확인됩니다.";
+"Connection test failed" = "연결 테스트 실패";
+"Transcribing audio" = "오디오 변환 중";
+"Copy" = "복사";
+"Ctrl" = "Ctrl";
+"Alt" = "Alt";
+"Cmd" = "Cmd";
+"Esc" = "Esc";
+"Tab" = "Tab";
+"End" = "End";
+"PgUp" = "PgUp";
+"PgDn" = "PgDn";
+"^C" = "^C";
+"^D" = "^D";
+"^Z" = "^Z";
+"^L" = "^L";
+"Voice input" = "음성 입력";
+"active" = "활성";
+"1 active session" = "활성 세션 1개";
+"%lld active sessions" = "활성 세션 %lld개";
+"Server Name" = "서버 이름";
+"192.168.1.1:22" = "192.168.1.1:22";
+"Standard Glass" = "표준 글래스";
+"Tinted Glass" = "틴티드 글래스";
+"Red Tint" = "빨간색 틴트";
+"(%lld)" = "(%lld)";
+"%lld/%lld" = "%lld/%lld";
+"%lld%%" = "%lld%%";
+"%lld %%" = "%lld %%";
+"%@/%@" = "%@/%@";
+"%@ / %@" = "%@ / %@";
+"Added %@" = "추가: %@";
+"© %lld Vivy Technologies Co., Limited" = "© %lld Vivy Technologies Co., Limited";
+"iCloud.app.vivy.VivyTerm" = "iCloud.app.vivy.VivyTerm";
+"Medium (8-bit)" = "중형 (8비트)";
+"Medium (FP32)" = "중형 (FP32)";
+"Medium (Q4)" = "중형 (Q4)";
+
+/* Server Form Placeholders */
+"My Server" = "내 서버";
+"203.0.113.10" = "203.0.113.10";
+"22" = "22";
+"root" = "root";
+"Required" = "필수";
+"Optional" = "선택사항";
+"Tailscale SSH" = "Tailscale SSH";
+"Uses server-side Tailscale SSH policy. No password or SSH key is required." = "서버 측 Tailscale SSH 정책을 사용합니다. 비밀번호나 SSH 키가 필요 없습니다.";
+"Tailscale SSH authentication was not accepted by the server." = "서버에서 Tailscale SSH 인증을 수락하지 않았습니다.";
+"This app currently supports direct tailnet connections only (no userspace proxy fallback)." = "이 앱은 현재 직접 tailnet 연결만 지원합니다 (유저스페이스 프록시 폴백 없음).";
+"Cloudflare" = "Cloudflare";
+"Cloudflare Access" = "Cloudflare Access";
+"OAuth login will open in browser. Team/App domain values are auto-discovered from host." = "OAuth 로그인이 브라우저에서 열립니다. 팀/앱 도메인 값은 호스트에서 자동 검색됩니다.";
+"Team Domain Override" = "팀 도메인 재정의";
+"Set Team Domain Override" = "팀 도메인 재정의 설정";
+"App Domain Override" = "앱 도메인 재정의";
+"Hide Overrides" = "재정의 숨기기";
+"Set Team/App Domain Override" = "팀/앱 도메인 재정의 설정";
+"Service Token Client ID" = "서비스 토큰 클라이언트 ID";
+"Service Token Client Secret" = "서비스 토큰 클라이언트 시크릿";
+"Cloudflare configuration error: %@" = "Cloudflare 설정 오류: %@";
+"Cloudflare authentication failed: %@" = "Cloudflare 인증 실패: %@";
+"Cloudflare tunnel failed: %@" = "Cloudflare 터널 실패: %@";
+"Cloudflare transport requires a valid hostname." = "Cloudflare 전송에는 유효한 호스트 이름이 필요합니다.";
+"Cloudflare service token client ID is required." = "Cloudflare 서비스 토큰 클라이언트 ID가 필요합니다.";
+"Cloudflare service token client secret is required." = "Cloudflare 서비스 토큰 클라이언트 시크릿이 필요합니다.";
+"Provide both Team Domain and App Domain overrides for Cloudflare OAuth." = "Cloudflare OAuth를 위해 팀 도메인과 앱 도메인 재정의를 모두 제공하세요.";
+"Cloudflare metadata discovery failed. Add Team Domain and App Domain overrides in server settings." = "Cloudflare 메타데이터 검색에 실패했습니다. 서버 설정에서 팀 도메인과 앱 도메인 재정의를 추가하세요.";
+
+/* Tmux Attach Prompt */
+"Choose tmux session" = "tmux 세션 선택";
+"Existing sessions" = "기존 세션";
+"Select a session to attach immediately." = "즉시 연결할 세션을 선택하세요.";
+"No tmux sessions found" = "tmux 세션을 찾을 수 없습니다";
+"Create a new session, or continue without tmux." = "새 세션을 만들거나 tmux 없이 계속하세요.";
+"Attached" = "연결됨";
+"Detached" = "분리됨";
+"1 client" = "1 클라이언트";
+"%lld clients" = "%lld 클라이언트";
+"1 window" = "1 윈도우";
+"%lld windows" = "%lld 윈도우";
+"New session" = "새 세션";
+"Skip tmux" = "tmux 건너뛰기";
+"Create VVTerm session" = "VVTerm 세션 생성";
+"Ask every time" = "매번 확인";
+"Use remembered session" = "기억된 세션 사용";
+"Always create or attach to a VVTerm-managed tmux session for this connection." = "이 연결에서 VVTerm이 관리하는 tmux 세션을 항상 생성하거나 연결합니다.";
+"Show a prompt on each new tab or split so you can choose a session." = "새 탭이나 분할 시 프롬프트를 표시하여 세션을 선택할 수 있습니다.";
+"Start a normal shell without tmux session persistence." = "tmux 세션 유지 없이 일반 셸을 시작합니다.";
+"Automatically attach to the last tmux session you selected." = "마지막으로 선택한 tmux 세션에 자동으로 연결합니다.";
+"Sessions stay alive across app restarts and disconnects when tmux is available." = "tmux를 사용할 수 있는 경우, 앱 재시작 및 연결 해제 후에도 세션이 유지됩니다.";
+"Choose the default behavior for new servers. You can still override per server in server settings." = "새 서버의 기본 동작을 선택합니다. 서버 설정에서 서버별로 재정의할 수 있습니다.";
+
+"%lld custom theme" = "사용자 정의 테마 %lld개";
+"%lld custom themes" = "사용자 정의 테마 %lld개";
+
+/* Biometric Lock */
+"Biometric Authentication" = "생체 인증";
+"Touch ID" = "Touch ID";
+"Face ID" = "Face ID";
+"Authentication reason is missing." = "인증 사유가 없습니다.";
+"Biometric authentication is unavailable on this device." = "이 기기에서는 생체 인증을 사용할 수 없습니다.";
+"Biometric authentication is not set up on this device." = "이 기기에서 생체 인증이 설정되지 않았습니다.";
+"Biometric authentication is locked. Unlock the device to try again." = "생체 인증이 잠겨 있습니다. 기기를 잠금 해제하고 다시 시도하세요.";
+"Set a device passcode before using biometric authentication." = "생체 인증을 사용하기 전에 기기 암호를 설정하세요.";
+"Biometric authentication is locked. Unlock the device and try again." = "생체 인증이 잠겨 있습니다. 기기를 잠금 해제하고 다시 시도하세요.";
+"Authentication failed." = "인증에 실패했습니다.";
+"Enable %@ for VVTerm" = "VVTerm에서 %@ 활성화";
+"Unlock VVTerm with %@" = "%@으로 VVTerm 잠금 해제";
+"Unlock server %@" = "서버 %@ 잠금 해제";
+"Unlock with %@" = "%@으로 잠금 해제";
+"VVTerm is locked" = "VVTerm이 잠겨 있습니다";
+"Require %@ to open this server" = "이 서버를 열려면 %@이(가) 필요합니다";
+"Require %@ to open VVTerm" = "VVTerm을 열려면 %@이(가) 필요합니다";
+"Lock when app goes to background" = "앱이 백그라운드로 전환될 때 잠금";
+"Privacy Mode" = "프라이버시 모드";
+"Re-auth grace period" = "재인증 유예 기간";
+"Always" = "항상";
+"%lld seconds" = "%lld초";
+"Security" = "보안";
+"Privacy mode hides server addresses and usernames in the app UI and when the app is inactive." = "프라이버시 모드는 앱 UI와 비활성 상태에서 서버 주소와 사용자 이름을 숨깁니다.";
+"Biometric lock protects app and server access on this device." = "생체 인증 잠금은 이 기기에서의 앱 및 서버 접근을 보호합니다.";
+
+/* Local Discovery */
+"Discover Local Devices" = "로컬 기기 검색";
+"Discover Local Devices..." = "로컬 기기 검색...";
+"Pick from Local Discovery..." = "로컬 검색에서 선택...";
+"Ready to scan your local network." = "로컬 네트워크를 스캔할 준비가 되었습니다.";
+"Connect to Wi-Fi or ethernet to discover local SSH hosts." = "로컬 SSH 호스트를 검색하려면 Wi-Fi 또는 이더넷에 연결하세요.";
+"Scanning with Bonjour and SSH port probe..." = "Bonjour 및 SSH 포트 프로브로 스캔 중...";
+"Scanning Bonjour services..." = "Bonjour 서비스 스캔 중...";
+"Scanning local subnet for SSH port 22..." = "로컬 서브넷에서 SSH 포트 22 스캔 중...";
+"Scanning..." = "스캔 중...";
+"No SSH hosts found." = "SSH 호스트를 찾을 수 없습니다.";
+"%lld SSH host(s) found." = "SSH 호스트 %lld개를 찾았습니다.";
+"Nearby SSH Hosts" = "근처 SSH 호스트";
+"Scanning Status" = "스캔 상태";
+"Rescan" = "재스캔";
+"Use Selected" = "선택 항목 사용";
+"Open Settings" = "설정 열기";
+"Add Manually" = "수동으로 추가";
+"No Results Help" = "결과 없음 도움말";
+"Discovery only prefills host details. Credentials are still configured in Add Server." = "검색은 호스트 정보만 미리 입력합니다. 자격 증명은 서버 추가에서 설정합니다.";
+"No SSH Hosts" = "SSH 호스트 없음";
+"Scan your local network to discover SSH devices, then prefill Add Server." = "로컬 네트워크를 스캔하여 SSH 기기를 검색한 후, 서버 추가를 미리 입력합니다.";
+"No SSH hosts discovered yet." = "아직 SSH 호스트가 검색되지 않았습니다.";
+"Bonjour" = "Bonjour";
+"Port Scan" = "포트 스캔";
+"Port 22" = "포트 22";
+"%lldms" = "%lldms";
+"Use" = "사용";
+
+/* Terminal Custom Themes / Snippets / Accessory Bar */
+"ANSI Palette" = "ANSI 팔레트";
+"Active Items" = "활성 항목";
+"All snippets are already added." = "모든 스니펫이 이미 추가되었습니다.";
+"All system actions are already added." = "모든 시스템 동작이 이미 추가되었습니다.";
+"Apply to Both" = "양쪽 모두 적용";
+"Apply to Dark" = "다크에 적용";
+"Apply to Light" = "라이트에 적용";
+"Arrow Down" = "아래 화살표";
+"Arrow Left" = "왼쪽 화살표";
+"Arrow Right" = "오른쪽 화살표";
+"Arrow Up" = "위 화살표";
+"Available Snippets" = "사용 가능한 스니펫";
+"Available System Actions" = "사용 가능한 시스템 동작";
+"Avoid storing secrets in snippets." = "스니펫에 비밀 정보를 저장하지 마세요.";
+"Back" = "뒤로";
+"Background" = "배경";
+"Backspace" = "백스페이스";
+"Bksp" = "Bksp";
+"Both" = "양쪽";
+"Builder" = "빌더";
+"Built-in" = "내장";
+"Cannot access selected file." = "선택한 파일에 접근할 수 없습니다.";
+"Clipboard content or imported files must be Ghostty-compatible theme text." = "클립보드 내용 또는 가져온 파일은 Ghostty 호환 테마 텍스트여야 합니다.";
+"Clipboard does not contain text." = "클립보드에 텍스트가 없습니다.";
+"Clipboard import is not supported on this platform." = "이 플랫폼에서는 클립보드 가져오기가 지원되지 않습니다.";
+"Content" = "내용";
+"Create Snippet" = "스니펫 생성";
+"Create your first custom theme from clipboard, file import, or builder." = "클립보드, 파일 가져오기 또는 빌더에서 첫 번째 사용자 정의 테마를 만들어 보세요.";
+"Ctrl and Alt stay fixed. %lld/%lld active items." = "Ctrl과 Alt는 고정입니다. 활성 항목 %lld/%lld개.";
+"Ctrl+A" = "Ctrl+A";
+"Ctrl+C" = "Ctrl+C";
+"Ctrl+D" = "Ctrl+D";
+"Ctrl+E" = "Ctrl+E";
+"Ctrl+K" = "Ctrl+K";
+"Ctrl+L" = "Ctrl+L";
+"Ctrl+U" = "Ctrl+U";
+"Ctrl+Z" = "Ctrl+Z";
+"Cursor" = "커서";
+"Cursor Text" = "커서 텍스트";
+"Custom Theme" = "사용자 정의 테마";
+"Custom Themes" = "사용자 정의 테마";
+"Customize Accessory Bar" = "액세서리 바 사용자 정의";
+"Dark + Light" = "다크 + 라이트";
+"Del" = "Del";
+"Delete Custom Theme?" = "사용자 정의 테마를 삭제하시겠습니까?";
+"Delete Snippet" = "스니펫 삭제";
+"Delete Snippet?" = "스니펫을 삭제하시겠습니까?";
+"Edit Snippet" = "스니펫 편집";
+"Edit \"%@\"" = "\"%@\" 편집";
+"Enable tmux by default" = "기본적으로 tmux 활성화";
+"Enter" = "Enter";
+"F1" = "F1";
+"F10" = "F10";
+"F11" = "F11";
+"F12" = "F12";
+"F2" = "F2";
+"F3" = "F3";
+"F4" = "F4";
+"F5" = "F5";
+"F6" = "F6";
+"F7" = "F7";
+"F8" = "F8";
+"F9" = "F9";
+"Failed to import theme file: %@" = "테마 파일 가져오기 실패: %@";
+"Foreground" = "전경";
+"Import from File" = "파일에서 가져오기";
+"Ins" = "Ins";
+"Insert" = "삽입";
+"Insert + Enter" = "삽입 + Enter";
+"Invalid hex color at line %lld. Use #RRGGBB." = "%lld번째 줄의 16진수 색상이 잘못되었습니다. #RRGGBB 형식을 사용하세요.";
+"Invalid palette value at line %lld. Expected N=#RRGGBB where N is 0...15." = "%lld번째 줄의 팔레트 값이 잘못되었습니다. N=#RRGGBB (N은 0...15) 형식이어야 합니다.";
+"Invalid theme line %lld. Expected key/value format." = "%lld번째 줄의 테마가 잘못되었습니다. 키/값 형식이어야 합니다.";
+"Keyboard Accessory" = "키보드 액세서리";
+"Leave optional values empty to keep defaults." = "기본값을 유지하려면 선택사항을 비워두세요.";
+"Manage Snippets" = "스니펫 관리";
+"Manage custom themes" = "사용자 정의 테마 관리";
+"Mode" = "모드";
+"New Custom Theme" = "새 사용자 정의 테마";
+"New Snippet" = "새 스니펫";
+"No Custom Themes" = "사용자 정의 테마 없음";
+"No snippets yet." = "아직 스니펫이 없습니다.";
+"On connect" = "연결 시";
+"Optional ANSI palette entries. Leave empty to use Ghostty defaults." = "선택적 ANSI 팔레트 항목입니다. Ghostty 기본값을 사용하려면 비워두세요.";
+"Page Down" = "페이지 다운";
+"Page Up" = "페이지 업";
+"Palette %lld" = "팔레트 %lld";
+"Paste from Clipboard" = "클립보드에서 붙여넣기";
+"Pasted Theme" = "붙여넣은 테마";
+"Pick %@ color" = "%@ 색상 선택";
+"Preview" = "미리보기";
+"Remove Theme" = "테마 제거";
+"Reorder actions, add snippets, and sync your accessory bar across devices." = "동작을 정렬하고, 스니펫을 추가하고, 기기 간에 액세서리 바를 동기화합니다.";
+"Reset to Default" = "기본값으로 초기화";
+"Save Custom Theme" = "사용자 정의 테마 저장";
+"Selection Background" = "선택 영역 배경";
+"Selection Foreground" = "선택 영역 전경";
+"Send Behavior" = "전송 동작";
+"Snippet" = "스니펫";
+"Snippet content cannot be empty." = "스니펫 내용은 비어 있을 수 없습니다.";
+"Snippet not found." = "스니펫을 찾을 수 없습니다.";
+"Snippet title cannot be empty." = "스니펫 제목은 비어 있을 수 없습니다.";
+"Snippets" = "스니펫";
+"Snippets send exactly as written. Ctrl/Alt modifiers are ignored for snippet taps." = "스니펫은 작성된 그대로 전송됩니다. 스니펫 탭에서는 Ctrl/Alt 수정자가 무시됩니다.";
+"Target" = "대상";
+"Theme content is empty." = "테마 내용이 비어 있습니다.";
+"Theme is missing required key: %@." = "테마에 필수 키가 없습니다: %@.";
+"Theme name contains invalid characters." = "테마 이름에 잘못된 문자가 포함되어 있습니다.";
+"Theme no longer exists." = "테마가 더 이상 존재하지 않습니다.";
+"This cannot be undone." = "이 작업은 취소할 수 없습니다.";
+"Title" = "제목";
+"Use Theme" = "테마 사용";
+"You can create up to %lld snippets." = "최대 %lld개의 스니펫을 만들 수 있습니다.";
+"^A" = "^A";
+"^E" = "^E";
+"^K" = "^K";
+"^U" = "^U";
+"%lld/%lld title chars • %lld/%lld content chars" = "%lld/%lld 제목 문자 • %lld/%lld 내용 문자";
+"%lld/%lld snippets. Tap a row to edit." = "%lld/%lld 스니펫. 행을 탭하여 편집합니다.";
+"?" = "?";
+"A" = "A";
+"APP_ENV=" = "APP_ENV=";
+"\\(index)" = "\\(index)";
+"cursor>" = "cursor>";
+"production" = "production";
+"restty@prod-web-01:~$ printenv APP_ENV" = "restty@prod-web-01:~$ printenv APP_ENV";
+"selection" = "선택";
+
+/* Custom Actions */
+"Shift" = "Shift";
+"Space" = "스페이스";
+"Shortcut" = "단축키";
+"Type" = "유형";
+"Custom Action" = "사용자 정의 동작";
+"Custom Actions" = "사용자 정의 동작";
+"Manage Custom Actions" = "사용자 정의 동작 관리";
+"Available Custom Actions" = "사용 가능한 사용자 정의 동작";
+"Create Action" = "동작 생성";
+"No custom actions yet." = "아직 사용자 정의 동작이 없습니다.";
+"All custom actions are already added." = "모든 사용자 정의 동작이 이미 추가되었습니다.";
+"You can create up to %lld custom actions." = "최대 %lld개의 사용자 정의 동작을 만들 수 있습니다.";
+"Action title cannot be empty." = "동작 제목은 비어 있을 수 없습니다.";
+"Command content cannot be empty." = "명령어 내용은 비어 있을 수 없습니다.";
+"Action not found." = "동작을 찾을 수 없습니다.";
+"Commands send exactly as written." = "명령어는 작성된 그대로 전송됩니다.";
+"Avoid storing secrets in commands or action titles." = "명령어나 동작 제목에 비밀 정보를 저장하지 마세요.";
+"Delete Custom Action" = "사용자 정의 동작 삭제";
+"Delete Custom Action?" = "사용자 정의 동작을 삭제하시겠습니까?";
+"Edit Custom Action" = "사용자 정의 동작 편집";
+"New Custom Action" = "새 사용자 정의 동작";
+"Ctrl, Alt, and Shift stay fixed. Add Cmd if you want it on the bar. %lld/%lld active items." = "Ctrl, Alt, Shift는 고정입니다. 바에 추가하려면 Cmd를 추가하세요. 활성 항목 %lld/%lld개.";
+"%lld/%lld custom actions. Tap a row to edit." = "%lld/%lld 사용자 정의 동작. 행을 탭하여 편집합니다.";
+"Title length: %lld/%lld" = "제목 길이: %lld/%lld";
+"Command length: %lld/%lld" = "명령어 길이: %lld/%lld";
+"Show keyboard dismiss button" = "키보드 닫기 버튼 표시";
+"Hide keyboard" = "키보드 숨기기";
+"Reorder actions, add custom actions, show or hide the keyboard dismiss button, and sync your accessory bar across devices." = "동작을 정렬하고, 사용자 정의 동작을 추가하고, 키보드 닫기 버튼을 표시하거나 숨기고, 기기 간에 액세서리 바를 동기화합니다.";
+
+/* Image Paste */
+"Behavior" = "동작";
+"Image Paste" = "이미지 붙여넣기";
+"Automatically" = "자동";
+"Ask Before Upload" = "업로드 전 확인";
+"Off" = "끔";
+"Image paste is turned off." = "이미지 붙여넣기가 꺼져 있습니다.";
+"You'll be asked before the image is uploaded." = "이미지 업로드 전에 확인합니다.";
+"Images upload right away without showing the confirmation sheet." = "확인 시트 없이 이미지가 바로 업로드됩니다.";
+"Clipboard image is too large. The limit is %@." = "클립보드 이미지가 너무 큽니다. 제한은 %@입니다.";
+"Rich clipboard paste is only supported for POSIX remotes in V1. Remote platform: %@." = "V1에서 리치 클립보드 붙여넣기는 POSIX 리모트에서만 지원됩니다. 리모트 플랫폼: %@.";
+"Rich clipboard paste requires a POSIX-capable remote shell." = "리치 클립보드 붙여넣기에는 POSIX 호환 리모트 셸이 필요합니다.";
+"Remote upload failed: could not create temporary file" = "리모트 업로드 실패: 임시 파일을 생성할 수 없습니다";
+"Remote upload failed: %@" = "리모트 업로드 실패: %@";
+"timed out while creating remote temporary file" = "리모트 임시 파일 생성 중 시간 초과";
+"timed out while uploading image bytes" = "이미지 데이터 업로드 중 시간 초과";
+"Upload this %@ image and paste its path?" = "이 %@ 이미지를 업로드하고 경로를 붙여넣으시겠습니까?";
+"Paste image" = "이미지 붙여넣기";
+"Reconnect the terminal before uploading images." = "이미지를 업로드하기 전에 터미널을 재연결하세요.";
+"Uploading image to remote host..." = "리모트 호스트에 이미지 업로드 중...";
+"Upload image" = "이미지 업로드";
+"Always Upload" = "항상 업로드";
+"Paste Text Instead" = "대신 텍스트 붙여넣기";
+"Always Upload skips this prompt next time." = "항상 업로드를 선택하면 다음부터 이 확인을 건너뜁니다.";
+"Image ready to upload" = "업로드할 이미지 준비 완료";
