@@ -38,5 +38,45 @@ struct MacKeyboardShortcutTests {
     func neighboringKeyDoesNotMatchShortcut() {
         #expect(MacTerminalShortcut.paste.matches(keyCode: Ghostty.Input.Key.c.keyCode!, modifiers: .command) == false)
     }
+
+    @Test
+    func commandVPasteRequiresFirstResponderOwnership() {
+        #expect(
+            MacTerminalShortcutRouting.shouldHandle(
+                MacTerminalShortcut.paste,
+                keyCode: Ghostty.Input.Key.v.keyCode!,
+                modifiers: .command,
+                isFirstResponder: true
+            )
+        )
+        #expect(
+            MacTerminalShortcutRouting.shouldHandle(
+                MacTerminalShortcut.paste,
+                keyCode: Ghostty.Input.Key.v.keyCode!,
+                modifiers: .command,
+                isFirstResponder: false
+            ) == false
+        )
+    }
+
+    @Test
+    func commandCCopyRequiresFirstResponderOwnership() {
+        #expect(
+            MacTerminalShortcutRouting.shouldHandle(
+                MacTerminalShortcut.copy,
+                keyCode: Ghostty.Input.Key.c.keyCode!,
+                modifiers: .command,
+                isFirstResponder: true
+            )
+        )
+        #expect(
+            MacTerminalShortcutRouting.shouldHandle(
+                MacTerminalShortcut.copy,
+                keyCode: Ghostty.Input.Key.c.keyCode!,
+                modifiers: .command,
+                isFirstResponder: false
+            ) == false
+        )
+    }
 }
 #endif

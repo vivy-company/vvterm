@@ -149,7 +149,9 @@ class TerminalScrollView: NSView, NSUserInterfaceValidations {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        ensureSurfaceViewIsFirstResponder()
+        guard window?.firstResponder === surfaceView else {
+            return super.performKeyEquivalent(with: event)
+        }
         if surfaceView.performKeyEquivalent(with: event) {
             return true
         }
@@ -157,12 +159,12 @@ class TerminalScrollView: NSView, NSUserInterfaceValidations {
     }
 
     @objc func copy(_ sender: Any?) {
-        ensureSurfaceViewIsFirstResponder()
+        guard window?.firstResponder === surfaceView else { return }
         surfaceView.copy(sender)
     }
 
     @objc func paste(_ sender: Any?) {
-        ensureSurfaceViewIsFirstResponder()
+        guard window?.firstResponder === surfaceView else { return }
         surfaceView.paste(sender)
     }
 

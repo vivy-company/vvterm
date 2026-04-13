@@ -502,11 +502,23 @@ class GhosttyTerminalView: NSView, NSUserInterfaceValidations {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        let isFirstResponder = window?.firstResponder === self
+
         switch true {
-        case MacTerminalShortcut.paste.matches(event):
+        case MacTerminalShortcutRouting.shouldHandle(
+            MacTerminalShortcut.paste,
+            keyCode: event.keyCode,
+            modifiers: event.modifierFlags,
+            isFirstResponder: isFirstResponder
+        ):
             paste(nil)
             return true
-        case MacTerminalShortcut.copy.matches(event):
+        case MacTerminalShortcutRouting.shouldHandle(
+            MacTerminalShortcut.copy,
+            keyCode: event.keyCode,
+            modifiers: event.modifierFlags,
+            isFirstResponder: isFirstResponder
+        ):
             copy(nil)
             return true
         default:

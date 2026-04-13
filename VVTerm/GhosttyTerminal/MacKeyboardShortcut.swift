@@ -32,4 +32,15 @@ enum MacTerminalShortcut {
     static let richPaste = MacKeyboardShortcut(key: .v, modifiers: .control)!
     static let toggleVoiceRecording = MacKeyboardShortcut(key: .m, modifiers: [.command, .shift])!
 }
+
+enum MacTerminalShortcutRouting {
+    static func shouldHandle(
+        _ shortcut: MacKeyboardShortcut,
+        keyCode: UInt16,
+        modifiers: NSEvent.ModifierFlags,
+        isFirstResponder: Bool
+    ) -> Bool {
+        isFirstResponder && shortcut.matches(keyCode: keyCode, modifiers: modifiers)
+    }
+}
 #endif
