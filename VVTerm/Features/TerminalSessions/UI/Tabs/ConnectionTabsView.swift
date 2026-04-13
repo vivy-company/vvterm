@@ -40,6 +40,7 @@ struct ConnectionTerminalContainer: View {
     @State private var showingZenPanel = false
     #if os(macOS)
     @State private var zenWindowSafeAreaInsets = EdgeInsets()
+    @State private var hostingWindow: NSWindow?
     #endif
 
     /// Selected view type - persisted per server
@@ -144,6 +145,8 @@ struct ConnectionTerminalContainer: View {
                     MacOSZenWindowChromeBridge(contentInsets: $zenWindowSafeAreaInsets)
                         .frame(width: 0, height: 0)
                 }
+                HostingWindowObserver(window: $hostingWindow)
+                    .frame(width: 0, height: 0)
                 #endif
             }
             .macOSZenExpandedTopSafeArea(isZenModeEnabled && selectedView == "terminal")
@@ -318,7 +321,7 @@ struct ConnectionTerminalContainer: View {
         let serverId = server.id
         DispatchQueue.main.async {
             guard TerminalTabManager.shared.selectedViewByServer[serverId] != "terminal" else { return }
-            guard let window = NSApp.keyWindow,
+            guard let window = hostingWindow,
                   window.firstResponder is GhosttyTerminalView else { return }
             window.makeFirstResponder(nil)
         }
@@ -635,6 +638,45 @@ struct ConnectionTerminalContainer: View {
     }
     #endif
 }
+
+#if os(macOS)
+private struct HostingWindowObserver: NSViewRepresentable {
+    @Binding var window: NSWindow?
+
+    func makeNSView(context: Context) -> WindowObserverView {
+        let view = WindowObserverView()
+        view.onWindowChange = { [binding = _window] newWindow in
+            binding.wrappedValue = newWindow
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: WindowObserverView, context: Context) {
+        nsView.onWindowChange = { [binding = _window] newWindow in
+            binding.wrappedValue = newWindow
+        }
+        nsView.publishCurrentWindow()
+    }
+}
+
+private final class WindowObserverView: NSView {
+    var onWindowChange: ((NSWindow?) -> Void)?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        onWindowChange?(window)
+    }
+
+    override func viewWillMove(toWindow newWindow: NSWindow?) {
+        super.viewWillMove(toWindow: newWindow)
+        onWindowChange?(newWindow)
+    }
+
+    func publishCurrentWindow() {
+        onWindowChange?(window)
+    }
+}
+#endif
 
 private extension View {
     @ViewBuilder
