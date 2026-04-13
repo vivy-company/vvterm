@@ -171,6 +171,13 @@ struct ConnectionTerminalContainer: View {
                 if let currentId = selectedTabId, !serverTabs.contains(where: { $0.id == currentId }) {
                     selectedTabIdBinding.wrappedValue = serverTabs.first?.id
                 }
+                if selectedView != "terminal" || serverTabs.isEmpty {
+                    clearTerminalFocusIfNeeded()
+                }
+            }
+            .onChange(of: selectedView) { newValue in
+                guard newValue != "terminal" else { return }
+                clearTerminalFocusIfNeeded()
             }
             .onChange(of: isZenModeEnabled) { newValue in
                 if !newValue {
@@ -304,6 +311,18 @@ struct ConnectionTerminalContainer: View {
                 UserDefaults.standard.set(resolved.toHex(), forKey: "terminalBackgroundColor")
             }
         }
+    }
+
+    private func clearTerminalFocusIfNeeded() {
+        #if os(macOS)
+        let serverId = server.id
+        DispatchQueue.main.async {
+            guard TerminalTabManager.shared.selectedViewByServer[serverId] != "terminal" else { return }
+            guard let window = NSApp.keyWindow,
+                  window.firstResponder is GhosttyTerminalView else { return }
+            window.makeFirstResponder(nil)
+        }
+        #endif
     }
 
     // MARK: - Toolbar Items (macOS)
