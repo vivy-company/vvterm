@@ -499,7 +499,7 @@ struct SSHTerminalWrapper: NSViewRepresentable {
                           context.coordinator.wasActive,
                           let window = terminalView.window,
                           window.firstResponder !== terminalView else { return }
-                        window.makeFirstResponder(terminalView)
+                    window.makeFirstResponder(terminalView)
                 }
             }
         }

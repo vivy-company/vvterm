@@ -1052,7 +1052,7 @@ struct SSHTerminalPaneWrapper: NSViewRepresentable {
                           TerminalTabManager.shared.shouldGrantTerminalFocus(to: paneId, for: serverId),
                           let window = terminalView.window,
                           window.firstResponder !== terminalView else { return }
-                        window.makeFirstResponder(terminalView)
+                    window.makeFirstResponder(terminalView)
                 }
             }
         }
