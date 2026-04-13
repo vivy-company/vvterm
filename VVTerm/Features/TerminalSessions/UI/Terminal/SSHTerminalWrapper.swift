@@ -481,11 +481,26 @@ struct SSHTerminalWrapper: NSViewRepresentable {
             return
         }
 
-        // Ensure terminal has focus
         if let scrollView = nsView as? TerminalScrollView {
             let terminalView = scrollView.surfaceView
-            if let window = nsView.window, window.firstResponder != terminalView {
-                window.makeFirstResponder(terminalView)
+
+            let wasActive = context.coordinator.wasActive
+            context.coordinator.wasActive = isActive
+            context.coordinator.focusRequestID &+= 1
+
+            let currentWindowIdentity = nsView.window.map(ObjectIdentifier.init)
+            let didAttachToWindow = currentWindowIdentity != nil && currentWindowIdentity != context.coordinator.lastWindowIdentity
+            context.coordinator.lastWindowIdentity = currentWindowIdentity
+
+            if isActive && (!wasActive || didAttachToWindow) {
+                let focusRequestID = context.coordinator.focusRequestID
+                DispatchQueue.main.async {
+                    guard context.coordinator.focusRequestID == focusRequestID,
+                          context.coordinator.wasActive,
+                          let window = terminalView.window,
+                          window.firstResponder !== terminalView else { return }
+                        window.makeFirstResponder(terminalView)
+                }
             }
         }
     }
@@ -510,6 +525,9 @@ struct SSHTerminalWrapper: NSViewRepresentable {
 
         /// If true, this coordinator is reusing an existing terminal and should NOT cleanup on deinit
         var isReusingTerminal = false
+        var wasActive = false
+        var lastWindowIdentity: ObjectIdentifier?
+        var focusRequestID: UInt = 0
 
         init(
             server: Server,

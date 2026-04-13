@@ -130,6 +130,12 @@ final class TerminalTabManager: ObservableObject {
         return tabs(for: serverId).first { $0.id == tabId }
     }
 
+    func shouldGrantTerminalFocus(to paneId: UUID, for serverId: UUID) -> Bool {
+        guard selectedViewByServer[serverId] == "terminal",
+              let selectedTab = selectedTab(for: serverId) else { return false }
+        return selectedTab.focusedPaneId == paneId
+    }
+
     /// Check if can open new tab (Pro limit check)
     var canOpenNewTab: Bool {
         if StoreManager.shared.isPro { return true }
