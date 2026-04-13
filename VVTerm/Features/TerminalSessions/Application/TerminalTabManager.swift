@@ -131,7 +131,7 @@ final class TerminalTabManager: ObservableObject {
     }
 
     func shouldGrantTerminalFocus(to paneId: UUID, for serverId: UUID) -> Bool {
-        guard selectedViewByServer[serverId] == "terminal",
+        guard ViewTabConfigurationManager.shared.effectiveView(for: selectedViewByServer[serverId]) == "terminal",
               let selectedTab = selectedTab(for: serverId) else { return false }
         return selectedTab.focusedPaneId == paneId
     }
