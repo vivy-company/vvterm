@@ -14,7 +14,6 @@ enum TerminalDefaults {
     static let fontNameKey = "terminalFontName"
     static let fontSizeKey = "terminalFontSize"
     static let legacyDefaultFontName = "JetBrainsMono Nerd Font"
-    static let legacyDefaultFontSize = 12.0
     #if os(macOS)
     static let defaultPrimaryFontName = "Menlo"
     static let macOSFallbackFontFamilies = [

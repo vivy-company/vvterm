@@ -17,7 +17,6 @@ struct TerminalDefaultsTests {
         #expect(TerminalDefaults.defaultPrimaryFontName == "Menlo")
         #expect(TerminalDefaults.defaultFontSize == 12.0)
         #expect(TerminalDefaults.legacyDefaultFontName == "JetBrainsMono Nerd Font")
-        #expect(TerminalDefaults.legacyDefaultFontSize == 12.0)
         #expect(
             TerminalDefaults.macOSFallbackFontFamilies == ["Apple SD Gothic Neo", "JetBrainsMono Nerd Font"]
         )
