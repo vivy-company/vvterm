@@ -65,9 +65,17 @@ extension Ghostty {
             return families
         }
 
+        static func escapedFontFamilyValue(_ family: String) -> String {
+            family
+                .replacingOccurrences(of: "\r", with: "")
+                .replacingOccurrences(of: "\n", with: "")
+                .replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "\"", with: "\\\"")
+        }
+
         static func fontFamilyLines(primaryFamily: String) -> String {
             sanitizedFontFamilies(primaryFamily: primaryFamily)
-                .map { "font-family = \"\($0)\"" }
+                .map { "font-family = \"\(escapedFontFamilyValue($0))\"" }
                 .joined(separator: "\n")
         }
 

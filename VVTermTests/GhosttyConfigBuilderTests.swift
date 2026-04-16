@@ -47,6 +47,15 @@ struct GhosttyConfigBuilderTests {
         #endif
     }
 
+    @Test
+    func fontFamilyLinesEscapeQuotesBackslashesAndNewlines() {
+        let lines = Ghostty.ConfigBuilder.fontFamilyLines(primaryFamily: "A\"B\\C\nD\rE")
+            .split(separator: "\n")
+            .map(String.init)
+
+        #expect(lines.first == "font-family = \"A\\\"B\\\\CDE\"")
+    }
+
     #if os(iOS)
     @Test
     func iOSConfigContentPreservesSingleFamilyBehavior() {
