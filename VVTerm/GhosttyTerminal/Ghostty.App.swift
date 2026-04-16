@@ -44,6 +44,74 @@ enum Ghostty {
 // MARK: - Ghostty.App
 
 extension Ghostty {
+    enum ConfigBuilder {
+        static func sanitizedFontFamilies(primaryFamily: String) -> [String] {
+            #if os(macOS)
+            let candidates = [primaryFamily] + TerminalDefaults.macOSFallbackFontFamilies
+            #else
+            let candidates = [primaryFamily]
+            #endif
+
+            var seen = Set<String>()
+            var families: [String] = []
+
+            for candidate in candidates {
+                let family = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !family.isEmpty else { continue }
+                guard seen.insert(family).inserted else { continue }
+                families.append(family)
+            }
+
+            return families
+        }
+
+        static func fontFamilyLines(primaryFamily: String) -> String {
+            sanitizedFontFamilies(primaryFamily: primaryFamily)
+                .map { "font-family = \"\($0)\"" }
+                .joined(separator: "\n")
+        }
+
+        static func configContent(
+            primaryFontFamily: String,
+            fontSize: Double,
+            shellName: String,
+            themeName: String
+        ) -> String {
+            """
+            \(fontFamilyLines(primaryFamily: primaryFontFamily))
+            font-size = \(Int(fontSize))
+            window-inherit-font-size = false
+            window-padding-balance = false
+            window-padding-x = 0
+            window-padding-y = 0
+            window-padding-color = extend-always
+
+            # Enable shell integration (resources dir auto-detected from app bundle)
+            shell-integration = \(shellName)
+            shell-integration-features = no-cursor,sudo,title
+
+            # Cursor
+            cursor-style-blink = true
+
+            theme = \(themeName)
+
+            # Disable audible bell
+            audible-bell = false
+
+            # Limit scrollback to prevent unbounded memory growth
+            # 10000 lines is plenty for most use cases (~5-10MB)
+            scrollback-limit = 10000
+
+            # Faster scroll speed (especially for iOS touch)
+            mouse-scroll-multiplier = 3
+
+            # Custom keybinds
+            keybind = shift+enter=text:\\n
+
+            """
+        }
+    }
+
     /// Minimal wrapper for ghostty_app_t lifecycle management
     @MainActor
     class App: ObservableObject {
@@ -74,8 +142,8 @@ extension Ghostty {
 
         // MARK: - Terminal Settings from AppStorage
 
-        @AppStorage("terminalFontName") private var terminalFontName = "JetBrainsMono Nerd Font"
-        @AppStorage("terminalFontSize") private var terminalFontSize = 8.0
+        @AppStorage(TerminalDefaults.fontNameKey) private var terminalFontName = TerminalDefaults.defaultFontName
+        @AppStorage(TerminalDefaults.fontSizeKey) private var terminalFontSize = TerminalDefaults.defaultFontSize
         @AppStorage(CloudKitSyncConstants.terminalThemeNameKey) private var terminalThemeName = "Aizen Dark"
         @AppStorage(CloudKitSyncConstants.terminalThemeNameLightKey) private var terminalThemeNameLight = "Aizen Light"
         @AppStorage(CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) private var usePerAppearanceTheme = true
@@ -341,38 +409,12 @@ extension Ghostty {
                 let shellName = (shell as NSString).lastPathComponent
 
                 // Create config with font settings, shell integration, and theme
-                let configContent = """
-                font-family = \(terminalFontName)
-                font-size = \(Int(terminalFontSize))
-                window-inherit-font-size = false
-                window-padding-balance = false
-                window-padding-x = 0
-                window-padding-y = 0
-                window-padding-color = extend-always
-
-                # Enable shell integration (resources dir auto-detected from app bundle)
-                shell-integration = \(shellName)
-                shell-integration-features = no-cursor,sudo,title
-
-                # Cursor
-                cursor-style-blink = true
-
-                theme = \(effectiveThemeName)
-
-                # Disable audible bell
-                audible-bell = false
-
-                # Limit scrollback to prevent unbounded memory growth
-                # 10000 lines is plenty for most use cases (~5-10MB)
-                scrollback-limit = 10000
-
-                # Faster scroll speed (especially for iOS touch)
-                mouse-scroll-multiplier = 3
-
-                # Custom keybinds
-                keybind = shift+enter=text:\\n
-
-                """
+                let configContent = ConfigBuilder.configContent(
+                    primaryFontFamily: terminalFontName,
+                    fontSize: terminalFontSize,
+                    shellName: shellName,
+                    themeName: effectiveThemeName
+                )
 
                 Ghostty.logger.info("Loading Ghostty theme: \(self.effectiveThemeName)")
 
