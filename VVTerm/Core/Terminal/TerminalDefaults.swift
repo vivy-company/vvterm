@@ -101,7 +101,7 @@ enum TerminalDefaults {
 
         let normalizedFontName = normalizedMacOSFontName(
             storedFontName: resolvedFontName,
-            fontValidator: { isValidMacOSFixedPitchFamily(named: $0) }
+            fontAvailability: { isAvailableMacOSFont(named: $0) }
         )
 
         if normalizedFontName != resolvedFontName {
@@ -111,16 +111,13 @@ enum TerminalDefaults {
 
     static func normalizedMacOSFontName(
         storedFontName: String,
-        fontValidator: (String) -> Bool
+        fontAvailability: (String) -> Bool
     ) -> String {
-        let isValidFixedPitchFont = fontValidator(storedFontName)
-
-        return isValidFixedPitchFont ? storedFontName : defaultPrimaryFontName
+        fontAvailability(storedFontName) ? storedFontName : defaultPrimaryFontName
     }
 
-    private static func isValidMacOSFixedPitchFamily(named familyName: String) -> Bool {
-        guard let font = NSFont(name: familyName, size: 12) else { return false }
-        return font.isFixedPitch
+    private static func isAvailableMacOSFont(named fontName: String) -> Bool {
+        NSFont(name: fontName, size: 12) != nil
     }
     #endif
 }

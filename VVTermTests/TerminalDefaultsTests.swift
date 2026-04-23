@@ -76,7 +76,7 @@ struct TerminalDefaultsTests {
         #if os(macOS)
         let normalizedFontName = TerminalDefaults.normalizedMacOSFontName(
             storedFontName: TerminalDefaults.legacyDefaultFontName,
-            fontValidator: { _ in true }
+            fontAvailability: { _ in true }
         )
 
         #expect(normalizedFontName == TerminalDefaults.legacyDefaultFontName)
@@ -90,12 +90,26 @@ struct TerminalDefaultsTests {
         #if os(macOS)
         let normalizedFontName = TerminalDefaults.normalizedMacOSFontName(
             storedFontName: TerminalDefaults.legacyDefaultFontName,
-            fontValidator: { _ in false }
+            fontAvailability: { _ in false }
         )
 
         #expect(normalizedFontName == TerminalDefaults.defaultPrimaryFontName)
         #else
         throw Skip("macOS-only legacy font normalization")
+        #endif
+    }
+
+    @Test
+    func applyIfNeededPreservesInstalledMacOSFontsDuringNormalization() throws {
+        #if os(macOS)
+        let normalizedFontName = TerminalDefaults.normalizedMacOSFontName(
+            storedFontName: "Installed But Misclassified Font",
+            fontAvailability: { _ in true }
+        )
+
+        #expect(normalizedFontName == "Installed But Misclassified Font")
+        #else
+        throw Skip("macOS-only font normalization")
         #endif
     }
 
