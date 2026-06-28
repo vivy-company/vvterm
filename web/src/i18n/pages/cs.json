@@ -1,0 +1,2252 @@
+{
+  "pricingCards": {
+    "monthly": "Měsíčně",
+    "yearly": "Ročně"
+  },
+  "compare": {
+    "title": "Porovnání VVTerm — Jak si VVTerm stojí",
+    "description": "Podívejte se, jak VVTerm — nativní SSH terminál a SFTP klient pro iPhone, iPad a Mac — obstojí ve srovnání s dalšími SSH klienty, bok po boku.",
+    "bcHome": "Domů",
+    "bcCompare": "Porovnání",
+    "heroEyebrow": "Porovnání",
+    "heroTitle": "Jak si VVTerm stojí.",
+    "heroSubhead": "VVTerm je nativní SSH terminál a SFTP klient pro iPhone, iPad a Mac. Podívejte se, jak obstojí proti dalším oblíbeným SSH klientům — férově a funkci po funkci.",
+    "download": "Stáhnout VVTerm",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iPhone, iPad a Mac · Záměrně jen pro Apple",
+    "heroAlt": "SSH terminál VVTerm na iPhonu, iPadu a Macu",
+    "pickEyebrow": "Bok po boku",
+    "pickTitle": "Vyberte si porovnání.",
+    "pickBody": "Každé porovnání poctivě zvažuje <strong>platformy</strong>, <strong>přenosy</strong>, <strong>procházení souborů</strong> a <strong>ceny</strong>.",
+    "readComparison": "Přečíst porovnání",
+    "whyEyebrow": "Proč VVTerm",
+    "whyTitle": "Čím se odlišuje.",
+    "whyCards": [
+      {
+        "icon": "lucide:laptop",
+        "title": "Nativní aplikace pro Apple",
+        "body": "Vytvořeno pro iOS 16, iPadOS 16 a macOS 13 na Apple Silicon — s GPU terminálem poháněným libghostty, ne webovým obalem."
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "Možnost doživotní licence",
+        "body": "Začněte zdarma, předplaťte si Pro, nebo zaplaťte jednou za doživotní licenci za $49.99. Žádné povinné předplatné."
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "Moderní přenosy vestavěné",
+        "body": "Standardní SSH plus Mosh, Tailscale SSH a Cloudflare Tunnel SSH — žádné další nástroje k zapojení."
+      }
+    ],
+    "ctaTitle": "Vyzkoušejte ho na vlastních serverech.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma na iPhone, iPad i Mac a porovnejte ho tam, kde na tom záleží."
+  },
+  "compare/vvterm-vs-blink-shell": {
+    "title": "VVTerm vs Blink Shell — Porovnání Apple SSH terminálů",
+    "description": "VVTerm vs Blink Shell: dva Apple terminály se schopností Mosh porovnané z hlediska platforem, přenosů, vestavěného prohlížeče souborů SFTP, synchronizace přes iCloud a cen.",
+    "bcHome": "Domů",
+    "bcCompare": "Porovnání",
+    "heroTitle": "Dva Apple terminály,<br />oba postavené na Moshi.",
+    "heroSubhead": "VVTerm i Blink Shell jsou nativní Apple terminály se schopností Mosh. VVTerm běží na iPhonu, iPadu i Macu, zatímco Blink Shell se zaměřuje na iPhone a iPad. Rozdíly se projevují i v prohlížeči souborů SFTP, nabízených přenosech, synchronizaci přes iCloud a v tom, jak je každý z nich oceněn. Tady je férový pohled na oba.",
+    "download": "Stáhnout VVTerm",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iPhone, iPad a Mac · Záměrně jen pro Apple",
+    "heroAlt": "Terminál a prohlížeč SFTP VVTerm na zařízeních Apple",
+    "tableEyebrow": "Funkce po funkci",
+    "tableTitle": "VVTerm a Blink Shell, bok po boku.",
+    "tableBody": "Oba jsou <strong>nativní Apple terminály</strong> s <strong>Moshem</strong> v jádru. VVTerm přidává vestavěný prohlížeč SFTP, další přenosy a možnost doživotní licence.",
+    "colFeature": "Funkce",
+    "footnote": "Údaje o Blink Shell vycházejí z veřejně dostupných informací a mohou se měnit; aktuální detaily ověřte na webu výrobce. Buňky označené „—“ nebo „Záleží“ znamenají funkce, které se liší podle plánu nebo které neuvádíme jako definitivní fakt.",
+    "standoutEyebrow": "V čem VVTerm vyniká",
+    "standoutTitle": "Víc než jen terminál.",
+    "whyLabel": "Proč VVTerm?",
+    "whyEyebrow": "Proč VVTerm",
+    "whyTitle": "Mosh a mnohem víc.",
+    "whyBody": "Obě aplikace zvládají Mosh dobře. VVTerm ho doplňuje o <strong>GPU terminál poháněný libghostty</strong>, vestavěný <strong>prohlížeč souborů SFTP</strong> s náhledem textu, obrázků a videa, další přenosy jako <strong>Tailscale SSH a Cloudflare Tunnel SSH</strong>, <strong>synchronizaci metadat přes iCloud</strong> a možnost jednorázové <strong>doživotní licence za $49.99</strong>.",
+    "whyAlt": "Prohlížeč souborů SFTP VVTerm vedle shellu",
+    "seeEverything": "Podívejte se na vše, co VVTerm umí",
+    "fitEyebrow": "Kam se Blink Shell hodí",
+    "fitTitle": "Vyzrálý nástroj zaměřený na terminál.",
+    "fitBody": "Blink Shell je už léta respektovaným jménem ve světě iOS terminálů, se <strong>silným zaměřením na Mosh</strong> a důsledně <strong>klávesnicovým, na terminál zaměřeným</strong> workflow, který si oblíbila řada pokročilých uživatelů. Pokud je vaší prioritou prověřený shell s přístupem orientovaným na konfiguraci a příkazovou řádku — a komunita, která ho dlouho zdokonaluje — je to vynikající volba. VVTerm míří na jinou rovnováhu: nativní GPU terminál ve spojení s vestavěným prohlížečem SFTP, synchronizací přes iCloud a dalšími přenosy, s doživotní cenou.",
+    "rows": [
+      {
+        "label": "Platformy",
+        "vvterm": "iPhone, iPad, Mac",
+        "competitor": "iPhone, iPad"
+      },
+      {
+        "label": "Nativní aplikace pro Apple",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Terminálový engine",
+        "vvterm": "libghostty (GPU)",
+        "competitor": "—"
+      },
+      {
+        "label": "Standardní SSH",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Mosh",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Tailscale SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cloudflare Tunnel SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Vestavěný prohlížeč souborů SFTP",
+        "vvterm": "check",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "Náhled souborů (text/obrázek/video)",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Spravovaná perzistence relací tmux",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Připojení k serverům Windows/PowerShell",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Živé metriky serveru (CPU/RAM/disk)",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Hlasové ovládání přímo v zařízení",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Vestavěné motivy terminálu",
+        "vvterm": "440 motivů",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "iCloud synchronizace",
+        "vvterm": "check",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "Přihlašovací údaje v Apple Keychain",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cenový model",
+        "vvterm": "Zdarma + Pro + Doživotní",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "Doživotní / jednorázová možnost",
+        "vvterm": "check",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "Otevřený zdroj",
+        "vvterm": "check",
+        "competitor": "check"
+      }
+    ],
+    "standout": [
+      {
+        "icon": "lucide:folder-open-dot",
+        "title": "Skutečný prohlížeč souborů SFTP",
+        "body": "Procházejte vzdálené složky, nahrávejte a stahujte, přejmenovávejte, přesouvejte, mažte, vytvářejte adresáře a upravujte oprávnění POSIX — s náhledem textu, obrázků a videa ve stejné aplikaci."
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "GPU terminálový engine",
+        "body": "VVTerm vykresluje pomocí libghostty na Metalu pro skutečné barvy, ligatury a přesný výstup na iPhonu, iPadu i Macu."
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "Přenosy nad rámec Moshe",
+        "body": "Standardní SSH a Mosh, plus Tailscale SSH a Cloudflare Tunnel SSH pro dosažení strojů v tailnetu nebo za tunelem bez přesměrování portů."
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "Jasné ceny s doživotní možností",
+        "body": "Začnete zdarma, Pro za $6.49/měsíc nebo $24.99/rok, nebo jednorázová doživotní licence za $49.99."
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "Je VVTerm dobrou alternativou k Blink Shell?",
+        "answer": "Ano, zvláště pokud chcete vestavěný prohlížeč souborů SFTP s náhledem, servery synchronizované přes iCloud a moderní přenosy jako Tailscale SSH a Cloudflare Tunnel SSH vedle Moshe. Oba jsou nativní Apple terminály se silnou podporou Moshe, takže rozhodnutí často závisí na procházení souborů, synchronizaci a cenových preferencích."
+      },
+      {
+        "question": "Podporují obě aplikace Mosh?",
+        "answer": "Ano. Mosh je hlavní předností VVTerm i Blink Shell. Mosh udržuje relace naživu napříč změnami sítě, uspáním a kolísavým připojením s okamžitým lokálním echem. VVTerm přidává Tailscale SSH a Cloudflare Tunnel SSH nad rámec standardního SSH a Moshe."
+      },
+      {
+        "question": "Podporuje VVTerm Windows nebo Linux?",
+        "answer": "Klient VVTerm běží pouze na zařízeních Apple — iPhone, iPad a Mac — a Blink Shell běží na iPhonu a iPadu, takže ani jeden není volbou, pokud potřebujete <strong>klienta</strong> pro Windows nebo Linux. VVTerm se ale připojuje <strong>k</strong> serverům s Linuxem, macOS, BSD i Windows/PowerShell, s živými statistikami a perzistentními relacemi u každého z nich."
+      },
+      {
+        "question": "Co VVTerm přidává oproti Blink Shell?",
+        "answer": "Kromě společné podpory Moshe VVTerm zahrnuje plnohodnotný <strong>prohlížeč souborů SFTP</strong> s náhledem, <strong>spravovanou perzistenci relací tmux</strong>, <strong>živý monitoring serverů</strong>, <strong>hlasové ovládání přímo v zařízení</strong>, další přenosy (Tailscale SSH a Cloudflare Tunnel SSH) a 440 vestavěných motivů — s jednorázovou doživotní cenou. Blink Shell oproti tomu nabízí dlouho zdokonalovaný, klávesnicový workflow zaměřený na terminál."
+      },
+      {
+        "question": "Co je levnější, VVTerm nebo Blink Shell?",
+        "answer": "VVTerm je zdarma pro jeden pracovní prostor, jeden server a jednu kartu připojení, s Pro za $6.49/měsíc nebo $24.99/rok a jednorázovou doživotní licencí za $49.99. Cenový model Blink Shell se může v čase měnit — před rozhodnutím ověřte aktuální detaily na jejich webu."
+      },
+      {
+        "question": "Mohu importovat své servery z Blink Shell?",
+        "answer": "VVTerm nenabízí přímý import z Blink Shell. Servery přidáváte zadáním hosta, portu, uživatelského jména a metody ověřování. Přihlašovací údaje jsou uloženy v Apple Keychain a metadata serverů se synchronizují přes iCloud."
+      },
+      {
+        "question": "Jsou obě aplikace otevřený zdroj?",
+        "answer": "Oba projekty zveřejňují zdrojový kód. Zdrojový kód VVTerm je dostupný na github.com/vivy-company/vvterm a Blink Shell je otevřený zdroj pod licencí GPL-3.0."
+      }
+    ],
+    "ctaTitle": "Vezměte si s sebou soubory i přenosy.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma na iPhone, iPad i Mac a vyzkoušejte terminál, SFTP a Mosh pohromadě."
+  },
+  "compare/vvterm-vs-termius": {
+    "title": "VVTerm vs Termius — Porovnání nativního Apple SSH klienta",
+    "description": "VVTerm vs Termius: nativní SSH terminál a SFTP klient jen pro Apple s doživotní cenou, férově porovnaný s Termiem, multiplatformní předplatitelskou sadou.",
+    "bcHome": "Domů",
+    "bcCompare": "Porovnání",
+    "heroTitle": "Nativní Apple terminál,<br />nebo multiplatformní sada.",
+    "heroSubhead": "VVTerm je nativní SSH terminál a SFTP klient pro iPhone, iPad a Mac s možností doživotní ceny. Termius je multiplatformní klient založený na předplatném, který běží i na Windows, Linuxu, Androidu a na webu. Tady je, jak se porovnávají.",
+    "download": "Stáhnout VVTerm",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iPhone, iPad a Mac · Záměrně jen pro Apple",
+    "heroAlt": "Nativní SSH terminál VVTerm na zařízeních Apple",
+    "tableEyebrow": "Funkce po funkci",
+    "tableTitle": "VVTerm a Termius, bok po boku.",
+    "tableBody": "VVTerm jde <strong>do hloubky na Apple</strong>; Termius jde <strong>do šířky napříč platformami</strong>. Správná volba závisí na tom, kde pracujete.",
+    "colFeature": "Funkce",
+    "footnote": "Údaje o Termiu vycházejí z veřejně dostupných informací a mohou se měnit; aktuální detaily ověřte na webu výrobce. Buňky označené „—“ nebo „Záleží“ znamenají funkce, které se liší podle plánu nebo které neuvádíme jako definitivní fakt.",
+    "standoutEyebrow": "V čem VVTerm vyniká",
+    "standoutTitle": "Postaveno pro Apple, od začátku do konce.",
+    "whyLabel": "Proč VVTerm?",
+    "whyEyebrow": "Proč VVTerm",
+    "whyTitle": "Jen pro Apple, záměrně.",
+    "whyBody": "VVTerm vyměňuje multiplatformní dosah za hloubku na Apple. <strong>GPU terminál poháněný libghostty</strong>, vestavěný <strong>prohlížeč souborů SFTP</strong> s náhledem, <strong>synchronizace metadat přes iCloud</strong> a přihlašovací údaje uchované v <strong>Apple Keychain</strong> — vytvořeno pro iPhone, iPad a Mac, ne na ně přeneseno.",
+    "whyAlt": "Terminál a prohlížeč SFTP VVTerm vedle sebe",
+    "seeEverything": "Podívejte se na vše, co VVTerm umí",
+    "fitEyebrow": "Kam se Termius hodí",
+    "fitTitle": "Když vítězí multiplatformní dosah.",
+    "fitBody": "Termius je skutečně silnou volbou, pokud vaše práce přesahuje zařízení Apple. Běží na <strong>macOS, Windows, Linuxu, iOS, Androidu i na webu</strong> a nabízí týmové a sdílené trezory, které organizace často potřebují. Pokud přepínáte mezi noteboookem s Windows a strojem s Linuxem, nebo chcete jediného klienta, kterého celý váš tým spravuje centrálně, tu šíři je těžké překonat. VVTerm dělá opačný kompromis: zůstává jen pro Apple, aby se mohl plně opřít o nativní výkon, iCloud a Keychain.",
+    "rows": [
+      {
+        "label": "Platformy",
+        "vvterm": "iPhone, iPad, Mac",
+        "competitor": "Mac, Windows, Linux, iOS, Android, web"
+      },
+      {
+        "label": "Nativní aplikace pro Apple",
+        "vvterm": "check",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "Terminálový engine",
+        "vvterm": "libghostty (GPU)",
+        "competitor": "—"
+      },
+      {
+        "label": "Standardní SSH",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Mosh",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Tailscale SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cloudflare Tunnel SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Vestavěný prohlížeč souborů SFTP",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Náhled souborů (text/obrázek/video)",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Spravovaná perzistence relací tmux",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Připojení k serverům Windows/PowerShell",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Živé metriky serveru (CPU/RAM/disk)",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Hlasové ovládání přímo v zařízení",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Rozdělené panely",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Vestavěné motivy terminálu",
+        "vvterm": "440 motivů",
+        "competitor": "Záleží"
+      },
+      {
+        "label": "iCloud synchronizace",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Přihlašovací údaje v Apple Keychain",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cenový model",
+        "vvterm": "Zdarma + Pro + Doživotní",
+        "competitor": "Předplatné"
+      },
+      {
+        "label": "Doživotní / jednorázová možnost",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Otevřený zdroj",
+        "vvterm": "check",
+        "competitor": "cross"
+      }
+    ],
+    "standout": [
+      {
+        "icon": "lucide:laptop",
+        "title": "Nativní na každém zařízení Apple",
+        "body": "VVTerm je vytvořen pro iOS 16, iPadOS 16 a macOS 13 na Apple Silicon, s GPU terminálem poháněným libghostty a konvencemi platforem Apple v každém detailu."
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "Možnost doživotní licence",
+        "body": "Začněte zdarma, předplaťte si Pro za $6.49/měsíc nebo $24.99/rok, nebo zaplaťte jednou za doživotní licenci za $49.99. Žádné povinné předplatné pro další používání aplikace."
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "Moderní přenosy vestavěné",
+        "body": "Standardní SSH plus Mosh, Tailscale SSH a Cloudflare Tunnel SSH — dosáhněte na stroje v tailnetu nebo za tunelem bez přesměrování portů."
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Keychain a iCloud, po způsobu Apple",
+        "body": "Metadata serverů se synchronizují přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain — synchronizované jen přes iCloud Keychain, když to povolíte."
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "Je VVTerm dobrou alternativou k Termiu?",
+        "answer": "Pokud pracujete výhradně na zařízeních Apple, je VVTerm silnou alternativou. Je to nativní aplikace pro iPhone, iPad a Mac s GPU terminálem, vestavěným prohlížečem SFTP, synchronizací přes iCloud, přihlašovacími údaji v Keychain a možností jednorázové doživotní ceny. Termius je vhodnější, pokud potřebujete i přístup z Windows, Linuxu, Androidu nebo z webu."
+      },
+      {
+        "question": "Podporuje VVTerm Windows nebo Linux?",
+        "answer": "Aplikace VVTerm běží pouze na zařízeních Apple — iPhone, iPad a Mac — takže neexistuje verze klienta pro Windows, Linux, Android ani web. <strong>Připojuje se</strong> ale k serverům s Linuxem, macOS, BSD i Windows/PowerShell, s živými statistikami a perzistentními relacemi u každého z nich. Pokud potřebujete samotného klienta i na zařízení mimo Apple, je Termius pružnější volbou."
+      },
+      {
+        "question": "Co VVTerm nabízí, co Termius ne?",
+        "answer": "Několik nativních Apple extra funkcí: <strong>spravovanou perzistenci relací tmux</strong>, která udrží práci v běhu přes odpojení, <strong>živý monitoring serverů</strong> vestavěný v aplikaci, <strong>hlasové ovládání přímo v zařízení</strong>, synchronizaci přes iCloud, přihlašovací údaje v Keychain a jednorázovou doživotní cenu. Termius oproti tomu nabízí multiplatformní dosah a týmové funkce."
+      },
+      {
+        "question": "Co je levnější, VVTerm nebo Termius?",
+        "answer": "VVTerm je zdarma pro jeden pracovní prostor, jeden server a jednu kartu připojení, s Pro za $6.49/měsíc nebo $24.99/rok a jednorázovou doživotní licencí za $49.99. Termius používá předplatitelské ceny, které se mohou v čase měnit — aktuální detaily ověřte na jejich webu. Pokud preferujete jednorázovou platbu, doživotní možnost VVTerm je rozhodujícím rozdílem."
+      },
+      {
+        "question": "Mohu importovat své servery z Termia?",
+        "answer": "VVTerm nenabízí přímý import z Termia. Servery ve VVTerm přidáváte zadáním hosta, portu, uživatelského jména a metody ověřování. Přihlašovací údaje jsou uloženy v Apple Keychain a metadata serverů se synchronizují přes iCloud napříč vašimi zařízeními."
+      },
+      {
+        "question": "Má VVTerm týmové nebo sdílené trezory?",
+        "answer": "VVTerm je vytvořen pro zařízení jednotlivce a synchronizuje se přes váš osobní účet iCloud. Termius nabízí týmové a sdílené trezory pro organizace. Pokud je požadavkem centralizovaná správa týmu, je Termius vhodnější volbou."
+      },
+      {
+        "question": "Je VVTerm otevřený zdroj?",
+        "answer": "Ano. Zdrojový kód VVTerm je dostupný na github.com/vivy-company/vvterm."
+      }
+    ],
+    "ctaTitle": "Vyzkoušejte nativní Apple možnost.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma na iPhone, iPad i Mac a uvidíte rozdíl na vlastních serverech."
+  },
+  "docs/adding-a-server": {
+    "heading": "Přidání serveru",
+    "intro": "Každé připojení ve VVTerm začíná záznamem serveru. Tady je, co znamená jednotlivá pole, jak servery patří do pracovních prostorů a prostředí a jak je upravovat nebo mazat.",
+    "meta": "Dokumentace",
+    "title": "Přidání serveru ve VVTerm — VVTerm",
+    "description": "Naučte se pole serveru ve VVTerm — název, host, port, uživatelské jméno a prostředí — jak servery patří do pracovních prostorů a jak je upravovat nebo mazat.",
+    "schemaDescription": "Jak přidat server ve VVTerm: název, host, port, uživatelské jméno a prostředí, plus jak servery patří do pracovních prostorů a jak je upravovat nebo mazat.",
+    "bodyHtml": "\n  <p>\n    Server ve VVTerm je uložená definice stroje, ke kterému se připojujete: kde sídlí, pod jakým účtem\n    se přihlašujete a jak se ověřujete. Po uložení se objeví ve vašem seznamu serverů a synchronizuje se\n    napříč vašimi zařízeními přes iCloud. Samotné přihlašovací údaje zůstávají v Apple Keychain a nikdy\n    nejsou součástí této synchronizované definice.\n  </p>\n\n  <h2>Pole serveru</h2>\n  <ul>\n    <li><strong>Název</strong> — popisek, který si zvolíte, aby byl server snadno rozpoznatelný. Na připojení nemá vliv.</li>\n    <li><strong>Host</strong> — název hosta nebo IP adresa, ke které se připojujete, například <code>example.com</code> nebo <code>192.168.1.20</code>.</li>\n    <li><strong>Port</strong> — port SSH. Výchozí hodnota je <code>22</code>; změňte ji jen tehdy, pokud váš server naslouchá na jiném portu.</li>\n    <li><strong>Uživatelské jméno</strong> — účet, pod kterým se přihlašujete, například <code>root</code>, <code>ubuntu</code> nebo <code>admin</code>.</li>\n    <li><strong>Prostředí</strong> — volitelné seskupení, jako Produkce nebo Staging, sloužící k uspořádání serverů uvnitř pracovního prostoru.</li>\n  </ul>\n  <p>\n    Ověřování se nastavuje pro každý server zvlášť. Můžete použít heslo, SSH klíč nebo SSH klíč chráněný\n    heslovou frází. Podrobnosti a místo, kde je každý přihlašovací údaj uložen, jsou popsány v sekci <a href=\"/docs/authentication-and-keys\">Ověřování a SSH klíče</a>.\n  </p>\n\n  <h2>Pracovní prostory a prostředí</h2>\n  <p>\n    Každý server patří do nějakého <strong>pracovního prostoru</strong>. Pracovní prostor je skupina nejvyšší úrovně — můžete\n    mít jeden pracovní prostor na klienta, na projekt nebo na tým. Uvnitř pracovního prostoru dále <strong>prostředí</strong> třídí servery, takže můžete vizuálně oddělit produkční a stagingové\n    hosty a filtrovat seznam jen na to, co potřebujete.\n  </p>\n  <p>\n    Ve verzi zdarma získáte jeden pracovní prostor a jeden server. Pro tyto limity odstraňuje, takže si můžete\n    vytvořit tolik pracovních prostorů, prostředí a serverů, kolik chcete. V sekci <a href=\"/docs/workspaces-and-tabs\">Pracovní prostory, prostředí a karty</a> najdete, jak to zapadá\n    dohromady s více otevřenými připojeními.\n  </p>\n\n  <h2>Úprava serveru</h2>\n  <ol>\n    <li>Otevřete podrobnosti serveru ze svého seznamu.</li>\n    <li>Změňte kterékoli pole — název, host, port, uživatelské jméno, prostředí nebo metodu ověřování.</li>\n    <li>Uložte. Aktualizovaná definice se synchronizuje na vaše další zařízení přes iCloud.</li>\n  </ol>\n  <p>\n    Změna hosta, portu nebo uživatelského jména ovlivní pouze budoucí připojení. Pokud je relace už\n    otevřená, zachová si svá původní nastavení, dokud se znovu nepřipojíte.\n  </p>\n\n  <h2>Smazání serveru</h2>\n  <p>\n    Smazání serveru odstraní jeho definici z vašeho seznamu a po synchronizaci i z vašich dalších zařízení.\n    Jakýkoli přihlašovací údaj v Keychain svázaný se serverem je odstraněn spolu s ním. Pokud chcete jen dočasně\n    přestat vidět nějaký server, zvažte jeho přesun do jiného prostředí místo smazání, abyste si\n    zachovali jeho nastavení.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Když máte server uložený, nastavte si, jak se budete přihlašovat, v sekci <a href=\"/docs/authentication-and-keys\">Ověřování a SSH klíče</a>, nebo se podívejte, jak vaše uložené\n    servery putují mezi zařízeními, v sekci <a href=\"/docs/icloud-sync\">iCloud synchronizace a Keychain</a>.\n  </p>\n"
+  },
+  "docs/authentication-and-keys": {
+    "heading": "Ověřování a SSH klíče",
+    "intro": "VVTerm se přihlašuje pomocí hesla, SSH klíče nebo SSH klíče chráněného heslovou frází. Tady je, jak každá metoda funguje a kde jsou uloženy vaše přihlašovací údaje.",
+    "meta": "Dokumentace",
+    "title": "Ověřování a SSH klíče — VVTerm",
+    "description": "Ověřování heslem, SSH klíčem a SSH klíčem s heslovou frází ve VVTerm a jak jsou přihlašovací údaje uchovány v Apple Keychain místo synchronizovaných metadat.",
+    "schemaDescription": "Vysvětlení metod ověřování VVTerm: heslo, SSH klíč a SSH klíč s heslovou frází, plus jak jsou přihlašovací údaje uloženy v Apple Keychain.",
+    "bodyHtml": "\n  <p>\n    Ověřování se nastavuje pro každý server zvlášť, takže různé stroje mohou používat různé metody. VVTerm podporuje\n    tři možnosti a ať zvolíte kteroukoli, samotné tajemství je uloženo v Apple Keychain místo\n    v definici serveru, která se synchronizuje přes iCloud.\n  </p>\n\n  <h2>Metody ověřování</h2>\n  <ul>\n    <li>\n      <strong>Heslo</strong> — zadáte heslo k účtu na serveru. Je to nejrychlejší\n      způsob, jak ověřit, že host, port a uživatelské jméno jsou správné, a dobrá volba pro stroje, které\n      ovládáte. Heslo se uloží do Keychain, takže ho nemusíte pokaždé znovu psát.\n    </li>\n    <li>\n      <strong>SSH klíč</strong> — ověřujete se soukromým klíčem místo hesla. Odpovídající\n      veřejný klíč musí být přítomen v souboru <code>~/.ssh/authorized_keys</code> na serveru.\n      Přihlášení pomocí klíče je bezpečnější než heslo a umožňuje přihlášení bez hesla.\n    </li>\n    <li>\n      <strong>SSH klíč + heslová fráze</strong> — totéž jako SSH klíč, ale soukromý klíč je sám\n      zašifrován heslovou frází. I kdyby byl klíč vyzrazen, nelze ho použít bez\n      heslové fráze, což přidává vrstvu ochrany pro citlivé hosty.\n    </li>\n  </ul>\n\n  <h2>Kde jsou přihlašovací údaje uloženy</h2>\n  <p>\n    Hesla, soukromé klíče a heslové fráze jsou uloženy v <strong>Apple Keychain</strong>. <strong>Nejsou</strong>\n    součástí metadat serveru, která VVTerm synchronizuje přes iCloud\n    (CloudKit). To znamená, že váš seznam serverů může putovat mezi zařízeními, zatímco tajemství zůstávají v\n    zabezpečeném úložišti spravovaném systémem.\n  </p>\n  <p>\n    Přihlašovací údaje se synchronizují mezi vašimi zařízeními jen tehdy, když je v nastavení iOS\n    nebo macOS zapnutý <strong>iCloud Keychain</strong>. Když je zapnutý, klíč nebo heslo uložené na jednom zařízení se zpřístupní na\n    ostatních. Když je vypnutý, přihlašovací údaje zůstávají lokální na zařízení, kde byly zadány, a přidáte je\n    znovu tam, kde je potřeba. Úplný přehled toho, co se synchronizuje a co ne, najdete v sekci <a href=\"/docs/icloud-sync\">iCloud synchronizace a Keychain</a>.\n  </p>\n\n  <h2>Generování a import klíčů</h2>\n  <p>\n    Pokud ještě SSH klíč nemáte, VVTerm vám ho může vygenerovat. Po vygenerování zkopírujte\n    veřejný klíč a přidejte ho do souboru <code>~/.ssh/authorized_keys</code> na serveru, pak ten\n    klíč vyberte jako metodu ověřování serveru. Pokud máte existující soukromý klíč, naimportujte ho do\n    VVTerm a přiřaďte ho k serveru stejným způsobem.\n  </p>\n  <p>\n    Veřejný klíč na serveru je to, co autorizuje soukromý klíč na vašem zařízení. Jeden pár klíčů\n    můžete použít napříč mnoha servery tím, že vložíte stejný veřejný klíč do souboru <code>authorized_keys</code> každého serveru, nebo si pro přísnější kontrolu nechte oddělené klíče pro každého hosta.\n  </p>\n\n  <h2>Ověření hosta</h2>\n  <p>\n    Při prvním připojení k serveru VVTerm zobrazí otisk klíče hosta. Než ho přijmete, ověřte, že\n    odpovídá tomu, co očekáváte, abyste měli jistotu, že se připojujete ke správnému\n    stroji, a ne k podvodníkovi. Když hostu jednou důvěřujete, pozdější připojení probíhají bez výzvy,\n    pokud se jeho klíč nezmění.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Když máte nastavené ověřování, přejděte k <a href=\"/docs/sftp-file-browser\">prohlížeči souborů SFTP</a> pro správu vzdálených souborů, nebo se vraťte k sekci <a href=\"/docs/adding-a-server\">Přidání serveru</a> a doladěte\n    podrobnosti připojení.\n  </p>\n"
+  },
+  "docs/getting-started": {
+    "heading": "Začínáme",
+    "intro": "Nainstalujte VVTerm na iPhone, iPad nebo Mac, přidejte svůj první server a otevřete zabezpečenou shellovou relaci — pak se naučte, co zahrnuje verze zdarma a kdy se vyplatí Pro.",
+    "meta": "Dokumentace",
+    "title": "Začínáme s VVTerm — VVTerm",
+    "description": "Nainstalujte VVTerm na iPhone, iPad nebo Mac, zkontrolujte systémové požadavky, přidejte svůj první server, připojte se přes SSH a poznejte limity verzí zdarma a Pro.",
+    "schemaDescription": "Nainstalujte VVTerm, zkontrolujte systémové požadavky, přidejte svůj první server, připojte se přes SSH a pochopte verze zdarma a Pro.",
+    "bodyHtml": "\n  <p>\n    VVTerm je nativní SSH terminál a SFTP klient souborů pro iPhone, iPad a Mac. Vykresluje\n    terminál na GPU pomocí <strong>libghostty</strong> a připojuje se přes SSH pomocí <strong>libssh2</strong>, takže relace jsou rychlé a přesné. Kromě standardního SSH umí dosáhnout na\n    stroje přes <strong>Mosh</strong>, <strong>Tailscale SSH</strong> a <strong>Cloudflare Tunnel SSH</strong>. Tato stránka vás provede od instalace k vaší první výzvě shellu.\n  </p>\n\n  <h2>Systémové požadavky</h2>\n  <ul>\n    <li><strong>iPhone a iPad</strong> — iOS nebo iPadOS 16 nebo novější.</li>\n    <li><strong>Mac</strong> — macOS 13 Ventura nebo novější na Macu s Apple Silicon. Intelové Macy nejsou podporovány.</li>\n  </ul>\n  <p>\n    VVTerm je jedna aplikace na všech třech platformách a váš seznam serverů vás mezi nimi\n    provází přes iCloud.\n  </p>\n\n  <h2>Instalace VVTerm</h2>\n  <ol>\n    <li>Otevřete na svém zařízení App Store a nainstalujte VVTerm.</li>\n    <li>Spusťte aplikaci a dokončete krátký uvítací průvodce.</li>\n    <li>VVTerm se otevře s prázdným seznamem serverů, připravený na vaše první připojení.</li>\n  </ol>\n\n  <h2>Přidejte svůj první server</h2>\n  <p>Potřebujete tři údaje o serveru, na který se chcete dostat: jeho hosta, vaše uživatelské jméno a způsob ověřování.</p>\n  <ol>\n    <li>Začněte nový server a dejte mu rozpoznatelný <strong>název</strong>.</li>\n    <li>Zadejte <strong>hosta</strong> — název hosta jako <code>example.com</code> nebo IP jako <code>192.168.1.20</code>.</li>\n    <li>Nastavte <strong>port</strong>. SSH ve výchozím nastavení používá <code>22</code>; změňte ho jen tehdy, pokud váš server naslouchá jinde.</li>\n    <li>Zadejte <strong>uživatelské jméno</strong>, pod kterým se přihlašujete, například <code>root</code> nebo <code>ubuntu</code>.</li>\n    <li>Zvolte metodu ověřování — heslo, SSH klíč nebo SSH klíč s heslovou frází.</li>\n  </ol>\n  <p>\n    Úplný průvodce každým polem a tím, jak servery zapadají do pracovních prostorů, najdete v sekci <a href=\"/docs/adding-a-server\">Přidání serveru</a>.\n  </p>\n\n  <h2>Připojení</h2>\n  <ol>\n    <li>Uložte server a vyberte ho ze svého seznamu.</li>\n    <li>Při prvním připojení k hostu VVTerm zobrazí jeho otisk klíče, abyste mohli hosta před důvěrou ověřit.</li>\n    <li>Po přijetí se terminál otevře na výzvě shellu a můžete začít pracovat.</li>\n  </ol>\n  <p>\n    Na iPhonu a iPadu klávesnicový panel nad softwarovou klávesnicí přidává <code>Esc</code>, <code>Tab</code>, <code>Ctrl</code>, šipky a funkční klávesy, na kterých terminály závisejí. Na\n    Macu funguje plná obsluha klávesnice tak, jak byste od nativní aplikace čekali.\n  </p>\n\n  <h2>Zdarma vs Pro</h2>\n  <p>VVTerm se používá zdarma, s limity, které vyhovují jednomu stroji:</p>\n  <ul>\n    <li><strong>Zdarma</strong> — jeden pracovní prostor, jeden server a jedna karta připojení.</li>\n    <li><strong>Pro</strong> — neomezené pracovní prostory, servery a karty připojení.</li>\n  </ul>\n  <p>\n    Pro stojí <strong>$6.49 měsíčně</strong> nebo <strong>$24.99 ročně</strong>, s jednorázovým <strong>doživotním</strong> nákupem za <strong>$49.99</strong>. Nákupy, fakturaci a vrácení peněz\n    řeší Apple prostřednictvím vašeho účtu App Store. Až budete připraveni uspořádat více strojů, podívejte se na <a href=\"/docs/workspaces-and-tabs\">Pracovní prostory, prostředí a karty</a>.\n  </p>\n"
+  },
+  "docs/icloud-sync": {
+    "heading": "iCloud synchronizace a Keychain",
+    "intro": "Váš seznam serverů vás provází mezi iPhonem, iPadem a Macem přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain. Tady je přesně, co se synchronizuje a co ne.",
+    "meta": "Dokumentace",
+    "title": "iCloud synchronizace a Keychain — VVTerm",
+    "description": "VVTerm synchronizuje metadata serverů přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain a synchronizují se jen přes iCloud Keychain, když to zapnete.",
+    "schemaDescription": "Jak VVTerm synchronizuje metadata serverů přes iCloud, zatímco hesla a SSH klíče drží v Apple Keychain, jak funguje deduplikace a co se nesynchronizuje.",
+    "bodyHtml": "\n  <p>\n    VVTerm udržuje vaše nastavení konzistentní napříč zařízeními tím, že vaše data dělí na dvě části:\n    definice serverů, které popisují, jak se připojit, a tajemství používaná k přihlášení. Záměrně se s nimi\n    zachází odlišně, takže váš seznam může volně putovat, zatímco vaše přihlašovací údaje zůstávají chráněné.\n  </p>\n\n  <h2>Co se synchronizuje přes iCloud</h2>\n  <p>\n    <strong>Metadata</strong> serverů se synchronizují přes iCloud pomocí CloudKit. To zahrnuje údaje, které\n    zadáte při <a href=\"/docs/adding-a-server\">přidávání serveru</a> — jeho název, host, port, uživatelské jméno\n    a prostředí — spolu s vašimi pracovními prostory a tím, jak je vše uspořádáno. Přidejte server na svém\n    Macu a objeví se na vašem iPhonu i iPadu; přejmenujte pracovní prostor na jednom zařízení a změna se přenese\n    na ostatní.\n  </p>\n\n  <h2>Co zůstává v Keychain</h2>\n  <p>\n    Vaše tajemství — <strong>hesla, soukromé SSH klíče a heslové fráze</strong> — jsou uloženy v <strong>Apple Keychain</strong>, ne v synchronizovaných metadatech. Záměrně se drží mimo\n    CloudKit, takže ta část vašich dat, která prochází přes iCloud, nikdy neobsahuje žádný přihlašovací údaj.\n  </p>\n  <p>\n    Přihlašovací údaje se mezi vašimi zařízeními přesouvají jen tehdy, když je v nastavení iOS\n    nebo macOS zapnutý <strong>iCloud Keychain</strong>. Když je zapnutý, uložené heslo nebo klíč se zpřístupní na vašich dalších zařízeních\n    přes zabezpečenou synchronizaci Keychain od Apple. Když je vypnutý, přihlašovací údaje zůstanou na zařízení, kde jste je zadali,\n    a přidáte je znovu na každém zařízení, které používáte.\n  </p>\n\n  <h2>Co se nesynchronizuje</h2>\n  <ul>\n    <li><strong>Přihlašovací údaje nikdy nepřenáší CloudKit.</strong> Hesla a SSH klíče jsou ze synchronizovaných metadat serveru zcela vyloučeny.</li>\n    <li>Pokud je iCloud Keychain vypnutý, vaše tajemství zařízení neopustí, i když se seznam serverů stále synchronizuje.</li>\n    <li>Aktivní terminálové relace a karty připojení jsou lokální pro zařízení a nesynchronizují se.</li>\n  </ul>\n\n  <h2>Deduplikace</h2>\n  <p>\n    Každý server i pracovní prostor nese stabilní identifikátor. Když VVTerm slučuje změny přicházející z\n    iCloud, páruje záznamy <strong>podle ID</strong>, takže stejný server, který existuje na dvou zařízeních, se\n    sjednotí do jediného záznamu místo zdvojení. To udrží váš seznam čistý, i když\n    provádíte úpravy na více než jednom zařízení.\n  </p>\n\n  <h2>Práce bez iCloud</h2>\n  <p>\n    Pokud je iCloud nedostupný nebo vypnutý, VVTerm se vrátí k lokálnímu úložišti, takže aplikace na tom zařízení\n    funguje dál. Vaše servery jsou uloženy lokálně a zůstávají použitelné; pouze se nešíří na\n    vaše další zařízení, dokud nebude synchronizace přes iCloud znovu dostupná.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Chcete-li ovládat, jak se ukládají tajemství pro jednotlivé servery, podívejte se na <a href=\"/docs/authentication-and-keys\">Ověřování a SSH klíče</a>. Chcete-li uspořádat servery,\n    které se synchronizují, podívejte se na <a href=\"/docs/workspaces-and-tabs\">Pracovní prostory, prostředí a karty</a>.\n  </p>\n"
+  },
+  "docs": {
+    "title": "Dokumentace VVTerm — SSH, SFTP a iCloud synchronizace",
+    "description": "Referenční dokumentace pro VVTerm: začínáme, přidávání serverů, ověřování a SSH klíče, prohlížeč souborů SFTP, synchronizace přes iCloud a pracovní prostory a karty.",
+    "bcHome": "Domů",
+    "bcDocs": "Dokumentace",
+    "heroEyebrow": "Dokumentace",
+    "heroTitle": "Dokumentace VVTerm.",
+    "heroSubhead": "Reference pro nastavení VVTerm na iPhonu, iPadu a Macu — přidávání serverů, ověřování a klíče, prohlížeč souborů SFTP, synchronizace přes iCloud a uspořádání práce pomocí pracovních prostorů a karet.",
+    "download": "Stáhnout VVTerm",
+    "readGuides": "Přečíst návody",
+    "heroNote": "iPhone, iPad a Mac · Začněte zdarma",
+    "readMore": "Číst dál",
+    "sections": {
+      "Basics": "Základy",
+      "Working remotely": "Práce na dálku"
+    },
+    "docs": {},
+    "ctaTitle": "Připraveni se připojit?",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma na iPhone, iPad i Mac a dosáhněte na svůj první server během pár minut."
+  },
+  "docs/sftp-file-browser": {
+    "heading": "Používání prohlížeče souborů SFTP",
+    "intro": "VVTerm obsahuje vestavěný prohlížeč SFTP, takže můžete přesouvat, prohlížet a upravovat vzdálené soubory bez samostatné aplikace. Tady je, jak ho používat.",
+    "meta": "Dokumentace",
+    "title": "Používání prohlížeče souborů SFTP — VVTerm",
+    "description": "Procházejte vzdálené složky, nahrávejte a stahujte soubory, vytvářejte složky, přejmenovávejte, přesouvejte, mažte, prohlížejte text, obrázky a video a upravujte oprávnění POSIX ve VVTerm.",
+    "schemaDescription": "Použijte prohlížeč souborů SFTP ve VVTerm k procházení vzdálených složek, nahrávání a stahování, vytváření adresářů, přejmenovávání, přesouvání, mazání, náhledu a úpravám souborů a oprávnění.",
+    "bodyHtml": "\n  <p>\n    Každý server, ke kterému se připojíte přes SSH, lze ve stejné aplikaci procházet i přes SFTP. Prohlížeč\n    souborů běží nad vaším stávajícím připojením, takže na serveru není nic dalšího ke konfiguraci —\n    pokud se umíte přihlásit přes SSH, můžete spravovat soubory.\n  </p>\n\n  <h2>Otevření prohlížeče souborů</h2>\n  <p>\n    U připojeného serveru otevřete zobrazení <strong>Soubory</strong> a začněte procházet. VVTerm vypíše obsah\n    vzdáleného adresáře a zobrazí názvy, velikosti a typy. Na Macu se prohlížeč nachází vedle vašeho\n    terminálu ve stejném okně; na iPhonu a iPadu se otevírá jako vlastní zobrazení, takže můžete přepínat mezi\n    shellem a svými soubory.\n  </p>\n\n  <h2>Procházení složek</h2>\n  <ul>\n    <li>Klepnutím nebo kliknutím na složku ji otevřete a pro pohyb nahoru použijte cestu nebo navigaci zpět.</li>\n    <li>Začněte ve svém domovském adresáři a vstupte do jakékoli cesty, kterou váš účet umí číst.</li>\n    <li>Položky, do kterých nemáte oprávnění vstoupit, jsou omezeny serverem, stejně jako by tomu bylo v shellu.</li>\n  </ul>\n\n  <h2>Nahrávání a stahování</h2>\n  <p>\n    Přesouvejte soubory oběma směry přímo z prohlížeče:\n  </p>\n  <ul>\n    <li><strong>Stáhněte</strong> vzdálený soubor do svého zařízení a uchovejte si lokální kopii.</li>\n    <li><strong>Nahrajte</strong> soubor ze svého zařízení do aktuální vzdálené složky.</li>\n  </ul>\n  <p>\n    Toto je nejrychlejší způsob, jak stáhnout log, nahrát konfiguraci nebo přesunout soubory mezi stroji\n    bez nutnosti přejít na příkazovou řádku.\n  </p>\n\n  <h2>Správa souborů a složek</h2>\n  <ul>\n    <li><strong>Vytvářejte složky</strong> pro uspořádání vzdálených adresářů.</li>\n    <li><strong>Přejmenovávejte</strong> soubory a složky na místě.</li>\n    <li><strong>Přesouvejte</strong> položky do jiné cesty.</li>\n    <li><strong>Mažte</strong> soubory a složky, které už nepotřebujete.</li>\n  </ul>\n  <p>\n    Tyto akce probíhají přes SFTP proti živému serveru, takže změny se projeví okamžitě.\n  </p>\n\n  <h2>Náhled souborů</h2>\n  <p>\n    Běžné typy souborů si můžete prohlédnout, aniž byste je nejprve stahovali. VVTerm vykresluje <strong>text</strong>, <strong>obrázky</strong> a <strong>video</strong> přímo v aplikaci, což usnadňuje\n    kontrolu obsahu souboru — ověřit konfiguraci, mrknout na snímek obrazovky nebo přehrát nahrávku —\n    než se rozhodnete, co s ním uděláte.\n  </p>\n\n  <h2>Úprava textových souborů</h2>\n  <p>\n    Pro textové soubory obsahuje prohlížeč editor, takže můžete rychle upravit konfiguraci nebo\n    skript a uložit ho rovnou zpět na server. Není potřeba soubor stahovat dolů, upravovat ho\n    lokálně a znovu nahrávat kvůli drobným úpravám.\n  </p>\n\n  <h2>Úprava oprávnění</h2>\n  <p>\n    Na serverech, které to podporují, můžete prohlížet a měnit <strong>oprávnění POSIX</strong> souboru —\n    bity pro čtení, zápis a spuštění pro vlastníka, skupinu i ostatní. To se hodí pro nastavení skriptu jako\n    spustitelného nebo zpřísnění přístupu k citlivému souboru bez ručního psaní <code>chmod</code>.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Přístup k souborům závisí na účtu, pod kterým se přihlašujete, nastaveném v sekci <a href=\"/docs/adding-a-server\">Přidání serveru</a> a <a href=\"/docs/authentication-and-keys\">Ověřování a SSH klíče</a>. Chcete-li mít své servery\n    konzistentní napříč zařízeními, podívejte se na <a href=\"/docs/icloud-sync\">iCloud synchronizace a Keychain</a>.\n  </p>\n"
+  },
+  "docs/workspaces-and-tabs": {
+    "heading": "Pracovní prostory, prostředí a karty",
+    "intro": "Pracovní prostory a prostředí udrží vaše servery uspořádané, zatímco karty připojení umožňují spustit více relací najednou. Tady je, jak do sebe jednotlivé části zapadají.",
+    "meta": "Dokumentace",
+    "title": "Pracovní prostory, prostředí a karty — VVTerm",
+    "description": "Uspořádejte servery pomocí pracovních prostorů a prostředí ve VVTerm, spouštějte více relací s kartami připojení a pochopte limity verzí zdarma a Pro.",
+    "schemaDescription": "Jak VVTerm uspořádává servery pomocí pracovních prostorů a prostředí, jak karty připojení umožňují spustit více relací a jaké limity verzí zdarma a Pro platí.",
+    "bodyHtml": "\n  <p>\n    S přibývajícími stroji vám VVTerm nabízí dva způsoby, jak je udržet uspořádané — pracovní prostory a\n    prostředí — a karty připojení, abyste mohli pracovat v několika relacích najednou. Synchronizují se napříč\n    vašimi zařízeními přes iCloud, takže vaše uspořádání je všude stejné.\n  </p>\n\n  <h2>Pracovní prostory</h2>\n  <p>\n    <strong>Pracovní prostor</strong> je skupina nejvyšší úrovně, do které vaše servery patří. Použijte jeden na klienta, na\n    projekt nebo na tým, abyste oddělili nesouvisející stroje. Každý server sídlí přesně v jednom\n    pracovním prostoru a přepnutí pracovních prostorů mění, které servery vidíte. Pracovní prostory se synchronizují přes iCloud\n    spolu se servery, které obsahují.\n  </p>\n\n  <h2>Prostředí</h2>\n  <p>\n    Uvnitř pracovního prostoru <strong>prostředí</strong> servery dále třídí — například Produkce,\n    Staging nebo Vývoj. Prostředí umožňují filtrovat zaplněný seznam jen na stroje, na kterých vám právě\n    záleží, a vizuálně oddělují produkční hosty od těch, na kterých můžete experimentovat. Prostředí serveru\n    nastavíte při <a href=\"/docs/adding-a-server\">přidávání nebo úpravě</a>.\n  </p>\n\n  <h2>Karty připojení</h2>\n  <p>\n    <strong>Karta připojení</strong> je jedna živá relace se serverem. Otevření serveru spustí\n    kartu; otevření dalšího serveru, nebo téhož serveru znovu, spustí druhou kartu. Každá karta je nezávislá,\n    takže můžete spustit dlouhou úlohu v jedné, zatímco pracujete v jiné.\n  </p>\n  <p>\n    Přepínáním mezi kartami přejdete z jedné relace na druhou bez odpojení. Na Macu karty sídlí v\n    jednotném panelu nástrojů; na iPhonu a iPadu se mezi otevřenými připojeními pohybujete ze zobrazení relace.\n  </p>\n\n  <h2>Limity verzí zdarma a Pro</h2>\n  <p>Verze VVTerm určují, kolik toho můžete uspořádat a kolik relací můžete spustit najednou:</p>\n  <ul>\n    <li><strong>Zdarma</strong> — jeden pracovní prostor, jeden server a jedna karta připojení.</li>\n    <li><strong>Pro</strong> — neomezené pracovní prostory, servery a karty připojení.</li>\n  </ul>\n  <p>\n    S Pro můžete mít otevřených několik připojení současně — například produkční shell, stagingový\n    shell a relaci SFTP — a seskupovat je napříč tolika pracovními prostory a prostředími, kolik\n    potřebujete. Pro stojí <strong>$6.49 měsíčně</strong> nebo <strong>$24.99 ročně</strong>, s\n    jednorázovým <strong>doživotním</strong> nákupem za <strong>$49.99</strong>; fakturaci a vrácení peněz\n    řeší Apple.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Začněte <a href=\"/docs/adding-a-server\">přidáním serveru</a> a jeho umístěním do pracovního prostoru, pak se\n    naučte, jak vaše uspořádání putuje mezi zařízeními, v sekci <a href=\"/docs/icloud-sync\">iCloud synchronizace a Keychain</a>.\n  </p>\n"
+  },
+  "features/cloudflare-tunnel-ssh": {
+    "title": "Cloudflare Tunnel SSH — VVTerm pro iPhone, iPad a Mac",
+    "description": "Připojte se k serverům za Cloudflare Tunnel bez otevírání příchozích portů, přímo z VVTerm na iPhonu, iPadu a Macu.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Cloudflare Tunnel SSH",
+    "heroEyebrow": "Cloudflare Tunnel SSH",
+    "heroTitle": "Připojení dovnitř,<br />nic odhaleného.",
+    "heroSubhead": "Dosáhněte na servery za Cloudflare Tunnel bez otevření jediného příchozího portu — přímo z VVTerm.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "VVTerm SSH přes Cloudflare Tunnel",
+    "statementEyebrow": "Ve výchozím stavu zavřeno",
+    "statementTitle": "Nechte každý příchozí port zavřený.",
+    "statementBody": "Váš origin server zůstává zapečetěný, zatímco připojení obstará tunel — takže získáte přístup přes SSH <strong>bez otevírání příchozích portů</strong> nebo děr ve firewallu.",
+    "benefits": [
+      {
+        "icon": "lucide:cloud",
+        "title": "Dosáhněte na tunelované hosty",
+        "body": "Připojte se k serverům vystaveným přes Cloudflare Tunnel pomocí názvu hosta vašeho tunelu."
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "Žádné příchozí porty",
+        "body": "Váš origin server drží každý příchozí port zavřený — připojení obstará tunel."
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "Žádné díry ve firewallu",
+        "body": "Vynechte pravidla příchozího firewallu a nastavení NAT pro přístup přes SSH ke stroji."
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "Stejný terminál",
+        "body": "Tunelovaní hosté běží ve stejném GPU terminálu a kartách jako vaše ostatní připojení."
+      }
+    ],
+    "crossEyebrow": "Nastavte to",
+    "crossTitle": "Nasměrujte VVTerm na svůj tunel.",
+    "crossBody": "Přidejte server s <strong>názvem hosta vašeho tunelu</strong> a připojte se. Origin drží své příchozí porty zavřené po celou dobu.",
+    "guideLink": "Připojení přes Cloudflare Tunnel SSH",
+    "tailscaleLink": "Nebo dosáhněte na stroje přes Tailscale SSH",
+    "terminalLink": "Podívejte se na SSH terminál",
+    "crossAlt": "VVTerm se připojuje k zapečetěnému origin serveru",
+    "faqItems": [
+      {
+        "question": "Co dělá Cloudflare Tunnel SSH?",
+        "answer": "Umožňuje připojit se k serverům za Cloudflare Tunnel bez otevírání jakýchkoli příchozích portů na originu."
+      },
+      {
+        "question": "Musím na svém serveru otevřít porty?",
+        "answer": "Ne. Celá podstata je v tom, že origin drží příchozí porty zavřené, zatímco připojení obstará tunel."
+      },
+      {
+        "question": "Jak server adresuji?",
+        "answer": "Připojte se pomocí názvu hosta, který jste pro tunel nakonfigurovali v Cloudflare."
+      },
+      {
+        "question": "Funguje to stejně jako běžná SSH relace?",
+        "answer": "Ano. Po připojení se tunelovaný host chová jako jakákoli jiná SSH relace ve VVTerm, včetně prohlížeče souborů."
+      },
+      {
+        "question": "Je to dostupné na iPhonu a Macu?",
+        "answer": "Ano. Připojení přes Cloudflare Tunnel SSH fungují na iPhonu, iPadu i Macu."
+      },
+      {
+        "question": "Proč použít tunel místo otevření portu?",
+        "answer": "Tunel se vyhne pravidlům příchozího firewallu a veřejnému odhalení, čímž zmenší útočnou plochu vašeho serveru."
+      }
+    ],
+    "ctaTitle": "Připojte se přes SSH bez otevírání portu.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se přes Cloudflare Tunnel."
+  },
+  "features/icloud-sync-keychain": {
+    "title": "iCloud synchronizace a zabezpečení Keychain — VVTerm",
+    "description": "Metadata serverů se synchronizují napříč vašimi zařízeními přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain a synchronizují se jen přes iCloud Keychain, když to zapnete. Přihlašovací údaje se nikdy nesynchronizují přes CloudKit.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "iCloud synchronizace a Keychain",
+    "heroEyebrow": "iCloud synchronizace a Keychain",
+    "heroTitle": "Vaše servery se synchronizují.<br />Vaše tajemství zůstávají.",
+    "heroSubhead": "Metadata serverů vás provázejí napříč zařízeními přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Pracovní prostory VVTerm synchronizované napříč zařízeními přes iCloud",
+    "statementEyebrow": "Jasné rozdělení",
+    "statementTitle": "Metadata se synchronizují. Přihlašovací údaje ne.",
+    "statementBody": "VVTerm synchronizuje váš <strong>seznam serverů</strong> přes iCloud, takže je na každém zařízení, ale vaše <strong>hesla a SSH klíče</strong> se nikdy nesynchronizují přes CloudKit — zůstávají v Apple Keychain.",
+    "benefits": [
+      {
+        "icon": "lucide:cloudy",
+        "title": "Servery všude",
+        "body": "Váš seznam serverů a pracovní prostory se synchronizují přes iCloud, takže vás provázejí na iPhone, iPad i Mac."
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Přihlašovací údaje v Keychain",
+        "body": "Hesla a SSH klíče žijí v Apple Keychain, odděleně od metadat, která se synchronizují."
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "Nikdy přes CloudKit",
+        "body": "Přihlašovací údaje se nikdy nesynchronizují přes CloudKit — jen metadata serverů."
+      },
+      {
+        "icon": "lucide:cloud",
+        "title": "Synchronizaci klíčů ovládáte vy",
+        "body": "Klíče se mezi zařízeními synchronizují jen přes iCloud Keychain, a jen když to zapnete."
+      }
+    ],
+    "crossEyebrow": "Jak to funguje",
+    "crossTitle": "Vy rozhodujete, co putuje.",
+    "crossBody": "Metadata serverů se synchronizují přes iCloud automaticky. Přihlašovací údaje se mezi zařízeními přesouvají <strong>jen přes iCloud Keychain</strong>, a jen když ho zapnete.",
+    "icloudDocLink": "Přečíst dokumentaci k iCloud synchronizaci",
+    "authDocLink": "Ověřování a SSH klíče",
+    "terminalLink": "Podívejte se na SSH terminál",
+    "tableTitle": "Co se kam synchronizuje",
+    "tableRows": [
+      {
+        "icon": "lucide:cloudy",
+        "label": "Názvy serverů, hosté, porty, pracovní prostory",
+        "where": "iCloud"
+      },
+      {
+        "icon": "lucide:key-round",
+        "label": "Hesla a SSH klíče",
+        "where": "Keychain"
+      },
+      {
+        "icon": "lucide:shield",
+        "label": "Přihlašovací údaje přes CloudKit",
+        "where": "Nikdy"
+      }
+    ],
+    "secEyebrow": "Zabezpečeno na zařízení",
+    "secTitle": "Zabezpečení, které jde nad rámec úložiště.",
+    "secBody": "Přihlašovací údaje v Keychain jsou jen začátek. VVTerm chrání i samotnou aplikaci a drží tajemství mimo obrazovku.",
+    "secCards": [
+      {
+        "icon": "lucide:scan-face",
+        "title": "Zámek aplikace s Face ID",
+        "body": "Vyžadujte Face ID nebo Touch ID pro otevření aplikace, zamkněte ji při přechodu na pozadí a uzamkněte jednotlivé servery za biometrikou."
+      },
+      {
+        "icon": "lucide:eye-off",
+        "title": "Režim soukromí",
+        "body": "Maskujte názvy hostů a další citlivé údaje v rozhraní — užitečné při sdílení obrazovky, prezentaci nebo nahrávání."
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Generování klíčů v aplikaci",
+        "body": "Vytvářejte SSH klíče Ed25519 nebo RSA 4096 přímo ve VVTerm, uložené v Keychain, s ověřením klíče hosta proti známým hostům."
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "Co se synchronizuje přes iCloud?",
+        "answer": "Metadata serverů — názvy, hosté, porty, uživatelská jména a uspořádání pracovních prostorů — se synchronizují napříč vašimi zařízeními přes iCloud."
+      },
+      {
+        "question": "Kde jsou uložena moje hesla a SSH klíče?",
+        "answer": "V <strong>Apple Keychain</strong>. Drží se odděleně od metadat serveru, která se synchronizují přes iCloud."
+      },
+      {
+        "question": "Synchronizují se přihlašovací údaje někdy přes CloudKit?",
+        "answer": "Ne. Přihlašovací údaje se nikdy nesynchronizují přes CloudKit. Takto se synchronizují jen metadata serverů."
+      },
+      {
+        "question": "Jak se přihlašovací údaje přesouvají mezi mými zařízeními?",
+        "answer": "Hesla a SSH klíče se synchronizují jen přes iCloud Keychain, a jen když máte iCloud Keychain zapnutý."
+      },
+      {
+        "question": "Co když iCloud Keychain nezapnu?",
+        "answer": "Vaše metadata serverů se stále synchronizují přes iCloud, ale přihlašovací údaje zůstávají lokální v Keychain každého zařízení."
+      },
+      {
+        "question": "Funguje synchronizace napříč iPhonem, iPadem a Macem?",
+        "answer": "Ano. Metadata serverů se synchronizují napříč všemi vašimi přihlášenými zařízeními Apple přes iCloud."
+      },
+      {
+        "question": "Mohu zamknout samotnou aplikaci?",
+        "answer": "Ano. Zámek aplikace může vyžadovat Face ID nebo Touch ID pro otevření VVTerm, automaticky zamknout při přechodu na pozadí a vyžadovat biometriku pro konkrétní servery."
+      },
+      {
+        "question": "Umí mi VVTerm vygenerovat SSH klíče?",
+        "answer": "Ano. V aplikaci můžete vygenerovat klíče <strong>Ed25519</strong> nebo <strong>RSA 4096</strong>. Jsou uloženy v Keychain a klíče hostů se ověřují proti vašim známým hostům."
+      }
+    ],
+    "ctaTitle": "Synchronizujte servery. Chraňte tajemství.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a nastavte synchronizaci napříč svými zařízeními Apple."
+  },
+  "features": {
+    "title": "Funkce — SSH terminál a SFTP klient VVTerm",
+    "description": "Vše, co VVTerm umí: GPU SSH terminál, perzistence relací tmux, prohlížeč souborů SFTP, živý monitoring serverů, podpora Windows, hluboké přizpůsobení, Mosh, Tailscale SSH, Cloudflare Tunnel SSH a synchronizace přes iCloud se zabezpečením Keychain.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "heroEyebrow": "Funkce",
+    "heroTitle": "Vše, co potřebujete<br />ke správě vzdálených strojů.",
+    "heroSubhead": "Nativní SSH terminál s perzistencí tmux, prohlížečem souborů SFTP, živým monitoringem, hlubokým přizpůsobením a moderními metodami připojení — v jedné aplikaci zaměřené na Apple pro iPhone, iPad a Mac.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "tourEyebrow": "Rychlá prohlídka",
+    "tourTitle": "Funkce, po kterých lidé sahají.",
+    "tourLabel": "Vlajkové funkce VVTerm",
+    "showcase": [
+      {
+        "pos": "100% 50%",
+        "title": "GPU terminál, který reaguje okamžitě.",
+        "caption": "top"
+      },
+      {
+        "pos": "8% 50%",
+        "title": "Prohlížeč SFTP vedle vašeho shellu.",
+        "caption": "bottom"
+      },
+      {
+        "pos": "30% 35%",
+        "title": "Relace, které přežijí výpadek.",
+        "caption": "top"
+      },
+      {
+        "pos": "72% 60%",
+        "title": "Synchronizováno napříč iPhonem, iPadem i Macem.",
+        "caption": "bottom"
+      }
+    ],
+    "learnMore": "Zjistit více",
+    "connectEyebrow": "Připojte se po svém",
+    "connectTitle": "Čtyři způsoby, jak dosáhnout na každý stroj.",
+    "connectBody": "Vyberte správný přenos pro každý server. Použijte <strong>standardní SSH</strong>, když chcete, a <strong>Mosh</strong>, <strong>Tailscale SSH</strong> nebo <strong>Cloudflare Tunnel SSH</strong>, když potřebujete.",
+    "connectionMethods": [
+      {
+        "slug": "ssh-terminal",
+        "icon": "lucide:square-terminal",
+        "title": "Standardní SSH",
+        "body": "Heslo, SSH klíč nebo klíč s heslovou frází z Keychain."
+      },
+      {
+        "slug": "mosh",
+        "icon": "lucide:radio",
+        "title": "Mosh",
+        "body": "Roamingové relace, které přežijí uspání a změny sítě."
+      },
+      {
+        "slug": "tailscale-ssh",
+        "icon": "lucide:waypoints",
+        "title": "Tailscale SSH",
+        "body": "Dosáhněte na stroje v tailnetu podle názvu MagicDNS, žádné otevřené porty."
+      },
+      {
+        "slug": "cloudflare-tunnel-ssh",
+        "icon": "lucide:cloud",
+        "title": "Cloudflare Tunnel SSH",
+        "body": "Připojte se za Cloudflare Tunnel bez příchozích portů."
+      }
+    ],
+    "ctaTitle": "Jedna aplikace pro každý server.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu stroji během pár minut.",
+    "features": {
+      "ssh-terminal": {
+        "title": "GPU SSH terminál",
+        "summary": "Rychlý a přesný terminál poháněný libghostty — vykreslovacím enginem z Ghostty — se skutečnými barvami, ligaturami a ostrým vykreslováním na Metalu."
+      },
+      "tmux-session-persistence": {
+        "title": "Perzistence relací tmux",
+        "summary": "Relace přežijí odpojení, uspání i přepínání aplikací. VVTerm spravuje tmux za vás — automaticky ho instaluje, znovu se připojuje při obnovení spojení a hned ho vyladí."
+      },
+      "terminal-customization": {
+        "title": "Motivy a přizpůsobení",
+        "summary": "Stovky vestavěných motivů, Nerd Fonts, styly kurzoru a vlastní klávesnicový panel s vašimi vlastními úryvky příkazů a zkratkami."
+      },
+      "sftp-file-browser": {
+        "title": "Prohlížeč souborů SFTP",
+        "summary": "Procházejte vzdálené složky, nahrávejte a stahujte, přejmenovávejte, přesouvejte, mažte, vytvářejte adresáře a upravujte oprávnění POSIX bez samostatné aplikace."
+      },
+      "server-monitoring": {
+        "title": "Živý monitoring serverů",
+        "summary": "Sledujte CPU, paměť, síť, disk, zátěž a nejnáročnější procesy v reálném čase — na hostech s Linuxem, macOS, BSD i Windows."
+      },
+      "windows-ssh": {
+        "title": "Podpora serverů Windows",
+        "summary": "Připojte se k hostům Windows a PowerShell, procházejte soubory přes SFTP, sledujte živé statistiky a udržujte perzistentní relace pomocí psmux."
+      },
+      "mosh": {
+        "title": "Roamingové relace Mosh",
+        "summary": "Mosh udržuje vaši relaci naživu napříč změnami sítě, uspáním a kolísavým připojením, s okamžitým lokálním echem a záložním SSH."
+      },
+      "tailscale-ssh": {
+        "title": "Tailscale SSH",
+        "summary": "Dosáhněte na stroje ve svém tailnetu podle jejich názvu MagicDNS — žádné přesměrování portů, žádné odhalené porty, žádné další klíče ke správě."
+      },
+      "cloudflare-tunnel-ssh": {
+        "title": "Cloudflare Tunnel SSH",
+        "summary": "Připojte se k serverům za Cloudflare Tunnel bez otevírání příchozích portů, přímo z VVTerm."
+      },
+      "icloud-sync-keychain": {
+        "title": "iCloud synchronizace a zabezpečení Keychain",
+        "summary": "Metadata serverů se synchronizují přes iCloud, zatímco hesla a SSH klíče zůstávají v Apple Keychain — synchronizované jen přes iCloud Keychain, když to povolíte."
+      }
+    }
+  },
+  "features/mosh": {
+    "title": "Roamingové relace Mosh — VVTerm pro iPhone, iPad a Mac",
+    "description": "Mosh udržuje vaši relaci naživu napříč změnami sítě, uspáním a kolísavým připojením, s okamžitým lokálním echem a záložním SSH. Vestavěno ve VVTerm pro iPhone, iPad a Mac.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Mosh",
+    "heroEyebrow": "Mosh",
+    "heroTitle": "Relace, které<br />se nikdy nepustí.",
+    "heroSubhead": "Mosh udržuje váš shell naživu napříč změnami sítě, uspáním a výpadky — s okamžitým lokálním echem a záložním SSH.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Roamingová relace Mosh ve VVTerm",
+    "statementEyebrow": "Zůstaňte připojeni",
+    "statementTitle": "Zavřete víko. Relaci si nechte.",
+    "statementBody": "Vejděte do výtahu, přepněte na mobilní data nebo nechte zařízení usnout — vaše relace Mosh <strong>naváže přesně tam, kde jste skončili</strong>, bez tance s opětovným připojováním.",
+    "benefits": [
+      {
+        "icon": "lucide:radio",
+        "title": "Přežije výpadky",
+        "body": "Roamingové relace zůstávají naživu přes přechody z Wi-Fi na mobilní data, uspání i přerušená spojení."
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "Okamžité lokální echo",
+        "body": "Mosh předvídá vaše stisky kláves, takže psaní působí okamžitě, i na lince s vysokou latencí."
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "Záložní SSH",
+        "body": "Když Mosh na hostu není dostupný, VVTerm se vrátí ke standardní SSH relaci."
+      },
+      {
+        "icon": "lucide:smartphone",
+        "title": "Vytvořeno pro mobil",
+        "body": "Ideální na iPhonu a iPadu, kde se sítě mění, jak se pohybujete mezi místy."
+      }
+    ],
+    "crossEyebrow": "Nastavte to",
+    "crossTitle": "Pár minut k roamingovým relacím.",
+    "crossBody": "Nasměrujte VVTerm na hosta s běžícím Moshem a připojte se. Pokud server Mosh nemá, stále automaticky dostanete <strong>standardní SSH relaci</strong>.",
+    "guideLink": "Nastavení Moshe na iPhonu a iPadu",
+    "terminalLink": "Podívejte se na SSH terminál",
+    "tailscaleLink": "Dosáhněte na stroje přes Tailscale SSH",
+    "crossAlt": "VVTerm Mosh se záložním SSH",
+    "faqItems": [
+      {
+        "question": "Co Mosh dělá?",
+        "answer": "Mosh udržuje vaši vzdálenou relaci naživu napříč změnami sítě, uspáním a kolísavým připojením a přidává okamžité lokální echo, takže psaní působí svižně."
+      },
+      {
+        "question": "Přežije moje relace přepnutí sítě?",
+        "answer": "Ano. Relace Mosh roamuje napříč změnami sítě — například z Wi-Fi na mobilní data — bez výpadku."
+      },
+      {
+        "question": "Co se stane, když host nemá Mosh?",
+        "answer": "VVTerm se vrátí ke standardní SSH relaci, když Mosh na serveru není dostupný."
+      },
+      {
+        "question": "Proč psaní s Moshem působí rychleji?",
+        "answer": "Mosh používá okamžité lokální echo k předvídání a okamžitému zobrazení vašich stisků kláves, i na připojení s vysokou latencí."
+      },
+      {
+        "question": "Je Mosh užitečný na iPhonu a iPadu?",
+        "answer": "Ano. Mosh je obzvlášť užitečný na mobilu, kde se pohybujete mezi sítěmi a zařízení často usíná."
+      },
+      {
+        "question": "Co potřebuji na serveru?",
+        "answer": "Server potřebuje nainstalovaný a dosažitelný Mosh. Jinak se VVTerm připojí přes standardní SSH."
+      }
+    ],
+    "ctaTitle": "Už nikdy nepřijdete o relaci.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se přes Mosh."
+  },
+  "features/server-monitoring": {
+    "title": "Živý monitoring serverů — SSH klient VVTerm",
+    "description": "Sledujte CPU, paměť, síť, disk, průměrnou zátěž, dobu běhu a nejnáročnější procesy v reálném čase, hned vedle vašeho shellu — na hostech s Linuxem, macOS, BSD i Windows.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Monitoring serverů",
+    "heroEyebrow": "Živý monitoring serverů",
+    "heroTitle": "Vězte, co váš<br />server právě dělá.",
+    "heroSubhead": "CPU, paměť, síť, disk, zátěž a nejnáročnější procesy — živě, hned vedle vašeho shellu, bez instalace agenta.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Živé statistiky serveru VVTerm pro CPU, paměť, síť a zátěž",
+    "statementEyebrow": "Kontext, ne dohady",
+    "statementTitle": "Diagnostikujte bez opuštění aplikace.",
+    "statementBody": "Když je něco pomalé, neměli byste si muset pamatovat přepínače <code>top</code>, <code>df</code> a <code>iostat</code>. VVTerm čte hosta přes vaši stávající SSH relaci a rozloží to — živě — vedle vašeho terminálu.",
+    "metrics": [
+      {
+        "icon": "lucide:cpu",
+        "title": "CPU",
+        "body": "Živé využití s rozpisem na user, system, iowait, steal a idle, plus počet jader."
+      },
+      {
+        "icon": "lucide:memory-stick",
+        "title": "Paměť",
+        "body": "Celková, použitá, volná, cache a buffery s jasným procentem na první pohled."
+      },
+      {
+        "icon": "lucide:arrow-down-up",
+        "title": "Síť",
+        "body": "Rychlosti příjmu a odesílání v reálném čase spolu s kumulativními součty."
+      },
+      {
+        "icon": "lucide:hard-drive",
+        "title": "Disk",
+        "body": "Využití podle svazku — použito, celkem a procento pro každý připojený souborový systém."
+      },
+      {
+        "icon": "lucide:gauge",
+        "title": "Zátěž a doba běhu",
+        "body": "Průměrná zátěž za 1, 5 a 15 minut, doba běhu systému a počet procesů."
+      },
+      {
+        "icon": "lucide:list-tree",
+        "title": "Nejnáročnější procesy",
+        "body": "Nejnáročnější procesy podle CPU a paměti, s PID a názvem."
+      }
+    ],
+    "crossEyebrow": "Každá platforma",
+    "crossTitle": "Čte správně na každém OS.",
+    "crossBody": "Dedikované kolektory pro <strong>Linux, macOS, FreeBSD, NetBSD, OpenBSD a Windows</strong> znamenají, že čísla jsou správná, ať běží cokoli — žádný agent, žádný démon, jen vaše SSH relace.",
+    "windowsLink": "Monitoring na hostech Windows",
+    "terminalLink": "O SSH terminálu",
+    "crossAlt": "Využití disku podle svazku ve VVTerm na monitorovaném hostu",
+    "faqItems": [
+      {
+        "question": "Co VVTerm monitoruje?",
+        "answer": "Využití CPU s rozpisem podle stavu, paměť, příjem a odesílání po síti, využití disku podle svazku, průměrnou zátěž za 1/5/15 minut, dobu běhu, počet procesů a nejnáročnější procesy podle CPU a paměti."
+      },
+      {
+        "question": "Jsou data živá?",
+        "answer": "Ano. Metriky se obnovují v reálném čase přes vaši stávající SSH relaci, takže vidíte, co server právě teď dělá, aniž byste otevírali samostatný nástroj."
+      },
+      {
+        "question": "Které operační systémy jsou podporovány?",
+        "answer": "VVTerm má dedikované kolektory pro Linux, macOS, FreeBSD, NetBSD, OpenBSD a Windows, takže statistiky se čtou správně na každé platformě."
+      },
+      {
+        "question": "Musím na server instalovat agenta?",
+        "answer": "Ne. Monitoring běží přes SSH připojení, které už máte — na hostu není žádný démon ani agent k instalaci."
+      },
+      {
+        "question": "Mohu monitorovat a zároveň pracovat?",
+        "answer": "Ano. Zobrazení statistik sídlí vedle vašeho terminálu, takže můžete sledovat zátěž, zatímco spouštíte příkazy na tomtéž serveru."
+      }
+    ],
+    "ctaTitle": "Vidíte své servery, živě.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a sledujte CPU, paměť a zátěž v reálném čase."
+  },
+  "features/sftp-file-browser": {
+    "title": "Prohlížeč souborů SFTP — VVTerm pro iPhone, iPad a Mac",
+    "description": "Procházejte vzdálené složky, nahrávejte a stahujte, přejmenovávejte, přesouvejte, mažte, vytvářejte adresáře, prohlížejte text, obrázky a video přímo v aplikaci, upravujte podporované textové soubory a nastavujte oprávnění POSIX — přes SFTP.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Soubory SFTP",
+    "heroEyebrow": "Soubory SFTP",
+    "heroTitle": "Vzdálené soubory,<br />bez druhé aplikace.",
+    "heroSubhead": "Procházejte, přenášejte, prohlížejte a upravujte vzdálené soubory přes SFTP — hned vedle vašeho shellu, na stejném připojení.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Prohlížeč souborů SFTP ve VVTerm",
+    "statementEyebrow": "Soubory, vestavěné",
+    "statementTitle": "Správce souborů pro vaše servery.",
+    "statementBody": "Nahrajte build, opravte konfiguraci, <strong>prohlédněte si log nebo obrázek</strong> a upravte <strong>oprávnění POSIX</strong> — to vše bez opuštění připojení, na kterém už jste.",
+    "cardsTitle": "Vše, co by prohlížeč souborů měl umět.",
+    "carouselLabel": "Možnosti prohlížeče souborů SFTP",
+    "cards": [
+      {
+        "pos": "8% 50%",
+        "title": "Procházejte a uspořádávejte.",
+        "body": "Pohybujte se vzdálenými adresáři, vytvářejte složky a přejmenovávejte, přesouvejte nebo mažte položky na místě."
+      },
+      {
+        "pos": "50% 45%",
+        "title": "Náhled přímo v aplikaci.",
+        "body": "Otevírejte textové, obrazové a video soubory přímo, aniž byste je museli nejprve stahovat do samostatné aplikace."
+      },
+      {
+        "pos": "30% 60%",
+        "title": "Upravujte textové soubory.",
+        "body": "Otevírejte a upravujte podporované textové soubory na serveru a ukládejte změny zpět přes SFTP."
+      },
+      {
+        "pos": "92% 50%",
+        "title": "Přenášejte oběma směry.",
+        "body": "Nahrávejte ze svého zařízení a stahujte do něj, na stejné relaci jako váš shell."
+      },
+      {
+        "pos": "70% 30%",
+        "title": "Oprávnění POSIX.",
+        "body": "Prohlížejte a měňte bity vlastníka, skupiny a režimu bez přechodu na chmod."
+      },
+      {
+        "pos": "20% 20%",
+        "title": "Vedle vašeho shellu.",
+        "body": "Soubory žijí ve stejné aplikaci a připojení jako terminál — žádný druhý nástroj ke správě."
+      }
+    ],
+    "crossEyebrow": "Jedno připojení",
+    "crossTitle": "Shell a soubory pohromadě.",
+    "crossBody": "Prohlížeč SFTP běží na <strong>stejné SSH relaci</strong> jako váš terminál, takže po připojení není nic dalšího ke konfiguraci.",
+    "guideLink": "Přenos souborů přes SFTP na iOS",
+    "terminalLink": "Podívejte se na SSH terminál",
+    "crossAlt": "Přenos souborů přes SFTP ve VVTerm",
+    "faqItems": [
+      {
+        "question": "Co mohu v prohlížeči souborů dělat?",
+        "answer": "Procházet vzdálené složky, nahrávat a stahovat, přejmenovávat, přesouvat, mazat, vytvářet adresáře, prohlížet textové, obrazové a video soubory, upravovat podporované textové soubory a upravovat oprávnění POSIX."
+      },
+      {
+        "question": "Používá SFTP?",
+        "answer": "Ano. Přenosy souborů probíhají přes <strong>SFTP</strong> na vašem stávajícím SSH připojení."
+      },
+      {
+        "question": "Mohu prohlížet soubory bez stahování?",
+        "answer": "Ano. Textové, obrazové a video soubory se zobrazí přímo v aplikaci."
+      },
+      {
+        "question": "Mohu upravovat soubory na serveru?",
+        "answer": "Ano. Můžete otevřít a upravit podporované textové soubory a uložit je zpět přes SFTP."
+      },
+      {
+        "question": "Mohu měnit oprávnění souborů?",
+        "answer": "Ano. Oprávnění POSIX — vlastník, skupina a režim — můžete upravovat přímo v prohlížeči."
+      },
+      {
+        "question": "Je prohlížeč souborů na iPhonu a Macu?",
+        "answer": "Ano. Prohlížeč SFTP je dostupný na iPhonu, iPadu i Macu."
+      }
+    ],
+    "ctaTitle": "Spravujte vzdálené soubory snadno.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a procházejte svůj server přes SFTP."
+  },
+  "features/ssh-terminal": {
+    "title": "GPU SSH terminál — VVTerm pro iPhone, iPad a Mac",
+    "description": "Rychlý a přesný SSH terminál poháněný libghostty, vykreslovacím enginem Ghostty, s vykreslováním na Metal GPU, skutečnými barvami a ligaturami. SSH přes libssh2 s přihlašovacími údaji v Keychain.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "SSH terminál",
+    "heroEyebrow": "SSH terminál",
+    "heroTitle": "Terminál,<br />který reaguje okamžitě.",
+    "heroSubhead": "GPU vykreslování s libghostty, skutečné barvy a ligatury — přes SSH přenos s přihlašovacími údaji uchovanými v Keychain.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "GPU SSH terminálová relace ve VVTerm",
+    "statementEyebrow": "Vytvořeno pro přesnost",
+    "statementTitle": "Na enginu záleží.",
+    "statementBody": "VVTerm vykresluje terminál pomocí <strong>libghostty</strong> — stejného vykreslovacího enginu za <strong>Ghostty</strong> — takže výstup je rychlý, správný a ostrý do posledního pixelu v každém snímku.",
+    "expandLabel": "Podívejte se, jak terminál vykresluje",
+    "modalEyebrow": "Vykreslovací engine",
+    "modalTitle": "Vykreslování na Metal GPU, snímek po snímku.",
+    "modalBody": "VVTerm používá <strong>libghostty</strong> — engine z <strong>Ghostty</strong> — a vykresluje každý snímek na <strong>Metalu</strong>, takže historie zůstává plynulá a text se vykresluje s 24bitovými skutečnými barvami a programátorskými ligaturami. SSH běží přes <strong>libssh2</strong>, s přihlašovacími údaji uchovanými v Apple Keychain.",
+    "modalAlt": "Vykreslování terminálu VVTerm na Metalu",
+    "sftpLink": "Procházejte soubory přes SFTP",
+    "benefits": [
+      {
+        "icon": "lucide:cpu",
+        "title": "Vykreslování na Metal GPU",
+        "body": "libghostty — engine z Ghostty — vykresluje každý snímek na Metalu pro ostrý text a plynulou historii."
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "Skutečné barvy a ligatury",
+        "body": "24bitové barvy a programátorské ligatury se vykreslují přesně tak, jak váš shell a motivy zamýšlejí."
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Tři metody ověřování",
+        "body": "Připojte se heslem, SSH klíčem nebo klíčem s heslovou frází — vše uloženo v Apple Keychain."
+      },
+      {
+        "icon": "lucide:layout-grid",
+        "title": "Karty a rozdělené panely",
+        "body": "Mějte několik připojení otevřených v kartách a na Macu rozdělte kartu na více panelů. Pro odemyká neomezené karty a dělení."
+      }
+    ],
+    "howEyebrow": "Připojte se",
+    "howTitle": "Od serveru k shellu během pár minut.",
+    "howBody": "Přidejte hosta, zvolte metodu ověřování a otevřete relaci. VVTerm drží vaše <strong>hesla a SSH klíče v Apple Keychain</strong> a váš seznam serverů synchronizovaný napříč zařízeními.",
+    "macGuide": "Přečíst návod k SSH na Macu",
+    "iphoneGuide": "SSH z vašeho iPhonu",
+    "sftpLink2": "Procházejte soubory přes SFTP",
+    "howAlt": "Ověřování SSH klíčem z Keychain ve VVTerm",
+    "faqItems": [
+      {
+        "question": "Jaký vykreslovací engine terminál používá?",
+        "answer": "VVTerm používá <strong>libghostty</strong>, vykreslovací engine z Ghostty, s vykreslováním na Metal GPU pro rychlý a přesný výstup terminálu."
+      },
+      {
+        "question": "Která SSH knihovna pohání připojení?",
+        "answer": "Připojení používají <strong>libssh2</strong> s OpenSSL pro SSH přenos."
+      },
+      {
+        "question": "Které metody ověřování jsou podporovány?",
+        "answer": "Heslo, SSH klíč a SSH klíč s heslovou frází. Přihlašovací údaje jsou uloženy v Apple Keychain, nikdy v synchronizovaných metadatech."
+      },
+      {
+        "question": "Podporuje skutečné barvy a ligatury?",
+        "answer": "Ano. Terminál vykresluje 24bitové skutečné barvy a programátorské ligatury."
+      },
+      {
+        "question": "Mohu mít otevřenou více než jednu relaci najednou?",
+        "answer": "Ano. Pro odemyká neomezené karty připojení. Verze zdarma zahrnuje jednu kartu připojení."
+      },
+      {
+        "question": "Mohu rozdělit terminál na panely?",
+        "answer": "Ano — na Macu můžete rozdělit kartu na více panelů, vodorovně nebo svisle. Rozdělené panely jsou funkce Pro."
+      },
+      {
+        "question": "Na jakých zařízeních běží?",
+        "answer": "iPhone a iPad s iOS nebo iPadOS 16 či novějším a Macy s Apple Silicon a macOS 13 Ventura či novějším."
+      }
+    ],
+    "ctaTitle": "Spusťte skutečný terminál, kdekoli.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a otevřete svou první SSH relaci."
+  },
+  "features/tailscale-ssh": {
+    "title": "Tailscale SSH — VVTerm pro iPhone, iPad a Mac",
+    "description": "Dosáhněte na stroje ve svém tailnetu podle jejich názvu MagicDNS — žádné přesměrování portů, žádné odhalené porty a žádné další klíče ke správě. Tailscale SSH, vestavěné ve VVTerm.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Tailscale SSH",
+    "heroEyebrow": "Tailscale SSH",
+    "heroTitle": "Váš tailnet,<br />na jeden název.",
+    "heroSubhead": "Dosáhněte na stroje podle jejich názvu MagicDNS — žádné přesměrování portů, žádné odhalené porty a žádné další klíče ke správě.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Relace Tailscale SSH přes MagicDNS ve VVTerm",
+    "statementEyebrow": "Soukromé ve výchozím stavu",
+    "statementTitle": "Žádné otevřené porty. Žádná veřejná plocha.",
+    "statementBody": "Vaše stroje zůstávají v tailnetu, takže <strong>nic není odhalené na internetu</strong> — a připojujete se podle <strong>názvu MagicDNS</strong> místo křehkých IP adres.",
+    "benefits": [
+      {
+        "icon": "lucide:waypoints",
+        "title": "Připojení přes MagicDNS",
+        "body": "Dosáhněte na stroj podle jeho názvu v tailnetu místo honění se za měnícími se IP adresami."
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "Žádné odhalené porty",
+        "body": "Vaše servery zůstávají mimo veřejný internet — není nic příchozího k napadení."
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Žádné další klíče",
+        "body": "Tailscale SSH obstará přístup, takže pro něj nespravujete další sadu SSH klíčů."
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "Nic k přesměrování",
+        "body": "Vynechte přesměrování portů a VPN cvičení — tailnet vás připojí přímo."
+      }
+    ],
+    "crossEyebrow": "Nastavte to",
+    "crossTitle": "Připojte se přes svůj tailnet.",
+    "crossBody": "Přidejte server podle jeho <strong>názvu MagicDNS</strong> a připojte se. Není co konfigurovat ohledně přesměrování portů a není co otevírat příchozího.",
+    "guideLink": "Připojení přes Tailscale SSH",
+    "cloudflareLink": "Nebo použijte Cloudflare Tunnel SSH",
+    "terminalLink": "Podívejte se na SSH terminál",
+    "crossAlt": "VVTerm dosahuje na stroj v tailnetu podle názvu",
+    "faqItems": [
+      {
+        "question": "Co je Tailscale SSH ve VVTerm?",
+        "answer": "Umožňuje připojit se ke strojům ve vašem tailnetu podle jejich názvu MagicDNS, bez přesměrování portů nebo odhalování portů na internet."
+      },
+      {
+        "question": "Musím přesměrovávat nějaké porty?",
+        "answer": "Ne. Tailscale SSH dosahuje na stroje přes váš tailnet, takže není žádné přesměrování portů ani příchozí odhalení."
+      },
+      {
+        "question": "Musím spravovat oddělené SSH klíče?",
+        "answer": "Ne. Tailscale SSH obstará přístup v tailnetu, takže pro něj nespravujete další klíče."
+      },
+      {
+        "question": "Jak stroj adresuji?",
+        "answer": "Použijte název MagicDNS stroje z vašeho tailnetu místo veřejné IP adresy."
+      },
+      {
+        "question": "Funguje to na iPhonu a Macu?",
+        "answer": "Ano. Připojení přes Tailscale SSH fungují ve VVTerm na iPhonu, iPadu i Macu."
+      },
+      {
+        "question": "Je můj server dosažitelný z veřejného internetu?",
+        "answer": "Ne. Stroje zůstávají ve vašem tailnetu bez odhalených portů, takže nejsou veřejně dosažitelné."
+      }
+    ],
+    "ctaTitle": "Dosáhněte na každý stroj, soukromě.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se přes Tailscale SSH."
+  },
+  "features/terminal-customization": {
+    "title": "Motivy a přizpůsobení terminálu — SSH klient VVTerm",
+    "description": "Udělejte si terminál po svém: 440 vestavěných motivů, Nerd Fonts, styly kurzoru, oddělené světlé a tmavé motivy a vlastní klávesnicový panel s vašimi vlastními úryvky příkazů a zkratkami.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Přizpůsobení",
+    "heroEyebrow": "Motivy a přizpůsobení",
+    "heroTitle": "Udělejte si terminál<br />opravdu svůj.",
+    "heroSubhead": "440 motivů, skutečné Nerd Fonts, styly kurzoru a klávesnicový panel, který si sestavíte sami — vyladěné jednou a synchronizované všude.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Náhled motivu a písma terminálu VVTerm",
+    "statementEyebrow": "Nastavte jednou",
+    "statementTitle": "Váš terminál, na každém zařízení.",
+    "statementBody": "Zvolte motiv, písmo, kurzor a rozložení klávesnice, které vám vyhovují — a pak nechte <strong>iCloud</strong> přenést vaše vlastní motivy a panel na iPhone, iPad i Mac.",
+    "benefits": [
+      {
+        "icon": "lucide:palette",
+        "title": "440 vestavěných motivů",
+        "body": "Obrovský katalog ve formátu motivů Ghostty a iTerm. Vytvářejte a importujte i vlastní motivy — synchronizují se napříč vašimi zařízeními."
+      },
+      {
+        "icon": "lucide:type",
+        "title": "Písma, která sedí",
+        "body": "Čtyři přibalené Nerd Fonts — JetBrains Mono, Fira Code, Hack a Meslo — plus jakékoli systémové neproporcionální písmo o velikosti 4 až 32 pt."
+      },
+      {
+        "icon": "lucide:text-cursor",
+        "title": "Kurzor po svém",
+        "body": "Kurzor blok, čára, podtržení nebo dutý blok, s volitelným blikáním a živým náhledem při výběru."
+      },
+      {
+        "icon": "lucide:sun-moon",
+        "title": "Světlý i tmavý, automaticky",
+        "body": "Nastavte oddělený motiv pro světlý a tmavý režim a VVTerm se přepne se vzhledem systému."
+      }
+    ],
+    "toolbarEyebrow": "Klávesy, které opravdu mačkáte",
+    "toolbarTitle": "Klávesnicový panel postavený kolem vás.",
+    "toolbarBody": "Na iPhonu a iPadu panel nad klávesnicí dá klávesy, které shell potřebuje, na dosah palce — a vy rozhodujete, co na něm je.",
+    "customActions": [
+      {
+        "icon": "lucide:keyboard",
+        "title": "Panel, který si sestavíte",
+        "body": "Nad klávesnicí iOS sídlí přizpůsobitelný panel — Esc, Tab, kombinace Ctrl, šipky, Home, End, PageUp/Down, F-klávesy a další. Mějte na dosah 4 až 28 kláves."
+      },
+      {
+        "icon": "lucide:terminal",
+        "title": "Úryvky příkazů",
+        "body": "Uložte si vlastní příkazy a vkládejte je jedním klepnutím — jako prostý text, nebo text plus Enter pro okamžité spuštění."
+      },
+      {
+        "icon": "lucide:command",
+        "title": "Vlastní zkratky",
+        "body": "Svažte klávesu s modifikátory Ctrl, Alt, Cmd nebo Shift a umístěte ji na panel pro kombinace, které používáte nejvíc."
+      }
+    ],
+    "crossEyebrow": "Víc než vzhled",
+    "crossTitle": "Postaveno na přesném enginu.",
+    "crossBody": "Motivy a písma se vykreslují přesně tak, jak je zamýšleno, protože terminál vykresluje pomocí <strong>libghostty</strong> na Metalu — 24bitové skutečné barvy a ligatury, každý snímek.",
+    "terminalLink": "O GPU terminálu",
+    "icloudLink": "Jak funguje iCloud synchronizace",
+    "crossAlt": "Vlastní iOS klávesnicový panel VVTerm s úryvky a zkratkami",
+    "faqItems": [
+      {
+        "question": "Kolik motivů terminálu je zahrnuto?",
+        "answer": "440 vestavěných motivů ve formátu motivů Ghostty a iTerm, od klasických palet po moderní. Můžete také vytvářet a importovat vlastní motivy."
+      },
+      {
+        "question": "Mohu použít vlastní písmo?",
+        "answer": "Ano. VVTerm přibaluje čtyři Nerd Fonts — JetBrains Mono, Fira Code, Hack a Meslo — a můžete zvolit jakékoli neproporcionální písmo nainstalované v systému. Velikost písma se upravuje od 4 do 32 pt."
+      },
+      {
+        "question": "Sleduje světlý a tmavý režim?",
+        "answer": "Ano. Můžete přiřadit jeden motiv pro světlý vzhled a jiný pro tmavý a VVTerm se přepne automaticky se systémem."
+      },
+      {
+        "question": "Co mohu umístit na iOS klávesnicový panel?",
+        "answer": "Systémové klávesy jako Esc, Tab, šipky, kombinace Ctrl a funkční klávesy, plus vaše vlastní přídavky: <strong>úryvky příkazů</strong>, které vkládají text (volitelně s Enter), a <strong>zkratky</strong>, které pošlou klávesu s modifikátory. Panel pojme 4 až 28 položek."
+      },
+      {
+        "question": "Synchronizují se moje motivy a panel napříč zařízeními?",
+        "answer": "Ano. Vlastní motivy, vaše preference motivu a rozložení klávesnicového panelu a vlastní akce se synchronizují přes iCloud. Verze zdarma zahrnuje až 3 vlastní akce panelu; Pro limit odstraňuje."
+      },
+      {
+        "question": "Kde tohle všechno změním?",
+        "answer": "V nastavení Terminálu — motiv, rodina a velikost písma, styl a blikání kurzoru — a v editoru klávesnicového příslušenství pro panel."
+      }
+    ],
+    "ctaTitle": "Vylaďte jednou. Vezměte všude.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a nastavte terminál, který vám bude jako doma."
+  },
+  "features/tmux-session-persistence": {
+    "title": "Perzistence relací tmux — VVTerm SSH pro iPhone, iPad a Mac",
+    "description": "VVTerm spravuje tmux za vás, takže SSH relace přežijí odpojení, uspání a přepínání aplikací. Automaticky instaluje tmux, znovu se připojuje při obnovení spojení a hned dodává vyladěnou konfiguraci.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "Perzistence tmuxu",
+    "heroEyebrow": "Perzistence relací tmux",
+    "heroTitle": "Vaše relace<br />přežije výpadek.",
+    "heroSubhead": "VVTerm spravuje tmux za vás, takže dlouho běžící práce pokračuje přes změny sítě, uspání a přepínání aplikací — a znovu se připojí ve chvíli, kdy obnovíte spojení.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "VVTerm znovu připojuje relaci tmux po přerušeném spojení",
+    "statementEyebrow": "Perzistence vyřešena",
+    "statementTitle": "Konec ztraceným relacím.",
+    "statementBody": "Většina mobilních SSH aplikací zahodí vše, když připojení zakolísá. VVTerm spouští váš shell uvnitř spravované relace <strong>tmux</strong> na serveru, takže dlouhý build, migrace nebo stahování pokračuje — a vy do něj rovnou naskočíte zpět.",
+    "benefits": [
+      {
+        "icon": "lucide:history",
+        "title": "Navažte tam, kde jste skončili",
+        "body": "Odpojte se od Wi-Fi, zamkněte telefon nebo ukončete aplikaci — váš shell, běžící příkazy a historie tu pořád jsou, když se znovu připojíte."
+      },
+      {
+        "icon": "lucide:download",
+        "title": "Automaticky instaluje tmux",
+        "body": "Pokud tmux chybí, VVTerm ho nainstaluje vaším systémovým správcem balíčků — brew, apt, dnf, pacman, apk, zypper a dalšími."
+      },
+      {
+        "icon": "lucide:list-restart",
+        "title": "Znovu se připojte k jakékoli relaci",
+        "body": "Zobrazte existující relace s počty oken a připojenými klienty a pak se klepnutím znovu připojte místo začínání od začátku."
+      },
+      {
+        "icon": "lucide:sliders-horizontal",
+        "title": "Podle vašich pravidel",
+        "body": "Vždy spravujte tmux, ptejte se pokaždé, nebo ho vynechte pro prostý shell — nastavte globální výchozí hodnotu a přepište ji pro jednotlivé servery."
+      }
+    ],
+    "howEyebrow": "Hned vyladěno",
+    "howTitle": "Konfigurace, kterou nemusíte psát.",
+    "howBody": "VVTerm zapisuje spravovanou konfiguraci do <strong>~/.vvterm/tmux.conf</strong> — skutečné barvy, podpora myši, historie o 10 000 řádcích, zvýraznění v režimu kopírování ladící s motivem a chytré rolování kolečkem, které u shellu používá režim kopírování, ale propustí ho uvnitř <code>htop</code>, <code>vim</code> a dalších celoobrazovkových aplikací.",
+    "moshLink": "Spárujte ho s roamingem Mosh",
+    "windowsLink": "Perzistence na Windows s psmux",
+    "terminalLink": "O terminálovém enginu",
+    "howAlt": "Seznam spravovaných relací tmux ve VVTerm připravený k opětovnému připojení",
+    "faqItems": [
+      {
+        "question": "Jak VVTerm udržuje mou relaci naživu?",
+        "answer": "Při připojení VVTerm vytvoří nebo připojí spravovanou relaci <strong>tmux</strong> na serveru. Protože relace žije na vzdáleném hostu, vaše práce běží dál i po výpadku spojení — VVTerm se k ní znovu připojí, když se příště připojíte."
+      },
+      {
+        "question": "Musím tmux instalovat nebo konfigurovat sám?",
+        "answer": "Ne. Pokud tmux není nainstalovaný, VVTerm ho nainstaluje správcem balíčků hosta. Také zapíše vyladěnou konfiguraci do <strong>~/.vvterm/tmux.conf</strong> — skutečné barvy, podpora myši, velký buffer historie a chytré rolování, které u shellu používá režim kopírování, ale propustí ho uvnitř celoobrazovkových aplikací."
+      },
+      {
+        "question": "Mohu se znovu připojit k relaci, kterou jsem spustil dříve?",
+        "answer": "Ano. VVTerm vypíše existující relace s počty oken a připojenými klienty, takže se můžete znovu připojit k té, kterou chcete, nebo uklidit staré odpojené relace."
+      },
+      {
+        "question": "Co když preferuji prostý shell?",
+        "answer": "Nastavte spuštění tmux na <strong>Vynechat</strong> globálně, nebo to přepište u jednoho serveru. Můžete také zvolit <strong>Ptát se pokaždé</strong>, takže se VVTerm zeptá, když otevřete novou kartu nebo rozdělení."
+      },
+      {
+        "question": "Je to totéž co řídicí režim tmux?",
+        "answer": "Ne. VVTerm orchestruje skutečnou relaci tmux přes normální shell pro perzistenci a opětovná připojení — neprovozuje řídicí režim tmux (-CC)."
+      },
+      {
+        "question": "Funguje to na serverech Windows?",
+        "answer": "Ano. Na hostech Windows a PowerShell VVTerm používá pro stejnou perzistenci <strong>psmux</strong> a umí ho nainstalovat pomocí winget, scoop, choco nebo cargo."
+      }
+    ],
+    "ctaTitle": "Už nikdy nepřijdete o relaci.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a udržte svou práci v běhu přes každé odpojení."
+  },
+  "features/windows-ssh": {
+    "title": "SSH na servery Windows — VVTerm pro iPhone, iPad a Mac",
+    "description": "Připojte se k hostům Windows a PowerShell přes SSH z iPhonu, iPadu nebo Macu — s procházením souborů SFTP, živými statistikami a perzistentními relacemi přes psmux.",
+    "bcHome": "Domů",
+    "bcFeatures": "Funkce",
+    "bcThis": "SSH na Windows",
+    "heroEyebrow": "Podpora serverů Windows",
+    "heroTitle": "SSH na Windows,<br />z jakéhokoli zařízení Apple.",
+    "heroSubhead": "Připojte se k hostům Windows a PowerShell se stejným terminálem, prohlížečem souborů a monitoringem, jaké používáte pro Linux — plus perzistentní relace přes psmux.",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "heroAlt": "Relace PowerShell ve VVTerm na hostu Windows",
+    "statementEyebrow": "Jedna aplikace, smíšený park",
+    "statementTitle": "Linux a Windows, bok po boku.",
+    "statementBody": "Většina Apple SSH klientů předpokládá hosta POSIX. VVTerm detekuje vzdálenou platformu — Linux, macOS, BSD nebo <strong>Windows</strong> — a přizpůsobí tomu svou obsluhu shellu, perzistenci a statistiky.",
+    "benefits": [
+      {
+        "icon": "lucide:monitor",
+        "title": "Windows a PowerShell",
+        "body": "VVTerm detekuje hosty Windows a jejich shell, takže relace PowerShell a cmd se vykreslují a chovají správně."
+      },
+      {
+        "icon": "lucide:history",
+        "title": "Perzistentní relace",
+        "body": "Udržte práci naživu přes odpojení pomocí psmux — multiplexeru ve stylu tmux pro Windows — nainstalovaného za vás, když chybí."
+      },
+      {
+        "icon": "lucide:folder-open-dot",
+        "title": "Soubory SFTP",
+        "body": "Procházejte, nahrávejte, stahujte, přejmenovávejte a přesouvejte soubory na serverech Windows se stejným prohlížečem souborů, jaký používáte všude."
+      },
+      {
+        "icon": "lucide:activity",
+        "title": "Živé statistiky",
+        "body": "CPU, paměť, síť a disk se na Windows čtou správně díky dedikovanému kolektoru metrik."
+      }
+    ],
+    "crossEyebrow": "Stejný workflow všude",
+    "crossTitle": "Žádný samostatný nástroj pro Windows.",
+    "crossBody": "Přidejte hosta Windows stejně jako jakýkoli server, ověřte se heslem nebo SSH klíčem z <strong>Keychain</strong> a získejte terminál, prohlížeč SFTP a živé statistiky, které už znáte.",
+    "tmuxLink": "Jak fungují perzistentní relace",
+    "sftpLink": "Prohlížeč souborů SFTP",
+    "monitoringLink": "Živý monitoring serverů",
+    "crossAlt": "Perzistentní relace psmux ve VVTerm na Windows",
+    "faqItems": [
+      {
+        "question": "Umí se VVTerm připojit k serverům Windows?",
+        "answer": "Ano. VVTerm se připojuje přes SSH k hostům Windows a Windows Server s běžícím SSH serverem a detekuje, zda je shell PowerShell nebo cmd, takže se výstup vykresluje správně."
+      },
+      {
+        "question": "Fungují perzistentní relace na Windows?",
+        "answer": "Ano. Na hostech Windows VVTerm používá <strong>psmux</strong>, multiplexer ve stylu tmux, takže vaše relace přežije odpojení. Pokud není nainstalovaný, VVTerm ho umí přidat pomocí winget, scoop, choco nebo cargo."
+      },
+      {
+        "question": "Funguje prohlížeč souborů na Windows?",
+        "answer": "Ano. Prohlížeč SFTP vypisuje, přenáší, přejmenovává, přesouvá a maže soubory na jakémkoli hostu se SSH serverem schopným SFTP, Windows nevyjímaje."
+      },
+      {
+        "question": "Mohu vidět statistiky serveru Windows?",
+        "answer": "Ano. VVTerm má kolektor specifický pro Windows pro CPU, paměť, síť a disk, takže živý monitoring funguje i tam."
+      },
+      {
+        "question": "Jak se ověřuji?",
+        "answer": "Heslem, SSH klíčem nebo SSH klíčem s heslovou frází — stejné možnosti jako u jakéhokoli jiného hosta, s přihlašovacími údaji uloženými v Apple Keychain."
+      }
+    ],
+    "ctaTitle": "Váš park Windows, ve vaší kapse.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu hostu Windows."
+  },
+  "guides/cloudflare-tunnel-ssh-setup": {
+    "heading": "Připojení přes Cloudflare Tunnel SSH",
+    "intro": "Připojte se přes SSH k serveru za Cloudflare Tunnel z VVTerm podle jeho veřejného názvu hosta — bez otevřených příchozích portů na hostu.",
+    "meta": "Návod",
+    "title": "Připojení přes Cloudflare Tunnel SSH — VVTerm",
+    "description": "Nakonfigurujte cloudflared pro SSH, zveřejněte veřejný název hosta a připojte se z VVTerm k serveru za Cloudflare Tunnel bez otevřených příchozích portů.",
+    "schemaDescription": "Podrobný návod k SSH přes Cloudflare Tunnel s VVTerm: nakonfigurujte cloudflared pro SSH, zveřejněte veřejný název hosta a připojte se k němu bez otevřených příchozích portů.",
+    "bodyHtml": "\n  <p>\n    Cloudflare Tunnel umožňuje serveru vystavit službu přes síť Cloudflare bez otevírání jakýchkoli\n    příchozích portů. VVTerm se umí připojit ke službě SSH zveřejněné tímto způsobem pomocí jejího <strong>veřejného názvu hosta</strong>, takže host za NAT nebo přísným firewallem zůstává dosažitelný.\n  </p>\n\n  <h2>Jak to funguje</h2>\n  <p>\n    Lehký démon <code>cloudflared</code> na serveru naváže <strong>odchozí</strong> spojení\n    s Cloudflare a zaregistruje trasu. Cloudflare pak namapuje veřejný název hosta na vaši lokální službu SSH.\n    Protože je tunel ustaven zevnitř ven, host nikdy nepotřebuje otevřený příchozí port — není\n    co vystavovat ani přesměrovávat.\n  </p>\n\n  <h2>Předpoklady</h2>\n  <ol>\n    <li><strong>Účet Cloudflare</strong> s doménou spravovanou v Cloudflare.</li>\n    <li><code>cloudflared</code> nainstalovaný na serveru a vytvořený a ověřený pojmenovaný tunel.</li>\n    <li>Tunel <strong>nakonfigurovaný pro SSH</strong>, směrující veřejný název hosta na lokální službu SSH na <code>localhost:22</code>.</li>\n  </ol>\n  <p>\n    V typické konfiguraci <code>cloudflared</code> pravidlo ingress mapuje název hosta na SSH, například:\n  </p>\n  <pre><code>ingress:\n  - hostname: ssh.example.com\n    service: ssh://localhost:22\n  - service: http_status:404</code></pre>\n  <p>\n    Přidejte veřejný název hosta jako DNS trasu pro tunel a pak tunel spusťte, aby se trasa aktivovala. Pokud\n    před názvem hosta používáte Cloudflare Access, ujistěte se, že vaše politika povoluje uživatele, který se bude\n    připojovat.\n  </p>\n\n  <h2>Připojení z VVTerm</h2>\n  <ol>\n    <li>Ve VVTerm klepněte na <strong>Přidat server</strong> (nebo upravte existující server).</li>\n    <li>Nastavte <strong>hosta</strong> na <strong>veřejný název hosta</strong> vašeho tunelu, například <code>ssh.example.com</code>.</li>\n    <li>Zadejte <strong>uživatelské jméno</strong>, pod kterým se na serveru přihlašujete, a ponechte své obvyklé SSH ověřování — heslo nebo klíč.</li>\n    <li>Jako metodu připojení zvolte <strong>Cloudflare Tunnel SSH</strong>.</li>\n    <li>Uložte a klepnutím na server se připojte.</li>\n  </ol>\n  <p>\n    VVTerm dosáhne na název hosta přes Cloudflare a přivede vás k shellu serveru, stejně jako přímá\n    SSH relace.\n  </p>\n\n  <h2>Žádné otevřené příchozí porty</h2>\n  <p>\n    Výhodou tohoto nastavení je to, co <strong>nemusíte</strong> dělat: žádný port 22 vystavený na\n    internet, žádné pravidlo firewallu pro příchozí SSH a žádná konfigurace routeru. Jediné síťové spojení, které\n    host iniciuje, je odchozí ke Cloudflare, což udržuje útočnou plochu malou.\n  </p>\n\n  <h2>Řešení potíží</h2>\n  <ul>\n    <li>Pokud se název hosta nepřipojí, ověřte, že tunel běží a že jeho pravidlo ingress směřuje na <code>ssh://localhost:22</code>.</li>\n    <li>Zkontrolujte, že veřejný název hosta má v dashboardu Cloudflare připojenou DNS trasu k tunelu.</li>\n    <li>Pokud je přístup zablokovaný, zkontrolujte případnou politiku Cloudflare Access pokrývající název hosta.</li>\n  </ul>\n"
+  },
+  "guides/how-to-ssh-from-iphone": {
+    "heading": "Jak se z iPhonu připojit přes SSH k serveru",
+    "intro": "Přidejte server, zvolte metodu ověřování a otevřete svou první zabezpečenou shellovou relaci na iOS — pak ji řiďte klávesnicovým panelem na obrazovce.",
+    "meta": "Návod",
+    "title": "Jak se připojit přes SSH z iPhonu — VVTerm",
+    "description": "Nainstalujte VVTerm, přidejte server, zvolte ověřování heslem nebo SSH klíčem, připojte se a použijte klávesnicový panel k připojení přes SSH k jakémukoli serveru z iPhonu.",
+    "schemaDescription": "Podrobný návod k otevření vaší první SSH relace z iPhonu s VVTerm: instalace, přidání serveru, volba metody ověřování, připojení a použití klávesnicového panelu.",
+    "bodyHtml": "\n  <p>\n    VVTerm promění váš iPhone v plnohodnotného SSH klienta. Můžete dosáhnout na jakýkoli server, který přijímá SSH —\n    stroj s Linuxem, Mac, Raspberry Pi, cloudovou VM — a pracovat ve skutečném GPU vykreslovaném terminálu.\n    Tento návod vás provede prvním připojením od začátku do konce.\n  </p>\n\n  <h2>Než začnete</h2>\n  <p>\n    Potřebujete iPhone s <strong>iOS 16 nebo novějším</strong> a server, na který dosáhnete přes\n    síť. Mějte připravené tři věci: <strong>název hosta nebo IP adresu</strong> serveru, <strong>port</strong> (SSH ve výchozím nastavení používá <code>22</code>) a vaše <strong>uživatelské jméno</strong>.\n    Pokud se ověřujete klíčem místo hesla, mějte po ruce i soukromý klíč.\n  </p>\n\n  <h2>Instalace VVTerm</h2>\n  <ol>\n    <li>Otevřete na svém iPhonu App Store a nainstalujte VVTerm.</li>\n    <li>Spusťte aplikaci a dokončete krátký uvítací průvodce.</li>\n  </ol>\n  <p>\n    Verze zdarma zahrnuje <strong>jeden server</strong>, což je vše, co k následování tohoto návodu potřebujete.\n    Pro odstraní limity, až budete chtít více serverů, pracovních prostorů a karet připojení.\n  </p>\n\n  <h2>Přidejte svůj server</h2>\n  <ol>\n    <li>Klepnutím na <strong>Přidat server</strong> otevřete formulář nového serveru.</li>\n    <li>Dejte serveru <strong>název</strong>, aby byl později snadno rozpoznatelný.</li>\n    <li>Zadejte <strong>hosta</strong> — název hosta jako <code>example.com</code> nebo IP jako <code>192.168.1.20</code>.</li>\n    <li>Nastavte <strong>port</strong>. Ponechte ho na <code>22</code>, pokud váš server nenaslouchá jinde.</li>\n    <li>Zadejte <strong>uživatelské jméno</strong>, pod kterým se přihlašujete, například <code>root</code> nebo <code>ubuntu</code>.</li>\n  </ol>\n\n  <h2>Zvolte metodu ověřování</h2>\n  <p>VVTerm podporuje tři způsoby ověřování a vaše přihlašovací údaje jsou uloženy v Apple Keychain — nikdy v synchronizovaných metadatech.</p>\n  <ul>\n    <li><strong>Heslo</strong> — zadejte heslo k účtu. Jednoduché a dobrý způsob, jak otestovat, že host a uživatelské jméno jsou správné.</li>\n    <li><strong>SSH klíč</strong> — použijte soukromý klíč pro bezpečnější přihlášení bez hesla. Vložte nebo naimportujte klíč a ujistěte se, že odpovídající veřejný klíč je v souboru <code>~/.ssh/authorized_keys</code> na serveru.</li>\n    <li><strong>SSH klíč + heslová fráze</strong> — totéž jako výše, ale soukromý klíč je sám zašifrován heslovou frází pro další vrstvu ochrany.</li>\n  </ul>\n  <p>\n    Pokud ještě klíč nemáte, VVTerm vám ho může vygenerovat. Přidejte vygenerovaný veřejný klíč do souboru\n    <code>authorized_keys</code> na serveru a pak ten klíč vyberte jako metodu ověřování serveru.\n  </p>\n\n  <h2>Připojení</h2>\n  <ol>\n    <li>Uložte server. Objeví se ve vašem seznamu serverů.</li>\n    <li>Klepnutím na server otevřete připojení.</li>\n    <li>Při prvním připojení VVTerm zobrazí otisk klíče hosta, abyste ho mohli před důvěrou ověřit.</li>\n    <li>Po přijetí se terminál otevře a vy se ocitnete na výzvě shellu.</li>\n  </ol>\n\n  <h2>Použijte klávesnicový panel</h2>\n  <p>\n    Softwarové klávesnici iOS chybí klávesy, na kterých terminály spoléhají, takže VVTerm přidává příslušenství\n    přímo nad ni. Odtud získáte:\n  </p>\n  <ul>\n    <li><strong>Esc</strong> — nezbytné pro vim, less a většinu TUI aplikací.</li>\n    <li><strong>Tab</strong> — doplňování shellu a cest.</li>\n    <li><strong>Ctrl</strong> — klepněte na něj, pak na písmeno, a pošlete řídicí sekvence jako <code>Ctrl-C</code> nebo <code>Ctrl-Z</code>.</li>\n    <li><strong>Šipky</strong> — pohyb kurzoru a procházení historie příkazů.</li>\n    <li><strong>Funkční klávesy</strong> — F1 až F12 pro aplikace, které je mapují.</li>\n  </ul>\n  <p>\n    Panel si můžete přizpůsobit vlastními úryvky příkazů, takže často používané příkazy máte na jedno\n    klepnutí.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Vaše relace může přežít výpadky sítě, pokud ji udržíte naživu pomocí tmux, a na servery,\n    které nejsou přímo vystavené, dosáhnete pomocí <a href=\"/guides/set-up-mosh-on-ios\">Moshe</a>, <a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a> nebo <a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>. Když potřebujete přesouvat soubory,\n    podívejte se na <a href=\"/guides/sftp-file-transfer-on-ios\">Přenos souborů přes SFTP na iOS</a>.\n  </p>\n"
+  },
+  "guides": {
+    "title": "Návody a postupy VVTerm — SSH, Mosh, Tailscale, SFTP",
+    "description": "Podrobné návody pro VVTerm: SSH z iPhonu a Macu, nastavení Moshe, připojení přes Tailscale SSH nebo Cloudflare Tunnel a přenos souborů přes SFTP.",
+    "bcHome": "Domů",
+    "bcGuides": "Návody",
+    "heroEyebrow": "Návody",
+    "heroTitle": "Návody &amp; postupy.",
+    "heroSubhead": "Praktické, podrobné postupy pro připojení k vašim serverům z iPhonu, iPadu a Macu — SSH, Mosh, Tailscale, Cloudflare Tunnel a přenos souborů přes SFTP.",
+    "download": "Stáhnout VVTerm",
+    "browseDocs": "Procházet dokumentaci",
+    "heroNote": "iPhone, iPad a Mac · Začněte zdarma",
+    "readGuide": "Přečíst návod",
+    "minRead": "{m} min čtení",
+    "categories": {
+      "Getting started": "Začínáme",
+      "Connections": "Připojení",
+      "Files": "Soubory"
+    },
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "Jak se z iPhonu připojit přes SSH k serveru",
+        "summary": "Přidejte server, zvolte metodu ověřování a otevřete svou první zabezpečenou shellovou relaci na iOS."
+      },
+      "ssh-from-mac": {
+        "title": "Jak se připojit přes SSH z Macu pomocí VVTerm",
+        "summary": "Nastavte nativní macOS terminál s kartami, klíči a servery synchronizovanými přes iCloud."
+      },
+      "set-up-mosh-on-ios": {
+        "title": "Nastavení Moshe na iPhonu a iPadu",
+        "summary": "Udržte SSH relace naživu napříč výpadky sítě a uspáním pomocí Moshe."
+      },
+      "tailscale-ssh-setup": {
+        "title": "Připojení přes Tailscale SSH",
+        "summary": "Dosáhněte na stroje ve svém tailnetu podle názvu MagicDNS bez odhalování portů."
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "Připojení přes Cloudflare Tunnel SSH",
+        "summary": "SSH na servery za Cloudflare Tunnel bez otevřených příchozích portů."
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "Přenos souborů přes SFTP na iOS",
+        "summary": "Procházejte, nahrávejte, stahujte a upravujte vzdálené soubory z iPhonu a iPadu."
+      }
+    },
+    "ctaTitle": "Uveďte tyto návody do praxe.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma na iPhone, iPad i Mac a připojte se ke svému prvnímu serveru během pár minut."
+  },
+  "guides/set-up-mosh-on-ios": {
+    "heading": "Nastavení Moshe na iPhonu a iPadu",
+    "intro": "Mosh udržuje SSH relace naživu napříč výpadky sítě, uspáním a změnami IP. Tady je, jak připravit server a zapnout Mosh ve VVTerm.",
+    "meta": "Návod",
+    "title": "Nastavení Moshe na iPhonu a iPadu — VVTerm",
+    "description": "Nainstalujte mosh-server, otevřete UDP porty a zapněte Mosh pro server ve VVTerm, abyste udrželi SSH relace naživu napříč výpadky sítě, uspáním a změnami IP na iOS.",
+    "schemaDescription": "Podrobný návod k používání Moshe s VVTerm na iOS a iPadOS: nainstalujte mosh-server, otevřete UDP porty, zapněte Mosh pro server a připojte se s roamingovými relacemi.",
+    "bodyHtml": "\n  <p>\n    Na telefonu nebo tabletu se vaše síť neustále mění — Wi-Fi na mobilní data, tunel do metra,\n    zamknutí obrazovky. Prostá SSH relace na každém z toho zemře. <strong>Mosh</strong> to řeší a\n    VVTerm ho má vestavěný.\n  </p>\n\n  <h2>Co je Mosh</h2>\n  <p>Mosh (mobile shell) je protokol vzdáleného terminálu navržený pro nespolehlivá, mobilní připojení. Oproti prostému SSH přidává:</p>\n  <ul>\n    <li><strong>Roaming</strong> — relace vás následuje, jak se mění vaše IP adresa, takže přepnutí z Wi-Fi na mobilní data ji neshodí.</li>\n    <li><strong>Přežije výpadky a uspání</strong> — zavřete víko nebo ztraťte signál a relace se znovu připojí, až budete zpět, místo aby zůstala viset mrtvá.</li>\n    <li><strong>Lokální echo</strong> — vaše stisky kláves se objeví okamžitě i na lince s vysokou latencí, s opravami aplikovanými, jak server odpovídá.</li>\n    <li><strong>Záložní SSH</strong> — Mosh používá SSH k ověření a spuštění relace, pak předá řízení vlastnímu UDP přenosu.</li>\n  </ul>\n\n  <h2>Připravte server</h2>\n  <p>Mosh spouští na hostu malého pomocníka, takže musí být nejprve nainstalován tam.</p>\n  <ol>\n    <li>\n      Připojte se přes SSH k serveru a nainstalujte balíček Mosh. Na Debianu nebo Ubuntu:\n      <pre><code>sudo apt install mosh</code></pre>\n      Na RHEL, Fedoře nebo CentOS použijte <code>sudo dnf install mosh</code> a na macOS použijte <code>brew install mosh</code>.\n    </li>\n    <li>To poskytne <code>mosh-server</code>, který VVTerm spustí přes SSH při každém připojení.</li>\n  </ol>\n\n  <h2>Otevřete UDP porty</h2>\n  <p>\n    Mosh nepoužívá pro svá data TCP port 22 — používá <strong>UDP</strong>, ve výchozím nastavení v rozsahu <code>60000–61000</code>. Pokud před serverem sedí firewall, povolte příchozí UDP na tomto rozsahu.\n  </p>\n  <ol>\n    <li>\n      S UFW na Ubuntu:\n      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>\n    </li>\n    <li>U cloudového poskytovatele přidejte stejný rozsah UDP do bezpečnostní skupiny nebo pravidel firewallu instance.</li>\n  </ol>\n  <p>\n    SSH na svém obvyklém TCP portu musí zůstat dosažitelné také, protože Mosh se ověřuje přes SSH před\n    spuštěním své UDP relace.\n  </p>\n\n  <h2>Zapněte Mosh ve VVTerm</h2>\n  <ol>\n    <li>Otevřete nastavení serveru ve VVTerm — buď při přidávání, nebo úpravou existujícího serveru.</li>\n    <li>Přepněte metodu připojení na <strong>Mosh</strong>.</li>\n    <li>Ponechte své stávající SSH ověřování; Mosh ho znovu použije ke spuštění relace.</li>\n    <li>Uložte a pak klepnutím na server se připojte.</li>\n  </ol>\n  <p>\n    VVTerm otevře SSH připojení, spustí na hostu <code>mosh-server</code> a pak přenese vaši\n    relaci přes UDP přenos Moshe.\n  </p>\n\n  <h2>Co si všimnete při změně sítě</h2>\n  <p>\n    Když je Mosh aktivní, zážitek se mění několika viditelnými způsoby. Psaní působí okamžitě díky lokálnímu\n    echu, i na pomalé lince. Když přepnete sítě nebo probudíte zařízení, relace se znovu připojí sama —\n    bez opětovného přihlášení, bez ztraceného shellu. Pokud je připojení krátce nedosažitelné, VVTerm zobrazí relaci jako\n    čekající a obnoví ji, jakmile se síť vrátí.\n  </p>\n\n  <h2>Tipy</h2>\n  <ul>\n    <li>Spárujte Mosh s tmux pro nejsilnější nastavení: Mosh přežije cestu k serveru a tmux zachová vaši práci, i kdyby sám server relaci restartoval.</li>\n    <li>Pokud se připojení nespustí, ověřte, že je nainstalovaný <code>mosh-server</code> a že je otevřený rozsah UDP — to jsou dvě nejčastější příčiny.</li>\n  </ul>\n"
+  },
+  "guides/sftp-file-transfer-on-ios": {
+    "heading": "Přenos souborů přes SFTP na iOS",
+    "intro": "Procházejte, nahrávejte, stahujte a upravujte vzdálené soubory z iPhonu a iPadu pomocí vestavěného prohlížeče souborů SFTP ve VVTerm — bez potřeby druhé aplikace.",
+    "meta": "Návod",
+    "title": "Přenos souborů přes SFTP na iOS — VVTerm",
+    "description": "Použijte vestavěný prohlížeč SFTP ve VVTerm na iPhonu a iPadu k procházení složek, nahrávání a stahování, přejmenovávání, přesouvání, mazání, náhledu médií a úpravám textu a oprávnění POSIX.",
+    "schemaDescription": "Podrobný návod k přenosu souborů přes SFTP na iOS s VVTerm: otevřete prohlížeč souborů, procházejte složky, nahrávejte a stahujte, spravujte soubory, prohlížejte média a upravujte text a oprávnění.",
+    "bodyHtml": "\n  <p>\n    Každý server, ke kterému se ve VVTerm připojíte, má také vestavěný <strong>prohlížeč souborů SFTP</strong>, takže můžete\n    spravovat vzdálené soubory bez opuštění aplikace nebo instalace samostatného klienta. Funguje přes stejné SSH\n    připojení, které už používáte.\n  </p>\n\n  <h2>Otevřete prohlížeč souborů</h2>\n  <ol>\n    <li>Připojte se k serveru jako obvykle.</li>\n    <li>Pro toto připojení otevřete zobrazení <strong>Soubory</strong> a přepněte z terminálu na prohlížeč SFTP.</li>\n    <li>VVTerm přes SFTP vypíše obsah výchozího adresáře — obvykle vaší domovské složky.</li>\n  </ol>\n\n  <h2>Procházejte vzdálené složky</h2>\n  <p>\n    Klepnutím na složku ji otevřete a pro pohyb nahoru po stromu použijte cestu nebo ovládací prvek zpět. Soubory zobrazují své názvy a\n    podrobnosti, takže najdete, co potřebujete. Procházení je jen pro čtení, dokud se nerozhodnete něco přenést nebo\n    změnit, takže pouhé rozhlížení se nepředstavuje žádné riziko.\n  </p>\n\n  <h2>Nahrávejte a stahujte</h2>\n  <ul>\n    <li><strong>Stáhněte</strong> vzdálený soubor do svého zařízení, když chcete lokální kopii, například abyste ho uložili do aplikace Soubory nebo sdíleli jinde.</li>\n    <li><strong>Nahrajte</strong> soubor z iPhonu nebo iPadu do aktuální vzdálené složky a pošlete ho na server.</li>\n  </ul>\n  <p>Přenosy probíhají přes šifrované SSH připojení, takže soubory nikdy neopustí zabezpečený kanál.</p>\n\n  <h2>Spravujte soubory a složky</h2>\n  <p>Prohlížeč zvládá běžné operace se soubory, jaké byste na serveru čekali:</p>\n  <ul>\n    <li><strong>Vytvářejte složky</strong> pro uspořádání vzdálených adresářů.</li>\n    <li><strong>Přejmenovávejte</strong> soubory a složky na místě.</li>\n    <li><strong>Přesouvejte</strong> položky do jiného adresáře.</li>\n    <li><strong>Mažte</strong> soubory a složky, které už nepotřebujete.</li>\n  </ul>\n\n  <h2>Náhled bez stahování</h2>\n  <p>\n    Mnoho souborů můžete <strong>prohlížet</strong> přímo ve VVTerm, než se rozhodnete, co s nimi uděláte —\n    textové soubory, obrázky a video — takže můžete zkontrolovat konfigurační soubor nebo snímek obrazovky, aniž byste ho nejprve stáhli\n    do svého zařízení.\n  </p>\n\n  <h2>Upravujte text a oprávnění</h2>\n  <ol>\n    <li>Otevřete podporovaný <strong>textový soubor</strong> a upravte ho na místě, pak uložte změny rovnou zpět na server přes SFTP.</li>\n    <li>Upravte <strong>oprávnění POSIX</strong> souboru nebo složky — bity pro čtení, zápis a spuštění pro vlastníka, skupinu a ostatní — když potřebujete opravit přístup bez přechodu do shellu.</li>\n  </ol>\n\n  <h2>Tipy</h2>\n  <ul>\n    <li>Pro rychlé úpravy konfigurace je úprava souboru v prohlížeči SFTP často rychlejší než otevírání editoru v terminálu.</li>\n    <li>Pomocí náhledu si ověřte, že máte správný soubor, než ho stáhnete nebo smažete.</li>\n    <li>Stejný prohlížeč SFTP je dostupný na iPhonu, iPadu i Macu, takže se workflow přenáší napříč všemi vašimi zařízeními.</li>\n  </ul>\n"
+  },
+  "guides/ssh-from-mac": {
+    "heading": "Jak se připojit přes SSH z Macu pomocí VVTerm",
+    "intro": "Nastavte nativní macOS SSH terminál s postranním panelem v rozděleném zobrazení, kartami připojení a servery, které se synchronizují z iPhonu a iPadu přes iCloud.",
+    "meta": "Návod",
+    "title": "Jak se připojit přes SSH z Macu — VVTerm",
+    "description": "Nainstalujte VVTerm na Mac, přidejte server v postranním panelu, zvolte metodu ověřování, připojte se v kartě a synchronizujte své servery napříč zařízeními Apple přes iCloud.",
+    "schemaDescription": "Podrobný návod k SSH z Macu s VVTerm: instalace, přidání serveru v postranním panelu, volba metody ověřování, připojení v kartě a synchronizace serverů přes iCloud.",
+    "bodyHtml": "\n  <p>\n    VVTerm pro Mac je nativní SSH terminál vytvořený jako zbytek macOS — postranní panel v rozděleném zobrazení s\n    vašimi servery vedle GPU vykreslovaného terminálu, s jednotným panelem nástrojů pro karty. Tento návod pokrývá\n    vaše první připojení na Macu.\n  </p>\n\n  <h2>Než začnete</h2>\n  <p>\n    Potřebujete Mac s <strong>Apple Silicon</strong> a <strong>macOS 13 Ventura nebo novějším</strong>.\n    Mějte připravené <strong>hosta</strong>, <strong>port</strong> (<code>22</code> ve výchozím nastavení) a <strong>uživatelské jméno</strong> serveru, plus heslo nebo SSH klíč pro ověření.\n  </p>\n\n  <h2>Instalace VVTerm</h2>\n  <ol>\n    <li>Nainstalujte VVTerm z App Store na svém Macu.</li>\n    <li>Otevřete aplikaci. Okno zobrazí postranní panel pro vaše servery a detailní oblast pro terminál.</li>\n  </ol>\n\n  <h2>Přidejte server v postranním panelu</h2>\n  <ol>\n    <li>Klepnutím na <strong>Přidat server</strong> otevřete formulář nového serveru.</li>\n    <li>Zadejte <strong>název</strong>, <strong>hosta</strong>, <strong>port</strong> a své <strong>uživatelské jméno</strong>.</li>\n    <li>Volitelně uspořádejte servery do pracovních prostorů a prostředí, aby větší parky zůstaly v postranním panelu přehledné.</li>\n    <li>Uložte. Server se objeví v seznamu postranního panelu.</li>\n  </ol>\n\n  <h2>Zvolte metodu ověřování</h2>\n  <p>\n    Vyberte, jak se chcete přihlašovat. Ať zvolíte cokoli, samotné tajemství je uloženo v <strong>Keychain</strong> na macOS, ne v synchronizovaných metadatech serveru.\n  </p>\n  <ul>\n    <li><strong>Heslo</strong> — zadejte heslo k účtu přímo.</li>\n    <li><strong>SSH klíč</strong> — naimportujte nebo vygenerujte soukromý klíč a přidejte odpovídající veřejný klíč do souboru <code>~/.ssh/authorized_keys</code> na serveru.</li>\n    <li><strong>SSH klíč + heslová fráze</strong> — použijte zašifrovaný soukromý klíč chráněný heslovou frází.</li>\n  </ul>\n\n  <h2>Připojte se v kartě</h2>\n  <ol>\n    <li>Vyberte server v postranním panelu a otevřete připojení.</li>\n    <li>Při prvním připojení potvrďte otisk klíče hosta.</li>\n    <li>Terminál se otevře v detailní oblasti, vykreslený na Metalu pomocí libghostty pro skutečné barvy a přesný výstup.</li>\n  </ol>\n\n  <h2>Otevřete více karet a panelů</h2>\n  <p>\n    Každé připojení žije v kartě v jednotném panelu nástrojů, takže můžete mít několik serverů otevřených\n    najednou a přepínat mezi nimi. Kartu můžete také rozdělit na <strong>panely</strong> pro shelly vedle sebe\n    na téže obrazovce.\n  </p>\n  <p>\n    Verze zdarma zahrnuje <strong>jednu kartu připojení</strong>. <strong>Pro</strong> odemyká neomezené\n    karty a rozdělené panely — $6.49/měsíc, $24.99/rok nebo doživotní nákup za $49.99, vyřízeno přes\n    Apple.\n  </p>\n\n  <h2>Vaše servery se synchronizují přes iCloud</h2>\n  <p>\n    Metadata serverů — názvy, hosté, porty, uživatelská jména a pracovní prostory — se synchronizují přes <strong>iCloud</strong>,\n    takže server, který přidáte na Macu, se automaticky objeví na vašem iPhonu a iPadu. Hesla a SSH\n    klíče <strong>nejsou</strong> součástí těchto metadat; zůstávají v Apple Keychain a putují mezi zařízeními\n    jen přes iCloud Keychain, když ho zapnete.\n  </p>\n\n  <h2>Další kroky</h2>\n  <p>\n    Udržte dlouho běžící práci naživu přes odpojení pomocí tmux, sledujte živé CPU a paměť pomocí monitoringu\n    serverů a dosáhněte na stroje, které nejsou přímo vystavené, pomocí <a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a> nebo <a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>.\n  </p>\n"
+  },
+  "guides/tailscale-ssh-setup": {
+    "heading": "Připojení přes Tailscale SSH",
+    "intro": "Dosáhněte na stroje ve svém tailnetu podle jejich názvu MagicDNS z VVTerm — žádné přesměrování portů, žádné odhalené porty a žádné další SSH klíče ke správě.",
+    "meta": "Návod",
+    "title": "Připojení přes Tailscale SSH — VVTerm",
+    "description": "Zapněte Tailscale SSH na svém hostu pomocí tailscale up --ssh, nastavte ACL a připojte se k názvu MagicDNS z VVTerm — žádné přesměrování portů ani odhalené porty.",
+    "schemaDescription": "Podrobný návod k používání Tailscale SSH s VVTerm: nainstalujte Tailscale na host a zařízení, zapněte SSH, nastavte ACL a připojte se k názvu MagicDNS bez přesměrování portů.",
+    "bodyHtml": "\n  <p>\n    Tailscale umístí vaše zařízení do soukromé mesh sítě a umí za vás obstarat SSH ověřování pomocí <strong>Tailscale SSH</strong>. S ním dosáhnete na server podle jeho názvu v tailnetu z VVTerm — žádné veřejné\n    porty, žádné přesměrování portů a žádné oddělené SSH klíče k distribuci.\n  </p>\n\n  <h2>Jak to funguje</h2>\n  <p>\n    Každý stroj, který připojíte ke svému tailnetu, dostane stabilní soukromou adresu a <strong>MagicDNS</strong> název jako <code>myserver.tailnet-name.ts.net</code>. Když je Tailscale SSH zapnutý, Tailscale sám\n    ověřuje připojení mezi zařízeními ve vašem tailnetu na základě vaší přístupové politiky, takže server\n    nikdy nepotřebuje otevřený příchozí port na veřejný internet.\n  </p>\n\n  <h2>Předpoklady</h2>\n  <ol>\n    <li><strong>Účet Tailscale</strong> s hostem a vaším iPhonem, iPadem nebo Macem připojenými ke stejnému tailnetu.</li>\n    <li><strong>Tailscale nainstalovaný na hostu</strong>, na který chcete dosáhnout.</li>\n    <li>Tailscale běžící na <strong>zařízení</strong>, ze kterého se připojujete, přihlášený ke stejnému účtu.</li>\n  </ol>\n\n  <h2>Zapněte Tailscale SSH na hostu</h2>\n  <ol>\n    <li>\n      Na serveru spusťte Tailscale s příznakem SSH:\n      <pre><code>sudo tailscale up --ssh</code></pre>\n    </li>\n    <li>Tím se host inzeruje jako přijímající připojení Tailscale SSH. Ověřování obstará Tailscale místo tradičních SSH klíčů.</li>\n    <li>\n      Ověřte název hosta v tailnetu a jeho stav:\n      <pre><code>tailscale status</code></pre>\n    </li>\n  </ol>\n\n  <h2>Povolte SSH ve svých ACL</h2>\n  <p>\n    Přístup přes Tailscale SSH se řídí <strong>SSH pravidly</strong> v přístupové politice vašeho tailnetu.\n    V administrátorské konzoli Tailscale se ujistěte, že vaše politika obsahuje sekci <code>ssh</code>, která\n    povoluje vašemu uživateli dosáhnout na hosta jako požadovaný přihlašovací uživatel. Bez odpovídajícího pravidla je připojení\n    odmítnuto, i když je host online. Před připojením politiku uložte.\n  </p>\n\n  <h2>Připojení z VVTerm</h2>\n  <ol>\n    <li>Ve VVTerm klepněte na <strong>Přidat server</strong> (nebo upravte existující server).</li>\n    <li>Nastavte <strong>hosta</strong> na <strong>název MagicDNS</strong> stroje, například <code>myserver.tailnet-name.ts.net</code>. Můžete také použít jeho IP adresu v tailnetu.</li>\n    <li>Ponechte port na <code>22</code> a zadejte <strong>uživatelské jméno</strong>, pod kterým se chcete na hostu přihlásit.</li>\n    <li>Jako metodu připojení zvolte <strong>Tailscale SSH</strong>, aby ověřování obstaral váš tailnet.</li>\n    <li>Uložte a klepnutím na server se připojte.</li>\n  </ol>\n\n  <h2>Žádné přesměrování portů</h2>\n  <p>\n    Protože provoz jede po šifrovaném tailnetu, <strong>neotevíráte</strong> port 22 na internet,\n    nekonfigurujete router ani neděláte díry ve firewallu. Host může sedět za NAT nebo přísným firewallem a\n    stále být dosažitelný z vašich zařízení, kdekoli mají připojení.\n  </p>\n\n  <h2>Řešení potíží</h2>\n  <ul>\n    <li>Pokud se název nepřeloží, ověřte, že je pro váš tailnet zapnutý MagicDNS a že se host v <code>tailscale status</code> zobrazuje jako připojený.</li>\n    <li>Pokud se připojíte, ale dostanete odepření přístupu, zkontrolujte svá ACL pravidla <code>ssh</code> a přihlašovacího uživatele, kterého jste požadovali.</li>\n    <li>Pokud zařízení hosta vůbec nevidí, ujistěte se, že jsou oba přihlášeni ke stejnému účtu Tailscale a online.</li>\n  </ul>\n"
+  },
+  "ipad": {
+    "metaTitle": "VVTerm pro iPad — Proměňte iPad v SSH pracovní stanici",
+    "metaDescription": "Nativní SSH terminál a SFTP klient pro iPad. Zkratky hardwarové klávesnice, multitasking Stage Manager, vlastní klávesnicový panel terminálu, perzistence relací tmux, roaming Mosh, živý monitoring serverů, externí displej a servery synchronizované přes iCloud.",
+    "bcHome": "Domů",
+    "bcPlatforms": "Platformy",
+    "bcIpad": "iPad",
+    "heroEyebrow": "VVTerm pro iPad",
+    "heroTitle": "Proměňte iPad v<br />SSH pracovní stanici.",
+    "heroSubhead": "Zkratky hardwarové klávesnice, multitasking Stage Manager, terminálový panel a relace Mosh, které roamují — s vestavěným prohlížečem SFTP a servery synchronizovanými přes iCloud.",
+    "download": "Stáhnout pro iPad",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "Vyžaduje iPadOS 16 nebo novější",
+    "heroAlt": "SSH terminál VVTerm na iPadu",
+    "statementEyebrow": "Víc než tablet",
+    "statementTitle": "Vážný shell, na iPadu.",
+    "statementBody": "VVTerm bere <strong>hardwarovou klávesnici</strong> jako prvotřídní vstup, doplňuje klávesy, které iPadOS skrývá, pomocí <strong>terminálového panelu</strong> a běží dál napříč okny <strong>Stage Manager</strong> i externími displeji.",
+    "tourTitle": "Vytvořeno pro způsob, jakým pracujete na iPadu.",
+    "tourLabel": "Prohlídka aplikace pro iPad",
+    "tourCards": [
+      {
+        "title": "Hardwarová klávesnice, prvotřídní.",
+        "body": "Zkratky Magic Keyboard, plná mapa kláves a skutečná obsluha šipek a modifikátorů pro práci v shellu."
+      },
+      {
+        "title": "Připraveno pro Stage Manager.",
+        "body": "Spusťte terminál vedle dokumentů a prohlížečů s překrývajícími se okny a multitaskingem."
+      },
+      {
+        "title": "Externí displej.",
+        "body": "Připojte displej pro větší pracovní prostor a mějte svou relaci přesně tam, kde jste ji nechali."
+      }
+    ],
+    "kbEyebrow": "Každá klávesa, kterou potřebujete",
+    "kbTitle": "Klávesy, které iPadOS skrývá, na jedno klepnutí.",
+    "kbBody": "Klávesnicový panel terminálu dá <strong>Esc, Tab a Ctrl</strong>, šipky a <strong>funkční klávesy</strong> hned nad klávesnici — a můžete si ho přizpůsobit vlastními <strong>úryvky příkazů a zkratkami</strong>. Připojte Magic Keyboard a fyzické klávesy se mapují rovnou do vašeho shellu.",
+    "kbLink": "Přizpůsobte si panel",
+    "kbCaption": "Panel nad klávesnicí na obrazovce",
+    "connectEyebrow": "Připojte se po svém",
+    "connectTitle": "Čtyři způsoby, jak dosáhnout na každý stroj.",
+    "connectBody": "Standardní SSH, když chcete, a <strong>Mosh</strong>, <strong>Tailscale SSH</strong> nebo <strong>Cloudflare Tunnel SSH</strong>, když potřebujete — žádné přesměrování portů k nastavení.",
+    "moshEyebrow": "Roaming Mosh",
+    "moshTitle": "Vezměte si svou relaci všude.",
+    "moshBody": "Přejděte od stolní Wi-Fi k mobilním datům, uspěte iPad, změňte sítě — s <strong>Moshem</strong> vaše relace zůstane na místě a znovu se připojí sama. Standardní <strong>SSH je vždy po ruce</strong> jako záloha.",
+    "moshAlt": "Roamingová relace Mosh ve VVTerm na iPadu",
+    "filesEyebrow": "Soubory, vestavěné",
+    "filesTitle": "SFTP, hned vedle vašeho shellu.",
+    "filesBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, vytvářejte adresáře, přejmenovávejte, přesouvejte a mažte — pak prohlížejte text, obrázky a video nebo <strong>upravujte oprávnění POSIX</strong>, to vše na iPadu.",
+    "filesAlt": "Prohlížeč souborů SFTP ve VVTerm na iPadu",
+    "expandLabel": "Prozkoumat prohlížeč SFTP",
+    "modalEyebrow": "Prohlížeč souborů SFTP",
+    "modalTitle": "Správce souborů vytvořený pro iPad.",
+    "modalBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, vytvářejte adresáře, přejmenovávejte, přesouvejte a mažte — pak <strong>prohlížejte text, obrázky a video</strong>, upravujte podporované textové soubory a měňte oprávnění POSIX bez druhé aplikace.",
+    "sftpLink": "Přečíst kompletní přehled SFTP",
+    "highlights": [
+      {
+        "title": "GPU terminálový engine",
+        "body": "libghostty vykresluje každý snímek na Metalu pro skutečné barvy, ligatury a přesnou relaci."
+      },
+      {
+        "title": "Klávesnicový panel terminálu",
+        "body": "Esc, Tab, Ctrl, šipky a funkční klávesy sídlí nad klávesnicí pro klávesy, které iPadOS skrývá."
+      },
+      {
+        "title": "Roaming Mosh",
+        "body": "Relace přežijí přechody z Wi-Fi na mobilní data i uspání, se SSH jako zálohou."
+      },
+      {
+        "title": "Servery synchronizované přes iCloud",
+        "body": "Váš seznam serverů vás provází z Macu a iPhonu. Přihlašovací údaje zůstávají v Keychain."
+      }
+    ],
+    "guideLink": "Přečíst návod k nastavení na iOS",
+    "moreEyebrow": "A ještě víc",
+    "moreTitle": "Pracovní stanice, ne hračka.",
+    "moreCards": [
+      {
+        "title": "Perzistence tmux",
+        "body": "Zavřete víko nebo přepněte aplikace — vaše relace běží dál na serveru a znovu se připojí, když se vrátíte."
+      },
+      {
+        "title": "Motivy a písma",
+        "body": "440 vestavěných motivů, Nerd Fonts, styly kurzoru a klávesnicový panel, který si sestavíte sami — synchronizováno z vašich dalších zařízení."
+      },
+      {
+        "title": "Živý monitoring",
+        "body": "CPU, paměť, síť, disk a nejnáročnější procesy v reálném čase, hned vedle vašeho terminálu."
+      }
+    ],
+    "learnMore": "Zjistit více",
+    "windowsNote": "Spravujete i stroje s Windows?",
+    "windowsLink": "SSH na servery s Windows ›",
+    "faqItems": [
+      {
+        "question": "Co VVTerm pro iPad ke spuštění potřebuje?",
+        "answer": "iPadOS 16 nebo novější. Terminál se vykresluje na Metalu, takže moderní iPad poskytne nejplynulejší výsledky."
+      },
+      {
+        "question": "Potřebuji Apple Pencil?",
+        "answer": "Ne. VVTerm je postaven kolem klávesnice a dotyku. Hardwarová klávesnice jako Magic Keyboard zrychlí práci v shellu nejvíc a terminálový panel na obrazovce pokryje klávesy, které by iPadOS jinak skryl."
+      },
+      {
+        "question": "Jak napíšu Esc, Tab, Ctrl a šipky?",
+        "answer": "Klávesnicový panel terminálu sídlí nad klávesnicí na obrazovce s Esc, Tab, Ctrl, šipkami a funkčními klávesami. S hardwarovou klávesnicí se fyzické klávesy mapují rovnou."
+      },
+      {
+        "question": "Funguje to se Stage Manager a externími displeji?",
+        "answer": "Ano. Spusťte VVTerm ve Stage Manager vedle dalších aplikací a připojte externí displej pro větší pracovní prostor. Mosh udrží relaci naživu, jak se pohybujete."
+      },
+      {
+        "question": "Přežije moje relace přepnutí z Wi-Fi na mobilní data?",
+        "answer": "S Moshem ano. Mosh roamuje napříč změnami sítě a uspáním a znovu se připojí sám, s návratem ke standardnímu SSH, když ho preferujete."
+      },
+      {
+        "question": "Co když zavřu víko uprostřed úlohy?",
+        "answer": "VVTerm spravuje na serveru relaci <strong>tmux</strong>, takže běžící příkaz pokračuje i po výpadku spojení a znovu se připojí, až se příště připojíte — pokud tmux chybí, nainstaluje ho za vás."
+      },
+      {
+        "question": "Mohu si přizpůsobit klávesnicový panel?",
+        "answer": "Ano. Zvolte, které klávesy se objeví, a přidejte vlastní <strong>úryvky příkazů</strong> (vkládají text, volitelně s Enter) a <strong>zkratky</strong> (klávesa s Ctrl, Alt, Cmd nebo Shift). Vaše rozložení se synchronizuje napříč zařízeními přes iCloud."
+      },
+      {
+        "question": "Mohu monitorovat zátěž serveru na iPadu?",
+        "answer": "Ano. Živý monitoring zobrazuje CPU, paměť, síť, disk, průměrnou zátěž a nejnáročnější procesy v reálném čase přes vaši stávající SSH relaci."
+      },
+      {
+        "question": "Kolik VVTerm stojí?",
+        "answer": "Je zdarma pro jeden pracovní prostor, jeden server a jednu kartu připojení. Pro stojí $6.49/měsíc nebo $24.99/rok a doživotní nákup je za $49.99."
+      }
+    ],
+    "ctaTitle": "Udělejte z iPadu svůj terminál.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu serveru během pár minut."
+  },
+  "iphone": {
+    "metaTitle": "VVTerm pro iPhone — SSH terminál ve vaší kapse",
+    "metaDescription": "Nativní SSH terminál a SFTP klient pro iPhone. Opravujte servery na cestách s opětovným připojením Mosh, perzistencí relací tmux, vlastním klávesnicovým panelem, hlasovým ovládáním přímo v zařízení, živým monitoringem serverů, zámkem aplikace Face ID a vestavěným prohlížečem SFTP.",
+    "bcHome": "Domů",
+    "bcPlatforms": "Platformy",
+    "bcIphone": "iPhone",
+    "heroEyebrow": "VVTerm pro iPhone",
+    "heroTitle": "Vaše servery,<br />ve vaší kapse.",
+    "heroSubhead": "Opravujte věci na cestách s opětovným připojením Mosh, terminálovým panelem, hlasovým ovládáním přímo v zařízení a zámkem Face ID — plus vestavěný prohlížeč SFTP a servery synchronizované přes iCloud.",
+    "download": "Stáhnout pro iPhone",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "Vyžaduje iOS 16 nebo novější",
+    "heroAlt": "SSH terminál VVTerm na iPhonu",
+    "statementEyebrow": "Vytvořeno pro chvíli, kdy to praskne",
+    "statementTitle": "Plnohodnotný terminál, který se vejde do kapsy.",
+    "statementBody": "Když něco potřebuje rychlou opravu, VVTerm vám dá <strong>klávesy, které potřebujete, na panelu</strong>, <strong>relace Mosh, které se znovu připojí</strong> samy, a <strong>hlasové ovládání</strong> pro chvíle, kdy je psaní na skle pomalé.",
+    "tourTitle": "Práce na dálku, odkudkoli.",
+    "tourLabel": "Prohlídka aplikace pro iPhone",
+    "tourCards": [
+      {
+        "title": "Připojte se znovu odkudkoli.",
+        "body": "Mosh udrží vaši relaci naživu napříč Wi-Fi, mobilními daty a zamknutou obrazovkou, pak hned naváže."
+      },
+      {
+        "title": "Hlas na příkaz.",
+        "body": "Diktujte příkazy bez použití rukou s přepisem přímo v zařízení, když je psaní na skle pomalé."
+      },
+      {
+        "title": "Zámek aplikace Face ID.",
+        "body": "Zamkněte VVTerm za Face ID, takže pohled stačí k udržení vašich serverů v soukromí."
+      }
+    ],
+    "kbEyebrow": "Každá klávesa, kterou potřebujete",
+    "kbTitle": "Klávesy, které iOS skrývá, na jedno klepnutí.",
+    "kbBody": "Klávesnicový panel terminálu dá <strong>Esc, Tab a Ctrl</strong>, šipky a <strong>funkční klávesy</strong> hned nad klávesnici — takže vim, tmux a zkratky shellu fungují tak, jak mají, i na telefonu.",
+    "kbCaption": "Panel nad klávesnicí na obrazovce",
+    "connectEyebrow": "Připojte se po svém",
+    "connectTitle": "Čtyři způsoby, jak dosáhnout na každý stroj.",
+    "connectBody": "Standardní SSH, když chcete, a <strong>Mosh</strong>, <strong>Tailscale SSH</strong> nebo <strong>Cloudflare Tunnel SSH</strong>, když potřebujete — žádné přesměrování portů k nastavení.",
+    "voiceEyebrow": "Hlas na příkaz",
+    "voiceTitle": "Mluvte na svůj terminál.",
+    "voiceBody": "Diktujte příkazy, když je psaní na skle pomalé. VVTerm mění řeč na vstup do shellu s <strong>přepisem přímo v zařízení</strong> — modely MLX Whisper nebo Parakeet, s Apple Speech jako zálohou. K přepisu se nic neposílá mimo zařízení.",
+    "voiceAlt": "Hlasové ovládání ve VVTerm na iPhonu",
+    "filesEyebrow": "Soubory, vestavěné",
+    "filesTitle": "SFTP, hned vedle vašeho shellu.",
+    "filesBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, vytvářejte adresáře, přejmenovávejte, přesouvejte a mažte — pak prohlížejte text, obrázky a video nebo <strong>upravujte oprávnění POSIX</strong>, to vše z vašeho telefonu.",
+    "filesAlt": "Prohlížeč souborů SFTP ve VVTerm na iPhonu",
+    "expandLabel": "Prozkoumat prohlížeč SFTP",
+    "modalEyebrow": "Prohlížeč souborů SFTP",
+    "modalTitle": "Vzdálené soubory, ve vaší kapse.",
+    "modalBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, vytvářejte adresáře, přejmenovávejte, přesouvejte a mažte — pak <strong>prohlížejte text, obrázky a video</strong>, upravujte podporované textové soubory a měňte oprávnění POSIX bez druhé aplikace.",
+    "sftpLink": "Přečíst kompletní přehled SFTP",
+    "highlights": [
+      {
+        "title": "GPU terminálový engine",
+        "body": "libghostty vykresluje každý snímek na Metalu pro skutečné barvy, ligatury a přesnou relaci."
+      },
+      {
+        "title": "Klávesnicový panel terminálu",
+        "body": "Esc, Tab, Ctrl, šipky a funkční klávesy sídlí nad klávesnicí pro klávesy, které iOS skrývá."
+      },
+      {
+        "title": "Roaming Mosh",
+        "body": "Relace přežijí přechody z Wi-Fi na mobilní data i zamknutý telefon, se SSH jako zálohou."
+      },
+      {
+        "title": "Zámek aplikace Face ID",
+        "body": "Biometrický zámek udrží váš seznam serverů a živé relace v soukromí na sdíleném nebo ztraceném telefonu."
+      }
+    ],
+    "guideLink1": "Jak se připojit přes SSH z iPhonu",
+    "guideLink2": "Nastavení Moshe na iOS",
+    "moreEyebrow": "A ještě víc",
+    "moreTitle": "Víc než rychlá oprava.",
+    "moreCards": [
+      {
+        "title": "Perzistence tmux",
+        "body": "Zamkněte telefon nebo ztraťte signál — VVTerm spravuje tmux, takže vaše relace běží dál a znovu se připojí, když jste zpět."
+      },
+      {
+        "title": "Živý monitoring",
+        "body": "Zkontrolujte CPU, paměť, síť, disk a nejnáročnější procesy v reálném čase, než sáhnete po notebooku."
+      },
+      {
+        "title": "Motivy a panel",
+        "body": "440 motivů, Nerd Fonts a klávesnicový panel, který si sestavíte z vlastních úryvků příkazů a zkratek."
+      }
+    ],
+    "learnMore": "Zjistit více",
+    "windowsNote": "Spravujete i stroje s Windows?",
+    "windowsLink": "SSH na servery s Windows ›",
+    "faqItems": [
+      {
+        "question": "Co VVTerm pro iPhone ke spuštění potřebuje?",
+        "answer": "iOS 16 nebo novější. Terminál se vykresluje na Metalu, takže moderní iPhone poskytne nejplynulejší výsledky."
+      },
+      {
+        "question": "Opravdu mohu opravit server z telefonu?",
+        "answer": "Ano. VVTerm je plnohodnotný SSH terminál s klávesami, které potřebujete, na panelu, relacemi Mosh, které se znovu připojí samy, a prohlížečem SFTP pro rychlé úpravy souborů — dost na to, abyste zvládli incident na cestách."
+      },
+      {
+        "question": "Jak funguje hlasové ovládání?",
+        "answer": "Vyslovte příkaz a VVTerm ho přepíše přímo v zařízení pomocí modelů MLX Whisper nebo Parakeet, s Apple Speech jako zálohou. K přepisu se na server o vašich příkazech nic neposílá."
+      },
+      {
+        "question": "Přežije moje relace přepnutí sítí nebo zamknutí telefonu?",
+        "answer": "S Moshem ano. Mosh roamuje napříč Wi-Fi a mobilními daty a přežije zamknutou obrazovku, znovu se připojí sám. Standardní SSH je vždy k dispozici, když ho preferujete."
+      },
+      {
+        "question": "Bude běžící příkaz pokračovat, když se odpojím?",
+        "answer": "Ano. VVTerm spravuje na serveru relaci <strong>tmux</strong>, takže dlouho běžící příkaz pokračuje přes výpadek nebo zamknutý telefon a znovu se připojí, když obnovíte spojení. Pokud tmux chybí, nainstaluje ho za vás."
+      },
+      {
+        "question": "Mohu zkontrolovat zátěž serveru z telefonu?",
+        "answer": "Ano. Živý monitoring zobrazuje CPU, paměť, síť, disk, průměrnou zátěž a nejnáročnější procesy v reálném čase přes vaši SSH relaci — užitečné pro třídění, než dorazíte k notebooku."
+      },
+      {
+        "question": "Jak udržím své servery v soukromí na telefonu?",
+        "answer": "Zapněte zámek aplikace Face ID. VVTerm zůstane zamknutý za biometrikou a přihlašovací údaje žijí v Apple Keychain místo v synchronizovaných datech."
+      },
+      {
+        "question": "Kolik VVTerm stojí?",
+        "answer": "Je zdarma pro jeden pracovní prostor, jeden server a jednu kartu připojení. Pro stojí $6.49/měsíc nebo $24.99/rok a doživotní nákup je za $49.99."
+      }
+    ],
+    "ctaTitle": "Noste své servery s sebou.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu serveru během pár minut."
+  },
+  "mac": {
+    "metaTitle": "VVTerm pro Mac — Nativní SSH terminál pro macOS",
+    "metaDescription": "Nativní SSH terminál a SFTP klient pro Macy s Apple Silicon. GPU vykreslování s libghostty, karty a rozdělené panely, perzistence relací tmux, živý monitoring serverů, hluboké přizpůsobení, Mosh, Tailscale SSH a servery synchronizované přes iCloud.",
+    "bcHome": "Domů",
+    "bcPlatforms": "Platformy",
+    "bcMac": "Mac",
+    "heroEyebrow": "VVTerm pro Mac",
+    "heroTitle": "Skutečný terminál<br />pro váš Mac.",
+    "heroSubhead": "GPU vykreslovaný, založený na kartách a vytvořený pro Apple Silicon — s vestavěným prohlížečem SFTP a servery, které se synchronizují do všech vašich zařízení.",
+    "download": "Stáhnout pro Mac",
+    "seePricing": "Zobrazit ceny",
+    "heroNote": "Vyžaduje macOS 13 Ventura nebo novější · Apple Silicon",
+    "heroAlt": "SSH terminál VVTerm na Macu",
+    "statementEyebrow": "Nativní, ne webový obal",
+    "statementTitle": "Vytvořeno tak, jak má aplikace pro Mac vypadat.",
+    "statementBody": "VVTerm používá <strong>postranní panel v rozděleném zobrazení</strong>, <strong>jednotný panel nástrojů</strong> a skutečnou obsluhu klávesnice — takže připojení k serveru působí přesně jako zbytek macOS.",
+    "tourTitle": "Poznejte aplikaci pro Mac.",
+    "tourLabel": "Prohlídka aplikace pro Mac",
+    "tourCards": [
+      {
+        "title": "Pracovní prostory v rozděleném zobrazení.",
+        "body": "Postranní panel NavigationSplitView s pracovními prostory a servery vedle vašeho živého terminálu."
+      },
+      {
+        "title": "Karty a rozdělené panely.",
+        "body": "Mějte několik připojení otevřených v jednotném panelu nástrojů a rozdělte kartu na panely pro shelly vedle sebe."
+      },
+      {
+        "title": "SFTP ve stejném okně.",
+        "body": "Procházejte a upravujte vzdálené soubory, aniž byste sahali po druhé aplikaci."
+      }
+    ],
+    "connectEyebrow": "Připojte se po svém",
+    "connectTitle": "Čtyři způsoby, jak dosáhnout na každý stroj.",
+    "connectBody": "Standardní SSH, když chcete, a <strong>Mosh</strong>, <strong>Tailscale SSH</strong> nebo <strong>Cloudflare Tunnel SSH</strong>, když potřebujete.",
+    "filesEyebrow": "Soubory, vestavěné",
+    "filesTitle": "SFTP, hned vedle vašeho shellu.",
+    "filesBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, prohlížejte text, obrázky a video a upravujte oprávnění POSIX — to vše ve stejném okně.",
+    "filesAlt": "Prohlížeč souborů SFTP ve VVTerm na Macu",
+    "expandLabel": "Prozkoumat prohlížeč SFTP",
+    "modalEyebrow": "Prohlížeč souborů SFTP",
+    "modalTitle": "Soubory a terminál, jedno okno.",
+    "modalBody": "Procházejte vzdálené složky, <strong>nahrávejte a stahujte</strong>, vytvářejte adresáře, přejmenovávejte, přesouvejte a mažte — pak <strong>prohlížejte text, obrázky a video</strong>, upravujte podporované textové soubory a měňte oprávnění POSIX bez opuštění aplikace pro Mac.",
+    "sftpLink": "Přečíst kompletní přehled SFTP",
+    "highlights": [
+      {
+        "title": "GPU terminálový engine",
+        "body": "libghostty vykresluje každý snímek na Metalu pro skutečné barvy, ligatury a přesnou relaci."
+      },
+      {
+        "title": "Nativní pro Apple Silicon",
+        "body": "Vytvořeno a vyladěno pro Macy řady M s macOS 13 Ventura nebo novějším."
+      },
+      {
+        "title": "Servery synchronizované přes iCloud",
+        "body": "Váš seznam serverů vás provází na iPhone a iPad. Přihlašovací údaje zůstávají v Keychain."
+      },
+      {
+        "title": "Zabezpečení Keychain",
+        "body": "Hesla a SSH klíče žijí v Apple Keychain, nikdy v synchronizovaných metadatech."
+      }
+    ],
+    "macGuideLink": "Přečíst návod k nastavení na Macu",
+    "moreEyebrow": "A ještě víc",
+    "moreTitle": "Vytvořeno pro skutečnou práci na dálku.",
+    "moreCards": [
+      {
+        "title": "Perzistence tmux",
+        "body": "Dlouhé buildy a migrace běží dál přes odpojení. VVTerm spravuje tmux a znovu se připojí, když obnovíte spojení."
+      },
+      {
+        "title": "Motivy a písma",
+        "body": "440 vestavěných motivů, Nerd Fonts a styly kurzoru, s oddělenými světlými a tmavými motivy, které se přepínají automaticky."
+      },
+      {
+        "title": "Živý monitoring",
+        "body": "Sledujte CPU, paměť, síť, disk a nejnáročnější procesy v reálném čase, hned vedle shellu."
+      }
+    ],
+    "learnMore": "Zjistit více",
+    "windowsNote": "Spravujete i stroje s Windows?",
+    "windowsLink": "SSH na servery s Windows ›",
+    "faqItems": [
+      {
+        "question": "Běží VVTerm na Intelových Macích?",
+        "answer": "Ne. VVTerm je vytvořen pro Macy s Apple Silicon a macOS 13 Ventura nebo novějším. Intelové Macy nejsou podporovány."
+      },
+      {
+        "question": "Jaký terminálový engine aplikace pro Mac používá?",
+        "answer": "Používá libghostty, vykreslovací engine z Ghostty, s vykreslováním na Metal GPU pro rychlý a přesný výstup terminálu."
+      },
+      {
+        "question": "Mohu mít otevřené více než jedno připojení najednou?",
+        "answer": "Ano. Pro odemyká neomezené karty připojení a kartu můžete rozdělit na více panelů pro shelly vedle sebe. Verze zdarma zahrnuje jednu kartu připojení."
+      },
+      {
+        "question": "Přežijí moje relace odpojení?",
+        "answer": "Ano. VVTerm spravuje na serveru relaci <strong>tmux</strong>, takže dlouho běžící práce pokračuje přes výpadky a uspání a znovu se připojí, když obnovíte spojení. Pokud tmux chybí, automaticky ho nainstaluje."
+      },
+      {
+        "question": "Mohu monitorovat zátěž serveru z aplikace pro Mac?",
+        "answer": "Ano. Živý monitoring serverů zobrazuje CPU, paměť, síť, disk, průměrnou zátěž a nejnáročnější procesy v reálném čase přes vaši SSH relaci — bez instalace agenta."
+      },
+      {
+        "question": "Mohu se připojit k serverům Windows?",
+        "answer": "Ano. VVTerm se připojuje k hostům Windows a PowerShell přes SSH, s SFTP, živými statistikami a perzistentními relacemi přes psmux."
+      },
+      {
+        "question": "Obsahuje prohlížeč souborů SFTP?",
+        "answer": "Ano. Aplikace pro Mac má vestavěný prohlížeč SFTP pro nahrávání, stahování, přejmenovávání, přesouvání, mazání, náhled a úpravy vzdálených souborů a oprávnění POSIX."
+      },
+      {
+        "question": "Synchronizují se moje servery na iPhone a iPad?",
+        "answer": "Metadata serverů se synchronizují přes iCloud. Hesla a SSH klíče jsou uloženy v Apple Keychain a synchronizují se jen přes iCloud Keychain, když to zapnete."
+      },
+      {
+        "question": "Kolik VVTerm pro Mac stojí?",
+        "answer": "Je zdarma pro jeden pracovní prostor, jeden server a jednu kartu připojení. Pro stojí $6.49/měsíc nebo $24.99/rok a doživotní nákup je za $49.99."
+      }
+    ],
+    "ctaTitle": "Přineste své servery na svůj Mac.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu serveru během pár minut."
+  },
+  "platforms": {
+    "metaTitle": "Platformy — VVTerm pro Mac, iPad a iPhone",
+    "metaDescription": "VVTerm je nativní SSH terminál a SFTP klient pro zařízení Apple. Prozkoumejte VVTerm pro Mac, iPad a iPhone — vytvořeno pro Apple Silicon se synchronizací přes iCloud a zabezpečením Keychain.",
+    "bcHome": "Domů",
+    "bcPlatforms": "Platformy",
+    "eyebrow": "Platformy",
+    "heroTitle": "Jedna SSH aplikace,<br />každé zařízení Apple.",
+    "heroSubhead": "Nativní terminál pro Mac, iPad a iPhone — s perzistencí relací tmux, živým monitoringem, hlubokým přizpůsobením a servery i přihlašovacími údaji, které se synchronizují přes iCloud.",
+    "seeFeatures": "Zobrazit všechny funkce",
+    "heroNote": "iOS a iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    "vvtermFor": "VVTerm pro",
+    "explore": "Prozkoumat",
+    "ctaTitle": "Začněte na jednom zařízení, dokončete na jiném.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a vaše servery vás budou provázet napříč Macem, iPadem a iPhonem.",
+    "cards": {
+      "mac": {
+        "tagline": "Nativní SSH terminál pro macOS",
+        "summary": "GPU vykreslovaný terminál s kartami a rozdělenými panely, perzistence relací tmux, prohlížeč souborů SFTP, živý monitoring a servery synchronizované přes iCloud — vytvořeno pro Macy s Apple Silicon.",
+        "requirement": "macOS 13 Ventura nebo novější · Apple Silicon"
+      },
+      "ipad": {
+        "tagline": "Proměňte iPad ve skutečnou SSH pracovní stanici",
+        "summary": "Zkratky hardwarové klávesnice, multitasking Stage Manager, přizpůsobitelný terminálový panel, perzistence tmux a relace Mosh, které přežijí výpadky sítě.",
+        "requirement": "iPadOS 16 nebo novější"
+      },
+      "iphone": {
+        "tagline": "Vaše servery ve vaší kapse",
+        "summary": "Připojte se znovu odkudkoli s Moshem, udržte relace naživu s tmux, kontrolujte živé statistiky serveru, procházejte vzdálené soubory a držte přihlašovací údaje v Keychain.",
+        "requirement": "iOS 16 nebo novější"
+      }
+    }
+  },
+  "pricing": {
+    "title": "Ceny VVTerm — Zdarma, Pro a Doživotní",
+    "description": "VVTerm začíná zdarma s jedním pracovním prostorem, serverem a kartou připojení. Přejděte na Pro pro neomezené vše za $6.49/měsíc nebo $24.99/rok, nebo zaplaťte jednou s doživotním nákupem za $49.99.",
+    "bcHome": "Domů",
+    "bcPricing": "Ceny",
+    "heroEyebrow": "Ceny",
+    "heroTitle": "Začněte zdarma.<br />Mějte to navždy.",
+    "heroSubhead": "Začněte zdarma s jedním serverem na každém zařízení Apple. Přejděte na Pro pro neomezené vše, nebo zaplaťte jednou za doživotní licenci — nákupy a vrácení peněz řeší Apple.",
+    "download": "Stáhnout zdarma",
+    "comparePlans": "Porovnat plány",
+    "heroNote": "Není potřeba účet · iPhone, iPad a Mac",
+    "compareEyebrow": "Porovnat plány",
+    "compareTitle": "Každý plán, bok po boku.",
+    "compareBody": "Stejný nativní terminál v každém plánu. Pro a <strong>Doživotní</strong> odemykají <strong>neomezené servery a karty připojení</strong> a přidávají <strong>prioritní podporu</strong>.",
+    "colFeatures": "Funkce",
+    "colFree": "Zdarma",
+    "colPro": "Pro",
+    "colLifetime": "Doživotní",
+    "rows": [
+      {
+        "label": "Pracovní prostory",
+        "free": "1",
+        "pro": "Neomezeně",
+        "lifetime": "Neomezeně"
+      },
+      {
+        "label": "Servery",
+        "free": "1",
+        "pro": "Neomezeně",
+        "lifetime": "Neomezeně"
+      },
+      {
+        "label": "Karty připojení",
+        "free": "1",
+        "pro": "Neomezeně",
+        "lifetime": "Neomezeně"
+      },
+      {
+        "label": "SSH, Mosh, Tailscale SSH, Cloudflare Tunnel SSH",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "GPU terminál (libghostty)",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Prohlížeč souborů SFTP",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "iCloud synchronizace",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Zabezpečení Keychain",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Hlasové ovládání",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Vlastní prostředí",
+        "free": "cross",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Prioritní podpora",
+        "free": "cross",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Všechny budoucí aktualizace",
+        "free": "dash",
+        "pro": "Po dobu předplatného",
+        "lifetime": "Navždy"
+      },
+      {
+        "label": "Fakturace",
+        "free": "Zdarma",
+        "pro": "Předplatné",
+        "lifetime": "Jednorázová"
+      }
+    ],
+    "benefits": [
+      {
+        "icon": "lucide:user-x",
+        "title": "Není potřeba účet",
+        "body": "Stáhněte a připojte se ke svému prvnímu serveru během pár minut — žádná registrace, žádný e-mail."
+      },
+      {
+        "icon": "lucide:calendar-x",
+        "title": "Zrušte kdykoli",
+        "body": "Pro je standardní předplatné App Store, které můžete zrušit, kdykoli chcete."
+      },
+      {
+        "icon": "lucide:badge-check",
+        "title": "Zaplaťte jednou s Doživotní",
+        "body": "Jeden nákup za $49.99 odemkne vše a každou budoucí aktualizaci, navždy."
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "Co dostanu zdarma?",
+        "answer": "Verze zdarma zahrnuje jeden pracovní prostor, jeden server a jednu kartu připojení — se standardním SSH, Moshem, Tailscale SSH a Cloudflare Tunnel SSH, GPU terminálem, prohlížečem souborů SFTP, synchronizací přes iCloud, zabezpečením Keychain a hlasovým ovládáním. K začátku není potřeba účet ani platba."
+      },
+      {
+        "question": "Jaký je rozdíl mezi Zdarma a Pro?",
+        "answer": "Zdarma je omezeno na jeden pracovní prostor, jeden server a jednu kartu připojení. Pro odstraňuje každý limit — neomezené pracovní prostory, servery a karty připojení — a přidává vlastní prostředí, prioritní podporu a všechny budoucí funkce po dobu předplatného."
+      },
+      {
+        "question": "Mohu jeden nákup použít na iPhonu, iPadu a Macu?",
+        "answer": "Ano. Nákupy jsou vázány na vaše Apple ID a fungují napříč iPhonem, iPadem a Macem, když jste přihlášeni stejným Apple ID. Vaše servery se synchronizují přes iCloud, takže vaše nastavení vás provází na každé zařízení."
+      },
+      {
+        "question": "Jak funguje vrácení peněz?",
+        "answer": "Všechny nákupy a vrácení peněz řeší Apple prostřednictvím App Store. Chcete-li požádat o vrácení peněz, navštivte reportaproblem.apple.com a postupujte podle procesu Apple. VVTerm nezpracovává platby ani vrácení peněz přímo."
+      },
+      {
+        "question": "Je k dispozici jak předplatné, tak doživotní možnost?",
+        "answer": "Ano. Pro je dostupné jako předplatné za $6.49/měsíc nebo $24.99/rok a existuje jednorázový doživotní nákup za $49.99, který odemyká vše v Pro bez opakovaného poplatku."
+      },
+      {
+        "question": "Zahrnují ceny všechny budoucí funkce?",
+        "answer": "Pro zahrnuje všechny budoucí funkce po dobu předplatného. Doživotní nákup zahrnuje všechny budoucí aktualizace navždy, bez dalších nákladů."
+      }
+    ],
+    "ctaTitle": "Začněte zdarma. Upgradujte, až vyrostete.",
+    "ctaSubtitle": "Stáhněte si VVTerm na iPhone, iPad i Mac a pak přejděte na Pro nebo si kupte doživotní licenci, kdykoli budete potřebovat víc."
+  },
+  "privacy": {
+    "title": "Zásady ochrany soukromí - VVTerm",
+    "description": "Zásady ochrany soukromí pro VVTerm, SSH terminálovou aplikaci pro iOS a macOS od Vivy Technologies Co., Limited.",
+    "heading": "Zásady ochrany soukromí",
+    "lastUpdated": "10. června 2026",
+    "s1h": "1. Úvod",
+    "s1p": "Vivy Technologies Co., Limited („my“, „naše“ nebo „nás“) provozuje VVTerm, SSH terminálovou aplikaci pro iOS a macOS. Tyto zásady ochrany soukromí vysvětlují, jak shromažďujeme, používáme a chráníme vaše informace.",
+    "s2h": "2. Informace, které shromažďujeme",
+    "s2serverH": "Konfigurace serverů",
+    "s2serverP": "VVTerm ukládá vaše konfigurace serverů (host, port, uživatelské jméno) lokálně a synchronizuje je přes iCloud do vašich dalších zařízení. Tato data jsou šifrována při přenosu i v klidu infrastrukturou iCloud od Apple.",
+    "s2credH": "Přihlašovací údaje",
+    "s2credP": "Hesla SSH a soukromé klíče jsou uloženy v Apple Keychain. Pokud je zapnutá synchronizace přes iCloud, přihlašovací údaje se synchronizují přes iCloud Keychain napříč vašimi zařízeními. Tyto přihlašovací údaje nikdy nepřijímáme a jsou chráněny zabezpečením vašeho zařízení.",
+    "s2analyticsH": "Analytická data",
+    "s2analyticsP1": "Používáme Umami Analytics, analytickou službu zaměřenou na soukromí, ke shromažďování anonymních statistik používání na našem webu a v aplikaci. Data jsou anonymní, zpracovávaná na našem vlastním self-hostovaném analytickém serveru a nikdy sdílená s analytickými společnostmi třetích stran nebo reklamními sítěmi.",
+    "s2analyticsP2": "Nikdy neshromažďujeme obsah vašich terminálových relací, příkazy, které píšete, adresy vašich serverů, uživatelská jména, obsah souborů ani cokoli, co vás identifikuje. Analytiku aplikace můžete kdykoli vypnout v Nastavení pod položkou „Pomozte zlepšit VVTerm“.",
+    "s2purchaseH": "Informace o nákupu",
+    "s2purchaseP": "Pokud zakoupíte VVTerm Pro, váš nákup je zpracován přes App Store. Obdržíme potvrzení vašeho nákupu, ale nemáme přístup k údajům o vaší platbě.",
+    "s3h": "3. Jak používáme vaše informace",
+    "s3list": [
+      "K poskytování a údržbě funkčnosti aplikace",
+      "K synchronizaci konfigurací serverů napříč vašimi zařízeními přes iCloud",
+      "K ověření stavu předplatného Pro",
+      "Ke zlepšování našeho webu a aplikace"
+    ],
+    "s4h": "4. Ukládání dat a zabezpečení",
+    "s4p": "Konfigurace serverů se synchronizují přes Apple iCloud, podléhající bezpečnostním opatřením Apple. Přihlašovací údaje jsou uloženy v Apple Keychain a mohou se synchronizovat přes iCloud Keychain, když je zapnutý. Jediná data, která naše vlastní servery přijímají, jsou anonymní statistiky používání popsané výše. Vaše osobní informace neprodáváme ani nesdílíme s třetími stranami.",
+    "s5h": "5. Vaše práva",
+    "s5intro": "Máte právo:",
+    "s5list": [
+      "Smazat všechna data aplikace odstraněním VVTerm ze svých zařízení",
+      "Vypnout synchronizaci přes iCloud v Nastavení a ponechat data jen lokálně",
+      "Kdykoli odstranit uložené přihlašovací údaje z Keychain",
+      "Vypnout anonymní statistiky používání v Nastavení („Pomozte zlepšit VVTerm“)",
+      "Požádat o informace o datech, která jsme mohli shromáždit"
+    ],
+    "s6h": "6. Kontaktujte nás",
+    "s6pre": "Pokud máte otázky k těmto zásadám ochrany soukromí, kontaktujte ",
+    "s6post": "."
+  },
+  "refund": {
+    "title": "Zásady vracení peněz - VVTerm",
+    "description": "Zásady vracení peněz pro nákupy VVTerm Pro přes Apple App Store.",
+    "heading": "Zásady vracení peněz",
+    "lastUpdated": "15. ledna 2026",
+    "s1h": "Vrácení peněz za nákupy v App Store",
+    "s1p": "VVTerm Pro se prodává přes Apple App Store. Apple vyřizuje fakturaci a vrácení peněz a oprávněnost určují zásady Apple.",
+    "s2h": "Jak požádat o vrácení peněz",
+    "s2intro": "Chcete-li požádat o vrácení peněz, použijte oficiální proces Apple:",
+    "s2steps": [
+      "Přihlaste se svým Apple ID",
+      "Najděte svůj nákup VVTerm Pro",
+      "Zvolte „Požádat o vrácení peněz“ a postupujte podle pokynů"
+    ],
+    "s2reportPre": "Přejděte na ",
+    "s2reportPost": "",
+    "s2outro": "Vrácení peněz nemůžeme vydávat přímo, ale pokud máte potíže s používáním aplikace, kontaktujte nás a uděláme, co bude v našich silách, abychom pomohli.",
+    "s3h": "Zrušení předplatného",
+    "s3intro": "Pokud jste si předplatili VVTerm Pro Měsíčně nebo Ročně, můžete zrušit kdykoli:",
+    "s3steps": [
+      "Otevřete Nastavení na iPhonu nebo iPadu, nebo Nastavení systému na Macu",
+      "Klepněte na své Apple ID, pak na Předplatné",
+      "Najděte VVTerm a klepněte na „Zrušit předplatné“"
+    ],
+    "s3outro": "Po zrušení:",
+    "s3list": [
+      "Přístup k Pro si ponecháte do konce stávajícího fakturačního období",
+      "Žádné další poplatky nebudou účtovány",
+      "Funkce Pro budou po skončení období vypnuty",
+      "Vaše servery a pracovní prostory zůstanou, ale budou platit limity verze zdarma"
+    ],
+    "s4h": "Doživotní nákupy",
+    "s4p": "Doživotní nákupy Pro jsou jednorázové a nevyžadují zrušení. Vrácení peněz vyřizuje Apple stejným postupem jako výše.",
+    "s5h": "Kontaktujte nás",
+    "s5pre": "Otázky nebo technické problémy? Kontaktujte ",
+    "s5post": "."
+  },
+  "resources": {
+    "title": "Zdroje — Návody, dokumentace a porovnání VVTerm",
+    "description": "Naučte se VVTerm: podrobné návody, dokumentace produktu a porovnání bok po boku s dalšími SSH klienty pro iPhone, iPad a Mac.",
+    "bcHome": "Domů",
+    "bcResources": "Zdroje",
+    "heroEyebrow": "Zdroje",
+    "heroTitle": "Vše, co vám pomůže<br />se připravit.",
+    "heroSubhead": "Návody, dokumentace a poctivá porovnání — abyste mohli připojit svůj první server a dostat se s VVTerm dál.",
+    "seePricing": "Zobrazit ceny",
+    "guidesTitle": "Návody",
+    "guidesBody": "Podrobné postupy pro připojování, přenos souborů a vytěžení maxima z VVTerm.",
+    "guidesCta": "Procházet návody",
+    "docsTitle": "Dokumentace",
+    "docsBody": "Reference pro servery, ověřování, prohlížeč SFTP, synchronizaci přes iCloud, pracovní prostory a karty.",
+    "docsCta": "Přečíst dokumentaci",
+    "compareTitle": "Porovnání",
+    "compareBody": "Podívejte se, jak si VVTerm stojí proti dalším SSH klientům — platformy, přenosy, soubory a ceny.",
+    "compareCta": "Zobrazit porovnání",
+    "ctaTitle": "Připraveni, až budete chtít.",
+    "ctaSubtitle": "Stáhněte si VVTerm zdarma a připojte se ke svému prvnímu stroji během pár minut."
+  },
+  "support": {
+    "title": "Podpora - VVTerm",
+    "description": "Zdroje podpory pro VVTerm, včetně kontaktu a poradenství k fakturaci.",
+    "heading": "Podpora",
+    "pageDescription": "Jsme tu, abychom pomohli s jakýmikoli otázkami k VVTerm.",
+    "s1h": "Kontakt",
+    "s1pre": "Napište nám na ",
+    "s1post": ". Obvykle odpovídáme do 1 až 2 pracovních dnů.",
+    "s2h": "Podpora aplikace",
+    "s2intro": "Přiložte prosím následující, abychom mohli pomoci rychleji:",
+    "s2list": [
+      "Model zařízení a verzi OS",
+      "Verzi aplikace VVTerm",
+      "Kroky k reprodukci problému",
+      "Jakékoli relevantní snímky obrazovky nebo logy"
+    ],
+    "s3h": "Fakturace a předplatná",
+    "s3p": "Nákupy vyřizuje App Store. Pokud máte otázky k fakturaci, můžete nás kontaktovat nebo spravovat předplatná v nastavení svého Apple ID."
+  },
+  "terms": {
+    "title": "Podmínky používání (EULA) - VVTerm",
+    "description": "Podmínky používání pro VVTerm, SSH terminálovou aplikaci pro iOS a macOS od Vivy Technologies Co., Limited.",
+    "heading": "Podmínky používání (EULA)",
+    "lastUpdated": "8. dubna 2026",
+    "s1h": "1. Potvrzení",
+    "s1p1": "Tyto podmínky používání („EULA“) jsou uzavřeny mezi vámi a Vivy Technologies Co., Limited („Vivy“, „my“, „naše“ nebo „nás“), nikoli s Apple. Za VVTerm („aplikaci“) a její obsah je výhradně odpovědná Vivy, nikoli Apple. Stažením, instalací nebo používáním aplikace souhlasíte s tím, že jste vázáni touto EULA. Pokud nesouhlasíte, aplikaci nepoužívejte.",
+    "s1p2": "Tato EULA nenahrazuje žádná pravidla používání v podmínkách Apple Media Services Terms and Conditions. Berete na vědomí, že jste měli možnost tyto podmínky prozkoumat.",
+    "s2h": "2. Rozsah licence",
+    "s2p1": "Vivy vám uděluje omezenou, nevýhradní, nepřevoditelnou licenci k používání aplikace na jakýchkoli produktech značky Apple, které vlastníte nebo ovládáte, a v rozsahu povoleném příslušnými pravidly používání App Store, včetně přístupu přes Family Sharing, hromadné nákupy nebo Legacy Contacts tam, kde to Apple umožňuje.",
+    "s2p2pre": "Tato EULA se vztahuje na oficiální binární soubory VVTerm distribuované přes Apple App Store. Zdrojový kód zveřejněný na ",
+    "s2p2post": " je licencován samostatně pod GPL-3.0.",
+    "s2freeH": "Verze zdarma",
+    "s2freeP": "Verzi VVTerm zdarma lze používat bezplatně, s následujícími omezeními: 1 pracovní prostor, 1 server a 1 souběžné připojení.",
+    "s3h": "3. VVTerm Pro a nákupy v App Store",
+    "s3p1": "VVTerm Pro vyžaduje platný nákup v aplikaci přes App Store. Pro odemyká neomezené pracovní prostory, servery a souběžná připojení.",
+    "s3p2": "Fakturaci předplatného a správu účtu vyřizuje Apple. Předplatná můžete spravovat a rušit v nastavení svého účtu Apple.",
+    "s4h": "4. Údržba a podpora",
+    "s4p": "Za poskytování jakékoli údržby a podpory aplikace je výhradně odpovědná Vivy, v rozsahu vyžadovaném touto EULA nebo příslušnými zákony. Apple nemá žádnou povinnost poskytovat jakékoli služby údržby nebo podpory ve vztahu k aplikaci.",
+    "s5h": "5. Záruka",
+    "s5p1": "V rozsahu, v jakém není jakákoli záruka účinně vyloučena podle příslušných zákonů, je za takovou záruku výhradně odpovědná Vivy.",
+    "s5p2": "V případě jakéhokoli nesouladu aplikace s příslušnou zárukou můžete uvědomit Apple a Apple vám může vrátit kupní cenu, kterou jste za aplikaci zaplatili, pokud nějakou. V maximálním rozsahu povoleném příslušnými zákony nebude mít Apple žádnou jinou záruční povinnost ve vztahu k aplikaci a jakékoli další nároky, ztráty, závazky, škody, náklady nebo výdaje přičitatelné jakémukoli nesouladu se zárukou jsou výhradní odpovědností Vivy.",
+    "s6h": "6. Nároky týkající se produktu",
+    "s6p": "Za řešení jakýchkoli nároků uplatněných vámi nebo jakoukoli třetí stranou týkajících se aplikace nebo vašeho vlastnictví či používání aplikace je odpovědná Vivy, nikoli Apple, včetně nároků z odpovědnosti za produkt, jakéhokoli nároku, že aplikace nesplňuje jakýkoli příslušný právní nebo regulační požadavek, a nároků vzniklých podle právních předpisů na ochranu spotřebitele, soukromí nebo podobných předpisů.",
+    "s7h": "7. Nároky z duševního vlastnictví",
+    "s7p": "V případě jakéhokoli nároku třetí strany, že aplikace nebo vaše vlastnictví a používání aplikace porušuje práva duševního vlastnictví této třetí strany, bude za vyšetřování, obhajobu, urovnání a vypořádání jakéhokoli takového nároku z porušení duševního vlastnictví výhradně odpovědná Vivy, nikoli Apple.",
+    "s8h": "8. Dodržování zákonů",
+    "s8p": "Prohlašujete a zaručujete, že se nenacházíte v zemi nebo regionu, který podléhá embargu vlády USA nebo který byl vládou USA označen za zemi „podporující terorismus“, a že nejste uvedeni na žádném seznamu zakázaných nebo omezených stran vlády USA.",
+    "s9h": "9. Podmínky a služby třetích stran",
+    "s9p1": "Při používání aplikace musíte dodržovat příslušné podmínky třetích stran. To zahrnuje podmínky vaší sítě nebo mobilního operátora, služby Apple jako iCloud a jakékoli externí služby nebo infrastrukturu, ke kterým prostřednictvím aplikace přistupujete, jako jsou vzdálené servery, Tailscale, Cloudflare nebo podobní poskytovatelé.",
+    "s9p2": "Aplikace může umožnit přístup k externím službám a webům. Tyto služby používáte na vlastní riziko. Vivy není odpovědná za zkoumání nebo hodnocení služeb třetích stran a neručí za jejich dostupnost, přesnost ani obsah.",
+    "s10h": "10. Omezení",
+    "s10intro": "Nesmíte:",
+    "s10list": [
+      "Provádět zpětnou analýzu, dekompilovat nebo rozkládat aplikaci",
+      "Odstraňovat nebo měnit jakákoli vlastnická upozornění nebo štítky",
+      "Sdílet nebo distribuovat svůj nákup v App Store s ostatními",
+      "Používat aplikaci k jakémukoli nezákonnému účelu",
+      "Pokoušet se získat neoprávněný přístup ke vzdáleným serverům"
+    ],
+    "s11h": "11. SSH připojení",
+    "s11intro": "VVTerm zprostředkovává SSH připojení k serverům, které nakonfigurujete. Jste výhradně odpovědní za:",
+    "s11list": [
+      "Zajištění, že máte oprávnění přistupovat k serverům, ke kterým se připojujete",
+      "Ochranu svých přihlašovacích údajů a SSH klíčů",
+      "Jakékoli akce provedené přes SSH připojení uskutečněná pomocí aplikace"
+    ],
+    "s12h": "12. Data a soukromí",
+    "s12pre": "Vaše používání aplikace také podléhá našim ",
+    "s12link": "Zásadám ochrany soukromí",
+    "s12post": ". Můžeme zpracovávat technické informace a informace související s podporou, jak je tam popsáno.",
+    "s13h": "13. iCloud synchronizace",
+    "s13p": "Konfigurace serverů se mohou synchronizovat přes Apple iCloud. Vaše používání iCloud podléhá podmínkám služby Apple. Neneseme odpovědnost za dostupnost iCloud nebo ztrátu dat kvůli problémům s iCloud.",
+    "s14h": "14. Vyloučení záruk",
+    "s14p": "APLIKACE JE POSKYTOVÁNA „TAK, JAK JE“ BEZ JAKÉKOLI ZÁRUKY, VÝSLOVNÉ NEBO PŘEDPOKLÁDANÉ. NEZARUČUJEME, ŽE APLIKACE BUDE NEPŘERUŠOVANÁ, BEZCHYBNÁ NEBO BEZPEČNÁ. SSH PŘIPOJENÍ JSOU USKUTEČŇOVÁNA PŘÍMO MEZI VAŠÍM ZAŘÍZENÍM A VZDÁLENÝMI SERVERY; TENTO PROVOZ NEPROXUJEME ANI NEKONTROLUJEME.",
+    "s15h": "15. Omezení odpovědnosti",
+    "s15p1": "V ŽÁDNÉM PŘÍPADĚ NEBUDE VIVY TECHNOLOGIES CO., LIMITED ODPOVĚDNÁ ZA JAKÉKOLI NEPŘÍMÉ, NÁHODNÉ, ZVLÁŠTNÍ, NÁSLEDNÉ NEBO SANKČNÍ ŠKODY VZNIKLÉ Z VAŠEHO POUŽÍVÁNÍ APLIKACE, VČETNĚ MIMO JINÉ ZTRÁTY DAT, NEOPRÁVNĚNÉHO PŘÍSTUPU NEBO VÝPADKU SERVERU.",
+    "s15p2": "V ROZSAHU NEZAKÁZANÉM ZÁKONEM NEPŘESÁHNE CELKOVÁ ODPOVĚDNOST VIVY VŮČI VÁM ZA VŠECHNY NÁROKY VZNIKLÉ Z APLIKACE NEBO V SOUVISLOSTI S NÍ ČÁSTKU 50,00 USD.",
+    "s16h": "16. Ukončení",
+    "s16p": "Vaše licence k používání aplikace se automaticky ukončí, pokud porušíte tyto podmínky. Apple může také ukončit váš přístup přes App Store.",
+    "s17h": "17. Rozhodné právo",
+    "s17p": "Tyto podmínky se řídí zákony zvláštní administrativní oblasti Hongkong, bez ohledu na jejich kolizní ustanovení.",
+    "s18h": "18. Třetí strana jako oprávněná osoba",
+    "s18p": "Vy a Vivy berete na vědomí a souhlasíte, že Apple a dceřiné společnosti Apple jsou třetími stranami oprávněnými z této EULA a že po vašem přijetí podmínek této EULA bude mít Apple právo, a bude se mít za to, že toto právo přijal, vymáhat tuto EULA vůči vám jako třetí strana oprávněná z této smlouvy.",
+    "s19h": "19. Kontakt",
+    "s19intro": "S otázkami, stížnostmi nebo nároky týkajícími se aplikace kontaktujte:",
+    "phoneLabel": "Telefon: ",
+    "emailLabel": "E-mail: "
+  }
+}
