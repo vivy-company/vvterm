@@ -1,0 +1,194 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "Themes & Terminal Customization — VVTerm SSH Client",
+    description:
+      "Make the terminal yours: 440 built-in themes, Nerd Fonts, cursor styles, separate light and dark themes, and a custom keyboard toolbar with your own command snippets and shortcuts.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "Customization",
+    heroEyebrow: "Themes & customization",
+    heroTitle: "Make the terminal<br />feel like yours.",
+    heroSubhead: "440 themes, real Nerd Fonts, cursor styles, and a keyboard toolbar you build yourself — tuned once and synced everywhere.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm terminal theme and font preview",
+    statementEyebrow: "Set it once",
+    statementTitle: "Your terminal, on every device.",
+    statementBody: "Choose a theme, a font, a cursor, and a keyboard layout that work for you — then let <strong>iCloud</strong> carry your custom themes and toolbar to iPhone, iPad, and Mac.",
+    benefits: [
+      { icon: "lucide:palette", title: "440 built-in themes", body: "A huge catalog in the Ghostty and iTerm theme format. Create and import your own custom themes too — they sync across your devices." },
+      { icon: "lucide:type", title: "Fonts that fit", body: "Four bundled Nerd Fonts — JetBrains Mono, Fira Code, Hack, and Meslo — plus any system monospace font, sized 4 to 32 pt." },
+      { icon: "lucide:text-cursor", title: "Cursor your way", body: "Block, bar, underline, or hollow-block cursor, with optional blink and a live preview as you choose." },
+      { icon: "lucide:sun-moon", title: "Light and dark, automatic", body: "Set a separate theme for light and dark mode and VVTerm switches with the system appearance." },
+    ],
+    toolbarEyebrow: "The keys you actually press",
+    toolbarTitle: "A keyboard toolbar built around you.",
+    toolbarBody: "On iPhone and iPad, the bar above the keyboard puts the keys a shell needs within thumb reach — and you decide what's on it.",
+    customActions: [
+      { icon: "lucide:keyboard", title: "A toolbar you build", body: "Above the iOS keyboard sits a customizable bar — Esc, Tab, Ctrl combos, arrows, Home, End, PageUp/Down, F-keys, and more. Keep 4 to 28 keys within reach." },
+      { icon: "lucide:terminal", title: "Command snippets", body: "Save your own commands and insert them with one tap — as plain text, or text plus Enter to run immediately." },
+      { icon: "lucide:command", title: "Custom shortcuts", body: "Bind a key with Ctrl, Alt, Cmd, or Shift modifiers and drop it on the toolbar for the chords you use most." },
+    ],
+    crossEyebrow: "More than looks",
+    crossTitle: "Built on a precise engine.",
+    crossBody: "Themes and fonts render exactly as intended because the terminal draws with <strong>libghostty</strong> on Metal — 24-bit true color and ligatures, every frame.",
+    terminalLink: "About the GPU terminal",
+    icloudLink: "How iCloud sync works",
+    crossAlt: "VVTerm custom iOS keyboard toolbar with snippets and shortcuts",
+    faqItems: [
+      { question: "How many terminal themes are included?", answer: "440 built-in themes in the Ghostty and iTerm theme format, from classic palettes to modern ones. You can also create and import your own custom themes." },
+      { question: "Can I use my own font?", answer: "Yes. VVTerm bundles four Nerd Fonts — JetBrains Mono, Fira Code, Hack, and Meslo — and you can pick any monospace font installed on the system. Font size adjusts from 4 to 32 pt." },
+      { question: "Does it follow light and dark mode?", answer: "Yes. You can assign one theme for light appearance and another for dark, and VVTerm switches automatically with the system." },
+      { question: "What can I put on the iOS keyboard toolbar?", answer: "System keys like Esc, Tab, arrows, Ctrl combos, and function keys, plus your own additions: <strong>command snippets</strong> that insert text (optionally with Enter) and <strong>shortcuts</strong> that send a key with modifiers. The bar holds 4 to 28 items." },
+      { question: "Do my themes and toolbar sync across devices?", answer: "Yes. Custom themes, your theme preference, and your keyboard toolbar layout and custom actions sync through iCloud. The free tier includes up to 3 custom toolbar actions; Pro removes the limit." },
+      { question: "Where do I change all this?", answer: "In Terminal settings — theme, font family and size, cursor style and blink — and in the keyboard accessory editor for the toolbar." },
+    ],
+    ctaTitle: "Tune it once. Take it everywhere.",
+    ctaSubtitle: "Download VVTerm free and set up a terminal that feels like home.",
+  },
+  zh: {
+    title: "主题与终端自定义 — VVTerm SSH 客户端",
+    description:
+      "把终端变成你的：440 款内置主题、Nerd Fonts、光标样式、可分别设置的深浅色主题，以及可放入你自己命令片段和快捷键的自定义键盘工具栏。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "自定义",
+    heroEyebrow: "主题与自定义",
+    heroTitle: "让终端<br />成为你的样子。",
+    heroSubhead: "440 款主题、真正的 Nerd Fonts、光标样式，以及你亲手打造的键盘工具栏 —— 调优一次，处处同步。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm 终端主题和字体预览",
+    statementEyebrow: "设置一次",
+    statementTitle: "你的终端，在每台设备上。",
+    statementBody: "选择适合你的主题、字体、光标和键盘布局 —— 然后让 <strong>iCloud</strong> 把你的自定义主题和工具栏带到 iPhone、iPad 和 Mac。",
+    benefits: [
+      { icon: "lucide:palette", title: "440 款内置主题", body: "采用 Ghostty 和 iTerm 主题格式的庞大目录。你也可以创建和导入自己的自定义主题 —— 它们会在你的设备间同步。" },
+      { icon: "lucide:type", title: "合适的字体", body: "内置四款 Nerd Fonts —— JetBrains Mono、Fira Code、Hack 和 Meslo —— 还可使用任意系统等宽字体，字号 4 到 32 pt。" },
+      { icon: "lucide:text-cursor", title: "你想要的光标", body: "方块、竖线、下划线或空心方块光标，可选闪烁，并在你选择时实时预览。" },
+      { icon: "lucide:sun-moon", title: "深浅色自动切换", body: "为浅色和深色模式分别设置主题，VVTerm 随系统外观自动切换。" },
+    ],
+    toolbarEyebrow: "你真正会按的键",
+    toolbarTitle: "围绕你打造的键盘工具栏。",
+    toolbarBody: "在 iPhone 和 iPad 上，键盘上方的工具栏把 shell 所需的按键放在拇指可及之处 —— 由你决定它上面有什么。",
+    customActions: [
+      { icon: "lucide:keyboard", title: "你亲手搭建的工具栏", body: "iOS 键盘上方是一个可自定义的工具栏 —— Esc、Tab、Ctrl 组合、方向键、Home、End、PageUp/Down、功能键等等。让 4 到 28 个按键触手可及。" },
+      { icon: "lucide:terminal", title: "命令片段", body: "保存你自己的命令并一键插入 —— 可作为纯文本，或文本加回车立即执行。" },
+      { icon: "lucide:command", title: "自定义快捷键", body: "绑定带 Ctrl、Alt、Cmd 或 Shift 修饰键的按键，并将其放到工具栏上，用于你最常用的组合键。" },
+    ],
+    crossEyebrow: "不止于外观",
+    crossTitle: "建立在精准引擎之上。",
+    crossBody: "主题和字体完全按预期渲染，因为终端使用 Metal 上的 <strong>libghostty</strong> 绘制 —— 每一帧都是 24 位真彩色和连字。",
+    terminalLink: "了解 GPU 终端",
+    icloudLink: "iCloud 同步如何工作",
+    crossAlt: "VVTerm 带片段和快捷键的自定义 iOS 键盘工具栏",
+    faqItems: [
+      { question: "包含多少款终端主题？", answer: "440 款采用 Ghostty 和 iTerm 主题格式的内置主题，从经典配色到现代配色应有尽有。你也可以创建和导入自己的自定义主题。" },
+      { question: "我可以使用自己的字体吗？", answer: "可以。VVTerm 内置四款 Nerd Fonts —— JetBrains Mono、Fira Code、Hack 和 Meslo —— 你也可以选择系统上安装的任意等宽字体。字号可在 4 到 32 pt 之间调整。" },
+      { question: "它会跟随深浅色模式吗？", answer: "会。你可以为浅色外观指定一款主题、为深色外观指定另一款，VVTerm 会随系统自动切换。" },
+      { question: "我可以在 iOS 键盘工具栏上放什么？", answer: "Esc、Tab、方向键、Ctrl 组合和功能键等系统按键，再加上你自己的添加项：插入文本的<strong>命令片段</strong>（可选附带回车），以及发送带修饰键按键的<strong>快捷键</strong>。工具栏可容纳 4 到 28 个项目。" },
+      { question: "我的主题和工具栏会在设备间同步吗？", answer: "会。自定义主题、你的主题偏好，以及你的键盘工具栏布局和自定义操作都通过 iCloud 同步。免费版最多包含 3 个自定义工具栏操作；Pro 取消该限制。" },
+      { question: "我在哪里修改这些设置？", answer: "在终端设置中 —— 主题、字体系列和字号、光标样式和闪烁 —— 以及在键盘配件编辑器中设置工具栏。" },
+    ],
+    ctaTitle: "调优一次，处处带走。",
+    ctaSubtitle: "免费下载 VVTerm，打造一个让你感觉像家一样的终端。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm Terminal Customization", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/terminal-customization", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/terminal-customization" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/terminal-customization" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:palette" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="customization_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="20% 60%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- KEYBOARD TOOLBAR -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{C.toolbarEyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[20ch] headline">{C.toolbarTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph">{C.toolbarBody}</p>
+    </div>
+    <div class="container-wide mt-12 grid gap-4 sm:grid-cols-3">
+      {C.customActions.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.crossEyebrow}</p>
+        <h2 class="mt-3 headline">{C.crossTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.crossBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/features/ssh-terminal", lang)} class="inline-flex link-arrow">{C.terminalLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/icloud-sync-keychain", lang)} class="inline-flex link-arrow">{C.icloudLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <MediaBlock pos="45% 20%" alt={C.crossAlt} />
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="customization_cta_appstore" />
+</MarketingLayout>

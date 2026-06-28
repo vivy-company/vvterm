@@ -1,0 +1,154 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import CTABand from "../../components/CTABand.astro";
+import { Icon } from "astro-icon/components";
+import { GUIDES } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "VVTerm Guides & How-Tos — SSH, Mosh, Tailscale, SFTP",
+    description:
+      "Step-by-step guides for VVTerm: SSH from iPhone and Mac, set up Mosh, connect with Tailscale SSH or Cloudflare Tunnel, and transfer files over SFTP.",
+    bcHome: "Home",
+    bcGuides: "Guides",
+    heroEyebrow: "Guides",
+    heroTitle: "Guides &amp; how-tos.",
+    heroSubhead:
+      "Practical, step-by-step walkthroughs for connecting to your servers from iPhone, iPad, and Mac — SSH, Mosh, Tailscale, Cloudflare Tunnel, and SFTP file transfer.",
+    download: "Download VVTerm",
+    browseDocs: "Browse the docs",
+    heroNote: "iPhone, iPad, and Mac · Free to start",
+    readGuide: "Read guide",
+    minRead: (m: number) => `${m} min read`,
+    categories: {
+      "Getting started": "Getting started",
+      Connections: "Connections",
+      Files: "Files",
+    } as Record<string, string>,
+    guides: {} as Record<string, { title: string; summary: string }>,
+    ctaTitle: "Put these guides to work.",
+    ctaSubtitle:
+      "Download VVTerm free on iPhone, iPad, and Mac, and connect to your first server in minutes.",
+  },
+  zh: {
+    title: "VVTerm 指南与教程 — SSH、Mosh、Tailscale、SFTP",
+    description:
+      "VVTerm 分步指南：从 iPhone 和 Mac 进行 SSH、设置 Mosh、使用 Tailscale SSH 或 Cloudflare Tunnel 连接，以及通过 SFTP 传输文件。",
+    bcHome: "首页",
+    bcGuides: "指南",
+    heroEyebrow: "指南",
+    heroTitle: "指南与教程。",
+    heroSubhead:
+      "从 iPhone、iPad 和 Mac 连接服务器的实用分步教程 —— SSH、Mosh、Tailscale、Cloudflare Tunnel 以及 SFTP 文件传输。",
+    download: "下载 VVTerm",
+    browseDocs: "浏览文档",
+    heroNote: "iPhone、iPad 和 Mac · 免费起步",
+    readGuide: "阅读指南",
+    minRead: (m: number) => `${m} 分钟阅读`,
+    categories: {
+      "Getting started": "快速上手",
+      Connections: "连接方式",
+      Files: "文件传输",
+    } as Record<string, string>,
+    guides: {
+      "how-to-ssh-from-iphone": {
+        title: "如何从 iPhone SSH 连接服务器",
+        summary: "添加服务器、选择认证方式，并在 iOS 上开启你的第一个安全 shell 会话。",
+      },
+      "ssh-from-mac": {
+        title: "如何用 VVTerm 从 Mac 进行 SSH",
+        summary: "搭建一个原生 macOS 终端，支持标签页、密钥和 iCloud 同步的服务器。",
+      },
+      "set-up-mosh-on-ios": {
+        title: "在 iPhone 和 iPad 上设置 Mosh",
+        summary: "用 Mosh 让 SSH 会话在网络中断和休眠后依然保持。",
+      },
+      "tailscale-ssh-setup": {
+        title: "使用 Tailscale SSH 连接",
+        summary: "通过 MagicDNS 名称连接 tailnet 中的机器，无需暴露端口。",
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        title: "通过 Cloudflare Tunnel SSH 连接",
+        summary: "无需开放任何入站端口，即可 SSH 连接 Cloudflare Tunnel 后的服务器。",
+      },
+      "sftp-file-transfer-on-ios": {
+        title: "在 iOS 上通过 SFTP 传输文件",
+        summary: "从 iPhone 和 iPad 浏览、上传、下载和编辑远程文件。",
+      },
+    } as Record<string, { title: string; summary: string }>,
+    ctaTitle: "把这些指南付诸实践。",
+    ctaSubtitle:
+      "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，几分钟内连接你的第一台服务器。",
+  },
+}, lang);
+
+const categoryOrder = ["Getting started", "Connections", "Files"];
+
+const groups = categoryOrder
+  .map((name) => ({ name, items: GUIDES.filter((g) => g.category === name) }))
+  .filter((group) => group.items.length > 0);
+
+const cardTitle = (slug: string, fallback: string) => C.guides[slug]?.title ?? fallback;
+const cardSummary = (slug: string, fallback: string) => C.guides[slug]?.summary ?? fallback;
+---
+
+<MarketingLayout
+  title={C.title}
+  description={C.description}
+  canonicalPath="/guides"
+  activeTop="resources"
+>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcGuides, href: "/guides" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-ink" name="lucide:book-open" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton label={C.download} track="guides_hub_appstore" />
+        <a href={localizePath("/docs", lang)} class="link-arrow">{C.browseDocs} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+  </section>
+
+  <!-- GUIDE GROUPS -->
+  <section class="px-6 pb-24 pt-12 sm:pb-32 sm:pt-16">
+    <div class="container-wide grid gap-20 sm:gap-24">
+      {groups.map((group) => (
+        <div>
+          <h2 class="text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl">{C.categories[group.name] ?? group.name}</h2>
+          <div class="mt-7 grid gap-4 md:grid-cols-2">
+            {group.items.map((guide) => (
+              <a
+                href={localizePath(`/guides/${guide.slug}`, lang)}
+                class="group card flex flex-col p-8 transition hover:border-white/25"
+              >
+                <h3 class="text-2xl font-semibold tracking-[-0.02em] text-ink">{cardTitle(guide.slug, guide.title)}</h3>
+                <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{cardSummary(guide.slug, guide.summary)}</p>
+                <div class="mt-6 flex items-center justify-between">
+                  <span class="inline-flex link-arrow">{C.readGuide} <span aria-hidden="true">›</span></span>
+                  <span class="text-[13px] text-faint">{C.minRead(guide.minutes)}</span>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <CTABand
+    title={C.ctaTitle}
+    subtitle={C.ctaSubtitle}
+    track="guides_hub_cta_appstore"
+  />
+</MarketingLayout>

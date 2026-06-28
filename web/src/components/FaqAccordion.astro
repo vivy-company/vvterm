@@ -1,0 +1,46 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  title?: string;
+  items: FaqItem[];
+  emitSchema?: boolean;
+}
+
+const { title = "Questions? Answers.", items, emitSchema = true } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: item.answer },
+  })),
+};
+---
+
+<section class="section">
+  <div class="mx-auto max-w-[820px]">
+    <h2 class="headline-sm">{title}</h2>
+    <div class="mt-10 border-t border-line">
+      {items.map((item) => (
+        <details class="group border-b border-line">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-lg font-medium text-ink marker:hidden [&::-webkit-details-marker]:hidden">
+            <span>{item.question}</span>
+            <Icon class="size-5 shrink-0 text-faint transition group-open:rotate-180" name="lucide:chevron-down" />
+          </summary>
+          <div class="pb-6 pr-10 text-base leading-relaxed text-muted">
+            <p set:html={item.answer} />
+          </div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+{emitSchema && <script type="application/ld+json" set:html={JSON.stringify(schema)} />}

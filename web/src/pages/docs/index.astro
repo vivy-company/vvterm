@@ -1,0 +1,147 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import CTABand from "../../components/CTABand.astro";
+import { Icon } from "astro-icon/components";
+import { DOCS } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "VVTerm Documentation — SSH, SFTP, and iCloud Sync",
+    description:
+      "Reference documentation for VVTerm: getting started, adding servers, authentication and SSH keys, the SFTP file browser, iCloud sync, and workspaces and tabs.",
+    bcHome: "Home",
+    bcDocs: "Documentation",
+    heroEyebrow: "Documentation",
+    heroTitle: "VVTerm documentation.",
+    heroSubhead:
+      "Reference for setting up VVTerm on iPhone, iPad, and Mac — adding servers, authentication and keys, the SFTP file browser, iCloud sync, and organizing your work with workspaces and tabs.",
+    download: "Download VVTerm",
+    readGuides: "Read the guides",
+    heroNote: "iPhone, iPad, and Mac · Free to start",
+    readMore: "Read more",
+    sections: {
+      Basics: "Basics",
+      "Working remotely": "Working remotely",
+    } as Record<string, string>,
+    docs: {} as Record<string, { title: string; summary: string }>,
+    ctaTitle: "Ready to connect?",
+    ctaSubtitle:
+      "Download VVTerm free on iPhone, iPad, and Mac, and reach your first server in minutes.",
+  },
+  zh: {
+    title: "VVTerm 文档 — SSH、SFTP 与 iCloud 同步",
+    description:
+      "VVTerm 参考文档：快速上手、添加服务器、认证与 SSH 密钥、SFTP 文件浏览器、iCloud 同步，以及工作区与标签页。",
+    bcHome: "首页",
+    bcDocs: "文档",
+    heroEyebrow: "文档",
+    heroTitle: "VVTerm 文档。",
+    heroSubhead:
+      "在 iPhone、iPad 和 Mac 上设置 VVTerm 的参考 —— 添加服务器、认证与密钥、SFTP 文件浏览器、iCloud 同步，以及用工作区和标签页整理你的工作。",
+    download: "下载 VVTerm",
+    readGuides: "阅读指南",
+    heroNote: "iPhone、iPad 和 Mac · 免费起步",
+    readMore: "阅读更多",
+    sections: {
+      Basics: "基础",
+      "Working remotely": "远程操作",
+    } as Record<string, string>,
+    docs: {
+      "getting-started": {
+        title: "快速上手",
+        summary: "安装 VVTerm、添加你的第一台服务器并连接。",
+      },
+      "adding-a-server": {
+        title: "添加服务器",
+        summary: "主机、端口、用户名、环境和工作区。",
+      },
+      "authentication-and-keys": {
+        title: "认证与 SSH 密钥",
+        summary: "密码、SSH 密钥、口令，以及密钥的存储位置。",
+      },
+      "sftp-file-browser": {
+        title: "使用 SFTP 文件浏览器",
+        summary: "浏览、传输、预览和编辑远程文件及权限。",
+      },
+      "icloud-sync": {
+        title: "iCloud 同步与 Keychain",
+        summary: "服务器元数据和密钥如何在你的设备间同步。",
+      },
+      "workspaces-and-tabs": {
+        title: "工作区、环境与标签页",
+        summary: "整理服务器并同时运行多个连接。",
+      },
+    } as Record<string, { title: string; summary: string }>,
+    ctaTitle: "准备好连接了吗？",
+    ctaSubtitle:
+      "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，几分钟内连接你的第一台服务器。",
+  },
+}, lang);
+
+const sectionOrder = ["Basics", "Working remotely"];
+
+const groups = sectionOrder
+  .map((name) => ({ name, items: DOCS.filter((d) => d.section === name) }))
+  .filter((group) => group.items.length > 0);
+
+const cardTitle = (slug: string, fallback: string) => C.docs[slug]?.title ?? fallback;
+const cardSummary = (slug: string, fallback: string) => C.docs[slug]?.summary ?? fallback;
+---
+
+<MarketingLayout
+  title={C.title}
+  description={C.description}
+  canonicalPath="/docs"
+  activeTop="resources"
+>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcDocs, href: "/docs" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-ink" name="lucide:file-text" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero">{C.heroTitle}</h1>
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton label={C.download} track="docs_hub_appstore" />
+        <a href={localizePath("/guides", lang)} class="link-arrow">{C.readGuides} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+  </section>
+
+  <!-- DOC GROUPS -->
+  <section class="px-6 pb-24 pt-12 sm:pb-32 sm:pt-16">
+    <div class="container-wide grid gap-20 sm:gap-24">
+      {groups.map((group) => (
+        <div>
+          <h2 class="text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl">{C.sections[group.name] ?? group.name}</h2>
+          <div class="mt-7 grid gap-4 md:grid-cols-2">
+            {group.items.map((doc) => (
+              <a
+                href={localizePath(`/docs/${doc.slug}`, lang)}
+                class="group card flex flex-col p-8 transition hover:border-white/25"
+              >
+                <h3 class="text-2xl font-semibold tracking-[-0.02em] text-ink">{cardTitle(doc.slug, doc.title)}</h3>
+                <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{cardSummary(doc.slug, doc.summary)}</p>
+                <span class="mt-6 inline-flex link-arrow">{C.readMore} <span aria-hidden="true">›</span></span>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <CTABand
+    title={C.ctaTitle}
+    subtitle={C.ctaSubtitle}
+    track="docs_hub_cta_appstore"
+  />
+</MarketingLayout>

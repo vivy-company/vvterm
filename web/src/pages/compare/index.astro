@@ -1,0 +1,173 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import CTABand from "../../components/CTABand.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { COMPARISONS } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "VVTerm Comparisons — How VVTerm Stacks Up",
+    description:
+      "See how VVTerm — a native SSH terminal and SFTP client for iPhone, iPad, and Mac — compares to other SSH clients, side by side.",
+    bcHome: "Home",
+    bcCompare: "Comparisons",
+    heroEyebrow: "Comparisons",
+    heroTitle: "How VVTerm compares.",
+    heroSubhead:
+      "VVTerm is a native SSH terminal and SFTP client for iPhone, iPad, and Mac. See how it lines up against other popular SSH clients — fairly, and feature by feature.",
+    download: "Download VVTerm",
+    seePricing: "See pricing",
+    heroNote: "iPhone, iPad, and Mac · Apple-only by design",
+    heroAlt: "VVTerm SSH terminal on iPhone, iPad, and Mac",
+    pickEyebrow: "Side by side",
+    pickTitle: "Pick a comparison.",
+    pickBody:
+      "Each comparison weighs <strong>platforms</strong>, <strong>transports</strong>, <strong>file browsing</strong>, and <strong>pricing</strong> — honestly.",
+    readComparison: "Read the comparison",
+    whyEyebrow: "Why VVTerm",
+    whyTitle: "What sets it apart.",
+    whyCards: [
+      {
+        icon: "lucide:laptop",
+        title: "A native Apple app",
+        body: "Built for iOS 16, iPadOS 16, and macOS 13 on Apple Silicon — with a GPU terminal powered by libghostty, not a web wrapper.",
+      },
+      {
+        icon: "lucide:badge-dollar-sign",
+        title: "Lifetime pricing option",
+        body: "Start free, subscribe to Pro, or pay once for a $49.99 lifetime license. No mandatory subscription.",
+      },
+      {
+        icon: "lucide:waypoints",
+        title: "Modern transports built in",
+        body: "Standard SSH plus Mosh, Tailscale SSH, and Cloudflare Tunnel SSH — no extra tools to wire up.",
+      },
+    ],
+    ctaTitle: "See it on your own servers.",
+    ctaSubtitle: "Download VVTerm free on iPhone, iPad, and Mac, and compare it where it counts.",
+  },
+  zh: {
+    title: "VVTerm 对比 — VVTerm 的表现如何",
+    description:
+      "看看 VVTerm —— 一款面向 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端 —— 与其他 SSH 客户端的并排对比。",
+    bcHome: "首页",
+    bcCompare: "对比",
+    heroEyebrow: "对比",
+    heroTitle: "VVTerm 如何对比。",
+    heroSubhead:
+      "VVTerm 是一款面向 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端。看看它与其他热门 SSH 客户端的对比 —— 公正，且逐项比较。",
+    download: "下载 VVTerm",
+    seePricing: "查看价格",
+    heroNote: "iPhone、iPad 和 Mac · 专为 Apple 设计",
+    heroAlt: "iPhone、iPad 和 Mac 上的 VVTerm SSH 终端",
+    pickEyebrow: "并排比较",
+    pickTitle: "选择一个对比。",
+    pickBody:
+      "每个对比都会公正地权衡<strong>平台</strong>、<strong>传输方式</strong>、<strong>文件浏览</strong>和<strong>价格</strong>。",
+    readComparison: "阅读对比",
+    whyEyebrow: "为什么选 VVTerm",
+    whyTitle: "它的独到之处。",
+    whyCards: [
+      {
+        icon: "lucide:laptop",
+        title: "原生 Apple 应用",
+        body: "为 Apple Silicon 上的 iOS 16、iPadOS 16 和 macOS 13 打造 —— 配备由 libghostty 驱动的 GPU 终端，而非网页套壳。",
+      },
+      {
+        icon: "lucide:badge-dollar-sign",
+        title: "终身买断选项",
+        body: "免费开始、订阅专业版，或一次性购买 $49.99 的终身授权。无强制订阅。",
+      },
+      {
+        icon: "lucide:waypoints",
+        title: "内置现代传输方式",
+        body: "标准 SSH 以及 Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH —— 无需额外工具来配置。",
+      },
+    ],
+    ctaTitle: "在你自己的服务器上体验。",
+    ctaSubtitle: "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，在最关键的地方做对比。",
+  },
+}, lang);
+---
+
+<MarketingLayout
+  title={C.title}
+  description={C.description}
+  canonicalPath="/compare"
+  activeTop="resources"
+>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcCompare, href: "/compare" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-ink" name="lucide:git-compare" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero">{C.heroTitle}</h1>
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton label={C.download} track="compare_hub_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-5xl">
+      <MediaBlock pos="50% 50%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- COMPARISON CARDS -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="text-center">
+        <p class="eyebrow-accent">{C.pickEyebrow}</p>
+        <h2 class="mt-3 headline">{C.pickTitle}</h2>
+        <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.pickBody} />
+      </div>
+      <div class="mt-12 grid gap-4 md:grid-cols-2">
+        {COMPARISONS.map((item) => (
+          <a
+            href={localizePath(`/compare/${item.slug}`, lang)}
+            class="group card flex flex-col p-8 transition hover:border-white/25"
+          >
+            <Icon class="size-7 text-accent" name="lucide:git-compare" />
+            <h3 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+            <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{item.summary}</p>
+            <span class="mt-6 inline-flex link-arrow">{C.readComparison} <span aria-hidden="true">›</span></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY VVTERM -->
+  <section class="px-6 pb-24 sm:pb-32">
+    <div class="container-wide">
+      <div class="text-center">
+        <p class="eyebrow-accent">{C.whyEyebrow}</p>
+        <h2 class="mt-3 headline">{C.whyTitle}</h2>
+      </div>
+      <div class="mt-12 grid gap-4 md:grid-cols-3">
+        {C.whyCards.map((item) => (
+          <article class="card p-7">
+            <Icon class="size-6 text-accent" name={item.icon} />
+            <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTABand
+    title={C.ctaTitle}
+    subtitle={C.ctaSubtitle}
+    track="compare_hub_cta_appstore"
+  />
+</MarketingLayout>

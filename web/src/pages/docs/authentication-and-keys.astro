@@ -1,0 +1,166 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { SITE } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const slug = "authentication-and-keys";
+
+const C = pick({
+  en: {
+    heading: "Authentication and SSH keys",
+    intro:
+      "VVTerm signs in with a password, an SSH key, or an SSH key protected by a passphrase. Here is how each method works and where your credentials are stored.",
+    meta: "Documentation",
+    title: "Authentication and SSH keys — VVTerm",
+    description:
+      "Password, SSH key, and SSH key with passphrase authentication in VVTerm, and how credentials are kept in the Apple Keychain rather than synced metadata.",
+    schemaDescription:
+      "VVTerm authentication methods explained: password, SSH key, and SSH key with passphrase, plus how credentials are stored in the Apple Keychain.",
+    bodyHtml: `
+  <p>
+    Authentication is set per server, so different machines can use different methods. VVTerm supports
+    three options, and whichever you choose, the secret itself is stored in the Apple Keychain rather
+    than in the server definition that syncs through iCloud.
+  </p>
+
+  <h2>Authentication methods</h2>
+  <ul>
+    <li>
+      <strong>Password</strong> — you enter the account password for the server. It is the quickest
+      way to confirm that a host, port, and username are correct, and a fine choice for machines you
+      control. The password is saved to the Keychain so you do not retype it each time.
+    </li>
+    <li>
+      <strong>SSH key</strong> — you authenticate with a private key instead of a password. The
+      matching public key must be present in the server's <code>~/.ssh/authorized_keys</code> file.
+      Key-based login is more secure than a password and supports passwordless sign-in.
+    </li>
+    <li>
+      <strong>SSH key + passphrase</strong> — the same as an SSH key, but the private key is itself
+      encrypted with a passphrase. Even if the key is exposed, it cannot be used without the
+      passphrase, which adds a layer of protection for sensitive hosts.
+    </li>
+  </ul>
+
+  <h2>Where credentials live</h2>
+  <p>
+    Passwords, private keys, and passphrases are stored in the <strong>Apple Keychain</strong>. They
+    are <strong>not</strong> included in the server metadata that VVTerm syncs through iCloud
+    (CloudKit). That means your server list can travel between devices while the secrets stay in the
+    secure, system-managed store.
+  </p>
+  <p>
+    Credentials sync between your devices only when <strong>iCloud Keychain</strong> is enabled in iOS
+    or macOS settings. With it on, a key or password saved on one device becomes available on the
+    others. With it off, credentials stay local to the device they were entered on, and you add them
+    again where needed. For the full picture of what syncs and what does not, see <a href="/docs/icloud-sync">iCloud sync and Keychain</a>.
+  </p>
+
+  <h2>Generating and importing keys</h2>
+  <p>
+    If you do not already have an SSH key, VVTerm can generate one for you. After generating, copy the
+    public key and add it to the server's <code>~/.ssh/authorized_keys</code> file, then select that
+    key as the server's authentication method. If you have an existing private key, import it into
+    VVTerm and assign it to the server the same way.
+  </p>
+  <p>
+    A public key on the server is what authorizes a private key on your device. You can reuse one key
+    pair across many servers by placing the same public key in each server's <code>authorized_keys</code>, or keep separate keys per host for tighter control.
+  </p>
+
+  <h2>Verifying the host</h2>
+  <p>
+    The first time you connect to a server, VVTerm shows the host's key fingerprint. Confirm it
+    matches what you expect before accepting, so you can be sure you are connecting to the right
+    machine and not an impostor. After you trust a host, later connections proceed without prompting
+    unless its key changes.
+  </p>
+
+  <h2>Next steps</h2>
+  <p>
+    With authentication set up, move on to <a href="/docs/sftp-file-browser">the SFTP file browser</a> to manage remote files, or revisit <a href="/docs/adding-a-server">Adding a server</a> to tune the
+    connection details.
+  </p>
+`,
+  },
+  zh: {
+    heading: "认证与 SSH 密钥",
+    intro:
+      "VVTerm 通过密码、SSH 密钥或受口令保护的 SSH 密钥登录。这里说明每种方式如何工作，以及你的密钥保存在哪里。",
+    meta: "文档",
+    title: "认证与 SSH 密钥 — VVTerm",
+    description:
+      "VVTerm 中的密码、SSH 密钥及带口令的 SSH 密钥认证，以及密钥如何保存在 Apple Keychain 而非同步的元数据中。",
+    schemaDescription:
+      "VVTerm 认证方式解析：密码、SSH 密钥和带口令的 SSH 密钥，以及密钥如何保存在 Apple Keychain 中。",
+    bodyHtml: `
+  <p>
+    认证是按服务器设置的，因此不同机器可以使用不同方式。VVTerm 支持三种选项，无论你选哪一种，密钥本身都保存在 Apple Keychain 中，而非通过 iCloud 同步的服务器定义里。
+  </p>
+
+  <h2>认证方式</h2>
+  <ul>
+    <li>
+      <strong>密码</strong> —— 你输入该服务器的账户密码。这是确认主机、端口和用户名是否正确的最快方式，对你掌控的机器是个不错的选择。密码会保存到 Keychain，这样你不必每次重新输入。
+    </li>
+    <li>
+      <strong>SSH 密钥</strong> —— 你用私钥而非密码进行认证。对应的公钥必须存在于服务器的 <code>~/.ssh/authorized_keys</code> 文件中。基于密钥的登录比密码更安全，并支持免密码登录。
+    </li>
+    <li>
+      <strong>SSH 密钥 + 口令</strong> —— 与 SSH 密钥相同，但私钥本身用一个口令加密。即使密钥被泄露，没有口令也无法使用，这为敏感主机增加了一层保护。
+    </li>
+  </ul>
+
+  <h2>密钥保存在哪里</h2>
+  <p>
+    密码、私钥和口令保存在 <strong>Apple Keychain</strong> 中。它们<strong>不</strong>包含在 VVTerm 通过 iCloud（CloudKit）同步的服务器元数据里。这意味着你的服务器列表可以在设备间流转，而密钥则留在安全的、由系统管理的存储中。
+  </p>
+  <p>
+    只有当 iOS 或 macOS 设置中启用了 <strong>iCloud Keychain</strong> 时，密钥才会在你的设备间同步。开启后，在一台设备上保存的密钥或密码会在其他设备上可用。关闭时，密钥仅留在输入它的设备本地，你需要在需要的地方再次添加。关于哪些会同步、哪些不会的完整说明，参见 <a href="/zh/docs/icloud-sync">iCloud 同步与 Keychain</a>。
+  </p>
+
+  <h2>生成与导入密钥</h2>
+  <p>
+    如果你还没有 SSH 密钥，VVTerm 可以为你生成一个。生成后，复制公钥并把它加入服务器的 <code>~/.ssh/authorized_keys</code> 文件，然后把该密钥选为服务器的认证方式。如果你已有私钥，把它导入 VVTerm 并以同样的方式分配给服务器。
+  </p>
+  <p>
+    服务器上的公钥用于授权你设备上的私钥。你可以把同一个公钥放进每台服务器的 <code>authorized_keys</code>，从而在多台服务器间复用一对密钥；也可以为每台主机保留独立的密钥以获得更严格的控制。
+  </p>
+
+  <h2>验证主机</h2>
+  <p>
+    首次连接某台服务器时，VVTerm 会显示该主机的密钥指纹。在接受前确认它与你预期的一致，这样你就能确定自己连接到的是正确的机器而非冒名者。信任某台主机后，除非它的密钥发生变化，之后的连接会无需提示直接进行。
+  </p>
+
+  <h2>后续步骤</h2>
+  <p>
+    设置好认证后，前往<a href="/zh/docs/sftp-file-browser">SFTP 文件浏览器</a>管理远程文件，或回到<a href="/zh/docs/adding-a-server">添加服务器</a>调整连接细节。
+  </p>
+`,
+  },
+}, lang);
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  name: C.heading,
+  description: C.schemaDescription,
+  url: `${SITE.siteUrl}${localizePath(`/docs/${slug}`, lang)}`,
+};
+---
+
+<DocsLayout
+  kind="docs"
+  activeSlug={slug}
+  heading={C.heading}
+  intro={C.intro}
+  meta={C.meta}
+  title={C.title}
+  description={C.description}
+  canonicalPath={`/docs/${slug}`}
+  structuredData={[articleSchema]}
+>
+  <Fragment set:html={C.bodyHtml} />
+</DocsLayout>

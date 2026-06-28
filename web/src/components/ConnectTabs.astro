@@ -1,0 +1,43 @@
+---
+import MediaBlock from "./MediaBlock.astro";
+
+interface Props {
+  platform?: string;
+}
+
+// Cross-fading image panels + pill tabs for the four connection transports.
+// Behavior is driven by the shared [data-tabs] handler in SiteScripts.astro.
+const { platform } = Astro.props;
+
+const tabs = [
+  { key: "ssh", label: "SSH", pos: "100% 50%" },
+  { key: "mosh", label: "Mosh", pos: "60% 40%" },
+  { key: "tailscale", label: "Tailscale SSH", pos: "20% 60%" },
+  { key: "cloudflare", label: "Cloudflare Tunnel", pos: "80% 30%" },
+];
+const on = (label: string) => `VVTerm over ${label}${platform ? ` on ${platform}` : ""}`;
+---
+
+<div class="container-wide mt-16" data-tabs>
+  <div class="relative grid">
+    {tabs.map((tab, i) => (
+      <div
+        data-tab-panel={tab.key}
+        class:list={[
+          "col-start-1 row-start-1 transition-opacity duration-500 ease-out",
+          i === 0 ? "opacity-100 z-10" : "opacity-0 pointer-events-none",
+        ]}
+      >
+        <MediaBlock pos={tab.pos} ratio="aspect-[16/10]" alt={on(tab.label)} />
+      </div>
+    ))}
+  </div>
+
+  <div class="relative mx-auto mt-8 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-line bg-surface p-1">
+    <span data-tab-indicator class="pointer-events-none absolute left-0 top-0 rounded-full bg-white opacity-0 transition-all duration-300 ease-out"></span>
+    {tabs.map((tab) => (
+      <button type="button" data-tab-btn={tab.key} class="relative z-10 rounded-full px-4 py-2 text-sm font-medium text-ink/70 transition-colors">{tab.label}</button>
+    ))}
+  </div>
+  <p class="mt-6 text-center text-sm text-faint">Switch transports per server. <a href="/features" class="text-accent hover:underline">See all connection methods ›</a></p>
+</div>

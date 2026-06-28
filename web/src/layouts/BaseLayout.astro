@@ -1,13 +1,13 @@
 ---
 import "../styles/global.css";
 import { SITE } from "../lib/site";
+import { getLocale, localizePath, HTML_LANG, LOCALES, DEFAULT_LOCALE, LOCALE_META } from "../i18n/utils";
 
 interface Props {
   title?: string;
   description?: string;
   canonicalPath?: string;
   ogType?: "website" | "article";
-  locale?: string;
   robots?: string;
   structuredData?: Array<Record<string, unknown>>;
 }
@@ -17,19 +17,27 @@ const {
   description = SITE.description,
   canonicalPath = "/",
   ogType = "website",
-  locale = "en_US",
   robots = "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
   structuredData = [],
 } = Astro.props;
 
-const canonical = new URL(canonicalPath, SITE.siteUrl).toString();
+const lang = getLocale(Astro.url);
+const ogLocale = LOCALE_META[lang].ogLocale;
+// canonicalPath is the locale-agnostic route (e.g. "/mac"); build per-locale URLs from it.
+const canonical = new URL(localizePath(canonicalPath, lang), SITE.siteUrl).toString();
+const defaultHref = new URL(localizePath(canonicalPath, DEFAULT_LOCALE), SITE.siteUrl).toString();
+const alternates = LOCALES.map((l) => ({
+  hreflang: LOCALE_META[l].hreflang,
+  href: new URL(localizePath(canonicalPath, l), SITE.siteUrl).toString(),
+}));
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={HTML_LANG[lang]}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#000000" />
     <title>{title}</title>
     <meta name="title" content={title} />
     <meta name="description" content={description} />
@@ -38,12 +46,14 @@ const canonical = new URL(canonicalPath, SITE.siteUrl).toString();
     <meta name="apple-itunes-app" content={`app-id=${SITE.appStoreId}`} />
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="canonical" href={canonical} />
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={defaultHref} />
     <link rel="preconnect" href="https://analytics.vivy.app" />
     <link rel="preconnect" href="https://www.googletagmanager.com" />
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.name} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:locale" content={locale} />
+    <meta property="og:locale" content={ogLocale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={`${SITE.siteUrl}/og.png`} />
@@ -55,12 +65,6 @@ const canonical = new URL(canonicalPath, SITE.siteUrl).toString();
     <meta property="twitter:image" content={`${SITE.siteUrl}/og.png`} />
     <script defer src="https://analytics.vivy.app/script.js" data-website-id={SITE.umamiWebsiteId}></script>
     <script async src={`https://www.googletagmanager.com/gtag/js?id=${SITE.gtagId}`}></script>
-    <script is:inline>
-      const savedTheme = localStorage.getItem("vvterm-theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const theme = savedTheme || (prefersDark ? "dark" : "light");
-      document.documentElement.classList.toggle("dark", theme === "dark");
-    </script>
     <script is:inline define:vars={{ gtagId: SITE.gtagId }}>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
@@ -72,40 +76,7 @@ const canonical = new URL(canonicalPath, SITE.siteUrl).toString();
     </script>
     {structuredData.map((schema) => <script type="application/ld+json" set:html={JSON.stringify(schema)} />)}
   </head>
-  <body class="min-h-screen bg-white text-slate-900 antialiased selection:bg-orange-200/70 dark:bg-[#0b0b0c] dark:text-slate-100 dark:selection:bg-orange-300/30">
-    <div class="relative isolate overflow-x-clip">
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 -z-10 opacity-[0.12] dark:opacity-[0.18]"
-        style="background-image:
-          radial-gradient(circle at 20% 18%, rgba(249,115,22,0.18), transparent 22%),
-          radial-gradient(circle at 82% 34%, rgba(15,23,42,0.10), transparent 24%),
-          radial-gradient(circle at 50% 80%, rgba(249,115,22,0.12), transparent 28%);
-        "
-      ></div>
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(255,255,255,0.78),rgba(255,255,255,0.58),rgba(255,255,255,0.82))] dark:bg-[linear-gradient(180deg,rgba(2,6,23,0.72),rgba(2,6,23,0.48),rgba(2,6,23,0.78))]"
-      ></div>
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 -z-10 opacity-[0.9] dark:hidden"
-        style={`background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' fill='none'/%3E%3Cg fill='%230f172a' fill-opacity='0.072' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='13' font-weight='700' letter-spacing='2.2'%3E%3Ctext x='24' y='42'%3E%26gt; ssh%3C/text%3E%3Ctext x='140' y='42'%3E%26gt; mosh%3C/text%3E%3Ctext x='252' y='42'%3Eicloud%3C/text%3E%3Ctext x='26' y='118'%3Ekeychain%3C/text%3E%3Ctext x='148' y='118'%3Etailscale%3C/text%3E%3Ctext x='258' y='118'%3E%26gt; sync%3C/text%3E%3Ctext x='24' y='194'%3Ecloudflare%3C/text%3E%3Ctext x='172' y='194'%3E%26gt; terminal%3C/text%3E%3C/g%3E%3Cg stroke='%23f97316' stroke-opacity='0.11' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M104 28h24'/%3E%3Cpath d='M110 22v12'/%3E%3Cpath d='M122 22v12'/%3E%3Cpath d='M286 28h16'/%3E%3Cpath d='M294 20v16'/%3E%3Cpath d='M112 104h20'/%3E%3Cpath d='M118 98v12'/%3E%3Cpath d='M244 104h20'/%3E%3Cpath d='M250 98v12'/%3E%3Cpath d='M132 180h24'/%3E%3Cpath d='M138 174v12'/%3E%3Cpath d='M286 180h16'/%3E%3Cpath d='M294 172v16'/%3E%3C/g%3E%3C/svg%3E");
-        background-repeat: repeat;
-        background-size: 320px 240px;
-        background-position: top left;
-        `}
-      ></div>
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 -z-10 hidden opacity-[0.95] dark:block"
-        style={`background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'%3E%3Crect width='320' height='240' fill='none'/%3E%3Cg fill='%23ffffff' fill-opacity='0.075' font-family='-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif' font-size='13' font-weight='700' letter-spacing='2.2'%3E%3Ctext x='24' y='42'%3E%26gt; ssh%3C/text%3E%3Ctext x='140' y='42'%3E%26gt; mosh%3C/text%3E%3Ctext x='252' y='42'%3Eicloud%3C/text%3E%3Ctext x='26' y='118'%3Ekeychain%3C/text%3E%3Ctext x='148' y='118'%3Etailscale%3C/text%3E%3Ctext x='258' y='118'%3E%26gt; sync%3C/text%3E%3Ctext x='24' y='194'%3Ecloudflare%3C/text%3E%3Ctext x='172' y='194'%3E%26gt; terminal%3C/text%3E%3C/g%3E%3Cg stroke='%23fb923c' stroke-opacity='0.18' stroke-width='1.15' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M104 28h24'/%3E%3Cpath d='M110 22v12'/%3E%3Cpath d='M122 22v12'/%3E%3Cpath d='M286 28h16'/%3E%3Cpath d='M294 20v16'/%3E%3Cpath d='M112 104h20'/%3E%3Cpath d='M118 98v12'/%3E%3Cpath d='M244 104h20'/%3E%3Cpath d='M250 98v12'/%3E%3Cpath d='M132 180h24'/%3E%3Cpath d='M138 174v12'/%3E%3Cpath d='M286 180h16'/%3E%3Cpath d='M294 172v16'/%3E%3C/g%3E%3C/svg%3E");
-        background-repeat: repeat;
-        background-size: 320px 240px;
-        background-position: top left;
-        `}
-      ></div>
-      <slot />
-    </div>
+  <body class="min-h-screen overflow-x-clip bg-black text-ink antialiased">
+    <slot />
   </body>
 </html>

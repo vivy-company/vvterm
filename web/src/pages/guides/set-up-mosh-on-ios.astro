@@ -1,0 +1,190 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { SITE } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const slug = "set-up-mosh-on-ios";
+
+const C = pick({
+  en: {
+    heading: "Set up Mosh on iPhone and iPad",
+    intro:
+      "Mosh keeps SSH sessions alive across network drops, sleep, and IP changes. Here's how to prepare your server and enable Mosh in VVTerm.",
+    meta: "Guide",
+    title: "Set up Mosh on iPhone and iPad — VVTerm",
+    description:
+      "Install mosh-server, open the UDP ports, and enable Mosh for a server in VVTerm to keep SSH sessions alive across network drops, sleep, and IP changes on iOS.",
+    schemaDescription:
+      "Step-by-step guide to using Mosh with VVTerm on iOS and iPadOS: install mosh-server, open UDP ports, enable Mosh for a server, and connect with roaming sessions.",
+    bodyHtml: `
+  <p>
+    On a phone or tablet your network changes constantly — Wi-Fi to cellular, a tunnel into the subway,
+    the screen locking. A plain SSH session dies on each of those. <strong>Mosh</strong> solves it, and
+    VVTerm has it built in.
+  </p>
+
+  <h2>What Mosh is</h2>
+  <p>Mosh (mobile shell) is a remote terminal protocol designed for unreliable, mobile connections. Compared with plain SSH it adds:</p>
+  <ul>
+    <li><strong>Roaming</strong> — the session follows you as your IP address changes, so switching from Wi-Fi to cellular doesn't drop it.</li>
+    <li><strong>Survives drops and sleep</strong> — close the lid or lose signal, and the session reconnects when you're back instead of hanging dead.</li>
+    <li><strong>Local echo</strong> — your keystrokes appear instantly even on a high-latency link, with corrections applied as the server replies.</li>
+    <li><strong>SSH fallback</strong> — Mosh uses SSH to authenticate and start the session, then hands off to its own UDP transport.</li>
+  </ul>
+
+  <h2>Prepare the server</h2>
+  <p>Mosh runs a small helper on the host, so it has to be installed there first.</p>
+  <ol>
+    <li>
+      SSH into the server and install the Mosh package. On Debian or Ubuntu:
+      <pre><code>sudo apt install mosh</code></pre>
+      On RHEL, Fedora, or CentOS use <code>sudo dnf install mosh</code>, and on macOS use <code>brew install mosh</code>.
+    </li>
+    <li>This provides <code>mosh-server</code>, which VVTerm launches over SSH each time you connect.</li>
+  </ol>
+
+  <h2>Open the UDP ports</h2>
+  <p>
+    Mosh does not use TCP port 22 for its data — it uses <strong>UDP</strong>, by default in the range <code>60000–61000</code>. If a firewall sits in front of the server, allow inbound UDP on that range.
+  </p>
+  <ol>
+    <li>
+      With UFW on Ubuntu:
+      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>
+    </li>
+    <li>On a cloud provider, add the same UDP range to the instance's security group or firewall rules.</li>
+  </ol>
+  <p>
+    SSH on its usual TCP port must stay reachable too, because Mosh authenticates over SSH before
+    starting its UDP session.
+  </p>
+
+  <h2>Enable Mosh in VVTerm</h2>
+  <ol>
+    <li>Open the server's settings in VVTerm — either when adding it or by editing an existing server.</li>
+    <li>Switch the connection method to <strong>Mosh</strong>.</li>
+    <li>Keep your existing SSH authentication; Mosh reuses it to start the session.</li>
+    <li>Save, then tap the server to connect.</li>
+  </ol>
+  <p>
+    VVTerm opens an SSH connection, starts <code>mosh-server</code> on the host, and then carries your
+    session over Mosh's UDP transport.
+  </p>
+
+  <h2>What you'll notice on a network change</h2>
+  <p>
+    With Mosh active, the experience changes in a few visible ways. Typing feels instant thanks to local
+    echo, even on a slow link. When you switch networks or wake the device, the session reconnects on its
+    own — no re-login, no lost shell. If the connection is briefly unreachable, VVTerm shows the session as
+    waiting and resumes it once the network returns.
+  </p>
+
+  <h2>Tips</h2>
+  <ul>
+    <li>Pair Mosh with tmux for the strongest setup: Mosh survives the trip to the server, and tmux preserves your work even if the server itself restarts the session.</li>
+    <li>If a connection won't start, confirm <code>mosh-server</code> is installed and the UDP range is open — those are the two most common causes.</li>
+  </ul>
+`,
+  },
+  zh: {
+    heading: "在 iPhone 和 iPad 上设置 Mosh",
+    intro:
+      "Mosh 让 SSH 会话在网络中断、休眠和 IP 变化后依然保持。下面介绍如何准备服务器并在 VVTerm 中启用 Mosh。",
+    meta: "指南",
+    title: "在 iPhone 和 iPad 上设置 Mosh — VVTerm",
+    description:
+      "安装 mosh-server、开放 UDP 端口，并在 VVTerm 中为服务器启用 Mosh，让 SSH 会话在 iOS 上的网络中断、休眠和 IP 变化后依然保持。",
+    schemaDescription:
+      "在 iOS 和 iPadOS 上用 VVTerm 使用 Mosh 的分步指南：安装 mosh-server、开放 UDP 端口、为服务器启用 Mosh，并以漫游会话连接。",
+    bodyHtml: `
+  <p>
+    在手机或平板上，你的网络在不断变化 —— 从 Wi-Fi 切到蜂窝、钻进地铁隧道、屏幕锁定。
+    普通的 SSH 会话在这些情况下都会断开。<strong>Mosh</strong> 解决了这个问题，而且 VVTerm 已内置它。
+  </p>
+
+  <h2>什么是 Mosh</h2>
+  <p>Mosh（mobile shell，移动 shell）是一种为不可靠的移动连接而设计的远程终端协议。与普通 SSH 相比，它增加了：</p>
+  <ul>
+    <li><strong>漫游</strong> —— 会话随你的 IP 地址变化而跟随，所以从 Wi-Fi 切到蜂窝不会让它断开。</li>
+    <li><strong>抵御中断和休眠</strong> —— 合上盖子或失去信号后，会话会在你回来时重新连接，而不是僵死挂起。</li>
+    <li><strong>本地回显</strong> —— 即便在高延迟链路上，你的按键也会即时显示，并在服务器回复时进行修正。</li>
+    <li><strong>SSH 回退</strong> —— Mosh 使用 SSH 进行认证并启动会话，随后切换到它自己的 UDP 传输。</li>
+  </ul>
+
+  <h2>准备服务器</h2>
+  <p>Mosh 在主机上运行一个小型辅助程序，因此必须先在那里安装。</p>
+  <ol>
+    <li>
+      SSH 登录服务器并安装 Mosh 软件包。在 Debian 或 Ubuntu 上：
+      <pre><code>sudo apt install mosh</code></pre>
+      在 RHEL、Fedora 或 CentOS 上使用 <code>sudo dnf install mosh</code>，在 macOS 上使用 <code>brew install mosh</code>。
+    </li>
+    <li>这会提供 <code>mosh-server</code>，VVTerm 每次连接时都会通过 SSH 启动它。</li>
+  </ol>
+
+  <h2>开放 UDP 端口</h2>
+  <p>
+    Mosh 的数据并不使用 TCP 22 端口 —— 它使用 <strong>UDP</strong>，默认在 <code>60000–61000</code> 范围内。如果服务器前面有防火墙，请放行该范围的入站 UDP。
+  </p>
+  <ol>
+    <li>
+      在 Ubuntu 上使用 UFW：
+      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>
+    </li>
+    <li>在云服务商上，把相同的 UDP 范围加入实例的安全组或防火墙规则。</li>
+  </ol>
+  <p>
+    SSH 所用的常规 TCP 端口也必须保持可达，因为 Mosh 在启动 UDP 会话前会先通过 SSH 认证。
+  </p>
+
+  <h2>在 VVTerm 中启用 Mosh</h2>
+  <ol>
+    <li>在 VVTerm 中打开服务器设置 —— 添加服务器时或编辑现有服务器时均可。</li>
+    <li>将连接方式切换为 <strong>Mosh</strong>。</li>
+    <li>保留你现有的 SSH 认证；Mosh 会复用它来启动会话。</li>
+    <li>保存，然后点按服务器进行连接。</li>
+  </ol>
+  <p>
+    VVTerm 会打开一个 SSH 连接，在主机上启动 <code>mosh-server</code>，然后通过 Mosh 的 UDP 传输承载你的会话。
+  </p>
+
+  <h2>网络变化时你会注意到什么</h2>
+  <p>
+    启用 Mosh 后，体验会在几个可见的方面发生变化。得益于本地回显，即使在慢速链路上打字也感觉即时。
+    当你切换网络或唤醒设备时，会话会自动重连 —— 无需重新登录，也不会丢失 shell。
+    如果连接短暂不可达，VVTerm 会将会话显示为等待状态，并在网络恢复后继续。
+  </p>
+
+  <h2>提示</h2>
+  <ul>
+    <li>将 Mosh 与 tmux 搭配使用是最稳的方案：Mosh 抵御到服务器一路上的网络问题，而 tmux 即使在服务器自身重启会话时也能保留你的工作。</li>
+    <li>如果连接无法启动，请确认已安装 <code>mosh-server</code> 且 UDP 范围已开放 —— 这是两个最常见的原因。</li>
+  </ul>
+`,
+  },
+}, lang);
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: C.heading,
+  description: C.schemaDescription,
+  url: `${SITE.siteUrl}${localizePath(`/guides/${slug}`, lang)}`,
+};
+---
+
+<DocsLayout
+  kind="guides"
+  activeSlug={slug}
+  heading={C.heading}
+  intro={C.intro}
+  meta={C.meta}
+  title={C.title}
+  description={C.description}
+  canonicalPath={`/guides/${slug}`}
+  structuredData={[articleSchema]}
+>
+  <Fragment set:html={C.bodyHtml} />
+</DocsLayout>

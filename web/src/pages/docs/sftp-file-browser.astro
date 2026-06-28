@@ -1,0 +1,189 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { SITE } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const slug = "sftp-file-browser";
+
+const C = pick({
+  en: {
+    heading: "Using the SFTP file browser",
+    intro:
+      "VVTerm includes a built-in SFTP browser so you can move, preview, and edit remote files without a separate app. Here is how to use it.",
+    meta: "Documentation",
+    title: "Using the SFTP file browser — VVTerm",
+    description:
+      "Browse remote folders, upload and download files, create folders, rename, move, delete, preview text, images, and video, and edit POSIX permissions in VVTerm.",
+    schemaDescription:
+      "Use the VVTerm SFTP file browser to browse remote folders, upload and download, create directories, rename, move, delete, preview, and edit files and permissions.",
+    bodyHtml: `
+  <p>
+    Every server you connect to over SSH can also be browsed over SFTP in the same app. The file
+    browser runs on top of your existing connection, so there is nothing extra to configure on the
+    server — if you can SSH in, you can manage files.
+  </p>
+
+  <h2>Opening the file browser</h2>
+  <p>
+    From a connected server, open the <strong>Files</strong> view to start browsing. VVTerm lists the
+    remote directory contents, showing names, sizes, and types. On Mac the browser sits beside your
+    terminal in the same window; on iPhone and iPad it opens as its own view so you can switch between
+    the shell and your files.
+  </p>
+
+  <h2>Browsing folders</h2>
+  <ul>
+    <li>Tap or click a folder to open it, and use the path or back navigation to move up.</li>
+    <li>Start from your home directory and walk into any path your account can read.</li>
+    <li>Items you do not have permission to enter are limited by the server, just as they would be in a shell.</li>
+  </ul>
+
+  <h2>Uploading and downloading</h2>
+  <p>
+    Move files in both directions directly from the browser:
+  </p>
+  <ul>
+    <li><strong>Download</strong> a remote file to your device to keep a local copy.</li>
+    <li><strong>Upload</strong> a file from your device to the current remote folder.</li>
+  </ul>
+  <p>
+    This is the quickest way to pull down a log, push up a config, or move assets between machines
+    without dropping to a command line.
+  </p>
+
+  <h2>Managing files and folders</h2>
+  <ul>
+    <li><strong>Create folders</strong> to organize remote directories.</li>
+    <li><strong>Rename</strong> files and folders in place.</li>
+    <li><strong>Move</strong> items to a different path.</li>
+    <li><strong>Delete</strong> files and folders you no longer need.</li>
+  </ul>
+  <p>
+    These actions run over SFTP against the live server, so changes take effect immediately.
+  </p>
+
+  <h2>Previewing files</h2>
+  <p>
+    You can preview common file types without downloading them first. VVTerm renders <strong>text</strong>, <strong>images</strong>, and <strong>video</strong> inline, which makes it
+    easy to check a file's contents — confirm a config, glance at a screenshot, or scrub a recording —
+    before deciding what to do with it.
+  </p>
+
+  <h2>Editing text files</h2>
+  <p>
+    For text files, the browser includes an editor so you can make a quick change to a config or
+    script and save it straight back to the server. There is no need to copy a file down, edit it
+    locally, and upload it again for small edits.
+  </p>
+
+  <h2>Editing permissions</h2>
+  <p>
+    On servers that support it, you can view and change a file's <strong>POSIX permissions</strong> —
+    the read, write, and execute bits for owner, group, and others. This is handy for making a script
+    executable or tightening access on a sensitive file without typing <code>chmod</code> by hand.
+  </p>
+
+  <h2>Next steps</h2>
+  <p>
+    File access depends on the account you log in as, set in <a href="/docs/adding-a-server">Adding a server</a> and <a href="/docs/authentication-and-keys">Authentication and SSH keys</a>. To keep your servers
+    consistent across devices, see <a href="/docs/icloud-sync">iCloud sync and Keychain</a>.
+  </p>
+`,
+  },
+  zh: {
+    heading: "使用 SFTP 文件浏览器",
+    intro:
+      "VVTerm 内置了一个 SFTP 浏览器，让你无需另装应用即可移动、预览和编辑远程文件。这里说明如何使用它。",
+    meta: "文档",
+    title: "使用 SFTP 文件浏览器 — VVTerm",
+    description:
+      "在 VVTerm 中浏览远程文件夹、上传和下载文件、新建文件夹、重命名、移动、删除、预览文本、图片和视频，并编辑 POSIX 权限。",
+    schemaDescription:
+      "使用 VVTerm 的 SFTP 文件浏览器浏览远程文件夹、上传和下载、新建目录、重命名、移动、删除、预览，以及编辑文件和权限。",
+    bodyHtml: `
+  <p>
+    你通过 SSH 连接的每台服务器，都能在同一个应用里通过 SFTP 浏览。文件浏览器运行在你现有的连接之上，因此服务器端无需额外配置 —— 只要你能 SSH 登录，就能管理文件。
+  </p>
+
+  <h2>打开文件浏览器</h2>
+  <p>
+    在已连接的服务器中，打开 <strong>Files</strong> 视图开始浏览。VVTerm 会列出远程目录的内容，显示名称、大小和类型。在 Mac 上，浏览器与终端并排在同一个窗口里；在 iPhone 和 iPad 上，它作为独立视图打开，方便你在 shell 和文件之间切换。
+  </p>
+
+  <h2>浏览文件夹</h2>
+  <ul>
+    <li>点按或单击一个文件夹将其打开，并用路径或返回导航向上移动。</li>
+    <li>从你的主目录开始，进入你的账户能读取的任意路径。</li>
+    <li>你没有权限进入的项目会受服务器限制，就像在 shell 中一样。</li>
+  </ul>
+
+  <h2>上传与下载</h2>
+  <p>
+    直接在浏览器中双向移动文件：
+  </p>
+  <ul>
+    <li><strong>下载</strong>一个远程文件到你的设备，保留本地副本。</li>
+    <li><strong>上传</strong>一个文件从你的设备到当前远程文件夹。</li>
+  </ul>
+  <p>
+    这是拉取日志、推送配置或在机器间移动资源的最快方式，无需切换到命令行。
+  </p>
+
+  <h2>管理文件和文件夹</h2>
+  <ul>
+    <li><strong>新建文件夹</strong>来整理远程目录。</li>
+    <li>就地<strong>重命名</strong>文件和文件夹。</li>
+    <li>把项目<strong>移动</strong>到不同路径。</li>
+    <li><strong>删除</strong>你不再需要的文件和文件夹。</li>
+  </ul>
+  <p>
+    这些操作通过 SFTP 直接对实时服务器执行，因此更改会立即生效。
+  </p>
+
+  <h2>预览文件</h2>
+  <p>
+    你可以预览常见文件类型而无需先下载。VVTerm 会内联渲染<strong>文本</strong>、<strong>图片</strong>和<strong>视频</strong>，让你在决定如何处理之前轻松查看文件内容 —— 确认一份配置、瞥一眼截图，或拖动浏览一段录像。
+  </p>
+
+  <h2>编辑文本文件</h2>
+  <p>
+    对于文本文件，浏览器内置了一个编辑器，让你能快速改动配置或脚本并直接保存回服务器。小幅修改无需把文件下载下来、本地编辑再上传回去。
+  </p>
+
+  <h2>编辑权限</h2>
+  <p>
+    在支持的服务器上，你可以查看并更改文件的 <strong>POSIX 权限</strong> —— 即所有者、组和其他人的读、写、执行位。这对于把脚本设为可执行，或在不手动输入 <code>chmod</code> 的情况下收紧敏感文件的访问很方便。
+  </p>
+
+  <h2>后续步骤</h2>
+  <p>
+    文件访问取决于你登录所用的账户，它在<a href="/zh/docs/adding-a-server">添加服务器</a>和<a href="/zh/docs/authentication-and-keys">认证与 SSH 密钥</a>中设置。要让你的服务器在设备间保持一致，参见 <a href="/zh/docs/icloud-sync">iCloud 同步与 Keychain</a>。
+  </p>
+`,
+  },
+}, lang);
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  name: C.heading,
+  description: C.schemaDescription,
+  url: `${SITE.siteUrl}${localizePath(`/docs/${slug}`, lang)}`,
+};
+---
+
+<DocsLayout
+  kind="docs"
+  activeSlug={slug}
+  heading={C.heading}
+  intro={C.intro}
+  meta={C.meta}
+  title={C.title}
+  description={C.description}
+  canonicalPath={`/docs/${slug}`}
+  structuredData={[articleSchema]}
+>
+  <Fragment set:html={C.bodyHtml} />
+</DocsLayout>

@@ -1,0 +1,381 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import CTABand from "../../components/CTABand.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import Expandable from "../../components/Expandable.astro";
+import { Icon } from "astro-icon/components";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+const competitor = "Termius";
+
+type Cell = string | "check" | "cross" | "dash";
+
+const C = pick({
+  en: {
+    title: "VVTerm vs Termius — Native Apple SSH Client Compared",
+    description:
+      "VVTerm vs Termius: a native Apple-only SSH terminal and SFTP client with lifetime pricing, compared fairly to Termius, a cross-platform subscription suite.",
+    bcHome: "Home",
+    bcCompare: "Comparisons",
+    heroTitle: "A native Apple terminal,<br />or a cross-platform suite.",
+    heroSubhead:
+      "VVTerm is a native SSH terminal and SFTP client for iPhone, iPad, and Mac with a lifetime pricing option. Termius is a cross-platform, subscription-based client that also runs on Windows, Linux, Android, and the web. Here is how they compare.",
+    download: "Download VVTerm",
+    seePricing: "See pricing",
+    heroNote: "iPhone, iPad, and Mac · Apple-only by design",
+    heroAlt: "VVTerm native SSH terminal on Apple devices",
+    tableEyebrow: "Feature by feature",
+    tableTitle: "VVTerm and Termius, side by side.",
+    tableBody:
+      "VVTerm goes <strong>deep on Apple</strong>; Termius goes <strong>wide across platforms</strong>. The right choice depends on where you work.",
+    colFeature: "Feature",
+    footnote:
+      'Termius details are based on publicly available information and may change; check the vendor\'s site for current details. Cells marked "—" or "Varies" indicate features that differ by plan or that we do not assert as a definitive fact.',
+    standoutEyebrow: "Where VVTerm stands out",
+    standoutTitle: "Built for Apple, end to end.",
+    whyLabel: "Why VVTerm?",
+    whyEyebrow: "Why VVTerm",
+    whyTitle: "Apple-only, on purpose.",
+    whyBody:
+      "VVTerm trades cross-platform reach for depth on Apple. A <strong>GPU terminal powered by libghostty</strong>, a built-in <strong>SFTP file browser</strong> with preview, <strong>iCloud metadata sync</strong>, and credentials kept in <strong>Apple Keychain</strong> — built for iPhone, iPad, and Mac, not ported to them.",
+    whyAlt: "VVTerm terminal and SFTP browser side by side",
+    seeEverything: "See everything VVTerm does",
+    fitEyebrow: "Where Termius might fit",
+    fitTitle: "When cross-platform reach wins.",
+    fitBody:
+      "Termius is a genuinely strong choice if your work spans more than Apple devices. It runs on <strong>macOS, Windows, Linux, iOS, Android, and the web</strong>, and offers team and shared-vault features that organizations often need. If you switch between a Windows laptop and a Linux box, or you want a single client your whole team manages centrally, that breadth is hard to match. VVTerm makes the opposite trade: it stays Apple-only so it can lean fully into native performance, iCloud, and Keychain.",
+    rows: [
+      { label: "Platforms", vvterm: "iPhone, iPad, Mac", competitor: "Mac, Windows, Linux, iOS, Android, web" },
+      { label: "Native Apple app", vvterm: "check", competitor: "Varies" },
+      { label: "Terminal engine", vvterm: "libghostty (GPU)", competitor: "—" },
+      { label: "Standard SSH", vvterm: "check", competitor: "check" },
+      { label: "Mosh", vvterm: "check", competitor: "check" },
+      { label: "Tailscale SSH", vvterm: "check", competitor: "—" },
+      { label: "Cloudflare Tunnel SSH", vvterm: "check", competitor: "—" },
+      { label: "Built-in SFTP file browser", vvterm: "check", competitor: "check" },
+      { label: "File preview (text/image/video)", vvterm: "check", competitor: "—" },
+      { label: "Managed tmux session persistence", vvterm: "check", competitor: "—" },
+      { label: "Connect to Windows/PowerShell servers", vvterm: "check", competitor: "check" },
+      { label: "Live server metrics (CPU/RAM/disk)", vvterm: "check", competitor: "—" },
+      { label: "On-device voice-to-command", vvterm: "check", competitor: "—" },
+      { label: "Split panes", vvterm: "check", competitor: "check" },
+      { label: "Built-in terminal themes", vvterm: "440 themes", competitor: "Varies" },
+      { label: "iCloud sync", vvterm: "check", competitor: "—" },
+      { label: "Credentials in Apple Keychain", vvterm: "check", competitor: "—" },
+      { label: "Pricing model", vvterm: "Free + Pro + Lifetime", competitor: "Subscription" },
+      { label: "Lifetime / one-time option", vvterm: "check", competitor: "—" },
+      { label: "Open source", vvterm: "check", competitor: "cross" },
+    ] as { label: string; vvterm: Cell; competitor: Cell }[],
+    standout: [
+      {
+        icon: "lucide:laptop",
+        title: "Native on every Apple device",
+        body: "VVTerm is built for iOS 16, iPadOS 16, and macOS 13 on Apple Silicon, with a GPU terminal powered by libghostty and Apple-platform conventions throughout.",
+      },
+      {
+        icon: "lucide:badge-dollar-sign",
+        title: "A lifetime option",
+        body: "Start free, subscribe to Pro at $6.49/month or $24.99/year, or pay once for a $49.99 lifetime license. No mandatory subscription to keep using the app.",
+      },
+      {
+        icon: "lucide:waypoints",
+        title: "Modern transports built in",
+        body: "Standard SSH plus Mosh, Tailscale SSH, and Cloudflare Tunnel SSH — reach machines on a tailnet or behind a tunnel without forwarding ports.",
+      },
+      {
+        icon: "lucide:key-round",
+        title: "Keychain and iCloud, the Apple way",
+        body: "Server metadata syncs through iCloud while passwords and SSH keys stay in Apple Keychain — synced only through iCloud Keychain when you allow it.",
+      },
+    ],
+    faqItems: [
+      {
+        question: "Is VVTerm a good Termius alternative?",
+        answer:
+          "If you work entirely on Apple devices, VVTerm is a strong alternative. It is a native iPhone, iPad, and Mac app with a GPU terminal, a built-in SFTP browser, iCloud sync, Keychain-stored credentials, and a one-time lifetime pricing option. Termius is a better fit if you also need Windows, Linux, Android, or web access.",
+      },
+      {
+        question: "Does VVTerm support Windows or Linux?",
+        answer:
+          "The VVTerm app runs only on Apple devices — iPhone, iPad, and Mac — so there is no Windows, Linux, Android, or web version of the client. It does, however, <strong>connect to</strong> Linux, macOS, BSD, and Windows/PowerShell servers, with live stats and persistent sessions on each. If you also need the client itself on a non-Apple device, Termius is the more flexible choice.",
+      },
+      {
+        question: "What does VVTerm offer that Termius doesn't?",
+        answer:
+          "A few Apple-native extras: <strong>managed tmux session persistence</strong> that keeps work running through disconnects, <strong>live server monitoring</strong> built into the app, <strong>on-device voice-to-command</strong>, iCloud sync, Keychain-stored credentials, and a one-time lifetime price. Termius counters with cross-platform reach and team features.",
+      },
+      {
+        question: "Which is cheaper, VVTerm or Termius?",
+        answer:
+          "VVTerm is free for one workspace, one server, and one connection tab, with Pro at $6.49/month or $24.99/year and a one-time $49.99 lifetime license. Termius uses subscription pricing that can change over time — check their site for current details. If you prefer a single one-time payment, VVTerm's lifetime option is the deciding difference.",
+      },
+      {
+        question: "Can I import my servers from Termius?",
+        answer:
+          "VVTerm does not offer a direct Termius import. You add servers in VVTerm by entering the host, port, username, and authentication method. Credentials are stored in Apple Keychain and server metadata syncs through iCloud across your devices.",
+      },
+      {
+        question: "Does VVTerm have team or shared-vault features?",
+        answer:
+          "VVTerm is built for an individual's devices and syncs through your personal iCloud account. Termius offers team and shared-vault features for organizations. If centralized team management is a requirement, Termius is the better fit.",
+      },
+      {
+        question: "Is VVTerm open source?",
+        answer: "Yes. VVTerm's source is available at github.com/vivy-company/vvterm.",
+      },
+    ],
+    ctaTitle: "Try the native Apple option.",
+    ctaSubtitle: "Download VVTerm free on iPhone, iPad, and Mac, and see the difference on your own servers.",
+  },
+  zh: {
+    title: "VVTerm vs Termius — 原生 Apple SSH 客户端对比",
+    description:
+      "VVTerm 对比 Termius：一款仅限 Apple 的原生 SSH 终端与 SFTP 客户端，提供终身买断定价，公正地与跨平台订阅套件 Termius 对比。",
+    bcHome: "首页",
+    bcCompare: "对比",
+    heroTitle: "原生 Apple 终端，<br />还是跨平台套件。",
+    heroSubhead:
+      "VVTerm 是一款面向 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端，提供终身买断选项。Termius 是一款基于订阅的跨平台客户端，还可运行于 Windows、Linux、Android 和网页端。以下是二者的对比。",
+    download: "下载 VVTerm",
+    seePricing: "查看价格",
+    heroNote: "iPhone、iPad 和 Mac · 专为 Apple 设计",
+    heroAlt: "Apple 设备上的 VVTerm 原生 SSH 终端",
+    tableEyebrow: "逐项对比",
+    tableTitle: "VVTerm 与 Termius，并排比较。",
+    tableBody:
+      "VVTerm 在 Apple 上<strong>深耕</strong>；Termius 则<strong>横跨多平台</strong>。正确的选择取决于你在哪里工作。",
+    colFeature: "功能",
+    footnote:
+      'Termius 的相关信息基于公开可得的资料，可能会有变化；请查阅其官网了解最新详情。标记为"—"或"Varies"的单元格表示该功能因套餐而异，或我们无法将其断言为确定事实。',
+    standoutEyebrow: "VVTerm 的独到之处",
+    standoutTitle: "为 Apple 而生，从头到尾。",
+    whyLabel: "为什么选 VVTerm？",
+    whyEyebrow: "为什么选 VVTerm",
+    whyTitle: "专注 Apple，刻意为之。",
+    whyBody:
+      "VVTerm 以跨平台覆盖换取在 Apple 上的深度。<strong>由 libghostty 驱动的 GPU 终端</strong>、内置带预览的 <strong>SFTP 文件浏览器</strong>、<strong>iCloud 元数据同步</strong>，以及保存在 <strong>Apple Keychain</strong> 中的凭据 —— 为 iPhone、iPad 和 Mac 量身打造，而非移植而来。",
+    whyAlt: "VVTerm 终端与 SFTP 浏览器并排",
+    seeEverything: "查看 VVTerm 的全部功能",
+    fitEyebrow: "Termius 何时更合适",
+    fitTitle: "当跨平台覆盖更重要时。",
+    fitBody:
+      "如果你的工作不止于 Apple 设备，Termius 确实是一个不错的选择。它可运行于 <strong>macOS、Windows、Linux、iOS、Android 和网页端</strong>，并提供组织常常需要的团队与共享保险库功能。如果你在 Windows 笔记本和 Linux 主机之间切换，或希望整个团队集中管理同一个客户端，这种广度很难匹敌。VVTerm 做了相反的取舍：保持仅限 Apple，从而全力投入原生性能、iCloud 和 Keychain。",
+    rows: [
+      { label: "平台", vvterm: "iPhone、iPad、Mac", competitor: "Mac、Windows、Linux、iOS、Android、网页端" },
+      { label: "原生 Apple 应用", vvterm: "check", competitor: "Varies" },
+      { label: "终端引擎", vvterm: "libghostty（GPU）", competitor: "—" },
+      { label: "标准 SSH", vvterm: "check", competitor: "check" },
+      { label: "Mosh", vvterm: "check", competitor: "check" },
+      { label: "Tailscale SSH", vvterm: "check", competitor: "—" },
+      { label: "Cloudflare Tunnel SSH", vvterm: "check", competitor: "—" },
+      { label: "内置 SFTP 文件浏览器", vvterm: "check", competitor: "check" },
+      { label: "文件预览（文本/图片/视频）", vvterm: "check", competitor: "—" },
+      { label: "托管的 tmux 会话持久化", vvterm: "check", competitor: "—" },
+      { label: "连接 Windows/PowerShell 服务器", vvterm: "check", competitor: "check" },
+      { label: "实时服务器指标（CPU/内存/磁盘）", vvterm: "check", competitor: "—" },
+      { label: "本地设备语音转命令", vvterm: "check", competitor: "—" },
+      { label: "分屏窗格", vvterm: "check", competitor: "check" },
+      { label: "内置终端主题", vvterm: "440 款主题", competitor: "Varies" },
+      { label: "iCloud 同步", vvterm: "check", competitor: "—" },
+      { label: "凭据存于 Apple Keychain", vvterm: "check", competitor: "—" },
+      { label: "定价模式", vvterm: "免费 + 专业版 + 终身版", competitor: "订阅" },
+      { label: "终身/一次性买断选项", vvterm: "check", competitor: "—" },
+      { label: "开源", vvterm: "check", competitor: "cross" },
+    ] as { label: string; vvterm: Cell; competitor: Cell }[],
+    standout: [
+      {
+        icon: "lucide:laptop",
+        title: "在每一台 Apple 设备上原生运行",
+        body: "VVTerm 为 Apple Silicon 上的 iOS 16、iPadOS 16 和 macOS 13 打造，配备由 libghostty 驱动的 GPU 终端，并贯穿 Apple 平台的使用习惯。",
+      },
+      {
+        icon: "lucide:badge-dollar-sign",
+        title: "终身买断选项",
+        body: "免费开始，以每月 $6.49 或每年 $24.99 订阅专业版，或一次性购买 $49.99 的终身授权。无需强制订阅即可继续使用应用。",
+      },
+      {
+        icon: "lucide:waypoints",
+        title: "内置现代传输方式",
+        body: "标准 SSH 以及 Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH —— 无需转发端口即可连接 tailnet 上或隧道后的机器。",
+      },
+      {
+        icon: "lucide:key-round",
+        title: "Keychain 与 iCloud，Apple 的方式",
+        body: "服务器元数据通过 iCloud 同步，密码和 SSH 密钥则保存在 Apple Keychain 中 —— 仅在你允许时才通过 iCloud Keychain 同步。",
+      },
+    ],
+    faqItems: [
+      {
+        question: "VVTerm 是 Termius 的好替代品吗？",
+        answer:
+          "如果你完全在 Apple 设备上工作，VVTerm 是一个有力的替代品。它是一款原生的 iPhone、iPad 和 Mac 应用，配备 GPU 终端、内置 SFTP 浏览器、iCloud 同步、保存在 Keychain 中的凭据，以及一次性终身买断选项。如果你还需要 Windows、Linux、Android 或网页端访问，Termius 更合适。",
+      },
+      {
+        question: "VVTerm 支持 Windows 或 Linux 吗？",
+        answer:
+          "VVTerm 应用仅在 Apple 设备上运行 —— iPhone、iPad 和 Mac —— 因此没有 Windows、Linux、Android 或网页版客户端。不过，它确实可以<strong>连接到</strong> Linux、macOS、BSD 和 Windows/PowerShell 服务器，并在每种服务器上提供实时统计和持久会话。如果你还需要在非 Apple 设备上运行客户端本身，Termius 是更灵活的选择。",
+      },
+      {
+        question: "VVTerm 有哪些 Termius 没有的功能？",
+        answer:
+          "一些 Apple 原生的额外功能：在断线时保持工作运行的<strong>托管 tmux 会话持久化</strong>、内置于应用的<strong>实时服务器监控</strong>、<strong>本地设备语音转命令</strong>、iCloud 同步、保存在 Keychain 中的凭据，以及一次性终身价格。Termius 则以跨平台覆盖和团队功能取胜。",
+      },
+      {
+        question: "VVTerm 和 Termius 哪个更便宜？",
+        answer:
+          "VVTerm 对一个工作区、一台服务器和一个连接标签免费，专业版每月 $6.49 或每年 $24.99，并提供一次性 $49.99 的终身授权。Termius 采用可能随时间变化的订阅定价 —— 请查阅其官网了解最新详情。如果你更喜欢一次性付款，VVTerm 的终身选项就是决定性的差异。",
+      },
+      {
+        question: "我可以从 Termius 导入我的服务器吗？",
+        answer:
+          "VVTerm 不提供直接的 Termius 导入。你需要在 VVTerm 中输入主机、端口、用户名和身份验证方式来添加服务器。凭据保存在 Apple Keychain 中，服务器元数据通过 iCloud 在你的设备间同步。",
+      },
+      {
+        question: "VVTerm 有团队或共享保险库功能吗？",
+        answer:
+          "VVTerm 为个人的设备打造，并通过你的个人 iCloud 账户同步。Termius 为组织提供团队和共享保险库功能。如果集中式团队管理是必需的，Termius 更合适。",
+      },
+      {
+        question: "VVTerm 是开源的吗？",
+        answer: "是的。VVTerm 的源代码可在 github.com/vivy-company/vvterm 获取。",
+      },
+    ],
+    ctaTitle: "试试原生 Apple 方案。",
+    ctaSubtitle: "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，在你自己的服务器上感受差异。",
+  },
+}, lang);
+---
+
+<MarketingLayout
+  title={C.title}
+  description={C.description}
+  canonicalPath="/compare/vvterm-vs-termius"
+  activeTop="resources"
+>
+  <Breadcrumbs
+    items={[
+      { name: C.bcHome, href: "/" },
+      { name: C.bcCompare, href: "/compare" },
+      { name: C.title, href: "/compare/vvterm-vs-termius" },
+    ]}
+  />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <p class="eyebrow-accent">VVTerm vs {competitor}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton label={C.download} track="compare_termius_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-5xl">
+      <MediaBlock pos="100% 50%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="text-center">
+        <p class="eyebrow-accent">{C.tableEyebrow}</p>
+        <h2 class="mt-3 headline">{C.tableTitle}</h2>
+        <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.tableBody} />
+      </div>
+
+      <div class="mt-12 overflow-x-auto">
+        <table class="w-full min-w-[640px] border-collapse text-left">
+          <thead>
+            <tr class="border-b border-line">
+              <th class="py-4 pr-4 text-sm font-medium text-muted">{C.colFeature}</th>
+              <th class="px-4 py-4 text-base font-semibold text-ink">VVTerm</th>
+              <th class="px-4 py-4 text-base font-semibold text-ink">{competitor}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {C.rows.map((row) => (
+              <tr class="border-b border-line">
+                <th scope="row" class="py-4 pr-4 text-left text-[15px] font-normal text-ink/90">{row.label}</th>
+                {[row.vvterm, row.competitor].map((cell) => (
+                  <td class="px-4 py-4 text-[15px] text-muted">
+                    {cell === "check" ? (
+                      <Icon class="size-5 text-accent" name="lucide:check" />
+                    ) : cell === "cross" ? (
+                      <Icon class="size-5 text-faint" name="lucide:x" />
+                    ) : cell === "dash" ? (
+                      <span class="text-faint">—</span>
+                    ) : (
+                      <span>{cell}</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="mt-6 max-w-2xl text-[13px] leading-relaxed text-faint">{C.footnote}</p>
+    </div>
+  </section>
+
+  <!-- WHERE VVTERM STANDS OUT -->
+  <section class="px-6 pb-12 sm:pb-16">
+    <div class="container-wide">
+      <div class="text-center">
+        <p class="eyebrow-accent">{C.standoutEyebrow}</p>
+        <h2 class="mt-3 headline">{C.standoutTitle}</h2>
+      </div>
+      <div class="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {C.standout.map((item) => (
+          <article class="card p-7">
+            <Icon class="size-6 text-accent" name={item.icon} />
+            <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+            <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+          </article>
+        ))}
+      </div>
+      <div class="mt-14 flex justify-center">
+        <Expandable id="termius-why" label={C.whyLabel}>
+          <div class="mx-auto max-w-3xl text-center">
+            <p class="eyebrow-accent">{C.whyEyebrow}</p>
+            <h2 class="mt-3 headline">{C.whyTitle}</h2>
+            <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.whyBody} />
+          </div>
+          <div class="mx-auto mt-14 max-w-5xl">
+            <MediaBlock pos="20% 50%" ratio="aspect-[16/10]" alt={C.whyAlt} />
+          </div>
+          <div class="mt-12 text-center">
+            <a href={localizePath("/features", lang)} class="link-arrow">{C.seeEverything} <span aria-hidden="true">›</span></a>
+          </div>
+        </Expandable>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHERE COMPETITOR MIGHT FIT -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-apple">
+      <div class="card p-8 sm:p-10">
+        <p class="eyebrow-accent">{C.fitEyebrow}</p>
+        <h2 class="mt-3 headline-sm">{C.fitTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.fitBody} />
+      </div>
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand
+    title={C.ctaTitle}
+    subtitle={C.ctaSubtitle}
+    track="compare_termius_cta_appstore"
+  />
+</MarketingLayout>

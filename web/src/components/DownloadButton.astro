@@ -1,0 +1,34 @@
+---
+import { SITE } from "../lib/site";
+import { getLang, useT } from "../i18n/utils";
+
+interface Props {
+  label?: string;
+  track?: string;
+  variant?: "primary" | "light" | "outline";
+  class?: string;
+}
+
+const t = useT(getLang(Astro.url));
+
+const {
+  label = t("nav.downloadVVTerm"),
+  track = "appstore_click",
+  variant = "primary",
+  class: className = "",
+} = Astro.props;
+
+const variantClass =
+  variant === "light" ? "btn-light" : variant === "outline" ? "btn-outline" : "btn-primary";
+---
+
+<a
+  class:list={[variantClass, className]}
+  href={SITE.appStoreUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  data-track={track}
+  data-conversion-value="0"
+>
+  {label}
+</a>

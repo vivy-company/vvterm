@@ -1,0 +1,38 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  label?: string;
+  autoplay?: boolean;
+  variant?: "center" | "row";
+}
+
+const { label = "Gallery", autoplay = true, variant = "center" } = Astro.props;
+// center: one big card centered with peeks. row: left-aligned row of smaller cards.
+const pad = variant === "row" ? "max(1.5rem, calc(50vw - 540px))" : "max(1rem, calc(50vw - 450px))";
+---
+
+<div data-carousel data-autoplay={autoplay ? "" : undefined} aria-roledescription="carousel" aria-label={label} class="mt-12">
+  <div class="ml-[calc(50%-50vw)] w-screen">
+    <div
+      data-carousel-track
+      class="flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-clip overscroll-x-contain [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      style={`padding-inline: ${pad}; scroll-padding-inline: ${pad};`}
+    >
+      <slot />
+    </div>
+  </div>
+
+  <div class="container-wide mt-10 flex items-center justify-center gap-4">
+    <div data-carousel-dots class="flex h-12 items-center gap-3 rounded-full bg-surface px-6"></div>
+    <button
+      type="button"
+      data-carousel-playpause
+      aria-label="Pause"
+      class="grid size-12 shrink-0 place-items-center rounded-full bg-surface text-ink transition hover:bg-surface-hover"
+    >
+      <Icon class="size-5" name="lucide:pause" data-pp-pause />
+      <Icon class="hidden size-5" name="lucide:play" data-pp-play />
+    </button>
+  </div>
+</div>

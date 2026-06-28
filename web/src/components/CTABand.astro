@@ -1,0 +1,31 @@
+---
+import DownloadButton from "./DownloadButton.astro";
+import { getLang, useT, localizePath } from "../i18n/utils";
+
+interface Props {
+  title?: string;
+  subtitle?: string;
+  track?: string;
+}
+
+const lang = getLang(Astro.url);
+const t = useT(lang);
+
+const {
+  title = t("cta.title"),
+  subtitle = t("cta.subtitle"),
+  track = "cta_band_appstore_click",
+} = Astro.props;
+---
+
+<section class="px-6 py-24 text-center sm:py-32">
+  <div class="mx-auto max-w-3xl">
+    <img src="/logo.png" alt="" width="80" height="80" class="mx-auto size-20 object-contain" />
+    <h2 class="mt-8 headline">{title}</h2>
+    <p class="mx-auto mt-5 max-w-2xl subhead">{subtitle}</p>
+    <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+      <DownloadButton track={track} />
+      <a href={localizePath("/pricing", lang)} class="link-arrow">{t("cta.seePricing")} <span aria-hidden="true">›</span></a>
+    </div>
+  </div>
+</section>

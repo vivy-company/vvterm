@@ -1,0 +1,260 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import DownloadButton from "../components/DownloadButton.astro";
+import CTABand from "../components/CTABand.astro";
+import FaqAccordion from "../components/FaqAccordion.astro";
+import PricingCards from "../components/PricingCards.astro";
+import { Icon } from "astro-icon/components";
+import { softwareSchema } from "../lib/site";
+import { localizePath , pick } from "../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+type Cell = string | "check" | "cross" | "dash";
+
+const C = pick({
+  en: {
+    title: "VVTerm Pricing — Free, Pro, and Lifetime",
+    description:
+      "VVTerm is free to start with one workspace, server, and connection tab. Go Pro for unlimited everything at $6.49/month or $24.99/year, or pay once with a $49.99 lifetime purchase.",
+    bcHome: "Home",
+    bcPricing: "Pricing",
+    heroEyebrow: "Pricing",
+    heroTitle: "Free to start.<br />Yours to keep.",
+    heroSubhead:
+      "Start free with one server on every Apple device. Upgrade to Pro for unlimited everything, or pay once for a lifetime license — purchases and refunds are handled by Apple.",
+    download: "Download free",
+    comparePlans: "Compare plans",
+    heroNote: "No account required · iPhone, iPad, and Mac",
+    compareEyebrow: "Compare plans",
+    compareTitle: "Every plan, side by side.",
+    compareBody:
+      "The same native terminal on every plan. Pro and <strong>Lifetime</strong> unlock <strong>unlimited servers and connection tabs</strong> and add <strong>priority support</strong>.",
+    colFeatures: "Features",
+    colFree: "Free",
+    colPro: "Pro",
+    colLifetime: "Lifetime",
+    rows: [
+      { label: "Workspaces", free: "1", pro: "Unlimited", lifetime: "Unlimited" },
+      { label: "Servers", free: "1", pro: "Unlimited", lifetime: "Unlimited" },
+      { label: "Connection tabs", free: "1", pro: "Unlimited", lifetime: "Unlimited" },
+      { label: "SSH, Mosh, Tailscale SSH, Cloudflare Tunnel SSH", free: "check", pro: "check", lifetime: "check" },
+      { label: "GPU terminal (libghostty)", free: "check", pro: "check", lifetime: "check" },
+      { label: "SFTP file browser", free: "check", pro: "check", lifetime: "check" },
+      { label: "iCloud sync", free: "check", pro: "check", lifetime: "check" },
+      { label: "Keychain security", free: "check", pro: "check", lifetime: "check" },
+      { label: "Voice-to-command", free: "check", pro: "check", lifetime: "check" },
+      { label: "Custom environments", free: "cross", pro: "check", lifetime: "check" },
+      { label: "Priority support", free: "cross", pro: "check", lifetime: "check" },
+      { label: "All future updates", free: "dash", pro: "While subscribed", lifetime: "Forever" },
+      { label: "Billing", free: "Free", pro: "Subscription", lifetime: "One-time" },
+    ] as { label: string; free: Cell; pro: Cell; lifetime: Cell }[],
+    benefits: [
+      { icon: "lucide:user-x", title: "No account required", body: "Download and connect to your first server in minutes — no sign-up, no email." },
+      { icon: "lucide:calendar-x", title: "Cancel anytime", body: "Pro is a standard App Store subscription you can cancel whenever you want." },
+      { icon: "lucide:badge-check", title: "Pay once with Lifetime", body: "One $49.99 purchase unlocks everything and every future update, forever." },
+    ],
+    faqItems: [
+      {
+        question: "What do I get for free?",
+        answer:
+          "The free tier includes one workspace, one server, and one connection tab — with standard SSH, Mosh, Tailscale SSH, and Cloudflare Tunnel SSH, the GPU terminal, the SFTP file browser, iCloud sync, Keychain security, and voice-to-command. No account or payment is needed to start.",
+      },
+      {
+        question: "What is the difference between Free and Pro?",
+        answer:
+          "Free is limited to one workspace, one server, and one connection tab. Pro removes every limit — unlimited workspaces, servers, and connection tabs — and adds custom environments, priority support, and all future features while you are subscribed.",
+      },
+      {
+        question: "Can I use one purchase on iPhone, iPad, and Mac?",
+        answer:
+          "Yes. Purchases are tied to your Apple ID and work across iPhone, iPad, and Mac when you are signed in with the same Apple ID. Your servers sync through iCloud, so your setup follows you to every device.",
+      },
+      {
+        question: "How do refunds work?",
+        answer:
+          "All purchases and refunds are handled by Apple through the App Store. To request a refund, visit reportaproblem.apple.com and follow Apple's process. VVTerm does not process payments or refunds directly.",
+      },
+      {
+        question: "Is there both a subscription and a lifetime option?",
+        answer:
+          "Yes. Pro is available as a subscription at $6.49/month or $24.99/year, and there is a one-time Lifetime purchase at $49.99 that unlocks everything in Pro with no recurring charge.",
+      },
+      {
+        question: "Do prices include all future features?",
+        answer:
+          "Pro includes all future features while you are subscribed. The Lifetime purchase includes all future updates forever, with no additional cost.",
+      },
+    ],
+    ctaTitle: "Start free. Upgrade when you grow.",
+    ctaSubtitle: "Download VVTerm on iPhone, iPad, and Mac, then go Pro or buy lifetime whenever you need more.",
+  },
+  zh: {
+    title: "VVTerm 价格 — 免费版、专业版与终身版",
+    description:
+      "VVTerm 免费即可开始，含一个工作区、一台服务器和一个连接标签。升级到专业版可获得全部无限，每月 $6.49 或每年 $24.99，也可一次性购买 $49.99 的终身版。",
+    bcHome: "首页",
+    bcPricing: "价格",
+    heroEyebrow: "价格",
+    heroTitle: "免费开始。<br />永久属于你。",
+    heroSubhead:
+      "在每一台 Apple 设备上免费开始，含一台服务器。升级到专业版获得全部无限，或一次性购买终身授权 —— 购买与退款均由 Apple 处理。",
+    download: "免费下载",
+    comparePlans: "比较套餐",
+    heroNote: "无需账户 · iPhone、iPad 和 Mac",
+    compareEyebrow: "比较套餐",
+    compareTitle: "每个套餐，并排比较。",
+    compareBody:
+      "每个套餐都使用同样的原生终端。专业版和<strong>终身版</strong>解锁<strong>无限服务器和连接标签</strong>，并提供<strong>优先支持</strong>。",
+    colFeatures: "功能",
+    colFree: "免费版",
+    colPro: "专业版",
+    colLifetime: "终身版",
+    rows: [
+      { label: "工作区", free: "1", pro: "无限", lifetime: "无限" },
+      { label: "服务器", free: "1", pro: "无限", lifetime: "无限" },
+      { label: "连接标签", free: "1", pro: "无限", lifetime: "无限" },
+      { label: "SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSH", free: "check", pro: "check", lifetime: "check" },
+      { label: "GPU 终端（libghostty）", free: "check", pro: "check", lifetime: "check" },
+      { label: "SFTP 文件浏览器", free: "check", pro: "check", lifetime: "check" },
+      { label: "iCloud 同步", free: "check", pro: "check", lifetime: "check" },
+      { label: "Keychain 安全", free: "check", pro: "check", lifetime: "check" },
+      { label: "语音转命令", free: "check", pro: "check", lifetime: "check" },
+      { label: "自定义环境", free: "cross", pro: "check", lifetime: "check" },
+      { label: "优先支持", free: "cross", pro: "check", lifetime: "check" },
+      { label: "所有未来更新", free: "dash", pro: "订阅期间", lifetime: "永久" },
+      { label: "计费方式", free: "免费", pro: "订阅", lifetime: "一次性" },
+    ] as { label: string; free: Cell; pro: Cell; lifetime: Cell }[],
+    benefits: [
+      { icon: "lucide:user-x", title: "无需账户", body: "几分钟内下载并连接到你的第一台服务器 —— 无需注册，无需邮箱。" },
+      { icon: "lucide:calendar-x", title: "随时取消", body: "专业版是标准的 App Store 订阅，你可以随时取消。" },
+      { icon: "lucide:badge-check", title: "终身版一次买断", body: "一次 $49.99 的购买即可永久解锁全部功能和每一次未来更新。" },
+    ],
+    faqItems: [
+      {
+        question: "免费版能得到什么？",
+        answer:
+          "免费版包含一个工作区、一台服务器和一个连接标签 —— 含标准 SSH、Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH、GPU 终端、SFTP 文件浏览器、iCloud 同步、Keychain 安全以及语音转命令。开始使用无需账户或付费。",
+      },
+      {
+        question: "免费版和专业版有什么区别？",
+        answer:
+          "免费版限制为一个工作区、一台服务器和一个连接标签。专业版移除所有限制 —— 无限工作区、服务器和连接标签 —— 并在订阅期间增加自定义环境、优先支持和所有未来功能。",
+      },
+      {
+        question: "一次购买能在 iPhone、iPad 和 Mac 上使用吗？",
+        answer:
+          "可以。购买与你的 Apple ID 绑定，使用同一 Apple ID 登录时可在 iPhone、iPad 和 Mac 上通用。你的服务器通过 iCloud 同步，配置会跟随你到每一台设备。",
+      },
+      {
+        question: "退款如何处理？",
+        answer:
+          "所有购买和退款都由 Apple 通过 App Store 处理。如需退款，请访问 reportaproblem.apple.com 并按照 Apple 的流程操作。VVTerm 不直接处理付款或退款。",
+      },
+      {
+        question: "是否同时提供订阅和终身选项？",
+        answer:
+          "是的。专业版以订阅形式提供，每月 $6.49 或每年 $24.99；另有一次性的终身版，售价 $49.99，可解锁专业版的全部功能且无重复扣费。",
+      },
+      {
+        question: "价格是否包含所有未来功能？",
+        answer:
+          "专业版在你订阅期间包含所有未来功能。终身版永久包含所有未来更新，且无需额外费用。",
+      },
+    ],
+    ctaTitle: "免费开始，按需升级。",
+    ctaSubtitle: "在 iPhone、iPad 和 Mac 上下载 VVTerm，需要更多时随时升级专业版或购买终身版。",
+  },
+}, lang);
+---
+
+<MarketingLayout
+  title={C.title}
+  description={C.description}
+  canonicalPath="/pricing"
+  activeTop="pricing"
+  structuredData={[softwareSchema]}
+>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcPricing, href: "/pricing" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <p class="eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton label={C.download} track="pricing_hero_appstore" />
+        <a href="#compare" class="link-arrow">{C.comparePlans} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+  </section>
+
+  <!-- PRICING CARDS -->
+  <section class="px-6 py-16 sm:py-20">
+    <PricingCards />
+  </section>
+
+  <!-- COMPARISON TABLE -->
+  <section id="compare" class="section">
+    <div class="container-wide">
+      <div class="text-center">
+        <p class="eyebrow-accent">{C.compareEyebrow}</p>
+        <h2 class="mt-3 headline">{C.compareTitle}</h2>
+        <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.compareBody} />
+      </div>
+
+      <div class="mt-12 overflow-x-auto">
+        <table class="w-full min-w-[640px] border-collapse text-left">
+          <thead>
+            <tr class="border-b border-line">
+              <th class="py-4 pr-4 text-sm font-medium text-muted">{C.colFeatures}</th>
+              <th class="px-4 py-4 text-base font-semibold text-ink">{C.colFree}</th>
+              <th class="px-4 py-4 text-base font-semibold text-ink">{C.colPro}</th>
+              <th class="px-4 py-4 text-base font-semibold text-ink">{C.colLifetime}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {C.rows.map((row) => (
+              <tr class="border-b border-line">
+                <th scope="row" class="py-4 pr-4 text-left text-[15px] font-normal text-ink/90">{row.label}</th>
+                {[row.free, row.pro, row.lifetime].map((cell) => (
+                  <td class="px-4 py-4 text-[15px] text-muted">
+                    {cell === "check" ? (
+                      <Icon class="size-5 text-accent" name="lucide:check" />
+                    ) : cell === "cross" ? (
+                      <span class="text-faint">✕</span>
+                    ) : cell === "dash" ? (
+                      <span class="text-faint">—</span>
+                    ) : (
+                      <span>{cell}</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 md:grid-cols-3">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="pricing_cta_appstore" />
+</MarketingLayout>

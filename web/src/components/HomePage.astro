@@ -1,529 +1,339 @@
 ---
 import { Icon } from "astro-icon/components";
 import { SITE, translations } from "../lib/site";
+import { localizePath } from "../i18n/utils";
+import { PLATFORMS } from "../lib/nav";
+import Carousel from "./Carousel.astro";
+import GalleryCard from "./GalleryCard.astro";
+import MediaBlock from "./MediaBlock.astro";
+import PricingCards from "./PricingCards.astro";
+import Expandable from "./Expandable.astro";
 
-const whyItems = [
-  { key: "native", icon: "lucide:laptop-minimal-check", color: "text-orange-500", bg: "bg-orange-500/10" },
-  { key: "modern", icon: "lucide:waypoints", color: "text-amber-500", bg: "bg-amber-500/10" },
-  { key: "sync", icon: "lucide:cloudy", color: "text-orange-400", bg: "bg-orange-400/10" },
-  { key: "pricing", icon: "lucide:badge-dollar-sign", color: "text-emerald-600", bg: "bg-emerald-500/10" }
-];
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+const t = translations[lang] as typeof translations.en;
+const tour = t.home.tour as unknown as Record<string, string>;
+const files = t.home.files as unknown as Record<string, string>;
 
 const featureItems = [
-  { key: "rendering", icon: "lucide:square-terminal", color: "text-emerald-600", bg: "bg-emerald-500/10" },
-  { key: "connect", icon: "lucide:plug-zap", color: "text-amber-500", bg: "bg-amber-500/10" },
-  { key: "files", icon: "lucide:folder-open-dot", color: "text-orange-500", bg: "bg-orange-500/10" },
-  { key: "preview", icon: "lucide:file-search-2", color: "text-violet-600", bg: "bg-violet-500/10" },
-  { key: "pickup", icon: "lucide:smartphone", color: "text-orange-500", bg: "bg-orange-500/10" },
-  { key: "organize", icon: "lucide:folders", color: "text-violet-600", bg: "bg-violet-500/10" }
+  { key: "rendering", icon: "lucide:square-terminal" },
+  { key: "connect", icon: "lucide:plug-zap" },
+  { key: "files", icon: "lucide:folder-open-dot" },
+  { key: "preview", icon: "lucide:file-search-2" },
+  { key: "pickup", icon: "lucide:smartphone" },
+  { key: "organize", icon: "lucide:folders" }
+] as const;
+
+const suiteIcons = [
+  "lucide:square-terminal", "lucide:radio", "lucide:waypoints", "lucide:cloud",
+  "lucide:folder-open-dot", "lucide:cloudy", "lucide:key-round", "lucide:mic"
 ];
 
-const useCases = [
-  { key: "solo", icon: "lucide:user-round" },
-  { key: "homelab", icon: "lucide:server-cog" },
-  { key: "apple", icon: "lucide:laptop" },
-  { key: "ai", icon: "lucide:bot" }
+// NOTE: images are temporary crops of the hero composite (preview.png). Swap for real
+// per-feature screenshots later — just replace `img` per card.
+const tourCards = [
+  { img: "/preview.png", pos: "100% 50%", caption: "top" },
+  { img: "/preview.png", pos: "8% 45%", caption: "bottom" },
+  { img: "/preview.png", pos: "52% 50%", caption: "top" },
+  { img: "/preview.png", pos: "30% 35%", caption: "bottom" },
+  { img: "/preview.png", pos: "72% 60%", caption: "top" },
+  { img: "/preview.png", pos: "45% 20%", caption: "bottom" },
+] as const;
+
+const connectionTabs = [
+  { key: "ssh", label: "SSH", pos: "100% 50%" },
+  { key: "mosh", label: "Mosh", pos: "60% 40%" },
+  { key: "tailscale", label: "Tailscale SSH", pos: "20% 60%" },
+  { key: "cloudflare", label: "Cloudflare Tunnel", pos: "80% 30%" }
 ];
 
-const faqs = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"];
-const currentYear = new Date().getFullYear();
+const fileCardIcons = [
+  "lucide:folder-open-dot",
+  "lucide:arrow-down-up",
+  "lucide:file-search-2",
+  "lucide:pencil",
+  "lucide:shield",
+  "lucide:cloudy",
+];
+
+const faqs = ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"] as const;
 
 const highlightAnswer = (text: string) =>
   text
-    .replace(/VVTerm/g, '<span class="text-orange-500">VVTerm</span>')
-    .replace(/libghostty/g, '<span class="text-orange-500">libghostty</span>')
-    .replace(/Ghostty/g, '<span class="text-orange-500">Ghostty</span>')
-    .replace(/iCloud/g, '<span class="text-orange-500">iCloud</span>')
-    .replace(/Apple Keychain/g, '<span class="text-orange-500">Apple Keychain</span>')
-    .replace(/Keychain/g, '<span class="text-orange-500">Keychain</span>');
+    .replace(/VVTerm/g, '<span class="font-medium text-ink">VVTerm</span>')
+    .replace(/libghostty/g, '<span class="font-medium text-ink">libghostty</span>')
+    .replace(/Ghostty/g, '<span class="font-medium text-ink">Ghostty</span>')
+    .replace(/iCloud/g, '<span class="font-medium text-ink">iCloud</span>')
+    .replace(/Apple Keychain/g, '<span class="font-medium text-ink">Apple Keychain</span>')
+    .replace(/Keychain/g, '<span class="font-medium text-ink">Keychain</span>');
 ---
 
 <main>
-  <section class="relative px-4 pb-10 pt-16 sm:px-6 sm:pt-24">
-    <div class="relative mx-auto flex max-w-5xl flex-col items-center text-center">
-      <div class="max-w-4xl">
-        <img src="/logo.png" alt="VVTerm" width="96" height="96" class="mx-auto size-24 object-contain drop-shadow-[0_0_28px_rgba(249,115,22,0.18)]" />
-        <p class="mt-8 inline-flex min-h-6 items-center justify-center gap-0.5 font-mono text-xs font-semibold uppercase tracking-[0.16em] text-orange-500 sm:text-sm">
-          <span data-typing-text>{translations.en.hero.eyebrow}</span>
-          <span class="inline-block h-[1.1em] w-[0.7ch] bg-orange-500 align-middle animate-pulse"></span>
-        </p>
-        <h1 class="mx-auto mt-5 max-w-[17ch] text-5xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-6xl lg:max-w-[16ch] lg:text-[4.75rem] lg:leading-[0.98]" data-i18n="hero.title">{translations.en.hero.title}</h1>
-        <p class="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-600 dark:text-slate-300 sm:text-xl" data-i18n="hero.subtitle">{translations.en.hero.subtitle}</p>
-        <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <a
-            class="inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
-            href={SITE.appStoreUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-track="appstore_click"
-            data-conversion-value="0"
-          >
-            <Icon class="size-4" name="lucide:download" />
-            <span data-i18n="hero.primaryCta">{translations.en.hero.primaryCta}</span>
-          </a>
-          <a
-            class="inline-flex min-h-13 items-center justify-center gap-2 rounded-full border border-slate-900/10 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 dark:border-white/10 dark:bg-white/5 dark:text-slate-100"
-            href={SITE.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-track="github_click_hero"
-          >
-            <Icon class="size-4" name="lucide:github" />
-            <span data-i18n="hero.secondaryCta">{translations.en.hero.secondaryCta}</span>
-          </a>
-        </div>
-        <p class="mt-4 text-sm text-slate-500 dark:text-slate-400" data-i18n-html="hero.meta" set:html={translations.en.hero.meta}></p>
-      </div>
-
-      <div class="flex min-h-[300px] w-full items-center justify-center sm:min-h-[420px] lg:min-h-[520px]">
-        <img src="/preview.png" alt="VVTerm on iPhone, iPad, and Mac" width="1600" height="1100" class="w-full max-w-4xl scale-110 drop-shadow-[0_28px_48px_rgba(15,23,42,0.18)] lg:max-w-[64rem]" loading="eager" fetchpriority="high" />
-      </div>
+  <!-- HERO -->
+  <section class="px-6 pt-20 sm:pt-32">
+    <div class="mx-auto max-w-5xl">
+      <img src="/preview.png" alt="VVTerm SSH terminal on iPhone, iPad, and Mac" width="1600" height="1100" class="w-full" loading="eager" fetchpriority="high" />
+    </div>
+    <div class="mx-auto mt-6 max-w-4xl text-center">
+      <img src="/logo.png" alt="VVTerm app icon" width="64" height="64" class="mx-auto size-16 object-contain" />
+      <p class="mt-5 text-[21px] font-semibold tracking-tight text-ink">VVTerm</p>
+      <h1 class="mx-auto mt-4 max-w-[15ch] headline-hero">{t.hero.h1}</h1>
+      <p class="mx-auto mt-6 max-w-xl text-lg leading-snug text-muted sm:text-[1.3125rem]">{t.hero.subtitle}</p>
     </div>
   </section>
 
-  <section id="why" class="px-4 py-8 sm:px-6 sm:py-10">
-    <div class="mx-auto max-w-6xl">
-      <div>
-        <h2 class="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-5xl" data-i18n="why.title">{translations.en.why.title}</h2>
-        <p class="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg" data-i18n="why.subtitle">{translations.en.why.subtitle}</p>
-      </div>
-      <div class="mt-8 grid overflow-hidden rounded-[1.5rem] border border-slate-900/8 bg-white/80 dark:border-white/10 dark:bg-white/10 md:grid-cols-2">
-        {whyItems.map((item) => (
-          <article class="border-b border-slate-900/8 bg-white/85 p-6 dark:border-white/10 dark:bg-[#121214] md:border-r [&:nth-child(2n)]:md:border-r-0 [&:nth-last-child(-n+2)]:border-b-0">
-            <div class:list={["mb-4 grid size-11 place-items-center rounded-xl", item.bg, item.color]}>
-              <Icon class="size-5" name={item.icon} />
+  <!-- PROMO CARD -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="overflow-hidden rounded-[28px] bg-gradient-to-br from-[#1f1f22] to-[#0e0e10] p-8 sm:p-12">
+        <div class="grid items-center gap-10 lg:grid-cols-2">
+          <div>
+            <h2 class="text-3xl font-semibold tracking-[-0.02em] text-ink sm:text-4xl">{t.home.promo.title}</h2>
+            <p class="mt-4 max-w-md text-base leading-relaxed text-muted">{t.home.promo.desc}</p>
+            <div class="mt-7 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <a class="btn-primary" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="appstore_click" data-conversion-value="0">
+                <span>{t.hero.primaryCta}</span>
+              </a>
+              <a class="link-arrow" href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" data-track="github_click_hero">
+                <span>{t.hero.secondaryCta}</span>
+                <span aria-hidden="true">›</span>
+              </a>
             </div>
-            <h3 class="text-xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100" data-i18n={`why.${item.key}.title`}>
-              {translations.en.why[item.key as keyof typeof translations.en.why].title}
-            </h3>
-            <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300" data-i18n={`why.${item.key}.desc`}>
-              {translations.en.why[item.key as keyof typeof translations.en.why].desc}
-            </p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section id="features" class="px-4 py-12 sm:px-6">
-    <div class="mx-auto max-w-6xl">
-      <div>
-        <h2 class="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-5xl" data-i18n="features.title">{translations.en.features.title}</h2>
-        <p class="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg" data-i18n="features.subtitle">{translations.en.features.subtitle}</p>
-      </div>
-      <div class="mt-8 grid gap-px overflow-hidden rounded-[1.5rem] border border-slate-900/8 bg-slate-900/8 dark:border-white/10 dark:bg-white/10 md:grid-cols-2 xl:grid-cols-3">
-        {featureItems.map((feature) => (
-          <article class="bg-white/90 dark:bg-[#121214] p-7">
-            <div class:list={["mb-4 grid size-11 place-items-center rounded-xl", feature.bg, feature.color]}>
-              <Icon class="size-5" name={feature.icon} />
-            </div>
-            <h3 class="text-2xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100" data-i18n={`features.${feature.key}.title`}>
-              {translations.en.features[feature.key as keyof typeof translations.en.features].title}
-            </h3>
-            <p class="mt-3 text-base leading-8 text-slate-600 dark:text-slate-300" data-i18n={`features.${feature.key}.desc`}>
-              {translations.en.features[feature.key as keyof typeof translations.en.features].desc}
-            </p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section id="pricing" class="px-4 py-12 sm:px-6">
-    <div class="mx-auto max-w-6xl">
-      <div>
-        <h2 class="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-5xl" data-i18n="useCases.title">{translations.en.useCases.title}</h2>
-        <p class="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg" data-i18n="useCases.subtitle">{translations.en.useCases.subtitle}</p>
-      </div>
-      <div class="mt-8 grid gap-px overflow-hidden rounded-[1.5rem] border border-slate-900/8 bg-slate-900/8 dark:border-white/10 dark:bg-white/10 md:grid-cols-2">
-        {useCases.map((item) => (
-          <article class="bg-white/90 dark:bg-[#121214] p-6">
-            <div class="mb-4 flex items-center gap-3">
-              <Icon class="size-5 text-orange-500" name={item.icon} />
-              <h3 class="text-lg font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100 sm:text-xl" data-i18n={`useCases.${item.key}.title`}>
-                {translations.en.useCases[item.key as keyof typeof translations.en.useCases].title}
-              </h3>
-            </div>
-            <p class="max-w-[36ch] text-sm leading-7 text-slate-600 dark:text-slate-300" data-i18n={`useCases.${item.key}.desc`}>
-              {translations.en.useCases[item.key as keyof typeof translations.en.useCases].desc}
-            </p>
-          </article>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <section class="px-4 py-12 sm:px-6">
-    <div class="mx-auto max-w-6xl">
-      <div>
-        <h2 class="text-4xl font-semibold tracking-[-0.055em] text-slate-950 dark:text-slate-100 sm:text-6xl" data-i18n="pricing.title">{translations.en.pricing.title}</h2>
-        <p class="mt-4 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300" data-i18n="pricing.subtitle">{translations.en.pricing.subtitle}</p>
-      </div>
-      <div class="mt-8 grid gap-4 lg:grid-cols-3">
-        <article class="flex flex-col rounded-[2rem] border border-slate-900/8 bg-white/95 p-8 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#121214] dark:shadow-none">
-          <h3 class="text-2xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100" data-i18n="pricing.free.name">{translations.en.pricing.free.name}</h3>
-          <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="pricing.free.description">{translations.en.pricing.free.description}</p>
-          <p class="mt-5">
-            <span data-price-text="free">
-              <span class="text-5xl font-semibold tracking-[-0.06em] text-slate-950 dark:text-slate-100" data-i18n="pricing.free.price">{translations.en.pricing.free.price}</span>
-              <span class="ml-1 text-base text-slate-500 dark:text-slate-400" data-i18n="pricing.free.period">{translations.en.pricing.free.period}</span>
-            </span>
-          </p>
-          <ul class="mb-6 mt-6 grid flex-1 gap-3 text-slate-600 dark:text-slate-300" data-i18n-list="pricing.free.features">
-            {translations.en.pricing.free.features.map((item) => (
-              <li class="flex gap-3"><span class="text-orange-500">✓</span><span>{item}</span></li>
-            ))}
-          </ul>
-          <a class="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-900/10 bg-white px-5 py-3 text-sm font-semibold text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-100" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="pricing_free_click" data-conversion-value="0">
-            <span data-i18n="pricing.free.cta">{translations.en.pricing.free.cta}</span>
-          </a>
-        </article>
-
-        <article class="flex flex-col rounded-[2rem] border border-slate-900/8 bg-white/95 p-8 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-white/10 dark:bg-[#121214] dark:shadow-none">
-          <h3 class="text-2xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100" data-i18n="pricing.pro.name">{translations.en.pricing.pro.name}</h3>
-          <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="pricing.pro.description">{translations.en.pricing.pro.description}</p>
-          <div class="mt-5 flex gap-1 rounded-full bg-slate-100 p-1 dark:bg-white/8">
-            <button type="button" class="flex-1 rounded-full px-4 py-3 text-sm font-medium text-slate-500 dark:text-slate-400" data-billing-toggle="monthly">Monthly</button>
-            <button type="button" class="is-active flex-1 rounded-full bg-white px-4 py-3 text-sm font-medium text-slate-950 shadow-sm dark:bg-white/10 dark:text-slate-100 dark:shadow-none" data-billing-toggle="yearly">
-              Yearly
-              <span class="ml-2 text-xs text-emerald-600" data-i18n="pricing.pro.yearly.save">{translations.en.pricing.pro.yearly.save}</span>
-            </button>
           </div>
-          <p class="mt-5">
-            <span data-price-monthly hidden>
-              <span class="text-5xl font-semibold tracking-[-0.06em] text-slate-950 dark:text-slate-100" data-i18n="pricing.pro.monthly.price">{translations.en.pricing.pro.monthly.price}</span>
-              <span class="ml-1 text-base text-slate-500 dark:text-slate-400" data-i18n="pricing.pro.monthly.period">{translations.en.pricing.pro.monthly.period}</span>
-            </span>
-            <span data-price-yearly>
-              <span class="text-5xl font-semibold tracking-[-0.06em] text-slate-950 dark:text-slate-100" data-i18n="pricing.pro.yearly.price">{translations.en.pricing.pro.yearly.price}</span>
-              <span class="ml-1 text-base text-slate-500 dark:text-slate-400" data-i18n="pricing.pro.yearly.period">{translations.en.pricing.pro.yearly.period}</span>
-            </span>
-          </p>
-          <ul class="mb-6 mt-6 grid flex-1 gap-3 text-slate-600 dark:text-slate-300" data-i18n-list="pricing.pro.features">
-            {translations.en.pricing.pro.features.map((item) => (
-              <li class="flex gap-3"><span class="text-orange-500">✓</span><span>{item}</span></li>
+          <div class="grid grid-cols-4 gap-3 sm:gap-4">
+            {suiteIcons.map((icon) => (
+              <div class="grid aspect-square place-items-center rounded-2xl border border-white/10 bg-white/5">
+                <Icon class="size-7 text-accent" name={icon} />
+              </div>
             ))}
-          </ul>
-          <a class="inline-flex min-h-12 items-center justify-center rounded-full border border-slate-900/10 bg-white px-5 py-3 text-sm font-semibold text-slate-950 dark:border-white/10 dark:bg-white/5 dark:text-slate-100" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-pricing-cta data-monthly-label={translations.en.pricing.pro.ctaMonthly} data-yearly-label={translations.en.pricing.pro.ctaYearly} data-monthly-track="pricing_pro_monthly_click" data-yearly-track="pricing_pro_yearly_click" data-monthly-value="6.49" data-yearly-value="24.99" data-billing-cycle="yearly" data-track="pricing_pro_yearly_click" data-conversion-value="24.99">
-            <span data-i18n="pricing.pro.ctaYearly">{translations.en.pricing.pro.ctaYearly}</span>
-          </a>
-        </article>
+          </div>
+        </div>
+      </div>
+      <p class="mt-6 text-center text-sm text-faint" set:html={t.hero.meta.replace('href="/pricing"', `href="${localizePath("/pricing", lang)}"`)}></p>
+    </div>
+  </section>
 
-        <article class="flex flex-col rounded-[2rem] border border-orange-200/70 bg-white/95 p-8 shadow-[0_22px_60px_rgba(15,23,42,0.08)] dark:border-orange-400/30 dark:bg-orange-500/10 dark:shadow-none">
-          <div class="ml-auto rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-500 dark:bg-orange-500/15" data-i18n="pricing.lifetime.badge">{translations.en.pricing.lifetime.badge}</div>
-          <h3 class="mt-4 text-2xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-slate-100" data-i18n="pricing.lifetime.name">{translations.en.pricing.lifetime.name}</h3>
-          <p class="mt-2 text-slate-600 dark:text-slate-300" data-i18n="pricing.lifetime.description">{translations.en.pricing.lifetime.description}</p>
-          <p class="mt-5">
-            <span class="text-5xl font-semibold tracking-[-0.06em] text-slate-950 dark:text-slate-100" data-i18n="pricing.lifetime.price">{translations.en.pricing.lifetime.price}</span>
-          </p>
-          <ul class="mb-6 mt-6 grid flex-1 gap-3 text-slate-600 dark:text-slate-300" data-i18n-list="pricing.lifetime.features">
-            {translations.en.pricing.lifetime.features.map((item) => (
-              <li class="flex gap-3"><span class="text-orange-500">✓</span><span>{item}</span></li>
-            ))}
-          </ul>
-          <a class="inline-flex min-h-12 items-center justify-center rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-orange-600" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="pricing_lifetime_click" data-conversion-value="49.99">
-            <span data-i18n="pricing.lifetime.cta">{translations.en.pricing.lifetime.cta}</span>
-          </a>
-          <p class="mt-4 text-center text-sm text-slate-500 dark:text-slate-400" data-i18n="pricing.lifetime.guarantee">{translations.en.pricing.lifetime.guarantee}</p>
-        </article>
+  <!-- GET TO KNOW (center-mode gallery, Apple Logic style) -->
+  <section class="py-16 sm:py-24">
+    <div class="container-wide">
+      <h2 class="headline">{t.home.tour.title}</h2>
+    </div>
+    <Carousel label="Get to know VVTerm">
+      {tourCards.map((card, i) => (
+        <GalleryCard img={card.img} pos={card.pos} title={tour[`c${i}`]} caption={card.caption as "top" | "bottom"} />
+      ))}
+    </Carousel>
+  </section>
+
+  <!-- CONNECT (pill-tab terminal demo) -->
+  <section class="bg-[#09090b] section">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{t.home.connect.eyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[16ch] headline">{t.home.connect.title}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={highlightAnswer(t.home.connect.body)}></p>
+    </div>
+
+    <div class="container-wide mt-16" data-tabs>
+      <div class="relative grid">
+        {connectionTabs.map((tab, i) => (
+          <div
+            data-tab-panel={tab.key}
+            class:list={[
+              "col-start-1 row-start-1 transition-opacity duration-500 ease-out",
+              i === 0 ? "opacity-100 z-10" : "opacity-0 pointer-events-none",
+            ]}
+          >
+            <MediaBlock pos={tab.pos} ratio="aspect-[16/10]" alt={`VVTerm over ${tab.label}`} />
+          </div>
+        ))}
+      </div>
+
+      <div class="relative mx-auto mt-8 flex w-fit max-w-full flex-wrap justify-center gap-1 rounded-full border border-line bg-surface p-1">
+        <span data-tab-indicator class="pointer-events-none absolute left-0 top-0 rounded-full bg-white opacity-0 transition-all duration-300 ease-out"></span>
+        {connectionTabs.map((tab) => (
+          <button type="button" data-tab-btn={tab.key} class="relative z-10 rounded-full px-4 py-2 text-sm font-medium text-ink/70 transition-colors">{tab.label}</button>
+        ))}
+      </div>
+      <p class="mt-6 text-center text-sm text-faint"><span>{t.home.connect.caption}</span> <a href={localizePath("/features", lang)} class="text-accent hover:underline">{t.home.connect.captionLink}</a></p>
+    </div>
+  </section>
+
+  <!-- TMUX PERSISTENCE (two column) -->
+  <section class="section">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{t.home.tmux.eyebrow}</p>
+        <h2 class="mt-3 headline">{t.home.tmux.title}</h2>
+        <p class="mt-6 body-emph" set:html={highlightAnswer(t.home.tmux.body)}></p>
+        <a href={localizePath("/features/tmux-session-persistence", lang)} class="mt-8 inline-flex link-arrow"><span>{t.home.tmux.link}</span> <span aria-hidden="true">›</span></a>
+      </div>
+      <MediaBlock pos="30% 35%" alt="VVTerm tmux session persistence" />
+    </div>
+  </section>
+
+  <!-- CUSTOMIZATION + MONITORING (two-up) -->
+  <section class="px-6 pb-24 sm:pb-32">
+    <div class="container-wide grid gap-4 lg:grid-cols-2">
+      <a href={localizePath("/features/terminal-customization", lang)} class="group card flex flex-col p-8 transition hover:border-white/25 sm:p-10">
+        <Icon class="size-8 text-accent" name="lucide:palette" />
+        <h3 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{t.home.custom.title}</h3>
+        <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{t.home.custom.body}</p>
+        <span class="mt-6 link-arrow"><span>{t.home.custom.link}</span> <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" /></span>
+      </a>
+      <a href={localizePath("/features/server-monitoring", lang)} class="group card flex flex-col p-8 transition hover:border-white/25 sm:p-10">
+        <Icon class="size-8 text-accent" name="lucide:activity" />
+        <h3 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{t.home.monitor.title}</h3>
+        <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{t.home.monitor.body}</p>
+        <span class="mt-6 link-arrow"><span>{t.home.monitor.link}</span> <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" /></span>
+      </a>
+    </div>
+    <p class="container-wide mt-6 text-center text-sm text-faint"><span>{t.home.windows.caption}</span> <a href={localizePath("/features/windows-ssh", lang)} class="text-accent hover:underline">{t.home.windows.link}</a></p>
+  </section>
+
+  <!-- FILES (two column) -->
+  <section class="section">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <MediaBlock class="order-2 lg:order-1" pos="8% 50%" alt="VVTerm SFTP file browser" />
+      <div class="order-1 max-w-xl lg:order-2">
+        <p class="eyebrow-accent">{t.home.files.eyebrow}</p>
+        <h2 class="mt-3 headline">{t.home.files.title}</h2>
+        <p class="mt-6 body-emph" set:html={highlightAnswer(t.home.files.body)}></p>
+      </div>
+    </div>
+    <div class="container-wide mt-14 flex justify-center">
+      <Expandable id="sftp" label={t.home.files.expand}>
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="eyebrow-accent">{t.home.files.modalEyebrow}</p>
+          <h2 class="mt-3 headline">{t.home.files.modalTitle}</h2>
+          <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={highlightAnswer(t.home.files.modalBody)}></p>
+        </div>
+        <div class="mx-auto mt-14 max-w-5xl">
+          <MediaBlock pos="8% 50%" ratio="aspect-[16/10]" alt="VVTerm SFTP file browser" />
+        </div>
+
+        <div class="mx-auto mt-16 grid max-w-5xl gap-4 sm:grid-cols-3">
+          {fileCardIcons.map((icon, i) => (
+            <article class="card p-7 text-left">
+              <Icon class="size-6 text-accent" name={icon} />
+              <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{files[`card${i}title`]}</h3>
+              <p class="mt-2 text-[15px] leading-relaxed text-muted">{files[`card${i}body`]}</p>
+            </article>
+          ))}
+        </div>
+
+        <div class="mx-auto mt-16 max-w-4xl text-center">
+          <h3 class="text-2xl font-semibold tracking-[-0.02em] text-ink sm:text-3xl">{t.home.files.outroTitle}</h3>
+          <p class="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-muted">{t.home.files.outroBody}</p>
+        </div>
+        <div class="mx-auto mt-12 max-w-5xl">
+          <MediaBlock pos="92% 50%" ratio="aspect-[16/9]" alt="VVTerm file transfer" />
+        </div>
+
+        <div class="mt-12 text-center">
+          <a href={localizePath("/features/sftp-file-browser", lang)} class="link-arrow"><span>{t.home.files.overviewLink}</span> <span aria-hidden="true">›</span></a>
+        </div>
+      </Expandable>
+    </div>
+  </section>
+
+  <!-- VOICE (full-bleed gradient) -->
+  <section class="py-24 sm:py-32">
+    <div class="relative">
+      <div aria-hidden="true" class="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(41,151,255,0.45),rgba(120,80,255,0.25)_40%,transparent_70%)]"></div>
+      <div class="container-apple relative pt-44 text-center">
+        <p class="eyebrow-accent">{t.home.voice.eyebrow}</p>
+        <h2 class="mx-auto mt-3 max-w-[14ch] headline">{t.home.voice.title}</h2>
+        <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={highlightAnswer(t.home.voice.body)}></p>
+        <div class="mx-auto mt-16 max-w-2xl">
+          <MediaBlock pos="45% 20%" alt="VVTerm voice-to-command on iPhone" />
+        </div>
       </div>
     </div>
   </section>
 
-  <section id="faq" class="px-4 py-8 sm:px-6 sm:py-10">
-    <div class="mx-auto max-w-6xl">
-      <div>
-        <h2 class="text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-5xl" data-i18n="faq.title">{translations.en.faq.title}</h2>
-      </div>
-      <div class="mt-6 grid gap-4">
+  <!-- FEATURES carousel -->
+  <section class="py-16 sm:py-24">
+    <div class="container-wide">
+      <p class="eyebrow-accent">{t.home.work.eyebrow}</p>
+      <h2 class="mt-3 headline">{t.features.title}</h2>
+    </div>
+    <Carousel label="Features" variant="row">
+      {featureItems.map((feature, i) => (
+        <article class="w-[74vw] shrink-0 snap-start sm:w-[400px]">
+          <div class="aspect-[4/3] overflow-hidden rounded-[28px] bg-[#1d1d1f]">
+            <img src="/preview.png" alt="" class="size-full object-cover" style={`object-position:${["100% 40%", "0% 60%", "50% 50%", "80% 30%", "20% 70%", "60% 50%"][i]}`} loading="lazy" />
+          </div>
+          <p class="mt-5 max-w-[42ch] text-base leading-relaxed text-muted">
+            <strong class="font-semibold text-ink">{t.features[feature.key].title}</strong>{" "}
+            <span>{t.features[feature.key].desc}</span>
+          </p>
+        </article>
+      ))}
+    </Carousel>
+    <div class="container-wide">
+      <a href={localizePath("/features", lang)} class="mt-10 inline-flex link-arrow"><span>{t.home.work.all}</span> <span aria-hidden="true">›</span></a>
+    </div>
+  </section>
+
+  <!-- PLATFORMS -->
+  <section id="platforms" class="section">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">Mac · iPad · iPhone</p>
+      <h2 class="mx-auto mt-3 max-w-[18ch] headline">{t.platforms.title}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph">{t.platforms.subtitle}</p>
+    </div>
+    <div class="container-wide mt-16 grid gap-4 md:grid-cols-3">
+      {PLATFORMS.map((platform) => (
+        <a href={localizePath(`/${platform.slug}`, lang)} class="group card flex flex-col p-8 transition hover:border-white/25">
+          <Icon class="size-8 text-ink" name={platform.icon} />
+          <h3 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">VVTerm for {platform.name}</h3>
+          <p class="mt-3 flex-1 text-base leading-relaxed text-muted">
+            {t.platforms[platform.slug as "mac" | "ipad" | "iphone"].tagline}
+          </p>
+          <span class="mt-6 link-arrow">
+            <span>{t.platforms.cta}</span>
+            <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" />
+          </span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="section">
+    <div class="container-wide text-center">
+      <h2 class="mx-auto max-w-[20ch] headline">{t.pricing.title}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph">{t.pricing.subtitle}</p>
+    </div>
+    <PricingCards class="mt-16" />
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="section">
+    <div class="mx-auto max-w-[820px]">
+      <h2 class="text-4xl font-semibold tracking-[-0.02em] text-ink sm:text-5xl">{t.faq.title}</h2>
+      <div class="mt-10 border-t border-line">
         {faqs.map((key) => (
-          <article class="border-b border-slate-900/8 pb-4 dark:border-white/10 last:border-b-0 last:pb-0">
-            <h3 class="text-lg font-semibold tracking-[-0.03em] text-slate-950 dark:text-slate-100" data-i18n={`faq.${key}.question`}>
-              {translations.en.faq[key as keyof typeof translations.en.faq].question}
-            </h3>
-            <p class="mt-2 text-[15px] leading-7 text-slate-600 dark:text-slate-300" data-i18n-html={`faq.${key}.answer`} set:html={highlightAnswer(translations.en.faq[key as keyof typeof translations.en.faq].answer)} />
-          </article>
+          <details class="group border-b border-line">
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-6 py-5 text-left text-lg font-medium text-ink [&::-webkit-details-marker]:hidden">
+              <span>{t.faq[key].question}</span>
+              <Icon class="size-5 shrink-0 text-faint transition group-open:rotate-180" name="lucide:chevron-down" />
+            </summary>
+            <p class="pb-6 pr-10 text-base leading-relaxed text-muted" set:html={highlightAnswer(t.faq[key].answer)} />
+          </details>
         ))}
       </div>
     </div>
   </section>
 
-  <section class="px-4 py-12 sm:px-6 sm:py-16">
-    <div class="mx-auto flex max-w-4xl flex-col items-center text-center">
-      <img src="/logo.png" alt="VVTerm" width="72" height="72" class="size-18 object-contain drop-shadow-[0_0_24px_rgba(249,115,22,0.16)]" />
-      <h2 class="mt-6 text-3xl font-semibold tracking-[-0.05em] text-slate-950 dark:text-slate-100 sm:text-5xl" data-i18n="closing.title">{translations.en.closing.title}</h2>
-      <p class="mt-4 max-w-2xl text-base leading-8 text-slate-600 dark:text-slate-300 sm:text-lg" data-i18n="closing.subtitle">{translations.en.closing.subtitle}</p>
-      <a
-        class="mt-8 inline-flex min-h-13 items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-orange-600"
-        href={SITE.appStoreUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        data-track="closing_appstore_click"
-        data-conversion-value="0"
-      >
-        <Icon class="size-4" name="lucide:download" />
-        <span data-i18n="closing.cta">{translations.en.closing.cta}</span>
+  <!-- CLOSING -->
+  <section class="px-6 py-24 text-center sm:py-32">
+    <div class="mx-auto max-w-3xl">
+      <img src="/logo.png" alt="" width="72" height="72" class="mx-auto size-18 object-contain" />
+      <h2 class="mt-7 headline">{t.closing.title}</h2>
+      <p class="mx-auto mt-5 max-w-xl subhead">{t.closing.subtitle}</p>
+      <a class="btn-primary mt-9" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="closing_appstore_click" data-conversion-value="0">
+        <span>{t.closing.cta}</span>
       </a>
     </div>
   </section>
-
-  <footer class="relative px-4 pb-12 pt-14 text-slate-900 [background-image:radial-gradient(ellipse_70%_38%_at_50%_100%,rgba(249,115,22,0.10)_0%,rgba(249,115,22,0.03)_34%,transparent_72%)] dark:text-slate-100 dark:[background-image:radial-gradient(ellipse_70%_38%_at_50%_100%,rgba(249,115,22,0.18)_0%,rgba(249,115,22,0.05)_34%,transparent_72%)] sm:px-6 sm:pb-16 sm:pt-18">
-    <div class="relative mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)_minmax(0,0.75fr)]">
-      <div class="max-w-xl">
-        <div class="flex items-center gap-3">
-          <img src="/logo.png" alt="VVTerm" width="48" height="48" class="size-12 object-contain" />
-          <div>
-            <p class="text-xl font-semibold tracking-[-0.04em] text-slate-950 dark:text-white">VVTerm</p>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400" data-i18n="footer.tagline">{translations.en.footer.tagline}</p>
-          </div>
-        </div>
-        <p class="mt-6 max-w-lg text-sm leading-7 text-slate-600 dark:text-slate-400" data-i18n="footer.description">
-          {translations.en.footer.description}
-        </p>
-        <p class="mt-6 text-sm text-slate-500 dark:text-slate-500">© {currentYear} <span data-i18n="footer.copyright">{translations.en.footer.copyright}</span></p>
-      </div>
-
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500" data-i18n="footer.productTitle">{translations.en.footer.productTitle}</p>
-        <nav class="mt-5 grid gap-3 text-sm text-slate-700 dark:text-slate-300">
-          <a href="#why" class="transition hover:text-orange-500" data-i18n="footer.navWhy">{translations.en.footer.navWhy}</a>
-          <a href="#features" class="transition hover:text-orange-500" data-i18n="footer.navFeatures">{translations.en.footer.navFeatures}</a>
-          <a href="#pricing" class="transition hover:text-orange-500" data-i18n="footer.navPricing">{translations.en.footer.navPricing}</a>
-          <a href="#faq" class="transition hover:text-orange-500" data-i18n="footer.navFaq">{translations.en.footer.navFaq}</a>
-          <a class="inline-flex items-center gap-2 transition hover:text-orange-500" href={SITE.githubUrl} target="_blank" rel="noopener noreferrer" data-track="github_click_footer">
-            <Icon class="size-4" name="lucide:github" />
-            <span data-i18n="hero.secondaryCta">{translations.en.hero.secondaryCta}</span>
-          </a>
-        </nav>
-      </div>
-
-      <div>
-        <p class="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-500" data-i18n="footer.resourcesTitle">{translations.en.footer.resourcesTitle}</p>
-        <nav class="mt-5 grid gap-3 text-sm text-slate-700 dark:text-slate-300">
-          <a href={SITE.discordUrl} target="_blank" rel="noopener noreferrer" data-track="discord_click" data-i18n="footer.discord" class="transition hover:text-orange-500">
-            {translations.en.footer.discord}
-          </a>
-          <a href="/privacy" class="transition hover:text-orange-500" data-i18n="footer.privacy">{translations.en.footer.privacy}</a>
-          <a href="/terms" class="transition hover:text-orange-500" data-i18n="footer.terms">{translations.en.footer.terms}</a>
-          <a href="/refund" class="transition hover:text-orange-500" data-i18n="footer.refunds">{translations.en.footer.refunds}</a>
-          <a href="/support" class="transition hover:text-orange-500" data-i18n="footer.support">{translations.en.footer.support}</a>
-        </nav>
-      </div>
-    </div>
-    <div class="relative mx-auto mt-10 flex max-w-6xl justify-center lg:justify-end">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          aria-label="Toggle theme"
-          data-theme-toggle
-          class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-900/10 bg-white text-slate-700 transition hover:border-slate-900/15 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-        >
-          <Icon class="size-4 dark:hidden" name="lucide:moon" />
-          <Icon class="hidden size-4 dark:block" name="lucide:sun" />
-        </button>
-        <div class="relative">
-          <select
-            class="h-10 cursor-pointer appearance-none rounded-full border border-slate-900/10 bg-white pl-4 pr-10 text-sm text-slate-700 transition hover:border-slate-900/15 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
-            aria-label="Select language"
-            data-language-select
-          >
-            <option value="en">English</option>
-            <option value="zh">中文</option>
-          </select>
-          <Icon class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" name="lucide:chevron-down" />
-        </div>
-      </div>
-    </div>
-  </footer>
 </main>
-
-<script is:inline define:vars={{ translations, gtagConversionId: SITE.gtagConversionId }}>
-  const langSelect = document.querySelector("[data-language-select]");
-  const themeToggle = document.querySelector("[data-theme-toggle]");
-  const typingText = document.querySelector("[data-typing-text]");
-  const billingButtons = Array.from(document.querySelectorAll("[data-billing-toggle]"));
-  const pricingCta = document.querySelector("[data-pricing-cta]");
-  const monthlyPrice = document.querySelector("[data-price-monthly]");
-  const yearlyPrice = document.querySelector("[data-price-yearly]");
-  let typingTimer = null;
-  let typingVersion = 0;
-
-  const getByPath = (object, path) =>
-    path.split(".").reduce((value, part) => (value == null ? value : value[part]), object);
-
-  const highlightAnswer = (text) =>
-    text
-      .replace(/VVTerm/g, '<span class="text-orange-500">VVTerm</span>')
-      .replace(/libghostty/g, '<span class="text-orange-500">libghostty</span>')
-      .replace(/Ghostty/g, '<span class="text-orange-500">Ghostty</span>')
-      .replace(/iCloud/g, '<span class="text-orange-500">iCloud</span>')
-      .replace(/Apple Keychain/g, '<span class="text-orange-500">Apple Keychain</span>')
-      .replace(/Keychain/g, '<span class="text-orange-500">Keychain</span>');
-
-  const startTypingSequence = (phrases) => {
-    if (!typingText || !Array.isArray(phrases) || !phrases.length) return;
-    typingVersion += 1;
-    const version = typingVersion;
-    if (typingTimer) window.clearTimeout(typingTimer);
-
-    let phraseIndex = 0;
-    let charIndex = 0;
-    let deleting = false;
-
-    const tick = () => {
-      if (version !== typingVersion) return;
-      const currentPhrase = phrases[phraseIndex] || "";
-
-      if (!deleting) {
-        charIndex += 1;
-        typingText.textContent = currentPhrase.slice(0, charIndex);
-        if (charIndex >= currentPhrase.length) {
-          typingTimer = window.setTimeout(() => {
-            deleting = true;
-            tick();
-          }, 1400);
-          return;
-        }
-        typingTimer = window.setTimeout(tick, 72);
-        return;
-      }
-
-      charIndex -= 1;
-      typingText.textContent = currentPhrase.slice(0, Math.max(0, charIndex));
-      if (charIndex <= 0) {
-        deleting = false;
-        phraseIndex = (phraseIndex + 1) % phrases.length;
-        typingTimer = window.setTimeout(tick, 220);
-        return;
-      }
-      typingTimer = window.setTimeout(tick, 42);
-    };
-
-    typingText.textContent = "";
-    tick();
-  };
-
-  const applyLanguage = (lang) => {
-    const dictionary = translations[lang] || translations.en;
-    document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
-    if (langSelect) langSelect.value = lang;
-
-    document.querySelectorAll("[data-i18n]").forEach((node) => {
-      const value = getByPath(dictionary, node.dataset.i18n);
-      if (typeof value === "string") node.textContent = value;
-    });
-
-    document.querySelectorAll("[data-i18n-html]").forEach((node) => {
-      const value = getByPath(dictionary, node.dataset.i18nHtml);
-      if (typeof value === "string") node.innerHTML = highlightAnswer(value);
-    });
-
-    document.querySelectorAll("[data-i18n-list]").forEach((node) => {
-      const items = getByPath(dictionary, node.dataset.i18nList);
-      if (!Array.isArray(items)) return;
-      const isComparison = node.dataset.i18nList === "comparison.items";
-      node.innerHTML = items.map((item) => isComparison
-        ? `<li class="flex gap-3"><span class="font-semibold text-orange-500">•</span><span>${item}</span></li>`
-        : `<li class="flex gap-3"><span class="text-orange-500">✓</span><span>${item}</span></li>`).join("");
-    });
-
-    if (pricingCta) {
-      pricingCta.dataset.monthlyLabel = dictionary.pricing.pro.ctaMonthly;
-      pricingCta.dataset.yearlyLabel = dictionary.pricing.pro.ctaYearly;
-      syncBilling(pricingCta.dataset.billingCycle || "yearly");
-    }
-
-    startTypingSequence(dictionary.hero.eyebrowSequence || [dictionary.hero.eyebrow]);
-  };
-
-  const syncBilling = (cycle) => {
-    const isYearly = cycle === "yearly";
-    billingButtons.forEach((button) => {
-      button.classList.toggle("is-active", button.dataset.billingToggle === cycle);
-      button.classList.toggle("bg-white", button.dataset.billingToggle === cycle);
-      button.classList.toggle("dark:bg-white/10", button.dataset.billingToggle === cycle);
-      button.classList.toggle("text-slate-950", button.dataset.billingToggle === cycle);
-      button.classList.toggle("dark:text-slate-100", button.dataset.billingToggle === cycle);
-      button.classList.toggle("shadow-sm", button.dataset.billingToggle === cycle);
-      button.classList.toggle("text-slate-500", button.dataset.billingToggle !== cycle);
-      button.classList.toggle("dark:text-slate-400", button.dataset.billingToggle !== cycle);
-    });
-
-    if (monthlyPrice) monthlyPrice.hidden = isYearly;
-    if (yearlyPrice) yearlyPrice.hidden = !isYearly;
-    if (!pricingCta) return;
-
-    pricingCta.dataset.billingCycle = cycle;
-    pricingCta.dataset.track = isYearly ? pricingCta.dataset.yearlyTrack : pricingCta.dataset.monthlyTrack;
-    pricingCta.dataset.conversionValue = isYearly ? pricingCta.dataset.yearlyValue : pricingCta.dataset.monthlyValue;
-    pricingCta.textContent = isYearly ? pricingCta.dataset.yearlyLabel : pricingCta.dataset.monthlyLabel;
-  };
-
-  const trackEvent = (eventName) => {
-    if (window.umami && typeof window.umami.track === "function") window.umami.track(eventName);
-  };
-
-  const trackConversion = (event, eventName, value) => {
-    trackEvent(eventName);
-    if (typeof window.gtag !== "function") return;
-    event.preventDefault();
-    const url = event.currentTarget.href;
-    let navigated = false;
-    const navigate = () => {
-      if (navigated) return;
-      navigated = true;
-      window.open(url, "_blank", "noopener,noreferrer");
-    };
-    window.gtag("event", "conversion", {
-      send_to: gtagConversionId,
-      value: value || 0,
-      currency: "USD",
-      transaction_id: `${eventName}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
-      event_callback: navigate,
-    });
-    window.setTimeout(navigate, 1000);
-  };
-
-  if (langSelect) {
-    const storedLanguage = localStorage.getItem("vvterm-language");
-    const preferredLanguage = storedLanguage || ((navigator.language || "").startsWith("zh") ? "zh" : "en");
-    applyLanguage(preferredLanguage);
-    langSelect.addEventListener("change", (event) => {
-      const lang = event.currentTarget.value;
-      localStorage.setItem("vvterm-language", lang);
-      applyLanguage(lang);
-      trackEvent(`language_change_${lang}`);
-    });
-  }
-
-  if (themeToggle) {
-    themeToggle.addEventListener("click", () => {
-      const isDark = document.documentElement.classList.toggle("dark");
-      localStorage.setItem("vvterm-theme", isDark ? "dark" : "light");
-    });
-  }
-
-  billingButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const cycle = button.dataset.billingToggle;
-      if (!cycle) return;
-      syncBilling(cycle);
-      trackEvent(`billing_toggle_${cycle}`);
-    });
-  });
-
-  document.querySelectorAll("[data-track]").forEach((link) => {
-    link.addEventListener("click", (event) => {
-      const eventName = link.dataset.track;
-      const value = Number(link.dataset.conversionValue || "0");
-      if (!eventName) return;
-      if (link.dataset.conversionValue != null) {
-        trackConversion(event, eventName, value);
-      } else {
-        trackEvent(eventName);
-      }
-    });
-  });
-
-  if (pricingCta) syncBilling(pricingCta.dataset.billingCycle || "yearly");
-</script>

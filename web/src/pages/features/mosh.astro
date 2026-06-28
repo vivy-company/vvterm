@@ -1,0 +1,163 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "Mosh Roaming Sessions — VVTerm for iPhone, iPad, and Mac",
+    description:
+      "Mosh keeps your session alive across network changes, sleep, and flaky connections, with instant local echo and SSH fallback. Built into VVTerm for iPhone, iPad, and Mac.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "Mosh",
+    heroEyebrow: "Mosh",
+    heroTitle: "Sessions that<br />never let go.",
+    heroSubhead: "Mosh keeps your shell alive across network changes, sleep, and drops — with instant local echo and SSH fallback.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm Mosh roaming session",
+    statementEyebrow: "Stay connected",
+    statementTitle: "Close the lid. Keep the session.",
+    statementBody: "Step into an elevator, switch to cellular, or let your device sleep — your Mosh session <strong>picks up right where you left it</strong>, with no reconnect dance.",
+    benefits: [
+      { icon: "lucide:radio", title: "Survives drops", body: "Roaming sessions stay alive through Wi-Fi to cellular handoffs, sleep, and dropped links." },
+      { icon: "lucide:plug-zap", title: "Instant local echo", body: "Mosh predicts your keystrokes so typing feels immediate, even on a high-latency link." },
+      { icon: "lucide:square-terminal", title: "SSH fallback", body: "When Mosh is not available on a host, VVTerm falls back to a standard SSH session." },
+      { icon: "lucide:smartphone", title: "Made for mobile", body: "Ideal on iPhone and iPad, where networks change as you move between places." },
+    ],
+    crossEyebrow: "Set it up",
+    crossTitle: "A few minutes to roaming sessions.",
+    crossBody: "Point VVTerm at a host running Mosh and connect. If the server does not have Mosh, you still get a <strong>standard SSH session</strong> automatically.",
+    guideLink: "Set up Mosh on iPhone and iPad",
+    terminalLink: "See the SSH terminal",
+    tailscaleLink: "Reach machines over Tailscale SSH",
+    crossAlt: "VVTerm Mosh with SSH fallback",
+    faqItems: [
+      { question: "What does Mosh do?", answer: "Mosh keeps your remote session alive across network changes, sleep, and flaky connections, and adds instant local echo so typing feels responsive." },
+      { question: "Does my session survive switching networks?", answer: "Yes. A Mosh session roams across network changes — for example Wi-Fi to cellular — without dropping." },
+      { question: "What happens if the host has no Mosh?", answer: "VVTerm falls back to a standard SSH session when Mosh is not available on the server." },
+      { question: "Why does typing feel faster with Mosh?", answer: "Mosh uses instant local echo to predict and show your keystrokes immediately, even on a high-latency connection." },
+      { question: "Is Mosh useful on iPhone and iPad?", answer: "Yes. Mosh is especially helpful on mobile, where you move between networks and the device sleeps often." },
+      { question: "What do I need on the server?", answer: "The server needs Mosh installed and reachable. Otherwise VVTerm connects over standard SSH." },
+    ],
+    ctaTitle: "Never lose a session again.",
+    ctaSubtitle: "Download VVTerm free and connect with Mosh.",
+  },
+  zh: {
+    title: "Mosh 漫游会话 — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
+    description:
+      "Mosh 让你的会话在网络切换、睡眠和不稳定连接中保持存活，并提供即时本地回显和 SSH 回退。内置于适用于 iPhone、iPad 和 Mac 的 VVTerm。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "Mosh",
+    heroEyebrow: "Mosh",
+    heroTitle: "永不松手的<br />会话。",
+    heroSubhead: "Mosh 让你的 shell 在网络切换、睡眠和断线中保持存活 —— 配合即时本地回显和 SSH 回退。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm Mosh 漫游会话",
+    statementEyebrow: "保持连接",
+    statementTitle: "合上盖子，保留会话。",
+    statementBody: "走进电梯、切换到蜂窝网络，或让设备睡眠 —— 你的 Mosh 会话会<strong>从你离开的地方继续</strong>，无需重新连接的折腾。",
+    benefits: [
+      { icon: "lucide:radio", title: "在断线中存活", body: "漫游会话在 Wi-Fi 到蜂窝的切换、睡眠和断链中保持存活。" },
+      { icon: "lucide:plug-zap", title: "即时本地回显", body: "Mosh 预测你的击键，因此即使在高延迟链路上，打字也感觉即时。" },
+      { icon: "lucide:square-terminal", title: "SSH 回退", body: "当主机上没有 Mosh 时，VVTerm 会回退到标准 SSH 会话。" },
+      { icon: "lucide:smartphone", title: "为移动而生", body: "在 iPhone 和 iPad 上尤为理想，因为你在不同地点间移动时网络会变化。" },
+    ],
+    crossEyebrow: "开始设置",
+    crossTitle: "几分钟即可拥有漫游会话。",
+    crossBody: "让 VVTerm 指向一台运行 Mosh 的主机并连接。如果服务器没有 Mosh，你仍会自动获得一个<strong>标准 SSH 会话</strong>。",
+    guideLink: "在 iPhone 和 iPad 上设置 Mosh",
+    terminalLink: "查看 SSH 终端",
+    tailscaleLink: "通过 Tailscale SSH 访问机器",
+    crossAlt: "VVTerm Mosh 带 SSH 回退",
+    faqItems: [
+      { question: "Mosh 有什么作用？", answer: "Mosh 让你的远程会话在网络切换、睡眠和不稳定连接中保持存活，并加入即时本地回显，使打字感觉灵敏。" },
+      { question: "切换网络后我的会话还在吗？", answer: "在。Mosh 会话能在网络切换中漫游 —— 例如 Wi-Fi 到蜂窝 —— 而不掉线。" },
+      { question: "如果主机没有 Mosh 会怎样？", answer: "当服务器上没有 Mosh 时，VVTerm 会回退到标准 SSH 会话。" },
+      { question: "为什么用 Mosh 打字感觉更快？", answer: "Mosh 使用即时本地回显来预测并立即显示你的击键，即使在高延迟连接上也是如此。" },
+      { question: "Mosh 在 iPhone 和 iPad 上有用吗？", answer: "有用。Mosh 在移动场景中尤其有帮助 —— 你在不同网络间移动，且设备经常睡眠。" },
+      { question: "服务器上需要什么？", answer: "服务器需要安装并可访问 Mosh。否则 VVTerm 会通过标准 SSH 连接。" },
+    ],
+    ctaTitle: "再也不丢失会话。",
+    ctaSubtitle: "免费下载 VVTerm，用 Mosh 连接。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm Mosh Sessions", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/mosh", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/mosh" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/mosh" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:radio" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="mosh_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="30% 35%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.crossEyebrow}</p>
+        <h2 class="mt-3 headline">{C.crossTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.crossBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/guides/set-up-mosh-on-ios", lang)} class="inline-flex link-arrow">{C.guideLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/ssh-terminal", lang)} class="inline-flex link-arrow">{C.terminalLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/tailscale-ssh", lang)} class="inline-flex link-arrow">{C.tailscaleLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <MediaBlock pos="60% 60%" alt={C.crossAlt} />
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="mosh_cta_appstore" />
+</MarketingLayout>

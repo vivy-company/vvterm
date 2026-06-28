@@ -1,22 +1,37 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* Type: rely on the locally-installed Apple typeface (SF Pro Text/Display) when present,
+   otherwise the OS system font. On Apple devices this resolves to San Francisco natively,
+   so we match Apple's look without bundling Apple's proprietary web fonts. */
+
+@theme {
+  /* Apple-style dark palette */
+  --color-ink: #f5f5f7; /* near-white headlines */
+  --color-muted: #86868b; /* gray body text */
+  --color-faint: #6e6e73; /* dimmer labels / footnotes */
+  --color-surface: #1d1d1f; /* cards */
+  --color-surface-2: #161617; /* alt cards / nav */
+  --color-surface-hover: #2a2a2c; /* hovered control surfaces */
+  --color-line: #2a2a2c; /* hairline borders */
+  --color-accent: #2997ff; /* links / bright accent */
+  --color-accent-strong: #0071e3; /* primary button */
+  --color-accent-hover: #0077ed;
+  /* Apple type families */
+  --font-sans: "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-headline: "SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
 
 @layer base {
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     scroll-behavior: smooth;
+    background-color: #000;
   }
 
   body {
-    font-family:
-      -apple-system,
-      BlinkMacSystemFont,
-      "SF Pro Display",
-      "SF Pro Text",
-      system-ui,
-      sans-serif;
+    font-family: var(--font-sans);
+    letter-spacing: -0.01em;
   }
 
   h1,
@@ -24,11 +39,88 @@
   h3,
   h4,
   h5,
-  h6,
-  p,
-  li,
-  blockquote,
-  figcaption {
+  h6 {
     text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: rgba(41, 151, 255, 0.3);
+  }
+
+  /* Scroll-reveal / entrance animations (gated by .reveal-on added via JS; no-JS = visible).
+     Opacity-only so it can never shift layout / affect perceived spacing. */
+  @media (prefers-reduced-motion: no-preference) {
+    html.reveal-on [data-reveal] {
+      opacity: 0;
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    html.reveal-on [data-reveal].is-in {
+      opacity: 1;
+    }
+  }
+}
+
+@layer components {
+  /* Section container — Apple content column ~980, wide galleries ~1080 */
+  .container-apple {
+    @apply mx-auto w-full max-w-[980px] px-6;
+  }
+  .container-wide {
+    @apply mx-auto w-full max-w-[1080px] px-6;
+  }
+
+  /* Section vertical rhythm (Apple ~128px) */
+  .section {
+    @apply px-6 py-24 sm:py-32;
+  }
+  .section-tight {
+    @apply px-6 py-16 sm:py-24;
+  }
+
+  /* Typographic scale (Apple typography values from apple.com/logic-pro) */
+  .eyebrow-accent {
+    @apply font-headline text-2xl font-semibold leading-tight tracking-[0.005em] text-accent sm:text-[1.75rem];
+  }
+  .headline-hero {
+    @apply font-headline text-[2.5rem] font-semibold leading-[1.05] tracking-[-0.015em] text-ink sm:text-[4rem] lg:text-[5rem];
+  }
+  .headline {
+    @apply font-headline text-[2.5rem] font-semibold leading-[1.0625] tracking-[-0.009em] text-ink sm:text-5xl lg:text-[4rem];
+  }
+  .headline-sm {
+    @apply font-headline text-[2rem] font-semibold leading-[1.1] tracking-[0.004em] text-ink sm:text-[2.5rem];
+  }
+  /* Card / sub-section title */
+  .title-card {
+    @apply text-xl font-semibold tracking-[-0.02em] text-ink;
+  }
+  .subhead {
+    @apply text-xl leading-snug text-muted sm:text-[1.375rem];
+  }
+  /* Gray body with white emphasis via <strong> */
+  .body-emph {
+    @apply text-xl leading-snug text-muted sm:text-[1.375rem];
+  }
+  .body-emph strong {
+    @apply font-semibold text-ink;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-accent-strong px-6 py-2.5 text-base font-medium text-white transition hover:bg-accent-hover;
+  }
+  .btn-light {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-ink px-6 py-2.5 text-base font-medium text-black transition hover:bg-white;
+  }
+  .btn-outline {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#5b5b5e] bg-transparent px-6 py-2.5 text-base font-medium text-ink transition hover:border-ink;
+  }
+  .link-arrow {
+    @apply inline-flex items-center gap-1 text-base font-medium text-accent transition hover:underline;
+  }
+
+  /* Surfaces — Apple tiles are flat #1d1d1f, no border by default */
+  .card {
+    @apply rounded-3xl bg-surface;
   }
 }

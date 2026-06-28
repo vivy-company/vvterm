@@ -1,0 +1,163 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "Cloudflare Tunnel SSH — VVTerm for iPhone, iPad, and Mac",
+    description:
+      "Connect to servers behind Cloudflare Tunnel without opening inbound ports, straight from VVTerm on iPhone, iPad, and Mac.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "Cloudflare Tunnel SSH",
+    heroEyebrow: "Cloudflare Tunnel SSH",
+    heroTitle: "Connect in,<br />nothing exposed.",
+    heroSubhead: "Reach servers behind Cloudflare Tunnel without opening a single inbound port — straight from VVTerm.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm SSH over Cloudflare Tunnel",
+    statementEyebrow: "Closed by default",
+    statementTitle: "Keep every inbound port shut.",
+    statementBody: "Your origin server stays sealed while the tunnel does the connecting — so you get SSH access <strong>without opening inbound ports</strong> or punching holes in a firewall.",
+    benefits: [
+      { icon: "lucide:cloud", title: "Reach tunneled hosts", body: "Connect to servers exposed through Cloudflare Tunnel using your tunnel hostname." },
+      { icon: "lucide:shield", title: "No inbound ports", body: "Your origin server keeps every inbound port closed — the tunnel does the reaching." },
+      { icon: "lucide:plug-zap", title: "No firewall holes", body: "Skip inbound firewall rules and NAT setup for SSH access to the box." },
+      { icon: "lucide:square-terminal", title: "Same terminal", body: "Tunneled hosts run in the same GPU terminal and tabs as your other connections." },
+    ],
+    crossEyebrow: "Set it up",
+    crossTitle: "Point VVTerm at your tunnel.",
+    crossBody: "Add a server with your <strong>tunnel hostname</strong> and connect. The origin keeps its inbound ports closed the whole time.",
+    guideLink: "Connect over Cloudflare Tunnel SSH",
+    tailscaleLink: "Or reach machines over Tailscale SSH",
+    terminalLink: "See the SSH terminal",
+    crossAlt: "VVTerm connecting to a sealed origin server",
+    faqItems: [
+      { question: "What does Cloudflare Tunnel SSH do?", answer: "It lets you connect to servers behind a Cloudflare Tunnel without opening any inbound ports on the origin." },
+      { question: "Do I need to open ports on my server?", answer: "No. The whole point is that the origin keeps inbound ports closed while the tunnel handles the connection." },
+      { question: "How do I address the server?", answer: "Connect using the hostname you have configured for the tunnel in Cloudflare." },
+      { question: "Does it work the same as a normal SSH session?", answer: "Yes. Once connected, a tunneled host behaves like any other SSH session in VVTerm, including the file browser." },
+      { question: "Is it available on iPhone and Mac?", answer: "Yes. Cloudflare Tunnel SSH connections work on iPhone, iPad, and Mac." },
+      { question: "Why use a tunnel instead of opening a port?", answer: "A tunnel avoids inbound firewall rules and public exposure, reducing the attack surface of your server." },
+    ],
+    ctaTitle: "SSH in without opening a port.",
+    ctaSubtitle: "Download VVTerm free and connect over Cloudflare Tunnel.",
+  },
+  zh: {
+    title: "Cloudflare Tunnel SSH — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
+    description:
+      "无需开放入站端口，直接从 iPhone、iPad 和 Mac 上的 VVTerm 连接 Cloudflare Tunnel 后方的服务器。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "Cloudflare Tunnel SSH",
+    heroEyebrow: "Cloudflare Tunnel SSH",
+    heroTitle: "连得进去，<br />毫无暴露。",
+    heroSubhead: "无需开放任何一个入站端口即可访问 Cloudflare Tunnel 后方的服务器 —— 直接从 VVTerm。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm 通过 Cloudflare Tunnel 进行 SSH",
+    statementEyebrow: "默认关闭",
+    statementTitle: "让每一个入站端口都保持关闭。",
+    statementBody: "你的源服务器保持封闭，而由隧道负责建立连接 —— 因此你无需开放入站端口或在防火墙上打洞即可获得 SSH 访问。",
+    benefits: [
+      { icon: "lucide:cloud", title: "访问隧道主机", body: "使用你的隧道主机名连接通过 Cloudflare Tunnel 暴露的服务器。" },
+      { icon: "lucide:shield", title: "无入站端口", body: "你的源服务器保持所有入站端口关闭 —— 由隧道负责连接。" },
+      { icon: "lucide:plug-zap", title: "无防火墙漏洞", body: "为对该主机的 SSH 访问省去入站防火墙规则和 NAT 设置。" },
+      { icon: "lucide:square-terminal", title: "同一个终端", body: "隧道主机运行在与你其他连接相同的 GPU 终端和标签页中。" },
+    ],
+    crossEyebrow: "开始设置",
+    crossTitle: "让 VVTerm 指向你的隧道。",
+    crossBody: "用你的<strong>隧道主机名</strong>添加服务器并连接。源服务器始终保持入站端口关闭。",
+    guideLink: "通过 Cloudflare Tunnel SSH 连接",
+    tailscaleLink: "或通过 Tailscale SSH 访问机器",
+    terminalLink: "查看 SSH 终端",
+    crossAlt: "VVTerm 连接到封闭的源服务器",
+    faqItems: [
+      { question: "Cloudflare Tunnel SSH 有什么作用？", answer: "它让你无需在源服务器上开放任何入站端口，即可连接 Cloudflare Tunnel 后方的服务器。" },
+      { question: "我需要在服务器上开放端口吗？", answer: "不需要。其核心就在于源服务器保持入站端口关闭，而由隧道处理连接。" },
+      { question: "我如何寻址服务器？", answer: "使用你在 Cloudflare 中为隧道配置的主机名连接。" },
+      { question: "它和普通 SSH 会话一样吗？", answer: "一样。连接后，隧道主机在 VVTerm 中的表现与任何其他 SSH 会话相同，包括文件浏览器。" },
+      { question: "它在 iPhone 和 Mac 上可用吗？", answer: "可用。Cloudflare Tunnel SSH 连接在 iPhone、iPad 和 Mac 上均可工作。" },
+      { question: "为什么用隧道而不是开放端口？", answer: "隧道避免了入站防火墙规则和公网暴露，减小了服务器的攻击面。" },
+    ],
+    ctaTitle: "无需开放端口即可 SSH 连入。",
+    ctaSubtitle: "免费下载 VVTerm，通过 Cloudflare Tunnel 连接。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm Cloudflare Tunnel SSH", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/cloudflare-tunnel-ssh", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/cloudflare-tunnel-ssh" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/cloudflare-tunnel-ssh" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:cloud" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="cloudflare_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="80% 30%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.crossEyebrow}</p>
+        <h2 class="mt-3 headline">{C.crossTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.crossBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/guides/cloudflare-tunnel-ssh-setup", lang)} class="inline-flex link-arrow">{C.guideLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/tailscale-ssh", lang)} class="inline-flex link-arrow">{C.tailscaleLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/ssh-terminal", lang)} class="inline-flex link-arrow">{C.terminalLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <MediaBlock pos="52% 70%" alt={C.crossAlt} />
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="cloudflare_cta_appstore" />
+</MarketingLayout>

@@ -3,22 +3,12 @@
     "download": "Download"
   },
   "hero": {
-    "eyebrow": "Built for everyday remote work",
-    "eyebrowSequence": [
-      "Built for everyday remote work",
-      "SSH, Mosh, and Tailscale",
-      "Built-in SFTP remote files",
-      "Cloudflare Tunnel SSH included",
-      "Built on Ghostty terminal emulation",
-      "iCloud-synced server metadata",
-      "Keychain-secured credentials",
-      "Across iPhone, iPad, and Mac"
-    ],
     "title": "A better native SSH client for Apple devices",
+    "h1": "SSH that feels native.",
     "subtitle": "Connect to servers, keep them organized, browse remote files, and stay in sync with Keychain-secured credentials across your iPhone, iPad, and Mac.",
-    "primaryCta": "Try VVTerm free",
+    "primaryCta": "Try it free",
     "secondaryCta": "View on GitHub",
-    "meta": "Requires iOS 16+ or macOS 13+ (Apple Silicon). Free forever, or <span class=\"text-orange-500 font-medium\">buy lifetime</span>."
+    "meta": "Requires iOS 16+ or macOS 13+ (Apple Silicon). Free forever, or <a href=\"/pricing\" class=\"text-accent font-medium hover:underline\">buy lifetime ›</a>."
   },
   "why": {
     "title": "Why choose VVTerm",
@@ -147,7 +137,7 @@
     }
   },
   "faq": {
-    "title": "Frequently asked questions",
+    "title": "Questions? Answers.",
     "q1": {
       "question": "What is VVTerm?",
       "answer": "VVTerm is an SSH terminal app for iOS and macOS. It lets you manage and connect to remote servers with iCloud sync across your Apple devices."
@@ -189,10 +179,100 @@
       "answer": "Yes. VVTerm includes a built-in SFTP Files view for browsing folders, previewing text, image, and video files, uploading and downloading, renaming or moving items, creating folders, and editing POSIX permissions on supported servers."
     }
   },
+  "platforms": {
+    "title": "One app, native on every Apple device",
+    "subtitle": "VVTerm adapts to each platform — a full GPU terminal on Mac, a real workstation on iPad, and quick access on iPhone.",
+    "cta": "Learn more",
+    "mac": { "tagline": "GPU terminal with tabs, SFTP, and iCloud-synced servers." },
+    "ipad": { "tagline": "Hardware keyboard, multitasking, and Mosh roaming." },
+    "iphone": { "tagline": "Reconnect from anywhere and fix things on the go." }
+  },
+  "resources": {
+    "title": "Learn, compare, and get set up",
+    "subtitle": "Guides, documentation, and head-to-head comparisons to help you get the most out of VVTerm.",
+    "guides": { "title": "Guides", "desc": "Step-by-step walkthroughs for SSH, Mosh, Tailscale SSH, and SFTP." },
+    "docs": { "title": "Documentation", "desc": "Reference for setup, authentication, sync, and the file browser." },
+    "compare": { "title": "Comparisons", "desc": "See how VVTerm stacks up against Termius and Blink Shell." }
+  },
   "closing": {
     "title": "Your servers. Anywhere.",
     "subtitle": "Start free on iPhone, iPad, and Mac.",
     "cta": "Download VVTerm"
+  },
+  "home": {
+    "promo": {
+      "title": "Open source. Free forever.",
+      "desc": "Standard SSH, Mosh, Tailscale SSH, and Cloudflare Tunnel SSH in one native app — with tmux session persistence, an SFTP file browser, live monitoring, iCloud sync, and Keychain security."
+    },
+    "tour": {
+      "title": "Get to know VVTerm.",
+      "c0": "A terminal that feels instant.",
+      "c1": "Remote files, right beside your shell.",
+      "c2": "Every server, organized.",
+      "c3": "Reconnect from anywhere with Mosh.",
+      "c4": "Synced across iPhone, iPad, and Mac.",
+      "c5": "Talk to your terminal with voice."
+    },
+    "connect": {
+      "eyebrow": "Modern SSH, built in",
+      "title": "Reach any machine, four ways.",
+      "body": "Use <strong>standard SSH</strong> when you want it and <strong>Mosh</strong>, <strong>Tailscale SSH</strong>, or <strong>Cloudflare Tunnel SSH</strong> when you need them — no extra tools to juggle.",
+      "caption": "Switch transports per server.",
+      "captionLink": "See all connection methods ›"
+    },
+    "tmux": {
+      "eyebrow": "Never lose your work",
+      "title": "Sessions that survive the drop.",
+      "body": "VVTerm manages <strong>tmux</strong> for you, so a long build or migration keeps running when your connection blinks, your phone sleeps, or you switch apps. It <strong>auto-installs tmux</strong>, ships a tuned config, and reattaches the moment you reconnect.",
+      "link": "How tmux persistence works"
+    },
+    "custom": {
+      "title": "Make it yours.",
+      "body": "440 built-in themes, Nerd Fonts, cursor styles, and a keyboard toolbar you build with your own command snippets and shortcuts — synced across devices.",
+      "link": "Themes & customization"
+    },
+    "monitor": {
+      "title": "Watch it live.",
+      "body": "CPU, memory, network, disk, load, and top processes in real time — right beside your shell, on Linux, macOS, BSD, and Windows hosts.",
+      "link": "Live server monitoring"
+    },
+    "windows": {
+      "caption": "Connecting to Windows too?",
+      "link": "SSH to Windows servers ›"
+    },
+    "files": {
+      "eyebrow": "Files, built in",
+      "title": "An SFTP browser, right beside your shell.",
+      "body": "Browse remote folders, <strong>upload and download</strong>, create directories, rename, move, and delete — then <strong>preview text, images, and video</strong> or edit POSIX permissions, all without a second app.",
+      "expand": "Explore the SFTP browser",
+      "modalEyebrow": "SFTP file browser",
+      "modalTitle": "Everything you need for remote files.",
+      "modalBody": "A full file manager built into VVTerm — <strong>browse, upload, download, rename, move, and delete</strong>, create folders, <strong>preview text, images, and video</strong>, edit supported text files, and adjust POSIX permissions on servers that allow it.",
+      "card0title": "Browse and manage",
+      "card0body": "Move through remote folders, then rename, move, delete, and create directories in place.",
+      "card1title": "Transfer both ways",
+      "card1body": "Upload from your device and download to it — single files or whole folders over SFTP.",
+      "card2title": "Preview inline",
+      "card2body": "Open text, images, and video right in VVTerm without downloading them first.",
+      "card3title": "Edit text files",
+      "card3body": "Make quick edits to supported text files and save them straight back to the server.",
+      "card4title": "POSIX permissions",
+      "card4body": "Inspect and adjust owner, group, and other permission bits on servers that allow it.",
+      "card5title": "Right beside your shell",
+      "card5body": "Jump between the terminal and the file browser for the same server without switching apps.",
+      "outroTitle": "No second app. No context switch.",
+      "outroBody": "Most SSH clients send you to a separate SFTP app for file work. VVTerm keeps files and terminal together, so checking a config, fixing a permission, or pulling a log never breaks your flow.",
+      "overviewLink": "Read the full SFTP overview"
+    },
+    "voice": {
+      "eyebrow": "Voice to command",
+      "title": "Talk to your terminal.",
+      "body": "Dictate commands on the go with <strong>on-device transcription</strong>. VVTerm turns speech into shell input using MLX models or Apple Speech — useful when you are away from a keyboard."
+    },
+    "work": {
+      "eyebrow": "Everyday remote work",
+      "all": "All features"
+    }
   },
   "footer": {
     "tagline": "Native SSH client for iPhone, iPad, and Mac",
@@ -209,5 +289,58 @@
     "terms": "Terms of Use (EULA)",
     "refunds": "Refunds",
     "support": "Support"
+  },
+  "nav": {
+    "platforms": "Platforms",
+    "features": "Features",
+    "pricing": "Pricing",
+    "resources": "Resources",
+    "product": "Product",
+    "legal": "Legal",
+    "guides": "Guides",
+    "documentation": "Documentation",
+    "support": "Support",
+    "comparisons": "Comparisons",
+    "compare": "Compare",
+    "compareApps": "Compare apps",
+    "allComparisons": "All comparisons",
+    "download": "Download",
+    "downloadVVTerm": "Download VVTerm",
+    "downloadAppStore": "Download on the App Store",
+    "exploreVVTerm": "Explore VVTerm",
+    "getVVTerm": "Get VVTerm",
+    "getStarted": "Get started",
+    "learn": "Learn",
+    "terminal": "Terminal",
+    "connections": "Connections",
+    "filesSync": "Files & sync",
+    "allFeatures": "All features",
+    "allFeaturesArrow": "All features ›",
+    "home": "Home",
+    "platformLink": "VVTerm for {name}",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfUse": "Terms of Use",
+    "privacy": "Privacy",
+    "terms": "Terms of Use (EULA)",
+    "refunds": "Refunds",
+    "requirement": "VVTerm requires iPhone or iPad on iOS 16 or later, or a Mac with Apple Silicon on macOS 13 Ventura or later. Server metadata syncs through iCloud; passwords and SSH keys are stored in Apple Keychain. Purchases and refunds are handled by Apple through the App Store.",
+    "copyright": "Copyright © {year} Vivy Technologies Co., Limited. All rights reserved.",
+    "feature": {
+      "ssh-terminal": "SSH terminal",
+      "tmux-session-persistence": "tmux persistence",
+      "terminal-customization": "Customization",
+      "sftp-file-browser": "SFTP files",
+      "server-monitoring": "Server monitoring",
+      "windows-ssh": "Windows SSH",
+      "mosh": "Mosh",
+      "tailscale-ssh": "Tailscale SSH",
+      "cloudflare-tunnel-ssh": "Cloudflare Tunnel SSH",
+      "icloud-sync-keychain": "iCloud sync & Keychain"
+    }
+  },
+  "cta": {
+    "title": "Your servers. Anywhere.",
+    "subtitle": "Start free on iPhone, iPad, and Mac. Upgrade to Pro or buy lifetime whenever you need more.",
+    "seePricing": "See pricing"
   }
 }

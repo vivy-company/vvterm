@@ -1,0 +1,31 @@
+---
+// Unified carousel card: full image with an overlaid caption (top or bottom).
+// Temporary art uses crops of /preview.png — swap `img`/`pos` later.
+interface Props {
+  img?: string;
+  pos?: string;
+  title: string;
+  caption?: "top" | "bottom";
+  i18nKey?: string;
+}
+
+const { img = "/preview.png", pos = "50% 50%", title, caption = "top", i18nKey } = Astro.props;
+---
+
+<article class="relative w-[88vw] shrink-0 snap-center overflow-hidden rounded-[28px] bg-surface sm:w-[900px]">
+  <div class="aspect-[16/10]">
+    <img src={img} alt={title} class="size-full object-cover" style={`object-position:${pos}`} loading="lazy" decoding="async" />
+  </div>
+  <div
+    class:list={[
+      "absolute inset-x-0 p-8 sm:p-10",
+      caption === "bottom"
+        ? "bottom-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent"
+        : "top-0 bg-gradient-to-b from-black/65 via-black/25 to-transparent",
+    ]}
+  >
+    <p class="max-w-[24ch] text-2xl font-semibold leading-tight tracking-[-0.015em] text-ink sm:text-[28px]" {...(i18nKey ? { "data-i18n": i18nKey } : {})}>
+      {title}
+    </p>
+  </div>
+</article>

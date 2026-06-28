@@ -1,0 +1,15 @@
+---
+import HomePage from "../../components/HomePage.astro";
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import { softwareSchema, websiteSchema } from "../../lib/site";
+---
+
+<MarketingLayout
+  title="VVTerm - 适用于 iPhone、iPad 和 Mac 的 SSH 终端与 SFTP 客户端"
+  description="你的服务器，随处可达。适用于 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端，支持 tmux 会话保持、Mosh、Tailscale SSH 与 Cloudflare Tunnel SSH、实时监控、iCloud 同步以及 Keychain 安全。"
+  canonicalPath="/"
+  structuredData={[softwareSchema, websiteSchema]}
+  showLanguage={true}
+>
+  <HomePage />
+</MarketingLayout>

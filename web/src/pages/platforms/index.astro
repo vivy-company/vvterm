@@ -1,0 +1,131 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import { Icon } from "astro-icon/components";
+import { SITE } from "../../lib/site";
+import { PLATFORMS } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    metaTitle: "Platforms — VVTerm for Mac, iPad, and iPhone",
+    metaDescription: "VVTerm is a native SSH terminal and SFTP client for Apple devices. Explore VVTerm for Mac, iPad, and iPhone — built for Apple Silicon with iCloud sync and Keychain security.",
+    bcHome: "Home",
+    bcPlatforms: "Platforms",
+    eyebrow: "Platforms",
+    heroTitle: "One SSH app,<br />every Apple device.",
+    heroSubhead: "A native terminal for Mac, iPad, and iPhone — with tmux session persistence, live monitoring, deep customization, and servers and credentials that sync through iCloud.",
+    seeFeatures: "See all features",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    vvtermFor: "VVTerm for",
+    explore: "Explore",
+    ctaTitle: "Start on one device, finish on another.",
+    ctaSubtitle: "Download VVTerm free and your servers follow you across Mac, iPad, and iPhone.",
+    cards: {
+      mac: {
+        tagline: "A native SSH terminal for macOS",
+        summary: "GPU-rendered terminal with tabs and split panes, tmux session persistence, an SFTP file browser, live monitoring, and iCloud-synced servers — built for Apple Silicon Macs.",
+        requirement: "macOS 13 Ventura or later · Apple Silicon",
+      },
+      ipad: {
+        tagline: "Turn iPad into a real SSH workstation",
+        summary: "Hardware-keyboard shortcuts, Stage Manager multitasking, a customizable terminal toolbar, tmux persistence, and Mosh sessions that survive network drops.",
+        requirement: "iPadOS 16 or later",
+      },
+      iphone: {
+        tagline: "Your servers in your pocket",
+        summary: "Reconnect from anywhere with Mosh, keep sessions alive with tmux, check live server stats, browse remote files, and keep credentials in Keychain.",
+        requirement: "iOS 16 or later",
+      },
+    },
+  },
+  zh: {
+    metaTitle: "平台 — 适用于 Mac、iPad 和 iPhone 的 VVTerm",
+    metaDescription: "VVTerm 是为 Apple 设备打造的原生 SSH 终端与 SFTP 客户端。了解适用于 Mac、iPad 和 iPhone 的 VVTerm —— 专为 Apple Silicon 打造，具备 iCloud 同步和 Keychain 安全。",
+    bcHome: "首页",
+    bcPlatforms: "平台",
+    eyebrow: "平台",
+    heroTitle: "一款 SSH 应用，<br />覆盖每台 Apple 设备。",
+    heroSubhead: "为 Mac、iPad 和 iPhone 打造的原生终端 —— 具备 tmux 会话持久化、实时监控、深度自定义，服务器和凭据通过 iCloud 同步。",
+    seeFeatures: "查看全部功能",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    vvtermFor: "VVTerm for",
+    explore: "了解",
+    ctaTitle: "在一台设备开始，在另一台完成。",
+    ctaSubtitle: "免费下载 VVTerm，你的服务器将在 Mac、iPad 和 iPhone 间一路跟随你。",
+    cards: {
+      mac: {
+        tagline: "macOS 上的原生 SSH 终端",
+        summary: "GPU 渲染终端，支持标签页与分屏、tmux 会话持久化、SFTP 文件浏览器、实时监控和 iCloud 同步服务器 —— 专为 Apple Silicon Mac 打造。",
+        requirement: "macOS 13 Ventura 或更高版本 · Apple Silicon",
+      },
+      ipad: {
+        tagline: "把 iPad 变成真正的 SSH 工作站",
+        summary: "硬件键盘快捷键、台前调度多任务、可自定义的终端工具栏、tmux 持久化，以及能在断网中存续的 Mosh 会话。",
+        requirement: "iPadOS 16 或更高版本",
+      },
+      iphone: {
+        tagline: "你的服务器，装进口袋",
+        summary: "用 Mosh 随处重连，用 tmux 让会话保持存活，查看实时服务器统计，浏览远程文件，并将凭据保存在 Keychain 中。",
+        requirement: "iOS 16 或更高版本",
+      },
+    },
+  },
+}, lang);
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: C.metaTitle,
+  description: C.metaDescription,
+  url: `${SITE.siteUrl}${localizePath("/platforms", lang)}`,
+};
+---
+
+<MarketingLayout title={C.metaTitle} description={C.metaDescription} canonicalPath="/platforms" activeTop="platforms" structuredData={[webPageSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcPlatforms, href: "/platforms" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <p class="eyebrow-accent">{C.eyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="platforms_hero_appstore" />
+        <a href={localizePath("/features", lang)} class="link-arrow">{C.seeFeatures} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+  </section>
+
+  <!-- PLATFORM GRID -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="grid gap-4 md:grid-cols-3">
+        {PLATFORMS.map((platform) => {
+          const card = C.cards[platform.slug as keyof typeof C.cards];
+          return (
+            <a href={localizePath(`/${platform.slug}`, lang)} class="group card flex flex-col p-8 transition hover:border-white/25">
+              <Icon class="size-8 text-accent" name={platform.icon} />
+              <h2 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{C.vvtermFor} {platform.name}</h2>
+              <p class="mt-3 text-base font-medium text-ink/80">{card.tagline}</p>
+              <p class="mt-3 flex-1 text-[15px] leading-relaxed text-muted">{card.summary}</p>
+              <p class="mt-5 text-[13px] text-faint">{card.requirement}</p>
+              <span class="mt-6 link-arrow">
+                {C.explore} {platform.name}
+                <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" />
+              </span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="platforms_cta_appstore" />
+</MarketingLayout>

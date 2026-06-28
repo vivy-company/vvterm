@@ -1,0 +1,288 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import CTABand from "../components/CTABand.astro";
+import FaqAccordion from "../components/FaqAccordion.astro";
+import Carousel from "../components/Carousel.astro";
+import MediaBlock from "../components/MediaBlock.astro";
+import Expandable from "../components/Expandable.astro";
+import ConnectTabs from "../components/ConnectTabs.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../lib/site";
+import { localizePath , pick } from "../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    metaTitle: "VVTerm for Mac — Native SSH Terminal for macOS",
+    metaDescription: "A native SSH terminal and SFTP client for Apple Silicon Macs. GPU rendering with libghostty, tabs and split panes, tmux session persistence, live server monitoring, deep customization, Mosh, Tailscale SSH, and iCloud-synced servers.",
+    bcHome: "Home",
+    bcPlatforms: "Platforms",
+    bcMac: "Mac",
+    heroEyebrow: "VVTerm for Mac",
+    heroTitle: "A real terminal<br />for your Mac.",
+    heroSubhead: "GPU-rendered, tab-based, and built for Apple Silicon — with a built-in SFTP browser and servers that sync to all your devices.",
+    download: "Download for Mac",
+    seePricing: "See pricing",
+    heroNote: "Requires macOS 13 Ventura or later · Apple Silicon",
+    heroAlt: "VVTerm SSH terminal on a Mac",
+    statementEyebrow: "Native, not a web wrapper",
+    statementTitle: "Built like a Mac app should be.",
+    statementBody: "VVTerm uses a <strong>split-view sidebar</strong>, a <strong>unified toolbar</strong>, and real keyboard handling — so connecting to a server feels exactly like the rest of macOS.",
+    tourTitle: "Get to know the Mac app.",
+    tourLabel: "Mac app tour",
+    tourCards: [
+      { title: "Split-view workspaces.", body: "A NavigationSplitView sidebar of workspaces and servers next to your live terminal." },
+      { title: "Tabs and split panes.", body: "Keep several connections open in the unified toolbar, and split a tab into panes for side-by-side shells." },
+      { title: "SFTP in the same window.", body: "Browse and edit remote files without reaching for a second app." },
+    ],
+    connectEyebrow: "Connect your way",
+    connectTitle: "Four ways to reach every machine.",
+    connectBody: "Standard SSH when you want it, and <strong>Mosh</strong>, <strong>Tailscale SSH</strong>, or <strong>Cloudflare Tunnel SSH</strong> when you need them.",
+    filesEyebrow: "Files, built in",
+    filesTitle: "SFTP, right beside your shell.",
+    filesBody: "Browse remote folders, <strong>upload and download</strong>, preview text, images, and video, and edit POSIX permissions — all in the same window.",
+    filesAlt: "VVTerm SFTP file browser on Mac",
+    expandLabel: "Explore the SFTP browser",
+    modalEyebrow: "SFTP file browser",
+    modalTitle: "Files and terminal, one window.",
+    modalBody: "Browse remote folders, <strong>upload and download</strong>, create directories, rename, move, and delete — then <strong>preview text, images, and video</strong>, edit supported text files, and adjust POSIX permissions without leaving the Mac app.",
+    sftpLink: "Read the full SFTP overview",
+    highlights: [
+      { title: "GPU terminal engine", body: "libghostty draws every frame on Metal for true color, ligatures, and an accurate session." },
+      { title: "Apple Silicon native", body: "Built and tuned for M-series Macs on macOS 13 Ventura or later." },
+      { title: "iCloud-synced servers", body: "Your server list follows you to iPhone and iPad. Credentials stay in Keychain." },
+      { title: "Keychain security", body: "Passwords and SSH keys live in Apple Keychain, never in synced metadata." },
+    ],
+    macGuideLink: "Read the Mac setup guide",
+    moreEyebrow: "Even more",
+    moreTitle: "Built for real remote work.",
+    moreCards: [
+      { title: "tmux persistence", body: "Long builds and migrations keep running through disconnects. VVTerm manages tmux and reattaches when you reconnect." },
+      { title: "Themes & fonts", body: "440 built-in themes, Nerd Fonts, and cursor styles, with separate light and dark themes that switch automatically." },
+      { title: "Live monitoring", body: "Watch CPU, memory, network, disk, and top processes in real time, right beside the shell." },
+    ],
+    learnMore: "Learn more",
+    windowsNote: "Managing Windows boxes too?",
+    windowsLink: "SSH to Windows servers ›",
+    faqItems: [
+      { question: "Does VVTerm run on Intel Macs?", answer: "No. VVTerm is built for Apple Silicon Macs running macOS 13 Ventura or later. Intel Macs are not supported." },
+      { question: "What terminal engine does the Mac app use?", answer: "It uses libghostty, the rendering engine from Ghostty, with Metal GPU drawing for fast, accurate terminal output." },
+      { question: "Can I open more than one connection at a time?", answer: "Yes. Pro unlocks unlimited connection tabs, and you can split a tab into multiple panes for side-by-side shells. The free tier includes one connection tab." },
+      { question: "Do my sessions survive a disconnect?", answer: "Yes. VVTerm manages a <strong>tmux</strong> session on the server, so long-running work keeps going through drops and sleep and reattaches when you reconnect. It auto-installs tmux if it's missing." },
+      { question: "Can I monitor server load from the Mac app?", answer: "Yes. Live server monitoring shows CPU, memory, network, disk, load average, and top processes in real time over your SSH session — no agent to install." },
+      { question: "Can I connect to Windows servers?", answer: "Yes. VVTerm connects to Windows and PowerShell hosts over SSH, with SFTP, live stats, and persistent sessions via psmux." },
+      { question: "Does it include an SFTP file browser?", answer: "Yes. The Mac app has a built-in SFTP browser for uploading, downloading, renaming, moving, deleting, previewing, and editing remote files and POSIX permissions." },
+      { question: "Do my servers sync to my iPhone and iPad?", answer: "Server metadata syncs through iCloud. Passwords and SSH keys are stored in Apple Keychain and sync only through iCloud Keychain when you enable it." },
+      { question: "How much does VVTerm for Mac cost?", answer: "It is free for one workspace, one server, and one connection tab. Pro is $6.49/month or $24.99/year, and a lifetime purchase is $49.99." },
+    ],
+    ctaTitle: "Bring your servers to your Mac.",
+    ctaSubtitle: "Download VVTerm free and connect to your first server in minutes.",
+  },
+  zh: {
+    metaTitle: "VVTerm for Mac — macOS 原生 SSH 终端",
+    metaDescription: "为 Apple Silicon Mac 打造的原生 SSH 终端与 SFTP 客户端。基于 libghostty 的 GPU 渲染、标签页与分屏、tmux 会话持久化、实时服务器监控、深度自定义，以及 Mosh、Tailscale SSH 和 iCloud 同步服务器。",
+    bcHome: "首页",
+    bcPlatforms: "平台",
+    bcMac: "Mac",
+    heroEyebrow: "VVTerm for Mac",
+    heroTitle: "为你的 Mac 打造的<br />真正的终端。",
+    heroSubhead: "GPU 渲染、多标签页、专为 Apple Silicon 打造 —— 内置 SFTP 浏览器，服务器在你的所有设备间同步。",
+    download: "下载 Mac 版",
+    seePricing: "查看价格",
+    heroNote: "需要 macOS 13 Ventura 或更高版本 · Apple Silicon",
+    heroAlt: "Mac 上的 VVTerm SSH 终端",
+    statementEyebrow: "原生应用，而非网页套壳",
+    statementTitle: "如 Mac 应用本该有的样子。",
+    statementBody: "VVTerm 采用<strong>分栏侧边栏</strong>、<strong>统一工具栏</strong>和真正的键盘处理 —— 连接服务器的体验与 macOS 的其他部分别无二致。",
+    tourTitle: "了解 Mac 应用。",
+    tourLabel: "Mac 应用导览",
+    tourCards: [
+      { title: "分栏工作区。", body: "工作区和服务器的侧边栏，紧邻你的实时终端。" },
+      { title: "标签页与分屏。", body: "在统一工具栏中同时打开多个连接，并将标签页拆分为多个窗格，并排操作多个 shell。" },
+      { title: "同一窗口内的 SFTP。", body: "无需另开一个应用即可浏览和编辑远程文件。" },
+    ],
+    connectEyebrow: "按你的方式连接",
+    connectTitle: "四种方式连接每一台机器。",
+    connectBody: "需要时使用标准 SSH，也可在需要时选择 <strong>Mosh</strong>、<strong>Tailscale SSH</strong> 或 <strong>Cloudflare Tunnel SSH</strong>。",
+    filesEyebrow: "内置文件管理",
+    filesTitle: "SFTP，就在你的 shell 旁边。",
+    filesBody: "浏览远程文件夹，<strong>上传和下载</strong>，预览文本、图片和视频，编辑 POSIX 权限 —— 全部在同一窗口内完成。",
+    filesAlt: "Mac 上的 VVTerm SFTP 文件浏览器",
+    expandLabel: "探索 SFTP 浏览器",
+    modalEyebrow: "SFTP 文件浏览器",
+    modalTitle: "文件与终端，同一窗口。",
+    modalBody: "浏览远程文件夹，<strong>上传和下载</strong>，创建目录、重命名、移动和删除 —— 然后<strong>预览文本、图片和视频</strong>，编辑受支持的文本文件，并调整 POSIX 权限，无需离开 Mac 应用。",
+    sftpLink: "阅读完整的 SFTP 介绍",
+    highlights: [
+      { title: "GPU 终端引擎", body: "libghostty 在 Metal 上绘制每一帧，呈现真彩色、连字和精准的会话。" },
+      { title: "Apple Silicon 原生", body: "为 macOS 13 Ventura 或更高版本上的 M 系列 Mac 构建并调优。" },
+      { title: "iCloud 同步服务器", body: "你的服务器列表跟随你到 iPhone 和 iPad。凭据始终保存在 Keychain 中。" },
+      { title: "Keychain 安全", body: "密码和 SSH 密钥保存在 Apple Keychain 中，绝不存于同步的元数据里。" },
+    ],
+    macGuideLink: "阅读 Mac 设置指南",
+    moreEyebrow: "更多",
+    moreTitle: "为真正的远程工作而生。",
+    moreCards: [
+      { title: "tmux 持久化", body: "长时间的构建和迁移在断线后仍继续运行。VVTerm 管理 tmux，并在你重新连接时自动接回会话。" },
+      { title: "主题与字体", body: "440 款内置主题、Nerd Fonts 和光标样式，深浅色主题可分别设置并自动切换。" },
+      { title: "实时监控", body: "在 shell 旁实时查看 CPU、内存、网络、磁盘和占用最高的进程。" },
+    ],
+    learnMore: "了解更多",
+    windowsNote: "也在管理 Windows 主机？",
+    windowsLink: "SSH 连接 Windows 服务器 ›",
+    faqItems: [
+      { question: "VVTerm 能在 Intel Mac 上运行吗？", answer: "不能。VVTerm 专为运行 macOS 13 Ventura 或更高版本的 Apple Silicon Mac 打造，不支持 Intel Mac。" },
+      { question: "Mac 应用使用什么终端引擎？", answer: "它使用 libghostty —— 来自 Ghostty 的渲染引擎，配合 Metal GPU 绘制，提供快速、精准的终端输出。" },
+      { question: "我可以同时打开多个连接吗？", answer: "可以。Pro 解锁无限连接标签页，你还能将标签页拆分为多个窗格并排操作 shell。免费版包含一个连接标签页。" },
+      { question: "断线后我的会话还在吗？", answer: "在。VVTerm 在服务器上管理 <strong>tmux</strong> 会话，长时间运行的工作可在断线和睡眠期间继续，并在你重新连接时自动接回。若缺少 tmux，会自动安装。" },
+      { question: "我可以从 Mac 应用监控服务器负载吗？", answer: "可以。实时服务器监控通过你的 SSH 会话实时显示 CPU、内存、网络、磁盘、平均负载和占用最高的进程 —— 无需安装任何代理。" },
+      { question: "我可以连接 Windows 服务器吗？", answer: "可以。VVTerm 通过 SSH 连接 Windows 和 PowerShell 主机，并支持 SFTP、实时统计，以及通过 psmux 实现的持久会话。" },
+      { question: "它包含 SFTP 文件浏览器吗？", answer: "包含。Mac 应用内置 SFTP 浏览器，可上传、下载、重命名、移动、删除、预览和编辑远程文件及 POSIX 权限。" },
+      { question: "我的服务器会同步到 iPhone 和 iPad 吗？", answer: "服务器元数据通过 iCloud 同步。密码和 SSH 密钥保存在 Apple Keychain 中，仅在你启用 iCloud Keychain 时才会同步。" },
+      { question: "VVTerm for Mac 多少钱？", answer: "一个工作区、一台服务器和一个连接标签页免费。Pro 为每月 $6.49 或每年 $24.99，终身买断为 $49.99。" },
+    ],
+    ctaTitle: "把你的服务器带到 Mac 上。",
+    ctaSubtitle: "免费下载 VVTerm，几分钟内连接你的第一台服务器。",
+  },
+}, lang);
+
+const softwareSchema = softwareAppSchema({ name: "VVTerm for Mac", operatingSystem: "macOS 13+", path: localizePath("/mac", lang), description: C.metaDescription });
+---
+
+<MarketingLayout title={C.metaTitle} description={C.metaDescription} canonicalPath="/mac" activeTop="platforms" structuredData={[softwareSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcPlatforms, href: "/#platforms" }, { name: C.bcMac, href: "/mac" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-ink" name="lucide:laptop" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <a class="btn-primary" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="mac_appstore_hero" data-conversion-value="0">{C.download}</a>
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="100% 50%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- TOUR CAROUSEL -->
+  <section class="py-16 sm:py-24">
+    <div class="container-wide">
+      <h2 class="headline">{C.tourTitle}</h2>
+    </div>
+    <Carousel label={C.tourLabel} variant="row">
+      {C.tourCards.map((card, i) => (
+        <article class="w-[74vw] shrink-0 snap-start sm:w-[400px]">
+          <div class="aspect-[4/3] overflow-hidden rounded-[28px] bg-[#1d1d1f]">
+            <img src="/preview.png" alt="" class="size-full object-cover" style={`object-position:${["100% 50%", "8% 45%", "52% 50%"][i]}`} loading="lazy" />
+          </div>
+          <p class="mt-5 max-w-[42ch] text-base leading-relaxed text-muted">
+            <strong class="font-semibold text-ink">{card.title}</strong> {card.body}
+          </p>
+        </article>
+      ))}
+    </Carousel>
+  </section>
+
+  <!-- CONNECT pill-tabs -->
+  <section class="section">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{C.connectEyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[16ch] headline">{C.connectTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.connectBody} />
+    </div>
+    <ConnectTabs platform="Mac" />
+  </section>
+
+  <!-- FILES two-column -->
+  <section class="section">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <MediaBlock class="order-2 lg:order-1" pos="8% 50%" alt={C.filesAlt} />
+      <div class="order-1 max-w-xl lg:order-2">
+        <p class="eyebrow-accent">{C.filesEyebrow}</p>
+        <h2 class="mt-3 headline">{C.filesTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.filesBody} />
+      </div>
+    </div>
+    <div class="container-wide mt-14 flex justify-center">
+      <Expandable id="mac-files" label={C.expandLabel}>
+        <div class="mx-auto max-w-3xl text-center">
+          <p class="eyebrow-accent">{C.modalEyebrow}</p>
+          <h2 class="mt-3 headline">{C.modalTitle}</h2>
+          <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.modalBody} />
+        </div>
+        <div class="mx-auto mt-14 max-w-5xl">
+          <MediaBlock pos="8% 50%" ratio="aspect-[16/10]" alt={C.filesAlt} />
+        </div>
+        <div class="mt-12 text-center">
+          <a href={localizePath("/features/sftp-file-browser", lang)} class="link-arrow">{C.sftpLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </Expandable>
+    </div>
+  </section>
+
+  <!-- HIGHLIGHTS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.highlights.map((item, i) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={["lucide:square-terminal", "lucide:cpu", "lucide:cloudy", "lucide:key-round"][i]} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+    <div class="container-wide mt-8">
+      <a href={localizePath("/guides/ssh-from-mac", lang)} class="inline-flex link-arrow">{C.macGuideLink} <span aria-hidden="true">›</span></a>
+    </div>
+  </section>
+
+  <!-- MORE POWER -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{C.moreEyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[20ch] headline">{C.moreTitle}</h2>
+    </div>
+    <div class="container-wide mt-12 grid gap-4 sm:grid-cols-3">
+      <a href={localizePath("/features/tmux-session-persistence", lang)} class="group card flex flex-col p-7 transition hover:border-white/25">
+        <Icon class="size-7 text-accent" name="lucide:history" />
+        <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{C.moreCards[0].title}</h3>
+        <p class="mt-2 flex-1 text-[15px] leading-relaxed text-muted">{C.moreCards[0].body}</p>
+        <span class="mt-5 link-arrow">{C.learnMore} <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" /></span>
+      </a>
+      <a href={localizePath("/features/terminal-customization", lang)} class="group card flex flex-col p-7 transition hover:border-white/25">
+        <Icon class="size-7 text-accent" name="lucide:palette" />
+        <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{C.moreCards[1].title}</h3>
+        <p class="mt-2 flex-1 text-[15px] leading-relaxed text-muted">{C.moreCards[1].body}</p>
+        <span class="mt-5 link-arrow">{C.learnMore} <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" /></span>
+      </a>
+      <a href={localizePath("/features/server-monitoring", lang)} class="group card flex flex-col p-7 transition hover:border-white/25">
+        <Icon class="size-7 text-accent" name="lucide:activity" />
+        <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{C.moreCards[2].title}</h3>
+        <p class="mt-2 flex-1 text-[15px] leading-relaxed text-muted">{C.moreCards[2].body}</p>
+        <span class="mt-5 link-arrow">{C.learnMore} <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" /></span>
+      </a>
+    </div>
+    <p class="container-wide mt-6 text-center text-sm text-faint">{C.windowsNote} <a href={localizePath("/features/windows-ssh", lang)} class="text-accent hover:underline">{C.windowsLink}</a></p>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="mac_cta_appstore" />
+</MarketingLayout>

@@ -6,7 +6,7 @@ export const SITE = {
   siteUrl: "https://vvterm.com",
   title: "VVTerm - SSH Terminal and SFTP Client for iPhone, iPad, and Mac",
   description:
-    "Your servers. Everywhere. Native SSH terminal and SFTP client for iPhone, iPad, and Mac with Mosh, Tailscale SSH, Cloudflare Tunnel SSH, iCloud sync, and Keychain security.",
+    "Your servers. Everywhere. Native SSH terminal and SFTP client for iPhone, iPad, and Mac with tmux session persistence, Mosh, Tailscale & Cloudflare Tunnel SSH, live monitoring, iCloud sync, and Keychain security.",
   appStoreUrl: "https://apps.apple.com/app/vvterm/id6757482822",
   githubUrl: "https://github.com/vivy-company/vvterm",
   discordUrl: "https://discord.gg/zemMZtrkSb",
@@ -17,6 +17,28 @@ export const SITE = {
 };
 
 export const translations = { en, zh } as const;
+
+// Factory for per-page SoftwareApplication JSON-LD (centralizes author/image/offers/category).
+export function softwareAppSchema(opts: {
+  name: string;
+  operatingSystem: string;
+  path: string;
+  description: string;
+  applicationCategory?: string;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: opts.name,
+    applicationCategory: opts.applicationCategory ?? "DeveloperApplication",
+    operatingSystem: opts.operatingSystem,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    description: opts.description,
+    url: `${SITE.siteUrl}${opts.path}`,
+    image: `${SITE.siteUrl}/og.png`,
+    author: { "@type": "Organization", name: "Vivy Technologies" },
+  };
+}
 
 export const faqSchema = [
   {

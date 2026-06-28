@@ -1,0 +1,46 @@
+---
+import { SITE } from "../lib/site";
+import { getLang, localizePath } from "../i18n/utils";
+
+interface Crumb {
+  name: string;
+  href: string;
+}
+
+interface Props {
+  items: Crumb[];
+}
+
+const { items } = Astro.props;
+
+const lang = getLang(Astro.url);
+// Localize internal crumb hrefs for the active locale.
+const crumbs = items.map((item) => ({ ...item, href: localizePath(item.href, lang) }));
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: crumbs.map((item, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: item.name,
+    item: new URL(item.href, SITE.siteUrl).toString(),
+  })),
+};
+---
+
+<nav aria-label="Breadcrumb" class="container-wide pt-8">
+  <ol class="flex flex-wrap items-center gap-2 text-[13px] text-faint">
+    {crumbs.map((item, index) => (
+      <li class="flex items-center gap-2">
+        {index > 0 && <span aria-hidden="true" class="text-line">/</span>}
+        {index < crumbs.length - 1 ? (
+          <a href={item.href} class="transition hover:text-ink">{item.name}</a>
+        ) : (
+          <span class="text-ink/80" aria-current="page">{item.name}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

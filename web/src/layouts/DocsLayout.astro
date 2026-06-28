@@ -1,0 +1,120 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteScripts from "../components/SiteScripts.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import { DOCS, GUIDES, SIDEBAR_I18N } from "../lib/nav";
+import { getLocale, useT, localizePath } from "../i18n/utils";
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  structuredData?: Array<Record<string, unknown>>;
+  kind: "docs" | "guides";
+  activeSlug: string;
+  heading: string;
+  intro?: string;
+  meta?: string;
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  structuredData = [],
+  kind,
+  activeSlug,
+  heading,
+  intro,
+  meta,
+} = Astro.props;
+
+const lang = getLocale(Astro.url);
+const t = useT(lang);
+const lp = (path: string) => localizePath(path, lang);
+
+const base = kind === "docs" ? "/docs" : "/guides";
+const hubLabel = kind === "docs" ? t("nav.documentation") : t("nav.guides");
+
+// Locale-specific sidebar labels (fall back to the English title/section from nav.ts).
+const sidebar = SIDEBAR_I18N[lang]?.[kind] ?? {};
+const entries =
+  kind === "docs"
+    ? DOCS.map((d) => ({ slug: d.slug, title: sidebar[d.slug]?.title ?? d.title, group: sidebar[d.slug]?.group ?? d.section }))
+    : GUIDES.map((g) => ({ slug: g.slug, title: sidebar[g.slug]?.title ?? g.title, group: sidebar[g.slug]?.group ?? g.category }));
+
+const groups: { name: string; items: typeof entries }[] = [];
+for (const entry of entries) {
+  let group = groups.find((g) => g.name === entry.group);
+  if (!group) {
+    group = { name: entry.group, items: [] };
+    groups.push(group);
+  }
+  group.items.push(entry);
+}
+
+const crumbs = [
+  { name: t("nav.home"), href: "/" },
+  { name: hubLabel, href: base },
+  { name: heading, href: `${base}/${activeSlug}` },
+];
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  ogType="article"
+  structuredData={structuredData}
+>
+  <SiteHeader activeTop="resources" />
+  <Breadcrumbs items={crumbs} />
+
+  <div class="container-wide grid gap-12 py-10 lg:grid-cols-[15rem_minmax(0,1fr)]">
+    <aside class="hidden lg:block">
+      <div class="sticky top-20">
+        <a href={lp(base)} class="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">{hubLabel}</a>
+        <nav class="mt-4 grid gap-6">
+          {groups.map((group) => (
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">{group.name}</p>
+              <ul class="mt-2 grid gap-0.5 border-l border-line">
+                {group.items.map((item) => (
+                  <li>
+                    <a
+                      href={lp(`${base}/${item.slug}`)}
+                      class:list={[
+                        "-ml-px block border-l py-1.5 pl-3 text-[13px] transition",
+                        item.slug === activeSlug
+                          ? "border-accent font-medium text-ink"
+                          : "border-transparent text-muted hover:border-faint hover:text-ink",
+                      ]}
+                    >
+                      {item.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
+      </div>
+    </aside>
+
+    <article class="min-w-0">
+      <header class="border-b border-line pb-8">
+        {meta && <p class="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">{meta}</p>}
+        <h1 class="mt-3 text-4xl font-semibold tracking-[-0.02em] text-ink sm:text-5xl">{heading}</h1>
+        {intro && <p class="mt-5 text-lg leading-relaxed text-muted">{intro}</p>}
+      </header>
+      <div class="mt-8 space-y-5 text-[15px] leading-7 text-muted [&_a]:font-medium [&_a]:text-accent [&_a:hover]:underline [&_code]:rounded [&_code]:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:text-ink [&_h2]:mt-12 [&_h2]:scroll-mt-20 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:tracking-[-0.02em] [&_h2]:text-ink [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-ink [&_li]:leading-7 [&_li::marker]:text-faint [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_strong]:font-semibold [&_strong]:text-ink [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5 [&_pre]:overflow-x-auto [&_pre]:rounded-2xl [&_pre]:border [&_pre]:border-white/10 [&_pre]:bg-[#0c0c0e] [&_pre]:p-4 [&_pre]:text-sm [&_pre]:text-[#d4d4d8] [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_pre_code]:text-[#d4d4d8]">
+        <slot />
+      </div>
+    </article>
+  </div>
+
+  <SiteFooter />
+  <SiteScripts />
+</BaseLayout>

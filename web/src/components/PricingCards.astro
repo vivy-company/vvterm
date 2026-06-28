@@ -1,0 +1,97 @@
+---
+import { SITE, translations } from "../lib/site";
+import { pick } from "../i18n/utils";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+const p = translations[lang].pricing;
+const toggle = pick({ en: { monthly: "Monthly", yearly: "Yearly" }, zh: { monthly: "按月", yearly: "按年" } }, lang);
+---
+
+<div class:list={["container-wide grid gap-4 lg:grid-cols-3", className]}>
+  <!-- Free -->
+  <article class="card flex flex-col p-8 text-left">
+    <h3 class="text-2xl font-semibold tracking-[-0.02em] text-ink">{p.free.name}</h3>
+    <p class="mt-2 text-muted">{p.free.description}</p>
+    <p class="mt-5">
+      <span class="text-5xl font-semibold tracking-[-0.03em] text-ink">{p.free.price}</span>
+      <span class="ml-1 text-base text-faint">{p.free.period}</span>
+    </p>
+    <ul class="mb-7 mt-6 grid flex-1 gap-3 text-[15px] text-muted">
+      {p.free.features.map((item) => (
+        <li class="flex gap-3"><span class="text-accent">✓</span><span>{item}</span></li>
+      ))}
+    </ul>
+    <a class="btn-outline" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="pricing_free_click" data-conversion-value="0">
+      <span>{p.free.cta}</span>
+    </a>
+  </article>
+
+  <!-- Pro -->
+  <article class="card flex flex-col p-8 text-left">
+    <h3 class="text-2xl font-semibold tracking-[-0.02em] text-ink">{p.pro.name}</h3>
+    <p class="mt-2 text-muted">{p.pro.description}</p>
+    <div class="relative mt-5 flex rounded-full border border-line bg-black/40 p-1" data-billing-switch>
+      <span data-billing-indicator class="pointer-events-none absolute left-0 top-0 rounded-full bg-white/10 transition-all duration-300 ease-out"></span>
+      <button type="button" class="relative z-10 flex-1 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium text-faint transition-colors" data-billing-toggle="monthly">{toggle.monthly}</button>
+      <button type="button" class="relative z-10 flex-1 whitespace-nowrap rounded-full px-3 py-2 text-[13px] font-medium text-faint transition-colors" data-billing-toggle="yearly">
+        {toggle.yearly} <span class="text-accent">{p.pro.yearly.save}</span>
+      </button>
+    </div>
+    <p class="mt-5">
+      <span data-price-monthly hidden>
+        <span class="text-5xl font-semibold tracking-[-0.03em] text-ink">{p.pro.monthly.price}</span>
+        <span class="ml-1 text-base text-faint">{p.pro.monthly.period}</span>
+      </span>
+      <span data-price-yearly>
+        <span class="text-5xl font-semibold tracking-[-0.03em] text-ink">{p.pro.yearly.price}</span>
+        <span class="ml-1 text-base text-faint">{p.pro.yearly.period}</span>
+      </span>
+    </p>
+    <ul class="mb-7 mt-6 grid flex-1 gap-3 text-[15px] text-muted">
+      {p.pro.features.map((item) => (
+        <li class="flex gap-3"><span class="text-accent">✓</span><span>{item}</span></li>
+      ))}
+    </ul>
+    <a
+      class="btn-outline"
+      href={SITE.appStoreUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-pricing-cta
+      data-monthly-track="pricing_pro_monthly_click"
+      data-yearly-track="pricing_pro_yearly_click"
+      data-monthly-value="6.49"
+      data-yearly-value="24.99"
+      data-billing-cycle="yearly"
+      data-track="pricing_pro_yearly_click"
+      data-conversion-value="24.99"
+    >
+      <span data-cta-monthly hidden>{p.pro.ctaMonthly}</span>
+      <span data-cta-yearly>{p.pro.ctaYearly}</span>
+    </a>
+  </article>
+
+  <!-- Lifetime -->
+  <article class="flex flex-col rounded-3xl border border-accent/40 bg-gradient-to-b from-accent/12 to-transparent p-8 text-left">
+    <div class="ml-auto rounded-full bg-accent/15 px-3 py-1 text-xs font-semibold text-accent">{p.lifetime.badge}</div>
+    <h3 class="mt-4 text-2xl font-semibold tracking-[-0.02em] text-ink">{p.lifetime.name}</h3>
+    <p class="mt-2 text-muted">{p.lifetime.description}</p>
+    <p class="mt-5">
+      <span class="text-5xl font-semibold tracking-[-0.03em] text-ink">{p.lifetime.price}</span>
+    </p>
+    <ul class="mb-7 mt-6 grid flex-1 gap-3 text-[15px] text-muted">
+      {p.lifetime.features.map((item) => (
+        <li class="flex gap-3"><span class="text-accent">✓</span><span>{item}</span></li>
+      ))}
+    </ul>
+    <a class="btn-primary" href={SITE.appStoreUrl} target="_blank" rel="noopener noreferrer" data-track="pricing_lifetime_click" data-conversion-value="49.99">
+      <span>{p.lifetime.cta}</span>
+    </a>
+    <p class="mt-4 text-center text-[13px] text-faint">{p.lifetime.guarantee}</p>
+  </article>
+</div>

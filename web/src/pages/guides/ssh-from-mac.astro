@@ -1,0 +1,192 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import { SITE } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const slug = "ssh-from-mac";
+
+const C = pick({
+  en: {
+    heading: "How to SSH from your Mac with VVTerm",
+    intro:
+      "Set up a native macOS SSH terminal with a split-view sidebar, tabbed connections, and servers that sync from your iPhone and iPad over iCloud.",
+    meta: "Guide",
+    title: "How to SSH from your Mac — VVTerm",
+    description:
+      "Install VVTerm on your Mac, add a server in the sidebar, choose an auth method, connect in a tab, and sync your servers across Apple devices over iCloud.",
+    schemaDescription:
+      "Step-by-step guide to SSH from a Mac with VVTerm: install, add a server in the sidebar, choose an auth method, connect in a tab, and sync servers over iCloud.",
+    bodyHtml: `
+  <p>
+    VVTerm for Mac is a native SSH terminal built like the rest of macOS — a split-view sidebar of
+    your servers next to a GPU-rendered terminal, with a unified toolbar for tabs. This guide covers
+    your first connection on the Mac.
+  </p>
+
+  <h2>Before you start</h2>
+  <p>
+    You need a Mac with <strong>Apple Silicon</strong> running <strong>macOS 13 Ventura or later</strong>.
+    Have your server's <strong>host</strong>, <strong>port</strong> (<code>22</code> by default), and <strong>username</strong> ready, plus a password or SSH key for authentication.
+  </p>
+
+  <h2>Install VVTerm</h2>
+  <ol>
+    <li>Install VVTerm from the App Store on your Mac.</li>
+    <li>Open the app. The window shows a sidebar for your servers and a detail area for the terminal.</li>
+  </ol>
+
+  <h2>Add a server in the sidebar</h2>
+  <ol>
+    <li>Tap <strong>Add Server</strong> to open the new-server form.</li>
+    <li>Enter a <strong>name</strong>, the <strong>host</strong>, the <strong>port</strong>, and your <strong>username</strong>.</li>
+    <li>Optionally organize servers into workspaces and environments so larger fleets stay tidy in the sidebar.</li>
+    <li>Save. The server appears in the sidebar list.</li>
+  </ol>
+
+  <h2>Choose an authentication method</h2>
+  <p>
+    Pick how you want to log in. Whatever you choose, the secret itself is stored in the macOS <strong>Keychain</strong>, not in synced server metadata.
+  </p>
+  <ul>
+    <li><strong>Password</strong> — enter the account password directly.</li>
+    <li><strong>SSH key</strong> — import or generate a private key and add the matching public key to the server's <code>~/.ssh/authorized_keys</code>.</li>
+    <li><strong>SSH key + passphrase</strong> — use an encrypted private key protected by a passphrase.</li>
+  </ul>
+
+  <h2>Connect in a tab</h2>
+  <ol>
+    <li>Select the server in the sidebar to open a connection.</li>
+    <li>Confirm the host key fingerprint the first time you connect.</li>
+    <li>The terminal opens in the detail area, drawn on Metal by libghostty for true color and accurate output.</li>
+  </ol>
+
+  <h2>Open multiple tabs and panes</h2>
+  <p>
+    Each connection lives in a tab in the unified toolbar, so you can keep several servers open at
+    once and switch between them. You can also split a tab into <strong>panes</strong> for side-by-side
+    shells on the same screen.
+  </p>
+  <p>
+    The free tier includes <strong>one connection tab</strong>. <strong>Pro</strong> unlocks unlimited
+    tabs and split panes — $6.49/month, $24.99/year, or a $49.99 lifetime purchase, handled through
+    Apple.
+  </p>
+
+  <h2>Your servers sync over iCloud</h2>
+  <p>
+    Server metadata — names, hosts, ports, usernames, and workspaces — syncs through <strong>iCloud</strong>,
+    so a server you add on your Mac shows up on your iPhone and iPad automatically. Passwords and SSH
+    keys are <strong>not</strong> part of that metadata; they stay in the Apple Keychain and only travel
+    between devices through iCloud Keychain when you enable it.
+  </p>
+
+  <h2>Next steps</h2>
+  <p>
+    Keep long-running work alive across disconnects with tmux, watch live CPU and memory with server
+    monitoring, and reach machines that aren't directly exposed using <a href="/guides/tailscale-ssh-setup">Tailscale SSH</a> or <a href="/guides/cloudflare-tunnel-ssh-setup">Cloudflare Tunnel SSH</a>.
+  </p>
+`,
+  },
+  zh: {
+    heading: "如何用 VVTerm 从 Mac 进行 SSH",
+    intro:
+      "搭建一个原生 macOS SSH 终端，配备分栏侧边栏、标签式连接，以及通过 iCloud 从 iPhone 和 iPad 同步的服务器。",
+    meta: "指南",
+    title: "如何从 Mac 进行 SSH — VVTerm",
+    description:
+      "在 Mac 上安装 VVTerm，在侧边栏添加服务器、选择认证方式、在标签页中连接，并通过 iCloud 在 Apple 设备间同步服务器。",
+    schemaDescription:
+      "使用 VVTerm 从 Mac 进行 SSH 的分步指南：安装、在侧边栏添加服务器、选择认证方式、在标签页中连接，并通过 iCloud 同步服务器。",
+    bodyHtml: `
+  <p>
+    VVTerm for Mac 是一款如同 macOS 其他部分般打造的原生 SSH 终端 —— 服务器分栏侧边栏紧邻
+    GPU 渲染终端，并配有用于标签页的统一工具栏。本指南涵盖你在 Mac 上的第一次连接。
+  </p>
+
+  <h2>开始之前</h2>
+  <p>
+    你需要一台搭载 <strong>Apple Silicon</strong>、运行 <strong>macOS 13 Ventura 或更高版本</strong>的 Mac。
+    准备好服务器的<strong>主机</strong>、<strong>端口</strong>（默认 <code>22</code>）和<strong>用户名</strong>，以及用于认证的密码或 SSH 密钥。
+  </p>
+
+  <h2>安装 VVTerm</h2>
+  <ol>
+    <li>在 Mac 上从 App Store 安装 VVTerm。</li>
+    <li>打开应用。窗口会显示一个服务器侧边栏和一个用于终端的详情区域。</li>
+  </ol>
+
+  <h2>在侧边栏添加服务器</h2>
+  <ol>
+    <li>点按 <strong>Add Server</strong> 打开新建服务器表单。</li>
+    <li>输入<strong>名称</strong>、<strong>主机</strong>、<strong>端口</strong>和你的<strong>用户名</strong>。</li>
+    <li>可选：把服务器组织进工作区和环境，让规模较大的机群在侧边栏里保持整洁。</li>
+    <li>保存，服务器即出现在侧边栏列表中。</li>
+  </ol>
+
+  <h2>选择认证方式</h2>
+  <p>
+    选择你想要的登录方式。无论选哪种，密钥本身都保存在 macOS <strong>Keychain</strong> 中，而非同步的服务器元数据里。
+  </p>
+  <ul>
+    <li><strong>密码</strong> —— 直接输入账户密码。</li>
+    <li><strong>SSH 密钥</strong> —— 导入或生成一个私钥，并把对应的公钥加入服务器的 <code>~/.ssh/authorized_keys</code>。</li>
+    <li><strong>SSH 密钥 + 口令</strong> —— 使用由口令保护的加密私钥。</li>
+  </ul>
+
+  <h2>在标签页中连接</h2>
+  <ol>
+    <li>在侧边栏中选中服务器即可打开连接。</li>
+    <li>首次连接时确认主机密钥指纹。</li>
+    <li>终端在详情区域打开，由 libghostty 在 Metal 上绘制，呈现真彩色和精准输出。</li>
+  </ol>
+
+  <h2>打开多个标签页和窗格</h2>
+  <p>
+    每个连接都在统一工具栏的一个标签页中，因此你可以同时打开多台服务器并在它们之间切换。
+    你还可以把一个标签页拆分为<strong>窗格</strong>，在同一屏幕上并排操作多个 shell。
+  </p>
+  <p>
+    免费版包含<strong>一个连接标签页</strong>。<strong>Pro</strong> 解锁无限标签页和分屏窗格 ——
+    每月 $6.49、每年 $24.99，或 $49.99 终身买断，均通过 Apple 处理。
+  </p>
+
+  <h2>你的服务器通过 iCloud 同步</h2>
+  <p>
+    服务器元数据 —— 名称、主机、端口、用户名和工作区 —— 通过 <strong>iCloud</strong> 同步，
+    因此你在 Mac 上添加的服务器会自动出现在你的 iPhone 和 iPad 上。密码和 SSH 密钥
+    <strong>不</strong>属于这些元数据；它们保存在 Apple Keychain 中，仅在你启用 iCloud Keychain 时才会在设备间传输。
+  </p>
+
+  <h2>后续步骤</h2>
+  <p>
+    用 tmux 让长时间运行的工作在断线后存活，用服务器监控实时查看 CPU 和内存，
+    并通过 <a href="/zh/guides/tailscale-ssh-setup">Tailscale SSH</a> 或 <a href="/zh/guides/cloudflare-tunnel-ssh-setup">Cloudflare Tunnel SSH</a> 连接那些没有直接暴露的机器。
+  </p>
+`,
+  },
+}, lang);
+
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: C.heading,
+  description: C.schemaDescription,
+  url: `${SITE.siteUrl}${localizePath(`/guides/${slug}`, lang)}`,
+};
+---
+
+<DocsLayout
+  kind="guides"
+  activeSlug={slug}
+  heading={C.heading}
+  intro={C.intro}
+  meta={C.meta}
+  title={C.title}
+  description={C.description}
+  canonicalPath={`/guides/${slug}`}
+  structuredData={[articleSchema]}
+>
+  <Fragment set:html={C.bodyHtml} />
+</DocsLayout>

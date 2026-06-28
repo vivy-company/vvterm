@@ -1,0 +1,42 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteScripts from "../components/SiteScripts.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  canonicalPath?: string;
+  ogType?: "website" | "article";
+  robots?: string;
+  structuredData?: Array<Record<string, unknown>>;
+  activeTop?: "platforms" | "features" | "pricing" | "resources";
+  /** Retained for backward compatibility; the language switcher now shows on every page. */
+  showLanguage?: boolean;
+}
+
+const {
+  title,
+  description,
+  canonicalPath,
+  ogType = "website",
+  robots,
+  structuredData = [],
+  activeTop,
+} = Astro.props;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  ogType={ogType}
+  robots={robots}
+  structuredData={structuredData}
+>
+  <SiteHeader activeTop={activeTop} />
+  <slot />
+  <SiteFooter />
+  <SiteScripts />
+</BaseLayout>

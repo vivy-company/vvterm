@@ -1,0 +1,222 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "iCloud Sync and Keychain Security — VVTerm",
+    description:
+      "Server metadata syncs across your devices through iCloud, while passwords and SSH keys stay in Apple Keychain and sync only through iCloud Keychain when you enable it. Credentials are never synced via CloudKit.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "iCloud sync & Keychain",
+    heroEyebrow: "iCloud sync & Keychain",
+    heroTitle: "Your servers sync.<br />Your secrets stay.",
+    heroSubhead: "Server metadata follows you across devices through iCloud, while passwords and SSH keys stay in Apple Keychain.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm workspaces synced across devices via iCloud",
+    statementEyebrow: "A clear separation",
+    statementTitle: "Metadata syncs. Credentials don't.",
+    statementBody: "VVTerm syncs your <strong>server list</strong> through iCloud so it is on every device, but your <strong>passwords and SSH keys</strong> are never synced via CloudKit — they stay in Apple Keychain.",
+    benefits: [
+      { icon: "lucide:cloudy", title: "Servers everywhere", body: "Your server list and workspaces sync through iCloud, so they follow you to iPhone, iPad, and Mac." },
+      { icon: "lucide:key-round", title: "Keychain credentials", body: "Passwords and SSH keys live in Apple Keychain, separate from the metadata that syncs." },
+      { icon: "lucide:shield", title: "Never via CloudKit", body: "Credentials are never synced through CloudKit — only server metadata is." },
+      { icon: "lucide:cloud", title: "You control key sync", body: "Keys sync between devices only through iCloud Keychain, and only when you enable it." },
+    ],
+    crossEyebrow: "How it works",
+    crossTitle: "You decide what travels.",
+    crossBody: "Server metadata syncs through iCloud automatically. Credentials move between devices <strong>only through iCloud Keychain</strong>, and only when you turn it on.",
+    icloudDocLink: "Read the iCloud sync docs",
+    authDocLink: "Authentication and SSH keys",
+    terminalLink: "See the SSH terminal",
+    tableTitle: "What syncs where",
+    tableRows: [
+      { icon: "lucide:cloudy", label: "Server names, hosts, ports, workspaces", where: "iCloud" },
+      { icon: "lucide:key-round", label: "Passwords and SSH keys", where: "Keychain" },
+      { icon: "lucide:shield", label: "Credentials over CloudKit", where: "Never" },
+    ],
+    secEyebrow: "Locked down on device",
+    secTitle: "Security that goes beyond storage.",
+    secBody: "Credentials in Keychain are only the start. VVTerm also guards the app itself and keeps secrets off the screen.",
+    secCards: [
+      { icon: "lucide:scan-face", title: "App Lock with Face ID", body: "Require Face ID or Touch ID to open the app, lock when it goes to the background, and gate individual servers behind biometrics." },
+      { icon: "lucide:eye-off", title: "Privacy Mode", body: "Mask hostnames and other sensitive details in the UI — useful when you screen-share, present, or record." },
+      { icon: "lucide:key-round", title: "Generate keys in-app", body: "Create Ed25519 or RSA 4096 SSH keys right in VVTerm, stored in Keychain, with host-key verification against known hosts." },
+    ],
+    faqItems: [
+      { question: "What syncs through iCloud?", answer: "Server metadata — names, hosts, ports, usernames, and workspace organization — syncs across your devices through iCloud." },
+      { question: "Where are my passwords and SSH keys stored?", answer: "In <strong>Apple Keychain</strong>. They are kept separate from the server metadata that syncs through iCloud." },
+      { question: "Are credentials ever synced through CloudKit?", answer: "No. Credentials are never synced via CloudKit. Only server metadata syncs that way." },
+      { question: "How do credentials move between my devices?", answer: "Passwords and SSH keys sync only through iCloud Keychain, and only when you have iCloud Keychain enabled." },
+      { question: "What if I do not enable iCloud Keychain?", answer: "Your server metadata still syncs through iCloud, but credentials stay local to each device's Keychain." },
+      { question: "Does sync work across iPhone, iPad, and Mac?", answer: "Yes. Server metadata syncs across all your signed-in Apple devices through iCloud." },
+      { question: "Can I lock the app itself?", answer: "Yes. App Lock can require Face ID or Touch ID to open VVTerm, lock automatically when it goes to the background, and require biometrics for specific servers." },
+      { question: "Can VVTerm generate SSH keys for me?", answer: "Yes. You can generate <strong>Ed25519</strong> or <strong>RSA 4096</strong> keys in the app. They're stored in Keychain, and host keys are verified against your known hosts." },
+    ],
+    ctaTitle: "Sync servers. Keep secrets safe.",
+    ctaSubtitle: "Download VVTerm free and set up sync across your Apple devices.",
+  },
+  zh: {
+    title: "iCloud 同步与 Keychain 安全 — VVTerm",
+    description:
+      "服务器元数据通过 iCloud 在你的设备间同步，而密码和 SSH 密钥保留在 Apple Keychain 中，仅在你启用时才通过 iCloud Keychain 同步。凭据绝不通过 CloudKit 同步。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "iCloud 同步与 Keychain",
+    heroEyebrow: "iCloud 同步与 Keychain",
+    heroTitle: "服务器同步。<br />秘密留下。",
+    heroSubhead: "服务器元数据通过 iCloud 在设备间跟随你，而密码和 SSH 密钥保留在 Apple Keychain 中。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm 工作区通过 iCloud 在设备间同步",
+    statementEyebrow: "清晰的分离",
+    statementTitle: "元数据同步，凭据不同步。",
+    statementBody: "VVTerm 通过 iCloud 同步你的<strong>服务器列表</strong>，使其出现在每台设备上，但你的<strong>密码和 SSH 密钥</strong>绝不通过 CloudKit 同步 —— 它们保留在 Apple Keychain 中。",
+    benefits: [
+      { icon: "lucide:cloudy", title: "服务器随处可见", body: "你的服务器列表和工作区通过 iCloud 同步，因此会跟随你到 iPhone、iPad 和 Mac。" },
+      { icon: "lucide:key-round", title: "Keychain 凭据", body: "密码和 SSH 密钥保存在 Apple Keychain 中，与同步的元数据分离。" },
+      { icon: "lucide:shield", title: "绝不经 CloudKit", body: "凭据绝不通过 CloudKit 同步 —— 只有服务器元数据才会。" },
+      { icon: "lucide:cloud", title: "你掌控密钥同步", body: "密钥仅通过 iCloud Keychain 在设备间同步，且仅在你启用时。" },
+    ],
+    crossEyebrow: "如何工作",
+    crossTitle: "由你决定哪些会传输。",
+    crossBody: "服务器元数据通过 iCloud 自动同步。凭据<strong>仅通过 iCloud Keychain</strong>在设备间移动，且仅在你开启它时。",
+    icloudDocLink: "阅读 iCloud 同步文档",
+    authDocLink: "认证与 SSH 密钥",
+    terminalLink: "查看 SSH 终端",
+    tableTitle: "什么同步到哪里",
+    tableRows: [
+      { icon: "lucide:cloudy", label: "服务器名称、主机、端口、工作区", where: "iCloud" },
+      { icon: "lucide:key-round", label: "密码和 SSH 密钥", where: "Keychain" },
+      { icon: "lucide:shield", label: "凭据经 CloudKit", where: "从不" },
+    ],
+    secEyebrow: "在设备上严密保护",
+    secTitle: "超越存储的安全。",
+    secBody: "Keychain 中的凭据只是开始。VVTerm 还守护应用本身，并让秘密远离屏幕。",
+    secCards: [
+      { icon: "lucide:scan-face", title: "Face ID 应用锁", body: "要求 Face ID 或 Touch ID 才能打开应用，进入后台时锁定，并将单台服务器置于生物识别之后。" },
+      { icon: "lucide:eye-off", title: "隐私模式", body: "在界面中遮蔽主机名和其他敏感信息 —— 在屏幕共享、演示或录制时很有用。" },
+      { icon: "lucide:key-round", title: "应用内生成密钥", body: "直接在 VVTerm 中创建 Ed25519 或 RSA 4096 SSH 密钥，保存在 Keychain 中，并针对已知主机进行主机密钥验证。" },
+    ],
+    faqItems: [
+      { question: "什么会通过 iCloud 同步？", answer: "服务器元数据 —— 名称、主机、端口、用户名和工作区组织 —— 通过 iCloud 在你的设备间同步。" },
+      { question: "我的密码和 SSH 密钥存放在哪里？", answer: "存放在 <strong>Apple Keychain</strong> 中。它们与通过 iCloud 同步的服务器元数据分开保存。" },
+      { question: "凭据会通过 CloudKit 同步吗？", answer: "不会。凭据绝不通过 CloudKit 同步。只有服务器元数据以这种方式同步。" },
+      { question: "凭据如何在我的设备间移动？", answer: "密码和 SSH 密钥仅通过 iCloud Keychain 同步，且仅在你启用了 iCloud Keychain 时。" },
+      { question: "如果我不启用 iCloud Keychain 呢？", answer: "你的服务器元数据仍通过 iCloud 同步，但凭据会保留在每台设备本地的 Keychain 中。" },
+      { question: "同步在 iPhone、iPad 和 Mac 间有效吗？", answer: "有效。服务器元数据通过 iCloud 在你所有已登录的 Apple 设备间同步。" },
+      { question: "我可以锁定应用本身吗？", answer: "可以。应用锁可要求 Face ID 或 Touch ID 才能打开 VVTerm、进入后台时自动锁定，并对特定服务器要求生物识别。" },
+      { question: "VVTerm 能为我生成 SSH 密钥吗？", answer: "可以。你可以在应用中生成 <strong>Ed25519</strong> 或 <strong>RSA 4096</strong> 密钥。它们保存在 Keychain 中，并针对你的已知主机验证主机密钥。" },
+    ],
+    ctaTitle: "同步服务器，守护秘密。",
+    ctaSubtitle: "免费下载 VVTerm，在你的 Apple 设备间设置同步。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm iCloud Sync and Keychain Security", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/icloud-sync-keychain", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/icloud-sync-keychain" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/icloud-sync-keychain" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:cloudy" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="icloud_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="72% 60%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.crossEyebrow}</p>
+        <h2 class="mt-3 headline">{C.crossTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.crossBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/docs/icloud-sync", lang)} class="inline-flex link-arrow">{C.icloudDocLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/docs/authentication-and-keys", lang)} class="inline-flex link-arrow">{C.authDocLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/ssh-terminal", lang)} class="inline-flex link-arrow">{C.terminalLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <div class="overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c0e] shadow-2xl">
+        <div class="border-b border-white/8 bg-[#161617] px-4 py-3 text-[12px] font-medium text-faint">{C.tableTitle}</div>
+        <div class="divide-y divide-white/5 text-[13px]">
+          {C.tableRows.map((row) => (
+            <div class="flex items-center gap-3 px-4 py-3">
+              <Icon class="size-4 text-accent" name={row.icon} />
+              <span class="flex-1 text-ink/90">{row.label}</span>
+              <span class="text-[11px] text-faint">{row.where}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEVICE SECURITY -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{C.secEyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[22ch] headline">{C.secTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph">{C.secBody}</p>
+    </div>
+    <div class="container-wide mt-12 grid gap-4 sm:grid-cols-3">
+      {C.secCards.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="icloud_cta_appstore" />
+</MarketingLayout>

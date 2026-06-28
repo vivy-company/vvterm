@@ -1,68 +1,134 @@
 ---
 import LegalPage from "../components/LegalPage.astro";
-import BaseLayout from "../layouts/BaseLayout.astro";
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import { pick } from "../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const content = pick({
+  en: {
+    title: "Refund Policy - VVTerm",
+    description: "Refund Policy for VVTerm Pro purchases through Apple's App Store.",
+    heading: "Refund Policy",
+    lastUpdated: "January 15, 2026",
+    s1h: "Refunds for App Store Purchases",
+    s1p: "VVTerm Pro is sold through Apple’s App Store. Apple handles billing and refunds, and eligibility is determined by Apple’s policies.",
+    s2h: "How to Request a Refund",
+    s2intro: "To request a refund, use Apple’s official process:",
+    s2steps: [
+      "Sign in with your Apple ID",
+      "Find your VVTerm Pro purchase",
+      'Select "Request a refund" and follow the prompts',
+    ],
+    s2reportPre: "Go to ",
+    s2reportPost: "",
+    s2outro:
+      "We’re unable to issue refunds directly, but if you’re having trouble using the app, contact us and we’ll do our best to help.",
+    s3h: "Subscription Cancellation",
+    s3intro: "If you subscribed to VVTerm Pro Monthly or Yearly, you can cancel at any time:",
+    s3steps: [
+      "Open Settings on your iPhone or iPad, or System Settings on Mac",
+      "Tap your Apple ID, then Subscriptions",
+      'Find VVTerm and tap "Cancel Subscription"',
+    ],
+    s3outro: "Upon cancellation:",
+    s3list: [
+      "You'll retain Pro access until the end of your current billing period",
+      "No further charges will be made",
+      "Pro features will be disabled after the period ends",
+      "Your servers and workspaces will remain, but free tier limits will apply",
+    ],
+    s4h: "Lifetime Purchases",
+    s4p: "Lifetime Pro purchases are one-time and do not require cancellation. Refunds are handled by Apple using the same process above.",
+    s5h: "Contact Us",
+    s5pre: "Questions or technical issues? Contact ",
+    s5post: ".",
+  },
+  zh: {
+    title: "退款政策 - VVTerm",
+    description: "通过 Apple App Store 购买 VVTerm Pro 的退款政策。",
+    heading: "退款政策",
+    lastUpdated: "2026年1月15日",
+    s1h: "App Store 购买的退款",
+    s1p: "VVTerm Pro 通过 Apple App Store 销售。Apple 负责计费和退款，是否符合退款条件由 Apple 的政策决定。",
+    s2h: "如何申请退款",
+    s2intro: "如需申请退款，请使用 Apple 的官方流程：",
+    s2steps: [
+      "使用你的 Apple ID 登录",
+      "找到你的 VVTerm Pro 购买记录",
+      '选择"申请退款"并按提示操作',
+    ],
+    s2reportPre: "前往 ",
+    s2reportPost: "",
+    s2outro:
+      "我们无法直接发放退款，但如果你在使用应用时遇到问题，请联系我们，我们会尽力帮助。",
+    s3h: "订阅取消",
+    s3intro: "如果你订阅了 VVTerm Pro 月度版或年度版，可以随时取消：",
+    s3steps: [
+      "在 iPhone 或 iPad 上打开「设置」，或在 Mac 上打开「系统设置」",
+      "点按你的 Apple ID，然后选择「订阅」",
+      "找到 VVTerm 并点按「取消订阅」",
+    ],
+    s3outro: "取消后：",
+    s3list: [
+      "你将保留 Pro 访问权限，直至当前计费周期结束",
+      "不会再产生任何扣费",
+      "周期结束后 Pro 功能将被停用",
+      "你的服务器和工作区会保留，但将适用免费版的限制",
+    ],
+    s4h: "终身购买",
+    s4p: "终身版 Pro 为一次性购买，无需取消。退款由 Apple 通过上述相同流程处理。",
+    s5h: "联系我们",
+    s5pre: "有疑问或技术问题？请联系 ",
+    s5post: "。",
+  },
+}, lang);
 ---
 
-<BaseLayout
-  title="Refund Policy - VVTerm"
-  description="Refund Policy for VVTerm Pro purchases through Apple's App Store."
+<MarketingLayout
+  title={content.title}
+  description={content.description}
   canonicalPath="/refund"
   ogType="article"
 >
-  <LegalPage title="Refund Policy" lastUpdated="January 15, 2026">
+  <LegalPage title={content.heading} lastUpdated={content.lastUpdated}>
     <section>
-      <h2>Refunds for App Store Purchases</h2>
-      <p>
-        VVTerm Pro is sold through Apple’s App Store. Apple handles billing and refunds, and eligibility
-        is determined by Apple’s policies.
-      </p>
+      <h2>{content.s1h}</h2>
+      <p>{content.s1p}</p>
     </section>
 
     <section>
-      <h2>How to Request a Refund</h2>
-      <p>To request a refund, use Apple’s official process:</p>
+      <h2>{content.s2h}</h2>
+      <p>{content.s2intro}</p>
       <ol>
-        <li>Go to <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a></li>
-        <li>Sign in with your Apple ID</li>
-        <li>Find your VVTerm Pro purchase</li>
-        <li>Select "Request a refund" and follow the prompts</li>
+        <li>{content.s2reportPre}<a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>{content.s2reportPost}</li>
+        {content.s2steps.map((item) => <li>{item}</li>)}
       </ol>
-      <p>
-        We’re unable to issue refunds directly, but if you’re having trouble using the app, contact us
-        and we’ll do our best to help.
-      </p>
+      <p>{content.s2outro}</p>
     </section>
 
     <section>
-      <h2>Subscription Cancellation</h2>
-      <p>If you subscribed to VVTerm Pro Monthly or Yearly, you can cancel at any time:</p>
+      <h2>{content.s3h}</h2>
+      <p>{content.s3intro}</p>
       <ol>
-        <li>Open Settings on your iPhone or iPad, or System Settings on Mac</li>
-        <li>Tap your Apple ID, then Subscriptions</li>
-        <li>Find VVTerm and tap "Cancel Subscription"</li>
+        {content.s3steps.map((item) => <li>{item}</li>)}
       </ol>
-      <p>Upon cancellation:</p>
+      <p>{content.s3outro}</p>
       <ul>
-        <li>You'll retain Pro access until the end of your current billing period</li>
-        <li>No further charges will be made</li>
-        <li>Pro features will be disabled after the period ends</li>
-        <li>Your servers and workspaces will remain, but free tier limits will apply</li>
+        {content.s3list.map((item) => <li>{item}</li>)}
       </ul>
     </section>
 
     <section>
-      <h2>Lifetime Purchases</h2>
-      <p>
-        Lifetime Pro purchases are one-time and do not require cancellation. Refunds are handled by
-        Apple using the same process above.
-      </p>
+      <h2>{content.s4h}</h2>
+      <p>{content.s4p}</p>
     </section>
 
     <section>
-      <h2>Contact Us</h2>
+      <h2>{content.s5h}</h2>
       <p>
-        Questions or technical issues? Contact <a href="mailto:vvterm@vivy.company">vvterm@vivy.company</a>.
+        {content.s5pre}<a href="mailto:vvterm@vivy.company">vvterm@vivy.company</a>{content.s5post}
       </p>
     </section>
   </LegalPage>
-</BaseLayout>
+</MarketingLayout>

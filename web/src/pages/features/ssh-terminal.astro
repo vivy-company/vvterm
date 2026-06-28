@@ -1,0 +1,193 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import Expandable from "../../components/Expandable.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "GPU SSH Terminal — VVTerm for iPhone, iPad, and Mac",
+    description:
+      "A fast, accurate SSH terminal powered by libghostty, the Ghostty rendering engine, with Metal GPU drawing, true color, and ligatures. SSH via libssh2 with Keychain credentials.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "SSH terminal",
+    heroEyebrow: "SSH terminal",
+    heroTitle: "A terminal<br />that feels instant.",
+    heroSubhead: "GPU rendering with libghostty, true color, and ligatures — over an SSH transport with credentials kept in Keychain.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm GPU SSH terminal session",
+    statementEyebrow: "Built for accuracy",
+    statementTitle: "The engine matters.",
+    statementBody: "VVTerm draws the terminal with <strong>libghostty</strong> — the same rendering engine behind <strong>Ghostty</strong> — so output is fast, correct, and pixel-crisp on every frame.",
+    expandLabel: "See how the terminal renders",
+    modalEyebrow: "Rendering engine",
+    modalTitle: "Metal GPU drawing, frame by frame.",
+    modalBody: "VVTerm runs <strong>libghostty</strong> — the engine from <strong>Ghostty</strong> — and draws every frame on <strong>Metal</strong>, so scrollback stays smooth and text renders with 24-bit true color and programming ligatures. SSH runs over <strong>libssh2</strong>, with credentials kept in Apple Keychain.",
+    modalAlt: "VVTerm terminal rendering on Metal",
+    sftpLink: "Browse files over SFTP",
+    benefits: [
+      { icon: "lucide:cpu", title: "Metal GPU rendering", body: "libghostty — the engine from Ghostty — draws every frame on Metal for crisp text and smooth scrollback." },
+      { icon: "lucide:square-terminal", title: "True color and ligatures", body: "24-bit color and programming ligatures render exactly as your shell and themes intend." },
+      { icon: "lucide:key-round", title: "Three auth methods", body: "Connect with a password, an SSH key, or a key with passphrase — all stored in Apple Keychain." },
+      { icon: "lucide:layout-grid", title: "Tabs and split panes", body: "Keep several connections open in tabs, and on Mac split a tab into multiple panes. Pro unlocks unlimited tabs and splitting." },
+    ],
+    howEyebrow: "Get connected",
+    howTitle: "From server to shell in minutes.",
+    howBody: "Add a host, pick an auth method, and open a session. VVTerm keeps your <strong>passwords and SSH keys in Apple Keychain</strong> and your server list in sync across devices.",
+    macGuide: "Read the Mac SSH guide",
+    iphoneGuide: "SSH from your iPhone",
+    sftpLink2: "Browse files over SFTP",
+    howAlt: "VVTerm SSH key authentication from Keychain",
+    faqItems: [
+      { question: "What rendering engine does the terminal use?", answer: "VVTerm uses <strong>libghostty</strong>, the rendering engine from Ghostty, with Metal GPU drawing for fast, accurate terminal output." },
+      { question: "Which SSH library powers connections?", answer: "Connections use <strong>libssh2</strong> with OpenSSL for the SSH transport." },
+      { question: "What authentication methods are supported?", answer: "Password, SSH key, and SSH key with passphrase. Credentials are stored in Apple Keychain, never in synced metadata." },
+      { question: "Does it support true color and ligatures?", answer: "Yes. The terminal renders 24-bit true color and programming ligatures." },
+      { question: "Can I open more than one session at a time?", answer: "Yes. Pro unlocks unlimited connection tabs. The free tier includes one connection tab." },
+      { question: "Can I split the terminal into panes?", answer: "Yes — on Mac you can split a tab into multiple panes, horizontally or vertically. Split panes are a Pro feature." },
+      { question: "What devices does it run on?", answer: "iPhone and iPad on iOS or iPadOS 16 or later, and Apple Silicon Macs on macOS 13 Ventura or later." },
+    ],
+    ctaTitle: "Run a real terminal, anywhere.",
+    ctaSubtitle: "Download VVTerm free and open your first SSH session.",
+  },
+  zh: {
+    title: "GPU SSH 终端 — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
+    description:
+      "由 libghostty（Ghostty 渲染引擎）驱动的快速、精准 SSH 终端，配合 Metal GPU 绘制、真彩色和连字。通过 libssh2 建立 SSH 连接，凭据保存在 Keychain 中。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "SSH 终端",
+    heroEyebrow: "SSH 终端",
+    heroTitle: "感觉即时的<br />终端。",
+    heroSubhead: "基于 libghostty 的 GPU 渲染、真彩色和连字 —— 通过 SSH 传输，凭据保存在 Keychain 中。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "Mac 上的 VVTerm GPU SSH 终端会话",
+    statementEyebrow: "为精准而生",
+    statementTitle: "引擎至关重要。",
+    statementBody: "VVTerm 使用 <strong>libghostty</strong> 绘制终端 —— 与 <strong>Ghostty</strong> 背后相同的渲染引擎 —— 因此输出快速、准确，每一帧都像素清晰。",
+    expandLabel: "看看终端如何渲染",
+    modalEyebrow: "渲染引擎",
+    modalTitle: "逐帧的 Metal GPU 绘制。",
+    modalBody: "VVTerm 运行 <strong>libghostty</strong> —— 来自 <strong>Ghostty</strong> 的引擎 —— 并在 <strong>Metal</strong> 上绘制每一帧，因此回滚保持流畅，文本以 24 位真彩色和编程连字渲染。SSH 通过 <strong>libssh2</strong> 运行，凭据保存在 Apple Keychain 中。",
+    modalAlt: "VVTerm 终端在 Metal 上渲染",
+    sftpLink: "通过 SFTP 浏览文件",
+    benefits: [
+      { icon: "lucide:cpu", title: "Metal GPU 渲染", body: "libghostty —— 来自 Ghostty 的引擎 —— 在 Metal 上绘制每一帧，呈现清晰文本和流畅回滚。" },
+      { icon: "lucide:square-terminal", title: "真彩色与连字", body: "24 位色彩和编程连字完全按照你的 shell 与主题的意图渲染。" },
+      { icon: "lucide:key-round", title: "三种认证方式", body: "使用密码、SSH 密钥或带口令的密钥连接 —— 全部保存在 Apple Keychain 中。" },
+      { icon: "lucide:layout-grid", title: "标签页与分屏", body: "在标签页中同时打开多个连接，在 Mac 上还可将标签页拆分为多个窗格。Pro 解锁无限标签页和分屏。" },
+    ],
+    howEyebrow: "建立连接",
+    howTitle: "几分钟内从服务器到 shell。",
+    howBody: "添加主机、选择认证方式、打开会话。VVTerm 将你的<strong>密码和 SSH 密钥保存在 Apple Keychain</strong> 中，并在设备间同步你的服务器列表。",
+    macGuide: "阅读 Mac SSH 指南",
+    iphoneGuide: "从 iPhone 进行 SSH",
+    sftpLink2: "通过 SFTP 浏览文件",
+    howAlt: "VVTerm 从 Keychain 进行 SSH 密钥认证",
+    faqItems: [
+      { question: "终端使用什么渲染引擎？", answer: "VVTerm 使用 <strong>libghostty</strong> —— 来自 Ghostty 的渲染引擎 —— 配合 Metal GPU 绘制，提供快速、准确的终端输出。" },
+      { question: "连接由哪个 SSH 库驱动？", answer: "连接使用 <strong>libssh2</strong> 配合 OpenSSL 进行 SSH 传输。" },
+      { question: "支持哪些认证方式？", answer: "密码、SSH 密钥，以及带口令的 SSH 密钥。凭据保存在 Apple Keychain 中，绝不存于同步的元数据里。" },
+      { question: "它支持真彩色和连字吗？", answer: "支持。终端可渲染 24 位真彩色和编程连字。" },
+      { question: "我可以同时打开多个会话吗？", answer: "可以。Pro 解锁无限连接标签页。免费版包含一个连接标签页。" },
+      { question: "我可以把终端拆分成多个窗格吗？", answer: "可以 —— 在 Mac 上你可以将标签页水平或垂直拆分为多个窗格。分屏是 Pro 功能。" },
+      { question: "它能在哪些设备上运行？", answer: "运行 iOS 或 iPadOS 16 及以上的 iPhone 和 iPad，以及运行 macOS 13 Ventura 及以上的 Apple Silicon Mac。" },
+    ],
+    ctaTitle: "随时随地运行真正的终端。",
+    ctaSubtitle: "免费下载 VVTerm，开启你的第一个 SSH 会话。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm GPU SSH Terminal", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/ssh-terminal", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/ssh-terminal" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/ssh-terminal" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:square-terminal" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="ssh_terminal_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="100% 50%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+      <div class="mt-12 flex justify-center">
+        <Expandable id="ssh-terminal-more" label={C.expandLabel}>
+          <div class="mx-auto max-w-3xl text-center">
+            <p class="eyebrow-accent">{C.modalEyebrow}</p>
+            <h2 class="mt-3 headline">{C.modalTitle}</h2>
+            <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.modalBody} />
+          </div>
+          <div class="mx-auto mt-14 max-w-5xl">
+            <MediaBlock pos="100% 50%" ratio="aspect-[16/9]" alt={C.modalAlt} />
+          </div>
+          <div class="mt-12 text-center">
+            <a href={localizePath("/features/sftp-file-browser", lang)} class="link-arrow">{C.sftpLink} <span aria-hidden="true">›</span></a>
+          </div>
+        </Expandable>
+      </div>
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS / CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.howEyebrow}</p>
+        <h2 class="mt-3 headline">{C.howTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.howBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/guides/ssh-from-mac", lang)} class="inline-flex link-arrow">{C.macGuide} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/guides/how-to-ssh-from-iphone", lang)} class="inline-flex link-arrow">{C.iphoneGuide} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/sftp-file-browser", lang)} class="inline-flex link-arrow">{C.sftpLink2} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <MediaBlock pos="60% 40%" alt={C.howAlt} />
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="ssh_terminal_cta_appstore" />
+</MarketingLayout>

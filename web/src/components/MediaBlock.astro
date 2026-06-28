@@ -1,0 +1,16 @@
+---
+// Image placeholder block. Temporary art uses crops of /preview.png — swap `src`/`pos` later.
+interface Props {
+  src?: string;
+  pos?: string;
+  alt?: string;
+  ratio?: string;
+  class?: string;
+}
+
+const { src = "/preview.png", pos = "50% 50%", alt = "", ratio = "aspect-[16/10]", class: className = "" } = Astro.props;
+---
+
+<div class:list={["overflow-hidden rounded-[28px] bg-surface", ratio, className]}>
+  <img src={src} alt={alt} class="size-full object-cover" style={`object-position:${pos}`} loading="lazy" decoding="async" />
+</div>

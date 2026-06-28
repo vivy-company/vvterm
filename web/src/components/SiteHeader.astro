@@ -1,0 +1,281 @@
+---
+import { Icon } from "astro-icon/components";
+import { SITE } from "../lib/site";
+import { PLATFORMS, FEATURES } from "../lib/nav";
+import { getLang, useT, localizePath } from "../i18n/utils";
+
+interface Props {
+  activeTop?: "platforms" | "features" | "pricing" | "resources";
+}
+
+const { activeTop } = Astro.props;
+
+const lang = getLang(Astro.url);
+const t = useT(lang);
+
+// Localize an internal path for the active locale.
+const lp = (path: string) => localizePath(path, lang);
+// Localized "VVTerm for {platform}" label.
+const platformLabel = (name: string) => t("nav.platformLink").replace("{name}", name);
+
+// Resolve a feature link from its slug; labels come from the localized nav dictionary.
+const feature = (slug: string) => ({ href: lp(`/features/${slug}`), label: t(`nav.feature.${slug}`) });
+
+// Apple-style mega menus: a wide "lead" column of large links plus supporting
+// columns of small links. Solid dark panel, no icons.
+const menus = [
+  {
+    key: "platforms",
+    label: t("nav.platforms"),
+    href: lp("/platforms"),
+    columns: [
+      {
+        heading: t("nav.exploreVVTerm"),
+        lead: true,
+        items: PLATFORMS.map((p) => ({ href: lp(`/${p.slug}`), label: platformLabel(p.name) })),
+        extra: [
+          { href: lp("/features"), label: t("nav.allFeatures") },
+          { href: lp("/compare"), label: t("nav.compareApps") },
+        ],
+      },
+      {
+        heading: t("nav.getVVTerm"),
+        items: [
+          { href: SITE.appStoreUrl, label: t("nav.downloadAppStore"), external: true },
+          { href: lp("/pricing"), label: t("nav.pricing") },
+        ],
+      },
+      {
+        heading: t("nav.resources"),
+        items: [
+          { href: lp("/guides"), label: t("nav.guides") },
+          { href: lp("/docs"), label: t("nav.documentation") },
+          { href: lp("/support"), label: t("nav.support") },
+        ],
+      },
+    ],
+  },
+  {
+    key: "features",
+    label: t("nav.features"),
+    href: lp("/features"),
+    columns: [
+      {
+        heading: t("nav.terminal"),
+        items: [
+          feature("ssh-terminal"),
+          feature("tmux-session-persistence"),
+          feature("terminal-customization"),
+          feature("server-monitoring"),
+        ],
+      },
+      {
+        heading: t("nav.connections"),
+        items: [
+          feature("mosh"),
+          feature("tailscale-ssh"),
+          feature("cloudflare-tunnel-ssh"),
+          feature("windows-ssh"),
+        ],
+      },
+      {
+        heading: t("nav.filesSync"),
+        items: [
+          feature("sftp-file-browser"),
+          feature("icloud-sync-keychain"),
+          { href: lp("/features"), label: t("nav.allFeaturesArrow") },
+        ],
+      },
+    ],
+  },
+  {
+    key: "resources",
+    label: t("nav.resources"),
+    href: lp("/resources"),
+    columns: [
+      {
+        heading: t("nav.learn"),
+        lead: true,
+        items: [
+          { href: lp("/guides"), label: t("nav.guides") },
+          { href: lp("/docs"), label: t("nav.documentation") },
+          { href: lp("/support"), label: t("nav.support") },
+        ],
+      },
+      {
+        heading: t("nav.compare"),
+        items: [
+          { href: lp("/compare/vvterm-vs-termius"), label: "VVTerm vs Termius" },
+          { href: lp("/compare/vvterm-vs-blink-shell"), label: "VVTerm vs Blink Shell" },
+          { href: lp("/compare"), label: t("nav.allComparisons") },
+        ],
+      },
+      {
+        heading: t("nav.getStarted"),
+        items: [
+          { href: SITE.appStoreUrl, label: t("nav.downloadAppStore"), external: true },
+          { href: lp("/pricing"), label: t("nav.pricing") },
+        ],
+      },
+    ],
+  },
+];
+
+const standaloneLinks = [{ key: "pricing", href: lp("/pricing"), label: t("nav.pricing") }];
+
+const mobileGroups = [
+  { title: t("nav.platforms"), items: PLATFORMS.map((p) => ({ href: lp(`/${p.slug}`), label: platformLabel(p.name) })) },
+  { title: t("nav.features"), items: FEATURES.map((f) => ({ href: lp(`/features/${f.slug}`), label: t(`nav.feature.${f.slug}`) })) },
+  {
+    title: t("nav.resources"),
+    items: [
+      { href: lp("/guides"), label: t("nav.guides") },
+      { href: lp("/docs"), label: t("nav.documentation") },
+      { href: lp("/compare"), label: t("nav.comparisons") },
+      { href: lp("/pricing"), label: t("nav.pricing") },
+    ],
+  },
+];
+---
+
+<header data-header class="sticky top-0 z-50 bg-[#1d1d1f]">
+  <nav class="mx-auto flex h-11 max-w-[1024px] items-center justify-between px-4 text-[12px] sm:px-6">
+    <a href={lp("/")} class="flex items-center gap-1.5" aria-label="VVTerm home">
+      <img src="/logo.png" alt="" width="26" height="26" class="size-[26px] object-contain" />
+      <span class="text-[13px] font-semibold tracking-tight text-ink">VVTerm</span>
+    </a>
+
+    <div class="hidden items-center gap-1 lg:flex">
+      {menus.map((menu) => (
+        menu.href ? (
+          <a
+            href={menu.href}
+            data-menu-trigger={menu.key}
+            aria-expanded="false"
+            class:list={["cursor-pointer rounded-md px-3 py-1.5 text-ink/80 transition hover:text-ink", activeTop === menu.key && "text-ink"]}
+          >
+            {menu.label}
+          </a>
+        ) : (
+          <button
+            type="button"
+            data-menu-trigger={menu.key}
+            aria-expanded="false"
+            class:list={["cursor-pointer rounded-md px-3 py-1.5 text-ink/80 transition hover:text-ink", activeTop === menu.key && "text-ink"]}
+          >
+            {menu.label}
+          </button>
+        )
+      ))}
+      {standaloneLinks.map((link) => (
+        <a
+          href={link.href}
+          data-menu-close
+          class:list={["rounded-md px-3 py-1.5 text-ink/80 transition hover:text-ink", activeTop === link.key && "text-ink"]}
+        >
+          {link.label}
+        </a>
+      ))}
+    </div>
+
+    <a
+      href={SITE.appStoreUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden rounded-full bg-accent-strong px-3.5 py-1 font-medium text-white transition hover:bg-accent-hover lg:inline-flex"
+      data-track="appstore_click_header"
+      data-conversion-value="0"
+      data-menu-close
+    >
+      {t("nav.download")}
+    </a>
+
+    <button
+      type="button"
+      aria-label="Open menu"
+      data-nav-toggle
+      class="inline-flex size-8 items-center justify-center rounded-full text-ink/80 transition hover:bg-white/8 lg:hidden"
+    >
+      <Icon class="size-5" name="lucide:menu" />
+    </button>
+  </nav>
+
+  <!-- Desktop mega-menu: one persistent surface, content slides by direction -->
+  <div data-menu-root hidden class="absolute inset-x-0 top-full overflow-hidden bg-[#1d1d1f] opacity-0 transition-opacity duration-200 ease-out">
+    <div data-menu-stage class="relative transition-[height] duration-300 ease-out">
+      {menus.map((menu) => (
+        <div
+          data-menu-panel={menu.key}
+          aria-hidden="true"
+          inert
+          class="pointer-events-none absolute inset-x-0 top-0 opacity-0 transition-[opacity,transform] duration-300 ease-out"
+        >
+          <div class="mx-auto grid max-w-[1024px] grid-cols-2 gap-x-12 gap-y-8 px-6 pb-14 pt-9 md:grid-cols-3">
+            {menu.columns.map((column) => (
+              <div>
+                <p class="text-[12px] font-normal text-faint">{column.heading}</p>
+                {column.lead ? (
+                  <div class="mt-3 flex flex-col gap-2">
+                    {column.items.map((item) => (
+                      <a
+                        href={item.href}
+                        {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        class="w-fit text-[20px] font-semibold leading-tight tracking-[-0.01em] text-ink/65 transition-colors hover:text-ink"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                    {column.extra && (
+                      <div class="mt-3 flex flex-col gap-2">
+                        {column.extra.map((item) => (
+                          <a href={item.href} class="w-fit text-[13px] font-medium text-ink/50 transition-colors hover:text-ink">{item.label}</a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div class="mt-3 flex flex-col gap-2.5">
+                    {column.items.map((item) => (
+                      <a
+                        href={item.href}
+                        {...(item.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                        class="w-fit text-[13px] font-medium text-ink/65 transition-colors hover:text-ink"
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <div data-mobile-nav hidden class="max-h-[calc(100dvh-3rem)] overflow-y-auto overscroll-contain border-t border-white/8 bg-black px-6 py-5 lg:hidden">
+    <div class="mx-auto grid max-w-[1024px] gap-5">
+      {mobileGroups.map((group) => (
+        <div>
+          <p class="px-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-faint">{group.title}</p>
+          <div class="mt-2 grid gap-0.5">
+            {group.items.map((item) => (
+              <a href={item.href} class="rounded-xl px-2 py-2.5 text-sm font-medium text-ink/85">{item.label}</a>
+            ))}
+          </div>
+        </div>
+      ))}
+      <a
+        class="btn-primary w-full"
+        href={SITE.appStoreUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-track="appstore_click_mobilenav"
+        data-conversion-value="0"
+      >
+        {t("nav.downloadVVTerm")}
+      </a>
+    </div>
+  </div>
+</header>

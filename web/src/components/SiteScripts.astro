@@ -1,0 +1,416 @@
+---
+import { SITE } from "../lib/site";
+---
+
+<script is:inline define:vars={{ gtagConversionId: SITE.gtagConversionId }}>
+  const trackEvent = (eventName) => {
+    if (window.umami && typeof window.umami.track === "function") window.umami.track(eventName);
+  };
+
+  const trackConversion = (event, eventName, value) => {
+    trackEvent(eventName);
+    if (typeof window.gtag !== "function") return;
+    event.preventDefault();
+    const url = event.currentTarget.href;
+    let navigated = false;
+    const navigate = () => {
+      if (navigated) return;
+      navigated = true;
+      window.open(url, "_blank", "noopener,noreferrer");
+    };
+    window.gtag("event", "conversion", {
+      send_to: gtagConversionId,
+      value: value || 0,
+      currency: "USD",
+      transaction_id: `${eventName}_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+      event_callback: navigate,
+    });
+    window.setTimeout(navigate, 1000);
+  };
+
+  const navToggle = document.querySelector("[data-nav-toggle]");
+  const mobileNav = document.querySelector("[data-mobile-nav]");
+  if (navToggle && mobileNav) {
+    navToggle.addEventListener("click", () => {
+      mobileNav.hidden = !mobileNav.hidden;
+    });
+  }
+
+  // Pricing billing toggle (monthly/yearly) with a morphing indicator.
+  document.querySelectorAll("[data-billing-switch]").forEach((sw) => {
+    const buttons = Array.from(sw.querySelectorAll("[data-billing-toggle]"));
+    const indicator = sw.querySelector("[data-billing-indicator]");
+    const card = sw.closest("article") || document;
+    const cta = card.querySelector("[data-pricing-cta]");
+    const monthlyPrice = card.querySelector("[data-price-monthly]");
+    const yearlyPrice = card.querySelector("[data-price-yearly]");
+    const ctaMonthly = card.querySelector("[data-cta-monthly]");
+    const ctaYearly = card.querySelector("[data-cta-yearly]");
+
+    const moveIndicator = (button, animate) => {
+      if (!indicator || !button) return;
+      const prev = indicator.style.transition;
+      if (!animate) indicator.style.transition = "none";
+      indicator.style.width = button.offsetWidth + "px";
+      indicator.style.height = button.offsetHeight + "px";
+      indicator.style.transform = "translate(" + button.offsetLeft + "px," + button.offsetTop + "px)";
+      if (!animate) requestAnimationFrame(() => { indicator.style.transition = prev || ""; });
+    };
+
+    const sync = (cycle, animate) => {
+      const isYearly = cycle === "yearly";
+      buttons.forEach((b) => {
+        const active = b.dataset.billingToggle === cycle;
+        b.classList.toggle("text-ink", active);
+        b.classList.toggle("text-faint", !active);
+        if (active) moveIndicator(b, animate);
+      });
+      if (monthlyPrice) monthlyPrice.hidden = isYearly;
+      if (yearlyPrice) yearlyPrice.hidden = !isYearly;
+      if (ctaMonthly) ctaMonthly.hidden = isYearly;
+      if (ctaYearly) ctaYearly.hidden = !isYearly;
+      if (cta) {
+        cta.dataset.billingCycle = cycle;
+        cta.dataset.track = isYearly ? cta.dataset.yearlyTrack : cta.dataset.monthlyTrack;
+        cta.dataset.conversionValue = isYearly ? cta.dataset.yearlyValue : cta.dataset.monthlyValue;
+      }
+    };
+
+    buttons.forEach((b) => {
+      b.addEventListener("click", () => {
+        const cycle = b.dataset.billingToggle;
+        if (!cycle) return;
+        sync(cycle, true);
+        trackEvent("billing_toggle_" + cycle);
+      });
+    });
+
+    sync((cta && cta.dataset.billingCycle) || "yearly", false);
+    window.addEventListener("resize", () => {
+      const active = buttons.find((b) => b.classList.contains("text-ink"));
+      if (active) moveIndicator(active, false);
+    });
+  });
+
+  // Desktop mega-menu: one persistent surface; content slides left/right by direction.
+  const header = document.querySelector("[data-header]");
+  const menuRoot = header && header.querySelector("[data-menu-root]");
+  const menuStage = header && header.querySelector("[data-menu-stage]");
+  if (header && menuRoot && menuStage) {
+    const triggers = Array.from(header.querySelectorAll("[data-menu-trigger]"));
+    const panels = Array.from(header.querySelectorAll("[data-menu-panel]"));
+    const order = panels.map((p) => p.dataset.menuPanel);
+    const SLIDE = 14;
+    let currentKey = null;
+    let leaveTimer = null;
+    let closeTimer = null;
+
+    const showPanel = (key) => {
+      if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+
+      const opening = menuRoot.hidden;
+      if (opening) menuRoot.hidden = false;
+      else menuRoot.style.opacity = "1"; // recover if a close fade had already started
+
+      // Same content already shown — opacity restored above, nothing more to do.
+      if (key === currentKey && !opening) return;
+
+      triggers.forEach((t) => t.setAttribute("aria-expanded", String(t.dataset.menuTrigger === key)));
+
+      const newIdx = order.indexOf(key);
+      const oldIdx = currentKey ? order.indexOf(currentKey) : -1;
+      const dir = oldIdx === -1 ? 0 : newIdx > oldIdx ? 1 : -1;
+
+      panels.forEach((panel) => {
+        const active = panel.dataset.menuPanel === key;
+        if (active) {
+          if (dir !== 0) {
+            panel.style.transition = "none";
+            panel.style.transform = "translateX(" + dir * SLIDE + "px)";
+            panel.style.opacity = "0";
+            void panel.offsetWidth; // reflow so the slide-in animates
+            panel.style.transition = "";
+          }
+          panel.style.transform = "translateX(0)";
+          panel.style.opacity = "1";
+          panel.classList.remove("pointer-events-none");
+          panel.removeAttribute("aria-hidden");
+          panel.inert = false; // only the visible panel is in the tab order
+        } else {
+          const wasCurrent = panel.dataset.menuPanel === currentKey;
+          panel.style.transform = wasCurrent && dir !== 0 ? "translateX(" + -dir * SLIDE + "px)" : "translateX(0)";
+          panel.style.opacity = "0";
+          panel.classList.add("pointer-events-none");
+          panel.setAttribute("aria-hidden", "true");
+          panel.inert = true;
+        }
+      });
+
+      const activePanel = panels.find((p) => p.dataset.menuPanel === key);
+      const targetH = activePanel.offsetHeight;
+      if (opening) {
+        menuStage.style.transition = "none";
+        menuStage.style.height = targetH + "px";
+        void menuStage.offsetWidth;
+        menuStage.style.transition = "";
+        requestAnimationFrame(() => { menuRoot.style.opacity = "1"; });
+      } else {
+        menuStage.style.height = targetH + "px";
+      }
+      currentKey = key;
+    };
+
+    const hideAll = () => {
+      if (leaveTimer) { clearTimeout(leaveTimer); leaveTimer = null; }
+      triggers.forEach((t) => t.setAttribute("aria-expanded", "false"));
+      panels.forEach((p) => { p.inert = true; }); // nothing focusable while closed
+      menuRoot.style.opacity = "0";
+      if (closeTimer) clearTimeout(closeTimer);
+      closeTimer = setTimeout(() => { menuRoot.hidden = true; currentKey = null; }, 220);
+    };
+
+    triggers.forEach((trigger) => {
+      const key = trigger.dataset.menuTrigger;
+      trigger.addEventListener("mouseenter", () => showPanel(key));
+      trigger.addEventListener("focus", () => showPanel(key));
+    });
+
+    header.querySelectorAll("[data-menu-close]").forEach((el) => {
+      el.addEventListener("mouseenter", hideAll);
+      el.addEventListener("focus", hideAll);
+    });
+
+    header.addEventListener("mouseleave", () => {
+      leaveTimer = setTimeout(hideAll, 120);
+    });
+    header.addEventListener("focusout", (event) => {
+      if (!header.contains(event.relatedTarget)) hideAll();
+    });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") hideAll(); });
+  }
+
+  document.querySelectorAll("[data-track]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      const eventName = link.dataset.track;
+      if (!eventName) return;
+      if (link.dataset.conversionValue != null) {
+        trackConversion(event, eventName, Number(link.dataset.conversionValue || "0"));
+      } else {
+        trackEvent(eventName);
+      }
+    });
+  });
+
+  // Horizontal card carousels (full-bleed scroll-snap, dots, autoplay)
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  document.querySelectorAll("[data-carousel]").forEach((root) => {
+    const track = root.querySelector("[data-carousel-track]");
+    const dotsWrap = root.querySelector("[data-carousel-dots]");
+    const playpause = root.querySelector("[data-carousel-playpause]");
+    if (!track) return;
+
+    const cards = Array.from(track.children);
+
+    // Cache card geometry; only re-read layout on resize, never on scroll.
+    let metrics = [];
+    let trackW = 0;
+    const measure = () => {
+      trackW = track.clientWidth;
+      metrics = cards.map((c) => ({ left: c.offsetLeft, width: c.offsetWidth, center: c.offsetLeft + c.offsetWidth / 2 }));
+    };
+
+    const step = () => (metrics[1] ? metrics[1].left - metrics[0].left : trackW * 0.8);
+    const atEnd = () => track.scrollLeft >= track.scrollWidth - trackW - 4;
+
+    let timer = null;
+    let playing = false;
+    const auto = root.hasAttribute("data-autoplay") && !reduceMotion && cards.length > 1;
+
+    const setPlayIcon = (isPlaying) => {
+      if (!playpause) return;
+      playpause.setAttribute("aria-label", isPlaying ? "Pause" : "Play");
+      const p = playpause.querySelector("[data-pp-pause]");
+      const pl = playpause.querySelector("[data-pp-play]");
+      if (p) p.classList.toggle("hidden", !isPlaying);
+      if (pl) pl.classList.toggle("hidden", isPlaying);
+    };
+    const tick = () => (atEnd() ? track.scrollTo({ left: 0, behavior: "smooth" }) : track.scrollBy({ left: step(), behavior: "smooth" }));
+    const startTimer = () => { if (auto && !timer) timer = window.setInterval(tick, 4500); };
+    const clearTimer = () => { if (timer) window.clearInterval(timer); timer = null; };
+    const play = () => { playing = true; setPlayIcon(true); startTimer(); };
+    const pause = () => { playing = false; setPlayIcon(false); clearTimer(); };
+
+    // Scroll a card to the center of the track (precise, no page jump)
+    const goTo = (index) => {
+      const m = metrics[index];
+      if (!m) return;
+      track.scrollTo({ left: Math.max(0, m.left - (trackW - m.width) / 2), behavior: "smooth" });
+    };
+
+    // Click a card to bring it to the center
+    cards.forEach((card, index) => {
+      card.classList.add("cursor-pointer");
+      card.addEventListener("click", (event) => {
+        if (event.target.closest("a, button")) return;
+        pause();
+        goTo(index);
+      });
+    });
+
+    const dots = [];
+    if (dotsWrap) {
+      cards.forEach((_, index) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.setAttribute("aria-label", `Go to slide ${index + 1}`);
+        dot.className = "h-2 rounded-full bg-white/40 transition-all duration-300 w-2";
+        dot.addEventListener("click", () => {
+          pause();
+          goTo(index);
+        });
+        dotsWrap.appendChild(dot);
+        dots.push(dot);
+      });
+    }
+
+    const activeIndex = () => {
+      const center = track.scrollLeft + trackW / 2;
+      let best = Infinity;
+      let idx = 0;
+      for (let i = 0; i < metrics.length; i++) {
+        const d = Math.abs(metrics[i].center - center);
+        if (d < best) { best = d; idx = i; }
+      }
+      return idx;
+    };
+
+    let rafId = 0;
+    const update = () => {
+      if (!dots.length || rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const active = activeIndex();
+        dots.forEach((dot, index) => {
+          const on = index === active;
+          dot.classList.toggle("bg-white", on);
+          dot.classList.toggle("w-7", on);
+          dot.classList.toggle("bg-white/40", !on);
+          dot.classList.toggle("w-2", !on);
+        });
+      });
+    };
+
+    measure();
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", () => { measure(); update(); });
+    update();
+
+    if (playpause) playpause.addEventListener("click", () => (playing ? pause() : play()));
+    setPlayIcon(false);
+
+    if (auto) {
+      root.addEventListener("mouseenter", () => { if (playing) clearTimer(); });
+      root.addEventListener("mouseleave", () => { if (playing) startTimer(); });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => (entry.isIntersecting ? play() : pause()));
+      }, { threshold: 0.35 });
+      io.observe(root);
+    }
+  });
+
+  // Scroll-reveal + on-load entrance animations
+  if (!reduceMotion) {
+    document.documentElement.classList.add("reveal-on");
+    const revealObserver = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-in");
+          obs.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    );
+    document
+      .querySelectorAll(
+        "main section .headline-hero, main section .headline, main section .headline-sm, main section .eyebrow-accent, main section .subhead, main section .body-emph, main section .card, main section article, main section [data-carousel], [data-reveal]"
+      )
+      .forEach((el) => {
+        // A carousel reveals as one unit; don't also reveal its inner cards. Skip modal content.
+        if (!el.hasAttribute("data-carousel") && el.closest("[data-carousel]")) return;
+        if (el.closest("[data-expand-modal]")) return;
+        el.setAttribute("data-reveal", "");
+        revealObserver.observe(el);
+      });
+  }
+
+  // Pill tab switchers
+  document.querySelectorAll("[data-tabs]").forEach((root) => {
+    const buttons = Array.from(root.querySelectorAll("[data-tab-btn]"));
+    const panels = Array.from(root.querySelectorAll("[data-tab-panel]"));
+    const indicator = root.querySelector("[data-tab-indicator]");
+    const moveIndicator = (button) => {
+      if (!indicator || !button) return;
+      indicator.style.width = button.offsetWidth + "px";
+      indicator.style.height = button.offsetHeight + "px";
+      indicator.style.transform = "translate(" + button.offsetLeft + "px," + button.offsetTop + "px)";
+      indicator.style.opacity = "1";
+    };
+    const select = (key) => {
+      buttons.forEach((button) => {
+        const on = button.dataset.tabBtn === key;
+        button.classList.toggle("text-black", on);
+        button.classList.toggle("text-ink/70", !on);
+        if (on) moveIndicator(button);
+      });
+      panels.forEach((panel) => {
+        const on = panel.dataset.tabPanel === key;
+        panel.classList.toggle("opacity-100", on);
+        panel.classList.toggle("z-10", on);
+        panel.classList.toggle("opacity-0", !on);
+        panel.classList.toggle("pointer-events-none", !on);
+      });
+    };
+    buttons.forEach((button) => button.addEventListener("click", () => select(button.dataset.tabBtn)));
+    if (buttons[0]) select(buttons[0].dataset.tabBtn);
+    window.addEventListener("resize", () => {
+      const active = buttons.find((b) => b.classList.contains("text-black"));
+      if (active) {
+        const prev = indicator && indicator.style.transition;
+        if (indicator) indicator.style.transition = "none";
+        moveIndicator(active);
+        if (indicator) requestAnimationFrame(() => { indicator.style.transition = prev || ""; });
+      }
+    });
+  });
+
+  // Slide-up expand modals
+  document.querySelectorAll("[data-expand-open]").forEach((btn) => {
+    const id = btn.dataset.expandOpen;
+    const modal = document.querySelector(`[data-expand-modal="${id}"]`);
+    if (!modal) return;
+    const backdrop = modal.querySelector("[data-expand-backdrop]");
+    const panel = modal.querySelector("[data-expand-panel]");
+    let closing = null;
+    const open = () => {
+      if (closing) { window.clearTimeout(closing); closing = null; }
+      modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      requestAnimationFrame(() => {
+        if (backdrop) backdrop.classList.add("opacity-100");
+        if (panel) panel.classList.remove("translate-y-full");
+      });
+    };
+    const close = () => {
+      if (backdrop) backdrop.classList.remove("opacity-100");
+      if (panel) panel.classList.add("translate-y-full");
+      document.body.style.overflow = "";
+      closing = window.setTimeout(() => { modal.hidden = true; }, 500);
+    };
+    btn.addEventListener("click", open);
+    modal.querySelectorAll("[data-expand-close]").forEach((c) => c.addEventListener("click", close));
+    if (backdrop) backdrop.addEventListener("click", close);
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !modal.hidden) close(); });
+  });
+</script>

@@ -1,0 +1,161 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import FaqAccordion from "../../components/FaqAccordion.astro";
+import MediaBlock from "../../components/MediaBlock.astro";
+import { Icon } from "astro-icon/components";
+import { SITE, softwareAppSchema } from "../../lib/site";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "SSH to Windows Servers — VVTerm for iPhone, iPad, and Mac",
+    description:
+      "Connect to Windows and PowerShell hosts over SSH from your iPhone, iPad, or Mac — with SFTP file browsing, live stats, and persistent sessions through psmux.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    bcThis: "Windows SSH",
+    heroEyebrow: "Windows server support",
+    heroTitle: "SSH to Windows,<br />from any Apple device.",
+    heroSubhead: "Connect to Windows and PowerShell hosts with the same terminal, file browser, and monitoring you use for Linux — plus persistent sessions through psmux.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm PowerShell session on a Windows host",
+    statementEyebrow: "One app, mixed fleet",
+    statementTitle: "Linux and Windows, side by side.",
+    statementBody: "Most Apple SSH clients assume a POSIX host. VVTerm detects the remote platform — Linux, macOS, BSD, or <strong>Windows</strong> — and adapts its shell handling, persistence, and stats to match.",
+    benefits: [
+      { icon: "lucide:monitor", title: "Windows & PowerShell", body: "VVTerm detects Windows hosts and their shell, so PowerShell and cmd sessions render and behave correctly." },
+      { icon: "lucide:history", title: "Persistent sessions", body: "Keep work alive across disconnects with psmux — the tmux-style multiplexer for Windows — installed for you when it's missing." },
+      { icon: "lucide:folder-open-dot", title: "SFTP files", body: "Browse, upload, download, rename, and move files on Windows servers with the same file browser you use everywhere." },
+      { icon: "lucide:activity", title: "Live stats", body: "CPU, memory, network, and disk read correctly on Windows with a dedicated metrics collector." },
+    ],
+    crossEyebrow: "Same workflow everywhere",
+    crossTitle: "No separate tool for Windows.",
+    crossBody: "Add a Windows host the same way you add any server, authenticate with a password or SSH key from <strong>Keychain</strong>, and get the terminal, SFTP browser, and live stats you already know.",
+    tmuxLink: "How persistent sessions work",
+    sftpLink: "The SFTP file browser",
+    monitoringLink: "Live server monitoring",
+    crossAlt: "VVTerm psmux persistent sessions on Windows",
+    faqItems: [
+      { question: "Can VVTerm connect to Windows servers?", answer: "Yes. VVTerm connects over SSH to Windows and Windows Server hosts running an SSH server, and detects whether the shell is PowerShell or cmd so output renders correctly." },
+      { question: "Do persistent sessions work on Windows?", answer: "Yes. On Windows hosts VVTerm uses <strong>psmux</strong>, a tmux-style multiplexer, so your session survives disconnects. If it isn't installed, VVTerm can add it with winget, scoop, choco, or cargo." },
+      { question: "Does the file browser work on Windows?", answer: "Yes. The SFTP browser lists, transfers, renames, moves, and deletes files on any host with an SFTP-capable SSH server, Windows included." },
+      { question: "Can I see Windows server stats?", answer: "Yes. VVTerm has a Windows-specific collector for CPU, memory, network, and disk, so live monitoring works there too." },
+      { question: "How do I authenticate?", answer: "Password, SSH key, or SSH key with passphrase — the same options as any other host, with credentials stored in Apple Keychain." },
+    ],
+    ctaTitle: "Your Windows fleet, in your pocket.",
+    ctaSubtitle: "Download VVTerm free and connect to your first Windows host.",
+  },
+  zh: {
+    title: "SSH 连接 Windows 服务器 — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
+    description:
+      "从你的 iPhone、iPad 或 Mac 通过 SSH 连接 Windows 和 PowerShell 主机 —— 支持 SFTP 文件浏览、实时统计，以及通过 psmux 实现的持久会话。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    bcThis: "Windows SSH",
+    heroEyebrow: "Windows 服务器支持",
+    heroTitle: "从任意 Apple 设备<br />SSH 连接 Windows。",
+    heroSubhead: "用你连接 Linux 时相同的终端、文件浏览器和监控来连接 Windows 和 PowerShell 主机 —— 还有通过 psmux 实现的持久会话。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    heroAlt: "VVTerm 在 Windows 主机上的 PowerShell 会话",
+    statementEyebrow: "一款应用，混合机群",
+    statementTitle: "Linux 和 Windows，并肩而立。",
+    statementBody: "大多数 Apple SSH 客户端默认主机是 POSIX 系统。VVTerm 会检测远程平台 —— Linux、macOS、BSD 或 <strong>Windows</strong> —— 并相应调整其 shell 处理、持久化和统计。",
+    benefits: [
+      { icon: "lucide:monitor", title: "Windows 与 PowerShell", body: "VVTerm 检测 Windows 主机及其 shell，因此 PowerShell 和 cmd 会话能正确渲染和运行。" },
+      { icon: "lucide:history", title: "持久会话", body: "用 psmux —— Windows 上类 tmux 的多路复用器 —— 让工作在断线中存活，缺失时会为你安装。" },
+      { icon: "lucide:folder-open-dot", title: "SFTP 文件", body: "用你处处使用的同一个文件浏览器，在 Windows 服务器上浏览、上传、下载、重命名和移动文件。" },
+      { icon: "lucide:activity", title: "实时统计", body: "借助专用的指标采集器，CPU、内存、网络和磁盘在 Windows 上都能正确读数。" },
+    ],
+    crossEyebrow: "处处相同的工作流",
+    crossTitle: "Windows 无需单独的工具。",
+    crossBody: "用添加任意服务器的相同方式添加 Windows 主机，使用来自 <strong>Keychain</strong> 的密码或 SSH 密钥认证，即可获得你已熟悉的终端、SFTP 浏览器和实时统计。",
+    tmuxLink: "持久会话如何工作",
+    sftpLink: "SFTP 文件浏览器",
+    monitoringLink: "实时服务器监控",
+    crossAlt: "VVTerm 在 Windows 上的 psmux 持久会话",
+    faqItems: [
+      { question: "VVTerm 能连接 Windows 服务器吗？", answer: "可以。VVTerm 通过 SSH 连接运行 SSH 服务器的 Windows 和 Windows Server 主机，并检测 shell 是 PowerShell 还是 cmd，以便输出正确渲染。" },
+      { question: "持久会话在 Windows 上有效吗？", answer: "有效。在 Windows 主机上，VVTerm 使用类 tmux 的多路复用器 <strong>psmux</strong>，让你的会话在断线中存活。若未安装，VVTerm 可用 winget、scoop、choco 或 cargo 添加它。" },
+      { question: "文件浏览器在 Windows 上有效吗？", answer: "有效。SFTP 浏览器可在任何带 SFTP 能力 SSH 服务器的主机上列出、传输、重命名、移动和删除文件，包括 Windows。" },
+      { question: "我能查看 Windows 服务器统计吗？", answer: "可以。VVTerm 为 CPU、内存、网络和磁盘提供 Windows 专用采集器，因此实时监控在那里也能工作。" },
+      { question: "我如何认证？", answer: "密码、SSH 密钥，或带口令的 SSH 密钥 —— 与任何其他主机相同的选项，凭据保存在 Apple Keychain 中。" },
+    ],
+    ctaTitle: "你的 Windows 机群，揣在口袋里。",
+    ctaSubtitle: "免费下载 VVTerm，连接你的第一台 Windows 主机。",
+  },
+}, lang);
+
+const appSchema = softwareAppSchema({ name: "VVTerm Windows SSH", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/windows-ssh", lang), description: C.description });
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features/windows-ssh" activeTop="features" structuredData={[appSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }, { name: C.bcThis, href: "/features/windows-ssh" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <Icon class="mx-auto size-12 text-accent" name="lucide:monitor" />
+      <p class="mt-5 eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="windows_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+    <div class="mx-auto mt-14 max-w-4xl">
+      <MediaBlock pos="80% 30%" alt={C.heroAlt} />
+    </div>
+  </section>
+
+  <!-- BIG STATEMENT -->
+  <section class="section">
+    <div class="container-apple text-center">
+      <p class="eyebrow-accent">{C.statementEyebrow}</p>
+      <h2 class="mt-3 headline">{C.statementTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.statementBody} />
+    </div>
+  </section>
+
+  <!-- BENEFITS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.benefits.map((item) => (
+        <article class="card p-7">
+          <Icon class="size-6 text-accent" name={item.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{item.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-muted">{item.body}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- CROSS-LINK -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide grid items-center gap-12 lg:grid-cols-2">
+      <div class="max-w-xl">
+        <p class="eyebrow-accent">{C.crossEyebrow}</p>
+        <h2 class="mt-3 headline">{C.crossTitle}</h2>
+        <p class="mt-6 body-emph" set:html={C.crossBody} />
+        <div class="mt-8 flex flex-col gap-3">
+          <a href={localizePath("/features/tmux-session-persistence", lang)} class="inline-flex link-arrow">{C.tmuxLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/sftp-file-browser", lang)} class="inline-flex link-arrow">{C.sftpLink} <span aria-hidden="true">›</span></a>
+          <a href={localizePath("/features/server-monitoring", lang)} class="inline-flex link-arrow">{C.monitoringLink} <span aria-hidden="true">›</span></a>
+        </div>
+      </div>
+      <MediaBlock pos="60% 40%" alt={C.crossAlt} />
+    </div>
+  </section>
+
+  <FaqAccordion items={C.faqItems} />
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="windows_cta_appstore" />
+</MarketingLayout>

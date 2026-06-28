@@ -8,19 +8,15 @@ interface Props {
 const { title, description, lastUpdated } = Astro.props;
 ---
 
-<main class="px-4 py-12 sm:px-6 sm:py-16">
+<main class="px-6 py-16 sm:py-20">
   <div class="mx-auto max-w-3xl">
-    <header class="mb-10">
-      <a href="/" class="inline-block">
-        <img src="/logo.png" alt="VVTerm" width="48" height="48" class="size-12 rounded-2xl" />
-      </a>
-      <h1 class="mt-4 text-4xl font-semibold tracking-tight text-slate-950 dark:text-slate-100 sm:text-5xl">{title}</h1>
-      {description && <p class="mt-3 text-base text-slate-600 dark:text-slate-300">{description}</p>}
-      {lastUpdated && <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Last updated: {lastUpdated}</p>}
+    <header class="mb-10 border-b border-line pb-8">
+      <h1 class="text-4xl font-semibold tracking-[-0.02em] text-ink sm:text-5xl">{title}</h1>
+      {description && <p class="mt-4 text-lg text-muted">{description}</p>}
+      {lastUpdated && <p class="mt-2 text-sm text-faint">Last updated: {lastUpdated}</p>}
     </header>
-    <div class="space-y-6 text-slate-600 dark:text-slate-300 [&_a]:text-orange-500 [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-slate-950 [&_h2]:dark:text-slate-100 [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-slate-950 [&_h3]:dark:text-slate-100 [&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_p]:leading-7 [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5">
+    <div class="space-y-6 text-[15px] leading-7 text-muted [&_a]:text-accent [&_a:hover]:underline [&_h2]:mb-3 [&_h2]:mt-10 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:text-ink [&_h3]:mb-2 [&_h3]:mt-6 [&_h3]:text-lg [&_h3]:font-medium [&_h3]:text-ink [&_li]:leading-7 [&_li::marker]:text-faint [&_ol]:mt-3 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-5 [&_p]:leading-7 [&_strong]:text-ink [&_ul]:mt-3 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-5">
       <slot />
     </div>
-    <a href="/" class="mt-8 inline-block text-sm font-medium text-orange-500 hover:underline">← Back to Home</a>
   </div>
 </main>

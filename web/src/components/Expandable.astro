@@ -1,0 +1,44 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  id: string;
+  label: string;
+  i18nKey?: string;
+}
+
+const { id, label, i18nKey } = Astro.props;
+---
+
+<button
+  type="button"
+  data-expand-open={id}
+  class="inline-flex items-center gap-3 rounded-full bg-[#1d1d1f] py-2 pl-5 pr-2 text-base font-medium text-ink transition hover:bg-[#2a2a2c]"
+>
+  <span {...(i18nKey ? { "data-i18n": i18nKey } : {})}>{label}</span>
+  <span class="grid size-8 place-items-center rounded-full bg-accent-strong text-white">
+    <Icon class="size-4" name="lucide:plus" />
+  </span>
+</button>
+
+<div data-expand-modal={id} hidden class="fixed inset-0 z-[100]">
+  <div data-expand-backdrop class="absolute inset-0 bg-black/75 opacity-0 transition-opacity duration-300"></div>
+  <div
+    data-expand-panel
+    class="absolute inset-x-3 bottom-0 top-10 mx-auto max-w-[1400px] translate-y-full transform-gpu overflow-y-auto overscroll-contain rounded-t-[32px] border border-white/10 bg-[#0a0a0a] shadow-[0_-24px_70px_rgba(0,0,0,0.7)] transition-transform duration-500 will-change-transform [-ms-overflow-style:none] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:inset-x-6 sm:top-14"
+  >
+    <div class="pointer-events-none sticky top-0 z-10 flex justify-end p-5 sm:p-6">
+      <button
+        type="button"
+        data-expand-close
+        aria-label="Close"
+        class="pointer-events-auto grid size-11 place-items-center rounded-full bg-[#e8e8ed]/90 text-black backdrop-blur transition hover:bg-white"
+      >
+        <Icon class="size-5" name="lucide:x" />
+      </button>
+    </div>
+    <div class="-mt-16 px-6 pb-24 pt-6">
+      <slot />
+    </div>
+  </div>
+</div>

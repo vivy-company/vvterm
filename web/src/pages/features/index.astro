@@ -1,0 +1,178 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import Carousel from "../../components/Carousel.astro";
+import GalleryCard from "../../components/GalleryCard.astro";
+import { Icon } from "astro-icon/components";
+import { SITE } from "../../lib/site";
+import { FEATURES } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "Features — VVTerm SSH Terminal and SFTP Client",
+    description:
+      "Everything VVTerm does: a GPU SSH terminal, tmux session persistence, an SFTP file browser, live server monitoring, Windows support, deep customization, Mosh, Tailscale SSH, Cloudflare Tunnel SSH, and iCloud sync with Keychain security.",
+    bcHome: "Home",
+    bcFeatures: "Features",
+    heroEyebrow: "Features",
+    heroTitle: "Everything you need<br />to run remote machines.",
+    heroSubhead:
+      "A native SSH terminal with tmux persistence, an SFTP file browser, live monitoring, deep customization, and modern connection methods — in one Apple-first app for iPhone, iPad, and Mac.",
+    seePricing: "See pricing",
+    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    tourEyebrow: "A quick tour",
+    tourTitle: "The features people reach for.",
+    tourLabel: "VVTerm flagship features",
+    showcase: [
+      { pos: "100% 50%", title: "A GPU terminal that feels instant.", caption: "top" },
+      { pos: "8% 50%", title: "An SFTP browser beside your shell.", caption: "bottom" },
+      { pos: "30% 35%", title: "Sessions that survive the drop.", caption: "top" },
+      { pos: "72% 60%", title: "Synced across iPhone, iPad, and Mac.", caption: "bottom" },
+    ],
+    learnMore: "Learn more",
+    connectEyebrow: "Connect your way",
+    connectTitle: "Four ways to reach every machine.",
+    connectBody:
+      "Pick the right transport per server. Use <strong>standard SSH</strong> when you want it and <strong>Mosh</strong>, <strong>Tailscale SSH</strong>, or <strong>Cloudflare Tunnel SSH</strong> when you need them.",
+    connectionMethods: [
+      { slug: "ssh-terminal", icon: "lucide:square-terminal", title: "Standard SSH", body: "Password, SSH key, or key with passphrase from Keychain." },
+      { slug: "mosh", icon: "lucide:radio", title: "Mosh", body: "Roaming sessions that survive sleep and network changes." },
+      { slug: "tailscale-ssh", icon: "lucide:waypoints", title: "Tailscale SSH", body: "Reach tailnet machines by MagicDNS name, no open ports." },
+      { slug: "cloudflare-tunnel-ssh", icon: "lucide:cloud", title: "Cloudflare Tunnel SSH", body: "Connect behind Cloudflare Tunnel with no inbound ports." },
+    ],
+    ctaTitle: "One app for every server.",
+    ctaSubtitle: "Download VVTerm free and connect to your first machine in minutes.",
+    features: Object.fromEntries(FEATURES.map((f) => [f.slug, { title: f.title, summary: f.summary }])),
+  },
+  zh: {
+    title: "功能 — VVTerm SSH 终端与 SFTP 客户端",
+    description:
+      "VVTerm 的全部能力：GPU SSH 终端、tmux 会话持久化、SFTP 文件浏览器、实时服务器监控、Windows 支持、深度自定义、Mosh、Tailscale SSH、Cloudflare Tunnel SSH，以及带 Keychain 安全的 iCloud 同步。",
+    bcHome: "首页",
+    bcFeatures: "功能",
+    heroEyebrow: "功能",
+    heroTitle: "运行远程机器<br />所需的一切。",
+    heroSubhead:
+      "原生 SSH 终端，配合 tmux 持久化、SFTP 文件浏览器、实时监控、深度自定义和现代连接方式 —— 集成在一款为 iPhone、iPad 和 Mac 打造的 Apple 优先应用中。",
+    seePricing: "查看价格",
+    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
+    tourEyebrow: "快速一览",
+    tourTitle: "人们最常用的功能。",
+    tourLabel: "VVTerm 旗舰功能",
+    showcase: [
+      { pos: "100% 50%", title: "感觉即时的 GPU 终端。", caption: "top" },
+      { pos: "8% 50%", title: "shell 旁的 SFTP 浏览器。", caption: "bottom" },
+      { pos: "30% 35%", title: "断线后依然存活的会话。", caption: "top" },
+      { pos: "72% 60%", title: "在 iPhone、iPad 和 Mac 间同步。", caption: "bottom" },
+    ],
+    learnMore: "了解更多",
+    connectEyebrow: "按你的方式连接",
+    connectTitle: "四种方式连接每一台机器。",
+    connectBody:
+      "为每台服务器选择合适的传输方式。想用时使用<strong>标准 SSH</strong>，需要时使用 <strong>Mosh</strong>、<strong>Tailscale SSH</strong> 或 <strong>Cloudflare Tunnel SSH</strong>。",
+    connectionMethods: [
+      { slug: "ssh-terminal", icon: "lucide:square-terminal", title: "标准 SSH", body: "使用密码、SSH 密钥，或来自 Keychain 的带口令密钥。" },
+      { slug: "mosh", icon: "lucide:radio", title: "Mosh", body: "可在睡眠和网络切换中存活的漫游会话。" },
+      { slug: "tailscale-ssh", icon: "lucide:waypoints", title: "Tailscale SSH", body: "通过 MagicDNS 名称访问 tailnet 机器，无需开放端口。" },
+      { slug: "cloudflare-tunnel-ssh", icon: "lucide:cloud", title: "Cloudflare Tunnel SSH", body: "无需入站端口即可连接 Cloudflare Tunnel 后方主机。" },
+    ],
+    ctaTitle: "一款应用，连接每一台服务器。",
+    ctaSubtitle: "免费下载 VVTerm，几分钟内连接你的第一台机器。",
+    features: {
+      "ssh-terminal": { title: "GPU SSH 终端", summary: "由 libghostty —— Ghostty 的渲染引擎 —— 驱动的快速、精准终端，支持真彩色、连字和清晰的 Metal 绘制。" },
+      "tmux-session-persistence": { title: "tmux 会话持久化", summary: "会话在断线、睡眠和切换应用后依然存在。VVTerm 替你管理 tmux —— 自动安装、重连时自动接回，并开箱即用地完成调优。" },
+      "terminal-customization": { title: "主题与自定义", summary: "数百款内置主题、Nerd Fonts、光标样式，以及可放入你自己命令片段和快捷键的自定义键盘工具栏。" },
+      "sftp-file-browser": { title: "SFTP 文件浏览器", summary: "浏览远程文件夹，上传和下载，重命名、移动、删除、创建目录，并编辑 POSIX 权限，无需另装应用。" },
+      "server-monitoring": { title: "实时服务器监控", summary: "实时查看 CPU、内存、网络、磁盘、平均负载和占用最高的进程 —— 支持 Linux、macOS、BSD 和 Windows 主机。" },
+      "windows-ssh": { title: "Windows 服务器支持", summary: "连接 Windows 和 PowerShell 主机，通过 SFTP 浏览文件，查看实时统计，并用 psmux 保持持久会话。" },
+      "mosh": { title: "Mosh 漫游会话", summary: "Mosh 让会话在网络切换、睡眠和不稳定连接中保持存活，并提供即时本地回显和 SSH 回退。" },
+      "tailscale-ssh": { title: "Tailscale SSH", summary: "通过 MagicDNS 名称访问 tailnet 上的机器 —— 无需端口转发、无暴露端口、无需管理额外密钥。" },
+      "cloudflare-tunnel-ssh": { title: "Cloudflare Tunnel SSH", summary: "无需开放入站端口，直接从 VVTerm 连接 Cloudflare Tunnel 后方的服务器。" },
+      "icloud-sync-keychain": { title: "iCloud 同步与 Keychain 安全", summary: "服务器元数据通过 iCloud 同步，而密码和 SSH 密钥保留在 Apple Keychain 中 —— 仅在你允许时才通过 iCloud Keychain 同步。" },
+    },
+  },
+}, lang);
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: C.title,
+  description: C.description,
+  url: `${SITE.siteUrl}${localizePath("/features", lang)}`,
+};
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/features" activeTop="features" structuredData={[webPageSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcFeatures, href: "/features" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <p class="eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="features_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+      <p class="mt-5 text-[13px] text-faint">{C.heroNote}</p>
+    </div>
+  </section>
+
+  <!-- FLAGSHIP SHOWCASE -->
+  <section class="py-16 sm:py-24">
+    <div class="container-wide">
+      <p class="eyebrow-accent">{C.tourEyebrow}</p>
+      <h2 class="mt-3 headline">{C.tourTitle}</h2>
+    </div>
+    <Carousel label={C.tourLabel}>
+      {C.showcase.map((card) => (
+        <GalleryCard pos={card.pos} title={card.title} caption={card.caption as "top" | "bottom"} />
+      ))}
+    </Carousel>
+  </section>
+
+  <!-- FEATURE GRID -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURES.map((feature) => (
+          <a href={localizePath(`/features/${feature.slug}`, lang)} class="group card flex flex-col p-8 transition hover:border-white/25">
+            <Icon class="size-8 text-accent" name={feature.icon} />
+            <h2 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{C.features[feature.slug].title}</h2>
+            <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{C.features[feature.slug].summary}</p>
+            <span class="mt-6 link-arrow">
+              {C.learnMore}
+              <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" />
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CONNECTION METHODS -->
+  <section class="px-6 pb-20 sm:pb-28">
+    <div class="container-wide text-center">
+      <p class="eyebrow-accent">{C.connectEyebrow}</p>
+      <h2 class="mx-auto mt-3 max-w-[18ch] headline">{C.connectTitle}</h2>
+      <p class="mx-auto mt-6 max-w-2xl body-emph" set:html={C.connectBody} />
+    </div>
+    <div class="container-wide mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {C.connectionMethods.map((method) => (
+        <a href={localizePath(`/features/${method.slug}`, lang)} class="group card flex flex-col p-7 transition hover:border-white/25">
+          <Icon class="size-6 text-accent" name={method.icon} />
+          <h3 class="mt-4 text-xl font-semibold tracking-[-0.02em] text-ink">{method.title}</h3>
+          <p class="mt-2 flex-1 text-[15px] leading-relaxed text-muted">{method.body}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="features_cta_appstore" />
+</MarketingLayout>

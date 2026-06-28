@@ -1,0 +1,90 @@
+---
+import { SITE } from "../lib/site";
+import { PLATFORMS, FEATURES } from "../lib/nav";
+import { getLocale, useT, localizePath, alternatePath, LANG_LABELS, LOCALES } from "../i18n/utils";
+
+const lang = getLocale(Astro.url);
+const t = useT(lang);
+const lp = (path: string) => localizePath(path, lang);
+const platformLabel = (name: string) => t("nav.platformLink").replace("{name}", name);
+
+// One link per other locale (scales past two languages).
+const otherLocales = LOCALES.filter((l) => l !== lang).map((l) => ({
+  href: alternatePath(Astro.url, l),
+  label: LANG_LABELS[l],
+}));
+
+const currentYear = new Date().getFullYear();
+
+const columns = [
+  {
+    title: t("nav.platforms"),
+    links: PLATFORMS.map((p) => ({ href: lp(`/${p.slug}`), label: platformLabel(p.name) })),
+  },
+  {
+    title: t("nav.product"),
+    links: [
+      { href: lp("/features"), label: t("nav.features") },
+      { href: lp("/pricing"), label: t("nav.pricing") },
+      { href: lp(`/features/${FEATURES[0].slug}`), label: t("nav.feature.ssh-terminal") },
+      { href: lp("/features/sftp-file-browser"), label: t("nav.feature.sftp-file-browser") },
+    ],
+  },
+  {
+    title: t("nav.resources"),
+    links: [
+      { href: lp("/guides"), label: t("nav.guides") },
+      { href: lp("/docs"), label: t("nav.documentation") },
+      { href: lp("/compare"), label: t("nav.comparisons") },
+      { href: SITE.discordUrl, label: "Discord", external: true, track: "discord_click" },
+      { href: SITE.githubUrl, label: "GitHub", external: true, track: "github_click_footer" },
+    ],
+  },
+  {
+    title: t("nav.legal"),
+    links: [
+      { href: lp("/privacy"), label: t("nav.privacy") },
+      { href: lp("/terms"), label: t("nav.terms") },
+      { href: lp("/refund"), label: t("nav.refunds") },
+      { href: lp("/support"), label: t("nav.support") },
+    ],
+  },
+];
+---
+
+<footer class="border-t border-line bg-black text-[12px] leading-5 text-faint">
+  <div class="container-wide py-10">
+    <div class="border-b border-line pb-6">
+      <p class="max-w-3xl">{t("nav.requirement")}</p>
+    </div>
+
+    <div class="grid gap-8 pt-8 sm:grid-cols-2 lg:grid-cols-4">
+      {columns.map((column) => (
+        <div>
+          <p class="font-semibold text-ink">{column.title}</p>
+          <nav class="mt-3 grid gap-2.5">
+            {column.links.map((link) => (
+              <a
+                href={link.href}
+                class="w-fit text-faint transition hover:text-ink"
+                {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                {...(link.track ? { "data-track": link.track } : {})}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      ))}
+    </div>
+
+    <div class="mt-10 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <p>{t("nav.copyright").replace("{year}", String(currentYear))}</p>
+      <div class="flex items-center gap-5">
+        <a href={lp("/privacy")} class="transition hover:text-ink">{t("nav.privacyPolicy")}</a>
+        <a href={lp("/terms")} class="transition hover:text-ink">{t("nav.termsOfUse")}</a>
+        {otherLocales.map((o) => <a href={o.href} class="transition hover:text-ink">{o.label}</a>)}
+      </div>
+    </div>
+  </div>
+</footer>

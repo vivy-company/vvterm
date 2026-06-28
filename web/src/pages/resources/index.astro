@@ -1,0 +1,139 @@
+---
+import MarketingLayout from "../../layouts/MarketingLayout.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import CTABand from "../../components/CTABand.astro";
+import DownloadButton from "../../components/DownloadButton.astro";
+import { Icon } from "astro-icon/components";
+import { SITE } from "../../lib/site";
+import { GUIDES, DOCS, COMPARISONS } from "../../lib/nav";
+import { localizePath , pick } from "../../i18n/utils";
+
+const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+
+const C = pick({
+  en: {
+    title: "Resources — VVTerm Guides, Docs, and Comparisons",
+    description:
+      "Learn VVTerm: step-by-step guides, product documentation, and side-by-side comparisons with other SSH clients for iPhone, iPad, and Mac.",
+    bcHome: "Home",
+    bcResources: "Resources",
+    heroEyebrow: "Resources",
+    heroTitle: "Everything to help<br />you get set up.",
+    heroSubhead: "Guides, documentation, and honest comparisons — so you can connect your first server and go further with VVTerm.",
+    seePricing: "See pricing",
+    guidesTitle: "Guides",
+    guidesBody: "Step-by-step walkthroughs for connecting, transferring files, and getting the most out of VVTerm.",
+    guidesCta: "Browse guides",
+    docsTitle: "Documentation",
+    docsBody: "Reference for servers, authentication, the SFTP browser, iCloud sync, workspaces, and tabs.",
+    docsCta: "Read the docs",
+    compareTitle: "Comparisons",
+    compareBody: "See how VVTerm lines up against other SSH clients — platforms, transports, files, and pricing.",
+    compareCta: "See comparisons",
+    ctaTitle: "Ready when you are.",
+    ctaSubtitle: "Download VVTerm free and connect to your first machine in minutes.",
+  },
+  zh: {
+    title: "资源 — VVTerm 指南、文档与对比",
+    description:
+      "了解 VVTerm：分步指南、产品文档，以及与其他 SSH 客户端在 iPhone、iPad 和 Mac 上的并排对比。",
+    bcHome: "首页",
+    bcResources: "资源",
+    heroEyebrow: "资源",
+    heroTitle: "助你完成设置的<br />一切资料。",
+    heroSubhead: "指南、文档和诚实的对比 —— 让你连接第一台服务器，并用 VVTerm 走得更远。",
+    seePricing: "查看价格",
+    guidesTitle: "指南",
+    guidesBody: "关于连接、传输文件以及充分利用 VVTerm 的分步演示。",
+    guidesCta: "浏览指南",
+    docsTitle: "文档",
+    docsBody: "关于服务器、身份验证、SFTP 浏览器、iCloud 同步、工作区和标签页的参考。",
+    docsCta: "阅读文档",
+    compareTitle: "对比",
+    compareBody: "看看 VVTerm 与其他 SSH 客户端的比较 —— 平台、传输方式、文件和价格。",
+    compareCta: "查看对比",
+    ctaTitle: "随时为你准备就绪。",
+    ctaSubtitle: "免费下载 VVTerm，几分钟内连接你的第一台机器。",
+  },
+}, lang);
+
+const sections = [
+  {
+    href: "/guides",
+    icon: "lucide:book-open",
+    title: C.guidesTitle,
+    body: C.guidesBody,
+    cta: C.guidesCta,
+    items: GUIDES.slice(0, 4).map((g) => ({ href: `/guides/${g.slug}`, label: g.title })),
+  },
+  {
+    href: "/docs",
+    icon: "lucide:file-text",
+    title: C.docsTitle,
+    body: C.docsBody,
+    cta: C.docsCta,
+    items: DOCS.slice(0, 4).map((d) => ({ href: `/docs/${d.slug}`, label: d.title })),
+  },
+  {
+    href: "/compare",
+    icon: "lucide:git-compare",
+    title: C.compareTitle,
+    body: C.compareBody,
+    cta: C.compareCta,
+    items: COMPARISONS.map((c) => ({ href: `/compare/${c.slug}`, label: c.title })),
+  },
+];
+
+const webPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: C.title,
+  description: C.description,
+  url: `${SITE.siteUrl}${localizePath("/resources", lang)}`,
+};
+---
+
+<MarketingLayout title={C.title} description={C.description} canonicalPath="/resources" activeTop="resources" structuredData={[webPageSchema]}>
+  <Breadcrumbs items={[{ name: C.bcHome, href: "/" }, { name: C.bcResources, href: "/resources" }]} />
+
+  <!-- HERO -->
+  <section class="px-6 pb-8 pt-10 text-center sm:pt-14">
+    <div class="mx-auto max-w-4xl">
+      <p class="eyebrow-accent">{C.heroEyebrow}</p>
+      <h1 class="mt-3 headline-hero" set:html={C.heroTitle} />
+      <p class="mx-auto mt-6 max-w-2xl subhead">{C.heroSubhead}</p>
+      <div class="mt-9 flex flex-wrap items-center justify-center gap-x-7 gap-y-4">
+        <DownloadButton track="resources_hero_appstore" />
+        <a href={localizePath("/pricing", lang)} class="link-arrow">{C.seePricing} <span aria-hidden="true">›</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESOURCE SECTIONS -->
+  <section class="section">
+    <div class="container-wide">
+      <div class="grid gap-4 md:grid-cols-3">
+        {sections.map((section) => (
+          <div class="card flex flex-col p-8">
+            <Icon class="size-8 text-accent" name={section.icon} />
+            <h2 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{section.title}</h2>
+            <p class="mt-3 text-[15px] leading-relaxed text-muted">{section.body}</p>
+            <ul class="mt-5 flex-1 space-y-2.5">
+              {section.items.map((item) => (
+                <li>
+                  <a href={localizePath(item.href, lang)} class="text-[15px] font-medium text-ink/70 transition-colors hover:text-ink">{item.label}</a>
+                </li>
+              ))}
+            </ul>
+            <a href={localizePath(section.href, lang)} class="group mt-6 link-arrow">
+              {section.cta}
+              <Icon class="size-4 transition group-hover:translate-x-1" name="lucide:arrow-right" />
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <CTABand title={C.ctaTitle} subtitle={C.ctaSubtitle} track="resources_cta_appstore" />
+</MarketingLayout>
