@@ -1,6 +1,6 @@
 ---
 import { SITE, translations } from "../lib/site";
-import { pick } from "../i18n/utils";
+import { pickPage } from "../i18n/utils";
 
 interface Props {
   class?: string;
@@ -9,7 +9,7 @@ interface Props {
 const { class: className = "" } = Astro.props;
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 const p = translations[lang].pricing;
-const toggle = pick({ en: { monthly: "Monthly", yearly: "Yearly" }, zh: { monthly: "按月", yearly: "按年" } }, lang);
+const toggle = pickPage("pricingCards", lang);
 ---
 
 <div class:list={["container-wide grid gap-4 lg:grid-cols-3", className]}>

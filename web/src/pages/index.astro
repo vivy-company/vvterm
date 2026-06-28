@@ -1,12 +1,16 @@
 ---
 import HomePage from "../components/HomePage.astro";
 import MarketingLayout from "../layouts/MarketingLayout.astro";
-import { SITE, softwareSchema, websiteSchema } from "../lib/site";
+import { softwareSchema, websiteSchema } from "../lib/site";
+import { getLocale, useT } from "../i18n/utils";
+
+const lang = getLocale(Astro.url);
+const t = useT(lang);
 ---
 
 <MarketingLayout
-  title={SITE.title}
-  description={SITE.description}
+  title={t("home.metaTitle")}
+  description={t("home.metaDescription")}
   canonicalPath="/"
   structuredData={[softwareSchema, websiteSchema]}
   showLanguage={true}

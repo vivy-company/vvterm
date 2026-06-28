@@ -8,98 +8,11 @@ import MediaBlock from "../../components/MediaBlock.astro";
 import Carousel from "../../components/Carousel.astro";
 import { Icon } from "astro-icon/components";
 import { SITE, softwareAppSchema } from "../../lib/site";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "SFTP File Browser — VVTerm for iPhone, iPad, and Mac",
-    description:
-      "Browse remote folders, upload and download, rename, move, delete, create directories, preview text, images, and video inline, edit supported text files, and set POSIX permissions — over SFTP.",
-    bcHome: "Home",
-    bcFeatures: "Features",
-    bcThis: "SFTP files",
-    heroEyebrow: "SFTP files",
-    heroTitle: "Remote files,<br />no second app.",
-    heroSubhead: "Browse, transfer, preview, and edit remote files over SFTP — right beside your shell, on the same connection.",
-    seePricing: "See pricing",
-    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm SFTP file browser",
-    statementEyebrow: "Files, built in",
-    statementTitle: "A file manager for your servers.",
-    statementBody: "Upload a build, fix a config, <strong>preview a log or an image</strong>, and adjust <strong>POSIX permissions</strong> — all without leaving the connection you are already on.",
-    cardsTitle: "Everything a file browser should do.",
-    carouselLabel: "SFTP file browser capabilities",
-    cards: [
-      { pos: "8% 50%", title: "Browse and organize.", body: "Move through remote directories, create folders, and rename, move, or delete items in place." },
-      { pos: "50% 45%", title: "Preview inline.", body: "Open text, image, and video files directly without downloading them to a separate app first." },
-      { pos: "30% 60%", title: "Edit text files.", body: "Open and edit supported text files on the server and save changes back over SFTP." },
-      { pos: "92% 50%", title: "Transfer both ways.", body: "Upload from your device and download to it, with the same session as your shell." },
-      { pos: "70% 30%", title: "POSIX permissions.", body: "Inspect and change owner, group, and mode bits without dropping to chmod." },
-      { pos: "20% 20%", title: "Beside your shell.", body: "Files live in the same app and connection as the terminal — no second tool to manage." },
-    ],
-    crossEyebrow: "One connection",
-    crossTitle: "Shell and files together.",
-    crossBody: "The SFTP browser runs on the <strong>same SSH session</strong> as your terminal, so there is nothing extra to configure once you are connected.",
-    guideLink: "Transfer files over SFTP on iOS",
-    terminalLink: "See the SSH terminal",
-    crossAlt: "VVTerm file transfer over SFTP",
-    faqItems: [
-      { question: "What can I do in the file browser?", answer: "Browse remote folders, upload and download, rename, move, delete, create directories, preview text, image, and video files, edit supported text files, and edit POSIX permissions." },
-      { question: "Does it use SFTP?", answer: "Yes. File transfers run over <strong>SFTP</strong> on your existing SSH connection." },
-      { question: "Can I preview files without downloading them?", answer: "Yes. Text, image, and video files preview inline in the app." },
-      { question: "Can I edit files on the server?", answer: "Yes. You can open and edit supported text files and save them back over SFTP." },
-      { question: "Can I change file permissions?", answer: "Yes. You can edit POSIX permissions — owner, group, and mode — directly in the browser." },
-      { question: "Is the file browser on iPhone and Mac?", answer: "Yes. The SFTP browser is available on iPhone, iPad, and Mac." },
-    ],
-    ctaTitle: "Manage remote files the easy way.",
-    ctaSubtitle: "Download VVTerm free and browse your server over SFTP.",
-  },
-  zh: {
-    title: "SFTP 文件浏览器 — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
-    description:
-      "通过 SFTP 浏览远程文件夹、上传和下载、重命名、移动、删除、创建目录、内嵌预览文本、图片和视频、编辑受支持的文本文件，并设置 POSIX 权限。",
-    bcHome: "首页",
-    bcFeatures: "功能",
-    bcThis: "SFTP 文件",
-    heroEyebrow: "SFTP 文件",
-    heroTitle: "远程文件，<br />无需第二个应用。",
-    heroSubhead: "通过 SFTP 浏览、传输、预览和编辑远程文件 —— 就在你的 shell 旁边，使用同一个连接。",
-    seePricing: "查看价格",
-    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm SFTP 文件浏览器",
-    statementEyebrow: "内置文件管理",
-    statementTitle: "为你的服务器准备的文件管理器。",
-    statementBody: "上传构建产物、修改配置、<strong>预览日志或图片</strong>，并调整 <strong>POSIX 权限</strong> —— 全部无需离开你正在使用的连接。",
-    cardsTitle: "文件浏览器该有的一切。",
-    carouselLabel: "SFTP 文件浏览器功能",
-    cards: [
-      { pos: "8% 50%", title: "浏览和整理。", body: "在远程目录间移动，创建文件夹，并就地重命名、移动或删除项目。" },
-      { pos: "50% 45%", title: "内嵌预览。", body: "直接打开文本、图片和视频文件，无需先下载到另一个应用。" },
-      { pos: "30% 60%", title: "编辑文本文件。", body: "在服务器上打开并编辑受支持的文本文件，并通过 SFTP 保存更改。" },
-      { pos: "92% 50%", title: "双向传输。", body: "从你的设备上传，也下载到设备，使用与 shell 相同的会话。" },
-      { pos: "70% 30%", title: "POSIX 权限。", body: "查看并更改所有者、组和模式位，无需切换到 chmod。" },
-      { pos: "20% 20%", title: "就在 shell 旁。", body: "文件与终端处于同一个应用和连接中 —— 无需管理第二个工具。" },
-    ],
-    crossEyebrow: "同一个连接",
-    crossTitle: "shell 与文件在一起。",
-    crossBody: "SFTP 浏览器运行在与终端<strong>相同的 SSH 会话</strong>上，因此连接后无需额外配置任何东西。",
-    guideLink: "在 iOS 上通过 SFTP 传输文件",
-    terminalLink: "查看 SSH 终端",
-    crossAlt: "VVTerm 通过 SFTP 传输文件",
-    faqItems: [
-      { question: "我在文件浏览器里能做什么？", answer: "浏览远程文件夹、上传和下载、重命名、移动、删除、创建目录、预览文本、图片和视频文件、编辑受支持的文本文件，以及编辑 POSIX 权限。" },
-      { question: "它使用 SFTP 吗？", answer: "是的。文件传输通过你现有的 SSH 连接上的 <strong>SFTP</strong> 运行。" },
-      { question: "我可以不下载就预览文件吗？", answer: "可以。文本、图片和视频文件可在应用内内嵌预览。" },
-      { question: "我可以在服务器上编辑文件吗？", answer: "可以。你可以打开并编辑受支持的文本文件，并通过 SFTP 保存回去。" },
-      { question: "我可以更改文件权限吗？", answer: "可以。你可以直接在浏览器中编辑 POSIX 权限 —— 所有者、组和模式。" },
-      { question: "文件浏览器在 iPhone 和 Mac 上都有吗？", answer: "都有。SFTP 浏览器在 iPhone、iPad 和 Mac 上均可使用。" },
-    ],
-    ctaTitle: "轻松管理远程文件。",
-    ctaSubtitle: "免费下载 VVTerm，通过 SFTP 浏览你的服务器。",
-  },
-}, lang);
+const C = pickPage("features/sftp-file-browser", lang);
 
 const appSchema = softwareAppSchema({ name: "VVTerm SFTP File Browser", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/sftp-file-browser", lang), description: C.description });
 ---

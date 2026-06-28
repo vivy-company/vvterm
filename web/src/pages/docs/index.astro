@@ -5,83 +5,11 @@ import DownloadButton from "../../components/DownloadButton.astro";
 import CTABand from "../../components/CTABand.astro";
 import { Icon } from "astro-icon/components";
 import { DOCS } from "../../lib/nav";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "VVTerm Documentation — SSH, SFTP, and iCloud Sync",
-    description:
-      "Reference documentation for VVTerm: getting started, adding servers, authentication and SSH keys, the SFTP file browser, iCloud sync, and workspaces and tabs.",
-    bcHome: "Home",
-    bcDocs: "Documentation",
-    heroEyebrow: "Documentation",
-    heroTitle: "VVTerm documentation.",
-    heroSubhead:
-      "Reference for setting up VVTerm on iPhone, iPad, and Mac — adding servers, authentication and keys, the SFTP file browser, iCloud sync, and organizing your work with workspaces and tabs.",
-    download: "Download VVTerm",
-    readGuides: "Read the guides",
-    heroNote: "iPhone, iPad, and Mac · Free to start",
-    readMore: "Read more",
-    sections: {
-      Basics: "Basics",
-      "Working remotely": "Working remotely",
-    } as Record<string, string>,
-    docs: {} as Record<string, { title: string; summary: string }>,
-    ctaTitle: "Ready to connect?",
-    ctaSubtitle:
-      "Download VVTerm free on iPhone, iPad, and Mac, and reach your first server in minutes.",
-  },
-  zh: {
-    title: "VVTerm 文档 — SSH、SFTP 与 iCloud 同步",
-    description:
-      "VVTerm 参考文档：快速上手、添加服务器、认证与 SSH 密钥、SFTP 文件浏览器、iCloud 同步，以及工作区与标签页。",
-    bcHome: "首页",
-    bcDocs: "文档",
-    heroEyebrow: "文档",
-    heroTitle: "VVTerm 文档。",
-    heroSubhead:
-      "在 iPhone、iPad 和 Mac 上设置 VVTerm 的参考 —— 添加服务器、认证与密钥、SFTP 文件浏览器、iCloud 同步，以及用工作区和标签页整理你的工作。",
-    download: "下载 VVTerm",
-    readGuides: "阅读指南",
-    heroNote: "iPhone、iPad 和 Mac · 免费起步",
-    readMore: "阅读更多",
-    sections: {
-      Basics: "基础",
-      "Working remotely": "远程操作",
-    } as Record<string, string>,
-    docs: {
-      "getting-started": {
-        title: "快速上手",
-        summary: "安装 VVTerm、添加你的第一台服务器并连接。",
-      },
-      "adding-a-server": {
-        title: "添加服务器",
-        summary: "主机、端口、用户名、环境和工作区。",
-      },
-      "authentication-and-keys": {
-        title: "认证与 SSH 密钥",
-        summary: "密码、SSH 密钥、口令，以及密钥的存储位置。",
-      },
-      "sftp-file-browser": {
-        title: "使用 SFTP 文件浏览器",
-        summary: "浏览、传输、预览和编辑远程文件及权限。",
-      },
-      "icloud-sync": {
-        title: "iCloud 同步与 Keychain",
-        summary: "服务器元数据和密钥如何在你的设备间同步。",
-      },
-      "workspaces-and-tabs": {
-        title: "工作区、环境与标签页",
-        summary: "整理服务器并同时运行多个连接。",
-      },
-    } as Record<string, { title: string; summary: string }>,
-    ctaTitle: "准备好连接了吗？",
-    ctaSubtitle:
-      "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，几分钟内连接你的第一台服务器。",
-  },
-}, lang);
+const C = pickPage("docs", lang);
 
 const sectionOrder = ["Basics", "Working remotely"];
 

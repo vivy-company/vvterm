@@ -7,92 +7,11 @@ import FaqAccordion from "../../components/FaqAccordion.astro";
 import MediaBlock from "../../components/MediaBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE, softwareAppSchema } from "../../lib/site";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "Tailscale SSH — VVTerm for iPhone, iPad, and Mac",
-    description:
-      "Reach machines on your tailnet by their MagicDNS name — no port forwarding, no exposed ports, and no extra keys to manage. Tailscale SSH, built into VVTerm.",
-    bcHome: "Home",
-    bcFeatures: "Features",
-    bcThis: "Tailscale SSH",
-    heroEyebrow: "Tailscale SSH",
-    heroTitle: "Your tailnet,<br />one name away.",
-    heroSubhead: "Reach machines by their MagicDNS name — no port forwarding, no exposed ports, and no extra keys to manage.",
-    seePricing: "See pricing",
-    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm Tailscale SSH session over MagicDNS",
-    statementEyebrow: "Private by default",
-    statementTitle: "No open ports. No public surface.",
-    statementBody: "Your machines stay on the tailnet, so there is <strong>nothing exposed to the internet</strong> — and you connect by <strong>MagicDNS name</strong> instead of brittle IP addresses.",
-    benefits: [
-      { icon: "lucide:waypoints", title: "Connect by MagicDNS", body: "Reach a machine by its tailnet name instead of chasing changing IP addresses." },
-      { icon: "lucide:shield", title: "No exposed ports", body: "Your servers stay off the public internet — there is nothing inbound to attack." },
-      { icon: "lucide:key-round", title: "No extra keys", body: "Tailscale SSH handles access, so you do not manage another set of SSH keys for it." },
-      { icon: "lucide:plug-zap", title: "Nothing to forward", body: "Skip port forwarding and VPN gymnastics — the tailnet connects you directly." },
-    ],
-    crossEyebrow: "Set it up",
-    crossTitle: "Connect over your tailnet.",
-    crossBody: "Add a server by its <strong>MagicDNS name</strong> and connect. There is no port forwarding to configure and nothing inbound to open.",
-    guideLink: "Connect with Tailscale SSH",
-    cloudflareLink: "Or use Cloudflare Tunnel SSH",
-    terminalLink: "See the SSH terminal",
-    crossAlt: "VVTerm reaching a tailnet machine by name",
-    faqItems: [
-      { question: "What is Tailscale SSH in VVTerm?", answer: "It lets you connect to machines on your tailnet by their MagicDNS name, without port forwarding or exposing ports to the internet." },
-      { question: "Do I need to forward any ports?", answer: "No. Tailscale SSH reaches machines over your tailnet, so there is no port forwarding and no inbound exposure." },
-      { question: "Do I have to manage separate SSH keys?", answer: "No. Tailscale SSH handles access on the tailnet, so you do not manage extra keys for it." },
-      { question: "How do I address a machine?", answer: "Use the machine's MagicDNS name from your tailnet instead of a public IP address." },
-      { question: "Does this work on iPhone and Mac?", answer: "Yes. Tailscale SSH connections work on iPhone, iPad, and Mac in VVTerm." },
-      { question: "Is my server reachable from the public internet?", answer: "No. Machines stay on your tailnet with no exposed ports, so they are not reachable publicly." },
-    ],
-    ctaTitle: "Reach every machine, privately.",
-    ctaSubtitle: "Download VVTerm free and connect over Tailscale SSH.",
-  },
-  zh: {
-    title: "Tailscale SSH — 适用于 iPhone、iPad 和 Mac 的 VVTerm",
-    description:
-      "通过 MagicDNS 名称访问 tailnet 上的机器 —— 无需端口转发、无暴露端口、无需管理额外密钥。Tailscale SSH 内置于 VVTerm。",
-    bcHome: "首页",
-    bcFeatures: "功能",
-    bcThis: "Tailscale SSH",
-    heroEyebrow: "Tailscale SSH",
-    heroTitle: "你的 tailnet，<br />只差一个名称。",
-    heroSubhead: "通过 MagicDNS 名称访问机器 —— 无需端口转发、无暴露端口、无需管理额外密钥。",
-    seePricing: "查看价格",
-    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm 通过 MagicDNS 的 Tailscale SSH 会话",
-    statementEyebrow: "默认私密",
-    statementTitle: "没有开放端口，没有公网暴露面。",
-    statementBody: "你的机器留在 tailnet 上，因此<strong>没有任何东西暴露到互联网</strong> —— 而且你通过 <strong>MagicDNS 名称</strong>连接，而非脆弱的 IP 地址。",
-    benefits: [
-      { icon: "lucide:waypoints", title: "通过 MagicDNS 连接", body: "通过机器的 tailnet 名称访问，无需追逐变化的 IP 地址。" },
-      { icon: "lucide:shield", title: "无暴露端口", body: "你的服务器不暴露在公网上 —— 没有任何入站面可供攻击。" },
-      { icon: "lucide:key-round", title: "无需额外密钥", body: "Tailscale SSH 负责访问控制，因此你无需为它管理另一套 SSH 密钥。" },
-      { icon: "lucide:plug-zap", title: "无需转发", body: "省去端口转发和 VPN 折腾 —— tailnet 直接为你建立连接。" },
-    ],
-    crossEyebrow: "开始设置",
-    crossTitle: "通过你的 tailnet 连接。",
-    crossBody: "通过 <strong>MagicDNS 名称</strong>添加服务器并连接。无需配置端口转发，也无需开放任何入站端口。",
-    guideLink: "使用 Tailscale SSH 连接",
-    cloudflareLink: "或使用 Cloudflare Tunnel SSH",
-    terminalLink: "查看 SSH 终端",
-    crossAlt: "VVTerm 通过名称访问 tailnet 机器",
-    faqItems: [
-      { question: "VVTerm 中的 Tailscale SSH 是什么？", answer: "它让你通过 MagicDNS 名称连接 tailnet 上的机器，无需端口转发，也无需将端口暴露到互联网。" },
-      { question: "我需要转发任何端口吗？", answer: "不需要。Tailscale SSH 通过你的 tailnet 访问机器，因此没有端口转发，也没有入站暴露。" },
-      { question: "我需要管理单独的 SSH 密钥吗？", answer: "不需要。Tailscale SSH 在 tailnet 上负责访问控制，因此你无需为它管理额外密钥。" },
-      { question: "我如何寻址一台机器？", answer: "使用机器在你 tailnet 上的 MagicDNS 名称，而非公网 IP 地址。" },
-      { question: "这在 iPhone 和 Mac 上有效吗？", answer: "有效。Tailscale SSH 连接在 VVTerm 的 iPhone、iPad 和 Mac 上均可工作。" },
-      { question: "我的服务器能从公网访问吗？", answer: "不能。机器留在你的 tailnet 上且无暴露端口，因此无法从公网访问。" },
-    ],
-    ctaTitle: "私密地访问每一台机器。",
-    ctaSubtitle: "免费下载 VVTerm，通过 Tailscale SSH 连接。",
-  },
-}, lang);
+const C = pickPage("features/tailscale-ssh", lang);
 
 const appSchema = softwareAppSchema({ name: "VVTerm Tailscale SSH", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/tailscale-ssh", lang), description: C.description });
 ---

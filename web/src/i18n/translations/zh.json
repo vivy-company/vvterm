@@ -183,16 +183,31 @@
     "title": "一个应用，在每台 Apple 设备上都原生",
     "subtitle": "VVTerm 会适配每个平台——在 Mac 上是完整的 GPU 终端，在 iPad 上是真正的工作站，在 iPhone 上随手可用。",
     "cta": "了解更多",
-    "mac": { "tagline": "带标签页、SFTP 和 iCloud 同步服务器的 GPU 终端。" },
-    "ipad": { "tagline": "硬件键盘、多任务和 Mosh 漫游会话。" },
-    "iphone": { "tagline": "随时随地重新连接，在路上也能处理问题。" }
+    "mac": {
+      "tagline": "带标签页、SFTP 和 iCloud 同步服务器的 GPU 终端。"
+    },
+    "ipad": {
+      "tagline": "硬件键盘、多任务和 Mosh 漫游会话。"
+    },
+    "iphone": {
+      "tagline": "随时随地重新连接，在路上也能处理问题。"
+    }
   },
   "resources": {
     "title": "学习、对比并完成设置",
     "subtitle": "通过指南、文档和逐项对比，帮助你充分发挥 VVTerm 的能力。",
-    "guides": { "title": "指南", "desc": "SSH、Mosh、Tailscale SSH 和 SFTP 的分步教程。" },
-    "docs": { "title": "文档", "desc": "关于设置、认证、同步和文件浏览器的参考资料。" },
-    "compare": { "title": "对比", "desc": "看看 VVTerm 与 Termius、Blink Shell 相比如何。" }
+    "guides": {
+      "title": "指南",
+      "desc": "SSH、Mosh、Tailscale SSH 和 SFTP 的分步教程。"
+    },
+    "docs": {
+      "title": "文档",
+      "desc": "关于设置、认证、同步和文件浏览器的参考资料。"
+    },
+    "compare": {
+      "title": "对比",
+      "desc": "看看 VVTerm 与 Termius、Blink Shell 相比如何。"
+    }
   },
   "closing": {
     "title": "你的服务器，随处可达。",
@@ -200,6 +215,8 @@
     "cta": "下载 VVTerm"
   },
   "home": {
+    "metaTitle": "VVTerm - 适用于 iPhone、iPad 和 Mac 的 SSH 终端与 SFTP 客户端",
+    "metaDescription": "你的服务器，随处可达。适用于 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端，支持 tmux 会话保持、Mosh、Tailscale SSH 与 Cloudflare Tunnel SSH、实时监控、iCloud 同步以及 Keychain 安全。",
     "promo": {
       "title": "开源。永久免费。",
       "desc": "标准 SSH、Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH，全部集成在一个原生应用里——还带有 tmux 会话保持、SFTP 文件浏览器、实时监控、iCloud 同步和 Keychain 安全。"
@@ -342,5 +359,59 @@
     "title": "你的服务器，随处可达。",
     "subtitle": "在 iPhone、iPad 和 Mac 上免费开始使用。升级到 Pro 或购买终身版，随时按需扩展。",
     "seePricing": "查看价格"
+  },
+  "sidebar": {
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "如何从 iPhone SSH 连接服务器",
+        "group": "快速上手"
+      },
+      "ssh-from-mac": {
+        "title": "如何用 VVTerm 从 Mac 进行 SSH",
+        "group": "快速上手"
+      },
+      "set-up-mosh-on-ios": {
+        "title": "在 iPhone 和 iPad 上设置 Mosh",
+        "group": "连接方式"
+      },
+      "tailscale-ssh-setup": {
+        "title": "使用 Tailscale SSH 连接",
+        "group": "连接方式"
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "通过 Cloudflare Tunnel SSH 连接",
+        "group": "连接方式"
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "在 iOS 上通过 SFTP 传输文件",
+        "group": "文件传输"
+      }
+    },
+    "docs": {
+      "getting-started": {
+        "title": "快速开始",
+        "group": "基础"
+      },
+      "adding-a-server": {
+        "title": "添加服务器",
+        "group": "基础"
+      },
+      "authentication-and-keys": {
+        "title": "认证与 SSH 密钥",
+        "group": "基础"
+      },
+      "sftp-file-browser": {
+        "title": "使用 SFTP 文件浏览器",
+        "group": "远程操作"
+      },
+      "icloud-sync": {
+        "title": "iCloud 同步与 Keychain",
+        "group": "远程操作"
+      },
+      "workspaces-and-tabs": {
+        "title": "工作区、环境与标签页",
+        "group": "远程操作"
+      }
+    }
   }
 }

@@ -183,16 +183,31 @@
     "title": "One app, native on every Apple device",
     "subtitle": "VVTerm adapts to each platform — a full GPU terminal on Mac, a real workstation on iPad, and quick access on iPhone.",
     "cta": "Learn more",
-    "mac": { "tagline": "GPU terminal with tabs, SFTP, and iCloud-synced servers." },
-    "ipad": { "tagline": "Hardware keyboard, multitasking, and Mosh roaming." },
-    "iphone": { "tagline": "Reconnect from anywhere and fix things on the go." }
+    "mac": {
+      "tagline": "GPU terminal with tabs, SFTP, and iCloud-synced servers."
+    },
+    "ipad": {
+      "tagline": "Hardware keyboard, multitasking, and Mosh roaming."
+    },
+    "iphone": {
+      "tagline": "Reconnect from anywhere and fix things on the go."
+    }
   },
   "resources": {
     "title": "Learn, compare, and get set up",
     "subtitle": "Guides, documentation, and head-to-head comparisons to help you get the most out of VVTerm.",
-    "guides": { "title": "Guides", "desc": "Step-by-step walkthroughs for SSH, Mosh, Tailscale SSH, and SFTP." },
-    "docs": { "title": "Documentation", "desc": "Reference for setup, authentication, sync, and the file browser." },
-    "compare": { "title": "Comparisons", "desc": "See how VVTerm stacks up against Termius and Blink Shell." }
+    "guides": {
+      "title": "Guides",
+      "desc": "Step-by-step walkthroughs for SSH, Mosh, Tailscale SSH, and SFTP."
+    },
+    "docs": {
+      "title": "Documentation",
+      "desc": "Reference for setup, authentication, sync, and the file browser."
+    },
+    "compare": {
+      "title": "Comparisons",
+      "desc": "See how VVTerm stacks up against Termius and Blink Shell."
+    }
   },
   "closing": {
     "title": "Your servers. Anywhere.",
@@ -200,6 +215,8 @@
     "cta": "Download VVTerm"
   },
   "home": {
+    "metaTitle": "VVTerm - SSH Terminal and SFTP Client for iPhone, iPad, and Mac",
+    "metaDescription": "Your servers. Everywhere. Native SSH terminal and SFTP client for iPhone, iPad, and Mac with tmux session persistence, Mosh, Tailscale & Cloudflare Tunnel SSH, live monitoring, iCloud sync, and Keychain security.",
     "promo": {
       "title": "Open source. Free forever.",
       "desc": "Standard SSH, Mosh, Tailscale SSH, and Cloudflare Tunnel SSH in one native app — with tmux session persistence, an SFTP file browser, live monitoring, iCloud sync, and Keychain security."
@@ -342,5 +359,59 @@
     "title": "Your servers. Anywhere.",
     "subtitle": "Start free on iPhone, iPad, and Mac. Upgrade to Pro or buy lifetime whenever you need more.",
     "seePricing": "See pricing"
+  },
+  "sidebar": {
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "How to SSH into a server from your iPhone",
+        "group": "Getting started"
+      },
+      "ssh-from-mac": {
+        "title": "How to SSH from your Mac with VVTerm",
+        "group": "Getting started"
+      },
+      "set-up-mosh-on-ios": {
+        "title": "Set up Mosh on iPhone and iPad",
+        "group": "Connections"
+      },
+      "tailscale-ssh-setup": {
+        "title": "Connect with Tailscale SSH",
+        "group": "Connections"
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "Connect over Cloudflare Tunnel SSH",
+        "group": "Connections"
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "Transfer files over SFTP on iOS",
+        "group": "Files"
+      }
+    },
+    "docs": {
+      "getting-started": {
+        "title": "Getting started",
+        "group": "Basics"
+      },
+      "adding-a-server": {
+        "title": "Adding a server",
+        "group": "Basics"
+      },
+      "authentication-and-keys": {
+        "title": "Authentication and SSH keys",
+        "group": "Basics"
+      },
+      "sftp-file-browser": {
+        "title": "Using the SFTP file browser",
+        "group": "Working remotely"
+      },
+      "icloud-sync": {
+        "title": "iCloud sync and Keychain",
+        "group": "Working remotely"
+      },
+      "workspaces-and-tabs": {
+        "title": "Workspaces, environments, and tabs",
+        "group": "Working remotely"
+      }
+    }
   }
 }

@@ -7,92 +7,11 @@ import FaqAccordion from "../../components/FaqAccordion.astro";
 import MediaBlock from "../../components/MediaBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE, softwareAppSchema } from "../../lib/site";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "Live Server Monitoring — VVTerm SSH Client",
-    description:
-      "See CPU, memory, network, disk, load average, uptime, and top processes in real time, right next to your shell — on Linux, macOS, BSD, and Windows hosts.",
-    bcHome: "Home",
-    bcFeatures: "Features",
-    bcThis: "Server monitoring",
-    heroEyebrow: "Live server monitoring",
-    heroTitle: "Know what your<br />server is doing.",
-    heroSubhead: "CPU, memory, network, disk, load, and top processes — live, right beside your shell, with no agent to install.",
-    seePricing: "See pricing",
-    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm live server stats for CPU, memory, network, and load",
-    statementEyebrow: "Context, not guesswork",
-    statementTitle: "Diagnose without leaving the app.",
-    statementBody: "When something's slow, you shouldn't have to remember <code>top</code>, <code>df</code>, and <code>iostat</code> flags. VVTerm reads the host over your existing SSH session and lays it out — live — next to your terminal.",
-    metrics: [
-      { icon: "lucide:cpu", title: "CPU", body: "Live usage with a user, system, iowait, steal, and idle breakdown, plus core count." },
-      { icon: "lucide:memory-stick", title: "Memory", body: "Total, used, free, cached, and buffers with a clear percentage at a glance." },
-      { icon: "lucide:arrow-down-up", title: "Network", body: "Real-time receive and transmit speeds alongside cumulative totals." },
-      { icon: "lucide:hard-drive", title: "Disk", body: "Per-volume usage — used, total, and percent for every mounted filesystem." },
-      { icon: "lucide:gauge", title: "Load & uptime", body: "1-, 5-, and 15-minute load averages, system uptime, and process count." },
-      { icon: "lucide:list-tree", title: "Top processes", body: "The heaviest processes by CPU and memory, with PID and name." },
-    ],
-    crossEyebrow: "Every platform",
-    crossTitle: "Reads correctly on each OS.",
-    crossBody: "Dedicated collectors for <strong>Linux, macOS, FreeBSD, NetBSD, OpenBSD, and Windows</strong> mean the numbers are right whatever you run — no agent, no daemon, just your SSH session.",
-    windowsLink: "Monitoring on Windows hosts",
-    terminalLink: "About the SSH terminal",
-    crossAlt: "VVTerm per-volume disk usage on a monitored host",
-    faqItems: [
-      { question: "What does VVTerm monitor?", answer: "CPU usage with a per-state breakdown, memory, network receive and transmit, disk usage per volume, 1/5/15-minute load averages, uptime, process count, and the top processes by CPU and memory." },
-      { question: "Is the data live?", answer: "Yes. Metrics refresh in real time over your existing SSH session, so you see what the server is doing right now without opening a separate tool." },
-      { question: "Which operating systems are supported?", answer: "VVTerm has dedicated collectors for Linux, macOS, FreeBSD, NetBSD, OpenBSD, and Windows, so stats read correctly on each platform." },
-      { question: "Do I need to install an agent on the server?", answer: "No. Monitoring runs over the SSH connection you already have — there is no daemon or agent to install on the host." },
-      { question: "Can I monitor and work at the same time?", answer: "Yes. The stats view sits alongside your terminal, so you can watch load while you run commands on the same server." },
-    ],
-    ctaTitle: "See your servers, live.",
-    ctaSubtitle: "Download VVTerm free and watch CPU, memory, and load in real time.",
-  },
-  zh: {
-    title: "实时服务器监控 — VVTerm SSH 客户端",
-    description:
-      "在 shell 旁实时查看 CPU、内存、网络、磁盘、平均负载、运行时间和占用最高的进程 —— 支持 Linux、macOS、BSD 和 Windows 主机。",
-    bcHome: "首页",
-    bcFeatures: "功能",
-    bcThis: "服务器监控",
-    heroEyebrow: "实时服务器监控",
-    heroTitle: "了解你的服务器<br />正在做什么。",
-    heroSubhead: "CPU、内存、网络、磁盘、负载和占用最高的进程 —— 实时显示，就在你的 shell 旁，无需安装任何代理。",
-    seePricing: "查看价格",
-    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm 实时显示 CPU、内存、网络和负载的服务器统计",
-    statementEyebrow: "上下文，而非猜测",
-    statementTitle: "无需离开应用即可诊断。",
-    statementBody: "当某些东西变慢时，你不该还得记住 <code>top</code>、<code>df</code> 和 <code>iostat</code> 的参数。VVTerm 通过你现有的 SSH 会话读取主机信息，并实时呈现在你的终端旁边。",
-    metrics: [
-      { icon: "lucide:cpu", title: "CPU", body: "实时使用率，包含 user、system、iowait、steal 和 idle 的细分，以及核心数。" },
-      { icon: "lucide:memory-stick", title: "内存", body: "总量、已用、空闲、缓存和缓冲区，一眼即可看清百分比。" },
-      { icon: "lucide:arrow-down-up", title: "网络", body: "实时收发速度以及累计总量。" },
-      { icon: "lucide:hard-drive", title: "磁盘", body: "每个卷的使用情况 —— 每个已挂载文件系统的已用、总量和百分比。" },
-      { icon: "lucide:gauge", title: "负载与运行时间", body: "1、5 和 15 分钟的平均负载、系统运行时间和进程数。" },
-      { icon: "lucide:list-tree", title: "占用最高的进程", body: "按 CPU 和内存占用最高的进程，含 PID 和名称。" },
-    ],
-    crossEyebrow: "每一个平台",
-    crossTitle: "在每个操作系统上都读数正确。",
-    crossBody: "为 <strong>Linux、macOS、FreeBSD、NetBSD、OpenBSD 和 Windows</strong> 准备的专用采集器，意味着无论你运行什么，数字都准确 —— 无代理、无守护进程，只需你的 SSH 会话。",
-    windowsLink: "在 Windows 主机上监控",
-    terminalLink: "了解 SSH 终端",
-    crossAlt: "VVTerm 在受监控主机上的每卷磁盘使用情况",
-    faqItems: [
-      { question: "VVTerm 监控什么？", answer: "带各状态细分的 CPU 使用率、内存、网络收发、每卷磁盘使用、1/5/15 分钟平均负载、运行时间、进程数，以及按 CPU 和内存占用最高的进程。" },
-      { question: "数据是实时的吗？", answer: "是的。指标通过你现有的 SSH 会话实时刷新，因此你能看到服务器此刻正在做什么，无需打开单独的工具。" },
-      { question: "支持哪些操作系统？", answer: "VVTerm 为 Linux、macOS、FreeBSD、NetBSD、OpenBSD 和 Windows 提供专用采集器，因此各平台上的统计读数都正确。" },
-      { question: "我需要在服务器上安装代理吗？", answer: "不需要。监控通过你已有的 SSH 连接运行 —— 主机上无需安装守护进程或代理。" },
-      { question: "我可以一边监控一边工作吗？", answer: "可以。统计视图位于你的终端旁边，因此你可以在同一台服务器上运行命令时观察负载。" },
-    ],
-    ctaTitle: "实时查看你的服务器。",
-    ctaSubtitle: "免费下载 VVTerm，实时观察 CPU、内存和负载。",
-  },
-}, lang);
+const C = pickPage("features/server-monitoring", lang);
 
 const appSchema = softwareAppSchema({ name: "VVTerm Server Monitoring", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/server-monitoring", lang), description: C.description });
 ---

@@ -5,87 +5,11 @@ import DownloadButton from "../../components/DownloadButton.astro";
 import CTABand from "../../components/CTABand.astro";
 import { Icon } from "astro-icon/components";
 import { GUIDES } from "../../lib/nav";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "VVTerm Guides & How-Tos — SSH, Mosh, Tailscale, SFTP",
-    description:
-      "Step-by-step guides for VVTerm: SSH from iPhone and Mac, set up Mosh, connect with Tailscale SSH or Cloudflare Tunnel, and transfer files over SFTP.",
-    bcHome: "Home",
-    bcGuides: "Guides",
-    heroEyebrow: "Guides",
-    heroTitle: "Guides &amp; how-tos.",
-    heroSubhead:
-      "Practical, step-by-step walkthroughs for connecting to your servers from iPhone, iPad, and Mac — SSH, Mosh, Tailscale, Cloudflare Tunnel, and SFTP file transfer.",
-    download: "Download VVTerm",
-    browseDocs: "Browse the docs",
-    heroNote: "iPhone, iPad, and Mac · Free to start",
-    readGuide: "Read guide",
-    minRead: (m: number) => `${m} min read`,
-    categories: {
-      "Getting started": "Getting started",
-      Connections: "Connections",
-      Files: "Files",
-    } as Record<string, string>,
-    guides: {} as Record<string, { title: string; summary: string }>,
-    ctaTitle: "Put these guides to work.",
-    ctaSubtitle:
-      "Download VVTerm free on iPhone, iPad, and Mac, and connect to your first server in minutes.",
-  },
-  zh: {
-    title: "VVTerm 指南与教程 — SSH、Mosh、Tailscale、SFTP",
-    description:
-      "VVTerm 分步指南：从 iPhone 和 Mac 进行 SSH、设置 Mosh、使用 Tailscale SSH 或 Cloudflare Tunnel 连接，以及通过 SFTP 传输文件。",
-    bcHome: "首页",
-    bcGuides: "指南",
-    heroEyebrow: "指南",
-    heroTitle: "指南与教程。",
-    heroSubhead:
-      "从 iPhone、iPad 和 Mac 连接服务器的实用分步教程 —— SSH、Mosh、Tailscale、Cloudflare Tunnel 以及 SFTP 文件传输。",
-    download: "下载 VVTerm",
-    browseDocs: "浏览文档",
-    heroNote: "iPhone、iPad 和 Mac · 免费起步",
-    readGuide: "阅读指南",
-    minRead: (m: number) => `${m} 分钟阅读`,
-    categories: {
-      "Getting started": "快速上手",
-      Connections: "连接方式",
-      Files: "文件传输",
-    } as Record<string, string>,
-    guides: {
-      "how-to-ssh-from-iphone": {
-        title: "如何从 iPhone SSH 连接服务器",
-        summary: "添加服务器、选择认证方式，并在 iOS 上开启你的第一个安全 shell 会话。",
-      },
-      "ssh-from-mac": {
-        title: "如何用 VVTerm 从 Mac 进行 SSH",
-        summary: "搭建一个原生 macOS 终端，支持标签页、密钥和 iCloud 同步的服务器。",
-      },
-      "set-up-mosh-on-ios": {
-        title: "在 iPhone 和 iPad 上设置 Mosh",
-        summary: "用 Mosh 让 SSH 会话在网络中断和休眠后依然保持。",
-      },
-      "tailscale-ssh-setup": {
-        title: "使用 Tailscale SSH 连接",
-        summary: "通过 MagicDNS 名称连接 tailnet 中的机器，无需暴露端口。",
-      },
-      "cloudflare-tunnel-ssh-setup": {
-        title: "通过 Cloudflare Tunnel SSH 连接",
-        summary: "无需开放任何入站端口，即可 SSH 连接 Cloudflare Tunnel 后的服务器。",
-      },
-      "sftp-file-transfer-on-ios": {
-        title: "在 iOS 上通过 SFTP 传输文件",
-        summary: "从 iPhone 和 iPad 浏览、上传、下载和编辑远程文件。",
-      },
-    } as Record<string, { title: string; summary: string }>,
-    ctaTitle: "把这些指南付诸实践。",
-    ctaSubtitle:
-      "在 iPhone、iPad 和 Mac 上免费下载 VVTerm，几分钟内连接你的第一台服务器。",
-  },
-}, lang);
+const C = pickPage("guides", lang);
 
 const categoryOrder = ["Getting started", "Connections", "Files"];
 
@@ -136,7 +60,7 @@ const cardSummary = (slug: string, fallback: string) => C.guides[slug]?.summary 
                 <p class="mt-3 flex-1 text-base leading-relaxed text-muted">{cardSummary(guide.slug, guide.summary)}</p>
                 <div class="mt-6 flex items-center justify-between">
                   <span class="inline-flex link-arrow">{C.readGuide} <span aria-hidden="true">›</span></span>
-                  <span class="text-[13px] text-faint">{C.minRead(guide.minutes)}</span>
+                  <span class="text-[13px] text-faint">{C.minRead.replace("{m}", String(guide.minutes))}</span>
                 </div>
               </a>
             ))}

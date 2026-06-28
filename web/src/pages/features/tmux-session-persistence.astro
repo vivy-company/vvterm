@@ -7,92 +7,11 @@ import FaqAccordion from "../../components/FaqAccordion.astro";
 import MediaBlock from "../../components/MediaBlock.astro";
 import { Icon } from "astro-icon/components";
 import { SITE, softwareAppSchema } from "../../lib/site";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "tmux Session Persistence — VVTerm SSH for iPhone, iPad, and Mac",
-    description:
-      "VVTerm manages tmux for you so SSH sessions survive disconnects, sleep, and app switches. It auto-installs tmux, reattaches on reconnect, and ships a tuned config out of the box.",
-    bcHome: "Home",
-    bcFeatures: "Features",
-    bcThis: "tmux persistence",
-    heroEyebrow: "tmux session persistence",
-    heroTitle: "Your session<br />survives the drop.",
-    heroSubhead: "VVTerm manages tmux for you, so long-running work keeps going through network changes, sleep, and app switches — and reattaches the moment you reconnect.",
-    seePricing: "See pricing",
-    heroNote: "iOS and iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm reattaching a tmux session after a dropped connection",
-    statementEyebrow: "Persistence, handled",
-    statementTitle: "No more lost sessions.",
-    statementBody: "Most mobile SSH apps drop everything when the connection blinks. VVTerm runs your shell inside a managed <strong>tmux</strong> session on the server, so a long build, a migration, or a download keeps going — and you step right back into it.",
-    benefits: [
-      { icon: "lucide:history", title: "Pick up where you left off", body: "Drop off Wi-Fi, lock your phone, or quit the app — your shell, running commands, and scrollback are still there when you reconnect." },
-      { icon: "lucide:download", title: "Auto-installs tmux", body: "If tmux is missing, VVTerm installs it with your system package manager — brew, apt, dnf, pacman, apk, zypper, and more." },
-      { icon: "lucide:list-restart", title: "Reattach to any session", body: "See existing sessions with their window counts and attached clients, then reattach with a tap instead of starting over." },
-      { icon: "lucide:sliders-horizontal", title: "On your terms", body: "Always manage tmux, ask each time, or skip it for a plain shell — set a global default and override it per server." },
-    ],
-    howEyebrow: "Tuned out of the box",
-    howTitle: "A config you don't have to write.",
-    howBody: "VVTerm writes a managed config to <strong>~/.vvterm/tmux.conf</strong> — true color, mouse support, a 10,000-line scrollback, theme-matched copy-mode highlighting, and smart wheel scroll that uses copy mode at the shell but passes through inside <code>htop</code>, <code>vim</code>, and other full-screen apps.",
-    moshLink: "Pair it with Mosh roaming",
-    windowsLink: "Persistence on Windows with psmux",
-    terminalLink: "About the terminal engine",
-    howAlt: "VVTerm managed tmux session list ready to reattach",
-    faqItems: [
-      { question: "How does VVTerm keep my session alive?", answer: "On connect, VVTerm creates or attaches a managed <strong>tmux</strong> session on the server. Because the session lives on the remote host, your work keeps running even after the connection drops — VVTerm reattaches to it the next time you connect." },
-      { question: "Do I have to install or configure tmux myself?", answer: "No. If tmux isn't installed, VVTerm installs it with the host's package manager. It also writes a tuned config to <strong>~/.vvterm/tmux.conf</strong> — true color, mouse support, a large scrollback buffer, and smart scroll that uses copy mode at the shell but passes through inside full-screen apps." },
-      { question: "Can I reconnect to a session I started earlier?", answer: "Yes. VVTerm lists existing sessions with their window counts and attached clients, so you can reattach to the one you want or clean up old detached sessions." },
-      { question: "What if I prefer a plain shell?", answer: "Set tmux startup to <strong>Skip</strong> globally, or override it on a single server. You can also choose <strong>Ask every time</strong> so VVTerm prompts when you open a new tab or split." },
-      { question: "Is this the same as tmux control mode?", answer: "No. VVTerm orchestrates a real tmux session over a normal shell for persistence and reconnects — it does not run tmux control mode (-CC)." },
-      { question: "Does it work on Windows servers?", answer: "Yes. On Windows and PowerShell hosts VVTerm uses <strong>psmux</strong> for the same persistence, and can install it with winget, scoop, choco, or cargo." },
-    ],
-    ctaTitle: "Never lose a session again.",
-    ctaSubtitle: "Download VVTerm free and keep your work running across every disconnect.",
-  },
-  zh: {
-    title: "tmux 会话持久化 — 适用于 iPhone、iPad 和 Mac 的 VVTerm SSH",
-    description:
-      "VVTerm 替你管理 tmux，让 SSH 会话在断线、睡眠和切换应用后依然存活。它自动安装 tmux、重连时自动接回，并开箱即用地提供经过调优的配置。",
-    bcHome: "首页",
-    bcFeatures: "功能",
-    bcThis: "tmux 持久化",
-    heroEyebrow: "tmux 会话持久化",
-    heroTitle: "你的会话<br />在断线后存活。",
-    heroSubhead: "VVTerm 替你管理 tmux，让长时间运行的工作在网络切换、睡眠和切换应用中继续 —— 并在你重新连接的瞬间自动接回。",
-    seePricing: "查看价格",
-    heroNote: "iOS 与 iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
-    heroAlt: "VVTerm 在断线后重新接回 tmux 会话",
-    statementEyebrow: "持久化，已处理好",
-    statementTitle: "不再丢失会话。",
-    statementBody: "大多数移动 SSH 应用在连接闪断时会丢失一切。VVTerm 在服务器上将你的 shell 运行于一个受管理的 <strong>tmux</strong> 会话中，因此长时间的构建、迁移或下载会继续 —— 你可以直接回到它。",
-    benefits: [
-      { icon: "lucide:history", title: "从上次的地方继续", body: "断开 Wi-Fi、锁屏或退出应用 —— 重新连接时，你的 shell、运行中的命令和回滚都还在。" },
-      { icon: "lucide:download", title: "自动安装 tmux", body: "若缺少 tmux，VVTerm 会用你的系统包管理器安装 —— brew、apt、dnf、pacman、apk、zypper 等等。" },
-      { icon: "lucide:list-restart", title: "接回任意会话", body: "查看现有会话及其窗口数量和已连接的客户端，然后轻点一下接回，无需重新开始。" },
-      { icon: "lucide:sliders-horizontal", title: "由你掌控", body: "始终管理 tmux、每次询问，或跳过它使用纯 shell —— 设置全局默认值并按服务器单独覆盖。" },
-    ],
-    howEyebrow: "开箱即调优",
-    howTitle: "一份你无需自己编写的配置。",
-    howBody: "VVTerm 将一份受管理的配置写入 <strong>~/.vvterm/tmux.conf</strong> —— 真彩色、鼠标支持、10,000 行回滚、与主题匹配的复制模式高亮，以及智能滚轮滚动：在 shell 中使用复制模式，但在 <code>htop</code>、<code>vim</code> 等全屏应用内则透传。",
-    moshLink: "搭配 Mosh 漫游使用",
-    windowsLink: "在 Windows 上用 psmux 实现持久化",
-    terminalLink: "了解终端引擎",
-    howAlt: "VVTerm 受管理的 tmux 会话列表，可随时接回",
-    faqItems: [
-      { question: "VVTerm 如何让我的会话保持存活？", answer: "连接时，VVTerm 在服务器上创建或接入一个受管理的 <strong>tmux</strong> 会话。由于会话存在于远程主机上，即使连接断开，你的工作仍会继续运行 —— VVTerm 会在你下次连接时自动接回。" },
-      { question: "我需要自己安装或配置 tmux 吗？", answer: "不需要。若未安装 tmux，VVTerm 会用主机的包管理器安装。它还会将一份调优过的配置写入 <strong>~/.vvterm/tmux.conf</strong> —— 真彩色、鼠标支持、大容量回滚缓冲区，以及智能滚动：在 shell 中使用复制模式，但在全屏应用内透传。" },
-      { question: "我可以重新连接到之前开启的会话吗？", answer: "可以。VVTerm 列出现有会话及其窗口数量和已连接的客户端，因此你可以接回想要的那个，或清理旧的已分离会话。" },
-      { question: "如果我更喜欢纯 shell 呢？", answer: "将 tmux 启动全局设为<strong>跳过</strong>，或在单台服务器上覆盖。你也可以选择<strong>每次询问</strong>，这样在你打开新标签页或分屏时 VVTerm 会提示。" },
-      { question: "这和 tmux 控制模式一样吗？", answer: "不一样。VVTerm 在普通 shell 上编排一个真正的 tmux 会话以实现持久化和重连 —— 它不运行 tmux 控制模式（-CC）。" },
-      { question: "它能在 Windows 服务器上运行吗？", answer: "可以。在 Windows 和 PowerShell 主机上，VVTerm 使用 <strong>psmux</strong> 实现同样的持久化，并可用 winget、scoop、choco 或 cargo 安装它。" },
-    ],
-    ctaTitle: "再也不丢失会话。",
-    ctaSubtitle: "免费下载 VVTerm，让你的工作在每次断线中持续运行。",
-  },
-}, lang);
+const C = pickPage("features/tmux-session-persistence", lang);
 
 const appSchema = softwareAppSchema({ name: "VVTerm tmux Session Persistence", operatingSystem: "iOS 16+, macOS 13+", path: localizePath("/features/tmux-session-persistence", lang), description: C.description });
 ---

@@ -285,28 +285,3 @@ export const NAV = {
     { href: "/compare", label: "Comparisons", icon: "lucide:git-compare" },
   ],
 };
-
-// Per-locale sidebar labels for DocsLayout (title + group only; summaries aren't shown).
-// Keyed by locale code → kind → slug. Add a language by adding its key here (missing
-// locales/slugs fall back to the English title/section from GUIDES/DOCS above).
-type SidebarEntry = { title: string; group: string };
-export const SIDEBAR_I18N: Record<string, { guides?: Record<string, SidebarEntry>; docs?: Record<string, SidebarEntry> }> = {
-  zh: {
-    guides: {
-      "how-to-ssh-from-iphone": { title: "如何从 iPhone SSH 连接服务器", group: "快速上手" },
-      "ssh-from-mac": { title: "如何用 VVTerm 从 Mac 进行 SSH", group: "快速上手" },
-      "set-up-mosh-on-ios": { title: "在 iPhone 和 iPad 上设置 Mosh", group: "连接方式" },
-      "tailscale-ssh-setup": { title: "使用 Tailscale SSH 连接", group: "连接方式" },
-      "cloudflare-tunnel-ssh-setup": { title: "通过 Cloudflare Tunnel SSH 连接", group: "连接方式" },
-      "sftp-file-transfer-on-ios": { title: "在 iOS 上通过 SFTP 传输文件", group: "文件传输" },
-    },
-    docs: {
-      "getting-started": { title: "快速开始", group: "基础" },
-      "adding-a-server": { title: "添加服务器", group: "基础" },
-      "authentication-and-keys": { title: "认证与 SSH 密钥", group: "基础" },
-      "sftp-file-browser": { title: "使用 SFTP 文件浏览器", group: "远程操作" },
-      "icloud-sync": { title: "iCloud 同步与 Keychain", group: "远程操作" },
-      "workspaces-and-tabs": { title: "工作区、环境与标签页", group: "远程操作" },
-    },
-  },
-};

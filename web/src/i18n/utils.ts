@@ -1,5 +1,7 @@
 import en from "./translations/en.json";
 import zh from "./translations/zh.json";
+import enPages from "./pages/en.json";
+import zhPages from "./pages/zh.json";
 import { LOCALES, DEFAULT_LOCALE, LOCALE_META, isLocale, type Locale } from "./locales";
 
 export { LOCALES, DEFAULT_LOCALE, LOCALE_META, type Locale };
@@ -15,6 +17,17 @@ export const HTML_LANG: Record<Locale, string> = Object.fromEntries(
 
 // Register every locale's shared-chrome dictionary here (the ONE place to add a language).
 const dicts: Record<Locale, Record<string, unknown>> = { en, zh };
+// Per-page content dictionaries, keyed by page id (e.g. "mac", "features/mosh"). Register new locales here too.
+type PageDict = Record<string, Record<string, unknown>>;
+const pageDicts: Partial<Record<Locale, PageDict>> = { en: enPages, zh: zhPages };
+
+/** A page's content for `locale`, with the default-locale dictionary filling any keys the translation omits. */
+export function pickPage(id: string, locale: Locale): any {
+  const base = (pageDicts[DEFAULT_LOCALE] as PageDict)[id] ?? {};
+  if (locale === DEFAULT_LOCALE) return base;
+  const override = pageDicts[locale]?.[id];
+  return override ? { ...base, ...override } : base;
+}
 
 /** Active locale from the URL: the first path segment if it is a non-default locale, else the default. */
 export function getLocale(url: URL): Locale {
@@ -58,4 +71,13 @@ export function useT(locale: Locale) {
 /** Pick a locale's branch from a per-page dictionary, falling back to the default locale. */
 export function pick<T>(dict: Partial<Record<Locale, T>>, locale: Locale): T {
   return (dict[locale] ?? dict[DEFAULT_LOCALE]) as T;
+}
+
+type SidebarEntry = { title: string; group: string };
+/** Localized docs/guides sidebar labels, per slug, with default-locale titles/groups as fallback. */
+export function sidebar(locale: Locale, kind: "docs" | "guides"): Record<string, SidebarEntry> {
+  const read = (l: Locale) => ((dicts[l] as { sidebar?: Record<string, Record<string, SidebarEntry>> }).sidebar?.[kind]) ?? {};
+  const base = read(DEFAULT_LOCALE);
+  const over = read(locale);
+  return Object.fromEntries(Object.keys(base).map((slug) => [slug, { ...base[slug], ...(over[slug] ?? {}) } as SidebarEntry]));
 }

@@ -4,8 +4,8 @@ import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import SiteScripts from "../components/SiteScripts.astro";
 import Breadcrumbs from "../components/Breadcrumbs.astro";
-import { DOCS, GUIDES, SIDEBAR_I18N } from "../lib/nav";
-import { getLocale, useT, localizePath } from "../i18n/utils";
+import { DOCS, GUIDES } from "../lib/nav";
+import { getLocale, useT, localizePath, sidebar } from "../i18n/utils";
 
 interface Props {
   title?: string;
@@ -39,11 +39,11 @@ const base = kind === "docs" ? "/docs" : "/guides";
 const hubLabel = kind === "docs" ? t("nav.documentation") : t("nav.guides");
 
 // Locale-specific sidebar labels (fall back to the English title/section from nav.ts).
-const sidebar = SIDEBAR_I18N[lang]?.[kind] ?? {};
+const sb = sidebar(lang, kind);
 const entries =
   kind === "docs"
-    ? DOCS.map((d) => ({ slug: d.slug, title: sidebar[d.slug]?.title ?? d.title, group: sidebar[d.slug]?.group ?? d.section }))
-    : GUIDES.map((g) => ({ slug: g.slug, title: sidebar[g.slug]?.title ?? g.title, group: sidebar[g.slug]?.group ?? g.category }));
+    ? DOCS.map((d) => ({ slug: d.slug, title: sb[d.slug]?.title ?? d.title, group: sb[d.slug]?.group ?? d.section }))
+    : GUIDES.map((g) => ({ slug: g.slug, title: sb[g.slug]?.title ?? g.title, group: sb[g.slug]?.group ?? g.category }));
 
 const groups: { name: string; items: typeof entries }[] = [];
 for (const entry of entries) {

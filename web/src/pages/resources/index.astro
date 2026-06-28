@@ -6,56 +6,11 @@ import DownloadButton from "../../components/DownloadButton.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../../lib/site";
 import { GUIDES, DOCS, COMPARISONS } from "../../lib/nav";
-import { localizePath , pick } from "../../i18n/utils";
+import { localizePath, pickPage } from "../../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const C = pick({
-  en: {
-    title: "Resources — VVTerm Guides, Docs, and Comparisons",
-    description:
-      "Learn VVTerm: step-by-step guides, product documentation, and side-by-side comparisons with other SSH clients for iPhone, iPad, and Mac.",
-    bcHome: "Home",
-    bcResources: "Resources",
-    heroEyebrow: "Resources",
-    heroTitle: "Everything to help<br />you get set up.",
-    heroSubhead: "Guides, documentation, and honest comparisons — so you can connect your first server and go further with VVTerm.",
-    seePricing: "See pricing",
-    guidesTitle: "Guides",
-    guidesBody: "Step-by-step walkthroughs for connecting, transferring files, and getting the most out of VVTerm.",
-    guidesCta: "Browse guides",
-    docsTitle: "Documentation",
-    docsBody: "Reference for servers, authentication, the SFTP browser, iCloud sync, workspaces, and tabs.",
-    docsCta: "Read the docs",
-    compareTitle: "Comparisons",
-    compareBody: "See how VVTerm lines up against other SSH clients — platforms, transports, files, and pricing.",
-    compareCta: "See comparisons",
-    ctaTitle: "Ready when you are.",
-    ctaSubtitle: "Download VVTerm free and connect to your first machine in minutes.",
-  },
-  zh: {
-    title: "资源 — VVTerm 指南、文档与对比",
-    description:
-      "了解 VVTerm：分步指南、产品文档，以及与其他 SSH 客户端在 iPhone、iPad 和 Mac 上的并排对比。",
-    bcHome: "首页",
-    bcResources: "资源",
-    heroEyebrow: "资源",
-    heroTitle: "助你完成设置的<br />一切资料。",
-    heroSubhead: "指南、文档和诚实的对比 —— 让你连接第一台服务器，并用 VVTerm 走得更远。",
-    seePricing: "查看价格",
-    guidesTitle: "指南",
-    guidesBody: "关于连接、传输文件以及充分利用 VVTerm 的分步演示。",
-    guidesCta: "浏览指南",
-    docsTitle: "文档",
-    docsBody: "关于服务器、身份验证、SFTP 浏览器、iCloud 同步、工作区和标签页的参考。",
-    docsCta: "阅读文档",
-    compareTitle: "对比",
-    compareBody: "看看 VVTerm 与其他 SSH 客户端的比较 —— 平台、传输方式、文件和价格。",
-    compareCta: "查看对比",
-    ctaTitle: "随时为你准备就绪。",
-    ctaSubtitle: "免费下载 VVTerm，几分钟内连接你的第一台机器。",
-  },
-}, lang);
+const C = pickPage("resources", lang);
 
 const sections = [
   {

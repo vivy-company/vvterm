@@ -1,50 +1,11 @@
 ---
 import LegalPage from "../components/LegalPage.astro";
 import MarketingLayout from "../layouts/MarketingLayout.astro";
-import { pick } from "../i18n/utils";
+import { pickPage } from "../i18n/utils";
 
 const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
 
-const content = pick({
-  en: {
-    title: "Support - VVTerm",
-    description: "Support resources for VVTerm, including contact and billing guidance.",
-    heading: "Support",
-    pageDescription: "We’re here to help with any questions about VVTerm.",
-    s1h: "Contact",
-    s1pre: "Email us at ",
-    s1post: ". We typically respond within 1 to 2 business days.",
-    s2h: "App Support",
-    s2intro: "Please include the following so we can help faster:",
-    s2list: [
-      "Device model and OS version",
-      "VVTerm app version",
-      "Steps to reproduce the issue",
-      "Any relevant screenshots or logs",
-    ],
-    s3h: "Billing and Subscriptions",
-    s3p: "Purchases are handled by the App Store. If you have billing questions, you can contact us or manage subscriptions in your Apple ID settings.",
-  },
-  zh: {
-    title: "支持 - VVTerm",
-    description: "VVTerm 的支持资源，包括联系方式与计费指引。",
-    heading: "支持",
-    pageDescription: "我们随时为你解答关于 VVTerm 的任何问题。",
-    s1h: "联系",
-    s1pre: "通过 ",
-    s1post: " 发邮件给我们。我们通常在 1 到 2 个工作日内回复。",
-    s2h: "应用支持",
-    s2intro: "请附上以下信息，以便我们更快地帮助你：",
-    s2list: [
-      "设备型号和操作系统版本",
-      "VVTerm 应用版本",
-      "问题的重现步骤",
-      "任何相关的截图或日志",
-    ],
-    s3h: "计费与订阅",
-    s3p: "购买由 App Store 处理。如果你有计费方面的问题，可以联系我们，或在你的 Apple ID 设置中管理订阅。",
-  },
-}, lang);
+const content = pickPage("support", lang);
 ---
 
 <MarketingLayout
