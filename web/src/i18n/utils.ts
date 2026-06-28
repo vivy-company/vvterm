@@ -2,6 +2,8 @@ import en from "./translations/en.json";
 import zh from "./translations/zh.json";
 import enPages from "./pages/en.json";
 import zhPages from "./pages/zh.json";
+import ru from "./translations/ru.json";
+import ruPages from "./pages/ru.json";
 import uk from "./translations/uk.json";
 import ukPages from "./pages/uk.json";
 import es from "./translations/es.json";
@@ -30,10 +32,10 @@ export const HTML_LANG: Record<Locale, string> = Object.fromEntries(
 ) as Record<Locale, string>;
 
 // Register every locale's shared-chrome dictionary here (the ONE place to add a language).
-const dicts: Record<Locale, Record<string, unknown>> = { en, zh, ja, ko, th, vi, pl, es, uk };
+const dicts: Record<Locale, Record<string, unknown>> = { en, zh, ja, ko, th, vi, pl, es, uk, ru };
 // Per-page content dictionaries, keyed by page id (e.g. "mac", "features/mosh"). Register new locales here too.
 type PageDict = Record<string, Record<string, unknown>>;
-const pageDicts: Partial<Record<Locale, PageDict>> = { en: enPages, zh: zhPages, ja: jaPages, ko: koPages, th: thPages, vi: viPages, pl: plPages, es: esPages, uk: ukPages };
+const pageDicts: Partial<Record<Locale, PageDict>> = { en: enPages, zh: zhPages, ja: jaPages, ko: koPages, th: thPages, vi: viPages, pl: plPages, es: esPages, uk: ukPages, ru: ruPages };
 
 /** A page's content for `locale`, with the default-locale dictionary filling any keys the translation omits. */
 export function pickPage(id: string, locale: Locale): any {
