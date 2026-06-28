@@ -1,14 +1,14 @@
 ---
-import { SITE, translations } from "../lib/site";
-import { pickPage } from "../i18n/utils";
+import { SITE } from "../lib/site";
+import { chrome, getLocale, pickPage } from "../i18n/utils";
 
 interface Props {
   class?: string;
 }
 
 const { class: className = "" } = Astro.props;
-const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
-const p = translations[lang].pricing;
+const lang = getLocale(Astro.url);
+const p = chrome(lang).pricing;
 const toggle = pickPage("pricingCards", lang);
 ---
 

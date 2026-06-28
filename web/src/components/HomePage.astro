@@ -1,7 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
-import { SITE, translations } from "../lib/site";
-import { localizePath } from "../i18n/utils";
+import { SITE } from "../lib/site";
+import { chrome, getLocale, localizePath } from "../i18n/utils";
 import { PLATFORMS } from "../lib/nav";
 import Carousel from "./Carousel.astro";
 import GalleryCard from "./GalleryCard.astro";
@@ -9,8 +9,8 @@ import MediaBlock from "./MediaBlock.astro";
 import PricingCards from "./PricingCards.astro";
 import Expandable from "./Expandable.astro";
 
-const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
-const t = translations[lang] as typeof translations.en;
+const lang = getLocale(Astro.url);
+const t = chrome(lang);
 const tour = t.home.tour as unknown as Record<string, string>;
 const files = t.home.files as unknown as Record<string, string>;
 

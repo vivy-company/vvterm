@@ -56,6 +56,11 @@ export function alternatePath(url: URL, to: Locale): string {
   return localizePath(path, to);
 }
 
+/** The full shared-chrome dictionary for a locale (default-locale dict as fallback for an unregistered locale). */
+export function chrome(locale: Locale): typeof en {
+  return (dicts[locale] ?? dicts[DEFAULT_LOCALE]) as typeof en;
+}
+
 /** Look up a dotted key in the shared dictionary for `locale`, falling back to the default, then the key. */
 export function useT(locale: Locale) {
   const read = (dict: Record<string, unknown>, key: string) =>

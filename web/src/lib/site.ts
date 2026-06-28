@@ -1,6 +1,3 @@
-import en from "../i18n/translations/en.json";
-import zh from "../i18n/translations/zh.json";
-
 export const SITE = {
   name: "VVTerm",
   siteUrl: "https://vvterm.com",
@@ -15,8 +12,6 @@ export const SITE = {
   gtagId: "AW-17966112771",
   gtagConversionId: "AW-17966112771/kskJCIz44oUcEIPA9PZC",
 };
-
-export const translations = { en, zh } as const;
 
 // Factory for per-page SoftwareApplication JSON-LD (centralizes author/image/offers/category).
 export function softwareAppSchema(opts: {
