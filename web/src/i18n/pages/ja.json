@@ -1,0 +1,2252 @@
+{
+  "pricingCards": {
+    "monthly": "月額",
+    "yearly": "年額"
+  },
+  "compare": {
+    "title": "VVTermの比較 — VVTermはどう違うのか",
+    "description": "iPhone、iPad、Mac向けのネイティブSSHターミナル＆SFTPクライアントであるVVTermが、他のSSHクライアントとどう比べられるかを並べて確認できます。",
+    "bcHome": "ホーム",
+    "bcCompare": "比較",
+    "heroEyebrow": "比較",
+    "heroTitle": "VVTermはどう違うのか。",
+    "heroSubhead": "VVTermはiPhone、iPad、Mac向けのネイティブSSHターミナル＆SFTPクライアントです。他の人気SSHクライアントと、公平に、機能ごとに比べてみましょう。",
+    "download": "VVTermをダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "iPhone、iPad、Mac · 設計からAppleのみ",
+    "heroAlt": "iPhone、iPad、MacのVVTerm SSHターミナル",
+    "pickEyebrow": "並べて比較",
+    "pickTitle": "比較を選ぶ。",
+    "pickBody": "それぞれの比較で、<strong>プラットフォーム</strong>、<strong>トランスポート</strong>、<strong>ファイル閲覧</strong>、<strong>料金</strong>を正直に検討します。",
+    "readComparison": "比較を読む",
+    "whyEyebrow": "VVTermを選ぶ理由",
+    "whyTitle": "際立つポイント。",
+    "whyCards": [
+      {
+        "icon": "lucide:laptop",
+        "title": "ネイティブなAppleアプリ",
+        "body": "iOS 16、iPadOS 16、Apple Silicon上のmacOS 13のために構築。Webラッパーではなく、libghostty搭載のGPUターミナルを備えています。"
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "買い切りという選択肢",
+        "body": "無料で始め、Proを購読、または一度の支払いで$49.99の買い切りライセンスを。必須のサブスクリプションはありません。"
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "最新のトランスポートを標準搭載",
+        "body": "標準SSHに加えてMosh、Tailscale SSH、Cloudflare Tunnel SSH。追加で組む必要のあるツールはありません。"
+      }
+    ],
+    "ctaTitle": "自分のサーバーで確かめる。",
+    "ctaSubtitle": "iPhone、iPad、Macで無料のVVTermをダウンロードし、肝心なところで比べてみましょう。"
+  },
+  "compare/vvterm-vs-blink-shell": {
+    "title": "VVTerm vs Blink Shell — Apple向けSSHターミナル比較",
+    "description": "VVTerm vs Blink Shell：Mosh対応の2つのAppleターミナルを、プラットフォーム、トランスポート、内蔵SFTPファイルブラウザ、iCloud同期、料金で比較します。",
+    "bcHome": "ホーム",
+    "bcCompare": "比較",
+    "heroTitle": "2つのAppleターミナル、<br />どちらもMoshのために。",
+    "heroSubhead": "VVTermとBlink Shellは、いずれもMosh対応のネイティブAppleターミナルです。VVTermはiPhone、iPad、Macで動作し、Blink ShellはiPhoneとiPadに注力しています。違いはSFTPファイルブラウザ、用意されたトランスポート、iCloud同期、そして価格設定にも表れます。両者を公平に見てみましょう。",
+    "download": "VVTermをダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "iPhone、iPad、Mac · 設計からAppleのみ",
+    "heroAlt": "AppleデバイスのVVTermターミナルとSFTPブラウザ",
+    "tableEyebrow": "機能ごとに",
+    "tableTitle": "VVTermとBlink Shellを並べて。",
+    "tableBody": "どちらも<strong>Mosh</strong>を中核に据えた<strong>ネイティブなAppleターミナル</strong>です。VVTermは内蔵SFTPブラウザ、追加のトランスポート、買い切りの選択肢を加えます。",
+    "colFeature": "機能",
+    "footnote": "Blink Shellの詳細は公開情報に基づいており、変更される場合があります。最新情報はベンダーのサイトでご確認ください。「—」または「条件による」と記したセルは、プランによって異なる、または確定した事実として断言できない機能を示します。",
+    "standoutEyebrow": "VVTermが際立つところ",
+    "standoutTitle": "ターミナル以上。",
+    "whyLabel": "なぜVVTerm？",
+    "whyEyebrow": "VVTermを選ぶ理由",
+    "whyTitle": "Mosh、そしてその先へ。",
+    "whyBody": "どちらのアプリもMoshをうまく扱います。VVTermはそこに、<strong>libghostty搭載のGPUターミナル</strong>、テキスト・画像・動画のプレビューに対応した内蔵<strong>SFTPファイルブラウザ</strong>、<strong>Tailscale SSHやCloudflare Tunnel SSH</strong>といった追加トランスポート、<strong>iCloudメタデータ同期</strong>、そして一度きりの<strong>$49.99の買い切り</strong>を組み合わせます。",
+    "whyAlt": "シェルの隣に並ぶVVTermのSFTPファイルブラウザ",
+    "seeEverything": "VVTermでできることをすべて見る",
+    "fitEyebrow": "Blink Shellが向いている場面",
+    "fitTitle": "成熟した、ターミナル第一のツール。",
+    "fitBody": "Blink ShellはiOSターミナルの世界で長年高く評価されてきた存在で、<strong>強力なMoshへの注力</strong>と、多くのパワーユーザーが好む徹底的に<strong>キーボード駆動でターミナル中心</strong>のワークフローを備えています。設定を作り込むコマンドライン第一のアプローチで実戦に鍛えられたシェルを最優先するなら——そして長い時間をかけて磨いてきたコミュニティを求めるなら——優れた選択肢です。VVTermは別のバランスを目指します。ネイティブなGPUターミナルに、内蔵SFTPブラウザ、iCloud同期、追加トランスポートを組み合わせ、買い切り価格も用意しています。",
+    "rows": [
+      {
+        "label": "プラットフォーム",
+        "vvterm": "iPhone、iPad、Mac",
+        "competitor": "iPhone、iPad"
+      },
+      {
+        "label": "ネイティブなAppleアプリ",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "ターミナルエンジン",
+        "vvterm": "libghostty（GPU）",
+        "competitor": "—"
+      },
+      {
+        "label": "標準SSH",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Mosh",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Tailscale SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cloudflare Tunnel SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "内蔵SFTPファイルブラウザ",
+        "vvterm": "check",
+        "competitor": "条件による"
+      },
+      {
+        "label": "ファイルプレビュー（テキスト/画像/動画）",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "管理されたtmuxセッション維持",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Windows/PowerShellサーバーへの接続",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "ライブサーバーメトリクス（CPU/RAM/ディスク）",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "オンデバイスの音声コマンド",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "内蔵ターミナルテーマ",
+        "vvterm": "440テーマ",
+        "competitor": "条件による"
+      },
+      {
+        "label": "iCloud同期",
+        "vvterm": "check",
+        "competitor": "条件による"
+      },
+      {
+        "label": "Apple Keychainの認証情報",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "料金モデル",
+        "vvterm": "無料 + Pro + 買い切り",
+        "competitor": "条件による"
+      },
+      {
+        "label": "買い切り / 1回限りの選択肢",
+        "vvterm": "check",
+        "competitor": "条件による"
+      },
+      {
+        "label": "オープンソース",
+        "vvterm": "check",
+        "competitor": "check"
+      }
+    ],
+    "standout": [
+      {
+        "icon": "lucide:folder-open-dot",
+        "title": "本物のSFTPファイルブラウザ",
+        "body": "リモートフォルダの閲覧、アップロードとダウンロード、名前変更、移動、削除、ディレクトリ作成、POSIX権限の編集を、同じアプリ内のテキスト・画像・動画プレビューとともに。"
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "GPUターミナルエンジン",
+        "body": "VVTermはMetal上でlibghosttyにより描画し、iPhone、iPad、Macでトゥルーカラー、リガチャ、正確な出力を実現します。"
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "Moshを超えるトランスポート",
+        "body": "標準SSHとMoshに加えて、Tailscale SSHとCloudflare Tunnel SSHで、tailnet上やトンネルの背後にあるマシンへ、ポート開放なしに到達できます。"
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "買い切りもある明快な料金",
+        "body": "無料で始められ、Proは月額$6.49または年額$24.99、もしくは一度きりの$49.99買い切りライセンス。"
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "VVTermはBlink Shellの良い代替になりますか？",
+        "answer": "はい。特に、プレビュー付きの内蔵SFTPファイルブラウザ、iCloud同期されるサーバー、Moshと並ぶTailscale SSHやCloudflare Tunnel SSHといった最新トランスポートを求めるならおすすめです。どちらも強力なMosh対応のネイティブAppleターミナルなので、判断はファイル閲覧、同期、料金の好みに帰着することが多いでしょう。"
+      },
+      {
+        "question": "両方のアプリがMoshに対応していますか？",
+        "answer": "はい。MoshはVVTermとBlink Shellの両方にとって中核的な強みです。Moshはネットワークの変化、スリープ、不安定な接続を越えてセッションを維持し、即時のローカルエコーを提供します。VVTermは標準SSHとMoshに加えてTailscale SSHとCloudflare Tunnel SSHを備えています。"
+      },
+      {
+        "question": "VVTermはWindowsやLinuxに対応していますか？",
+        "answer": "VVTermクライアントはAppleデバイス（iPhone、iPad、Mac）でのみ動作し、Blink ShellはiPhoneとiPadで動作します。そのため、WindowsやLinuxの<strong>クライアント</strong>が必要なら、どちらも選択肢ではありません。ただしVVTermはLinux、macOS、BSD、Windows/PowerShellサーバー<strong>へ</strong>接続でき、それぞれでライブ統計と持続的なセッションを利用できます。"
+      },
+      {
+        "question": "VVTermはBlink Shellに何を加えますか？",
+        "answer": "共通のMosh対応に加えて、VVTermはプレビュー付きのフル機能<strong>SFTPファイルブラウザ</strong>、<strong>管理されたtmuxセッション維持</strong>、<strong>ライブサーバー監視</strong>、<strong>オンデバイスの音声コマンド</strong>、追加トランスポート（Tailscale SSHとCloudflare Tunnel SSH）、440種類の内蔵テーマを、一度きりの買い切り価格とともに備えています。Blink Shellは、長く磨かれたキーボード第一のターミナル中心ワークフローで対抗します。"
+      },
+      {
+        "question": "VVTermとBlink Shell、どちらが安いですか？",
+        "answer": "VVTermはワークスペース1個、サーバー1台、接続タブ1個まで無料で、Proは月額$6.49または年額$24.99、一度きりの$49.99買い切りライセンスがあります。Blink Shellの料金モデルは時期によって変わることがあるため、決める前にサイトで最新情報をご確認ください。"
+      },
+      {
+        "question": "Blink Shellからサーバーをインポートできますか？",
+        "answer": "VVTermはBlink Shellからの直接インポートには対応していません。ホスト、ポート、ユーザー名、認証方式を入力してサーバーを追加します。認証情報はApple Keychainに保存され、サーバーのメタデータはiCloudを通じて同期されます。"
+      },
+      {
+        "question": "両方のアプリはオープンソースですか？",
+        "answer": "両プロジェクトともソースを公開しています。VVTermのソースは github.com/vivy-company/vvterm で入手でき、Blink ShellはGPL-3.0ライセンスのもとでオープンソースです。"
+      }
+    ],
+    "ctaTitle": "ファイルもトランスポートも一緒に。",
+    "ctaSubtitle": "iPhone、iPad、Macで無料のVVTermをダウンロードし、ターミナル、SFTP、Moshをまとめて試してみましょう。"
+  },
+  "compare/vvterm-vs-termius": {
+    "title": "VVTerm vs Termius — ネイティブApple SSHクライアント比較",
+    "description": "VVTerm vs Termius：買い切り価格を備えたApple専用のネイティブSSHターミナル＆SFTPクライアントを、クロスプラットフォームのサブスクリプション型スイートであるTermiusと公平に比較します。",
+    "bcHome": "ホーム",
+    "bcCompare": "比較",
+    "heroTitle": "ネイティブなAppleターミナルか、<br />クロスプラットフォームのスイートか。",
+    "heroSubhead": "VVTermはiPhone、iPad、Mac向けのネイティブSSHターミナル＆SFTPクライアントで、買い切りの選択肢があります。TermiusはWindows、Linux、Android、Webでも動作するクロスプラットフォームのサブスクリプション型クライアントです。両者を比べてみましょう。",
+    "download": "VVTermをダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "iPhone、iPad、Mac · 設計からAppleのみ",
+    "heroAlt": "AppleデバイスのVVTermネイティブSSHターミナル",
+    "tableEyebrow": "機能ごとに",
+    "tableTitle": "VVTermとTermiusを並べて。",
+    "tableBody": "VVTermは<strong>Appleを深く掘り下げ</strong>、Termiusは<strong>プラットフォームを広くカバー</strong>します。正しい選択は、どこで作業するかによって決まります。",
+    "colFeature": "機能",
+    "footnote": "Termiusの詳細は公開情報に基づいており、変更される場合があります。最新情報はベンダーのサイトでご確認ください。「—」または「条件による」と記したセルは、プランによって異なる、または確定した事実として断言できない機能を示します。",
+    "standoutEyebrow": "VVTermが際立つところ",
+    "standoutTitle": "Appleのために、端から端まで。",
+    "whyLabel": "なぜVVTerm？",
+    "whyEyebrow": "VVTermを選ぶ理由",
+    "whyTitle": "あえて、Apple専用。",
+    "whyBody": "VVTermはクロスプラットフォームの広さと引き換えに、Appleでの深さを取りました。<strong>libghostty搭載のGPUターミナル</strong>、プレビュー付きの内蔵<strong>SFTPファイルブラウザ</strong>、<strong>iCloudメタデータ同期</strong>、<strong>Apple Keychain</strong>に保たれる認証情報——iPhone、iPad、Macに移植されたのではなく、そのために作られています。",
+    "whyAlt": "並んで表示されるVVTermのターミナルとSFTPブラウザ",
+    "seeEverything": "VVTermでできることをすべて見る",
+    "fitEyebrow": "Termiusが向いている場面",
+    "fitTitle": "クロスプラットフォームの広さが効くとき。",
+    "fitBody": "作業がAppleデバイスの枠を超えるなら、Termiusは本当に強力な選択肢です。<strong>macOS、Windows、Linux、iOS、Android、Web</strong>で動作し、組織がしばしば必要とするチームや共有ボールトの機能を提供します。WindowsノートとLinuxマシンを行き来する場合や、チーム全体で一元管理する単一のクライアントが欲しい場合、その幅広さは他に代えがたいものです。VVTermは逆の選択をしています。Apple専用にとどまることで、ネイティブな性能、iCloud、Keychainに全力を注いでいます。",
+    "rows": [
+      {
+        "label": "プラットフォーム",
+        "vvterm": "iPhone、iPad、Mac",
+        "competitor": "Mac、Windows、Linux、iOS、Android、Web"
+      },
+      {
+        "label": "ネイティブなAppleアプリ",
+        "vvterm": "check",
+        "competitor": "条件による"
+      },
+      {
+        "label": "ターミナルエンジン",
+        "vvterm": "libghostty（GPU）",
+        "competitor": "—"
+      },
+      {
+        "label": "標準SSH",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Mosh",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "Tailscale SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Cloudflare Tunnel SSH",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "内蔵SFTPファイルブラウザ",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "ファイルプレビュー（テキスト/画像/動画）",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "管理されたtmuxセッション維持",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Windows/PowerShellサーバーへの接続",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "ライブサーバーメトリクス（CPU/RAM/ディスク）",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "オンデバイスの音声コマンド",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "ペイン分割",
+        "vvterm": "check",
+        "competitor": "check"
+      },
+      {
+        "label": "内蔵ターミナルテーマ",
+        "vvterm": "440テーマ",
+        "competitor": "条件による"
+      },
+      {
+        "label": "iCloud同期",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "Apple Keychainの認証情報",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "料金モデル",
+        "vvterm": "無料 + Pro + 買い切り",
+        "competitor": "サブスクリプション"
+      },
+      {
+        "label": "買い切り / 1回限りの選択肢",
+        "vvterm": "check",
+        "competitor": "—"
+      },
+      {
+        "label": "オープンソース",
+        "vvterm": "check",
+        "competitor": "cross"
+      }
+    ],
+    "standout": [
+      {
+        "icon": "lucide:laptop",
+        "title": "すべてのAppleデバイスでネイティブ",
+        "body": "VVTermはiOS 16、iPadOS 16、Apple Silicon上のmacOS 13のために構築され、libghostty搭載のGPUターミナルとAppleプラットフォームの作法を全体に取り入れています。"
+      },
+      {
+        "icon": "lucide:badge-dollar-sign",
+        "title": "買い切りという選択肢",
+        "body": "無料で始め、月額$6.49または年額$24.99でProを購読、もしくは一度の支払いで$49.99の買い切りライセンスを。アプリを使い続けるための必須サブスクリプションはありません。"
+      },
+      {
+        "icon": "lucide:waypoints",
+        "title": "最新のトランスポートを標準搭載",
+        "body": "標準SSHに加えてMosh、Tailscale SSH、Cloudflare Tunnel SSH。ポート転送なしに、tailnet上やトンネルの背後のマシンへ到達できます。"
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "KeychainとiCloud、Appleの流儀で",
+        "body": "サーバーのメタデータはiCloudを通じて同期される一方、パスワードとSSHキーはApple Keychainにとどまり、あなたが許可したときだけiCloud Keychainを通じて同期されます。"
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "VVTermはTermiusの良い代替になりますか？",
+        "answer": "Appleデバイスだけで作業するなら、VVTermは強力な代替です。GPUターミナル、内蔵SFTPブラウザ、iCloud同期、Keychainに保存される認証情報、そして一度きりの買い切りという選択肢を備えた、ネイティブなiPhone、iPad、Macアプリです。Windows、Linux、Android、Webアクセスも必要なら、Termiusのほうが適しています。"
+      },
+      {
+        "question": "VVTermはWindowsやLinuxに対応していますか？",
+        "answer": "VVTermアプリはAppleデバイス（iPhone、iPad、Mac）でのみ動作するため、クライアントのWindows、Linux、Android、Web版はありません。ただしLinux、macOS、BSD、Windows/PowerShellサーバー<strong>へ接続でき</strong>、それぞれでライブ統計と持続的なセッションを利用できます。クライアント自体をApple以外のデバイスでも使う必要があるなら、Termiusのほうが柔軟な選択肢です。"
+      },
+      {
+        "question": "VVTermがTermiusにない何を提供しますか？",
+        "answer": "いくつかのAppleネイティブな追加機能です。切断をまたいで作業を動かし続ける<strong>管理されたtmuxセッション維持</strong>、アプリに組み込まれた<strong>ライブサーバー監視</strong>、<strong>オンデバイスの音声コマンド</strong>、iCloud同期、Keychainに保存される認証情報、そして一度きりの買い切り価格。Termiusはクロスプラットフォームの広さとチーム機能で対抗します。"
+      },
+      {
+        "question": "VVTermとTermius、どちらが安いですか？",
+        "answer": "VVTermはワークスペース1個、サーバー1台、接続タブ1個まで無料で、Proは月額$6.49または年額$24.99、一度きりの$49.99買い切りライセンスがあります。Termiusは時期によって変わりうるサブスクリプション価格を採用しています。最新情報はサイトでご確認ください。一度きりの支払いを好むなら、VVTermの買い切りが決め手になるでしょう。"
+      },
+      {
+        "question": "Termiusからサーバーをインポートできますか？",
+        "answer": "VVTermはTermiusからの直接インポートには対応していません。VVTermではホスト、ポート、ユーザー名、認証方式を入力してサーバーを追加します。認証情報はApple Keychainに保存され、サーバーのメタデータはiCloudを通じてデバイス間で同期されます。"
+      },
+      {
+        "question": "VVTermにチームや共有ボールトの機能はありますか？",
+        "answer": "VVTermは個人のデバイスのために作られており、あなた個人のiCloudアカウントを通じて同期します。Termiusは組織向けのチームや共有ボールトの機能を提供します。一元的なチーム管理が必須なら、Termiusのほうが適しています。"
+      },
+      {
+        "question": "VVTermはオープンソースですか？",
+        "answer": "はい。VVTermのソースは github.com/vivy-company/vvterm で入手できます。"
+      }
+    ],
+    "ctaTitle": "ネイティブなApple版を試す。",
+    "ctaSubtitle": "iPhone、iPad、Macで無料のVVTermをダウンロードし、自分のサーバーでその違いを確かめましょう。"
+  },
+  "docs/adding-a-server": {
+    "heading": "サーバーを追加する",
+    "intro": "VVTermでのすべての接続はサーバーエントリーから始まります。各フィールドの意味、サーバーがワークスペースや環境にどう属するか、編集や削除の方法を説明します。",
+    "meta": "ドキュメント",
+    "title": "VVTermでサーバーを追加する — VVTerm",
+    "description": "VVTermのサーバーフィールド（名前、ホスト、ポート、ユーザー名、環境）、サーバーがワークスペースにどう属するか、編集や削除の方法を学べます。",
+    "schemaDescription": "VVTermでサーバーを追加する方法：名前、ホスト、ポート、ユーザー名、環境、そしてサーバーがワークスペースにどう属するか、編集や削除の方法。",
+    "bodyHtml": "\n  <p>\n    VVTermにおけるサーバーとは、接続先マシンの保存された定義です。どこにあり、誰として\n    ログインし、どう認証するか。保存すると、サーバーリストに表示され、iCloudを通じて\n    デバイス間で同期されます。認証情報そのものはApple Keychainにとどまり、\n    その同期される定義に含まれることはありません。\n  </p>\n\n  <h2>サーバーのフィールド</h2>\n  <ul>\n    <li><strong>名前</strong> — サーバーを見分けやすくするためにあなたが選ぶラベルです。接続には影響しません。</li>\n    <li><strong>ホスト</strong> — 接続先のホスト名またはIPアドレス。例：<code>example.com</code> や <code>192.168.1.20</code>。</li>\n    <li><strong>ポート</strong> — SSHポート。既定は <code>22</code> です。サーバーが別のポートで待ち受けている場合のみ変更してください。</li>\n    <li><strong>ユーザー名</strong> — ログインに使うアカウント。たとえば <code>root</code>、<code>ubuntu</code>、<code>admin</code> など。</li>\n    <li><strong>環境</strong> — 任意のグループ分けです。ProductionやStagingなど、ワークスペース内でサーバーを整理するために使います。</li>\n  </ul>\n  <p>\n    認証はサーバーごとに設定します。パスワード、SSHキー、またはパスフレーズで保護された\n    SSHキーを使えます。詳細と各認証情報の保存場所は <a href=\"/docs/authentication-and-keys\">認証とSSHキー</a> で説明します。\n  </p>\n\n  <h2>ワークスペースと環境</h2>\n  <p>\n    すべてのサーバーは <strong>ワークスペース</strong> に属します。ワークスペースは最上位のグループで——クライアントごと、\n    プロジェクトごと、チームごとに1つずつ持つとよいでしょう。ワークスペースの中では、<strong>環境</strong> がサーバーをさらに分類し、本番環境とステージング環境のホストを\n    視覚的に分けて、必要なものだけにリストを絞り込めます。\n  </p>\n  <p>\n    無料プランではワークスペース1個とサーバー1台が使えます。Proはこれらの制限を取り払い、\n    好きなだけワークスペース、環境、サーバーを構築できます。複数の接続を同時に開くこととの関係については、<a href=\"/docs/workspaces-and-tabs\">ワークスペース、環境、タブ</a> をご覧ください。\n  </p>\n\n  <h2>サーバーを編集する</h2>\n  <ol>\n    <li>リストからサーバーの詳細を開きます。</li>\n    <li>名前、ホスト、ポート、ユーザー名、環境、認証方式など、任意のフィールドを変更します。</li>\n    <li>保存します。更新された定義はiCloudを通じて他のデバイスに同期されます。</li>\n  </ol>\n  <p>\n    ホスト、ポート、ユーザー名の変更は、今後の接続にのみ影響します。すでに\n    セッションが開いている場合は、再接続するまで元の設定が維持されます。\n  </p>\n\n  <h2>サーバーを削除する</h2>\n  <p>\n    サーバーを削除すると、その定義がリストから取り除かれ、同期後に他のデバイスからも消えます。\n    サーバーに紐づくKeychainの認証情報も一緒に削除されます。一時的にサーバーを\n    非表示にしたいだけなら、削除せずに別の環境へ移すことを検討してください。そうすれば\n    設定を保てます。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    サーバーを保存したら、<a href=\"/docs/authentication-and-keys\">認証とSSHキー</a> でサインイン方法を設定するか、保存した\n    サーバーがデバイス間をどう移動するかを <a href=\"/docs/icloud-sync\">iCloud同期とKeychain</a> で学びましょう。\n  </p>\n"
+  },
+  "docs/authentication-and-keys": {
+    "heading": "認証とSSHキー",
+    "intro": "VVTermはパスワード、SSHキー、またはパスフレーズで保護されたSSHキーでサインインします。各方式のしくみと、認証情報の保存場所を説明します。",
+    "meta": "ドキュメント",
+    "title": "認証とSSHキー — VVTerm",
+    "description": "VVTermでのパスワード、SSHキー、パスフレーズ付きSSHキー認証と、認証情報が同期メタデータではなくApple Keychainに保たれるしくみ。",
+    "schemaDescription": "VVTermの認証方式を解説：パスワード、SSHキー、パスフレーズ付きSSHキー、そして認証情報がApple Keychainに保存されるしくみ。",
+    "bodyHtml": "\n  <p>\n    認証はサーバーごとに設定するので、マシンごとに異なる方式を使えます。VVTermは\n    3つの選択肢に対応しており、どれを選んでも、秘密情報そのものはiCloudを通じて同期される\n    サーバー定義ではなく、Apple Keychainに保存されます。\n  </p>\n\n  <h2>認証方式</h2>\n  <ul>\n    <li>\n      <strong>パスワード</strong> — サーバーのアカウントパスワードを入力します。ホスト、ポート、ユーザー名が\n      正しいかを確かめる最も手早い方法で、自分が管理するマシンには良い選択です。\n      パスワードはKeychainに保存されるので、毎回入力し直す必要はありません。\n    </li>\n    <li>\n      <strong>SSHキー</strong> — パスワードの代わりに秘密鍵で認証します。対応する\n      公開鍵がサーバーの <code>~/.ssh/authorized_keys</code> ファイルに存在する必要があります。\n      鍵ベースのログインはパスワードより安全で、パスワード不要のサインインに対応します。\n    </li>\n    <li>\n      <strong>SSHキー + パスフレーズ</strong> — SSHキーと同じですが、秘密鍵自体が\n      パスフレーズで暗号化されています。鍵が流出しても、パスフレーズなしには使えないため、\n      機密性の高いホストに保護の層を加えます。\n    </li>\n  </ul>\n\n  <h2>認証情報の保管場所</h2>\n  <p>\n    パスワード、秘密鍵、パスフレーズは <strong>Apple Keychain</strong> に保存されます。これらは\n    VVTermがiCloud（CloudKit）を通じて同期するサーバーメタデータには<strong>含まれません</strong>。\n    つまり、サーバーリストはデバイス間を移動できる一方、秘密情報は\n    セキュアでシステム管理された保管庫にとどまります。\n  </p>\n  <p>\n    認証情報がデバイス間で同期されるのは、iOSまたはmacOSの設定で <strong>iCloud Keychain</strong> が\n    有効な場合だけです。有効にすると、あるデバイスで保存した鍵やパスワードが\n    他のデバイスでも使えるようになります。無効の場合、認証情報は入力したデバイスにとどまり、\n    必要に応じて再度追加します。何が同期され何が同期されないかの全体像は、<a href=\"/docs/icloud-sync\">iCloud同期とKeychain</a> をご覧ください。\n  </p>\n\n  <h2>鍵の生成とインポート</h2>\n  <p>\n    まだSSHキーを持っていない場合、VVTermが生成できます。生成後、\n    公開鍵をコピーしてサーバーの <code>~/.ssh/authorized_keys</code> ファイルに追加し、その\n    鍵をサーバーの認証方式として選択します。既存の秘密鍵があれば、VVTermに\n    インポートして同じようにサーバーへ割り当てられます。\n  </p>\n  <p>\n    サーバー上の公開鍵が、あなたのデバイスの秘密鍵を承認します。同じ公開鍵を各サーバーの\n    <code>authorized_keys</code> に置くことで1つの鍵ペアを多数のサーバーで使い回すことも、\n    より厳格な管理のためにホストごとに別々の鍵を持つこともできます。\n  </p>\n\n  <h2>ホストの検証</h2>\n  <p>\n    サーバーに初めて接続するとき、VVTermはホストの鍵フィンガープリントを表示します。\n    承認する前に、期待どおりか確認してください。そうすれば、なりすましではなく正しい\n    マシンに接続していることを確かめられます。ホストを信頼した後は、鍵が変わらない限り、\n    以降の接続は確認なしに進みます。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    認証を設定したら、<a href=\"/docs/sftp-file-browser\">SFTPファイルブラウザ</a> に進んでリモートファイルを管理するか、<a href=\"/docs/adding-a-server\">サーバーを追加する</a> に戻って\n    接続の詳細を調整しましょう。\n  </p>\n"
+  },
+  "docs/getting-started": {
+    "heading": "はじめに",
+    "intro": "iPhone、iPad、MacにVVTermをインストールし、最初のサーバーを追加して、セキュアなシェルセッションを開きましょう。続いて、無料プランに含まれるものと、Proが価値を持つ場面を学びます。",
+    "meta": "ドキュメント",
+    "title": "VVTermをはじめる — VVTerm",
+    "description": "iPhone、iPad、MacにVVTermをインストールし、システム要件を確認し、最初のサーバーを追加してSSHで接続。無料プランとProプランの制限も学べます。",
+    "schemaDescription": "VVTermのインストール、システム要件の確認、最初のサーバーの追加、SSH接続、無料プランとProプランの理解。",
+    "bodyHtml": "\n  <p>\n    VVTermはiPhone、iPad、Mac向けのネイティブSSHターミナル＆SFTPファイルクライアントです。\n    <strong>libghostty</strong> でターミナルをGPU描画し、<strong>libssh2</strong> でSSH接続するため、\n    セッションは速く正確です。標準SSHに加えて、<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong> でマシンに到達できます。このページではインストールから最初のプロンプトまでを案内します。\n  </p>\n\n  <h2>システム要件</h2>\n  <ul>\n    <li><strong>iPhoneとiPad</strong> — iOSまたはiPadOS 16以降。</li>\n    <li><strong>Mac</strong> — Apple Silicon搭載MacのmacOS 13 Ventura以降。Intel Macには対応していません。</li>\n  </ul>\n  <p>\n    VVTermは3つのプラットフォーム共通の1つのアプリで、サーバーリストは\n    iCloudを通じてデバイス間についてきます。\n  </p>\n\n  <h2>VVTermをインストールする</h2>\n  <ol>\n    <li>デバイスでApp Storeを開き、VVTermをインストールします。</li>\n    <li>アプリを起動し、短いウェルカムフローを完了します。</li>\n    <li>VVTermは空のサーバーリストで開き、最初の接続の準備が整います。</li>\n  </ol>\n\n  <h2>最初のサーバーを追加する</h2>\n  <p>接続したいサーバーから3つの情報が必要です。ホスト、ユーザー名、そして認証方式です。</p>\n  <ol>\n    <li>新しいサーバーを作成し、わかりやすい <strong>名前</strong> を付けます。</li>\n    <li><strong>ホスト</strong> を入力します。<code>example.com</code> のようなホスト名や <code>192.168.1.20</code> のようなIPアドレスです。</li>\n    <li><strong>ポート</strong> を設定します。SSHは既定で <code>22</code> を使います。サーバーが別の場所で待ち受けている場合のみ変更してください。</li>\n    <li>ログインに使う <strong>ユーザー名</strong> を入力します。<code>root</code> や <code>ubuntu</code> など。</li>\n    <li>認証方式を選びます。パスワード、SSHキー、またはパスフレーズ付きSSHキー。</li>\n  </ol>\n  <p>\n    各フィールドの詳しい手順と、サーバーがワークスペースにどう収まるかについては、<a href=\"/docs/adding-a-server\">サーバーを追加する</a> をご覧ください。\n  </p>\n\n  <h2>接続する</h2>\n  <ol>\n    <li>サーバーを保存し、リストから選択します。</li>\n    <li>ホストに初めて接続するとき、VVTermは鍵フィンガープリントを表示するので、信頼する前にホストを検証できます。</li>\n    <li>承認すると、ターミナルがシェルプロンプトで開き、作業を始められます。</li>\n  </ol>\n  <p>\n    iPhoneとiPadでは、ソフトウェアキーボードの上にあるキーボードツールバーが、ターミナルに欠かせない\n    <code>Esc</code>、<code>Tab</code>、<code>Ctrl</code>、矢印キー、ファンクションキーを追加します。\n    Macでは、ネイティブアプリらしくフルキーボード操作が期待どおりに動作します。\n  </p>\n\n  <h2>無料版とPro</h2>\n  <p>VVTermは無料で使え、1台のマシンに合った制限が設けられています。</p>\n  <ul>\n    <li><strong>無料</strong> — ワークスペース1個、サーバー1台、接続タブ1個。</li>\n    <li><strong>Pro</strong> — ワークスペース、サーバー、接続タブが無制限。</li>\n  </ul>\n  <p>\n    Proは <strong>月額$6.49</strong> または <strong>年額$24.99</strong>、一度きりの <strong>買い切り</strong> 購入が <strong>$49.99</strong> です。購入、請求、返金は\n    App Storeアカウントを通じてAppleが対応します。より多くのマシンを整理する準備ができたら、<a href=\"/docs/workspaces-and-tabs\">ワークスペース、環境、タブ</a> をご覧ください。\n  </p>\n"
+  },
+  "docs/icloud-sync": {
+    "heading": "iCloud同期とKeychain",
+    "intro": "サーバーリストはiCloudを通じてiPhone、iPad、Macの間についてくる一方、パスワードとSSHキーはApple Keychainにとどまります。何が同期され何が同期されないかを正確に説明します。",
+    "meta": "ドキュメント",
+    "title": "iCloud同期とKeychain — VVTerm",
+    "description": "VVTermはサーバーメタデータをiCloudを通じて同期する一方、パスワードとSSHキーはApple Keychainにとどまり、有効にしたときだけiCloud Keychainを通じて同期します。",
+    "schemaDescription": "VVTermがサーバーメタデータをiCloudを通じて同期しつつ、パスワードとSSHキーをApple Keychainに保つしくみ、重複排除のしくみ、同期されないもの。",
+    "bodyHtml": "\n  <p>\n    VVTermは、データを2つの部分——接続方法を表すサーバー定義と、サインインに使う\n    秘密情報——に分けることで、デバイス間で設定を一貫させます。これらは意図的に\n    別々に扱われ、リストは自由に移動できる一方、認証情報は保護されたままです。\n  </p>\n\n  <h2>iCloudを通じて同期されるもの</h2>\n  <p>\n    サーバーの <strong>メタデータ</strong> はCloudKitを使ってiCloudを通じて同期されます。これには <a href=\"/docs/adding-a-server\">サーバーを追加する</a> ときに入力する\n    詳細——名前、ホスト、ポート、ユーザー名、環境——と、ワークスペースや整理の仕方が含まれます。\n    Macでサーバーを追加するとiPhoneやiPadに表示され、あるデバイスでワークスペースの名前を変えると\n    他のデバイスにも反映されます。\n  </p>\n\n  <h2>Keychainにとどまるもの</h2>\n  <p>\n    秘密情報——<strong>パスワード、SSH秘密鍵、パスフレーズ</strong>——は同期メタデータではなく <strong>Apple Keychain</strong> に保存されます。これらは意図的に\n    CloudKitから除外されており、iCloudを通じて移動するデータの部分に認証情報が含まれることは\n    ありません。\n  </p>\n  <p>\n    認証情報がデバイス間を移動するのは、iOSまたはmacOSの設定で <strong>iCloud Keychain</strong> が\n    有効な場合だけです。有効にすると、保存したパスワードや鍵がAppleのセキュアなKeychain同期を通じて\n    他のデバイスでも使えるようになります。無効の場合、認証情報は入力したデバイスにとどまり、\n    使用する各デバイスで再度追加します。\n  </p>\n\n  <h2>同期されないもの</h2>\n  <ul>\n    <li><strong>認証情報がCloudKitで運ばれることは決してありません。</strong> パスワードとSSHキーは、同期されるサーバーメタデータから完全に除外されています。</li>\n    <li>iCloud Keychainが無効なら、サーバーリストは同期されても、秘密情報はデバイスから出ません。</li>\n    <li>アクティブなターミナルセッションと接続タブはデバイス内のローカルなもので、同期されません。</li>\n  </ul>\n\n  <h2>重複排除</h2>\n  <p>\n    各サーバーとワークスペースは安定した識別子を持ちます。VVTermがiCloudから来る変更を\n    マージするとき、レコードを <strong>IDで</strong> 照合するため、2つのデバイスに存在する同じサーバーは\n    重複ではなく1つのエントリーに統合されます。複数のデバイスで編集しても、リストは\n    きれいに保たれます。\n  </p>\n\n  <h2>iCloudなしで使う</h2>\n  <p>\n    iCloudが利用できない、またはオフの場合、VVTermはローカルストレージにフォールバックして\n    そのデバイスでアプリが動き続けます。サーバーはローカルに保存され、使い続けられますが、\n    iCloud同期が再び利用可能になるまで他のデバイスには反映されません。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    サーバーごとの秘密情報の保存方法を制御するには、<a href=\"/docs/authentication-and-keys\">認証とSSHキー</a> をご覧ください。同期される\n    サーバーを整理するには、<a href=\"/docs/workspaces-and-tabs\">ワークスペース、環境、タブ</a> をご覧ください。\n  </p>\n"
+  },
+  "docs": {
+    "title": "VVTermドキュメント — SSH、SFTP、iCloud同期",
+    "description": "VVTermのリファレンスドキュメント：はじめに、サーバーの追加、認証とSSHキー、SFTPファイルブラウザ、iCloud同期、ワークスペースとタブ。",
+    "bcHome": "ホーム",
+    "bcDocs": "ドキュメント",
+    "heroEyebrow": "ドキュメント",
+    "heroTitle": "VVTermのドキュメント。",
+    "heroSubhead": "iPhone、iPad、MacでVVTermをセットアップするためのリファレンス——サーバーの追加、認証と鍵、SFTPファイルブラウザ、iCloud同期、そしてワークスペースとタブによる作業の整理。",
+    "download": "VVTermをダウンロード",
+    "readGuides": "ガイドを読む",
+    "heroNote": "iPhone、iPad、Mac · 無料で始められる",
+    "readMore": "もっと読む",
+    "sections": {
+      "Basics": "基本",
+      "Working remotely": "リモートで作業する"
+    },
+    "docs": {},
+    "ctaTitle": "接続の準備はできましたか？",
+    "ctaSubtitle": "iPhone、iPad、Macで無料のVVTermをダウンロードし、数分で最初のサーバーに到達しましょう。"
+  },
+  "docs/sftp-file-browser": {
+    "heading": "SFTPファイルブラウザを使う",
+    "intro": "VVTermには内蔵のSFTPブラウザがあり、別のアプリなしでリモートファイルの移動、プレビュー、編集ができます。使い方を説明します。",
+    "meta": "ドキュメント",
+    "title": "SFTPファイルブラウザを使う — VVTerm",
+    "description": "VVTermでリモートフォルダの閲覧、ファイルのアップロードとダウンロード、フォルダの作成、名前変更、移動、削除、テキスト・画像・動画のプレビュー、POSIX権限の編集を行えます。",
+    "schemaDescription": "VVTermのSFTPファイルブラウザを使って、リモートフォルダの閲覧、アップロードとダウンロード、ディレクトリの作成、名前変更、移動、削除、プレビュー、ファイルと権限の編集を行う方法。",
+    "bodyHtml": "\n  <p>\n    SSHで接続するすべてのサーバーは、同じアプリ内でSFTPによる閲覧もできます。ファイル\n    ブラウザは既存の接続の上で動作するので、サーバー側で追加設定は不要です——SSHで\n    入れるなら、ファイルも管理できます。\n  </p>\n\n  <h2>ファイルブラウザを開く</h2>\n  <p>\n    接続中のサーバーから <strong>ファイル</strong> ビューを開いて閲覧を始めます。VVTermは\n    リモートディレクトリの内容を一覧表示し、名前、サイズ、種類を示します。Macではブラウザが\n    同じウィンドウ内でターミナルの隣に並び、iPhoneとiPadでは独立したビューとして開くので、\n    シェルとファイルを行き来できます。\n  </p>\n\n  <h2>フォルダを閲覧する</h2>\n  <ul>\n    <li>フォルダをタップまたはクリックして開き、パスや戻る操作で上の階層へ移動します。</li>\n    <li>ホームディレクトリから始め、アカウントが読めるパスへ自由に入っていけます。</li>\n    <li>入る権限のない項目は、シェルと同じようにサーバー側で制限されます。</li>\n  </ul>\n\n  <h2>アップロードとダウンロード</h2>\n  <p>\n    ブラウザから直接、両方向にファイルを移動できます。\n  </p>\n  <ul>\n    <li>リモートファイルをデバイスへ <strong>ダウンロード</strong> してローカルコピーを保持します。</li>\n    <li>デバイスのファイルを現在のリモートフォルダへ <strong>アップロード</strong> します。</li>\n  </ul>\n  <p>\n    これは、ログを取得したり、設定を送り込んだり、マシン間でアセットを移動したりする\n    最も手早い方法で、コマンドラインに降りる必要はありません。\n  </p>\n\n  <h2>ファイルとフォルダを管理する</h2>\n  <ul>\n    <li><strong>フォルダを作成</strong> してリモートディレクトリを整理します。</li>\n    <li>ファイルやフォルダをその場で <strong>名前変更</strong> します。</li>\n    <li>項目を別のパスへ <strong>移動</strong> します。</li>\n    <li>不要になったファイルやフォルダを <strong>削除</strong> します。</li>\n  </ul>\n  <p>\n    これらの操作はライブのサーバーに対してSFTP経由で実行されるため、変更は即座に反映されます。\n  </p>\n\n  <h2>ファイルをプレビューする</h2>\n  <p>\n    一般的なファイル形式を、先にダウンロードせずプレビューできます。VVTermは <strong>テキスト</strong>、<strong>画像</strong>、<strong>動画</strong> をインライン表示するので、どう扱うか決める前に\n    ファイルの内容を確認——設定の確認、スクリーンショットの一瞥、録画のスクラブ——\n    するのが簡単です。\n  </p>\n\n  <h2>テキストファイルを編集する</h2>\n  <p>\n    テキストファイルについては、ブラウザにエディターが含まれており、設定やスクリプトに\n    素早く変更を加えてそのままサーバーへ保存できます。小さな編集のために、ファイルを\n    ダウンロードし、ローカルで編集し、再びアップロードする必要はありません。\n  </p>\n\n  <h2>権限を編集する</h2>\n  <p>\n    対応サーバーでは、ファイルの <strong>POSIX権限</strong>——所有者、グループ、その他に対する\n    読み取り、書き込み、実行のビット——を表示・変更できます。<code>chmod</code> を手で打たずに、\n    スクリプトを実行可能にしたり、機密ファイルのアクセスを厳しくしたりするのに便利です。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    ファイルアクセスは、<a href=\"/docs/adding-a-server\">サーバーを追加する</a> と <a href=\"/docs/authentication-and-keys\">認証とSSHキー</a> で設定するログインアカウントに依存します。サーバーを\n    デバイス間で一貫させるには、<a href=\"/docs/icloud-sync\">iCloud同期とKeychain</a> をご覧ください。\n  </p>\n"
+  },
+  "docs/workspaces-and-tabs": {
+    "heading": "ワークスペース、環境、タブ",
+    "intro": "ワークスペースと環境がサーバーを整理し、接続タブが複数のセッションを同時に動かします。それぞれがどう組み合わさるかを説明します。",
+    "meta": "ドキュメント",
+    "title": "ワークスペース、環境、タブ — VVTerm",
+    "description": "VVTermでワークスペースと環境を使ってサーバーを整理し、接続タブで複数のセッションを動かし、無料プランとProプランの制限を理解しましょう。",
+    "schemaDescription": "VVTermがワークスペースと環境でサーバーを整理するしくみ、接続タブで複数のセッションを動かす方法、そして適用される無料とProの制限。",
+    "bodyHtml": "\n  <p>\n    マシンが増えるにつれて、VVTermはそれらを整理する2つの方法——ワークスペースと\n    環境——と、複数のセッションを同時に扱える接続タブを提供します。これらは\n    iCloudを通じてデバイス間で同期されるので、整理の仕方はどこでも同じです。\n  </p>\n\n  <h2>ワークスペース</h2>\n  <p>\n    <strong>ワークスペース</strong> は、サーバーが属する最上位のグループです。クライアントごと、\n    プロジェクトごと、チームごとに1つ使って、無関係なマシンを切り分けます。すべてのサーバーは\n    ちょうど1つのワークスペースに属し、ワークスペースを切り替えると表示されるサーバーが変わります。\n    ワークスペースは、含まれるサーバーとともにiCloudを通じて同期されます。\n  </p>\n\n  <h2>環境</h2>\n  <p>\n    ワークスペースの中で、<strong>環境</strong> がサーバーをさらに分類します——たとえばProduction、\n    Staging、Developmentなど。環境を使えば、混み合ったリストを今気になるマシンだけに\n    絞り込めますし、本番ホストを実験できるホストから視覚的に区別できます。サーバーの環境は <a href=\"/docs/adding-a-server\">追加または編集</a> するときに設定します。\n  </p>\n\n  <h2>接続タブ</h2>\n  <p>\n    <strong>接続タブ</strong> は、サーバーとの1つのライブセッションです。サーバーを開くとタブが\n    始まり、別のサーバー、または同じサーバーをもう一度開くと2つ目のタブが始まります。各タブは独立しているので、\n    一方で長いタスクを動かしながら、もう一方で作業できます。\n  </p>\n  <p>\n    タブを切り替えれば、切断せずにセッションを行き来できます。Macではタブが\n    統合ツールバーに並び、iPhoneとiPadではセッションビューから開いている接続を移動します。\n  </p>\n\n  <h2>無料とProの制限</h2>\n  <p>VVTermのプランは、どれだけ整理でき、いくつのセッションを同時に動かせるかを左右します。</p>\n  <ul>\n    <li><strong>無料</strong> — ワークスペース1個、サーバー1台、接続タブ1個。</li>\n    <li><strong>Pro</strong> — ワークスペース、サーバー、接続タブが無制限。</li>\n  </ul>\n  <p>\n    Proなら、複数の接続を同時に開いたまま——たとえば本番シェル、\n    ステージングシェル、SFTPセッションを——保ち、必要なだけのワークスペースと環境にまたがって\n    まとめられます。Proは <strong>月額$6.49</strong> または <strong>年額$24.99</strong>、一度きりの <strong>買い切り</strong> 購入が <strong>$49.99</strong> です。請求と返金は\n    Appleが対応します。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    まず <a href=\"/docs/adding-a-server\">サーバーを追加</a> してワークスペースに配置し、次に\n    整理の仕方がデバイス間をどう移動するかを <a href=\"/docs/icloud-sync\">iCloud同期とKeychain</a> で学びましょう。\n  </p>\n"
+  },
+  "features/cloudflare-tunnel-ssh": {
+    "title": "Cloudflare Tunnel SSH — iPhone、iPad、Mac向けVVTerm",
+    "description": "Cloudflare Tunnelの背後にあるサーバーへ、受信ポートを開かずに、iPhone、iPad、MacのVVTermから直接接続できます。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "Cloudflare Tunnel SSH",
+    "heroEyebrow": "Cloudflare Tunnel SSH",
+    "heroTitle": "つなぐのはこちらから、<br />何もさらさない。",
+    "heroSubhead": "受信ポートを1つも開かずに、Cloudflare Tunnelの背後のサーバーへ——VVTermから直接到達できます。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "Cloudflare Tunnel経由のVVTerm SSH",
+    "statementEyebrow": "既定で閉じている",
+    "statementTitle": "受信ポートはすべて閉じたまま。",
+    "statementBody": "接続はトンネルが担うので、オリジンサーバーは閉ざされたままです。つまり、<strong>受信ポートを開く</strong>ことも、ファイアウォールに穴を開けることもなく、SSHアクセスが得られます。",
+    "benefits": [
+      {
+        "icon": "lucide:cloud",
+        "title": "トンネル経由のホストへ到達",
+        "body": "Cloudflare Tunnelで公開されたサーバーへ、トンネルのホスト名を使って接続します。"
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "受信ポートなし",
+        "body": "オリジンサーバーはすべての受信ポートを閉じたまま——到達するのはトンネル側です。"
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "ファイアウォールの穴なし",
+        "body": "そのマシンへのSSHアクセスのために、受信ファイアウォールルールやNAT設定をスキップできます。"
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "同じターミナル",
+        "body": "トンネル経由のホストも、他の接続と同じGPUターミナルとタブで動作します。"
+      }
+    ],
+    "crossEyebrow": "セットアップ",
+    "crossTitle": "VVTermをトンネルに向ける。",
+    "crossBody": "<strong>トンネルのホスト名</strong>でサーバーを追加して接続します。その間ずっと、オリジンは受信ポートを閉じたままです。",
+    "guideLink": "Cloudflare Tunnel SSHで接続する",
+    "tailscaleLink": "または、Tailscale SSHでマシンに到達する",
+    "terminalLink": "SSHターミナルを見る",
+    "crossAlt": "閉ざされたオリジンサーバーに接続するVVTerm",
+    "faqItems": [
+      {
+        "question": "Cloudflare Tunnel SSHは何をしますか？",
+        "answer": "オリジンの受信ポートを一切開かずに、Cloudflare Tunnelの背後にあるサーバーへ接続できるようにします。"
+      },
+      {
+        "question": "サーバーでポートを開く必要がありますか？",
+        "answer": "いいえ。トンネルが接続を担う一方でオリジンが受信ポートを閉じたままにできることが、まさにこのしくみの要点です。"
+      },
+      {
+        "question": "サーバーはどう指定しますか？",
+        "answer": "Cloudflareでトンネル用に設定したホスト名を使って接続します。"
+      },
+      {
+        "question": "通常のSSHセッションと同じように動作しますか？",
+        "answer": "はい。接続後、トンネル経由のホストはファイルブラウザを含め、VVTerm内の他のSSHセッションと同じように動作します。"
+      },
+      {
+        "question": "iPhoneやMacで使えますか？",
+        "answer": "はい。Cloudflare Tunnel SSH接続はiPhone、iPad、Macで動作します。"
+      },
+      {
+        "question": "ポートを開く代わりにトンネルを使う理由は？",
+        "answer": "トンネルは受信ファイアウォールルールと公開露出を避け、サーバーの攻撃対象領域を減らします。"
+      }
+    ],
+    "ctaTitle": "ポートを開かずにSSH。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、Cloudflare Tunnel経由で接続しましょう。"
+  },
+  "features/icloud-sync-keychain": {
+    "title": "iCloud同期とKeychainセキュリティ — VVTerm",
+    "description": "サーバーのメタデータはiCloudを通じてデバイス間で同期される一方、パスワードとSSHキーはApple Keychainにとどまり、有効にしたときだけiCloud Keychainを通じて同期されます。認証情報がCloudKitで同期されることは決してありません。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "iCloud同期とKeychain",
+    "heroEyebrow": "iCloud同期とKeychain",
+    "heroTitle": "サーバーは同期。<br />秘密はそのまま。",
+    "heroSubhead": "サーバーのメタデータはiCloudを通じてデバイス間についてくる一方、パスワードとSSHキーはApple Keychainにとどまります。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "iCloud経由でデバイス間同期されるVVTermのワークスペース",
+    "statementEyebrow": "明快な分離",
+    "statementTitle": "メタデータは同期。認証情報はしない。",
+    "statementBody": "VVTermはあなたの<strong>サーバーリスト</strong>をiCloudを通じて同期し、すべてのデバイスに行き渡らせます。一方、<strong>パスワードとSSHキー</strong>がCloudKitで同期されることは決してなく、Apple Keychainにとどまります。",
+    "benefits": [
+      {
+        "icon": "lucide:cloudy",
+        "title": "サーバーはどこでも",
+        "body": "サーバーリストとワークスペースはiCloudを通じて同期され、iPhone、iPad、Macについてきます。"
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "Keychainの認証情報",
+        "body": "パスワードとSSHキーは、同期されるメタデータとは別に、Apple Keychainに保管されます。"
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "CloudKit経由は決してなし",
+        "body": "認証情報がCloudKitを通じて同期されることは決してありません。同期されるのはサーバーのメタデータだけです。"
+      },
+      {
+        "icon": "lucide:cloud",
+        "title": "鍵の同期はあなた次第",
+        "body": "鍵がデバイス間で同期されるのはiCloud Keychain経由のみで、あなたが有効にしたときだけです。"
+      }
+    ],
+    "crossEyebrow": "しくみ",
+    "crossTitle": "何が移動するかは、あなたが決める。",
+    "crossBody": "サーバーのメタデータはiCloudを通じて自動的に同期されます。認証情報がデバイス間を移動するのは<strong>iCloud Keychain経由のみ</strong>で、あなたがオンにしたときだけです。",
+    "icloudDocLink": "iCloud同期のドキュメントを読む",
+    "authDocLink": "認証とSSHキー",
+    "terminalLink": "SSHターミナルを見る",
+    "tableTitle": "何がどこで同期されるか",
+    "tableRows": [
+      {
+        "icon": "lucide:cloudy",
+        "label": "サーバー名、ホスト、ポート、ワークスペース",
+        "where": "iCloud"
+      },
+      {
+        "icon": "lucide:key-round",
+        "label": "パスワードとSSHキー",
+        "where": "Keychain"
+      },
+      {
+        "icon": "lucide:shield",
+        "label": "CloudKit経由の認証情報",
+        "where": "決してなし"
+      }
+    ],
+    "secEyebrow": "デバイス上で堅く守る",
+    "secTitle": "保存を超えたセキュリティ。",
+    "secBody": "Keychainの認証情報は出発点にすぎません。VVTermはアプリ自体も守り、秘密情報を画面から遠ざけます。",
+    "secCards": [
+      {
+        "icon": "lucide:scan-face",
+        "title": "Face IDによるApp Lock",
+        "body": "アプリを開くのにFace IDまたはTouch IDを必須にし、バックグラウンドに移ると施錠し、個々のサーバーを生体認証の背後に置けます。"
+      },
+      {
+        "icon": "lucide:eye-off",
+        "title": "プライバシーモード",
+        "body": "UI上のホスト名やその他の機密な詳細をマスクします。画面共有、プレゼン、録画のときに便利です。"
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "アプリ内で鍵を生成",
+        "body": "Ed25519やRSA 4096のSSHキーをVVTerm内で作成し、Keychainに保存。既知のホストに対するホスト鍵検証も行います。"
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "iCloudを通じて何が同期されますか？",
+        "answer": "サーバーのメタデータ——名前、ホスト、ポート、ユーザー名、ワークスペースの整理——が、iCloudを通じてデバイス間で同期されます。"
+      },
+      {
+        "question": "パスワードとSSHキーはどこに保存されますか？",
+        "answer": "<strong>Apple Keychain</strong>です。iCloudを通じて同期されるサーバーメタデータとは別に保管されます。"
+      },
+      {
+        "question": "認証情報がCloudKitを通じて同期されることはありますか？",
+        "answer": "いいえ。認証情報がCloudKitで同期されることは決してありません。その経路で同期されるのはサーバーのメタデータだけです。"
+      },
+      {
+        "question": "認証情報はデバイス間でどう移動しますか？",
+        "answer": "パスワードとSSHキーはiCloud Keychain経由でのみ、しかもiCloud Keychainを有効にしているときだけ同期されます。"
+      },
+      {
+        "question": "iCloud Keychainを有効にしない場合はどうなりますか？",
+        "answer": "サーバーのメタデータはiCloudを通じて同期されますが、認証情報は各デバイスのKeychainにとどまります。"
+      },
+      {
+        "question": "同期はiPhone、iPad、Macで動作しますか？",
+        "answer": "はい。サーバーのメタデータは、サインインしているすべてのAppleデバイスでiCloudを通じて同期されます。"
+      },
+      {
+        "question": "アプリ自体をロックできますか？",
+        "answer": "はい。App Lockは、VVTermを開くのにFace IDまたはTouch IDを必須にし、バックグラウンドに移ると自動で施錠し、特定のサーバーに生体認証を要求できます。"
+      },
+      {
+        "question": "VVTermはSSHキーを生成できますか？",
+        "answer": "はい。アプリ内で<strong>Ed25519</strong>または<strong>RSA 4096</strong>の鍵を生成できます。Keychainに保存され、ホスト鍵は既知のホストに対して検証されます。"
+      }
+    ],
+    "ctaTitle": "サーバーは同期。秘密は安全に。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、Appleデバイス間で同期をセットアップしましょう。"
+  },
+  "features": {
+    "title": "機能 — VVTerm SSHターミナル＆SFTPクライアント",
+    "description": "VVTermでできることのすべて：GPU SSHターミナル、tmuxセッション維持、SFTPファイルブラウザ、ライブサーバー監視、Windows対応、深いカスタマイズ、Mosh、Tailscale SSH、Cloudflare Tunnel SSH、KeychainセキュリティによるiCloud同期。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "heroEyebrow": "機能",
+    "heroTitle": "リモートマシンを動かすのに<br />必要なすべて。",
+    "heroSubhead": "tmux維持、SFTPファイルブラウザ、ライブ監視、深いカスタマイズ、そして最新の接続方式を備えたネイティブSSHターミナル——iPhone、iPad、Mac向けのApple第一のアプリに。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "tourEyebrow": "クイックツアー",
+    "tourTitle": "みんなが手を伸ばす機能。",
+    "tourLabel": "VVTermの主要機能",
+    "showcase": [
+      {
+        "pos": "100% 50%",
+        "title": "一瞬で応答するGPUターミナル。",
+        "caption": "top"
+      },
+      {
+        "pos": "8% 50%",
+        "title": "シェルの隣にSFTPブラウザ。",
+        "caption": "bottom"
+      },
+      {
+        "pos": "30% 35%",
+        "title": "切断を乗り越えるセッション。",
+        "caption": "top"
+      },
+      {
+        "pos": "72% 60%",
+        "title": "iPhone、iPad、Macで同期。",
+        "caption": "bottom"
+      }
+    ],
+    "learnMore": "詳しく見る",
+    "connectEyebrow": "好きな方法でつなぐ",
+    "connectTitle": "どのマシンにも、4通りの方法で。",
+    "connectBody": "サーバーごとに最適なトランスポートを選べます。使いたいときは<strong>標準SSH</strong>、必要なときは<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong>を。",
+    "connectionMethods": [
+      {
+        "slug": "ssh-terminal",
+        "icon": "lucide:square-terminal",
+        "title": "標準SSH",
+        "body": "Keychainのパスワード、SSHキー、またはパスフレーズ付きの鍵で。"
+      },
+      {
+        "slug": "mosh",
+        "icon": "lucide:radio",
+        "title": "Mosh",
+        "body": "スリープやネットワークの変化を乗り越えるローミングセッション。"
+      },
+      {
+        "slug": "tailscale-ssh",
+        "icon": "lucide:waypoints",
+        "title": "Tailscale SSH",
+        "body": "MagicDNS名でtailnetのマシンに到達。ポート開放は不要。"
+      },
+      {
+        "slug": "cloudflare-tunnel-ssh",
+        "icon": "lucide:cloud",
+        "title": "Cloudflare Tunnel SSH",
+        "body": "受信ポートなしでCloudflare Tunnelの背後に接続。"
+      }
+    ],
+    "ctaTitle": "すべてのサーバーを、1つのアプリで。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、数分で最初のマシンに接続しましょう。",
+    "features": {
+      "ssh-terminal": {
+        "title": "GPU SSHターミナル",
+        "summary": "Ghosttyの描画エンジンであるlibghostty搭載の、速く正確なターミナル。トゥルーカラー、リガチャ、くっきりとしたMetal描画を備えています。"
+      },
+      "tmux-session-persistence": {
+        "title": "tmuxセッション維持",
+        "summary": "セッションは切断、スリープ、アプリ切り替えを乗り越えます。VVTermがtmuxを管理——自動インストールし、再接続時に再アタッチし、最初から調整します。"
+      },
+      "terminal-customization": {
+        "title": "テーマとカスタマイズ",
+        "summary": "数百種類の内蔵テーマ、Nerd Fonts、カーソルスタイル、そして自分のコマンドスニペットやショートカットを備えたカスタムキーボードツールバー。"
+      },
+      "sftp-file-browser": {
+        "title": "SFTPファイルブラウザ",
+        "summary": "リモートフォルダの閲覧、アップロードとダウンロード、名前変更、移動、削除、ディレクトリ作成、POSIX権限の編集を、別のアプリなしで。"
+      },
+      "server-monitoring": {
+        "title": "ライブサーバー監視",
+        "summary": "CPU、メモリ、ネットワーク、ディスク、ロードアベレージ、上位プロセスをリアルタイムで——Linux、macOS、BSD、Windowsホストに対応。"
+      },
+      "windows-ssh": {
+        "title": "Windowsサーバー対応",
+        "summary": "WindowsやPowerShellホストに接続し、SFTPでファイルを閲覧、ライブ統計を確認、psmuxで持続的なセッションを維持。"
+      },
+      "mosh": {
+        "title": "Moshローミングセッション",
+        "summary": "Moshはネットワークの変化、スリープ、不安定な接続を越えてセッションを維持し、即時のローカルエコーとSSHフォールバックを備えます。"
+      },
+      "tailscale-ssh": {
+        "title": "Tailscale SSH",
+        "summary": "tailnet上のマシンにMagicDNS名で到達——ポート転送なし、ポート露出なし、管理する追加の鍵なし。"
+      },
+      "cloudflare-tunnel-ssh": {
+        "title": "Cloudflare Tunnel SSH",
+        "summary": "受信ポートを開かずにCloudflare Tunnelの背後のサーバーへ、VVTermから直接接続。"
+      },
+      "icloud-sync-keychain": {
+        "title": "iCloud同期とKeychainセキュリティ",
+        "summary": "サーバーのメタデータはiCloudを通じて同期される一方、パスワードとSSHキーはApple Keychainにとどまり、許可したときだけiCloud Keychainを通じて同期されます。"
+      }
+    }
+  },
+  "features/mosh": {
+    "title": "Moshローミングセッション — iPhone、iPad、Mac向けVVTerm",
+    "description": "Moshはネットワークの変化、スリープ、不安定な接続を越えてセッションを維持し、即時のローカルエコーとSSHフォールバックを備えます。iPhone、iPad、Mac向けVVTermに内蔵。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "Mosh",
+    "heroEyebrow": "Mosh",
+    "heroTitle": "決して手放さない<br />セッション。",
+    "heroSubhead": "Moshはネットワークの変化、スリープ、切断を越えてシェルを維持します——即時のローカルエコーとSSHフォールバックとともに。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "VVTermのMoshローミングセッション",
+    "statementEyebrow": "つながり続ける",
+    "statementTitle": "蓋を閉じても、セッションはそのまま。",
+    "statementBody": "エレベーターに乗っても、セルラーに切り替えても、デバイスをスリープさせても——Moshセッションは<strong>中断したところからそのまま続き</strong>、再接続の手順は要りません。",
+    "benefits": [
+      {
+        "icon": "lucide:radio",
+        "title": "切断を乗り越える",
+        "body": "ローミングセッションは、Wi-Fiからセルラーへの切り替え、スリープ、リンク切れを越えて維持されます。"
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "即時のローカルエコー",
+        "body": "Moshはキー入力を予測するので、高遅延のリンクでも入力が即座に感じられます。"
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "SSHフォールバック",
+        "body": "ホストでMoshが利用できないとき、VVTermは標準SSHセッションにフォールバックします。"
+      },
+      {
+        "icon": "lucide:smartphone",
+        "title": "モバイルのために",
+        "body": "場所を移動するとネットワークが変わるiPhoneやiPadに最適です。"
+      }
+    ],
+    "crossEyebrow": "セットアップ",
+    "crossTitle": "数分でローミングセッションへ。",
+    "crossBody": "Moshが動作しているホストにVVTermを向けて接続します。サーバーにMoshがなくても、自動で<strong>標準SSHセッション</strong>が得られます。",
+    "guideLink": "iPhoneとiPadでMoshをセットアップする",
+    "terminalLink": "SSHターミナルを見る",
+    "tailscaleLink": "Tailscale SSHでマシンに到達する",
+    "crossAlt": "SSHフォールバック付きのVVTerm Mosh",
+    "faqItems": [
+      {
+        "question": "Moshは何をしますか？",
+        "answer": "Moshはネットワークの変化、スリープ、不安定な接続を越えてリモートセッションを維持し、入力が応答よく感じられるよう即時のローカルエコーを加えます。"
+      },
+      {
+        "question": "ネットワークを切り替えてもセッションは維持されますか？",
+        "answer": "はい。Moshセッションはネットワークの変化——たとえばWi-Fiからセルラーへ——を、切断せずに乗り越えます。"
+      },
+      {
+        "question": "ホストにMoshがない場合はどうなりますか？",
+        "answer": "サーバーでMoshが利用できないとき、VVTermは標準SSHセッションにフォールバックします。"
+      },
+      {
+        "question": "なぜMoshだと入力が速く感じるのですか？",
+        "answer": "Moshは即時のローカルエコーを使い、高遅延の接続でもキー入力を予測して即座に表示します。"
+      },
+      {
+        "question": "MoshはiPhoneやiPadで役立ちますか？",
+        "answer": "はい。ネットワークを移動し、デバイスが頻繁にスリープするモバイルで、Moshは特に役立ちます。"
+      },
+      {
+        "question": "サーバー側に何が必要ですか？",
+        "answer": "サーバーにMoshがインストールされ、到達可能である必要があります。そうでなければVVTermは標準SSHで接続します。"
+      }
+    ],
+    "ctaTitle": "もうセッションを失わない。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、Moshで接続しましょう。"
+  },
+  "features/server-monitoring": {
+    "title": "ライブサーバー監視 — VVTerm SSHクライアント",
+    "description": "CPU、メモリ、ネットワーク、ディスク、ロードアベレージ、稼働時間、上位プロセスをリアルタイムで、シェルのすぐ隣で確認——Linux、macOS、BSD、Windowsホストに対応。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "サーバー監視",
+    "heroEyebrow": "ライブサーバー監視",
+    "heroTitle": "サーバーの状態を<br />ひと目で。",
+    "heroSubhead": "CPU、メモリ、ネットワーク、ディスク、負荷、上位プロセスを、シェルのすぐ隣でライブに——インストールするエージェントは不要です。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "CPU、メモリ、ネットワーク、負荷を示すVVTermのライブサーバー統計",
+    "statementEyebrow": "推測ではなく、文脈を",
+    "statementTitle": "アプリを離れずに診断する。",
+    "statementBody": "何かが遅いとき、<code>top</code>、<code>df</code>、<code>iostat</code> のフラグを思い出す必要はありません。VVTermは既存のSSHセッションからホストを読み取り、ターミナルの隣にライブで並べます。",
+    "metrics": [
+      {
+        "icon": "lucide:cpu",
+        "title": "CPU",
+        "body": "user、system、iowait、steal、idleの内訳とコア数を伴う、ライブの使用率。"
+      },
+      {
+        "icon": "lucide:memory-stick",
+        "title": "メモリ",
+        "body": "合計、使用中、空き、キャッシュ、バッファを、ひと目でわかる明快なパーセンテージとともに。"
+      },
+      {
+        "icon": "lucide:arrow-down-up",
+        "title": "ネットワーク",
+        "body": "受信と送信のリアルタイム速度を、累積の合計値とともに。"
+      },
+      {
+        "icon": "lucide:hard-drive",
+        "title": "ディスク",
+        "body": "ボリュームごとの使用量——マウントされた各ファイルシステムの使用量、合計、割合。"
+      },
+      {
+        "icon": "lucide:gauge",
+        "title": "負荷と稼働時間",
+        "body": "1分、5分、15分のロードアベレージ、システム稼働時間、プロセス数。"
+      },
+      {
+        "icon": "lucide:list-tree",
+        "title": "上位プロセス",
+        "body": "CPUとメモリで最も重いプロセスを、PIDと名前とともに。"
+      }
+    ],
+    "crossEyebrow": "あらゆるプラットフォーム",
+    "crossTitle": "各OSで正しく読み取る。",
+    "crossBody": "<strong>Linux、macOS、FreeBSD、NetBSD、OpenBSD、Windows</strong>向けの専用コレクターにより、何を動かしていても数値は正確です——エージェントもデーモンもなく、あなたのSSHセッションだけで。",
+    "windowsLink": "Windowsホストでの監視",
+    "terminalLink": "SSHターミナルについて",
+    "crossAlt": "監視中のホストでのVVTermのボリュームごとのディスク使用量",
+    "faqItems": [
+      {
+        "question": "VVTermは何を監視しますか？",
+        "answer": "状態ごとの内訳を伴うCPU使用率、メモリ、ネットワークの受信と送信、ボリュームごとのディスク使用量、1/5/15分のロードアベレージ、稼働時間、プロセス数、そしてCPUとメモリで最も重いプロセスです。"
+      },
+      {
+        "question": "データはライブですか？",
+        "answer": "はい。メトリクスは既存のSSHセッションを通じてリアルタイムに更新されるので、別のツールを開かずにサーバーの今の状態がわかります。"
+      },
+      {
+        "question": "どのOSに対応していますか？",
+        "answer": "VVTermはLinux、macOS、FreeBSD、NetBSD、OpenBSD、Windows向けの専用コレクターを備えているので、各プラットフォームで統計が正しく読み取られます。"
+      },
+      {
+        "question": "サーバーにエージェントをインストールする必要がありますか？",
+        "answer": "いいえ。監視はすでにあるSSH接続を通じて動作します——ホストにインストールするデーモンやエージェントはありません。"
+      },
+      {
+        "question": "監視しながら作業できますか？",
+        "answer": "はい。統計ビューはターミナルの隣にあるので、同じサーバーでコマンドを実行しながら負荷を見られます。"
+      }
+    ],
+    "ctaTitle": "サーバーを、ライブで。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、CPU、メモリ、負荷をリアルタイムで見守りましょう。"
+  },
+  "features/sftp-file-browser": {
+    "title": "SFTPファイルブラウザ — iPhone、iPad、Mac向けVVTerm",
+    "description": "リモートフォルダの閲覧、アップロードとダウンロード、名前変更、移動、削除、ディレクトリ作成、テキスト・画像・動画のインラインプレビュー、対応テキストファイルの編集、POSIX権限の設定を——SFTP経由で。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "SFTPファイル",
+    "heroEyebrow": "SFTPファイル",
+    "heroTitle": "リモートファイルに、<br />2つ目のアプリは要らない。",
+    "heroSubhead": "リモートファイルの閲覧、転送、プレビュー、編集をSFTPで——シェルのすぐ隣で、同じ接続の上で。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "VVTermのSFTPファイルブラウザ",
+    "statementEyebrow": "ファイルを標準搭載",
+    "statementTitle": "サーバーのためのファイルマネージャー。",
+    "statementBody": "ビルドをアップロードし、設定を直し、<strong>ログや画像をプレビュー</strong>し、<strong>POSIX権限</strong>を調整する——すべて、今いる接続を離れずに。",
+    "cardsTitle": "ファイルブラウザに求めるすべて。",
+    "carouselLabel": "SFTPファイルブラウザの機能",
+    "cards": [
+      {
+        "pos": "8% 50%",
+        "title": "閲覧と整理。",
+        "body": "リモートディレクトリを移動し、フォルダを作成し、その場で項目の名前変更、移動、削除を行います。"
+      },
+      {
+        "pos": "50% 45%",
+        "title": "インラインでプレビュー。",
+        "body": "テキスト、画像、動画ファイルを、先に別のアプリへダウンロードせずに直接開きます。"
+      },
+      {
+        "pos": "30% 60%",
+        "title": "テキストファイルを編集。",
+        "body": "サーバー上の対応テキストファイルを開いて編集し、SFTP経由で変更を保存します。"
+      },
+      {
+        "pos": "92% 50%",
+        "title": "双方向の転送。",
+        "body": "デバイスからアップロード、デバイスへダウンロード。シェルと同じセッションで。"
+      },
+      {
+        "pos": "70% 30%",
+        "title": "POSIX権限。",
+        "body": "chmodに降りずに、所有者、グループ、モードのビットを確認・変更します。"
+      },
+      {
+        "pos": "20% 20%",
+        "title": "シェルのすぐ隣に。",
+        "body": "ファイルはターミナルと同じアプリ・接続にあります——管理する2つ目のツールはありません。"
+      }
+    ],
+    "crossEyebrow": "1つの接続",
+    "crossTitle": "シェルとファイルを一緒に。",
+    "crossBody": "SFTPブラウザはターミナルと<strong>同じSSHセッション</strong>で動作するので、接続したあとに追加で設定するものはありません。",
+    "guideLink": "iOSでSFTPによりファイルを転送する",
+    "terminalLink": "SSHターミナルを見る",
+    "crossAlt": "SFTP経由のVVTermファイル転送",
+    "faqItems": [
+      {
+        "question": "ファイルブラウザで何ができますか？",
+        "answer": "リモートフォルダの閲覧、アップロードとダウンロード、名前変更、移動、削除、ディレクトリ作成、テキスト・画像・動画ファイルのプレビュー、対応テキストファイルの編集、POSIX権限の編集です。"
+      },
+      {
+        "question": "SFTPを使いますか？",
+        "answer": "はい。ファイル転送は既存のSSH接続上で<strong>SFTP</strong>により行われます。"
+      },
+      {
+        "question": "ダウンロードせずにファイルをプレビューできますか？",
+        "answer": "はい。テキスト、画像、動画ファイルはアプリ内でインラインプレビューできます。"
+      },
+      {
+        "question": "サーバー上のファイルを編集できますか？",
+        "answer": "はい。対応テキストファイルを開いて編集し、SFTP経由で保存できます。"
+      },
+      {
+        "question": "ファイルの権限を変更できますか？",
+        "answer": "はい。POSIX権限——所有者、グループ、モード——をブラウザ内で直接編集できます。"
+      },
+      {
+        "question": "ファイルブラウザはiPhoneやMacにありますか？",
+        "answer": "はい。SFTPブラウザはiPhone、iPad、Macで利用できます。"
+      }
+    ],
+    "ctaTitle": "リモートファイルを、手軽に管理。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、SFTP経由でサーバーを閲覧しましょう。"
+  },
+  "features/ssh-terminal": {
+    "title": "GPU SSHターミナル — iPhone、iPad、Mac向けVVTerm",
+    "description": "Ghosttyの描画エンジンであるlibghostty搭載の、速く正確なSSHターミナル。Metal GPU描画、トゥルーカラー、リガチャを備え、libssh2でSSH接続、認証情報はKeychainに。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "SSHターミナル",
+    "heroEyebrow": "SSHターミナル",
+    "heroTitle": "一瞬で応答する<br />ターミナル。",
+    "heroSubhead": "libghosttyによるGPU描画、トゥルーカラー、リガチャ——SSHトランスポート上で、認証情報はKeychainに保たれます。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "VVTermのGPU SSHターミナルセッション",
+    "statementEyebrow": "正確さのために",
+    "statementTitle": "エンジンが、ものを言う。",
+    "statementBody": "VVTermは<strong>libghostty</strong>——<strong>Ghostty</strong>を支えるのと同じ描画エンジン——でターミナルを描画するので、出力は速く、正しく、毎フレームくっきりです。",
+    "expandLabel": "ターミナルの描画を見る",
+    "modalEyebrow": "描画エンジン",
+    "modalTitle": "Metal GPU描画、1フレームずつ。",
+    "modalBody": "VVTermは<strong>libghostty</strong>——<strong>Ghostty</strong>のエンジン——を動かし、毎フレームを<strong>Metal</strong>で描画するので、スクロールバックはなめらかに保たれ、テキストは24ビットのトゥルーカラーとプログラミングリガチャで描かれます。SSHは<strong>libssh2</strong>上で動作し、認証情報はApple Keychainに保たれます。",
+    "modalAlt": "Metal上で描画されるVVTermのターミナル",
+    "sftpLink": "SFTPでファイルを閲覧",
+    "benefits": [
+      {
+        "icon": "lucide:cpu",
+        "title": "Metal GPU描画",
+        "body": "libghostty——Ghosttyのエンジン——が毎フレームをMetalで描画し、くっきりとしたテキストとなめらかなスクロールバックを実現します。"
+      },
+      {
+        "icon": "lucide:square-terminal",
+        "title": "トゥルーカラーとリガチャ",
+        "body": "24ビットカラーとプログラミングリガチャが、シェルやテーマの意図どおりに正確に描画されます。"
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "3つの認証方式",
+        "body": "パスワード、SSHキー、またはパスフレーズ付きの鍵で接続——すべてApple Keychainに保存されます。"
+      },
+      {
+        "icon": "lucide:layout-grid",
+        "title": "タブとペイン分割",
+        "body": "複数の接続をタブで開いたまま保ち、Macではタブを複数のペインに分割できます。Proでタブとペイン分割が無制限になります。"
+      }
+    ],
+    "howEyebrow": "接続する",
+    "howTitle": "サーバーからシェルまで、数分で。",
+    "howBody": "ホストを追加し、認証方式を選び、セッションを開きます。VVTermは<strong>パスワードとSSHキーをApple Keychain</strong>に保ち、サーバーリストをデバイス間で同期します。",
+    "macGuide": "Mac版SSHガイドを読む",
+    "iphoneGuide": "iPhoneからSSH",
+    "sftpLink2": "SFTPでファイルを閲覧",
+    "howAlt": "KeychainからのVVTerm SSHキー認証",
+    "faqItems": [
+      {
+        "question": "ターミナルはどの描画エンジンを使っていますか？",
+        "answer": "VVTermはGhosttyの描画エンジンである<strong>libghostty</strong>を使い、Metal GPU描画で速く正確なターミナル出力を実現します。"
+      },
+      {
+        "question": "どのSSHライブラリが接続を支えていますか？",
+        "answer": "接続はSSHトランスポートに<strong>libssh2</strong>とOpenSSLを使います。"
+      },
+      {
+        "question": "どの認証方式に対応していますか？",
+        "answer": "パスワード、SSHキー、パスフレーズ付きSSHキーです。認証情報はApple Keychainに保存され、同期メタデータに含まれることは決してありません。"
+      },
+      {
+        "question": "トゥルーカラーとリガチャに対応していますか？",
+        "answer": "はい。ターミナルは24ビットのトゥルーカラーとプログラミングリガチャを描画します。"
+      },
+      {
+        "question": "一度に複数のセッションを開けますか？",
+        "answer": "はい。Proで接続タブが無制限になります。無料プランには接続タブ1個が含まれます。"
+      },
+      {
+        "question": "ターミナルをペインに分割できますか？",
+        "answer": "はい——Macではタブを水平または垂直に複数のペインに分割できます。ペイン分割はPro機能です。"
+      },
+      {
+        "question": "どのデバイスで動作しますか？",
+        "answer": "iOSまたはiPadOS 16以降のiPhoneとiPad、そしてmacOS 13 Ventura以降のApple Silicon Macです。"
+      }
+    ],
+    "ctaTitle": "本物のターミナルを、どこでも。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、最初のSSHセッションを開きましょう。"
+  },
+  "features/tailscale-ssh": {
+    "title": "Tailscale SSH — iPhone、iPad、Mac向けVVTerm",
+    "description": "tailnet上のマシンにMagicDNS名で到達——ポート転送なし、ポート露出なし、管理する追加の鍵なし。VVTermに内蔵されたTailscale SSH。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "Tailscale SSH",
+    "heroEyebrow": "Tailscale SSH",
+    "heroTitle": "あなたのtailnetは、<br />名前ひとつで。",
+    "heroSubhead": "MagicDNS名でマシンに到達——ポート転送なし、ポート露出なし、管理する追加の鍵なし。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "MagicDNS経由のVVTerm Tailscale SSHセッション",
+    "statementEyebrow": "既定でプライベート",
+    "statementTitle": "開いたポートなし。公開された面なし。",
+    "statementBody": "マシンはtailnet上にとどまるので、<strong>インターネットにさらされるものは何もありません</strong>——そして、壊れやすいIPアドレスではなく<strong>MagicDNS名</strong>で接続します。",
+    "benefits": [
+      {
+        "icon": "lucide:waypoints",
+        "title": "MagicDNSで接続",
+        "body": "変わり続けるIPアドレスを追いかける代わりに、tailnet名でマシンに到達します。"
+      },
+      {
+        "icon": "lucide:shield",
+        "title": "ポート露出なし",
+        "body": "サーバーは公開インターネットから外れたままです——攻撃できる受信口はありません。"
+      },
+      {
+        "icon": "lucide:key-round",
+        "title": "追加の鍵なし",
+        "body": "Tailscale SSHがアクセスを処理するので、そのために別のSSHキーセットを管理する必要はありません。"
+      },
+      {
+        "icon": "lucide:plug-zap",
+        "title": "転送するものなし",
+        "body": "ポート転送やVPNの曲芸をスキップ——tailnetがあなたを直接つなぎます。"
+      }
+    ],
+    "crossEyebrow": "セットアップ",
+    "crossTitle": "tailnet経由で接続する。",
+    "crossBody": "<strong>MagicDNS名</strong>でサーバーを追加して接続します。設定するポート転送も、開く受信口もありません。",
+    "guideLink": "Tailscale SSHで接続する",
+    "cloudflareLink": "または、Cloudflare Tunnel SSHを使う",
+    "terminalLink": "SSHターミナルを見る",
+    "crossAlt": "名前でtailnetマシンに到達するVVTerm",
+    "faqItems": [
+      {
+        "question": "VVTermのTailscale SSHとは何ですか？",
+        "answer": "tailnet上のマシンに、ポート転送やインターネットへのポート露出なしに、MagicDNS名で接続できるようにします。"
+      },
+      {
+        "question": "ポートを転送する必要がありますか？",
+        "answer": "いいえ。Tailscale SSHはtailnet経由でマシンに到達するので、ポート転送も受信露出もありません。"
+      },
+      {
+        "question": "別々のSSHキーを管理する必要がありますか？",
+        "answer": "いいえ。Tailscale SSHがtailnet上のアクセスを処理するので、そのために追加の鍵を管理する必要はありません。"
+      },
+      {
+        "question": "マシンはどう指定しますか？",
+        "answer": "公開IPアドレスの代わりに、tailnetのMagicDNS名を使います。"
+      },
+      {
+        "question": "iPhoneやMacで動作しますか？",
+        "answer": "はい。Tailscale SSH接続はVVTermのiPhone、iPad、Macで動作します。"
+      },
+      {
+        "question": "サーバーは公開インターネットから到達可能ですか？",
+        "answer": "いいえ。マシンはポート露出なしにtailnet上にとどまるので、公開からは到達できません。"
+      }
+    ],
+    "ctaTitle": "すべてのマシンへ、プライベートに。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、Tailscale SSH経由で接続しましょう。"
+  },
+  "features/terminal-customization": {
+    "title": "テーマとターミナルのカスタマイズ — VVTerm SSHクライアント",
+    "description": "ターミナルを自分仕様に：440種類の内蔵テーマ、Nerd Fonts、カーソルスタイル、ライトとダークの別々のテーマ、自分のコマンドスニペットやショートカットを備えたカスタムキーボードツールバー。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "カスタマイズ",
+    "heroEyebrow": "テーマとカスタマイズ",
+    "heroTitle": "ターミナルを<br />自分仕様に。",
+    "heroSubhead": "440種類のテーマ、本物のNerd Fonts、カーソルスタイル、そして自分で組み立てるキーボードツールバー——一度調整すれば、どこでも同期されます。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "VVTermのターミナルテーマとフォントのプレビュー",
+    "statementEyebrow": "一度設定すれば",
+    "statementTitle": "あなたのターミナルを、すべてのデバイスに。",
+    "statementBody": "テーマ、フォント、カーソル、キーボードレイアウトを自分に合うように選んだら、あとは<strong>iCloud</strong>がカスタムテーマとツールバーをiPhone、iPad、Macへ運びます。",
+    "benefits": [
+      {
+        "icon": "lucide:palette",
+        "title": "440種類の内蔵テーマ",
+        "body": "GhosttyとiTermのテーマ形式による膨大なカタログ。自分のカスタムテーマを作成・インポートすることもでき、デバイス間で同期されます。"
+      },
+      {
+        "icon": "lucide:type",
+        "title": "ぴたりと合うフォント",
+        "body": "4つのバンドルNerd Fonts——JetBrains Mono、Fira Code、Hack、Meslo——に加えて、任意のシステム等幅フォントを4〜32ptで。"
+      },
+      {
+        "icon": "lucide:text-cursor",
+        "title": "好みのカーソル",
+        "body": "ブロック、バー、アンダーライン、または中抜きブロックのカーソル。任意の点滅と、選択中のライブプレビュー付き。"
+      },
+      {
+        "icon": "lucide:sun-moon",
+        "title": "ライトとダーク、自動で",
+        "body": "ライトモードとダークモードに別々のテーマを設定すれば、VVTermはシステムの外観に合わせて切り替わります。"
+      }
+    ],
+    "toolbarEyebrow": "実際に押すキーを",
+    "toolbarTitle": "あなたを中心に組んだキーボードツールバー。",
+    "toolbarBody": "iPhoneとiPadでは、キーボードの上のバーが、シェルに必要なキーを親指の届く範囲に置きます——そして、何を載せるかはあなたが決めます。",
+    "customActions": [
+      {
+        "icon": "lucide:keyboard",
+        "title": "自分で組み立てるツールバー",
+        "body": "iOSキーボードの上にカスタマイズ可能なバー——Esc、Tab、Ctrlの組み合わせ、矢印、Home、End、PageUp/Down、Fキーなど。4〜28個のキーを手の届く範囲に保てます。"
+      },
+      {
+        "icon": "lucide:terminal",
+        "title": "コマンドスニペット",
+        "body": "自分のコマンドを保存し、ワンタップで挿入——プレーンテキストとして、または即実行するためにテキストとEnterで。"
+      },
+      {
+        "icon": "lucide:command",
+        "title": "カスタムショートカット",
+        "body": "Ctrl、Alt、Cmd、Shiftの修飾キーでキーを割り当て、よく使う組み合わせをツールバーに置けます。"
+      }
+    ],
+    "crossEyebrow": "見た目だけではない",
+    "crossTitle": "精密なエンジンの上に。",
+    "crossBody": "テーマとフォントが意図どおりに描画されるのは、ターミナルがMetal上で<strong>libghostty</strong>により描画するからです——24ビットのトゥルーカラーとリガチャを、毎フレーム。",
+    "terminalLink": "GPUターミナルについて",
+    "icloudLink": "iCloud同期のしくみ",
+    "crossAlt": "スニペットとショートカットを備えたVVTermのカスタムiOSキーボードツールバー",
+    "faqItems": [
+      {
+        "question": "ターミナルテーマはいくつ含まれますか？",
+        "answer": "GhosttyとiTermのテーマ形式による440種類の内蔵テーマで、定番のパレットから現代的なものまで揃っています。自分のカスタムテーマを作成・インポートすることもできます。"
+      },
+      {
+        "question": "自分のフォントを使えますか？",
+        "answer": "はい。VVTermは4つのNerd Fonts——JetBrains Mono、Fira Code、Hack、Meslo——をバンドルしており、システムにインストールされた任意の等幅フォントを選べます。フォントサイズは4〜32ptで調整できます。"
+      },
+      {
+        "question": "ライトモードとダークモードに追従しますか？",
+        "answer": "はい。ライト外観に1つ、ダークに別のテーマを割り当てられ、VVTermはシステムに合わせて自動的に切り替わります。"
+      },
+      {
+        "question": "iOSキーボードツールバーに何を載せられますか？",
+        "answer": "Esc、Tab、矢印、Ctrlの組み合わせ、ファンクションキーといったシステムキーに加えて、自分の追加分も：テキストを挿入する<strong>コマンドスニペット</strong>（任意でEnter付き）と、修飾キー付きでキーを送る<strong>ショートカット</strong>です。バーは4〜28個の項目を保持します。"
+      },
+      {
+        "question": "テーマとツールバーはデバイス間で同期されますか？",
+        "answer": "はい。カスタムテーマ、テーマの設定、キーボードツールバーのレイアウトとカスタムアクションはiCloudを通じて同期されます。無料プランにはカスタムツールバーアクションが最大3個含まれ、Proで制限がなくなります。"
+      },
+      {
+        "question": "これらはどこで変更しますか？",
+        "answer": "ターミナル設定で——テーマ、フォントファミリーとサイズ、カーソルスタイルと点滅を——そして、ツールバーについてはキーボードアクセサリーエディターで変更します。"
+      }
+    ],
+    "ctaTitle": "一度調整すれば、どこへでも。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、自分の居場所のように感じるターミナルをセットアップしましょう。"
+  },
+  "features/tmux-session-persistence": {
+    "title": "tmuxセッション維持 — iPhone、iPad、Mac向けVVTerm SSH",
+    "description": "VVTermがtmuxを管理し、SSHセッションが切断、スリープ、アプリ切り替えを乗り越えます。tmuxを自動インストールし、再接続時に再アタッチし、調整済みの設定を最初から用意します。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "tmux維持",
+    "heroEyebrow": "tmuxセッション維持",
+    "heroTitle": "セッションは<br />切断を乗り越える。",
+    "heroSubhead": "VVTermがtmuxを管理するので、長時間の作業はネットワークの変化、スリープ、アプリ切り替えを越えて続き——再接続した瞬間に再アタッチします。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "切断後にtmuxセッションを再アタッチするVVTerm",
+    "statementEyebrow": "維持はおまかせ",
+    "statementTitle": "もうセッションを失わない。",
+    "statementBody": "多くのモバイルSSHアプリは、接続が途切れるとすべてを失います。VVTermはサーバー上の管理された<strong>tmux</strong>セッション内でシェルを動かすので、長いビルド、マイグレーション、ダウンロードは続き——あなたはそのまま戻れます。",
+    "benefits": [
+      {
+        "icon": "lucide:history",
+        "title": "中断したところから続ける",
+        "body": "Wi-Fiが切れても、スマートフォンをロックしても、アプリを終了しても——再接続すると、シェル、実行中のコマンド、スクロールバックはまだそこにあります。"
+      },
+      {
+        "icon": "lucide:download",
+        "title": "tmuxを自動インストール",
+        "body": "tmuxがなければ、VVTermがシステムのパッケージマネージャーでインストールします——brew、apt、dnf、pacman、apk、zypperなど。"
+      },
+      {
+        "icon": "lucide:list-restart",
+        "title": "任意のセッションに再アタッチ",
+        "body": "既存のセッションをウィンドウ数とアタッチ済みクライアントとともに確認し、最初からやり直すのではなくタップで再アタッチします。"
+      },
+      {
+        "icon": "lucide:sliders-horizontal",
+        "title": "あなたの流儀で",
+        "body": "常にtmuxを管理する、毎回尋ねる、またはスキップして素のシェルに——グローバルな既定を設定し、サーバーごとに上書きできます。"
+      }
+    ],
+    "howEyebrow": "最初から調整済み",
+    "howTitle": "自分で書かなくていい設定。",
+    "howBody": "VVTermは管理された設定を<strong>~/.vvterm/tmux.conf</strong>に書き込みます——トゥルーカラー、マウス対応、10,000行のスクロールバック、テーマに合わせたコピーモードのハイライト、そしてシェルではコピーモードを使いつつ<code>htop</code>、<code>vim</code>などの全画面アプリ内ではそのまま渡すスマートなホイールスクロール。",
+    "moshLink": "Moshローミングと組み合わせる",
+    "windowsLink": "psmuxでWindowsでの維持",
+    "terminalLink": "ターミナルエンジンについて",
+    "howAlt": "再アタッチの準備が整ったVVTermの管理tmuxセッションリスト",
+    "faqItems": [
+      {
+        "question": "VVTermはどうやってセッションを維持しますか？",
+        "answer": "接続時、VVTermはサーバー上に管理された<strong>tmux</strong>セッションを作成またはアタッチします。セッションはリモートホスト上に存在するため、接続が途切れても作業は動き続け——次に接続したときVVTermが再アタッチします。"
+      },
+      {
+        "question": "tmuxを自分でインストールや設定する必要がありますか？",
+        "answer": "いいえ。tmuxがインストールされていなければ、VVTermがホストのパッケージマネージャーでインストールします。また、調整済みの設定を<strong>~/.vvterm/tmux.conf</strong>に書き込みます——トゥルーカラー、マウス対応、大きなスクロールバックバッファ、そしてシェルではコピーモードを使いつつ全画面アプリ内ではそのまま渡すスマートスクロール。"
+      },
+      {
+        "question": "以前に始めたセッションに再接続できますか？",
+        "answer": "はい。VVTermは既存のセッションをウィンドウ数とアタッチ済みクライアントとともに一覧表示するので、目的のものに再アタッチしたり、古いデタッチ済みセッションを片付けたりできます。"
+      },
+      {
+        "question": "素のシェルが好みの場合は？",
+        "answer": "tmuxの起動をグローバルに<strong>スキップ</strong>に設定するか、特定のサーバーで上書きします。<strong>毎回尋ねる</strong>を選べば、新しいタブや分割を開くときにVVTermが確認します。"
+      },
+      {
+        "question": "これはtmuxのコントロールモードと同じですか？",
+        "answer": "いいえ。VVTermは維持と再接続のために通常のシェル上で本物のtmuxセッションを編成します——tmuxのコントロールモード（-CC）は使いません。"
+      },
+      {
+        "question": "Windowsサーバーで動作しますか？",
+        "answer": "はい。WindowsとPowerShellホストでは、VVTermは同じ維持のために<strong>psmux</strong>を使い、winget、scoop、choco、cargoでインストールできます。"
+      }
+    ],
+    "ctaTitle": "もうセッションを失わない。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、どんな切断を越えても作業を動かし続けましょう。"
+  },
+  "features/windows-ssh": {
+    "title": "WindowsサーバーへSSH — iPhone、iPad、Mac向けVVTerm",
+    "description": "iPhone、iPad、MacからWindowsとPowerShellホストにSSH接続——SFTPファイル閲覧、ライブ統計、psmuxによる持続的なセッションとともに。",
+    "bcHome": "ホーム",
+    "bcFeatures": "機能",
+    "bcThis": "Windows SSH",
+    "heroEyebrow": "Windowsサーバー対応",
+    "heroTitle": "Windowsへ、<br />どのAppleデバイスからでもSSH。",
+    "heroSubhead": "Linuxで使うのと同じターミナル、ファイルブラウザ、監視で、WindowsとPowerShellホストに接続——さらにpsmuxによる持続的なセッションも。",
+    "seePricing": "料金を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "heroAlt": "WindowsホストでのVVTerm PowerShellセッション",
+    "statementEyebrow": "1つのアプリ、混在する環境",
+    "statementTitle": "LinuxとWindowsを、並べて。",
+    "statementBody": "多くのApple向けSSHクライアントはPOSIXホストを前提とします。VVTermはリモートのプラットフォーム——Linux、macOS、BSD、または<strong>Windows</strong>——を検出し、シェル処理、維持、統計をそれに合わせて適応させます。",
+    "benefits": [
+      {
+        "icon": "lucide:monitor",
+        "title": "WindowsとPowerShell",
+        "body": "VVTermはWindowsホストとそのシェルを検出するので、PowerShellやcmdのセッションが正しく描画・動作します。"
+      },
+      {
+        "icon": "lucide:history",
+        "title": "持続的なセッション",
+        "body": "Windows向けのtmuxスタイルのマルチプレクサーであるpsmuxで切断を越えて作業を維持——なければインストールします。"
+      },
+      {
+        "icon": "lucide:folder-open-dot",
+        "title": "SFTPファイル",
+        "body": "どこでも使うのと同じファイルブラウザで、Windowsサーバー上のファイルを閲覧、アップロード、ダウンロード、名前変更、移動できます。"
+      },
+      {
+        "icon": "lucide:activity",
+        "title": "ライブ統計",
+        "body": "専用のメトリクスコレクターにより、CPU、メモリ、ネットワーク、ディスクがWindowsで正しく読み取られます。"
+      }
+    ],
+    "crossEyebrow": "どこでも同じワークフロー",
+    "crossTitle": "Windowsのための別ツールは不要。",
+    "crossBody": "他のサーバーと同じようにWindowsホストを追加し、<strong>Keychain</strong>のパスワードまたはSSHキーで認証すれば、すでに知っているターミナル、SFTPブラウザ、ライブ統計が手に入ります。",
+    "tmuxLink": "持続的なセッションのしくみ",
+    "sftpLink": "SFTPファイルブラウザ",
+    "monitoringLink": "ライブサーバー監視",
+    "crossAlt": "WindowsでのVVTerm psmux持続セッション",
+    "faqItems": [
+      {
+        "question": "VVTermはWindowsサーバーに接続できますか？",
+        "answer": "はい。VVTermはSSHサーバーを動かすWindowsとWindows ServerのホストにSSHで接続し、シェルがPowerShellかcmdかを検出して出力が正しく描画されるようにします。"
+      },
+      {
+        "question": "Windowsで持続的なセッションは動作しますか？",
+        "answer": "はい。WindowsホストではVVTermはtmuxスタイルのマルチプレクサーである<strong>psmux</strong>を使うので、セッションが切断を乗り越えます。インストールされていなければ、winget、scoop、choco、cargoで追加できます。"
+      },
+      {
+        "question": "ファイルブラウザはWindowsで動作しますか？",
+        "answer": "はい。SFTPブラウザは、Windowsを含め、SFTP対応のSSHサーバーを持つ任意のホストでファイルの一覧表示、転送、名前変更、移動、削除を行います。"
+      },
+      {
+        "question": "Windowsサーバーの統計を見られますか？",
+        "answer": "はい。VVTermはCPU、メモリ、ネットワーク、ディスク向けのWindows専用コレクターを備えているので、そこでもライブ監視が動作します。"
+      },
+      {
+        "question": "どう認証しますか？",
+        "answer": "パスワード、SSHキー、またはパスフレーズ付きSSHキー——他のホストと同じ選択肢で、認証情報はApple Keychainに保存されます。"
+      }
+    ],
+    "ctaTitle": "あなたのWindows群を、ポケットに。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、最初のWindowsホストに接続しましょう。"
+  },
+  "guides/cloudflare-tunnel-ssh-setup": {
+    "heading": "Cloudflare Tunnel SSHで接続する",
+    "intro": "Cloudflare Tunnelの背後にあるサーバーへ、その公開ホスト名でVVTermからSSH接続——ホスト側で受信ポートを開かずに。",
+    "meta": "ガイド",
+    "title": "Cloudflare Tunnel SSHで接続する — VVTerm",
+    "description": "SSH向けにcloudflaredを設定し、公開ホスト名を公開し、受信ポートを開かずにCloudflare Tunnelの背後のサーバーへVVTermから接続します。",
+    "schemaDescription": "VVTermでCloudflare Tunnel経由のSSHを行うステップごとのガイド：SSH向けにcloudflaredを設定し、公開ホスト名を公開し、受信ポートを開かずに接続します。",
+    "bodyHtml": "\n  <p>\n    Cloudflare Tunnelを使うと、サーバーは受信ポートを一切開かずに、Cloudflareのネットワークを通じて\n    サービスを公開できます。VVTermは、こうして公開されたSSHサービスにその<strong>公開ホスト名</strong>を使って接続できるので、NATや厳格なファイアウォールの背後にあるホストも到達可能なままです。\n  </p>\n\n  <h2>しくみ</h2>\n  <p>\n    サーバー上の軽量な <code>cloudflared</code> デーモンがCloudflareへ<strong>送信方向</strong>の接続を\n    確立し、ルートを登録します。するとCloudflareが公開ホスト名をローカルのSSHサービスにマッピングします。\n    トンネルは内側から確立されるため、ホストは受信ポートを開く必要が決してありません——\n    さらすものも転送するものもありません。\n  </p>\n\n  <h2>前提条件</h2>\n  <ol>\n    <li>Cloudflareで管理されたドメインを持つ <strong>Cloudflareアカウント</strong>。</li>\n    <li>サーバーに <code>cloudflared</code> がインストールされ、名前付きトンネルが作成・認証済みであること。</li>\n    <li>トンネルが <strong>SSH向けに設定</strong> され、公開ホスト名を <code>localhost:22</code> のローカルSSHサービスへルーティングしていること。</li>\n  </ol>\n  <p>\n    一般的な <code>cloudflared</code> の設定では、ingressルールがホスト名をSSHにマッピングします。たとえば：\n  </p>\n  <pre><code>ingress:\n  - hostname: ssh.example.com\n    service: ssh://localhost:22\n  - service: http_status:404</code></pre>\n  <p>\n    公開ホスト名をトンネルのDNSルートとして追加し、トンネルを実行してルートを有効化します。ホスト名の前段に\n    Cloudflare Accessを使う場合は、接続するユーザーをポリシーが許可していることを確認してください。\n  </p>\n\n  <h2>VVTermから接続する</h2>\n  <ol>\n    <li>VVTermで <strong>サーバーを追加</strong> をタップします（または既存のサーバーを編集します）。</li>\n    <li><strong>ホスト</strong> をトンネルの <strong>公開ホスト名</strong> に設定します。たとえば <code>ssh.example.com</code>。</li>\n    <li>サーバーでログインする <strong>ユーザー名</strong> を入力し、いつものSSH認証——パスワードまたは鍵——を維持します。</li>\n    <li>接続方式として <strong>Cloudflare Tunnel SSH</strong> を選びます。</li>\n    <li>保存し、サーバーをタップして接続します。</li>\n  </ol>\n  <p>\n    VVTermはCloudflareを通じてホスト名に到達し、直接のSSHセッションと同じようにサーバーのシェルに\n    着地させます。\n  </p>\n\n  <h2>受信ポートは開かない</h2>\n  <p>\n    このセットアップの利点は、<strong>しなくてよいこと</strong>にあります。インターネットへのポート22の露出も、\n    受信SSHのファイアウォールルールも、ルーター設定も不要です。ホストが開始する唯一のネットワーク接続は\n    Cloudflareへの送信方向だけで、攻撃対象領域を小さく保ちます。\n  </p>\n\n  <h2>トラブルシューティング</h2>\n  <ul>\n    <li>ホスト名で接続できない場合、トンネルが実行中で、そのingressルールが <code>ssh://localhost:22</code> を指していることを確認してください。</li>\n    <li>公開ホスト名にCloudflareダッシュボードでトンネルへのDNSルートが付いていることを確認してください。</li>\n    <li>アクセスがブロックされる場合、そのホスト名を対象とするCloudflare Accessポリシーを見直してください。</li>\n  </ul>\n"
+  },
+  "guides/how-to-ssh-from-iphone": {
+    "heading": "iPhoneからサーバーへSSH接続する方法",
+    "intro": "サーバーを追加し、認証方式を選び、iOSで最初のセキュアなシェルセッションを開きましょう——そして画面上のキーボードツールバーで操作します。",
+    "meta": "ガイド",
+    "title": "iPhoneからSSHする方法 — VVTerm",
+    "description": "VVTermをインストールし、サーバーを追加し、パスワードまたはSSHキー認証を選び、接続し、キーボードツールバーを使ってiPhoneから任意のサーバーへSSH接続します。",
+    "schemaDescription": "VVTermでiPhoneから最初のSSHセッションを開くステップごとのガイド：インストール、サーバーの追加、認証方式の選択、接続、キーボードツールバーの利用。",
+    "bodyHtml": "\n  <p>\n    VVTermはあなたのiPhoneをフル機能のSSHクライアントに変えます。SSHを受け付ける任意のサーバー——\n    Linuxマシン、Mac、Raspberry Pi、クラウドVM——に到達し、本物のGPU描画ターミナルで作業できます。\n    このガイドでは最初の接続を端から端まで案内します。\n  </p>\n\n  <h2>始める前に</h2>\n  <p>\n    <strong>iOS 16以降</strong> を実行するiPhoneと、ネットワーク越しに到達できるサーバーが必要です。\n    3つのものを用意してください：サーバーの<strong>ホスト名またはIPアドレス</strong>、<strong>ポート</strong>（SSHは既定で <code>22</code>）、<strong>ユーザー名</strong>。\n    パスワードではなく鍵で認証する場合は、秘密鍵も用意しておきます。\n  </p>\n\n  <h2>VVTermをインストールする</h2>\n  <ol>\n    <li>iPhoneでApp Storeを開き、VVTermをインストールします。</li>\n    <li>アプリを起動し、短いウェルカムフローを完了します。</li>\n  </ol>\n  <p>\n    無料プランには <strong>サーバー1台</strong> が含まれており、このガイドを進めるのに十分です。\n    より多くのサーバー、ワークスペース、接続タブが欲しくなったら、Proが制限を取り払います。\n  </p>\n\n  <h2>サーバーを追加する</h2>\n  <ol>\n    <li><strong>サーバーを追加</strong> をタップして新規サーバーフォームを開きます。</li>\n    <li>あとで見分けやすいよう、サーバーに <strong>名前</strong> を付けます。</li>\n    <li><strong>ホスト</strong> を入力します——<code>example.com</code> のようなホスト名や <code>192.168.1.20</code> のようなIP。</li>\n    <li><strong>ポート</strong> を設定します。サーバーが別の場所で待ち受けていない限り <code>22</code> のままにします。</li>\n    <li>ログインに使う <strong>ユーザー名</strong> を入力します。たとえば <code>root</code> や <code>ubuntu</code>。</li>\n  </ol>\n\n  <h2>認証方式を選ぶ</h2>\n  <p>VVTermは3通りの認証方法に対応しており、認証情報はApple Keychainに保存されます——同期メタデータに含まれることは決してありません。</p>\n  <ul>\n    <li><strong>パスワード</strong> — アカウントのパスワードを入力します。手軽で、ホストとユーザー名が正しいか確かめるのに良い方法です。</li>\n    <li><strong>SSHキー</strong> — パスワード不要で、より安全なログインのために秘密鍵を使います。鍵を貼り付けるかインポートし、対応する公開鍵がサーバーの <code>~/.ssh/authorized_keys</code> にあることを確認します。</li>\n    <li><strong>SSHキー + パスフレーズ</strong> — 上記と同じですが、秘密鍵自体がパスフレーズで暗号化され、保護の層が加わります。</li>\n  </ul>\n  <p>\n    まだ鍵がない場合、VVTermが生成できます。生成された公開鍵をサーバーの\n    <code>authorized_keys</code> ファイルに追加し、その鍵をサーバーの認証方式として選びます。\n  </p>\n\n  <h2>接続する</h2>\n  <ol>\n    <li>サーバーを保存します。サーバーリストに表示されます。</li>\n    <li>サーバーをタップして接続を開きます。</li>\n    <li>初めて接続するとき、VVTermはホストの鍵フィンガープリントを表示するので、ホストを信頼する前に検証できます。</li>\n    <li>承認すると、ターミナルが開き、シェルプロンプトに着地します。</li>\n  </ol>\n\n  <h2>キーボードツールバーを使う</h2>\n  <p>\n    iOSのソフトウェアキーボードにはターミナルが頼るキーが欠けているので、VVTermはその真上に\n    アクセサリーツールバーを加えます。そこから次のものが使えます：\n  </p>\n  <ul>\n    <li><strong>Esc</strong> — vim、less、ほとんどのTUIアプリに欠かせません。</li>\n    <li><strong>Tab</strong> — シェルとパスの補完。</li>\n    <li><strong>Ctrl</strong> — タップしてから文字を押すと、<code>Ctrl-C</code> や <code>Ctrl-Z</code> のような制御シーケンスを送れます。</li>\n    <li><strong>矢印キー</strong> — カーソルの移動とコマンド履歴の辿り。</li>\n    <li><strong>ファンクションキー</strong> — それらをマップするアプリ向けのF1〜F12。</li>\n  </ul>\n  <p>\n    ツールバーは自分のコマンドスニペットでカスタマイズできるので、よく使うコマンドが\n    ワンタップで届きます。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    tmuxで生かしておけばセッションはネットワークの切断を乗り越えられますし、直接さらされていないサーバーには <a href=\"/guides/set-up-mosh-on-ios\">Mosh</a>、<a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a>、<a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a> を使って到達できます。ファイルを移動する必要があるときは、<a href=\"/guides/sftp-file-transfer-on-ios\">iOSでのSFTPファイル転送</a> をご覧ください。\n  </p>\n"
+  },
+  "guides": {
+    "title": "VVTermガイド＆ハウツー — SSH、Mosh、Tailscale、SFTP",
+    "description": "VVTermのステップごとのガイド：iPhoneとMacからのSSH、Moshのセットアップ、Tailscale SSHやCloudflare Tunnelでの接続、SFTPによるファイル転送。",
+    "bcHome": "ホーム",
+    "bcGuides": "ガイド",
+    "heroEyebrow": "ガイド",
+    "heroTitle": "ガイド＆ハウツー。",
+    "heroSubhead": "iPhone、iPad、Macからサーバーに接続するための、実践的でステップごとの手順書——SSH、Mosh、Tailscale、Cloudflare Tunnel、そしてSFTPによるファイル転送。",
+    "download": "VVTermをダウンロード",
+    "browseDocs": "ドキュメントを見る",
+    "heroNote": "iPhone、iPad、Mac · 無料で始められる",
+    "readGuide": "ガイドを読む",
+    "minRead": "{m} 分で読める",
+    "categories": {
+      "Getting started": "はじめに",
+      "Connections": "接続",
+      "Files": "ファイル"
+    },
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "iPhoneからサーバーへSSH接続する方法",
+        "summary": "サーバーを追加し、認証方式を選び、iOSで最初のセキュアなシェルセッションを開きます。"
+      },
+      "ssh-from-mac": {
+        "title": "VVTermでMacからSSH接続する方法",
+        "summary": "タブ、鍵、iCloud同期サーバーを備えたネイティブなmacOSターミナルをセットアップします。"
+      },
+      "set-up-mosh-on-ios": {
+        "title": "iPhoneとiPadでMoshをセットアップする",
+        "summary": "Moshでネットワークの切断やスリープを越えてSSHセッションを維持します。"
+      },
+      "tailscale-ssh-setup": {
+        "title": "Tailscale SSHで接続する",
+        "summary": "ポートを露出せずに、tailnet上のマシンにMagicDNS名で到達します。"
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "Cloudflare Tunnel SSHで接続する",
+        "summary": "受信ポートを開かずに、Cloudflare Tunnelの背後のサーバーへSSH接続します。"
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "iOSでSFTPによりファイルを転送する",
+        "summary": "iPhoneとiPadからリモートファイルを閲覧、アップロード、ダウンロード、編集します。"
+      }
+    },
+    "ctaTitle": "これらのガイドを活かそう。",
+    "ctaSubtitle": "iPhone、iPad、Macで無料のVVTermをダウンロードし、数分で最初のサーバーに接続しましょう。"
+  },
+  "guides/set-up-mosh-on-ios": {
+    "heading": "iPhoneとiPadでMoshをセットアップする",
+    "intro": "Moshはネットワークの切断、スリープ、IPの変化を越えてSSHセッションを維持します。サーバーを準備し、VVTermでMoshを有効にする方法を説明します。",
+    "meta": "ガイド",
+    "title": "iPhoneとiPadでMoshをセットアップする — VVTerm",
+    "description": "mosh-serverをインストールし、UDPポートを開き、VVTermでサーバーのMoshを有効にして、iOSでネットワークの切断、スリープ、IPの変化を越えてSSHセッションを維持します。",
+    "schemaDescription": "iOSとiPadOSでVVTermのMoshを使うステップごとのガイド：mosh-serverのインストール、UDPポートの開放、サーバーのMosh有効化、ローミングセッションでの接続。",
+    "bodyHtml": "\n  <p>\n    スマートフォンやタブレットでは、ネットワークが絶えず変わります——Wi-Fiからセルラー、地下鉄に入るトンネル、\n    画面のロック。素のSSHセッションはそのたびに切れます。<strong>Mosh</strong> はそれを解決し、\n    VVTermに内蔵されています。\n  </p>\n\n  <h2>Moshとは</h2>\n  <p>Mosh（mobile shell）は、信頼性の低いモバイル接続のために設計されたリモートターミナルプロトコルです。素のSSHと比べて、次を加えます：</p>\n  <ul>\n    <li><strong>ローミング</strong> — IPアドレスが変わってもセッションがついてくるので、Wi-Fiからセルラーへ切り替えても切れません。</li>\n    <li><strong>切断とスリープを乗り越える</strong> — 蓋を閉じたり電波を失ったりしても、ぶら下がって死ぬのではなく、戻ったときにセッションが再接続します。</li>\n    <li><strong>ローカルエコー</strong> — 高遅延のリンクでもキー入力が即座に表示され、サーバーの応答に合わせて補正されます。</li>\n    <li><strong>SSHフォールバック</strong> — MoshはSSHで認証してセッションを開始し、その後は独自のUDPトランスポートへ引き継ぎます。</li>\n  </ul>\n\n  <h2>サーバーを準備する</h2>\n  <p>Moshはホスト上で小さなヘルパーを動かすので、まずそこにインストールする必要があります。</p>\n  <ol>\n    <li>\n      サーバーにSSH接続し、Moshパッケージをインストールします。DebianまたはUbuntuでは：\n      <pre><code>sudo apt install mosh</code></pre>\n      RHEL、Fedora、CentOSでは <code>sudo dnf install mosh</code>、macOSでは <code>brew install mosh</code> を使います。\n    </li>\n    <li>これにより <code>mosh-server</code> が提供され、接続のたびにVVTermがSSH経由で起動します。</li>\n  </ol>\n\n  <h2>UDPポートを開く</h2>\n  <p>\n    MoshはデータにTCPポート22を使いません——<strong>UDP</strong> を使い、既定では <code>60000〜61000</code> の範囲です。サーバーの前段にファイアウォールがある場合、その範囲の受信UDPを許可します。\n  </p>\n  <ol>\n    <li>\n      UbuntuのUFWでは：\n      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>\n    </li>\n    <li>クラウドプロバイダーでは、同じUDP範囲をインスタンスのセキュリティグループまたはファイアウォールルールに追加します。</li>\n  </ol>\n  <p>\n    通常のTCPポートのSSHも到達可能なままにする必要があります。MoshはUDPセッションを始める前に\n    SSHで認証するからです。\n  </p>\n\n  <h2>VVTermでMoshを有効にする</h2>\n  <ol>\n    <li>VVTermでサーバーの設定を開きます——追加するときか、既存のサーバーを編集して。</li>\n    <li>接続方式を <strong>Mosh</strong> に切り替えます。</li>\n    <li>既存のSSH認証を維持します。Moshはそれを再利用してセッションを始めます。</li>\n    <li>保存し、サーバーをタップして接続します。</li>\n  </ol>\n  <p>\n    VVTermはSSH接続を開き、ホストで <code>mosh-server</code> を起動し、その後あなたのセッションを\n    MoshのUDPトランスポートで運びます。\n  </p>\n\n  <h2>ネットワークの変化で気づくこと</h2>\n  <p>\n    Moshが有効だと、体験はいくつかの目に見える形で変わります。遅いリンクでも、ローカルエコーのおかげで\n    入力が即座に感じられます。ネットワークを切り替えたりデバイスを起こしたりすると、セッションは自分で\n    再接続します——再ログインも、シェルの喪失もありません。接続が一時的に到達不能になると、VVTermはセッションを\n    待機中として表示し、ネットワークが戻ると再開します。\n  </p>\n\n  <h2>ヒント</h2>\n  <ul>\n    <li>最強の構成にはMoshとtmuxを組み合わせます。Moshはサーバーまでの経路を乗り越え、tmuxはサーバー自体がセッションを再起動しても作業を保ちます。</li>\n    <li>接続が始まらない場合、<code>mosh-server</code> がインストールされ、UDP範囲が開いていることを確認してください——この2つが最も多い原因です。</li>\n  </ul>\n"
+  },
+  "guides/sftp-file-transfer-on-ios": {
+    "heading": "iOSでSFTPによりファイルを転送する",
+    "intro": "VVTermの内蔵SFTPファイルブラウザを使って、iPhoneとiPadからリモートファイルを閲覧、アップロード、ダウンロード、編集——2つ目のアプリは不要です。",
+    "meta": "ガイド",
+    "title": "iOSでSFTPによりファイルを転送する — VVTerm",
+    "description": "iPhoneとiPadでVVTermの内蔵SFTPブラウザを使い、フォルダの閲覧、アップロードとダウンロード、名前変更、移動、削除、メディアのプレビュー、テキストとPOSIX権限の編集を行います。",
+    "schemaDescription": "VVTermでiOSのSFTPファイル転送を行うステップごとのガイド：ファイルブラウザを開き、フォルダを閲覧し、アップロードとダウンロード、ファイル管理、メディアのプレビュー、テキストと権限の編集。",
+    "bodyHtml": "\n  <p>\n    VVTermで接続するすべてのサーバーには、内蔵の<strong>SFTPファイルブラウザ</strong>も備わっているので、\n    アプリを離れたり別のクライアントをインストールしたりせずに、リモートファイルを管理できます。すでに使っている\n    同じSSH接続の上で動作します。\n  </p>\n\n  <h2>ファイルブラウザを開く</h2>\n  <ol>\n    <li>いつものようにサーバーに接続します。</li>\n    <li>その接続の <strong>ファイル</strong> ビューを開いて、ターミナルからSFTPブラウザへ切り替えます。</li>\n    <li>VVTermは開始ディレクトリ——通常はホームフォルダ——の内容をSFTP経由で一覧表示します。</li>\n  </ol>\n\n  <h2>リモートフォルダを閲覧する</h2>\n  <p>\n    フォルダをタップして開き、パスや戻る操作でツリーを上へ移動します。ファイルは名前と\n    詳細を表示するので、必要なものを見つけられます。閲覧は、転送や変更を選ぶまでは読み取り専用なので、\n    ただ見て回るだけならリスクはありません。\n  </p>\n\n  <h2>アップロードとダウンロード</h2>\n  <ul>\n    <li>ローカルコピーが欲しいとき——たとえばファイルアプリに保存したり、他で共有したりするために——リモートファイルをデバイスへ <strong>ダウンロード</strong> します。</li>\n    <li>iPhoneやiPadのファイルを現在のリモートフォルダへ <strong>アップロード</strong> して、サーバーへ送り込みます。</li>\n  </ul>\n  <p>転送は暗号化されたSSH接続の上で行われるので、ファイルがセキュアなチャネルを離れることはありません。</p>\n\n  <h2>ファイルとフォルダを管理する</h2>\n  <p>ブラウザは、サーバー上で期待される日常的なファイル操作を扱います：</p>\n  <ul>\n    <li><strong>フォルダを作成</strong> してリモートディレクトリを整理します。</li>\n    <li>ファイルやフォルダをその場で <strong>名前変更</strong> します。</li>\n    <li>項目を別のディレクトリへ <strong>移動</strong> します。</li>\n    <li>不要になったファイルやフォルダを <strong>削除</strong> します。</li>\n  </ul>\n\n  <h2>ダウンロードせずにプレビュー</h2>\n  <p>\n    どう扱うか決める前に、多くのファイルをVVTerm内で直接 <strong>プレビュー</strong> できます——\n    テキストファイル、画像、動画——なので、先にデバイスへ取り込まずに、設定ファイルやスクリーンショットを\n    確認できます。\n  </p>\n\n  <h2>テキストと権限を編集する</h2>\n  <ol>\n    <li>対応する <strong>テキストファイル</strong> を開いてその場で編集し、変更をSFTP経由でそのままサーバーへ保存します。</li>\n    <li>シェルに降りずにアクセスを直す必要があるとき、ファイルやフォルダの <strong>POSIX権限</strong>——所有者、グループ、その他に対する読み取り、書き込み、実行のビット——を調整します。</li>\n  </ol>\n\n  <h2>ヒント</h2>\n  <ul>\n    <li>素早い設定の微調整には、SFTPブラウザでファイルを編集するほうが、ターミナルでエディターを開くより速いことが多いです。</li>\n    <li>プレビューを使って、ダウンロードや削除の前に正しいファイルか確認しましょう。</li>\n    <li>同じSFTPブラウザがiPhone、iPad、Macで利用できるので、ワークフローはすべてのデバイスに引き継がれます。</li>\n  </ul>\n"
+  },
+  "guides/ssh-from-mac": {
+    "heading": "VVTermでMacからSSH接続する方法",
+    "intro": "分割ビューのサイドバー、タブ式の接続、そしてiPhoneとiPadからiCloud経由で同期されるサーバーを備えた、ネイティブなmacOS SSHターミナルをセットアップします。",
+    "meta": "ガイド",
+    "title": "MacからSSHする方法 — VVTerm",
+    "description": "MacにVVTermをインストールし、サイドバーでサーバーを追加し、認証方式を選び、タブで接続し、iCloud経由でAppleデバイス間でサーバーを同期します。",
+    "schemaDescription": "VVTermでMacからSSHするステップごとのガイド：インストール、サイドバーでのサーバー追加、認証方式の選択、タブでの接続、iCloud経由でのサーバー同期。",
+    "bodyHtml": "\n  <p>\n    VVTerm for Macは、macOSの他の部分と同じように作られたネイティブSSHターミナルです——サーバーの\n    分割ビューサイドバーがGPU描画ターミナルの隣に並び、タブ用の統合ツールバーを備えています。このガイドでは\n    Macでの最初の接続を扱います。\n  </p>\n\n  <h2>始める前に</h2>\n  <p>\n    <strong>macOS 13 Ventura以降</strong> を実行する <strong>Apple Silicon</strong> 搭載Macが必要です。\n    サーバーの <strong>ホスト</strong>、<strong>ポート</strong>（既定で <code>22</code>）、<strong>ユーザー名</strong> を用意し、認証用のパスワードまたはSSHキーも準備してください。\n  </p>\n\n  <h2>VVTermをインストールする</h2>\n  <ol>\n    <li>MacのApp StoreからVVTermをインストールします。</li>\n    <li>アプリを開きます。ウィンドウにはサーバー用のサイドバーと、ターミナル用の詳細エリアが表示されます。</li>\n  </ol>\n\n  <h2>サイドバーでサーバーを追加する</h2>\n  <ol>\n    <li><strong>サーバーを追加</strong> をタップして新規サーバーフォームを開きます。</li>\n    <li><strong>名前</strong>、<strong>ホスト</strong>、<strong>ポート</strong>、<strong>ユーザー名</strong> を入力します。</li>\n    <li>必要に応じて、サーバーをワークスペースと環境に整理して、大きな構成でもサイドバーをすっきり保ちます。</li>\n    <li>保存します。サーバーがサイドバーのリストに表示されます。</li>\n  </ol>\n\n  <h2>認証方式を選ぶ</h2>\n  <p>\n    ログイン方法を選びます。何を選んでも、秘密情報そのものは同期されるサーバーメタデータではなく、macOSの <strong>Keychain</strong> に保存されます。\n  </p>\n  <ul>\n    <li><strong>パスワード</strong> — アカウントのパスワードを直接入力します。</li>\n    <li><strong>SSHキー</strong> — 秘密鍵をインポートまたは生成し、対応する公開鍵をサーバーの <code>~/.ssh/authorized_keys</code> に追加します。</li>\n    <li><strong>SSHキー + パスフレーズ</strong> — パスフレーズで保護された暗号化済みの秘密鍵を使います。</li>\n  </ul>\n\n  <h2>タブで接続する</h2>\n  <ol>\n    <li>サイドバーでサーバーを選んで接続を開きます。</li>\n    <li>初めて接続するとき、ホスト鍵フィンガープリントを確認します。</li>\n    <li>ターミナルが詳細エリアに開き、libghosttyによってMetal上で描画され、トゥルーカラーと正確な出力を得られます。</li>\n  </ol>\n\n  <h2>複数のタブとペインを開く</h2>\n  <p>\n    各接続は統合ツールバーのタブにあるので、複数のサーバーを同時に開いたまま\n    切り替えられます。タブを <strong>ペイン</strong> に分割して、同じ画面で横並びの\n    シェルにすることもできます。\n  </p>\n  <p>\n    無料プランには <strong>接続タブ1個</strong> が含まれます。<strong>Pro</strong> はタブとペイン分割を\n    無制限に解放します——月額$6.49、年額$24.99、または$49.99の買い切り購入で、いずれも\n    Appleを通じて扱われます。\n  </p>\n\n  <h2>サーバーはiCloud経由で同期</h2>\n  <p>\n    サーバーのメタデータ——名前、ホスト、ポート、ユーザー名、ワークスペース——は <strong>iCloud</strong> を通じて同期されるので、\n    Macで追加したサーバーがiPhoneとiPadに自動的に表示されます。パスワードとSSH\n    キーはそのメタデータの一部では <strong>なく</strong>、Apple Keychainにとどまり、有効にしたときだけiCloud Keychainを通じて\n    デバイス間を移動します。\n  </p>\n\n  <h2>次のステップ</h2>\n  <p>\n    tmuxで長時間の作業を切断を越えて生かし、サーバー監視でCPUとメモリをライブで見守り、\n    直接さらされていないマシンには <a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a> や <a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a> を使って到達しましょう。\n  </p>\n"
+  },
+  "guides/tailscale-ssh-setup": {
+    "heading": "Tailscale SSHで接続する",
+    "intro": "tailnet上のマシンに、VVTermからMagicDNS名で到達——ポート転送なし、ポート露出なし、管理する追加のSSHキーなし。",
+    "meta": "ガイド",
+    "title": "Tailscale SSHで接続する — VVTerm",
+    "description": "tailscale up --sshでホストのTailscale SSHを有効にし、ACLを設定し、VVTermからMagicDNS名に接続——ポート転送やポート露出なしで。",
+    "schemaDescription": "VVTermでTailscale SSHを使うステップごとのガイド：ホストとデバイスにTailscaleをインストールし、SSHを有効にし、ACLを設定し、ポート転送なしでMagicDNS名に接続。",
+    "bodyHtml": "\n  <p>\n    Tailscaleはデバイスをプライベートなメッシュネットワークに置き、<strong>Tailscale SSH</strong> でSSH認証を\n    代わりに処理できます。これを使えば、VVTermからtailnet名でサーバーに到達できます——公開\n    ポートも、ポート転送も、配布する別のSSHキーもありません。\n  </p>\n\n  <h2>しくみ</h2>\n  <p>\n    tailnetに参加させたすべてのマシンは、安定したプライベートアドレスと、<code>myserver.tailnet-name.ts.net</code> のような <strong>MagicDNS</strong> 名を得ます。Tailscale SSHが有効なとき、Tailscale自体が\n    アクセスポリシーに基づいてtailnet内のデバイス間の接続を認証するので、サーバーは\n    公開インターネットに受信ポートを開く必要が決してありません。\n  </p>\n\n  <h2>前提条件</h2>\n  <ol>\n    <li>ホストと、あなたのiPhone、iPad、Macがどちらも同じtailnetに参加している <strong>Tailscaleアカウント</strong>。</li>\n    <li>到達したいホストに <strong>Tailscaleがインストール</strong> されていること。</li>\n    <li>接続元の <strong>デバイス</strong> でTailscaleが動作し、同じアカウントにサインインしていること。</li>\n  </ol>\n\n  <h2>ホストでTailscale SSHを有効にする</h2>\n  <ol>\n    <li>\n      サーバーで、SSHフラグを付けてTailscaleを起動します：\n      <pre><code>sudo tailscale up --ssh</code></pre>\n    </li>\n    <li>これにより、ホストがTailscale SSH接続を受け付けると広告されます。認証は従来のSSHキーではなくTailscaleが処理します。</li>\n    <li>\n      ホストのtailnet名と状態を確認します：\n      <pre><code>tailscale status</code></pre>\n    </li>\n  </ol>\n\n  <h2>ACLでSSHを許可する</h2>\n  <p>\n    Tailscale SSHアクセスは、tailnetのアクセス制御ポリシーにある <strong>SSHルール</strong> によって\n    管理されます。Tailscale管理コンソールで、ポリシーに、あなたのユーザーが目的のログインユーザーとしてホストに到達することを\n    許可する <code>ssh</code> セクションが含まれていることを確認してください。一致するルールがなければ、ホストがオンラインでも\n    接続は拒否されます。接続する前にポリシーを保存してください。\n  </p>\n\n  <h2>VVTermから接続する</h2>\n  <ol>\n    <li>VVTermで <strong>サーバーを追加</strong> をタップします（または既存のサーバーを編集します）。</li>\n    <li><strong>ホスト</strong> をマシンの <strong>MagicDNS名</strong> に設定します。たとえば <code>myserver.tailnet-name.ts.net</code>。tailnetのIPアドレスも使えます。</li>\n    <li>ポートを <code>22</code> のままにし、ホストでログインしたい <strong>ユーザー名</strong> を入力します。</li>\n    <li>認証がtailnetを通じて処理されるよう、接続方式として <strong>Tailscale SSH</strong> を選びます。</li>\n    <li>保存し、サーバーをタップして接続します。</li>\n  </ol>\n\n  <h2>ポート転送は不要</h2>\n  <p>\n    トラフィックは暗号化されたtailnetに乗るので、インターネットにポート22を開いたり、\n    ルーターを設定したり、ファイアウォールに穴を開けたりする必要は <strong>ありません</strong>。ホストはNATや厳格なファイアウォールの背後にあっても\n    接続のあるあなたのデバイスから、どこからでも到達可能です。\n  </p>\n\n  <h2>トラブルシューティング</h2>\n  <ul>\n    <li>名前が解決しない場合、tailnetでMagicDNSが有効で、ホストが <code>tailscale status</code> で接続済みと表示されていることを確認してください。</li>\n    <li>接続できても権限が拒否される場合、ACLの <code>ssh</code> ルールと、要求したログインユーザーを見直してください。</li>\n    <li>デバイスがホストをまったく見られない場合、両方が同じTailscaleアカウントにサインインしてオンラインであることを確認してください。</li>\n  </ul>\n"
+  },
+  "ipad": {
+    "metaTitle": "VVTerm for iPad — iPadをSSHワークステーションに",
+    "metaDescription": "iPad向けのネイティブSSHターミナル＆SFTPクライアント。ハードウェアキーボードのショートカット、Stage Managerによるマルチタスク、カスタムターミナルキーボードツールバー、tmuxセッション維持、Moshローミング、ライブサーバー監視、外部ディスプレイ、iCloud同期サーバー。",
+    "bcHome": "ホーム",
+    "bcPlatforms": "プラットフォーム",
+    "bcIpad": "iPad",
+    "heroEyebrow": "VVTerm for iPad",
+    "heroTitle": "iPadを<br />SSHワークステーションに。",
+    "heroSubhead": "ハードウェアキーボードのショートカット、Stage Managerのマルチタスク、ターミナルツールバー、そしてローミングするMoshセッション——内蔵SFTPブラウザとiCloud同期サーバーとともに。",
+    "download": "iPad版をダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "iPadOS 16以降が必要です",
+    "heroAlt": "iPadのVVTerm SSHターミナル",
+    "statementEyebrow": "タブレットを超えて",
+    "statementTitle": "iPadで、本格的なシェルを。",
+    "statementBody": "VVTermは<strong>ハードウェアキーボード</strong>を第一級の入力として扱い、iPadOSが隠すキーを<strong>ターミナルツールバー</strong>で補い、<strong>Stage Manager</strong>のウィンドウや外部ディスプレイをまたいで動き続けます。",
+    "tourTitle": "iPadでの作業の仕方のために。",
+    "tourLabel": "iPadアプリツアー",
+    "tourCards": [
+      {
+        "title": "ハードウェアキーボードを第一級に。",
+        "body": "Magic Keyboardのショートカット、フルキーマップ、そしてシェル作業のための本物の矢印と修飾キーの処理。"
+      },
+      {
+        "title": "Stage Manager対応。",
+        "body": "重なり合うウィンドウとマルチタスクで、ドキュメントやブラウザの隣でターミナルを動かせます。"
+      },
+      {
+        "title": "外部ディスプレイ。",
+        "body": "より広い作業スペースのためにディスプレイを接続し、セッションを中断したところに保ちます。"
+      }
+    ],
+    "kbEyebrow": "必要なキーすべて",
+    "kbTitle": "iPadOSが隠すキーを、ワンタップで。",
+    "kbBody": "ターミナルキーボードツールバーが、<strong>Esc、Tab、Ctrl</strong>、矢印キー、<strong>ファンクションキー</strong>をキーボードのすぐ上に置きます——そして自分の<strong>コマンドスニペットやショートカット</strong>でカスタマイズできます。Magic Keyboardをつなげば、物理キーがそのままシェルにマップされます。",
+    "kbLink": "ツールバーをカスタマイズ",
+    "kbCaption": "画面上のキーボードの上のツールバー",
+    "connectEyebrow": "好きな方法でつなぐ",
+    "connectTitle": "どのマシンにも、4通りの方法で。",
+    "connectBody": "使いたいときは標準SSH、必要なときは<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong>を——設定するポート転送はありません。",
+    "moshEyebrow": "Moshローミング",
+    "moshTitle": "セッションをどこへでも連れて。",
+    "moshBody": "デスクのWi-Fiからセルラーへ歩き、iPadをスリープさせ、ネットワークを変えても——<strong>Mosh</strong>ならセッションはそのまま留まり、自分で再接続します。標準の<strong>SSHはいつもフォールバック</strong>として控えています。",
+    "moshAlt": "iPadのVVTerm Moshローミングセッション",
+    "filesEyebrow": "ファイルを標準搭載",
+    "filesTitle": "SFTPを、シェルのすぐ隣に。",
+    "filesBody": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除——そしてテキスト、画像、動画のプレビューや<strong>POSIX権限の編集</strong>を、すべてiPadで。",
+    "filesAlt": "iPadのVVTerm SFTPファイルブラウザ",
+    "expandLabel": "SFTPブラウザを見る",
+    "modalEyebrow": "SFTPファイルブラウザ",
+    "modalTitle": "iPadのために作られたファイルマネージャー。",
+    "modalBody": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除——そして<strong>テキスト、画像、動画のプレビュー</strong>、対応テキストファイルの編集、POSIX権限の調整を、2つ目のアプリなしで。",
+    "sftpLink": "SFTPの全体像を読む",
+    "highlights": [
+      {
+        "title": "GPUターミナルエンジン",
+        "body": "libghosttyが毎フレームをMetalで描画し、トゥルーカラー、リガチャ、正確なセッションを実現します。"
+      },
+      {
+        "title": "ターミナルキーボードツールバー",
+        "body": "Esc、Tab、Ctrl、矢印、ファンクションキーが、iPadOSが隠すキーのためにキーボードの上に並びます。"
+      },
+      {
+        "title": "Moshローミング",
+        "body": "セッションはWi-Fiからセルラーへの切り替えやスリープを乗り越え、SSHがフォールバックとして控えます。"
+      },
+      {
+        "title": "iCloud同期サーバー",
+        "body": "サーバーリストはMacとiPhoneからついてきます。認証情報はKeychainにとどまります。"
+      }
+    ],
+    "guideLink": "iOSセットアップガイドを読む",
+    "moreEyebrow": "さらに",
+    "moreTitle": "おもちゃではなく、ワークステーション。",
+    "moreCards": [
+      {
+        "title": "tmux維持",
+        "body": "蓋を閉じてもアプリを切り替えても——セッションはサーバー上で動き続け、戻ったときに再アタッチします。"
+      },
+      {
+        "title": "テーマとフォント",
+        "body": "440種類の内蔵テーマ、Nerd Fonts、カーソルスタイル、そして自分で組み立てるキーボードツールバー——他のデバイスから同期されます。"
+      },
+      {
+        "title": "ライブ監視",
+        "body": "CPU、メモリ、ネットワーク、ディスク、上位プロセスをリアルタイムで、ターミナルのすぐ隣に。"
+      }
+    ],
+    "learnMore": "詳しく見る",
+    "windowsNote": "Windowsマシンも管理しますか？",
+    "windowsLink": "WindowsサーバーへSSH ›",
+    "faqItems": [
+      {
+        "question": "VVTerm for iPadを動かすには何が必要ですか？",
+        "answer": "iPadOS 16以降です。ターミナルはMetal上で描画されるので、最新のiPadが最もなめらかな結果をもたらします。"
+      },
+      {
+        "question": "Apple Pencilは必要ですか？",
+        "answer": "いいえ。VVTermはキーボードとタッチを中心に作られています。Magic Keyboardのようなハードウェアキーボードがシェル作業を最も速くし、画面上のターミナルツールバーがiPadOSなら隠すキーを補います。"
+      },
+      {
+        "question": "Esc、Tab、Ctrl、矢印はどう入力しますか？",
+        "answer": "ターミナルキーボードツールバーが画面上のキーボードの上にあり、Esc、Tab、Ctrl、矢印キー、ファンクションキーを備えます。ハードウェアキーボードでは物理キーがそのままマップされます。"
+      },
+      {
+        "question": "Stage Managerや外部ディスプレイで動作しますか？",
+        "answer": "はい。VVTermをStage Managerで他のアプリの隣で動かし、外部ディスプレイをつないでより広い作業スペースにできます。Moshが移動中もセッションを維持します。"
+      },
+      {
+        "question": "Wi-Fiからセルラーへ切り替えてもセッションは維持されますか？",
+        "answer": "Moshなら、はい。Moshはネットワークの変化やスリープを越えてローミングし、自分で再接続します。お好みなら標準SSHにフォールバックします。"
+      },
+      {
+        "question": "作業の途中で蓋を閉じたらどうなりますか？",
+        "answer": "VVTermはサーバー上で<strong>tmux</strong>セッションを管理するので、接続が途切れても実行中のコマンドは動き続け、次に接続したときに再アタッチします——tmuxがなければインストールします。"
+      },
+      {
+        "question": "キーボードツールバーをカスタマイズできますか？",
+        "answer": "はい。どのキーを表示するか選び、自分の<strong>コマンドスニペット</strong>（テキストを挿入、任意でEnter付き）と<strong>ショートカット</strong>（Ctrl、Alt、Cmd、Shift付きのキー）を追加できます。レイアウトはiCloudを通じてデバイス間で同期されます。"
+      },
+      {
+        "question": "iPadでサーバーの負荷を監視できますか？",
+        "answer": "はい。ライブ監視は、既存のSSHセッションを通じてCPU、メモリ、ネットワーク、ディスク、ロードアベレージ、上位プロセスをリアルタイムで表示します。"
+      },
+      {
+        "question": "VVTermの料金はいくらですか？",
+        "answer": "ワークスペース1個、サーバー1台、接続タブ1個まで無料です。Proは月額$6.49または年額$24.99、買い切り購入は$49.99です。"
+      }
+    ],
+    "ctaTitle": "iPadをあなたのターミナルに。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、数分で最初のサーバーに接続しましょう。"
+  },
+  "iphone": {
+    "metaTitle": "VVTerm for iPhone — ポケットの中のSSHターミナル",
+    "metaDescription": "iPhone向けのネイティブSSHターミナル＆SFTPクライアント。Mosh再接続、tmuxセッション維持、カスタムキーボードツールバー、オンデバイスの音声コマンド、ライブサーバー監視、Face IDアプリロック、内蔵SFTPブラウザで、外出先でもサーバーを直せます。",
+    "bcHome": "ホーム",
+    "bcPlatforms": "プラットフォーム",
+    "bcIphone": "iPhone",
+    "heroEyebrow": "VVTerm for iPhone",
+    "heroTitle": "あなたのサーバーを、<br />ポケットに。",
+    "heroSubhead": "Mosh再接続、ターミナルツールバー、オンデバイスの音声コマンド、Face IDロックで、外出先でもトラブルに対応——内蔵SFTPブラウザとiCloud同期サーバーとともに。",
+    "download": "iPhone版をダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "iOS 16以降が必要です",
+    "heroAlt": "iPhoneのVVTerm SSHターミナル",
+    "statementEyebrow": "壊れた瞬間のために",
+    "statementTitle": "ポケットに収まる、フル機能のターミナル。",
+    "statementBody": "素早い対応が必要なとき、VVTermは<strong>必要なキーをツールバー</strong>に揃え、<strong>自分で再接続するMoshセッション</strong>と、ガラスへの入力が遅いときのための<strong>音声コマンド</strong>を提供します。",
+    "tourTitle": "リモート作業を、どこからでも。",
+    "tourLabel": "iPhoneアプリツアー",
+    "tourCards": [
+      {
+        "title": "どこからでも再接続。",
+        "body": "MoshはWi-Fi、セルラー、ロック画面を越えてセッションを維持し、そのまま続きから始めます。"
+      },
+      {
+        "title": "音声でコマンド。",
+        "body": "ガラスへの入力が遅いとき、オンデバイスの文字起こしで手を使わずコマンドを口述します。"
+      },
+      {
+        "title": "Face IDアプリロック。",
+        "body": "VVTermをFace IDの背後にロックして、ひと目見るだけでサーバーをプライベートに保ちます。"
+      }
+    ],
+    "kbEyebrow": "必要なキーすべて",
+    "kbTitle": "iOSが隠すキーを、ワンタップで。",
+    "kbBody": "ターミナルキーボードツールバーが、<strong>Esc、Tab、Ctrl</strong>、矢印キー、<strong>ファンクションキー</strong>をキーボードのすぐ上に置きます——だからvim、tmux、シェルのショートカットが、電話でもあるべき形で動きます。",
+    "kbCaption": "画面上のキーボードの上のツールバー",
+    "connectEyebrow": "好きな方法でつなぐ",
+    "connectTitle": "どのマシンにも、4通りの方法で。",
+    "connectBody": "使いたいときは標準SSH、必要なときは<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong>を——設定するポート転送はありません。",
+    "voiceEyebrow": "音声でコマンド",
+    "voiceTitle": "声でターミナルを操作。",
+    "voiceBody": "ガラスへの入力が遅いとき、コマンドを口述します。VVTermは<strong>オンデバイスの文字起こし</strong>で音声をシェル入力に変換します——MLX WhisperまたはParakeetモデルを使い、Apple Speechをフォールバックに。文字起こしのためにデバイス外へ送られるものはありません。",
+    "voiceAlt": "iPhoneのVVTerm音声コマンド",
+    "filesEyebrow": "ファイルを標準搭載",
+    "filesTitle": "SFTPを、シェルのすぐ隣に。",
+    "filesBody": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除——そしてテキスト、画像、動画のプレビューや<strong>POSIX権限の編集</strong>を、すべて電話から。",
+    "filesAlt": "iPhoneのVVTerm SFTPファイルブラウザ",
+    "expandLabel": "SFTPブラウザを見る",
+    "modalEyebrow": "SFTPファイルブラウザ",
+    "modalTitle": "リモートファイルを、ポケットに。",
+    "modalBody": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除——そして<strong>テキスト、画像、動画のプレビュー</strong>、対応テキストファイルの編集、POSIX権限の調整を、2つ目のアプリなしで。",
+    "sftpLink": "SFTPの全体像を読む",
+    "highlights": [
+      {
+        "title": "GPUターミナルエンジン",
+        "body": "libghosttyが毎フレームをMetalで描画し、トゥルーカラー、リガチャ、正確なセッションを実現します。"
+      },
+      {
+        "title": "ターミナルキーボードツールバー",
+        "body": "Esc、Tab、Ctrl、矢印、ファンクションキーが、iOSが隠すキーのためにキーボードの上に並びます。"
+      },
+      {
+        "title": "Moshローミング",
+        "body": "セッションはWi-Fiからセルラーへの切り替えやロックされた電話を乗り越え、SSHがフォールバックとして控えます。"
+      },
+      {
+        "title": "Face IDアプリロック",
+        "body": "生体認証ロックが、共有または紛失した電話でもサーバーリストとライブセッションをプライベートに保ちます。"
+      }
+    ],
+    "guideLink1": "iPhoneからSSHする方法",
+    "guideLink2": "iOSでMoshをセットアップ",
+    "moreEyebrow": "さらに",
+    "moreTitle": "素早い対応にとどまらない。",
+    "moreCards": [
+      {
+        "title": "tmux維持",
+        "body": "電話をロックしても電波を失っても——VVTermがtmuxを管理するので、セッションは動き続け、戻ったときに再アタッチします。"
+      },
+      {
+        "title": "ライブ監視",
+        "body": "ラップトップに手を伸ばす前に、CPU、メモリ、ネットワーク、ディスク、上位プロセスをリアルタイムで確認します。"
+      },
+      {
+        "title": "テーマとツールバー",
+        "body": "440種類のテーマ、Nerd Fonts、そして自分のコマンドスニペットやショートカットで組み立てるキーボードツールバー。"
+      }
+    ],
+    "learnMore": "詳しく見る",
+    "windowsNote": "Windowsマシンも管理しますか？",
+    "windowsLink": "WindowsサーバーへSSH ›",
+    "faqItems": [
+      {
+        "question": "VVTerm for iPhoneを動かすには何が必要ですか？",
+        "answer": "iOS 16以降です。ターミナルはMetal上で描画されるので、最新のiPhoneが最もなめらかな結果をもたらします。"
+      },
+      {
+        "question": "本当に電話からサーバーを直せますか？",
+        "answer": "はい。VVTermは、必要なキーをツールバーに揃え、自分で再接続するMoshセッションと、素早いファイル編集のためのSFTPブラウザを備えたフル機能のSSHターミナルです——外出先でインシデントに対応するのに十分です。"
+      },
+      {
+        "question": "音声コマンドはどう動作しますか？",
+        "answer": "コマンドを話すと、VVTermがMLX WhisperまたはParakeetモデルを使ってオンデバイスで文字起こしし、Apple Speechをフォールバックにします。あなたのコマンドに関する情報が、文字起こしのためにサーバーへ送られることはありません。"
+      },
+      {
+        "question": "ネットワークを切り替えたり電話をロックしてもセッションは維持されますか？",
+        "answer": "Moshなら、はい。MoshはWi-Fiとセルラーを越えてローミングし、ロック画面を乗り越え、自分で再接続します。お好みなら標準SSHもいつでも利用できます。"
+      },
+      {
+        "question": "切断されても実行中のコマンドは動き続けますか？",
+        "answer": "はい。VVTermはサーバー上で<strong>tmux</strong>セッションを管理するので、長時間のコマンドは切断やロックされた電話を越えて動き続け、再接続したときに再アタッチします。tmuxがなければインストールします。"
+      },
+      {
+        "question": "電話からサーバーの負荷を確認できますか？",
+        "answer": "はい。ライブ監視は、SSHセッションを通じてCPU、メモリ、ネットワーク、ディスク、ロードアベレージ、上位プロセスをリアルタイムで表示します——ラップトップに向かう前のトリアージに便利です。"
+      },
+      {
+        "question": "電話でサーバーをプライベートに保つには？",
+        "answer": "Face IDアプリロックをオンにします。VVTermは生体認証の背後にロックされたままになり、認証情報は同期データではなくApple Keychainにとどまります。"
+      },
+      {
+        "question": "VVTermの料金はいくらですか？",
+        "answer": "ワークスペース1個、サーバー1台、接続タブ1個まで無料です。Proは月額$6.49または年額$24.99、買い切り購入は$49.99です。"
+      }
+    ],
+    "ctaTitle": "サーバーを、いつも持ち歩こう。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、数分で最初のサーバーに接続しましょう。"
+  },
+  "mac": {
+    "metaTitle": "VVTerm for Mac — macOS向けネイティブSSHターミナル",
+    "metaDescription": "Apple Silicon Mac向けのネイティブSSHターミナル＆SFTPクライアント。libghosttyによるGPU描画、タブとペイン分割、tmuxセッション維持、ライブサーバー監視、深いカスタマイズ、Mosh、Tailscale SSH、iCloud同期サーバー。",
+    "bcHome": "ホーム",
+    "bcPlatforms": "プラットフォーム",
+    "bcMac": "Mac",
+    "heroEyebrow": "VVTerm for Mac",
+    "heroTitle": "Macのための<br />本物のターミナル。",
+    "heroSubhead": "GPU描画、タブ式、そしてApple Siliconのために構築——内蔵SFTPブラウザと、すべてのデバイスに同期されるサーバーとともに。",
+    "download": "Mac版をダウンロード",
+    "seePricing": "料金を見る",
+    "heroNote": "macOS 13 Ventura以降が必要です · Apple Silicon",
+    "heroAlt": "MacのVVTerm SSHターミナル",
+    "statementEyebrow": "Webラッパーではなく、ネイティブ",
+    "statementTitle": "Macアプリのあるべき姿で。",
+    "statementBody": "VVTermは<strong>分割ビューのサイドバー</strong>、<strong>統合ツールバー</strong>、そして本物のキーボード処理を使います——だからサーバーへの接続が、macOSの他の部分とまったく同じように感じられます。",
+    "tourTitle": "Macアプリを知る。",
+    "tourLabel": "Macアプリツアー",
+    "tourCards": [
+      {
+        "title": "分割ビューのワークスペース。",
+        "body": "ワークスペースとサーバーのNavigationSplitViewサイドバーが、ライブターミナルの隣に。"
+      },
+      {
+        "title": "タブとペイン分割。",
+        "body": "統合ツールバーで複数の接続を開いたまま保ち、タブをペインに分割して横並びのシェルに。"
+      },
+      {
+        "title": "同じウィンドウにSFTP。",
+        "body": "2つ目のアプリに手を伸ばさず、リモートファイルを閲覧・編集できます。"
+      }
+    ],
+    "connectEyebrow": "好きな方法でつなぐ",
+    "connectTitle": "どのマシンにも、4通りの方法で。",
+    "connectBody": "使いたいときは標準SSH、必要なときは<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong>を。",
+    "filesEyebrow": "ファイルを標準搭載",
+    "filesTitle": "SFTPを、シェルのすぐ隣に。",
+    "filesBody": "リモートフォルダの閲覧、<strong>アップロードとダウンロード</strong>、テキスト・画像・動画のプレビュー、POSIX権限の編集を——すべて同じウィンドウで。",
+    "filesAlt": "MacのVVTerm SFTPファイルブラウザ",
+    "expandLabel": "SFTPブラウザを見る",
+    "modalEyebrow": "SFTPファイルブラウザ",
+    "modalTitle": "ファイルとターミナル、1つのウィンドウに。",
+    "modalBody": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除——そして<strong>テキスト、画像、動画のプレビュー</strong>、対応テキストファイルの編集、POSIX権限の調整を、Macアプリを離れずに。",
+    "sftpLink": "SFTPの全体像を読む",
+    "highlights": [
+      {
+        "title": "GPUターミナルエンジン",
+        "body": "libghosttyが毎フレームをMetalで描画し、トゥルーカラー、リガチャ、正確なセッションを実現します。"
+      },
+      {
+        "title": "Apple Siliconネイティブ",
+        "body": "macOS 13 Ventura以降のMシリーズMacのために構築・調整されています。"
+      },
+      {
+        "title": "iCloud同期サーバー",
+        "body": "サーバーリストはiPhoneとiPadについてきます。認証情報はKeychainにとどまります。"
+      },
+      {
+        "title": "Keychainセキュリティ",
+        "body": "パスワードとSSHキーはApple Keychainにあり、同期メタデータに含まれることは決してありません。"
+      }
+    ],
+    "macGuideLink": "Macセットアップガイドを読む",
+    "moreEyebrow": "さらに",
+    "moreTitle": "本格的なリモート作業のために。",
+    "moreCards": [
+      {
+        "title": "tmux維持",
+        "body": "長いビルドやマイグレーションは切断を越えて動き続けます。VVTermがtmuxを管理し、再接続時に再アタッチします。"
+      },
+      {
+        "title": "テーマとフォント",
+        "body": "440種類の内蔵テーマ、Nerd Fonts、カーソルスタイル、そして自動で切り替わるライトとダークの別々のテーマ。"
+      },
+      {
+        "title": "ライブ監視",
+        "body": "CPU、メモリ、ネットワーク、ディスク、上位プロセスをリアルタイムで、シェルのすぐ隣で見守ります。"
+      }
+    ],
+    "learnMore": "詳しく見る",
+    "windowsNote": "Windowsマシンも管理しますか？",
+    "windowsLink": "WindowsサーバーへSSH ›",
+    "faqItems": [
+      {
+        "question": "VVTermはIntel Macで動作しますか？",
+        "answer": "いいえ。VVTermはmacOS 13 Ventura以降を実行するApple Silicon Macのために作られています。Intel Macには対応していません。"
+      },
+      {
+        "question": "Macアプリはどのターミナルエンジンを使っていますか？",
+        "answer": "Ghosttyの描画エンジンであるlibghosttyを使い、Metal GPU描画で速く正確なターミナル出力を実現します。"
+      },
+      {
+        "question": "一度に複数の接続を開けますか？",
+        "answer": "はい。Proで接続タブが無制限になり、タブを複数のペインに分割して横並びのシェルにできます。無料プランには接続タブ1個が含まれます。"
+      },
+      {
+        "question": "セッションは切断を乗り越えますか？",
+        "answer": "はい。VVTermはサーバー上で<strong>tmux</strong>セッションを管理するので、長時間の作業は切断やスリープを越えて続き、再接続したときに再アタッチします。tmuxがなければ自動インストールします。"
+      },
+      {
+        "question": "MacアプリからサーバーのCPU負荷を監視できますか？",
+        "answer": "はい。ライブサーバー監視は、SSHセッションを通じてCPU、メモリ、ネットワーク、ディスク、ロードアベレージ、上位プロセスをリアルタイムで表示します——インストールするエージェントはありません。"
+      },
+      {
+        "question": "Windowsサーバーに接続できますか？",
+        "answer": "はい。VVTermはWindowsとPowerShellホストにSSHで接続し、SFTP、ライブ統計、psmuxによる持続的なセッションを利用できます。"
+      },
+      {
+        "question": "SFTPファイルブラウザは含まれますか？",
+        "answer": "はい。Macアプリには、リモートファイルとPOSIX権限のアップロード、ダウンロード、名前変更、移動、削除、プレビュー、編集のための内蔵SFTPブラウザがあります。"
+      },
+      {
+        "question": "サーバーはiPhoneとiPadに同期されますか？",
+        "answer": "サーバーのメタデータはiCloudを通じて同期されます。パスワードとSSHキーはApple Keychainに保存され、有効にしたときだけiCloud Keychainを通じて同期されます。"
+      },
+      {
+        "question": "VVTerm for Macの料金はいくらですか？",
+        "answer": "ワークスペース1個、サーバー1台、接続タブ1個まで無料です。Proは月額$6.49または年額$24.99、買い切り購入は$49.99です。"
+      }
+    ],
+    "ctaTitle": "サーバーをMacへ。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、数分で最初のサーバーに接続しましょう。"
+  },
+  "platforms": {
+    "metaTitle": "プラットフォーム — Mac、iPad、iPhone向けVVTerm",
+    "metaDescription": "VVTermはAppleデバイス向けのネイティブSSHターミナル＆SFTPクライアントです。Mac、iPad、iPhone向けのVVTermを見てみましょう——iCloud同期とKeychainセキュリティを備え、Apple Siliconのために構築。",
+    "bcHome": "ホーム",
+    "bcPlatforms": "プラットフォーム",
+    "eyebrow": "プラットフォーム",
+    "heroTitle": "1つのSSHアプリ、<br />すべてのAppleデバイスに。",
+    "heroSubhead": "Mac、iPad、iPhone向けのネイティブターミナル——tmuxセッション維持、ライブ監視、深いカスタマイズ、そしてiCloudを通じて同期されるサーバーと認証情報とともに。",
+    "seeFeatures": "すべての機能を見る",
+    "heroNote": "iOSおよびiPadOS 16以降 · macOS 13 Ventura以降 · Apple Silicon",
+    "vvtermFor": "VVTerm for",
+    "explore": "見る",
+    "ctaTitle": "あるデバイスで始め、別のデバイスで仕上げる。",
+    "ctaSubtitle": "VVTermを無料でダウンロードすれば、サーバーがMac、iPad、iPhoneをまたいであなたについてきます。",
+    "cards": {
+      "mac": {
+        "tagline": "macOS向けのネイティブSSHターミナル",
+        "summary": "タブとペイン分割を備えたGPU描画ターミナル、tmuxセッション維持、SFTPファイルブラウザ、ライブ監視、iCloud同期サーバー——Apple Silicon Macのために構築。",
+        "requirement": "macOS 13 Ventura以降 · Apple Silicon"
+      },
+      "ipad": {
+        "tagline": "iPadを本格的なSSHワークステーションに",
+        "summary": "ハードウェアキーボードのショートカット、Stage Managerのマルチタスク、カスタマイズ可能なターミナルツールバー、tmux維持、そしてネットワークの切断を乗り越えるMoshセッション。",
+        "requirement": "iPadOS 16以降"
+      },
+      "iphone": {
+        "tagline": "ポケットの中のサーバー",
+        "summary": "Moshでどこからでも再接続、tmuxでセッションを維持、ライブサーバー統計の確認、リモートファイルの閲覧、そしてKeychainに保つ認証情報。",
+        "requirement": "iOS 16以降"
+      }
+    }
+  },
+  "pricing": {
+    "title": "VVTermの料金 — 無料、Pro、買い切り",
+    "description": "VVTermはワークスペース1個、サーバー1台、接続タブ1個で無料で始められます。月額$6.49または年額$24.99ですべてが無制限のProへ、または$49.99の買い切りで一度の支払いに。",
+    "bcHome": "ホーム",
+    "bcPricing": "料金",
+    "heroEyebrow": "料金",
+    "heroTitle": "無料で始める。<br />ずっと自分のもの。",
+    "heroSubhead": "すべてのAppleデバイスでサーバー1台から無料で始められます。すべてが無制限のProにアップグレードするか、買い切りライセンスで一度支払うかを選べます——購入と返金はAppleが対応します。",
+    "download": "無料でダウンロード",
+    "comparePlans": "プランを比較",
+    "heroNote": "アカウント不要 · iPhone、iPad、Mac",
+    "compareEyebrow": "プランを比較",
+    "compareTitle": "すべてのプランを、並べて。",
+    "compareBody": "どのプランでも同じネイティブターミナル。Proと<strong>買い切り</strong>は<strong>無制限のサーバーと接続タブ</strong>を解放し、<strong>優先サポート</strong>を加えます。",
+    "colFeatures": "機能",
+    "colFree": "無料",
+    "colPro": "Pro",
+    "colLifetime": "買い切り",
+    "rows": [
+      {
+        "label": "ワークスペース",
+        "free": "1",
+        "pro": "無制限",
+        "lifetime": "無制限"
+      },
+      {
+        "label": "サーバー",
+        "free": "1",
+        "pro": "無制限",
+        "lifetime": "無制限"
+      },
+      {
+        "label": "接続タブ",
+        "free": "1",
+        "pro": "無制限",
+        "lifetime": "無制限"
+      },
+      {
+        "label": "SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSH",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "GPUターミナル（libghostty）",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "SFTPファイルブラウザ",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "iCloud同期",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "Keychainセキュリティ",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "音声コマンド",
+        "free": "check",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "カスタム環境",
+        "free": "cross",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "優先サポート",
+        "free": "cross",
+        "pro": "check",
+        "lifetime": "check"
+      },
+      {
+        "label": "今後のすべてのアップデート",
+        "free": "dash",
+        "pro": "購読中",
+        "lifetime": "ずっと"
+      },
+      {
+        "label": "請求",
+        "free": "無料",
+        "pro": "サブスクリプション",
+        "lifetime": "1回限り"
+      }
+    ],
+    "benefits": [
+      {
+        "icon": "lucide:user-x",
+        "title": "アカウント不要",
+        "body": "ダウンロードして数分で最初のサーバーに接続——サインアップもメールも不要です。"
+      },
+      {
+        "icon": "lucide:calendar-x",
+        "title": "いつでもキャンセル",
+        "body": "ProはいつでもキャンセルできるApp Storeの標準サブスクリプションです。"
+      },
+      {
+        "icon": "lucide:badge-check",
+        "title": "買い切りで一度の支払い",
+        "body": "$49.99の1回の購入で、すべてと今後のすべてのアップデートをずっと解放します。"
+      }
+    ],
+    "faqItems": [
+      {
+        "question": "無料で何が得られますか？",
+        "answer": "無料プランにはワークスペース1個、サーバー1台、接続タブ1個が含まれます——標準SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSH、GPUターミナル、SFTPファイルブラウザ、iCloud同期、Keychainセキュリティ、音声コマンドとともに。始めるのにアカウントも支払いも不要です。"
+      },
+      {
+        "question": "無料版とProの違いは何ですか？",
+        "answer": "無料はワークスペース1個、サーバー1台、接続タブ1個に制限されます。Proはすべての制限を取り払い——ワークスペース、サーバー、接続タブが無制限になり——カスタム環境、優先サポート、そして購読中の今後のすべての機能を加えます。"
+      },
+      {
+        "question": "1回の購入をiPhone、iPad、Macで使えますか？",
+        "answer": "はい。購入はApple IDに紐づき、同じApple IDでサインインしていればiPhone、iPad、Macで利用できます。サーバーはiCloudを通じて同期されるので、設定がすべてのデバイスについてきます。"
+      },
+      {
+        "question": "返金はどう機能しますか？",
+        "answer": "すべての購入と返金はApp Storeを通じてAppleが対応します。返金をリクエストするには、reportaproblem.apple.com にアクセスしてAppleの手続きに従ってください。VVTermが支払いや返金を直接処理することはありません。"
+      },
+      {
+        "question": "サブスクリプションと買い切りの両方がありますか？",
+        "answer": "はい。Proは月額$6.49または年額$24.99のサブスクリプションとして利用でき、Proのすべてを継続課金なしで解放する$49.99の1回限りの買い切り購入もあります。"
+      },
+      {
+        "question": "料金には今後のすべての機能が含まれますか？",
+        "answer": "Proには購読中の今後のすべての機能が含まれます。買い切り購入には、追加費用なしで今後のすべてのアップデートがずっと含まれます。"
+      }
+    ],
+    "ctaTitle": "無料で始める。大きくなったらアップグレード。",
+    "ctaSubtitle": "iPhone、iPad、MacでVVTermをダウンロードし、必要になったらProにするか買い切りで購入しましょう。"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー - VVTerm",
+    "description": "Vivy Technologies Co., LimitedによるiOSおよびmacOS向けSSHターミナルアプリ、VVTermのプライバシーポリシー。",
+    "heading": "プライバシーポリシー",
+    "lastUpdated": "2026年6月10日",
+    "s1h": "1. はじめに",
+    "s1p": "Vivy Technologies Co., Limited（「当社」）は、iOSおよびmacOS向けのSSHターミナルアプリケーションであるVVTermを運営しています。本プライバシーポリシーは、当社がどのようにあなたの情報を収集、利用、保護するかを説明します。",
+    "s2h": "2. 当社が収集する情報",
+    "s2serverH": "サーバー構成",
+    "s2serverP": "VVTermはあなたのサーバー構成（ホスト、ポート、ユーザー名）をローカルに保存し、iCloudを通じて他のデバイスに同期します。このデータは、AppleのiCloudインフラストラクチャによって転送中および保存時に暗号化されます。",
+    "s2credH": "認証情報",
+    "s2credP": "SSHパスワードと秘密鍵はApple Keychainに保存されます。iCloud同期が有効な場合、認証情報はiCloud Keychainを通じてデバイス間で同期されます。当社がこれらの認証情報を受け取ることは決してなく、それらはあなたのデバイスのセキュリティによって保護されます。",
+    "s2analyticsH": "分析データ",
+    "s2analyticsP1": "当社は、プライバシー重視の分析サービスであるUmami Analyticsを使用して、当社のウェブサイトおよびアプリで匿名の利用統計を収集します。データは匿名で、当社自身のセルフホスト型分析サーバーで処理され、第三者の分析企業や広告ネットワークと共有されることは決してありません。",
+    "s2analyticsP2": "当社は、あなたのターミナルセッションの内容、入力したコマンド、サーバーアドレス、ユーザー名、ファイルの内容、またはあなたを特定するものを収集することは決してありません。アプリの分析は、設定の「VVTermの改善に協力」からいつでもオフにできます。",
+    "s2purchaseH": "購入情報",
+    "s2purchaseP": "VVTerm Proを購入する場合、購入はApp Storeを通じて処理されます。当社は購入の確認を受け取りますが、あなたの支払い情報にアクセスすることはありません。",
+    "s3h": "3. 当社による情報の利用方法",
+    "s3list": [
+      "アプリ機能の提供と維持のため",
+      "iCloudを通じてデバイス間でサーバー構成を同期するため",
+      "Proサブスクリプションの状態を確認するため",
+      "当社のウェブサイトとアプリケーションを改善するため"
+    ],
+    "s4h": "4. データの保存とセキュリティ",
+    "s4p": "サーバー構成はApple iCloudを通じて同期され、Appleのセキュリティ対策の対象となります。認証情報はApple Keychainに保存され、有効な場合はiCloud Keychainを通じて同期されることがあります。当社自身のサーバーが受け取る唯一のデータは、上記の匿名の利用統計です。当社は、あなたの個人情報を第三者に販売したり共有したりすることはありません。",
+    "s5h": "5. あなたの権利",
+    "s5intro": "あなたには次の権利があります：",
+    "s5list": [
+      "デバイスからVVTermを削除して、すべてのアプリデータを削除する",
+      "設定でiCloud同期を無効にして、データをローカルのみに保つ",
+      "Keychainから保存された認証情報をいつでも削除する",
+      "設定で匿名の利用統計をオフにする（「VVTermの改善に協力」）",
+      "当社が収集した可能性のあるデータについての情報を請求する"
+    ],
+    "s6h": "6. お問い合わせ",
+    "s6pre": "本プライバシーポリシーについてご質問がある場合は、こちらまでご連絡ください ",
+    "s6post": "。"
+  },
+  "refund": {
+    "title": "返金ポリシー - VVTerm",
+    "description": "AppleのApp Storeを通じたVVTerm Pro購入の返金ポリシー。",
+    "heading": "返金ポリシー",
+    "lastUpdated": "2026年1月15日",
+    "s1h": "App Store購入の返金",
+    "s1p": "VVTerm ProはAppleのApp Storeを通じて販売されます。Appleが請求と返金を処理し、適格性はAppleのポリシーによって判断されます。",
+    "s2h": "返金をリクエストする方法",
+    "s2intro": "返金をリクエストするには、Appleの公式手続きをご利用ください：",
+    "s2steps": [
+      "Apple IDでサインインする",
+      "VVTerm Proの購入を見つける",
+      "「払い戻しをリクエストする」を選び、案内に従う"
+    ],
+    "s2reportPre": "こちらへアクセス ",
+    "s2reportPost": "",
+    "s2outro": "当社が直接返金を行うことはできませんが、アプリの利用でお困りの場合はご連絡いただければ、できる限りお手伝いします。",
+    "s3h": "サブスクリプションのキャンセル",
+    "s3intro": "VVTerm Proの月額または年額を購読した場合、いつでもキャンセルできます：",
+    "s3steps": [
+      "iPhoneまたはiPadで設定、Macでシステム設定を開く",
+      "Apple IDをタップし、次にサブスクリプションを選ぶ",
+      "VVTermを見つけて「サブスクリプションをキャンセルする」をタップする"
+    ],
+    "s3outro": "キャンセルすると：",
+    "s3list": [
+      "現在の請求期間の終わりまでProアクセスが維持されます",
+      "それ以上の課金は行われません",
+      "期間の終了後にPro機能が無効になります",
+      "サーバーとワークスペースは残りますが、無料プランの制限が適用されます"
+    ],
+    "s4h": "買い切り購入",
+    "s4p": "買い切りのPro購入は1回限りで、キャンセルは不要です。返金は上記と同じ手続きでAppleが対応します。",
+    "s5h": "お問い合わせ",
+    "s5pre": "ご質問や技術的な問題がありますか？こちらまでご連絡ください ",
+    "s5post": "。"
+  },
+  "resources": {
+    "title": "リソース — VVTermのガイド、ドキュメント、比較",
+    "description": "VVTermを学ぶ：ステップごとのガイド、製品ドキュメント、そしてiPhone、iPad、Mac向けの他のSSHクライアントとの並べた比較。",
+    "bcHome": "ホーム",
+    "bcResources": "リソース",
+    "heroEyebrow": "リソース",
+    "heroTitle": "セットアップを助ける<br />すべて。",
+    "heroSubhead": "ガイド、ドキュメント、そして正直な比較——最初のサーバーに接続し、VVTermでさらに先へ進めます。",
+    "seePricing": "料金を見る",
+    "guidesTitle": "ガイド",
+    "guidesBody": "接続、ファイル転送、そしてVVTermを最大限に活かすための、ステップごとの手順書。",
+    "guidesCta": "ガイドを見る",
+    "docsTitle": "ドキュメント",
+    "docsBody": "サーバー、認証、SFTPブラウザ、iCloud同期、ワークスペース、タブのリファレンス。",
+    "docsCta": "ドキュメントを読む",
+    "compareTitle": "比較",
+    "compareBody": "VVTermが他のSSHクライアントとどう並ぶかを確認——プラットフォーム、トランスポート、ファイル、料金。",
+    "compareCta": "比較を見る",
+    "ctaTitle": "準備ができたら、いつでも。",
+    "ctaSubtitle": "VVTermを無料でダウンロードし、数分で最初のマシンに接続しましょう。"
+  },
+  "support": {
+    "title": "サポート - VVTerm",
+    "description": "連絡先や請求に関する案内を含む、VVTermのサポートリソース。",
+    "heading": "サポート",
+    "pageDescription": "VVTermに関するどんなご質問にもお応えします。",
+    "s1h": "お問い合わせ",
+    "s1pre": "こちらまでメールでご連絡ください ",
+    "s1post": "。通常、1〜2営業日以内に返信いたします。",
+    "s2h": "アプリサポート",
+    "s2intro": "より早くお手伝いできるよう、次の情報を含めてください：",
+    "s2list": [
+      "デバイスのモデルとOSバージョン",
+      "VVTermアプリのバージョン",
+      "問題を再現する手順",
+      "関連するスクリーンショットやログ"
+    ],
+    "s3h": "請求とサブスクリプション",
+    "s3p": "購入はApp Storeが処理します。請求についてご質問がある場合は、当社にご連絡いただくか、Apple IDの設定でサブスクリプションを管理できます。"
+  },
+  "terms": {
+    "title": "利用規約（EULA） - VVTerm",
+    "description": "Vivy Technologies Co., LimitedによるiOSおよびmacOS向けSSHターミナルアプリ、VVTermの利用規約。",
+    "heading": "利用規約（EULA）",
+    "lastUpdated": "2026年4月8日",
+    "s1h": "1. 承認",
+    "s1p1": "本利用規約（「EULA」）は、あなたとVivy Technologies Co., Limited（「Vivy」「当社」）との間で締結されるものであり、Appleとの間ではありません。Appleではなく、VivyがVVTerm（「本アプリ」）およびそのコンテンツについて単独で責任を負います。本アプリをダウンロード、インストール、または使用することにより、あなたは本EULAに拘束されることに同意します。同意しない場合は、本アプリを使用しないでください。",
+    "s1p2": "本EULAは、Apple Media Servicesの利用規約におけるいかなる利用ルールにも優先しません。あなたは、それらの規約を確認する機会があったことを認めます。",
+    "s2h": "2. ライセンスの範囲",
+    "s2p1": "Vivyは、あなたが所有または管理するApple製品上で、かつ該当するApp Storeの利用ルールが許可する範囲で（Appleが認める場合のファミリー共有、ボリューム購入、レガシーコンタクトを通じたアクセスを含む）、本アプリを使用するための限定的、非独占的、譲渡不可のライセンスをあなたに付与します。",
+    "s2p2pre": "本EULAは、AppleのApp Storeを通じて配布される公式のVVTermバイナリに適用されます。次の場所で公開されているソースコードは ",
+    "s2p2post": " GPL-3.0のもとで別途ライセンスされています。",
+    "s2freeH": "無料版",
+    "s2freeP": "VVTermの無料版は、次の制限を条件として無償で使用できます：ワークスペース1個、サーバー1台、同時接続1個。",
+    "s3h": "3. VVTerm ProとApp Storeでの購入",
+    "s3p1": "VVTerm Proには、App Storeを通じた有効なアプリ内購入が必要です。Proは、ワークスペース、サーバー、同時接続を無制限に解放します。",
+    "s3p2": "サブスクリプションの請求とアカウント管理はAppleが処理します。サブスクリプションは、Appleアカウントの設定から管理・キャンセルできます。",
+    "s4h": "4. 保守とサポート",
+    "s4p": "Vivyは、本EULAまたは適用される法律が要求する範囲で、本アプリの保守およびサポートサービスを提供することについて単独で責任を負います。Appleは、本アプリに関していかなる保守またはサポートサービスを提供する義務も一切負いません。",
+    "s5h": "5. 保証",
+    "s5p1": "適用される法律のもとで効果的に否認されない保証がある限りにおいて、Vivyがそのような保証について単独で責任を負います。",
+    "s5p2": "本アプリが適用される保証に適合しない場合、あなたはAppleに通知でき、Appleは、もしあれば、本アプリについてあなたが支払った購入代金を返金することがあります。適用される法律が許容する最大限の範囲で、Appleは本アプリに関して他のいかなる保証義務も一切負わず、保証への不適合に起因するその他の請求、損失、責任、損害、費用、または経費は、Vivyの単独の責任となります。",
+    "s6h": "6. 製品に関する請求",
+    "s6p": "Appleではなく、Vivyが、本アプリまたはあなたによる本アプリの所有もしくは使用に関するあなたまたは第三者からのあらゆる請求（製品責任の請求、本アプリが適用される法的もしくは規制上の要件に適合しないとの請求、消費者保護、プライバシー、または類似の法令に基づく請求を含む）に対応する責任を負います。",
+    "s7h": "7. 知的財産に関する請求",
+    "s7p": "本アプリまたはあなたによる本アプリの所有および使用が第三者の知的財産権を侵害するとの第三者の請求があった場合、Appleではなく、Vivyが、そのような知的財産侵害の請求の調査、防御、和解、および解消について単独で責任を負います。",
+    "s8h": "8. 法令の遵守",
+    "s8p": "あなたは、米国政府の禁輸措置の対象となっている国もしくは地域、または米国政府によって「テロ支援」国として指定された国もしくは地域に所在しておらず、米国政府の禁止もしくは制限対象者のいずれのリストにも掲載されていないことを表明し、保証します。",
+    "s9h": "9. 第三者の規約とサービス",
+    "s9p1": "本アプリを使用する際、あなたは該当する第三者の規約を遵守しなければなりません。これには、あなたのネットワークもしくは無線通信事業者の規約、iCloudなどのAppleサービス、および本アプリを通じてアクセスする外部サービスやインフラストラクチャ（リモートサーバー、Tailscale、Cloudflare、または類似のプロバイダーなど）の規約が含まれます。",
+    "s9p2": "本アプリは、外部サービスやウェブサイトへのアクセスを可能にする場合があります。それらのサービスは自己責任で利用してください。Vivyは、第三者のサービスを検査または評価する責任を負わず、その可用性、正確性、または内容について責任を負いません。",
+    "s10h": "10. 制限",
+    "s10intro": "あなたは次のことをしてはなりません：",
+    "s10list": [
+      "本アプリをリバースエンジニアリング、逆コンパイル、または逆アセンブルすること",
+      "いかなる専有的な通知やラベルを除去または改変すること",
+      "あなたのApp Storeでの購入を他者と共有または配布すること",
+      "本アプリを違法な目的で使用すること",
+      "リモートサーバーへの不正アクセスを試みること"
+    ],
+    "s11h": "11. SSH接続",
+    "s11intro": "VVTermは、あなたが構成するサーバーへのSSH接続を可能にします。あなたは、次のことについて単独で責任を負います：",
+    "s11list": [
+      "接続するサーバーへのアクセス権限を有していることを確認すること",
+      "あなたの認証情報とSSHキーを保護すること",
+      "本アプリを通じて行われたSSH接続によって実行されたあらゆる行為"
+    ],
+    "s12h": "12. データとプライバシー",
+    "s12pre": "本アプリの利用は、当社の ",
+    "s12link": "プライバシーポリシー",
+    "s12post": " の対象でもあります。当社は、そこに記載されているとおり、技術的およびサポート関連の情報を処理することがあります。",
+    "s13h": "13. iCloud同期",
+    "s13p": "サーバー構成は、Apple iCloudを通じて同期される場合があります。iCloudの利用はAppleの利用規約の対象となります。当社は、iCloudの可用性、またはiCloudの問題に起因するデータの損失について責任を負いません。",
+    "s14h": "14. 保証の否認",
+    "s14p": "本アプリは、明示または黙示を問わず、いかなる種類の保証もなく「現状のまま」提供されます。当社は、本アプリが中断されないこと、エラーがないこと、または安全であることを保証しません。SSH接続は、あなたのデバイスとリモートサーバーとの間で直接行われます。当社はこのトラフィックを中継または検査しません。",
+    "s15h": "15. 責任の制限",
+    "s15p1": "いかなる場合も、VIVY TECHNOLOGIES CO., LIMITEDは、データの損失、不正アクセス、またはサーバーのダウンタイムを含むがこれらに限られない、本アプリの使用から生じる間接的、付随的、特別、結果的、または懲罰的な損害について責任を負いません。",
+    "s15p2": "法律で禁止されていない範囲で、本アプリに起因または関連するすべての請求に対するVivyのあなたへの総責任は、USD 50.00を超えないものとします。",
+    "s16h": "16. 終了",
+    "s16p": "あなたが本規約に違反した場合、本アプリを使用するためのあなたのライセンスは自動的に終了します。Appleも、App Storeを通じてあなたのアクセスを終了させることがあります。",
+    "s17h": "17. 準拠法",
+    "s17p": "本規約は、抵触法の規定にかかわらず、香港特別行政区の法律に準拠するものとします。",
+    "s18h": "18. 第三者受益者",
+    "s18p": "あなたとVivyは、AppleおよびAppleの子会社が本EULAの第三者受益者であること、ならびにあなたが本EULAの条項を承諾した時点で、Appleが第三者受益者として本EULAをあなたに対して行使する権利を有し、かつその権利を承諾したものとみなされることを認め、これに同意します。",
+    "s19h": "19. お問い合わせ",
+    "s19intro": "本アプリに関するご質問、苦情、または請求については、こちらまでご連絡ください：",
+    "phoneLabel": "電話：",
+    "emailLabel": "メール："
+  }
+}

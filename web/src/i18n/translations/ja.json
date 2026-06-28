@@ -1,0 +1,417 @@
+{
+  "header": {
+    "download": "ダウンロード"
+  },
+  "hero": {
+    "title": "Appleデバイスのための、より快適なネイティブSSHクライアント",
+    "h1": "ネイティブだから、心地いいSSH。",
+    "subtitle": "サーバーに接続し、整理し、リモートファイルを操作。Keychainで保護した認証情報を、iPhone、iPad、Macで同期できます。",
+    "primaryCta": "無料で試す",
+    "secondaryCta": "GitHubで見る",
+    "meta": "iOS 16以降またはmacOS 13以降（Apple Silicon）が必要です。ずっと無料、または<a href=\"/pricing\" class=\"text-accent font-medium hover:underline\">買い切りで購入 ›</a>。"
+  },
+  "why": {
+    "title": "VVTermを選ぶ理由",
+    "subtitle": "ネイティブなApple UX、最新のSSHオプション、そして個人ユーザーにも納得の価格。本当に必要なことに集中したターミナルアプリです。",
+    "native": {
+      "title": "iPhone、iPad、Macでネイティブ",
+      "desc": "Appleプラットフォームのために設計された1つのアプリ。どのデバイスでも自然になじむインターフェースです。"
+    },
+    "modern": {
+      "title": "最新のSSHを標準搭載",
+      "desc": "標準SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSHを、別々のツールを使い分けることなく利用できます。"
+    },
+    "sync": {
+      "title": "手間いらずのiCloud同期",
+      "desc": "サーバーのメタデータは自動で同期。認証情報はKeychainで保護されたまま守られます。"
+    },
+    "pricing": {
+      "title": "買い切りもある、フェアな価格",
+      "desc": "個人利用はずっと無料。Proでスケールを解放でき、サブスクリプションが苦手な方には買い切りも用意しています。"
+    }
+  },
+  "features": {
+    "title": "リモート作業を、もっと速く、もっとシンプルに",
+    "subtitle": "VVTermは、日々のリモート作業をAppleデバイス上でより速く、シンプルに、ネイティブに感じられるように作られています。",
+    "rendering": {
+      "title": "速くて正確なターミナル描画",
+      "desc": "libghostty搭載で応答性の高い描画と正しいターミナル動作を実現し、リモートセッションがより快適になります。"
+    },
+    "connect": {
+      "title": "好きな方法でつなぐ",
+      "desc": "使いたいときは標準SSH、必要なときは最新のトランスポートを。セットアップの手間も最小限です。"
+    },
+    "files": {
+      "title": "SFTPファイルブラウザを内蔵",
+      "desc": "リモートフォルダの閲覧、ファイルのアップロードとダウンロード、ディレクトリの作成、名前変更、移動、削除を、別のSFTPアプリに切り替えずに行えます。"
+    },
+    "preview": {
+      "title": "その場でプレビューと編集",
+      "desc": "テキスト、画像、動画ファイルをインラインでプレビューし、対応するテキストファイルを編集。メタデータやPOSIX権限も確認できます。"
+    },
+    "pickup": {
+      "title": "どのデバイスでも続きから",
+      "desc": "Macで始めて、スマートフォンから再接続。サーバーリストはいつもどこでも一緒です。"
+    },
+    "organize": {
+      "title": "サーバーをシンプルに整理",
+      "desc": "ワークスペース、環境、複数タブで、チーム向けプラットフォームのような負担なく個人のインフラを管理できます。"
+    }
+  },
+  "useCases": {
+    "title": "こんな方へ",
+    "subtitle": "実機を管理しているけれど、ターミナルを開くだけのために肥大化したコントロールプレーンは要らない。そんな方のために。",
+    "solo": {
+      "title": "個人開発者",
+      "desc": "サイドプロジェクト、クライアントワーク、小規模な本番スタックに、すっきりしたSSHワークフローを。"
+    },
+    "homelab": {
+      "title": "ホームラボユーザー",
+      "desc": "コンテナの確認、マシンの更新、サービス間の移動を、すでに使っているAppleデバイスから。"
+    },
+    "apple": {
+      "title": "Apple中心の技術系ユーザー",
+      "desc": "iPhone、iPad、Macで暮らしているなら、VVTermはその環境に逆らわず、ぴたりと収まります。"
+    },
+    "ai": {
+      "title": "リモートAIとサーバーのワークフロー",
+      "desc": "Codex、Claude Code、OpenCode、リモートエージェント、GPUマシン、推論ホスト、自動化サーバーを、デスクを離れていても確認できます。"
+    }
+  },
+  "pricing": {
+    "title": "ずっと無料。必要になったらアップグレード。",
+    "subtitle": "無料で始めて、構成が大きくなったらアップグレード。あるいは買い切りで、それきり。",
+    "free": {
+      "name": "無料",
+      "description": "個人利用はずっと無料",
+      "price": "$0",
+      "period": "/永久",
+      "features": [
+        "ワークスペース1個",
+        "サーバー1台",
+        "接続タブ1個",
+        "SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSH",
+        "Ghostty搭載のターミナル描画",
+        "iCloud同期",
+        "音声コマンド",
+        "Keychainによるセキュリティ"
+      ],
+      "cta": "VVTermをダウンロード"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "必要なときにスケールを解放",
+      "monthly": {
+        "price": "$6.49",
+        "period": "/月"
+      },
+      "yearly": {
+        "price": "$24.99",
+        "period": "/年",
+        "save": "68%お得"
+      },
+      "features": [
+        "ワークスペース無制限",
+        "サーバー無制限",
+        "接続タブ無制限",
+        "カスタム環境",
+        "優先サポート",
+        "今後のすべての機能"
+      ],
+      "ctaMonthly": "月額でアップグレード",
+      "ctaYearly": "年額でアップグレード"
+    },
+    "lifetime": {
+      "name": "買い切り",
+      "description": "一度の支払いでシンプルに",
+      "price": "$49.99",
+      "badge": "買い切りあり",
+      "features": [
+        "Proのすべて",
+        "1回限りの購入",
+        "今後のすべてのアップデート",
+        "ずっと優先サポート"
+      ],
+      "cta": "買い切りで購入",
+      "guarantee": "返金はApp Storeを通じてAppleが対応します"
+    }
+  },
+  "faq": {
+    "title": "疑問に、お答えします。",
+    "q1": {
+      "question": "VVTermとは何ですか？",
+      "answer": "VVTermはiOSとmacOS向けのSSHターミナルアプリです。リモートサーバーを管理・接続でき、Appleデバイス間でiCloud同期できます。"
+    },
+    "q2": {
+      "question": "iCloud同期はどのように動作しますか？",
+      "answer": "サーバー構成はiCloudを通じてすべてのデバイスに同期されます。パスワードとSSHキーはApple Keychainに保存され、有効にすればiCloud Keychainで同期できます。"
+    },
+    "q3": {
+      "question": "どの接続方式に対応していますか？",
+      "answer": "VVTermは標準SSHに加えて、Mosh、Tailscale SSH、Cloudflare Tunnel SSHに対応しています。認証情報は必要に応じてApple Keychainで保護されます。"
+    },
+    "q4": {
+      "question": "VVTermはiPadで動作しますか？",
+      "answer": "はい。VVTermはiPhone、iPad、Macで動作し、iOS版にはEsc、Tab、Ctrl、矢印キーを備えたキーボードツールバーが含まれます。"
+    },
+    "q5": {
+      "question": "どのターミナルエンジンを使っていますか？",
+      "answer": "VVTermはGhosttyと同じ描画エンジンであるlibghosttyを使用し、速く正確なターミナルエミュレーションを実現します。"
+    },
+    "q6": {
+      "question": "無料版とProの違いは何ですか？",
+      "answer": "無料版にはワークスペース1個、サーバー1台、接続タブ1個が含まれます。Proでは、ワークスペース、サーバー、同時接続、カスタム環境がすべて無制限になります。"
+    },
+    "q7": {
+      "question": "1回の購入を複数のデバイスで使えますか？",
+      "answer": "はい。Proの購入はApp Storeを通じて同期されます。各デバイスで同じApple IDでサインインすれば、どこでもProが利用できます。"
+    },
+    "q8": {
+      "question": "返金ポリシーはどうなっていますか？",
+      "answer": "返金はApp Storeを通じてAppleが対応します。リクエストするには、reportaproblem.apple.com のAppleの返金フローをご利用ください。"
+    },
+    "q9": {
+      "question": "システム要件は何ですか？",
+      "answer": "iPhoneとiPadはiOS 16以降、MacはApple Silicon搭載のmacOS 13 Ventura以降です。Intel Macには対応していません。"
+    },
+    "q10": {
+      "question": "VVTermにはリモートファイル閲覧機能が含まれますか？",
+      "answer": "はい。VVTermには、フォルダの閲覧、テキスト・画像・動画ファイルのプレビュー、アップロードとダウンロード、項目の名前変更や移動、フォルダの作成、対応サーバーでのPOSIX権限の編集ができる、内蔵のSFTPファイルビューが含まれます。"
+    }
+  },
+  "platforms": {
+    "title": "1つのアプリが、すべてのAppleデバイスでネイティブに",
+    "subtitle": "VVTermは各プラットフォームに最適化されます。MacではフルGPUターミナル、iPadでは本格的なワークステーション、iPhoneでは素早いアクセスを。",
+    "cta": "詳しく見る",
+    "mac": {
+      "tagline": "タブ、SFTP、iCloud同期サーバーを備えたGPUターミナル。"
+    },
+    "ipad": {
+      "tagline": "ハードウェアキーボード、マルチタスク、Moshローミング。"
+    },
+    "iphone": {
+      "tagline": "どこからでも再接続して、外出先でトラブルに対応。"
+    }
+  },
+  "resources": {
+    "title": "学び、比べ、セットアップする",
+    "subtitle": "ガイド、ドキュメント、そして他製品との直接比較で、VVTermを最大限に活用しましょう。",
+    "guides": {
+      "title": "ガイド",
+      "desc": "SSH、Mosh、Tailscale SSH、SFTPのステップごとの手順書。"
+    },
+    "docs": {
+      "title": "ドキュメント",
+      "desc": "セットアップ、認証、同期、ファイルブラウザのリファレンス。"
+    },
+    "compare": {
+      "title": "比較",
+      "desc": "VVTermがTermiusやBlink Shellとどう違うかを確認できます。"
+    }
+  },
+  "closing": {
+    "title": "あなたのサーバーを、どこへでも。",
+    "subtitle": "iPhone、iPad、Macで無料で始められます。",
+    "cta": "VVTermをダウンロード"
+  },
+  "home": {
+    "metaTitle": "VVTerm - iPhone、iPad、Mac向けSSHターミナル＆SFTPクライアント",
+    "metaDescription": "あなたのサーバーを、どこへでも。iPhone、iPad、Mac向けのネイティブSSHターミナル＆SFTPクライアント。tmuxセッション維持、Mosh、Tailscale・Cloudflare Tunnel SSH、ライブ監視、iCloud同期、Keychainセキュリティを搭載。",
+    "promo": {
+      "title": "オープンソース。ずっと無料。",
+      "desc": "標準SSH、Mosh、Tailscale SSH、Cloudflare Tunnel SSHを1つのネイティブアプリに。tmuxセッション維持、SFTPファイルブラウザ、ライブ監視、iCloud同期、Keychainセキュリティも備えています。"
+    },
+    "tour": {
+      "title": "VVTermを知る。",
+      "c0": "一瞬で応答するターミナル。",
+      "c1": "シェルのすぐ隣に、リモートファイル。",
+      "c2": "すべてのサーバーを、きちんと整理。",
+      "c3": "Moshでどこからでも再接続。",
+      "c4": "iPhone、iPad、Macで同期。",
+      "c5": "声でターミナルを操作。"
+    },
+    "connect": {
+      "eyebrow": "最新のSSHを標準搭載",
+      "title": "どのマシンにも、4通りの方法で。",
+      "body": "使いたいときは<strong>標準SSH</strong>、必要なときは<strong>Mosh</strong>、<strong>Tailscale SSH</strong>、<strong>Cloudflare Tunnel SSH</strong>を。別のツールを使い分ける必要はありません。",
+      "caption": "サーバーごとにトランスポートを切り替え。",
+      "captionLink": "すべての接続方式を見る ›"
+    },
+    "tmux": {
+      "eyebrow": "作業を失わない",
+      "title": "切断を乗り越えるセッション。",
+      "body": "VVTermが<strong>tmux</strong>を管理するので、接続が途切れても、スマートフォンがスリープしても、アプリを切り替えても、長いビルドやマイグレーションは動き続けます。<strong>tmuxを自動インストール</strong>し、調整済みの設定を用意し、再接続した瞬間に再アタッチします。",
+      "link": "tmuxによる維持のしくみ"
+    },
+    "custom": {
+      "title": "自分仕様に。",
+      "body": "440種類の内蔵テーマ、Nerd Fonts、カーソルスタイル、そして自分のコマンドスニペットやショートカットで組み立てるキーボードツールバー。すべてデバイス間で同期されます。",
+      "link": "テーマとカスタマイズ"
+    },
+    "monitor": {
+      "title": "リアルタイムで把握。",
+      "body": "CPU、メモリ、ネットワーク、ディスク、負荷、上位プロセスをリアルタイムで。シェルのすぐ隣で、Linux、macOS、BSD、Windowsホストに対応します。",
+      "link": "ライブサーバー監視"
+    },
+    "windows": {
+      "caption": "Windowsにもつなぎますか？",
+      "link": "WindowsサーバーへSSH ›"
+    },
+    "files": {
+      "eyebrow": "ファイルを標準搭載",
+      "title": "シェルのすぐ隣に、SFTPブラウザ。",
+      "body": "リモートフォルダを閲覧し、<strong>アップロードとダウンロード</strong>、ディレクトリの作成、名前変更、移動、削除を行い、<strong>テキスト、画像、動画をプレビュー</strong>したり、POSIX権限を編集したり。すべて2つ目のアプリなしで。",
+      "expand": "SFTPブラウザを見る",
+      "modalEyebrow": "SFTPファイルブラウザ",
+      "modalTitle": "リモートファイルに必要なすべて。",
+      "modalBody": "VVTermに組み込まれたフル機能のファイルマネージャー。<strong>閲覧、アップロード、ダウンロード、名前変更、移動、削除</strong>、フォルダの作成、<strong>テキスト、画像、動画のプレビュー</strong>、対応テキストファイルの編集、許可されたサーバーでのPOSIX権限の調整ができます。",
+      "card0title": "閲覧と管理",
+      "card0body": "リモートフォルダを移動し、その場で名前変更、移動、削除、ディレクトリ作成ができます。",
+      "card1title": "双方向の転送",
+      "card1body": "デバイスからアップロード、デバイスへダウンロード。単一ファイルでもフォルダ丸ごとでもSFTPで。",
+      "card2title": "インラインでプレビュー",
+      "card2body": "テキスト、画像、動画を、先にダウンロードせずVVTerm内で直接開けます。",
+      "card3title": "テキストファイルを編集",
+      "card3body": "対応テキストファイルを素早く編集し、そのままサーバーへ保存できます。",
+      "card4title": "POSIX権限",
+      "card4body": "許可されたサーバーで、所有者、グループ、その他の権限ビットを確認・調整できます。",
+      "card5title": "シェルのすぐ隣に",
+      "card5body": "同じサーバーのターミナルとファイルブラウザを、アプリを切り替えずに行き来できます。",
+      "outroTitle": "2つ目のアプリも、コンテキストの切り替えもなし。",
+      "outroBody": "多くのSSHクライアントはファイル操作のたびに別のSFTPアプリへ送ります。VVTermはファイルとターミナルを一緒にしておくので、設定の確認、権限の修正、ログの取得が作業の流れを妨げません。",
+      "overviewLink": "SFTPの全体像を読む"
+    },
+    "voice": {
+      "eyebrow": "音声でコマンド",
+      "title": "声でターミナルを操作。",
+      "body": "<strong>オンデバイスの文字起こし</strong>で、外出先でもコマンドを口述できます。VVTermはMLXモデルまたはApple Speechを使って音声をシェル入力に変換。キーボードが使えないときに便利です。"
+    },
+    "work": {
+      "eyebrow": "日々のリモート作業",
+      "all": "すべての機能"
+    }
+  },
+  "footer": {
+    "tagline": "iPhone、iPad、Mac向けのネイティブSSHクライアント",
+    "description": "オープンソースでずっと無料。Proと買い切りへの任意アップグレードもあります。",
+    "productTitle": "製品",
+    "resourcesTitle": "リソース",
+    "navWhy": "VVTermを選ぶ理由",
+    "navFeatures": "機能",
+    "navPricing": "料金",
+    "navFaq": "よくある質問",
+    "copyright": "Vivy Technologies Co., Limited",
+    "discord": "Discord",
+    "privacy": "プライバシー",
+    "terms": "利用規約（EULA）",
+    "refunds": "返金",
+    "support": "サポート"
+  },
+  "nav": {
+    "platforms": "プラットフォーム",
+    "features": "機能",
+    "pricing": "料金",
+    "resources": "リソース",
+    "product": "製品",
+    "legal": "法的情報",
+    "guides": "ガイド",
+    "documentation": "ドキュメント",
+    "support": "サポート",
+    "comparisons": "比較",
+    "compare": "比較する",
+    "compareApps": "アプリを比較",
+    "allComparisons": "すべての比較",
+    "download": "ダウンロード",
+    "downloadVVTerm": "VVTermをダウンロード",
+    "downloadAppStore": "App Storeでダウンロード",
+    "exploreVVTerm": "VVTermを見る",
+    "getVVTerm": "VVTermを入手",
+    "getStarted": "はじめる",
+    "learn": "学ぶ",
+    "terminal": "ターミナル",
+    "connections": "接続",
+    "filesSync": "ファイルと同期",
+    "allFeatures": "すべての機能",
+    "allFeaturesArrow": "すべての機能 ›",
+    "home": "ホーム",
+    "platformLink": "{name}向けのVVTerm",
+    "privacyPolicy": "プライバシーポリシー",
+    "termsOfUse": "利用規約",
+    "privacy": "プライバシー",
+    "terms": "利用規約（EULA）",
+    "refunds": "返金",
+    "requirement": "VVTermにはiOS 16以降のiPhoneまたはiPad、もしくはmacOS 13 Ventura以降のApple Silicon搭載Macが必要です。サーバーのメタデータはiCloudを通じて同期され、パスワードとSSHキーはApple Keychainに保存されます。購入と返金はApp Storeを通じてAppleが対応します。",
+    "copyright": "Copyright © {year} Vivy Technologies Co., Limited. All rights reserved.",
+    "feature": {
+      "ssh-terminal": "SSHターミナル",
+      "tmux-session-persistence": "tmux維持",
+      "terminal-customization": "カスタマイズ",
+      "sftp-file-browser": "SFTPファイル",
+      "server-monitoring": "サーバー監視",
+      "windows-ssh": "Windows SSH",
+      "mosh": "Mosh",
+      "tailscale-ssh": "Tailscale SSH",
+      "cloudflare-tunnel-ssh": "Cloudflare Tunnel SSH",
+      "icloud-sync-keychain": "iCloud同期とKeychain"
+    }
+  },
+  "cta": {
+    "title": "あなたのサーバーを、どこへでも。",
+    "subtitle": "iPhone、iPad、Macで無料で始められます。必要になったらProにアップグレードするか、買い切りで購入できます。",
+    "seePricing": "料金を見る"
+  },
+  "sidebar": {
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "iPhoneからサーバーへSSH接続する方法",
+        "group": "はじめに"
+      },
+      "ssh-from-mac": {
+        "title": "VVTermでMacからSSH接続する方法",
+        "group": "はじめに"
+      },
+      "set-up-mosh-on-ios": {
+        "title": "iPhoneとiPadでMoshをセットアップする",
+        "group": "接続"
+      },
+      "tailscale-ssh-setup": {
+        "title": "Tailscale SSHで接続する",
+        "group": "接続"
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "Cloudflare Tunnel SSHで接続する",
+        "group": "接続"
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "iOSでSFTPによりファイルを転送する",
+        "group": "ファイル"
+      }
+    },
+    "docs": {
+      "getting-started": {
+        "title": "はじめに",
+        "group": "基本"
+      },
+      "adding-a-server": {
+        "title": "サーバーを追加する",
+        "group": "基本"
+      },
+      "authentication-and-keys": {
+        "title": "認証とSSHキー",
+        "group": "基本"
+      },
+      "sftp-file-browser": {
+        "title": "SFTPファイルブラウザを使う",
+        "group": "リモートで作業する"
+      },
+      "icloud-sync": {
+        "title": "iCloud同期とKeychain",
+        "group": "リモートで作業する"
+      },
+      "workspaces-and-tabs": {
+        "title": "ワークスペース、環境、タブ",
+        "group": "リモートで作業する"
+      }
+    }
+  }
+}
