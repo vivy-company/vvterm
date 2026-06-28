@@ -1,0 +1,417 @@
+{
+  "header": {
+    "download": "Tải xuống"
+  },
+  "hero": {
+    "title": "Trình khách SSH gốc tốt hơn cho thiết bị Apple",
+    "h1": "SSH với trải nghiệm thuần Apple.",
+    "subtitle": "Kết nối tới máy chủ, sắp xếp gọn gàng, duyệt tệp từ xa và luôn đồng bộ với thông tin đăng nhập được bảo vệ bằng Keychain trên iPhone, iPad và Mac của bạn.",
+    "primaryCta": "Dùng thử miễn phí",
+    "secondaryCta": "Xem trên GitHub",
+    "meta": "Yêu cầu iOS 16+ hoặc macOS 13+ (Apple Silicon). Miễn phí trọn đời, hoặc <a href=\"/pricing\" class=\"text-accent font-medium hover:underline\">mua bản trọn đời ›</a>."
+  },
+  "why": {
+    "title": "Vì sao chọn VVTerm",
+    "subtitle": "Một ứng dụng terminal tập trung dành cho những người muốn trải nghiệm Apple gốc, các tùy chọn SSH hiện đại và mức giá vẫn hợp lý cho người dùng cá nhân.",
+    "native": {
+      "title": "Gốc trên iPhone, iPad và Mac",
+      "desc": "Một ứng dụng được thiết kế riêng cho nền tảng Apple, với giao diện thân thuộc ở mọi nơi bạn dùng."
+    },
+    "modern": {
+      "title": "Tích hợp sẵn SSH hiện đại",
+      "desc": "Dùng SSH tiêu chuẩn, Mosh, Tailscale SSH hoặc Cloudflare Tunnel SSH mà không phải xoay xở với nhiều công cụ riêng lẻ."
+    },
+    "sync": {
+      "title": "Đồng bộ iCloud không phiền phức",
+      "desc": "Giữ siêu dữ liệu máy chủ tự động đồng bộ trong khi thông tin đăng nhập vẫn được bảo vệ trong Keychain."
+    },
+    "pricing": {
+      "title": "Giá hợp lý kèm bản trọn đời",
+      "desc": "Miễn phí trọn đời cho mục đích cá nhân, Pro mở rộng quy mô, và có bản trọn đời nếu bạn không thích đăng ký thuê bao."
+    }
+  },
+  "features": {
+    "title": "Được xây dựng cho công việc từ xa nhanh và đơn giản hơn",
+    "subtitle": "VVTerm được tạo ra để công việc từ xa hằng ngày trở nên nhanh hơn, đơn giản hơn và gần gũi hơn trên thiết bị Apple.",
+    "rendering": {
+      "title": "Hiển thị terminal nhanh và chính xác",
+      "desc": "Được hỗ trợ bởi libghostty để vẽ phản hồi nhanh, hành vi terminal đúng chuẩn và phiên làm việc từ xa mượt mà hơn."
+    },
+    "connect": {
+      "title": "Kết nối theo cách của bạn",
+      "desc": "SSH tiêu chuẩn khi bạn muốn, các giao thức hiện đại khi bạn cần, với ít rắc rối thiết lập hơn."
+    },
+    "files": {
+      "title": "Trình duyệt tệp SFTP tích hợp",
+      "desc": "Duyệt thư mục từ xa, tải lên và tải xuống tệp, tạo thư mục, đổi tên, di chuyển hoặc xóa mục mà không cần chuyển sang ứng dụng SFTP riêng."
+    },
+    "preview": {
+      "title": "Xem trước và chỉnh sửa tại chỗ",
+      "desc": "Xem trước tệp văn bản, hình ảnh và video ngay trong ứng dụng, chỉnh sửa các tệp văn bản được hỗ trợ, và kiểm tra siêu dữ liệu cùng quyền POSIX."
+    },
+    "pickup": {
+      "title": "Tiếp tục trên mọi thiết bị",
+      "desc": "Bắt đầu trên Mac, kết nối lại từ điện thoại, và mang theo danh sách máy chủ ở mọi nơi."
+    },
+    "organize": {
+      "title": "Sắp xếp máy chủ đơn giản",
+      "desc": "Không gian làm việc, môi trường và nhiều tab giúp bạn quản lý hạ tầng cá nhân mà không cần đến nền tảng dành cho nhóm cồng kềnh."
+    }
+  },
+  "useCases": {
+    "title": "Dành cho ai",
+    "subtitle": "Dành cho những người quản lý máy thật, nhưng không muốn một bảng điều khiển nặng nề chỉ để mở một terminal.",
+    "solo": {
+      "title": "Lập trình viên độc lập",
+      "desc": "Cho các dự án phụ, công việc với khách hàng và các hệ thống production nhỏ cần một quy trình SSH gọn gàng."
+    },
+    "homelab": {
+      "title": "Người dùng homelab",
+      "desc": "Kiểm tra container, cập nhật máy và chuyển qua lại giữa các dịch vụ ngay trên những thiết bị Apple bạn đang dùng."
+    },
+    "apple": {
+      "title": "Người dùng kỹ thuật ưu tiên Apple",
+      "desc": "Nếu bạn sống cùng iPhone, iPad và Mac, VVTerm hòa hợp với môi trường đó thay vì chống lại nó."
+    },
+    "ai": {
+      "title": "Quy trình AI và máy chủ từ xa",
+      "desc": "Kiểm tra Codex, Claude Code, OpenCode, các agent từ xa, máy GPU, host suy luận và máy chủ tự động hóa khi bạn rời bàn làm việc."
+    }
+  },
+  "pricing": {
+    "title": "Miễn phí trọn đời. Nâng cấp khi cần thêm.",
+    "subtitle": "Bắt đầu miễn phí, nâng cấp khi hệ thống của bạn lớn lên, hoặc mua trọn đời cho xong.",
+    "free": {
+      "name": "Miễn phí",
+      "description": "Miễn phí trọn đời cho mục đích cá nhân",
+      "price": "$0",
+      "period": "/trọn đời",
+      "features": [
+        "1 không gian làm việc",
+        "1 máy chủ",
+        "1 tab kết nối",
+        "SSH, Mosh, Tailscale SSH và Cloudflare Tunnel SSH",
+        "Hiển thị terminal bằng Ghostty",
+        "Đồng bộ iCloud",
+        "Ra lệnh bằng giọng nói",
+        "Bảo mật Keychain"
+      ],
+      "cta": "Tải VVTerm"
+    },
+    "pro": {
+      "name": "Pro",
+      "description": "Mở rộng quy mô khi bạn cần thêm",
+      "monthly": {
+        "price": "$6.49",
+        "period": "/tháng"
+      },
+      "yearly": {
+        "price": "$24.99",
+        "period": "/năm",
+        "save": "Tiết kiệm 68%"
+      },
+      "features": [
+        "Không gian làm việc không giới hạn",
+        "Máy chủ không giới hạn",
+        "Tab kết nối không giới hạn",
+        "Môi trường tùy chỉnh",
+        "Hỗ trợ ưu tiên",
+        "Mọi tính năng tương lai"
+      ],
+      "ctaMonthly": "Nâng cấp theo tháng",
+      "ctaYearly": "Nâng cấp theo năm"
+    },
+    "lifetime": {
+      "name": "Trọn đời",
+      "description": "Trả một lần và giữ mọi thứ đơn giản",
+      "price": "$49.99",
+      "badge": "Có bản trọn đời",
+      "features": [
+        "Mọi thứ trong Pro",
+        "Mua một lần",
+        "Mọi bản cập nhật tương lai",
+        "Hỗ trợ ưu tiên trọn đời"
+      ],
+      "cta": "Mua trọn đời",
+      "guarantee": "Hoàn tiền do Apple xử lý qua App Store"
+    }
+  },
+  "faq": {
+    "title": "Có thắc mắc? Có câu trả lời.",
+    "q1": {
+      "question": "VVTerm là gì?",
+      "answer": "VVTerm là một ứng dụng terminal SSH cho iOS và macOS. Nó cho phép bạn quản lý và kết nối tới máy chủ từ xa với đồng bộ iCloud trên các thiết bị Apple của bạn."
+    },
+    "q2": {
+      "question": "Đồng bộ iCloud hoạt động thế nào?",
+      "answer": "Cấu hình máy chủ đồng bộ qua iCloud tới tất cả thiết bị của bạn. Mật khẩu và khóa SSH được lưu trong Apple Keychain và có thể đồng bộ qua iCloud Keychain khi bật."
+    },
+    "q3": {
+      "question": "Hỗ trợ những phương thức kết nối nào?",
+      "answer": "VVTerm hỗ trợ SSH tiêu chuẩn cùng Mosh, Tailscale SSH và Cloudflare Tunnel SSH. Thông tin đăng nhập luôn được bảo vệ trong Apple Keychain khi cần."
+    },
+    "q4": {
+      "question": "VVTerm có chạy trên iPad không?",
+      "answer": "Có. VVTerm chạy trên iPhone, iPad và Mac, và phiên bản iOS có thanh công cụ bàn phím với phím Esc, Tab, Ctrl và các phím mũi tên."
+    },
+    "q5": {
+      "question": "Nó dùng engine terminal nào?",
+      "answer": "VVTerm dùng libghostty, chính là engine hiển thị của Ghostty, để giả lập terminal nhanh và chính xác."
+    },
+    "q6": {
+      "question": "Bản Miễn phí và Pro gồm những gì?",
+      "answer": "Bản Miễn phí gồm 1 không gian làm việc, 1 máy chủ và 1 tab kết nối. Pro mở khóa không gian làm việc, máy chủ, kết nối đồng thời và môi trường tùy chỉnh không giới hạn."
+    },
+    "q7": {
+      "question": "Tôi có thể dùng một lần mua trên nhiều thiết bị không?",
+      "answer": "Có. Lần mua Pro của bạn đồng bộ qua App Store. Hãy đăng nhập cùng một Apple ID trên các thiết bị để mở khóa Pro ở mọi nơi."
+    },
+    "q8": {
+      "question": "Chính sách hoàn tiền thế nào?",
+      "answer": "Hoàn tiền do Apple xử lý qua App Store. Để yêu cầu, hãy dùng quy trình hoàn tiền của Apple tại reportaproblem.apple.com."
+    },
+    "q9": {
+      "question": "Yêu cầu hệ thống là gì?",
+      "answer": "iOS 16+ trên iPhone và iPad, hoặc macOS 13+ Ventura trên Mac dùng Apple Silicon. Mac dùng Intel không được hỗ trợ."
+    },
+    "q10": {
+      "question": "VVTerm có duyệt tệp từ xa không?",
+      "answer": "Có. VVTerm có sẵn chế độ xem tệp SFTP để duyệt thư mục, xem trước tệp văn bản, hình ảnh và video, tải lên và tải xuống, đổi tên hoặc di chuyển mục, tạo thư mục, và chỉnh sửa quyền POSIX trên các máy chủ được hỗ trợ."
+    }
+  },
+  "platforms": {
+    "title": "Một ứng dụng, gốc trên mọi thiết bị Apple",
+    "subtitle": "VVTerm thích ứng với từng nền tảng — terminal GPU đầy đủ trên Mac, một máy trạm thực thụ trên iPad, và truy cập nhanh trên iPhone.",
+    "cta": "Tìm hiểu thêm",
+    "mac": {
+      "tagline": "Terminal GPU với tab, SFTP và máy chủ đồng bộ qua iCloud."
+    },
+    "ipad": {
+      "tagline": "Bàn phím vật lý, đa nhiệm và phiên roaming Mosh."
+    },
+    "iphone": {
+      "tagline": "Kết nối lại từ bất cứ đâu và xử lý sự cố trên đường đi."
+    }
+  },
+  "resources": {
+    "title": "Học hỏi, so sánh và thiết lập",
+    "subtitle": "Hướng dẫn, tài liệu và các bài so sánh trực tiếp giúp bạn tận dụng tối đa VVTerm.",
+    "guides": {
+      "title": "Hướng dẫn",
+      "desc": "Hướng dẫn từng bước cho SSH, Mosh, Tailscale SSH và SFTP."
+    },
+    "docs": {
+      "title": "Tài liệu",
+      "desc": "Tham khảo cho thiết lập, xác thực, đồng bộ và trình duyệt tệp."
+    },
+    "compare": {
+      "title": "So sánh",
+      "desc": "Xem VVTerm so kè ra sao với Termius và Blink Shell."
+    }
+  },
+  "closing": {
+    "title": "Máy chủ của bạn. Ở khắp mọi nơi.",
+    "subtitle": "Bắt đầu miễn phí trên iPhone, iPad và Mac.",
+    "cta": "Tải VVTerm"
+  },
+  "home": {
+    "metaTitle": "VVTerm - Terminal SSH và trình khách SFTP cho iPhone, iPad và Mac",
+    "metaDescription": "Máy chủ của bạn. Ở khắp mọi nơi. Terminal SSH gốc và trình khách SFTP cho iPhone, iPad và Mac với duy trì phiên tmux, Mosh, Tailscale & Cloudflare Tunnel SSH, giám sát trực tiếp, đồng bộ iCloud và bảo mật Keychain.",
+    "promo": {
+      "title": "Mã nguồn mở. Miễn phí trọn đời.",
+      "desc": "SSH tiêu chuẩn, Mosh, Tailscale SSH và Cloudflare Tunnel SSH trong một ứng dụng gốc — cùng duy trì phiên tmux, trình duyệt tệp SFTP, giám sát trực tiếp, đồng bộ iCloud và bảo mật Keychain."
+    },
+    "tour": {
+      "title": "Làm quen với VVTerm.",
+      "c0": "Một terminal mang lại cảm giác tức thì.",
+      "c1": "Tệp từ xa, ngay cạnh shell của bạn.",
+      "c2": "Mọi máy chủ, được sắp xếp gọn gàng.",
+      "c3": "Kết nối lại từ bất cứ đâu với Mosh.",
+      "c4": "Đồng bộ trên iPhone, iPad và Mac.",
+      "c5": "Trò chuyện với terminal bằng giọng nói."
+    },
+    "connect": {
+      "eyebrow": "SSH hiện đại, tích hợp sẵn",
+      "title": "Tiếp cận mọi máy, theo bốn cách.",
+      "body": "Dùng <strong>SSH tiêu chuẩn</strong> khi bạn muốn và <strong>Mosh</strong>, <strong>Tailscale SSH</strong>, hoặc <strong>Cloudflare Tunnel SSH</strong> khi bạn cần — không cần thêm công cụ nào để xoay xở.",
+      "caption": "Đổi giao thức cho từng máy chủ.",
+      "captionLink": "Xem mọi phương thức kết nối ›"
+    },
+    "tmux": {
+      "eyebrow": "Không bao giờ mất việc đang làm",
+      "title": "Phiên làm việc sống sót qua mọi lần rớt mạng.",
+      "body": "VVTerm quản lý <strong>tmux</strong> giúp bạn, nên một bản build hay quá trình migration dài hơi vẫn chạy khi kết nối chập chờn, điện thoại ngủ, hay bạn chuyển ứng dụng. Nó <strong>tự động cài tmux</strong>, đi kèm cấu hình đã tinh chỉnh, và gắn lại ngay khi bạn kết nối trở lại.",
+      "link": "Cách duy trì phiên tmux hoạt động"
+    },
+    "custom": {
+      "title": "Biến nó thành của riêng bạn.",
+      "body": "440 chủ đề tích hợp, Nerd Fonts, kiểu con trỏ, và một thanh công cụ bàn phím bạn tự xây dựng với các đoạn lệnh và phím tắt của riêng mình — đồng bộ trên các thiết bị.",
+      "link": "Chủ đề & tùy chỉnh"
+    },
+    "monitor": {
+      "title": "Theo dõi trực tiếp.",
+      "body": "CPU, bộ nhớ, mạng, ổ đĩa, tải và các tiến trình hàng đầu theo thời gian thực — ngay cạnh shell của bạn, trên các host Linux, macOS, BSD và Windows.",
+      "link": "Giám sát máy chủ trực tiếp"
+    },
+    "windows": {
+      "caption": "Kết nối tới Windows nữa?",
+      "link": "SSH tới máy chủ Windows ›"
+    },
+    "files": {
+      "eyebrow": "Tệp, tích hợp sẵn",
+      "title": "Trình duyệt SFTP, ngay cạnh shell của bạn.",
+      "body": "Duyệt thư mục từ xa, <strong>tải lên và tải xuống</strong>, tạo thư mục, đổi tên, di chuyển và xóa — rồi <strong>xem trước văn bản, hình ảnh và video</strong> hoặc chỉnh quyền POSIX, tất cả mà không cần ứng dụng thứ hai.",
+      "expand": "Khám phá trình duyệt SFTP",
+      "modalEyebrow": "Trình duyệt tệp SFTP",
+      "modalTitle": "Mọi thứ bạn cần cho tệp từ xa.",
+      "modalBody": "Một trình quản lý tệp đầy đủ tích hợp trong VVTerm — <strong>duyệt, tải lên, tải xuống, đổi tên, di chuyển và xóa</strong>, tạo thư mục, <strong>xem trước văn bản, hình ảnh và video</strong>, chỉnh sửa các tệp văn bản được hỗ trợ, và điều chỉnh quyền POSIX trên các máy chủ cho phép.",
+      "card0title": "Duyệt và quản lý",
+      "card0body": "Di chuyển qua các thư mục từ xa, rồi đổi tên, di chuyển, xóa và tạo thư mục ngay tại chỗ.",
+      "card1title": "Truyền hai chiều",
+      "card1body": "Tải lên từ thiết bị của bạn và tải xuống về máy — từng tệp hoặc cả thư mục qua SFTP.",
+      "card2title": "Xem trước ngay trong ứng dụng",
+      "card2body": "Mở văn bản, hình ảnh và video ngay trong VVTerm mà không cần tải về trước.",
+      "card3title": "Chỉnh sửa tệp văn bản",
+      "card3body": "Chỉnh nhanh các tệp văn bản được hỗ trợ và lưu thẳng lại máy chủ.",
+      "card4title": "Quyền POSIX",
+      "card4body": "Kiểm tra và điều chỉnh các bit quyền của chủ sở hữu, nhóm và những người khác trên các máy chủ cho phép.",
+      "card5title": "Ngay cạnh shell của bạn",
+      "card5body": "Chuyển qua lại giữa terminal và trình duyệt tệp của cùng một máy chủ mà không cần đổi ứng dụng.",
+      "outroTitle": "Không cần ứng dụng thứ hai. Không phải chuyển ngữ cảnh.",
+      "outroBody": "Hầu hết trình khách SSH đẩy bạn sang một ứng dụng SFTP riêng để làm việc với tệp. VVTerm giữ tệp và terminal cùng nhau, nên việc kiểm tra một cấu hình, sửa một quyền, hay lấy một log không bao giờ làm gián đoạn mạch làm việc.",
+      "overviewLink": "Đọc tổng quan đầy đủ về SFTP"
+    },
+    "voice": {
+      "eyebrow": "Giọng nói thành lệnh",
+      "title": "Trò chuyện với terminal của bạn.",
+      "body": "Đọc lệnh khi đang di chuyển với <strong>nhận dạng giọng nói trên thiết bị</strong>. VVTerm biến giọng nói thành đầu vào shell bằng các mô hình MLX hoặc Apple Speech — hữu ích khi bạn không có bàn phím trong tay."
+    },
+    "work": {
+      "eyebrow": "Công việc từ xa hằng ngày",
+      "all": "Tất cả tính năng"
+    }
+  },
+  "footer": {
+    "tagline": "Trình khách SSH gốc cho iPhone, iPad và Mac",
+    "description": "Mã nguồn mở, miễn phí trọn đời, với tùy chọn nâng cấp Pro và trọn đời.",
+    "productTitle": "Sản phẩm",
+    "resourcesTitle": "Tài nguyên",
+    "navWhy": "Vì sao chọn VVTerm",
+    "navFeatures": "Tính năng",
+    "navPricing": "Bảng giá",
+    "navFaq": "Câu hỏi thường gặp",
+    "copyright": "Vivy Technologies Co., Limited",
+    "discord": "Discord",
+    "privacy": "Quyền riêng tư",
+    "terms": "Điều khoản sử dụng (EULA)",
+    "refunds": "Hoàn tiền",
+    "support": "Hỗ trợ"
+  },
+  "nav": {
+    "platforms": "Nền tảng",
+    "features": "Tính năng",
+    "pricing": "Bảng giá",
+    "resources": "Tài nguyên",
+    "product": "Sản phẩm",
+    "legal": "Pháp lý",
+    "guides": "Hướng dẫn",
+    "documentation": "Tài liệu",
+    "support": "Hỗ trợ",
+    "comparisons": "So sánh",
+    "compare": "So sánh",
+    "compareApps": "So sánh ứng dụng",
+    "allComparisons": "Tất cả bài so sánh",
+    "download": "Tải xuống",
+    "downloadVVTerm": "Tải VVTerm",
+    "downloadAppStore": "Tải trên App Store",
+    "exploreVVTerm": "Khám phá VVTerm",
+    "getVVTerm": "Nhận VVTerm",
+    "getStarted": "Bắt đầu",
+    "learn": "Tìm hiểu",
+    "terminal": "Terminal",
+    "connections": "Kết nối",
+    "filesSync": "Tệp & đồng bộ",
+    "allFeatures": "Tất cả tính năng",
+    "allFeaturesArrow": "Tất cả tính năng ›",
+    "home": "Trang chủ",
+    "platformLink": "VVTerm cho {name}",
+    "privacyPolicy": "Chính sách quyền riêng tư",
+    "termsOfUse": "Điều khoản sử dụng",
+    "privacy": "Quyền riêng tư",
+    "terms": "Điều khoản sử dụng (EULA)",
+    "refunds": "Hoàn tiền",
+    "requirement": "VVTerm yêu cầu iPhone hoặc iPad chạy iOS 16 trở lên, hoặc Mac dùng Apple Silicon chạy macOS 13 Ventura trở lên. Siêu dữ liệu máy chủ đồng bộ qua iCloud; mật khẩu và khóa SSH được lưu trong Apple Keychain. Mua hàng và hoàn tiền do Apple xử lý qua App Store.",
+    "copyright": "Bản quyền © {year} Vivy Technologies Co., Limited. Bảo lưu mọi quyền.",
+    "feature": {
+      "ssh-terminal": "Terminal SSH",
+      "tmux-session-persistence": "Duy trì tmux",
+      "terminal-customization": "Tùy chỉnh",
+      "sftp-file-browser": "Tệp SFTP",
+      "server-monitoring": "Giám sát máy chủ",
+      "windows-ssh": "Windows SSH",
+      "mosh": "Mosh",
+      "tailscale-ssh": "Tailscale SSH",
+      "cloudflare-tunnel-ssh": "Cloudflare Tunnel SSH",
+      "icloud-sync-keychain": "Đồng bộ iCloud & Keychain"
+    }
+  },
+  "cta": {
+    "title": "Máy chủ của bạn. Ở khắp mọi nơi.",
+    "subtitle": "Bắt đầu miễn phí trên iPhone, iPad và Mac. Nâng cấp lên Pro hoặc mua trọn đời bất cứ khi nào bạn cần thêm.",
+    "seePricing": "Xem bảng giá"
+  },
+  "sidebar": {
+    "guides": {
+      "how-to-ssh-from-iphone": {
+        "title": "Cách SSH vào máy chủ từ iPhone của bạn",
+        "group": "Bắt đầu"
+      },
+      "ssh-from-mac": {
+        "title": "Cách SSH từ Mac của bạn với VVTerm",
+        "group": "Bắt đầu"
+      },
+      "set-up-mosh-on-ios": {
+        "title": "Thiết lập Mosh trên iPhone và iPad",
+        "group": "Kết nối"
+      },
+      "tailscale-ssh-setup": {
+        "title": "Kết nối bằng Tailscale SSH",
+        "group": "Kết nối"
+      },
+      "cloudflare-tunnel-ssh-setup": {
+        "title": "Kết nối qua Cloudflare Tunnel SSH",
+        "group": "Kết nối"
+      },
+      "sftp-file-transfer-on-ios": {
+        "title": "Truyền tệp qua SFTP trên iOS",
+        "group": "Tệp"
+      }
+    },
+    "docs": {
+      "getting-started": {
+        "title": "Bắt đầu",
+        "group": "Kiến thức cơ bản"
+      },
+      "adding-a-server": {
+        "title": "Thêm máy chủ",
+        "group": "Kiến thức cơ bản"
+      },
+      "authentication-and-keys": {
+        "title": "Xác thực và khóa SSH",
+        "group": "Kiến thức cơ bản"
+      },
+      "sftp-file-browser": {
+        "title": "Dùng trình duyệt tệp SFTP",
+        "group": "Làm việc từ xa"
+      },
+      "icloud-sync": {
+        "title": "Đồng bộ iCloud và Keychain",
+        "group": "Làm việc từ xa"
+      },
+      "workspaces-and-tabs": {
+        "title": "Không gian làm việc, môi trường và tab",
+        "group": "Làm việc từ xa"
+      }
+    }
+  }
+}
