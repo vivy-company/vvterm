@@ -11,7 +11,7 @@
 // astro.config.mjs reads LOCALES/DEFAULT_LOCALE from here, so routing updates automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LOCALES = ["en", "zh", "ja", "ko", "th", "vi", "pl", "es", "uk", "ru"] as const;
+export const LOCALES = ["en", "zh", "ja", "ko", "th", "vi", "pl", "es", "uk", "ru", "be"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = "en";
@@ -27,6 +27,7 @@ export const LOCALE_META: Record<Locale, { label: string; htmlLang: string; ogLo
   es: { label: "Español", htmlLang: "es", ogLocale: "es_ES", hreflang: "es" },
   uk: { label: "Українська", htmlLang: "uk", ogLocale: "uk_UA", hreflang: "uk" },
   ru: { label: "Русский", htmlLang: "ru", ogLocale: "ru_RU", hreflang: "ru" },
+  be: { label: "Беларуская", htmlLang: "be", ogLocale: "be_BY", hreflang: "be" },
 };
 
 export const isLocale = (value: string): value is Locale => (LOCALES as readonly string[]).includes(value);
