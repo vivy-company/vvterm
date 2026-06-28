@@ -1,13 +1,13 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // SINGLE SOURCE OF TRUTH FOR LOCALES.
-// To add a language, do these (and nothing in the page components needs to change
-// for the build to stay green — untranslated strings fall back to the default):
+// To add a language (see src/i18n/README.md for detail). Nothing in the page components
+// needs to change — untranslated strings fall back to the default locale:
 //   1. Add its code to LOCALES below and a LOCALE_META entry.
-//   2. Add `import xx from "./translations/xx.json"` + register it in `dicts` in utils.ts.
-//   3. Translate `src/i18n/translations/xx.json` (chrome/shared strings).
-//   4. Add a per-page `xx:` branch to each page's local dictionary as you translate it
-//      (missing branches render the default language until you do).
-//   5. Create the `/xx/` route wrappers (copy the `src/pages/zh/**` tree).
+//   2. In utils.ts: import `./translations/xx.json` + `./pages/xx.json` and register them
+//      in `dicts` and `pageDicts`.
+//   3. Translate `src/i18n/translations/xx.json` (chrome/home/sidebar) and
+//      `src/i18n/pages/xx.json` (page content).
+//   4. Create the `/xx/` route wrappers (copy the `src/pages/zh/**` tree).
 // astro.config.mjs reads LOCALES/DEFAULT_LOCALE from here, so routing updates automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
