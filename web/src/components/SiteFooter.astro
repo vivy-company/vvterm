@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import { SITE } from "../lib/site";
 import { PLATFORMS, FEATURES } from "../lib/nav";
 import { getLocale, useT, localizePath, alternatePath, LANG_LABELS, LOCALES } from "../i18n/utils";
@@ -8,10 +9,11 @@ const t = useT(lang);
 const lp = (path: string) => localizePath(path, lang);
 const platformLabel = (name: string) => t("nav.platformLink").replace("{name}", name);
 
-// One link per other locale (scales past two languages).
-const otherLocales = LOCALES.filter((l) => l !== lang).map((l) => ({
+// Every locale (current one highlighted) for the language dropdown.
+const localeOptions = LOCALES.map((l) => ({
   href: alternatePath(Astro.url, l),
   label: LANG_LABELS[l],
+  active: l === lang,
 }));
 
 const currentYear = new Date().getFullYear();
@@ -83,7 +85,27 @@ const columns = [
       <div class="flex items-center gap-5">
         <a href={lp("/privacy")} class="transition hover:text-ink">{t("nav.privacyPolicy")}</a>
         <a href={lp("/terms")} class="transition hover:text-ink">{t("nav.termsOfUse")}</a>
-        {otherLocales.map((o) => <a href={o.href} class="transition hover:text-ink">{o.label}</a>)}
+        <details data-lang-picker class="group relative">
+          <summary class="flex cursor-pointer list-none items-center gap-1.5 text-faint transition hover:text-ink [&::-webkit-details-marker]:hidden">
+            <Icon name="lucide:globe" class="size-3.5" />
+            <span>{LANG_LABELS[lang]}</span>
+            <Icon name="lucide:chevron-down" class="size-3 transition group-open:rotate-180" />
+          </summary>
+          <div class="absolute bottom-full right-0 z-20 mb-2 grid max-h-72 w-44 gap-0.5 overflow-y-auto overscroll-contain rounded-xl border border-line bg-surface p-1.5 shadow-xl">
+            {localeOptions.map((o) => (
+              <a
+                href={o.href}
+                class:list={[
+                  "block rounded-lg px-3 py-1.5 transition",
+                  o.active ? "bg-surface-hover text-ink" : "text-faint hover:bg-surface-hover hover:text-ink",
+                ]}
+                {...(o.active ? { "aria-current": "true" } : {})}
+              >
+                {o.label}
+              </a>
+            ))}
+          </div>
+        </details>
       </div>
     </div>
   </div>

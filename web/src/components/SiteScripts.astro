@@ -413,4 +413,15 @@ import { SITE } from "../lib/site";
     if (backdrop) backdrop.addEventListener("click", close);
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !modal.hidden) close(); });
   });
+
+  // Language dropdown: close on outside click and on Escape.
+  const langPicker = document.querySelector("[data-lang-picker]");
+  if (langPicker) {
+    document.addEventListener("click", (event) => {
+      if (langPicker.open && !langPicker.contains(event.target)) langPicker.open = false;
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && langPicker.open) langPicker.open = false;
+    });
+  }
 </script>
