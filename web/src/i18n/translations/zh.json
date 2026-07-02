@@ -3,16 +3,16 @@
     "download": "下载"
   },
   "hero": {
-    "title": "更适合 Apple 设备的原生 SSH 客户端",
-    "h1": "如原生般顺手的 SSH。",
-    "subtitle": "连接服务器、浏览远程文件、保持有序，并通过 Keychain 保护的凭据在你的 iPhone、iPad 和 Mac 之间保持同步。",
+    "title": "为 Apple 设备而生的 SSH 客户端",
+    "h1": "像原生应用一样顺手的 SSH。",
+    "subtitle": "连接服务器、整理环境、处理远程文件，并用 Keychain 保护凭据，在 iPhone、iPad 和 Mac 之间保持同步。",
     "primaryCta": "免费试用",
     "secondaryCta": "查看 GitHub",
-    "meta": "需要 iOS 16+ 或 macOS 13+（Apple Silicon）。永久免费，也可<a href=\"/pricing\" class=\"text-accent font-medium hover:underline\">购买终身版 ›</a>。"
+    "meta": "需要 iOS 16+ 或 macOS 13+（Apple Silicon）。可长期免费使用，也可<a href=\"/zh/pricing\" class=\"text-accent font-medium hover:underline\">购买 Lifetime ›</a>。"
   },
   "why": {
     "title": "为什么选择 VVTerm",
-    "subtitle": "它是一款专注的终端应用，适合想要原生 Apple 体验、现代 SSH 方式，以及对个人用户仍然合理定价的用户。",
+    "subtitle": "为重视 Apple 原生体验、现代 SSH 连接方式和个人友好价格的技术用户打造。",
     "native": {
       "title": "原生支持 iPhone、iPad 和 Mac",
       "desc": "专门围绕 Apple 平台打造，无论在哪台设备上使用都更自然顺手。"
@@ -32,7 +32,7 @@
   },
   "features": {
     "title": "为更快、更简单的远程工作而打造",
-    "subtitle": "VVTerm 的目标是让日常远程工作在 Apple 设备上更快、更简单，也更原生。",
+    "subtitle": "VVTerm 让 Apple 设备上的日常远程工作更快、更清楚，也更顺手。",
     "rendering": {
       "title": "更快、更准确的终端渲染",
       "desc": "基于 libghostty，带来更灵敏的绘制表现、更准确的终端行为，以及更顺手的远程会话体验。"
@@ -60,7 +60,7 @@
   },
   "useCases": {
     "title": "适合哪些人",
-    "subtitle": "适合真正要管理机器的人，但不想为了打开终端而引入臃肿控制平台。",
+    "subtitle": "适合管理真实机器的人：不想为了打开一个终端，就套上一整套臃肿的控制平台。",
     "solo": {
       "title": "独立开发者",
       "desc": "适合副业项目、客户项目，以及需要清爽 SSH 工作流的小规模生产环境。"
@@ -79,8 +79,8 @@
     }
   },
   "pricing": {
-    "title": "永久免费。需要更多时再升级。",
-    "subtitle": "先免费开始，环境变大后再升级，或者直接购买终身版一步到位。",
+    "title": "免费开始。需要更多时再升级。",
+    "subtitle": "先免费使用；环境变大后升级 Pro，或一次买断 Lifetime。",
     "free": {
       "name": "免费版",
       "description": "个人使用永久免费",
@@ -180,17 +180,17 @@
     }
   },
   "platforms": {
-    "title": "一个应用，在每台 Apple 设备上都原生",
-    "subtitle": "VVTerm 会适配每个平台——在 Mac 上是完整的 GPU 终端，在 iPad 上是真正的工作站，在 iPhone 上随手可用。",
+    "title": "一款应用，覆盖所有 Apple 设备",
+    "subtitle": "VVTerm 会贴合每个平台：Mac 上是完整 GPU 终端，iPad 上是工作台，iPhone 上则是随手可用的快速入口。",
     "cta": "了解更多",
     "mac": {
       "tagline": "带标签页、SFTP 和 iCloud 同步服务器的 GPU 终端。"
     },
     "ipad": {
-      "tagline": "硬件键盘、多任务和 Mosh 漫游会话。"
+      "tagline": "实体键盘、多任务，以及 Mosh 漫游。"
     },
     "iphone": {
-      "tagline": "随时随地重新连接，在路上也能处理问题。"
+      "tagline": "随时重连，出门在外也能快速处理问题。"
     }
   },
   "resources": {
@@ -210,36 +210,36 @@
     }
   },
   "closing": {
-    "title": "你的服务器，随处可达。",
+    "title": "你的服务器，走到哪里都能用。",
     "subtitle": "在 iPhone、iPad 和 Mac 上免费开始使用。",
     "cta": "下载 VVTerm"
   },
   "home": {
     "metaTitle": "VVTerm - 适用于 iPhone、iPad 和 Mac 的 SSH 终端与 SFTP 客户端",
-    "metaDescription": "你的服务器，随处可达。适用于 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端，支持 tmux 会话保持、Mosh、Tailscale SSH 与 Cloudflare Tunnel SSH、实时监控、iCloud 同步以及 Keychain 安全。",
+    "metaDescription": "你的服务器，随身可用。面向 iPhone、iPad 和 Mac 的原生 SSH 终端与 SFTP 客户端，支持 tmux、Mosh、Tailscale、Cloudflare Tunnel SSH、实时监控、iCloud 和 Keychain。",
     "promo": {
       "title": "开源。永久免费。",
-      "desc": "标准 SSH、Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH，全部集成在一个原生应用里——还带有 tmux 会话保持、SFTP 文件浏览器、实时监控、iCloud 同步和 Keychain 安全。"
+      "desc": "标准 SSH、Mosh、Tailscale SSH 和 Cloudflare Tunnel SSH 集成在一款原生应用中，并带有 tmux 会话、SFTP 浏览器、实时监控、iCloud 同步和 Keychain 保护。"
     },
     "tour": {
       "title": "了解 VVTerm。",
       "c0": "瞬时响应的终端。",
-      "c1": "远程文件，就在终端旁边。",
+      "c1": "在 shell 旁边处理远程文件。",
       "c2": "每台服务器，井井有条。",
-      "c3": "用 Mosh 随时随地重新连接。",
+      "c3": "通过 Mosh 随时重新连接。",
       "c4": "在 iPhone、iPad 和 Mac 之间同步。",
-      "c5": "用语音操作你的终端。"
+      "c5": "用语音向终端输入命令。"
     },
     "connect": {
       "eyebrow": "内置现代 SSH",
-      "title": "四种方式，连接任意机器。",
+      "title": "四种方式，连接任何机器。",
       "body": "想用标准 SSH 时就用 <strong>标准 SSH</strong>，需要时也能用 <strong>Mosh</strong>、<strong>Tailscale SSH</strong> 或 <strong>Cloudflare Tunnel SSH</strong>——无需再拼装多个工具。",
       "caption": "可为每台服务器单独选择传输方式。",
       "captionLink": "查看所有连接方式 ›"
     },
     "tmux": {
       "eyebrow": "绝不丢失你的工作",
-      "title": "断线也不中断的会话。",
+      "title": "断线后仍保留的会话。",
       "body": "VVTerm 会替你管理 <strong>tmux</strong>，因此当连接闪断、手机休眠或切换应用时，长时间的构建或迁移仍会继续运行。它会<strong>自动安装 tmux</strong>、提供调校好的配置，并在你重新连接的瞬间自动重连会话。",
       "link": "了解 tmux 会话保持如何工作"
     },
@@ -259,7 +259,7 @@
     },
     "files": {
       "eyebrow": "内置文件管理",
-      "title": "SFTP 浏览器，就在终端旁边。",
+      "title": "就在 shell 旁边的 SFTP 浏览器。",
       "body": "浏览远程文件夹，<strong>上传和下载</strong>，创建目录、重命名、移动和删除——还能<strong>预览文本、图片和视频</strong>，或编辑 POSIX 权限，全部无需第二个应用。",
       "expand": "探索 SFTP 浏览器",
       "modalEyebrow": "SFTP 文件浏览器",
@@ -282,8 +282,8 @@
       "overviewLink": "阅读完整的 SFTP 介绍"
     },
     "voice": {
-      "eyebrow": "语音转命令",
-      "title": "对你的终端说话。",
+      "eyebrow": "语音命令",
+      "title": "对终端说话。",
       "body": "通过<strong>设备端转写</strong>在路上口述命令。VVTerm 使用 MLX 模型或 Apple 语音把语音转成 shell 输入——在你远离键盘时尤其好用。"
     },
     "work": {

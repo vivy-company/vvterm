@@ -5,12 +5,12 @@
   },
   "compare": {
     "title": "So sánh VVTerm — VVTerm so kè ra sao",
-    "description": "Xem VVTerm — một terminal SSH gốc và trình khách SFTP cho iPhone, iPad và Mac — so sánh với các trình khách SSH khác, đặt cạnh nhau.",
+    "description": "Xem VVTerm — một terminal SSH native và client SFTP cho iPhone, iPad và Mac — so sánh với các client SSH khác, đặt cạnh nhau.",
     "bcHome": "Trang chủ",
     "bcCompare": "So sánh",
     "heroEyebrow": "So sánh",
     "heroTitle": "VVTerm so sánh ra sao.",
-    "heroSubhead": "VVTerm là một terminal SSH gốc và trình khách SFTP cho iPhone, iPad và Mac. Xem nó đối chiếu với các trình khách SSH phổ biến khác — một cách công bằng, từng tính năng một.",
+    "heroSubhead": "VVTerm là một terminal SSH native và client SFTP cho iPhone, iPad và Mac. Xem nó đối chiếu với các client SSH phổ biến khác — một cách công bằng, từng tính năng một.",
     "download": "Tải VVTerm",
     "seePricing": "Xem bảng giá",
     "heroNote": "iPhone, iPad và Mac · Chỉ dành cho Apple theo thiết kế",
@@ -24,7 +24,7 @@
     "whyCards": [
       {
         "icon": "lucide:laptop",
-        "title": "Một ứng dụng Apple gốc",
+        "title": "Một ứng dụng đúng chất Apple",
         "body": "Được xây dựng cho iOS 16, iPadOS 16 và macOS 13 trên Apple Silicon — với terminal GPU dùng libghostty, không phải một lớp bọc web."
       },
       {
@@ -47,14 +47,14 @@
     "bcHome": "Trang chủ",
     "bcCompare": "So sánh",
     "heroTitle": "Hai terminal Apple,<br />đều được xây dựng cho Mosh.",
-    "heroSubhead": "VVTerm và Blink Shell đều là terminal Apple gốc hỗ trợ Mosh. VVTerm chạy trên iPhone, iPad và Mac, còn Blink Shell tập trung vào iPhone và iPad. Sự khác biệt còn thể hiện ở trình duyệt tệp SFTP, các giao thức được cung cấp, đồng bộ iCloud và cách định giá của từng ứng dụng. Đây là một cái nhìn công bằng về cả hai.",
+    "heroSubhead": "VVTerm và Blink Shell đều là terminal native trên Apple hỗ trợ Mosh. VVTerm chạy trên iPhone, iPad và Mac, còn Blink Shell tập trung vào iPhone và iPad. Sự khác biệt còn thể hiện ở trình duyệt tệp SFTP, các giao thức được cung cấp, đồng bộ iCloud và cách định giá của từng ứng dụng. Đây là một cái nhìn công bằng về cả hai.",
     "download": "Tải VVTerm",
     "seePricing": "Xem bảng giá",
     "heroNote": "iPhone, iPad và Mac · Chỉ dành cho Apple theo thiết kế",
     "heroAlt": "Terminal và trình duyệt SFTP của VVTerm trên thiết bị Apple",
     "tableEyebrow": "Từng tính năng một",
     "tableTitle": "VVTerm và Blink Shell, đặt cạnh nhau.",
-    "tableBody": "Cả hai đều là <strong>terminal Apple gốc</strong> với <strong>Mosh</strong> làm cốt lõi. VVTerm bổ sung trình duyệt SFTP tích hợp, các giao thức bổ sung và một tùy chọn trọn đời.",
+    "tableBody": "Cả hai đều là <strong>terminal native trên Apple</strong> với <strong>Mosh</strong> làm cốt lõi. VVTerm bổ sung trình duyệt SFTP tích hợp, các giao thức bổ sung và một tùy chọn trọn đời.",
     "colFeature": "Tính năng",
     "footnote": "Thông tin về Blink Shell dựa trên dữ liệu công khai và có thể thay đổi; hãy kiểm tra trang của nhà cung cấp để biết chi tiết hiện tại. Các ô đánh dấu \"—\" hoặc \"Tùy\" chỉ những tính năng khác nhau theo gói hoặc những điều chúng tôi không khẳng định là sự thật dứt khoát.",
     "standoutEyebrow": "Nơi VVTerm nổi bật",
@@ -67,7 +67,7 @@
     "seeEverything": "Xem mọi điều VVTerm làm được",
     "fitEyebrow": "Nơi Blink Shell có thể phù hợp",
     "fitTitle": "Một công cụ trưởng thành, ưu tiên terminal.",
-    "fitBody": "Blink Shell đã là một cái tên được tôn trọng trong thế giới terminal iOS suốt nhiều năm, với một <strong>trọng tâm Mosh mạnh mẽ</strong> và một quy trình <strong>điều khiển bằng bàn phím, lấy terminal làm trung tâm</strong> sâu sắc mà nhiều người dùng chuyên nghiệp yêu thích. Nếu ưu tiên của bạn là một shell đã được kiểm chứng với cách tiếp cận nặng về cấu hình, ưu tiên dòng lệnh — cùng một cộng đồng đã mài giũa nó trong thời gian dài — thì đó là một lựa chọn xuất sắc. VVTerm nhắm tới một cân bằng khác: một terminal GPU gốc kết hợp với trình duyệt SFTP tích hợp, đồng bộ iCloud và các giao thức bổ sung, kèm mức giá trọn đời.",
+    "fitBody": "Blink Shell đã là một cái tên được tôn trọng trong thế giới terminal iOS suốt nhiều năm, với một <strong>trọng tâm Mosh mạnh mẽ</strong> và một quy trình <strong>điều khiển bằng bàn phím, lấy terminal làm trung tâm</strong> sâu sắc mà nhiều người dùng chuyên nghiệp yêu thích. Nếu ưu tiên của bạn là một shell đã được kiểm chứng với cách tiếp cận nặng về cấu hình, ưu tiên dòng lệnh — cùng một cộng đồng đã mài giũa nó trong thời gian dài — thì đó là một lựa chọn xuất sắc. VVTerm nhắm tới một cân bằng khác: một terminal GPU native kết hợp với trình duyệt SFTP tích hợp, đồng bộ iCloud và các giao thức bổ sung, kèm mức giá trọn đời.",
     "rows": [
       {
         "label": "Nền tảng",
@@ -75,7 +75,7 @@
         "competitor": "iPhone, iPad"
       },
       {
-        "label": "Ứng dụng Apple gốc",
+        "label": "Ứng dụng đúng chất Apple",
         "vvterm": "check",
         "competitor": "check"
       },
@@ -130,7 +130,7 @@
         "competitor": "—"
       },
       {
-        "label": "Giọng nói thành lệnh trên thiết bị",
+        "label": "Lệnh thoại trên thiết bị",
         "vvterm": "check",
         "competitor": "—"
       },
@@ -190,19 +190,19 @@
     "faqItems": [
       {
         "question": "VVTerm có phải là lựa chọn thay thế tốt cho Blink Shell không?",
-        "answer": "Có, đặc biệt nếu bạn muốn một trình duyệt tệp SFTP tích hợp có xem trước, máy chủ đồng bộ qua iCloud, và các giao thức hiện đại như Tailscale SSH và Cloudflare Tunnel SSH bên cạnh Mosh. Cả hai đều là terminal Apple gốc với hỗ trợ Mosh mạnh mẽ, nên quyết định thường nằm ở ưu tiên về duyệt tệp, đồng bộ và giá cả."
+        "answer": "Có, đặc biệt nếu bạn muốn một trình duyệt tệp SFTP tích hợp có xem trước, máy chủ đồng bộ qua iCloud, và các giao thức hiện đại như Tailscale SSH và Cloudflare Tunnel SSH bên cạnh Mosh. Cả hai đều là terminal native trên Apple với hỗ trợ Mosh mạnh mẽ, nên quyết định thường nằm ở ưu tiên về duyệt tệp, đồng bộ và giá cả."
       },
       {
         "question": "Cả hai ứng dụng có hỗ trợ Mosh không?",
-        "answer": "Có. Mosh là một thế mạnh cốt lõi của cả VVTerm và Blink Shell. Mosh giữ phiên sống sót qua các thay đổi mạng, ngủ và kết nối chập chờn với echo cục bộ tức thì. VVTerm bổ sung Tailscale SSH và Cloudflare Tunnel SSH bên cạnh SSH tiêu chuẩn và Mosh."
+        "answer": "Có. Mosh là một thế mạnh cốt lõi của cả VVTerm và Blink Shell. Mosh giúp phiên tiếp tục qua các thay đổi mạng, chế độ ngủ và kết nối chập chờn với echo cục bộ tức thì. VVTerm bổ sung Tailscale SSH và Cloudflare Tunnel SSH bên cạnh SSH tiêu chuẩn và Mosh."
       },
       {
         "question": "VVTerm có hỗ trợ Windows hoặc Linux không?",
-        "answer": "Trình khách VVTerm chỉ chạy trên thiết bị Apple — iPhone, iPad và Mac — còn Blink Shell chạy trên iPhone và iPad, nên không ứng dụng nào là lựa chọn nếu bạn cần một <strong>trình khách</strong> Windows hoặc Linux. Tuy nhiên VVTerm kết nối <strong>tới</strong> các máy chủ Linux, macOS, BSD và Windows/PowerShell, với số liệu trực tiếp và phiên bền bỉ trên từng máy."
+        "answer": "VVTerm chỉ chạy trên thiết bị Apple — iPhone, iPad và Mac — còn Blink Shell chạy trên iPhone và iPad, nên không ứng dụng nào là lựa chọn nếu bạn cần một <strong>client</strong> Windows hoặc Linux. Tuy nhiên VVTerm kết nối <strong>tới</strong> các máy chủ Linux, macOS, BSD và Windows/PowerShell, với số liệu trực tiếp và phiên bền bỉ trên từng máy."
       },
       {
         "question": "VVTerm bổ sung gì so với Blink Shell?",
-        "answer": "Bên cạnh hỗ trợ Mosh chung, VVTerm có một <strong>trình duyệt tệp SFTP</strong> đầy đủ kèm xem trước, <strong>duy trì phiên tmux được quản lý</strong>, <strong>giám sát máy chủ trực tiếp</strong>, <strong>giọng nói thành lệnh trên thiết bị</strong>, các giao thức bổ sung (Tailscale SSH và Cloudflare Tunnel SSH), và 440 chủ đề tích hợp — kèm mức giá trọn đời trả một lần. Blink Shell đáp lại bằng một quy trình ưu tiên bàn phím, lấy terminal làm trung tâm đã được mài giũa lâu năm."
+        "answer": "Bên cạnh hỗ trợ Mosh chung, VVTerm có một <strong>trình duyệt tệp SFTP</strong> đầy đủ kèm xem trước, <strong>duy trì phiên tmux được quản lý</strong>, <strong>giám sát máy chủ trực tiếp</strong>, <strong>lệnh thoại trên thiết bị</strong>, các giao thức bổ sung (Tailscale SSH và Cloudflare Tunnel SSH), và 440 chủ đề tích hợp — kèm mức giá trọn đời trả một lần. Blink Shell đáp lại bằng một quy trình ưu tiên bàn phím, lấy terminal làm trung tâm đã được mài giũa lâu năm."
       },
       {
         "question": "VVTerm hay Blink Shell rẻ hơn?",
@@ -221,16 +221,16 @@
     "ctaSubtitle": "Tải VVTerm miễn phí trên iPhone, iPad và Mac, và thử terminal, SFTP và Mosh cùng nhau."
   },
   "compare/vvterm-vs-termius": {
-    "title": "VVTerm và Termius — So sánh trình khách SSH Apple gốc",
-    "description": "VVTerm và Termius: một terminal SSH và trình khách SFTP chỉ dành cho Apple với giá trọn đời, được so sánh công bằng với Termius, một bộ công cụ thuê bao đa nền tảng.",
+    "title": "VVTerm và Termius — So sánh client SSH native trên Apple",
+    "description": "VVTerm và Termius: một terminal SSH và client SFTP chỉ dành cho Apple với giá trọn đời, được so sánh công bằng với Termius, một bộ công cụ thuê bao đa nền tảng.",
     "bcHome": "Trang chủ",
     "bcCompare": "So sánh",
-    "heroTitle": "Một terminal Apple gốc,<br />hay một bộ công cụ đa nền tảng.",
-    "heroSubhead": "VVTerm là một terminal SSH gốc và trình khách SFTP cho iPhone, iPad và Mac với tùy chọn giá trọn đời. Termius là một trình khách đa nền tảng theo thuê bao cũng chạy trên Windows, Linux, Android và web. Đây là cách chúng so sánh.",
+    "heroTitle": "Một terminal native trên Apple,<br />hay một bộ công cụ đa nền tảng.",
+    "heroSubhead": "VVTerm là một terminal SSH native và client SFTP cho iPhone, iPad và Mac với tùy chọn giá trọn đời. Termius là một client đa nền tảng theo thuê bao cũng chạy trên Windows, Linux, Android và web. Đây là cách chúng so sánh.",
     "download": "Tải VVTerm",
     "seePricing": "Xem bảng giá",
     "heroNote": "iPhone, iPad và Mac · Chỉ dành cho Apple theo thiết kế",
-    "heroAlt": "Terminal SSH gốc VVTerm trên thiết bị Apple",
+    "heroAlt": "Terminal SSH native VVTerm trên thiết bị Apple",
     "tableEyebrow": "Từng tính năng một",
     "tableTitle": "VVTerm và Termius, đặt cạnh nhau.",
     "tableBody": "VVTerm đi <strong>sâu trên Apple</strong>; Termius đi <strong>rộng khắp các nền tảng</strong>. Lựa chọn đúng phụ thuộc vào nơi bạn làm việc.",
@@ -246,7 +246,7 @@
     "seeEverything": "Xem mọi điều VVTerm làm được",
     "fitEyebrow": "Nơi Termius có thể phù hợp",
     "fitTitle": "Khi phạm vi đa nền tảng thắng thế.",
-    "fitBody": "Termius thực sự là một lựa chọn mạnh nếu công việc của bạn trải rộng hơn các thiết bị Apple. Nó chạy trên <strong>macOS, Windows, Linux, iOS, Android và web</strong>, và cung cấp các tính năng nhóm cùng kho lưu trữ dùng chung mà các tổ chức thường cần. Nếu bạn chuyển qua lại giữa laptop Windows và máy Linux, hoặc muốn một trình khách duy nhất cho cả nhóm quản lý tập trung, thì độ rộng đó khó sánh được. VVTerm chọn đánh đổi ngược lại: nó giữ riêng cho Apple để có thể dồn toàn lực vào hiệu năng gốc, iCloud và Keychain.",
+    "fitBody": "Termius thực sự là một lựa chọn mạnh nếu công việc của bạn trải rộng hơn các thiết bị Apple. Nó chạy trên <strong>macOS, Windows, Linux, iOS, Android và web</strong>, và cung cấp các tính năng nhóm cùng kho lưu trữ dùng chung mà các tổ chức thường cần. Nếu bạn chuyển qua lại giữa laptop Windows và máy Linux, hoặc muốn một client duy nhất cho cả nhóm quản lý tập trung, thì độ rộng đó khó sánh được. VVTerm chọn đánh đổi ngược lại: nó giữ riêng cho Apple để có thể dồn toàn lực vào hiệu năng native, iCloud và Keychain.",
     "rows": [
       {
         "label": "Nền tảng",
@@ -254,7 +254,7 @@
         "competitor": "Mac, Windows, Linux, iOS, Android, web"
       },
       {
-        "label": "Ứng dụng Apple gốc",
+        "label": "Ứng dụng đúng chất Apple",
         "vvterm": "check",
         "competitor": "Tùy"
       },
@@ -309,7 +309,7 @@
         "competitor": "—"
       },
       {
-        "label": "Giọng nói thành lệnh trên thiết bị",
+        "label": "Lệnh thoại trên thiết bị",
         "vvterm": "check",
         "competitor": "—"
       },
@@ -374,15 +374,15 @@
     "faqItems": [
       {
         "question": "VVTerm có phải là lựa chọn thay thế tốt cho Termius không?",
-        "answer": "Nếu bạn làm việc hoàn toàn trên thiết bị Apple, VVTerm là một lựa chọn thay thế mạnh mẽ. Đó là một ứng dụng iPhone, iPad và Mac gốc với terminal GPU, một trình duyệt SFTP tích hợp, đồng bộ iCloud, thông tin đăng nhập lưu trong Keychain, và tùy chọn giá trọn đời trả một lần. Termius phù hợp hơn nếu bạn cũng cần truy cập Windows, Linux, Android hoặc web."
+        "answer": "Nếu bạn làm việc hoàn toàn trên thiết bị Apple, VVTerm là một lựa chọn thay thế mạnh mẽ. Đó là một ứng dụng native cho iPhone, iPad và Mac với terminal GPU, một trình duyệt SFTP tích hợp, đồng bộ iCloud, thông tin đăng nhập lưu trong Keychain, và tùy chọn giá trọn đời trả một lần. Termius phù hợp hơn nếu bạn cũng cần truy cập Windows, Linux, Android hoặc web."
       },
       {
         "question": "VVTerm có hỗ trợ Windows hoặc Linux không?",
-        "answer": "Ứng dụng VVTerm chỉ chạy trên thiết bị Apple — iPhone, iPad và Mac — nên không có phiên bản Windows, Linux, Android hay web của trình khách. Tuy nhiên nó <strong>kết nối tới</strong> các máy chủ Linux, macOS, BSD và Windows/PowerShell, với số liệu trực tiếp và phiên bền bỉ trên từng máy. Nếu bạn cũng cần chính trình khách trên một thiết bị không phải Apple, Termius là lựa chọn linh hoạt hơn."
+        "answer": "Ứng dụng VVTerm chỉ chạy trên thiết bị Apple — iPhone, iPad và Mac — nên không có phiên bản Windows, Linux, Android hay web của client. Tuy nhiên nó <strong>kết nối tới</strong> các máy chủ Linux, macOS, BSD và Windows/PowerShell, với số liệu trực tiếp và phiên bền bỉ trên từng máy. Nếu bạn cũng cần chính client trên một thiết bị không phải Apple, Termius là lựa chọn linh hoạt hơn."
       },
       {
         "question": "VVTerm có gì mà Termius không có?",
-        "answer": "Một vài điểm cộng kiểu Apple gốc: <strong>duy trì phiên tmux được quản lý</strong> giúp công việc tiếp tục qua các lần ngắt kết nối, <strong>giám sát máy chủ trực tiếp</strong> tích hợp ngay trong ứng dụng, <strong>giọng nói thành lệnh trên thiết bị</strong>, đồng bộ iCloud, thông tin đăng nhập lưu trong Keychain, và mức giá trọn đời trả một lần. Termius đáp lại bằng phạm vi đa nền tảng và các tính năng cho nhóm."
+        "answer": "Một vài điểm cộng đúng chất Apple: <strong>duy trì phiên tmux được quản lý</strong> giúp công việc tiếp tục qua các lần ngắt kết nối, <strong>giám sát máy chủ trực tiếp</strong> tích hợp ngay trong ứng dụng, <strong>lệnh thoại trên thiết bị</strong>, đồng bộ iCloud, thông tin đăng nhập lưu trong Keychain, và mức giá trọn đời trả một lần. Termius đáp lại bằng phạm vi đa nền tảng và các tính năng cho nhóm."
       },
       {
         "question": "VVTerm hay Termius rẻ hơn?",
@@ -401,7 +401,7 @@
         "answer": "Có. Mã nguồn của VVTerm có tại github.com/vivy-company/vvterm."
       }
     ],
-    "ctaTitle": "Thử lựa chọn Apple gốc.",
+    "ctaTitle": "Thử lựa chọn đúng chất Apple.",
     "ctaSubtitle": "Tải VVTerm miễn phí trên iPhone, iPad và Mac, và thấy sự khác biệt trên chính máy chủ của bạn."
   },
   "docs/adding-a-server": {
@@ -411,7 +411,7 @@
     "title": "Thêm máy chủ trong VVTerm — VVTerm",
     "description": "Tìm hiểu các trường máy chủ trong VVTerm — tên, host, cổng, tên người dùng và môi trường — cách máy chủ thuộc về không gian làm việc, và cách chỉnh sửa hoặc xóa chúng.",
     "schemaDescription": "Cách thêm máy chủ trong VVTerm: tên, host, cổng, tên người dùng và môi trường, cùng cách máy chủ thuộc về không gian làm việc và cách chỉnh sửa hoặc xóa chúng.",
-    "bodyHtml": "\n  <p>\n    Một máy chủ trong VVTerm là định nghĩa đã lưu của một máy bạn kết nối tới: nó nằm ở đâu, bạn\n    đăng nhập với danh nghĩa ai, và bạn xác thực như thế nào. Sau khi lưu, nó xuất hiện trong danh sách máy chủ và đồng bộ trên\n    các thiết bị của bạn qua iCloud. Bản thân thông tin đăng nhập ở lại trong Apple Keychain và không bao giờ là một phần\n    của định nghĩa đã đồng bộ đó.\n  </p>\n\n  <h2>Các trường máy chủ</h2>\n  <ul>\n    <li><strong>Tên</strong> — một nhãn bạn chọn để dễ nhận diện máy chủ. Nó không ảnh hưởng đến kết nối.</li>\n    <li><strong>Host</strong> — tên máy chủ hoặc địa chỉ IP để kết nối, ví dụ <code>example.com</code> hoặc <code>192.168.1.20</code>.</li>\n    <li><strong>Cổng</strong> — cổng SSH. Mặc định là <code>22</code>; chỉ thay đổi nếu máy chủ của bạn lắng nghe trên cổng khác.</li>\n    <li><strong>Tên người dùng</strong> — tài khoản bạn đăng nhập, chẳng hạn <code>root</code>, <code>ubuntu</code> hoặc <code>admin</code>.</li>\n    <li><strong>Môi trường</strong> — một cách nhóm tùy chọn, như Production hay Staging, dùng để sắp xếp máy chủ trong một không gian làm việc.</li>\n  </ul>\n  <p>\n    Xác thực được đặt theo từng máy chủ. Bạn có thể dùng mật khẩu, một khóa SSH, hoặc một khóa SSH được bảo vệ bằng\n    cụm mật khẩu. Chi tiết và nơi lưu từng loại thông tin đăng nhập được trình bày trong <a href=\"/docs/authentication-and-keys\">Xác thực và khóa SSH</a>.\n  </p>\n\n  <h2>Không gian làm việc và môi trường</h2>\n  <p>\n    Mọi máy chủ đều thuộc về một <strong>không gian làm việc</strong>. Không gian làm việc là một nhóm cấp cao nhất — bạn có thể\n    dùng một không gian làm việc cho mỗi khách hàng, mỗi dự án hoặc mỗi nhóm. Trong một không gian làm việc, một <strong>môi trường</strong> sắp xếp máy chủ thêm một bậc để bạn có thể giữ các host production và staging\n    tách biệt về mặt trực quan và lọc danh sách xuống còn những gì bạn cần.\n  </p>\n  <p>\n    Ở bậc miễn phí bạn có một không gian làm việc và một máy chủ. Pro gỡ bỏ các giới hạn đó để bạn có thể xây dựng\n    bao nhiêu không gian làm việc, môi trường và máy chủ tùy thích. Xem <a href=\"/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a> để biết cách điều này gắn kết\n    với nhiều kết nối đang mở.\n  </p>\n\n  <h2>Chỉnh sửa một máy chủ</h2>\n  <ol>\n    <li>Mở chi tiết của máy chủ từ danh sách của bạn.</li>\n    <li>Thay đổi bất kỳ trường nào — tên, host, cổng, tên người dùng, môi trường, hoặc phương thức xác thực.</li>\n    <li>Lưu. Định nghĩa đã cập nhật đồng bộ tới các thiết bị khác của bạn qua iCloud.</li>\n  </ol>\n  <p>\n    Thay đổi host, cổng hoặc tên người dùng chỉ ảnh hưởng đến các kết nối trong tương lai. Nếu một phiên đang\n    mở, nó giữ nguyên cài đặt ban đầu cho đến khi bạn kết nối lại.\n  </p>\n\n  <h2>Xóa một máy chủ</h2>\n  <p>\n    Xóa một máy chủ sẽ gỡ định nghĩa của nó khỏi danh sách và, sau khi đồng bộ, khỏi các thiết bị khác của bạn.\n    Bất kỳ thông tin đăng nhập trong keychain gắn với máy chủ cũng bị gỡ theo. Nếu bạn chỉ muốn tạm thời không thấy một\n    máy chủ, hãy cân nhắc chuyển nó sang một môi trường khác thay vì xóa, để\n    giữ lại cài đặt của nó.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Với một máy chủ đã lưu, hãy thiết lập cách bạn đăng nhập tại <a href=\"/docs/authentication-and-keys\">Xác thực và khóa SSH</a>, hoặc tìm hiểu cách các máy chủ đã lưu\n    của bạn di chuyển giữa các thiết bị trong <a href=\"/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    Một máy chủ trong VVTerm là định nghĩa đã lưu của một máy bạn kết nối tới: nó nằm ở đâu, bạn\n    đăng nhập với danh nghĩa ai, và bạn xác thực như thế nào. Sau khi lưu, nó xuất hiện trong danh sách máy chủ và đồng bộ trên\n    các thiết bị của bạn qua iCloud. Bản thân thông tin đăng nhập ở lại trong Apple Keychain và không bao giờ là một phần\n    của định nghĩa đã đồng bộ đó.\n  </p>\n\n  <h2>Các trường máy chủ</h2>\n  <ul>\n    <li><strong>Tên</strong> — một nhãn bạn chọn để dễ nhận diện máy chủ. Nó không ảnh hưởng đến kết nối.</li>\n    <li><strong>Host</strong> — tên máy chủ hoặc địa chỉ IP để kết nối, ví dụ <code>example.com</code> hoặc <code>192.168.1.20</code>.</li>\n    <li><strong>Cổng</strong> — cổng SSH. Mặc định là <code>22</code>; chỉ thay đổi nếu máy chủ của bạn lắng nghe trên cổng khác.</li>\n    <li><strong>Tên người dùng</strong> — tài khoản bạn đăng nhập, chẳng hạn <code>root</code>, <code>ubuntu</code> hoặc <code>admin</code>.</li>\n    <li><strong>Môi trường</strong> — một cách nhóm tùy chọn, như Production hay Staging, dùng để sắp xếp máy chủ trong một không gian làm việc.</li>\n  </ul>\n  <p>\n    Xác thực được đặt theo từng máy chủ. Bạn có thể dùng mật khẩu, một khóa SSH, hoặc một khóa SSH được bảo vệ bằng\n    cụm mật khẩu. Chi tiết và nơi lưu từng loại thông tin đăng nhập được trình bày trong <a href=\"/vi/docs/authentication-and-keys\">Xác thực và khóa SSH</a>.\n  </p>\n\n  <h2>Không gian làm việc và môi trường</h2>\n  <p>\n    Mọi máy chủ đều thuộc về một <strong>không gian làm việc</strong>. Không gian làm việc là một nhóm cấp cao nhất — bạn có thể\n    dùng một không gian làm việc cho mỗi khách hàng, mỗi dự án hoặc mỗi nhóm. Trong một không gian làm việc, một <strong>môi trường</strong> sắp xếp máy chủ thêm một bậc để bạn có thể giữ các host production và staging\n    tách biệt về mặt trực quan và lọc danh sách xuống còn những gì bạn cần.\n  </p>\n  <p>\n    Ở bậc miễn phí bạn có một không gian làm việc và một máy chủ. Pro gỡ bỏ các giới hạn đó để bạn có thể xây dựng\n    bao nhiêu không gian làm việc, môi trường và máy chủ tùy thích. Xem <a href=\"/vi/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a> để biết cách điều này gắn kết\n    với nhiều kết nối đang mở.\n  </p>\n\n  <h2>Chỉnh sửa một máy chủ</h2>\n  <ol>\n    <li>Mở chi tiết của máy chủ từ danh sách của bạn.</li>\n    <li>Thay đổi bất kỳ trường nào — tên, host, cổng, tên người dùng, môi trường, hoặc phương thức xác thực.</li>\n    <li>Lưu. Định nghĩa đã cập nhật đồng bộ tới các thiết bị khác của bạn qua iCloud.</li>\n  </ol>\n  <p>\n    Thay đổi host, cổng hoặc tên người dùng chỉ ảnh hưởng đến các kết nối trong tương lai. Nếu một phiên đang\n    mở, nó giữ nguyên cài đặt ban đầu cho đến khi bạn kết nối lại.\n  </p>\n\n  <h2>Xóa một máy chủ</h2>\n  <p>\n    Xóa một máy chủ sẽ gỡ định nghĩa của nó khỏi danh sách và, sau khi đồng bộ, khỏi các thiết bị khác của bạn.\n    Bất kỳ thông tin đăng nhập trong keychain gắn với máy chủ cũng bị gỡ theo. Nếu bạn chỉ muốn tạm thời không thấy một\n    máy chủ, hãy cân nhắc chuyển nó sang một môi trường khác thay vì xóa, để\n    giữ lại cài đặt của nó.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Với một máy chủ đã lưu, hãy thiết lập cách bạn đăng nhập tại <a href=\"/vi/docs/authentication-and-keys\">Xác thực và khóa SSH</a>, hoặc tìm hiểu cách các máy chủ đã lưu\n    của bạn di chuyển giữa các thiết bị trong <a href=\"/vi/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
   },
   "docs/authentication-and-keys": {
     "heading": "Xác thực và khóa SSH",
@@ -420,7 +420,7 @@
     "title": "Xác thực và khóa SSH — VVTerm",
     "description": "Xác thực bằng mật khẩu, khóa SSH và khóa SSH có cụm mật khẩu trong VVTerm, và cách thông tin đăng nhập được giữ trong Apple Keychain thay vì siêu dữ liệu đồng bộ.",
     "schemaDescription": "Giải thích các phương thức xác thực của VVTerm: mật khẩu, khóa SSH và khóa SSH có cụm mật khẩu, cùng cách thông tin đăng nhập được lưu trong Apple Keychain.",
-    "bodyHtml": "\n  <p>\n    Xác thực được đặt theo từng máy chủ, nên các máy khác nhau có thể dùng phương thức khác nhau. VVTerm hỗ trợ\n    ba tùy chọn, và dù bạn chọn cái nào, bản thân bí mật được lưu trong Apple Keychain thay vì\n    trong định nghĩa máy chủ đồng bộ qua iCloud.\n  </p>\n\n  <h2>Các phương thức xác thực</h2>\n  <ul>\n    <li>\n      <strong>Mật khẩu</strong> — bạn nhập mật khẩu tài khoản của máy chủ. Đây là cách nhanh nhất\n      để xác nhận host, cổng và tên người dùng là đúng, và là một lựa chọn ổn cho những máy bạn\n      kiểm soát. Mật khẩu được lưu vào Keychain để bạn không phải gõ lại mỗi lần.\n    </li>\n    <li>\n      <strong>Khóa SSH</strong> — bạn xác thực bằng một khóa riêng tư thay vì mật khẩu. Khóa\n      công khai tương ứng phải có trong tệp <code>~/.ssh/authorized_keys</code> của máy chủ.\n      Đăng nhập bằng khóa an toàn hơn mật khẩu và hỗ trợ đăng nhập không cần mật khẩu.\n    </li>\n    <li>\n      <strong>Khóa SSH + cụm mật khẩu</strong> — giống như khóa SSH, nhưng bản thân khóa riêng tư được\n      mã hóa bằng một cụm mật khẩu. Ngay cả khi khóa bị lộ, nó không thể được dùng nếu không có\n      cụm mật khẩu, điều này tạo thêm một lớp bảo vệ cho các host nhạy cảm.\n    </li>\n  </ul>\n\n  <h2>Nơi thông tin đăng nhập được lưu</h2>\n  <p>\n    Mật khẩu, khóa riêng tư và cụm mật khẩu được lưu trong <strong>Apple Keychain</strong>. Chúng\n    <strong>không</strong> được bao gồm trong siêu dữ liệu máy chủ mà VVTerm đồng bộ qua iCloud\n    (CloudKit). Điều đó có nghĩa là danh sách máy chủ của bạn có thể di chuyển giữa các thiết bị trong khi các bí mật ở lại trong\n    kho lưu trữ an toàn do hệ thống quản lý.\n  </p>\n  <p>\n    Thông tin đăng nhập đồng bộ giữa các thiết bị chỉ khi <strong>iCloud Keychain</strong> được bật trong cài đặt iOS\n    hoặc macOS. Khi bật, một khóa hoặc mật khẩu được lưu trên một thiết bị trở nên khả dụng trên\n    các thiết bị khác. Khi tắt, thông tin đăng nhập ở lại cục bộ trên thiết bị nơi chúng được nhập, và bạn thêm chúng\n    lại ở nơi cần. Để hiểu đầy đủ về những gì đồng bộ và những gì không, xem <a href=\"/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n\n  <h2>Tạo và nhập khóa</h2>\n  <p>\n    Nếu bạn chưa có khóa SSH, VVTerm có thể tạo một khóa cho bạn. Sau khi tạo, sao chép\n    khóa công khai và thêm nó vào tệp <code>~/.ssh/authorized_keys</code> của máy chủ, rồi chọn khóa\n    đó làm phương thức xác thực của máy chủ. Nếu bạn đã có một khóa riêng tư, hãy nhập nó vào\n    VVTerm và gán nó cho máy chủ theo cùng cách.\n  </p>\n  <p>\n    Một khóa công khai trên máy chủ là thứ cho phép một khóa riêng tư trên thiết bị của bạn. Bạn có thể tái sử dụng một cặp\n    khóa trên nhiều máy chủ bằng cách đặt cùng một khóa công khai vào <code>authorized_keys</code> của mỗi máy chủ, hoặc giữ các khóa riêng cho từng host để kiểm soát chặt chẽ hơn.\n  </p>\n\n  <h2>Xác minh host</h2>\n  <p>\n    Lần đầu bạn kết nối tới một máy chủ, VVTerm hiển thị dấu vân tay khóa của host. Hãy xác nhận nó\n    khớp với những gì bạn mong đợi trước khi chấp nhận, để bạn chắc chắn mình đang kết nối tới đúng\n    máy chứ không phải một kẻ mạo danh. Sau khi bạn tin cậy một host, các kết nối sau diễn ra mà không hỏi lại\n    trừ khi khóa của nó thay đổi.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Với xác thực đã thiết lập, chuyển sang <a href=\"/docs/sftp-file-browser\">trình duyệt tệp SFTP</a> để quản lý tệp từ xa, hoặc xem lại <a href=\"/docs/adding-a-server\">Thêm máy chủ</a> để tinh chỉnh\n    chi tiết kết nối.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    Xác thực được đặt theo từng máy chủ, nên các máy khác nhau có thể dùng phương thức khác nhau. VVTerm hỗ trợ\n    ba tùy chọn, và dù bạn chọn cái nào, bản thân bí mật được lưu trong Apple Keychain thay vì\n    trong định nghĩa máy chủ đồng bộ qua iCloud.\n  </p>\n\n  <h2>Các phương thức xác thực</h2>\n  <ul>\n    <li>\n      <strong>Mật khẩu</strong> — bạn nhập mật khẩu tài khoản của máy chủ. Đây là cách nhanh nhất\n      để xác nhận host, cổng và tên người dùng là đúng, và là một lựa chọn ổn cho những máy bạn\n      kiểm soát. Mật khẩu được lưu vào Keychain để bạn không phải gõ lại mỗi lần.\n    </li>\n    <li>\n      <strong>Khóa SSH</strong> — bạn xác thực bằng một khóa riêng tư thay vì mật khẩu. Khóa\n      công khai tương ứng phải có trong tệp <code>~/.ssh/authorized_keys</code> của máy chủ.\n      Đăng nhập bằng khóa an toàn hơn mật khẩu và hỗ trợ đăng nhập không cần mật khẩu.\n    </li>\n    <li>\n      <strong>Khóa SSH + cụm mật khẩu</strong> — giống như khóa SSH, nhưng bản thân khóa riêng tư được\n      mã hóa bằng một cụm mật khẩu. Ngay cả khi khóa bị lộ, nó không thể được dùng nếu không có\n      cụm mật khẩu, điều này tạo thêm một lớp bảo vệ cho các host nhạy cảm.\n    </li>\n  </ul>\n\n  <h2>Nơi thông tin đăng nhập được lưu</h2>\n  <p>\n    Mật khẩu, khóa riêng tư và cụm mật khẩu được lưu trong <strong>Apple Keychain</strong>. Chúng\n    <strong>không</strong> được bao gồm trong siêu dữ liệu máy chủ mà VVTerm đồng bộ qua iCloud\n    (CloudKit). Điều đó có nghĩa là danh sách máy chủ của bạn có thể di chuyển giữa các thiết bị trong khi các bí mật ở lại trong\n    kho lưu trữ an toàn do hệ thống quản lý.\n  </p>\n  <p>\n    Thông tin đăng nhập đồng bộ giữa các thiết bị chỉ khi <strong>iCloud Keychain</strong> được bật trong cài đặt iOS\n    hoặc macOS. Khi bật, một khóa hoặc mật khẩu được lưu trên một thiết bị trở nên khả dụng trên\n    các thiết bị khác. Khi tắt, thông tin đăng nhập ở lại cục bộ trên thiết bị nơi chúng được nhập, và bạn thêm chúng\n    lại ở nơi cần. Để hiểu đầy đủ về những gì đồng bộ và những gì không, xem <a href=\"/vi/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n\n  <h2>Tạo và nhập khóa</h2>\n  <p>\n    Nếu bạn chưa có khóa SSH, VVTerm có thể tạo một khóa cho bạn. Sau khi tạo, sao chép\n    khóa công khai và thêm nó vào tệp <code>~/.ssh/authorized_keys</code> của máy chủ, rồi chọn khóa\n    đó làm phương thức xác thực của máy chủ. Nếu bạn đã có một khóa riêng tư, hãy nhập nó vào\n    VVTerm và gán nó cho máy chủ theo cùng cách.\n  </p>\n  <p>\n    Một khóa công khai trên máy chủ là thứ cho phép một khóa riêng tư trên thiết bị của bạn. Bạn có thể tái sử dụng một cặp\n    khóa trên nhiều máy chủ bằng cách đặt cùng một khóa công khai vào <code>authorized_keys</code> của mỗi máy chủ, hoặc giữ các khóa riêng cho từng host để kiểm soát chặt chẽ hơn.\n  </p>\n\n  <h2>Xác minh host</h2>\n  <p>\n    Lần đầu bạn kết nối tới một máy chủ, VVTerm hiển thị dấu vân tay khóa của host. Hãy xác nhận nó\n    khớp với những gì bạn mong đợi trước khi chấp nhận, để bạn chắc chắn mình đang kết nối tới đúng\n    máy chứ không phải một kẻ mạo danh. Sau khi bạn tin cậy một host, các kết nối sau diễn ra mà không hỏi lại\n    trừ khi khóa của nó thay đổi.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Với xác thực đã thiết lập, chuyển sang <a href=\"/vi/docs/sftp-file-browser\">trình duyệt tệp SFTP</a> để quản lý tệp từ xa, hoặc xem lại <a href=\"/vi/docs/adding-a-server\">Thêm máy chủ</a> để tinh chỉnh\n    chi tiết kết nối.\n  </p>\n"
   },
   "docs/getting-started": {
     "heading": "Bắt đầu",
@@ -429,7 +429,7 @@
     "title": "Bắt đầu với VVTerm — VVTerm",
     "description": "Cài VVTerm trên iPhone, iPad hoặc Mac, kiểm tra yêu cầu hệ thống, thêm máy chủ đầu tiên, kết nối qua SSH, và tìm hiểu giới hạn của bậc miễn phí và Pro.",
     "schemaDescription": "Cài VVTerm, kiểm tra yêu cầu hệ thống, thêm máy chủ đầu tiên, kết nối qua SSH, và hiểu các bậc miễn phí và Pro.",
-    "bodyHtml": "\n  <p>\n    VVTerm là một terminal SSH gốc và trình khách tệp SFTP cho iPhone, iPad và Mac. Nó hiển thị\n    terminal trên GPU với <strong>libghostty</strong> và kết nối qua SSH bằng <strong>libssh2</strong>, nên các phiên nhanh và chính xác. Ngoài SSH tiêu chuẩn, nó có thể tiếp cận\n    máy qua <strong>Mosh</strong>, <strong>Tailscale SSH</strong> và <strong>Cloudflare Tunnel SSH</strong>. Trang này đưa bạn từ cài đặt đến dấu nhắc đầu tiên.\n  </p>\n\n  <h2>Yêu cầu hệ thống</h2>\n  <ul>\n    <li><strong>iPhone và iPad</strong> — iOS hoặc iPadOS 16 trở lên.</li>\n    <li><strong>Mac</strong> — macOS 13 Ventura trở lên trên một Mac dùng Apple Silicon. Mac dùng Intel không được hỗ trợ.</li>\n  </ul>\n  <p>\n    VVTerm là một ứng dụng trên cả ba nền tảng, và danh sách máy chủ của bạn theo bạn giữa chúng\n    qua iCloud.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Mở App Store trên thiết bị của bạn và cài VVTerm.</li>\n    <li>Khởi chạy ứng dụng và hoàn tất quy trình chào mừng ngắn.</li>\n    <li>VVTerm mở ra với một danh sách máy chủ trống, sẵn sàng cho kết nối đầu tiên của bạn.</li>\n  </ol>\n\n  <h2>Thêm máy chủ đầu tiên</h2>\n  <p>Bạn cần ba chi tiết từ máy chủ bạn muốn tiếp cận: host của nó, tên người dùng của bạn, và cách bạn xác thực.</p>\n  <ol>\n    <li>Bắt đầu một máy chủ mới và đặt cho nó một <strong>tên</strong> dễ nhận diện.</li>\n    <li>Nhập <strong>host</strong> — một tên máy chủ như <code>example.com</code> hoặc một IP như <code>192.168.1.20</code>.</li>\n    <li>Đặt <strong>cổng</strong>. SSH dùng <code>22</code> theo mặc định; chỉ thay đổi nếu máy chủ của bạn lắng nghe ở nơi khác.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập, chẳng hạn <code>root</code> hoặc <code>ubuntu</code>.</li>\n    <li>Chọn một phương thức xác thực — mật khẩu, một khóa SSH, hoặc một khóa SSH có cụm mật khẩu.</li>\n  </ol>\n  <p>\n    Để xem hướng dẫn đầy đủ về từng trường và cách máy chủ gắn vào không gian làm việc, xem <a href=\"/docs/adding-a-server\">Thêm máy chủ</a>.\n  </p>\n\n  <h2>Kết nối</h2>\n  <ol>\n    <li>Lưu máy chủ và chọn nó từ danh sách của bạn.</li>\n    <li>Lần đầu bạn kết nối tới một host, VVTerm hiển thị dấu vân tay khóa của nó để bạn có thể xác minh host trước khi tin cậy.</li>\n    <li>Sau khi chấp nhận, terminal mở ra tại dấu nhắc shell và bạn có thể bắt đầu làm việc.</li>\n  </ol>\n  <p>\n    Trên iPhone và iPad, một thanh công cụ bàn phím phía trên bàn phím phần mềm bổ sung <code>Esc</code>, <code>Tab</code>, <code>Ctrl</code>, các phím mũi tên, và các phím chức năng mà terminal phụ thuộc vào. Trên\n    Mac, việc xử lý bàn phím đầy đủ hoạt động như bạn mong đợi ở một ứng dụng gốc.\n  </p>\n\n  <h2>Miễn phí và Pro</h2>\n  <p>VVTerm miễn phí để dùng, với các giới hạn phù hợp cho một máy:</p>\n  <ul>\n    <li><strong>Miễn phí</strong> — một không gian làm việc, một máy chủ và một tab kết nối.</li>\n    <li><strong>Pro</strong> — không gian làm việc, máy chủ và tab kết nối không giới hạn.</li>\n  </ul>\n  <p>\n    Pro có giá <strong>$6.49 mỗi tháng</strong> hoặc <strong>$24.99 mỗi năm</strong>, với một lần mua <strong>trọn đời</strong> giá <strong>$49.99</strong>. Mua hàng, thanh toán và hoàn tiền được\n    Apple xử lý qua tài khoản App Store của bạn. Khi bạn sẵn sàng sắp xếp nhiều máy hơn, xem <a href=\"/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    VVTerm là một terminal SSH native và client SFTP cho iPhone, iPad và Mac. Nó hiển thị\n    terminal trên GPU với <strong>libghostty</strong> và kết nối qua SSH bằng <strong>libssh2</strong>, nên các phiên nhanh và chính xác. Ngoài SSH tiêu chuẩn, nó có thể tiếp cận\n    máy qua <strong>Mosh</strong>, <strong>Tailscale SSH</strong> và <strong>Cloudflare Tunnel SSH</strong>. Trang này đưa bạn từ cài đặt đến dấu nhắc đầu tiên.\n  </p>\n\n  <h2>Yêu cầu hệ thống</h2>\n  <ul>\n    <li><strong>iPhone và iPad</strong> — iOS hoặc iPadOS 16 trở lên.</li>\n    <li><strong>Mac</strong> — macOS 13 Ventura trở lên trên một Mac dùng Apple Silicon. Mac dùng Intel không được hỗ trợ.</li>\n  </ul>\n  <p>\n    VVTerm là một ứng dụng trên cả ba nền tảng, và danh sách máy chủ của bạn theo bạn giữa chúng\n    qua iCloud.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Mở App Store trên thiết bị của bạn và cài VVTerm.</li>\n    <li>Khởi chạy ứng dụng và hoàn tất quy trình chào mừng ngắn.</li>\n    <li>VVTerm mở ra với một danh sách máy chủ trống, sẵn sàng cho kết nối đầu tiên của bạn.</li>\n  </ol>\n\n  <h2>Thêm máy chủ đầu tiên</h2>\n  <p>Bạn cần ba chi tiết từ máy chủ bạn muốn tiếp cận: host của nó, tên người dùng của bạn, và cách bạn xác thực.</p>\n  <ol>\n    <li>Bắt đầu một máy chủ mới và đặt cho nó một <strong>tên</strong> dễ nhận diện.</li>\n    <li>Nhập <strong>host</strong> — một tên máy chủ như <code>example.com</code> hoặc một IP như <code>192.168.1.20</code>.</li>\n    <li>Đặt <strong>cổng</strong>. SSH dùng <code>22</code> theo mặc định; chỉ thay đổi nếu máy chủ của bạn lắng nghe ở nơi khác.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập, chẳng hạn <code>root</code> hoặc <code>ubuntu</code>.</li>\n    <li>Chọn một phương thức xác thực — mật khẩu, một khóa SSH, hoặc một khóa SSH có cụm mật khẩu.</li>\n  </ol>\n  <p>\n    Để xem hướng dẫn đầy đủ về từng trường và cách máy chủ gắn vào không gian làm việc, xem <a href=\"/vi/docs/adding-a-server\">Thêm máy chủ</a>.\n  </p>\n\n  <h2>Kết nối</h2>\n  <ol>\n    <li>Lưu máy chủ và chọn nó từ danh sách của bạn.</li>\n    <li>Lần đầu bạn kết nối tới một host, VVTerm hiển thị dấu vân tay khóa của nó để bạn có thể xác minh host trước khi tin cậy.</li>\n    <li>Sau khi chấp nhận, terminal mở ra tại dấu nhắc shell và bạn có thể bắt đầu làm việc.</li>\n  </ol>\n  <p>\n    Trên iPhone và iPad, một thanh công cụ bàn phím phía trên bàn phím phần mềm bổ sung <code>Esc</code>, <code>Tab</code>, <code>Ctrl</code>, các phím mũi tên, và các phím chức năng mà terminal phụ thuộc vào. Trên\n    Mac, việc xử lý bàn phím đầy đủ hoạt động như bạn mong đợi ở một ứng dụng native.\n  </p>\n\n  <h2>Miễn phí và Pro</h2>\n  <p>VVTerm miễn phí để dùng, với các giới hạn phù hợp cho một máy:</p>\n  <ul>\n    <li><strong>Miễn phí</strong> — một không gian làm việc, một máy chủ và một tab kết nối.</li>\n    <li><strong>Pro</strong> — không gian làm việc, máy chủ và tab kết nối không giới hạn.</li>\n  </ul>\n  <p>\n    Pro có giá <strong>$6.49 mỗi tháng</strong> hoặc <strong>$24.99 mỗi năm</strong>, với một lần mua <strong>trọn đời</strong> giá <strong>$49.99</strong>. Mua hàng, thanh toán và hoàn tiền được\n    Apple xử lý qua tài khoản App Store của bạn. Khi bạn sẵn sàng sắp xếp nhiều máy hơn, xem <a href=\"/vi/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a>.\n  </p>\n"
   },
   "docs/icloud-sync": {
     "heading": "Đồng bộ iCloud và Keychain",
@@ -438,7 +438,7 @@
     "title": "Đồng bộ iCloud và Keychain — VVTerm",
     "description": "VVTerm đồng bộ siêu dữ liệu máy chủ qua iCloud trong khi mật khẩu và khóa SSH ở lại trong Apple Keychain, chỉ đồng bộ qua iCloud Keychain khi bạn bật nó.",
     "schemaDescription": "Cách VVTerm đồng bộ siêu dữ liệu máy chủ qua iCloud trong khi giữ mật khẩu và khóa SSH trong Apple Keychain, cách khử trùng lặp hoạt động, và những gì không đồng bộ.",
-    "bodyHtml": "\n  <p>\n    VVTerm giữ thiết lập của bạn nhất quán trên các thiết bị bằng cách chia dữ liệu của bạn thành hai phần: các\n    định nghĩa máy chủ mô tả cách kết nối, và các bí mật dùng để đăng nhập. Chúng được xử lý\n    khác nhau một cách có chủ đích, để danh sách của bạn có thể di chuyển tự do trong khi thông tin đăng nhập vẫn được bảo vệ.\n  </p>\n\n  <h2>Những gì đồng bộ qua iCloud</h2>\n  <p>\n    <strong>Siêu dữ liệu</strong> máy chủ đồng bộ qua iCloud bằng CloudKit. Điều đó bao gồm các chi tiết bạn\n    nhập khi <a href=\"/docs/adding-a-server\">thêm một máy chủ</a> — tên, host, cổng, tên người dùng\n    và môi trường của nó — cùng với không gian làm việc của bạn và cách mọi thứ được sắp xếp. Thêm một máy chủ trên\n    Mac và nó xuất hiện trên iPhone và iPad của bạn; đổi tên một không gian làm việc trên một thiết bị và thay đổi đó theo\n    sang các thiết bị khác.\n  </p>\n\n  <h2>Những gì ở lại trong Keychain</h2>\n  <p>\n    Các bí mật của bạn — <strong>mật khẩu, khóa SSH riêng tư và cụm mật khẩu</strong> — được lưu trong <strong>Apple Keychain</strong>, không phải trong siêu dữ liệu đồng bộ. Chúng được cố tình giữ ngoài\n    CloudKit, nên phần dữ liệu của bạn di chuyển qua iCloud không bao giờ chứa một thông tin đăng nhập.\n  </p>\n  <p>\n    Thông tin đăng nhập di chuyển giữa các thiết bị chỉ khi <strong>iCloud Keychain</strong> được bật trong cài đặt\n    iOS hoặc macOS của bạn. Khi bật, một mật khẩu hoặc khóa đã lưu trở nên khả dụng trên các thiết bị khác của bạn\n    qua đồng bộ Keychain an toàn của Apple. Khi tắt, thông tin đăng nhập ở lại trên thiết bị nơi bạn nhập\n    chúng, và bạn thêm chúng lại trên mỗi thiết bị bạn dùng.\n  </p>\n\n  <h2>Những gì không đồng bộ</h2>\n  <ul>\n    <li><strong>Thông tin đăng nhập không bao giờ được CloudKit mang đi.</strong> Mật khẩu và khóa SSH bị loại trừ hoàn toàn khỏi siêu dữ liệu máy chủ đồng bộ.</li>\n    <li>Nếu iCloud Keychain tắt, các bí mật của bạn không rời khỏi thiết bị, dù danh sách máy chủ vẫn đồng bộ.</li>\n    <li>Các phiên terminal đang hoạt động và tab kết nối là cục bộ trên một thiết bị và không được đồng bộ.</li>\n  </ul>\n\n  <h2>Khử trùng lặp</h2>\n  <p>\n    Mỗi máy chủ và không gian làm việc mang một định danh ổn định. Khi VVTerm hợp nhất các thay đổi đến từ\n    iCloud, nó khớp các bản ghi <strong>theo ID</strong>, nên cùng một máy chủ tồn tại trên hai thiết bị được\n    hòa giải thành một mục duy nhất thay vì bị nhân đôi. Điều này giữ danh sách của bạn gọn gàng ngay cả khi bạn\n    chỉnh sửa trên nhiều thiết bị.\n  </p>\n\n  <h2>Làm việc không có iCloud</h2>\n  <p>\n    Nếu iCloud không khả dụng hoặc bị tắt, VVTerm chuyển sang lưu trữ cục bộ để ứng dụng tiếp tục hoạt động\n    trên thiết bị đó. Máy chủ của bạn được lưu cục bộ và vẫn dùng được; chúng chỉ đơn giản là sẽ không lan truyền tới\n    các thiết bị khác của bạn cho đến khi đồng bộ iCloud khả dụng trở lại.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Để kiểm soát cách các bí mật được lưu theo từng máy chủ, xem <a href=\"/docs/authentication-and-keys\">Xác thực và khóa SSH</a>. Để sắp xếp các máy chủ\n    đồng bộ, xem <a href=\"/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    VVTerm giữ thiết lập của bạn nhất quán trên các thiết bị bằng cách chia dữ liệu của bạn thành hai phần: các\n    định nghĩa máy chủ mô tả cách kết nối, và các bí mật dùng để đăng nhập. Chúng được xử lý\n    khác nhau một cách có chủ đích, để danh sách của bạn có thể di chuyển tự do trong khi thông tin đăng nhập vẫn được bảo vệ.\n  </p>\n\n  <h2>Những gì đồng bộ qua iCloud</h2>\n  <p>\n    <strong>Siêu dữ liệu</strong> máy chủ đồng bộ qua iCloud bằng CloudKit. Điều đó bao gồm các chi tiết bạn\n    nhập khi <a href=\"/vi/docs/adding-a-server\">thêm một máy chủ</a> — tên, host, cổng, tên người dùng\n    và môi trường của nó — cùng với không gian làm việc của bạn và cách mọi thứ được sắp xếp. Thêm một máy chủ trên\n    Mac và nó xuất hiện trên iPhone và iPad của bạn; đổi tên một không gian làm việc trên một thiết bị và thay đổi đó theo\n    sang các thiết bị khác.\n  </p>\n\n  <h2>Những gì ở lại trong Keychain</h2>\n  <p>\n    Các bí mật của bạn — <strong>mật khẩu, khóa SSH riêng tư và cụm mật khẩu</strong> — được lưu trong <strong>Apple Keychain</strong>, không phải trong siêu dữ liệu đồng bộ. Chúng được cố tình giữ ngoài\n    CloudKit, nên phần dữ liệu của bạn di chuyển qua iCloud không bao giờ chứa một thông tin đăng nhập.\n  </p>\n  <p>\n    Thông tin đăng nhập di chuyển giữa các thiết bị chỉ khi <strong>iCloud Keychain</strong> được bật trong cài đặt\n    iOS hoặc macOS của bạn. Khi bật, một mật khẩu hoặc khóa đã lưu trở nên khả dụng trên các thiết bị khác của bạn\n    qua đồng bộ Keychain an toàn của Apple. Khi tắt, thông tin đăng nhập ở lại trên thiết bị nơi bạn nhập\n    chúng, và bạn thêm chúng lại trên mỗi thiết bị bạn dùng.\n  </p>\n\n  <h2>Những gì không đồng bộ</h2>\n  <ul>\n    <li><strong>Thông tin đăng nhập không bao giờ được CloudKit mang đi.</strong> Mật khẩu và khóa SSH bị loại trừ hoàn toàn khỏi siêu dữ liệu máy chủ đồng bộ.</li>\n    <li>Nếu iCloud Keychain tắt, các bí mật của bạn không rời khỏi thiết bị, dù danh sách máy chủ vẫn đồng bộ.</li>\n    <li>Các phiên terminal đang hoạt động và tab kết nối là cục bộ trên một thiết bị và không được đồng bộ.</li>\n  </ul>\n\n  <h2>Khử trùng lặp</h2>\n  <p>\n    Mỗi máy chủ và không gian làm việc mang một định danh ổn định. Khi VVTerm hợp nhất các thay đổi đến từ\n    iCloud, nó khớp các bản ghi <strong>theo ID</strong>, nên cùng một máy chủ tồn tại trên hai thiết bị được\n    hòa giải thành một mục duy nhất thay vì bị nhân đôi. Điều này giữ danh sách của bạn gọn gàng ngay cả khi bạn\n    chỉnh sửa trên nhiều thiết bị.\n  </p>\n\n  <h2>Làm việc không có iCloud</h2>\n  <p>\n    Nếu iCloud không khả dụng hoặc bị tắt, VVTerm chuyển sang lưu trữ cục bộ để ứng dụng tiếp tục hoạt động\n    trên thiết bị đó. Máy chủ của bạn được lưu cục bộ và vẫn dùng được; chúng chỉ đơn giản là sẽ không lan truyền tới\n    các thiết bị khác của bạn cho đến khi đồng bộ iCloud khả dụng trở lại.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Để kiểm soát cách các bí mật được lưu theo từng máy chủ, xem <a href=\"/vi/docs/authentication-and-keys\">Xác thực và khóa SSH</a>. Để sắp xếp các máy chủ\n    đồng bộ, xem <a href=\"/vi/docs/workspaces-and-tabs\">Không gian làm việc, môi trường và tab</a>.\n  </p>\n"
   },
   "docs": {
     "title": "Tài liệu VVTerm — SSH, SFTP và đồng bộ iCloud",
@@ -467,7 +467,7 @@
     "title": "Dùng trình duyệt tệp SFTP — VVTerm",
     "description": "Duyệt thư mục từ xa, tải lên và tải xuống tệp, tạo thư mục, đổi tên, di chuyển, xóa, xem trước văn bản, hình ảnh và video, và chỉnh sửa quyền POSIX trong VVTerm.",
     "schemaDescription": "Dùng trình duyệt tệp SFTP của VVTerm để duyệt thư mục từ xa, tải lên và tải xuống, tạo thư mục, đổi tên, di chuyển, xóa, xem trước, và chỉnh sửa tệp và quyền.",
-    "bodyHtml": "\n  <p>\n    Mọi máy chủ bạn kết nối qua SSH cũng có thể được duyệt qua SFTP trong cùng ứng dụng. Trình\n    duyệt tệp chạy trên kết nối hiện có của bạn, nên không có gì thêm phải cấu hình trên\n    máy chủ — nếu bạn SSH vào được, bạn quản lý tệp được.\n  </p>\n\n  <h2>Mở trình duyệt tệp</h2>\n  <p>\n    Từ một máy chủ đã kết nối, mở chế độ xem <strong>Tệp</strong> để bắt đầu duyệt. VVTerm liệt kê nội\n    dung thư mục từ xa, hiển thị tên, kích thước và loại. Trên Mac trình duyệt nằm cạnh terminal\n    của bạn trong cùng một cửa sổ; trên iPhone và iPad nó mở ra như chế độ xem riêng để bạn có thể chuyển giữa\n    shell và tệp của mình.\n  </p>\n\n  <h2>Duyệt thư mục</h2>\n  <ul>\n    <li>Chạm hoặc nhấp vào một thư mục để mở nó, và dùng đường dẫn hoặc điều hướng quay lại để đi lên.</li>\n    <li>Bắt đầu từ thư mục home của bạn và đi vào bất kỳ đường dẫn nào tài khoản của bạn có thể đọc.</li>\n    <li>Các mục bạn không có quyền vào bị máy chủ giới hạn, đúng như khi ở trong một shell.</li>\n  </ul>\n\n  <h2>Tải lên và tải xuống</h2>\n  <p>\n    Di chuyển tệp theo cả hai chiều trực tiếp từ trình duyệt:\n  </p>\n  <ul>\n    <li><strong>Tải xuống</strong> một tệp từ xa về thiết bị của bạn để giữ một bản sao cục bộ.</li>\n    <li><strong>Tải lên</strong> một tệp từ thiết bị của bạn vào thư mục từ xa hiện tại.</li>\n  </ul>\n  <p>\n    Đây là cách nhanh nhất để kéo một log xuống, đẩy một cấu hình lên, hoặc di chuyển tài nguyên giữa các máy\n    mà không phải xuống dòng lệnh.\n  </p>\n\n  <h2>Quản lý tệp và thư mục</h2>\n  <ul>\n    <li><strong>Tạo thư mục</strong> để sắp xếp các thư mục từ xa.</li>\n    <li><strong>Đổi tên</strong> tệp và thư mục ngay tại chỗ.</li>\n    <li><strong>Di chuyển</strong> các mục sang một đường dẫn khác.</li>\n    <li><strong>Xóa</strong> tệp và thư mục bạn không còn cần.</li>\n  </ul>\n  <p>\n    Các thao tác này chạy qua SFTP trên máy chủ trực tiếp, nên thay đổi có hiệu lực ngay lập tức.\n  </p>\n\n  <h2>Xem trước tệp</h2>\n  <p>\n    Bạn có thể xem trước các loại tệp thông dụng mà không cần tải xuống trước. VVTerm hiển thị <strong>văn bản</strong>, <strong>hình ảnh</strong> và <strong>video</strong> ngay trong ứng dụng, giúp\n    dễ dàng kiểm tra nội dung của một tệp — xác nhận một cấu hình, liếc qua một ảnh chụp màn hình, hoặc tua một bản ghi —\n    trước khi quyết định làm gì với nó.\n  </p>\n\n  <h2>Chỉnh sửa tệp văn bản</h2>\n  <p>\n    Với các tệp văn bản, trình duyệt có sẵn một trình chỉnh sửa để bạn có thể thay đổi nhanh một cấu hình hoặc\n    script và lưu thẳng lại máy chủ. Không cần sao chép một tệp xuống, chỉnh sửa nó\n    cục bộ, rồi tải lên lại cho những chỉnh sửa nhỏ.\n  </p>\n\n  <h2>Chỉnh sửa quyền</h2>\n  <p>\n    Trên các máy chủ hỗ trợ, bạn có thể xem và thay đổi <strong>quyền POSIX</strong> của một tệp —\n    các bit đọc, ghi và thực thi cho chủ sở hữu, nhóm và những người khác. Điều này tiện để làm cho một script\n    có thể thực thi hoặc siết chặt quyền truy cập trên một tệp nhạy cảm mà không phải gõ <code>chmod</code> bằng tay.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Quyền truy cập tệp phụ thuộc vào tài khoản bạn đăng nhập, được đặt trong <a href=\"/docs/adding-a-server\">Thêm máy chủ</a> và <a href=\"/docs/authentication-and-keys\">Xác thực và khóa SSH</a>. Để giữ máy chủ của bạn\n    nhất quán trên các thiết bị, xem <a href=\"/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    Mọi máy chủ bạn kết nối qua SSH cũng có thể được duyệt qua SFTP trong cùng ứng dụng. Trình\n    duyệt tệp chạy trên kết nối hiện có của bạn, nên không có gì thêm phải cấu hình trên\n    máy chủ — nếu bạn SSH vào được, bạn quản lý tệp được.\n  </p>\n\n  <h2>Mở trình duyệt tệp</h2>\n  <p>\n    Từ một máy chủ đã kết nối, mở chế độ xem <strong>Tệp</strong> để bắt đầu duyệt. VVTerm liệt kê nội\n    dung thư mục từ xa, hiển thị tên, kích thước và loại. Trên Mac trình duyệt nằm cạnh terminal\n    của bạn trong cùng một cửa sổ; trên iPhone và iPad nó mở ra như chế độ xem riêng để bạn có thể chuyển giữa\n    shell và tệp của mình.\n  </p>\n\n  <h2>Duyệt thư mục</h2>\n  <ul>\n    <li>Chạm hoặc nhấp vào một thư mục để mở nó, và dùng đường dẫn hoặc điều hướng quay lại để đi lên.</li>\n    <li>Bắt đầu từ thư mục home của bạn và đi vào bất kỳ đường dẫn nào tài khoản của bạn có thể đọc.</li>\n    <li>Các mục bạn không có quyền vào bị máy chủ giới hạn, đúng như khi ở trong một shell.</li>\n  </ul>\n\n  <h2>Tải lên và tải xuống</h2>\n  <p>\n    Di chuyển tệp theo cả hai chiều trực tiếp từ trình duyệt:\n  </p>\n  <ul>\n    <li><strong>Tải xuống</strong> một tệp từ xa về thiết bị của bạn để giữ một bản sao cục bộ.</li>\n    <li><strong>Tải lên</strong> một tệp từ thiết bị của bạn vào thư mục từ xa hiện tại.</li>\n  </ul>\n  <p>\n    Đây là cách nhanh nhất để kéo một log xuống, đẩy một cấu hình lên, hoặc di chuyển tài nguyên giữa các máy\n    mà không phải xuống dòng lệnh.\n  </p>\n\n  <h2>Quản lý tệp và thư mục</h2>\n  <ul>\n    <li><strong>Tạo thư mục</strong> để sắp xếp các thư mục từ xa.</li>\n    <li><strong>Đổi tên</strong> tệp và thư mục ngay tại chỗ.</li>\n    <li><strong>Di chuyển</strong> các mục sang một đường dẫn khác.</li>\n    <li><strong>Xóa</strong> tệp và thư mục bạn không còn cần.</li>\n  </ul>\n  <p>\n    Các thao tác này chạy qua SFTP trên máy chủ trực tiếp, nên thay đổi có hiệu lực ngay lập tức.\n  </p>\n\n  <h2>Xem trước tệp</h2>\n  <p>\n    Bạn có thể xem trước các loại tệp thông dụng mà không cần tải xuống trước. VVTerm hiển thị <strong>văn bản</strong>, <strong>hình ảnh</strong> và <strong>video</strong> ngay trong ứng dụng, giúp\n    dễ dàng kiểm tra nội dung của một tệp — xác nhận một cấu hình, liếc qua một ảnh chụp màn hình, hoặc tua một bản ghi —\n    trước khi quyết định làm gì với nó.\n  </p>\n\n  <h2>Chỉnh sửa tệp văn bản</h2>\n  <p>\n    Với các tệp văn bản, trình duyệt có sẵn một trình chỉnh sửa để bạn có thể thay đổi nhanh một cấu hình hoặc\n    script và lưu thẳng lại máy chủ. Không cần sao chép một tệp xuống, chỉnh sửa nó\n    cục bộ, rồi tải lên lại cho những chỉnh sửa nhỏ.\n  </p>\n\n  <h2>Chỉnh sửa quyền</h2>\n  <p>\n    Trên các máy chủ hỗ trợ, bạn có thể xem và thay đổi <strong>quyền POSIX</strong> của một tệp —\n    các bit đọc, ghi và thực thi cho chủ sở hữu, nhóm và những người khác. Điều này tiện để làm cho một script\n    có thể thực thi hoặc siết chặt quyền truy cập trên một tệp nhạy cảm mà không phải gõ <code>chmod</code> bằng tay.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Quyền truy cập tệp phụ thuộc vào tài khoản bạn đăng nhập, được đặt trong <a href=\"/vi/docs/adding-a-server\">Thêm máy chủ</a> và <a href=\"/vi/docs/authentication-and-keys\">Xác thực và khóa SSH</a>. Để giữ máy chủ của bạn\n    nhất quán trên các thiết bị, xem <a href=\"/vi/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
   },
   "docs/workspaces-and-tabs": {
     "heading": "Không gian làm việc, môi trường và tab",
@@ -476,7 +476,7 @@
     "title": "Không gian làm việc, môi trường và tab — VVTerm",
     "description": "Sắp xếp máy chủ bằng không gian làm việc và môi trường trong VVTerm, chạy nhiều phiên với tab kết nối, và hiểu giới hạn của bậc miễn phí và Pro.",
     "schemaDescription": "Cách VVTerm sắp xếp máy chủ bằng không gian làm việc và môi trường, cách tab kết nối cho phép bạn chạy nhiều phiên, và các giới hạn miễn phí và Pro được áp dụng.",
-    "bodyHtml": "\n  <p>\n    Khi bạn thêm nhiều máy hơn, VVTerm cung cấp cho bạn hai cách để giữ chúng được sắp xếp — không gian làm việc và\n    môi trường — và tab kết nối để bạn có thể làm việc trong nhiều phiên cùng lúc. Chúng đồng bộ trên\n    các thiết bị của bạn qua iCloud, nên cách sắp xếp của bạn giống nhau ở mọi nơi.\n  </p>\n\n  <h2>Không gian làm việc</h2>\n  <p>\n    Một <strong>không gian làm việc</strong> là nhóm cấp cao nhất mà máy chủ của bạn thuộc về. Dùng một cái cho mỗi khách hàng, mỗi\n    dự án, hoặc mỗi nhóm để giữ các máy không liên quan tách biệt. Mỗi máy chủ nằm trong đúng một\n    không gian làm việc, và chuyển không gian làm việc sẽ thay đổi những máy chủ bạn thấy. Không gian làm việc đồng bộ qua iCloud\n    cùng với các máy chủ chúng chứa.\n  </p>\n\n  <h2>Môi trường</h2>\n  <p>\n    Trong một không gian làm việc, một <strong>môi trường</strong> sắp xếp máy chủ thêm một bậc — ví dụ Production,\n    Staging hay Development. Môi trường cho phép bạn lọc một danh sách đông đúc xuống còn những máy bạn quan tâm\n    ngay lúc này, và chúng giữ các host production tách biệt về mặt trực quan với những máy bạn có thể thử nghiệm\n    trên đó. Bạn đặt môi trường của một máy chủ khi <a href=\"/docs/adding-a-server\">thêm hoặc chỉnh sửa nó</a>.\n  </p>\n\n  <h2>Tab kết nối</h2>\n  <p>\n    Một <strong>tab kết nối</strong> là một phiên trực tiếp duy nhất với một máy chủ. Mở một máy chủ sẽ bắt đầu một\n    tab; mở một máy chủ khác, hoặc cùng một máy chủ lần nữa, sẽ bắt đầu một tab thứ hai. Mỗi tab độc lập,\n    nên bạn có thể chạy một tác vụ dài trong một tab trong khi làm việc trong tab khác.\n  </p>\n  <p>\n    Chuyển giữa các tab để đi từ phiên này sang phiên khác mà không ngắt kết nối. Trên Mac, tab nằm trong\n    thanh công cụ hợp nhất; trên iPhone và iPad bạn di chuyển giữa các kết nối đang mở từ chế độ xem phiên.\n  </p>\n\n  <h2>Giới hạn của bậc Miễn phí và Pro</h2>\n  <p>Các bậc của VVTerm kiểm soát bạn có thể sắp xếp bao nhiêu và chạy bao nhiêu phiên cùng lúc:</p>\n  <ul>\n    <li><strong>Miễn phí</strong> — một không gian làm việc, một máy chủ và một tab kết nối.</li>\n    <li><strong>Pro</strong> — không gian làm việc, máy chủ và tab kết nối không giới hạn.</li>\n  </ul>\n  <p>\n    Với Pro bạn có thể giữ nhiều kết nối mở cùng lúc — ví dụ một shell production, một\n    shell staging, và một phiên SFTP — và nhóm chúng qua bao nhiêu không gian làm việc và môi trường tùy\n    bạn cần. Pro có giá <strong>$6.49 mỗi tháng</strong> hoặc <strong>$24.99 mỗi năm</strong>, với một\n    lần mua <strong>trọn đời</strong> giá <strong>$49.99</strong>; thanh toán và hoàn tiền được\n    Apple xử lý.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Hãy bắt đầu bằng cách <a href=\"/docs/adding-a-server\">thêm một máy chủ</a> và đặt nó vào một không gian làm việc, rồi\n    tìm hiểu cách cách sắp xếp của bạn di chuyển giữa các thiết bị trong <a href=\"/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    Khi bạn thêm nhiều máy hơn, VVTerm cung cấp cho bạn hai cách để giữ chúng được sắp xếp — không gian làm việc và\n    môi trường — và tab kết nối để bạn có thể làm việc trong nhiều phiên cùng lúc. Chúng đồng bộ trên\n    các thiết bị của bạn qua iCloud, nên cách sắp xếp của bạn giống nhau ở mọi nơi.\n  </p>\n\n  <h2>Không gian làm việc</h2>\n  <p>\n    Một <strong>không gian làm việc</strong> là nhóm cấp cao nhất mà máy chủ của bạn thuộc về. Dùng một cái cho mỗi khách hàng, mỗi\n    dự án, hoặc mỗi nhóm để giữ các máy không liên quan tách biệt. Mỗi máy chủ nằm trong đúng một\n    không gian làm việc, và chuyển không gian làm việc sẽ thay đổi những máy chủ bạn thấy. Không gian làm việc đồng bộ qua iCloud\n    cùng với các máy chủ chúng chứa.\n  </p>\n\n  <h2>Môi trường</h2>\n  <p>\n    Trong một không gian làm việc, một <strong>môi trường</strong> sắp xếp máy chủ thêm một bậc — ví dụ Production,\n    Staging hay Development. Môi trường cho phép bạn lọc một danh sách đông đúc xuống còn những máy bạn quan tâm\n    ngay lúc này, và chúng giữ các host production tách biệt về mặt trực quan với những máy bạn có thể thử nghiệm\n    trên đó. Bạn đặt môi trường của một máy chủ khi <a href=\"/vi/docs/adding-a-server\">thêm hoặc chỉnh sửa nó</a>.\n  </p>\n\n  <h2>Tab kết nối</h2>\n  <p>\n    Một <strong>tab kết nối</strong> là một phiên trực tiếp duy nhất với một máy chủ. Mở một máy chủ sẽ bắt đầu một\n    tab; mở một máy chủ khác, hoặc cùng một máy chủ lần nữa, sẽ bắt đầu một tab thứ hai. Mỗi tab độc lập,\n    nên bạn có thể chạy một tác vụ dài trong một tab trong khi làm việc trong tab khác.\n  </p>\n  <p>\n    Chuyển giữa các tab để đi từ phiên này sang phiên khác mà không ngắt kết nối. Trên Mac, tab nằm trong\n    thanh công cụ hợp nhất; trên iPhone và iPad bạn di chuyển giữa các kết nối đang mở từ chế độ xem phiên.\n  </p>\n\n  <h2>Giới hạn của bậc Miễn phí và Pro</h2>\n  <p>Các bậc của VVTerm kiểm soát bạn có thể sắp xếp bao nhiêu và chạy bao nhiêu phiên cùng lúc:</p>\n  <ul>\n    <li><strong>Miễn phí</strong> — một không gian làm việc, một máy chủ và một tab kết nối.</li>\n    <li><strong>Pro</strong> — không gian làm việc, máy chủ và tab kết nối không giới hạn.</li>\n  </ul>\n  <p>\n    Với Pro bạn có thể giữ nhiều kết nối mở cùng lúc — ví dụ một shell production, một\n    shell staging, và một phiên SFTP — và nhóm chúng qua bao nhiêu không gian làm việc và môi trường tùy\n    bạn cần. Pro có giá <strong>$6.49 mỗi tháng</strong> hoặc <strong>$24.99 mỗi năm</strong>, với một\n    lần mua <strong>trọn đời</strong> giá <strong>$49.99</strong>; thanh toán và hoàn tiền được\n    Apple xử lý.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Hãy bắt đầu bằng cách <a href=\"/vi/docs/adding-a-server\">thêm một máy chủ</a> và đặt nó vào một không gian làm việc, rồi\n    tìm hiểu cách cách sắp xếp của bạn di chuyển giữa các thiết bị trong <a href=\"/vi/docs/icloud-sync\">Đồng bộ iCloud và Keychain</a>.\n  </p>\n"
   },
   "features/cloudflare-tunnel-ssh": {
     "title": "Cloudflare Tunnel SSH — VVTerm cho iPhone, iPad và Mac",
@@ -485,7 +485,7 @@
     "bcFeatures": "Tính năng",
     "bcThis": "Cloudflare Tunnel SSH",
     "heroEyebrow": "Cloudflare Tunnel SSH",
-    "heroTitle": "Kết nối vào,<br />không phơi bày gì.",
+    "heroTitle": "Kết nối vào,<br />không mở cổng nào.",
     "heroSubhead": "Tiếp cận máy chủ phía sau Cloudflare Tunnel mà không mở một cổng vào nào — ngay từ VVTerm.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
@@ -497,7 +497,7 @@
       {
         "icon": "lucide:cloud",
         "title": "Tiếp cận host qua tunnel",
-        "body": "Kết nối tới máy chủ được phơi bày qua Cloudflare Tunnel bằng tên host tunnel của bạn."
+        "body": "Kết nối tới máy chủ được đưa qua Cloudflare Tunnel bằng tên host tunnel của bạn."
       },
       {
         "icon": "lucide:shield",
@@ -517,7 +517,7 @@
     ],
     "crossEyebrow": "Thiết lập",
     "crossTitle": "Trỏ VVTerm tới tunnel của bạn.",
-    "crossBody": "Thêm một máy chủ với <strong>tên host tunnel</strong> của bạn và kết nối. Máy gốc giữ các cổng vào đóng suốt thời gian đó.",
+    "crossBody": "Thêm một máy chủ với <strong>tên host tunnel</strong> của bạn và kết nối. Máy chủ gốc giữ các cổng vào đóng suốt thời gian đó.",
     "guideLink": "Kết nối qua Cloudflare Tunnel SSH",
     "tailscaleLink": "Hoặc tiếp cận máy qua Tailscale SSH",
     "terminalLink": "Xem terminal SSH",
@@ -525,11 +525,11 @@
     "faqItems": [
       {
         "question": "Cloudflare Tunnel SSH làm gì?",
-        "answer": "Nó cho phép bạn kết nối tới máy chủ phía sau một Cloudflare Tunnel mà không mở cổng vào nào trên máy gốc."
+        "answer": "Nó cho phép bạn kết nối tới máy chủ phía sau một Cloudflare Tunnel mà không mở cổng vào nào trên máy chủ gốc."
       },
       {
         "question": "Tôi có cần mở cổng trên máy chủ không?",
-        "answer": "Không. Mục đích chính là máy gốc giữ các cổng vào đóng trong khi tunnel xử lý kết nối."
+        "answer": "Không. Mục đích chính là máy chủ gốc giữ các cổng vào đóng trong khi tunnel xử lý kết nối."
       },
       {
         "question": "Tôi định địa chỉ máy chủ thế nào?",
@@ -545,7 +545,7 @@
       },
       {
         "question": "Tại sao dùng tunnel thay vì mở một cổng?",
-        "answer": "Một tunnel tránh được các quy tắc tường lửa vào và sự phơi bày công khai, giảm bề mặt tấn công của máy chủ."
+        "answer": "Một tunnel tránh được các quy tắc tường lửa vào và việc mở ra công khai, giảm bề mặt tấn công của máy chủ."
       }
     ],
     "ctaTitle": "SSH vào mà không mở một cổng nào.",
@@ -670,13 +670,13 @@
     "ctaSubtitle": "Tải VVTerm miễn phí và thiết lập đồng bộ trên các thiết bị Apple của bạn."
   },
   "features": {
-    "title": "Tính năng — Terminal SSH và trình khách SFTP VVTerm",
+    "title": "Tính năng — Terminal SSH và client SFTP VVTerm",
     "description": "Mọi điều VVTerm làm được: một terminal SSH GPU, duy trì phiên tmux, một trình duyệt tệp SFTP, giám sát máy chủ trực tiếp, hỗ trợ Windows, tùy chỉnh sâu, Mosh, Tailscale SSH, Cloudflare Tunnel SSH, và đồng bộ iCloud với bảo mật Keychain.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
     "heroEyebrow": "Tính năng",
     "heroTitle": "Mọi thứ bạn cần<br />để vận hành máy từ xa.",
-    "heroSubhead": "Một terminal SSH gốc với duy trì tmux, một trình duyệt tệp SFTP, giám sát trực tiếp, tùy chỉnh sâu, và các phương thức kết nối hiện đại — trong một ứng dụng ưu tiên Apple cho iPhone, iPad và Mac.",
+    "heroSubhead": "Terminal SSH native với tmux, trình duyệt SFTP, giám sát trực tiếp, tùy chỉnh sâu và các cách kết nối hiện đại — trong một ứng dụng dành cho hệ sinh thái Apple.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
     "tourEyebrow": "Một chuyến tham quan nhanh",
@@ -695,7 +695,7 @@
       },
       {
         "pos": "30% 35%",
-        "title": "Phiên làm việc sống sót qua mọi lần rớt mạng.",
+        "title": "Phiên làm việc không bị mất khi rớt mạng.",
         "caption": "top"
       },
       {
@@ -719,7 +719,7 @@
         "slug": "mosh",
         "icon": "lucide:radio",
         "title": "Mosh",
-        "body": "Phiên roaming sống sót qua giấc ngủ và các thay đổi mạng."
+        "body": "Phiên roaming được giữ qua giấc ngủ và các thay đổi mạng."
       },
       {
         "slug": "tailscale-ssh",
@@ -743,7 +743,7 @@
       },
       "tmux-session-persistence": {
         "title": "Duy trì phiên tmux",
-        "summary": "Phiên sống sót qua ngắt kết nối, giấc ngủ và chuyển ứng dụng. VVTerm quản lý tmux giúp bạn — tự động cài đặt, gắn lại khi kết nối lại, và tinh chỉnh ngay từ đầu."
+        "summary": "Phiên được giữ qua ngắt kết nối, giấc ngủ và chuyển ứng dụng. VVTerm quản lý tmux giúp bạn — tự động cài đặt, gắn lại khi kết nối lại, và tinh chỉnh ngay từ đầu."
       },
       "terminal-customization": {
         "title": "Chủ đề & tùy chỉnh",
@@ -763,11 +763,11 @@
       },
       "mosh": {
         "title": "Phiên roaming Mosh",
-        "summary": "Mosh giữ phiên của bạn sống sót qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, với echo cục bộ tức thì và dự phòng SSH."
+        "summary": "Mosh giữ phiên của bạn không bị mất qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, với echo cục bộ tức thì và dự phòng SSH."
       },
       "tailscale-ssh": {
         "title": "Tailscale SSH",
-        "summary": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS — không chuyển tiếp cổng, không phơi bày cổng, không có khóa thêm để quản lý."
+        "summary": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS — không chuyển tiếp cổng, không mở cổng ra internet, không có khóa thêm để quản lý."
       },
       "cloudflare-tunnel-ssh": {
         "title": "Cloudflare Tunnel SSH",
@@ -781,13 +781,13 @@
   },
   "features/mosh": {
     "title": "Phiên roaming Mosh — VVTerm cho iPhone, iPad và Mac",
-    "description": "Mosh giữ phiên của bạn sống sót qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, với echo cục bộ tức thì và dự phòng SSH. Tích hợp trong VVTerm cho iPhone, iPad và Mac.",
+    "description": "Mosh giữ phiên của bạn không bị mất qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, với echo cục bộ tức thì và dự phòng SSH. Tích hợp trong VVTerm cho iPhone, iPad và Mac.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
     "bcThis": "Mosh",
     "heroEyebrow": "Mosh",
     "heroTitle": "Phiên làm việc<br />không bao giờ buông tay.",
-    "heroSubhead": "Mosh giữ shell của bạn sống sót qua các thay đổi mạng, giấc ngủ và rớt kết nối — với echo cục bộ tức thì và dự phòng SSH.",
+    "heroSubhead": "Mosh giữ shell của bạn không bị mất qua các thay đổi mạng, giấc ngủ và rớt kết nối — với echo cục bộ tức thì và dự phòng SSH.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
     "heroAlt": "Phiên roaming Mosh của VVTerm",
@@ -826,10 +826,10 @@
     "faqItems": [
       {
         "question": "Mosh làm gì?",
-        "answer": "Mosh giữ phiên từ xa của bạn sống sót qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, và bổ sung echo cục bộ tức thì để việc gõ cảm giác phản hồi nhanh."
+        "answer": "Mosh giúp phiên từ xa của bạn tiếp tục qua các thay đổi mạng, giấc ngủ và kết nối chập chờn, đồng thời bổ sung echo cục bộ tức thì để việc gõ phản hồi nhanh hơn."
       },
       {
-        "question": "Phiên của tôi có sống sót khi chuyển mạng không?",
+        "question": "Phiên của tôi có giữ được khi chuyển mạng không?",
         "answer": "Có. Một phiên Mosh roaming qua các thay đổi mạng — ví dụ Wi-Fi sang di động — mà không rớt."
       },
       {
@@ -853,7 +853,7 @@
     "ctaSubtitle": "Tải VVTerm miễn phí và kết nối với Mosh."
   },
   "features/server-monitoring": {
-    "title": "Giám sát máy chủ trực tiếp — Trình khách SSH VVTerm",
+    "title": "Giám sát máy chủ trực tiếp — Client SSH VVTerm",
     "description": "Xem CPU, bộ nhớ, mạng, ổ đĩa, tải trung bình, thời gian hoạt động và các tiến trình hàng đầu theo thời gian thực, ngay cạnh shell của bạn — trên các host Linux, macOS, BSD và Windows.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
@@ -1022,7 +1022,7 @@
     "bcThis": "Terminal SSH",
     "heroEyebrow": "Terminal SSH",
     "heroTitle": "Một terminal<br />mang lại cảm giác tức thì.",
-    "heroSubhead": "Hiển thị GPU với libghostty, màu chuẩn và ligature — qua một giao thức SSH với thông tin đăng nhập giữ trong Keychain.",
+    "heroSubhead": "Terminal GPU với libghostty, màu chuẩn và ligature — qua một giao thức SSH với thông tin đăng nhập giữ trong Keychain.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
     "heroAlt": "Phiên terminal SSH GPU của VVTerm",
@@ -1038,7 +1038,7 @@
     "benefits": [
       {
         "icon": "lucide:cpu",
-        "title": "Hiển thị GPU Metal",
+        "title": "Terminal GPU Metal",
         "body": "libghostty — engine từ Ghostty — vẽ mọi khung hình trên Metal để có văn bản sắc nét và scrollback mượt mà."
       },
       {
@@ -1099,19 +1099,19 @@
   },
   "features/tailscale-ssh": {
     "title": "Tailscale SSH — VVTerm cho iPhone, iPad và Mac",
-    "description": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS — không chuyển tiếp cổng, không phơi bày cổng, và không có khóa thêm để quản lý. Tailscale SSH, tích hợp trong VVTerm.",
+    "description": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS — không chuyển tiếp cổng, không mở cổng ra internet, và không có khóa thêm để quản lý. Tailscale SSH, tích hợp trong VVTerm.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
     "bcThis": "Tailscale SSH",
     "heroEyebrow": "Tailscale SSH",
     "heroTitle": "Tailnet của bạn,<br />chỉ cách một cái tên.",
-    "heroSubhead": "Tiếp cận máy bằng tên MagicDNS — không chuyển tiếp cổng, không phơi bày cổng, và không có khóa thêm để quản lý.",
+    "heroSubhead": "Tiếp cận máy bằng tên MagicDNS — không chuyển tiếp cổng, không mở cổng ra internet, và không có khóa thêm để quản lý.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
     "heroAlt": "Phiên Tailscale SSH của VVTerm qua MagicDNS",
     "statementEyebrow": "Riêng tư theo mặc định",
     "statementTitle": "Không cổng mở. Không bề mặt công khai.",
-    "statementBody": "Máy của bạn ở lại trên tailnet, nên <strong>không có gì phơi bày ra internet</strong> — và bạn kết nối bằng <strong>tên MagicDNS</strong> thay vì các địa chỉ IP mong manh.",
+    "statementBody": "Máy của bạn ở lại trên tailnet, nên <strong>không có cổng nào mở ra internet</strong> — và bạn kết nối bằng <strong>tên MagicDNS</strong> thay vì các địa chỉ IP mong manh.",
     "benefits": [
       {
         "icon": "lucide:waypoints",
@@ -1120,7 +1120,7 @@
       },
       {
         "icon": "lucide:shield",
-        "title": "Không phơi bày cổng",
+        "title": "Không mở cổng ra internet",
         "body": "Máy chủ của bạn ở ngoài internet công khai — không có gì đi vào để tấn công."
       },
       {
@@ -1144,11 +1144,11 @@
     "faqItems": [
       {
         "question": "Tailscale SSH trong VVTerm là gì?",
-        "answer": "Nó cho phép bạn kết nối tới các máy trên tailnet của bạn bằng tên MagicDNS của chúng, mà không chuyển tiếp cổng hay phơi bày cổng ra internet."
+        "answer": "Nó cho phép bạn kết nối tới các máy trên tailnet của bạn bằng tên MagicDNS của chúng, mà không chuyển tiếp cổng hay mở cổng ra internet ra internet."
       },
       {
         "question": "Tôi có cần chuyển tiếp cổng nào không?",
-        "answer": "Không. Tailscale SSH tiếp cận máy qua tailnet của bạn, nên không có chuyển tiếp cổng và không có phơi bày đi vào."
+        "answer": "Không. Tailscale SSH tiếp cận máy qua tailnet của bạn, nên không có chuyển tiếp cổng và không mở cổng vào."
       },
       {
         "question": "Tôi có phải quản lý các khóa SSH riêng không?",
@@ -1164,14 +1164,14 @@
       },
       {
         "question": "Máy chủ của tôi có tiếp cận được từ internet công khai không?",
-        "answer": "Không. Máy ở lại trên tailnet của bạn không phơi bày cổng, nên chúng không tiếp cận được công khai."
+        "answer": "Không. Máy ở lại trên tailnet của bạn không mở cổng ra internet, nên chúng không tiếp cận được công khai."
       }
     ],
     "ctaTitle": "Tiếp cận mọi máy, một cách riêng tư.",
     "ctaSubtitle": "Tải VVTerm miễn phí và kết nối qua Tailscale SSH."
   },
   "features/terminal-customization": {
-    "title": "Chủ đề & tùy chỉnh terminal — Trình khách SSH VVTerm",
+    "title": "Chủ đề & tùy chỉnh terminal — Client SSH VVTerm",
     "description": "Biến terminal thành của bạn: 440 chủ đề tích hợp, Nerd Fonts, kiểu con trỏ, chủ đề sáng và tối riêng biệt, và một thanh công cụ bàn phím tùy chỉnh với các đoạn lệnh và phím tắt của riêng bạn.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
@@ -1264,12 +1264,12 @@
   },
   "features/tmux-session-persistence": {
     "title": "Duy trì phiên tmux — VVTerm SSH cho iPhone, iPad và Mac",
-    "description": "VVTerm quản lý tmux giúp bạn nên các phiên SSH sống sót qua ngắt kết nối, giấc ngủ và chuyển ứng dụng. Nó tự động cài tmux, gắn lại khi kết nối lại, và đi kèm cấu hình đã tinh chỉnh ngay từ đầu.",
+    "description": "VVTerm quản lý tmux giúp các phiên SSH không bị mất khi ngắt kết nối, ngủ máy hoặc chuyển ứng dụng. Nó tự động cài tmux, gắn lại khi kết nối lại, và đi kèm cấu hình đã tinh chỉnh ngay từ đầu.",
     "bcHome": "Trang chủ",
     "bcFeatures": "Tính năng",
     "bcThis": "Duy trì tmux",
     "heroEyebrow": "Duy trì phiên tmux",
-    "heroTitle": "Phiên của bạn<br />sống sót qua rớt mạng.",
+    "heroTitle": "Phiên của bạn<br />không mất khi rớt mạng.",
     "heroSubhead": "VVTerm quản lý tmux giúp bạn, nên công việc dài hơi tiếp tục chạy qua các thay đổi mạng, giấc ngủ và chuyển ứng dụng — và gắn lại ngay khi bạn kết nối lại.",
     "seePricing": "Xem bảng giá",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
@@ -1308,7 +1308,7 @@
     "howAlt": "Danh sách phiên tmux được quản lý của VVTerm sẵn sàng gắn lại",
     "faqItems": [
       {
-        "question": "VVTerm giữ phiên của tôi sống sót thế nào?",
+        "question": "VVTerm giữ phiên của tôi không bị mất thế nào?",
         "answer": "Khi kết nối, VVTerm tạo hoặc gắn vào một phiên <strong>tmux</strong> được quản lý trên máy chủ. Vì phiên nằm trên host từ xa, công việc của bạn vẫn tiếp tục chạy ngay cả sau khi kết nối rớt — VVTerm gắn lại vào nó lần kế tiếp bạn kết nối."
       },
       {
@@ -1349,7 +1349,7 @@
     "heroAlt": "Phiên PowerShell của VVTerm trên một host Windows",
     "statementEyebrow": "Một ứng dụng, đội máy hỗn hợp",
     "statementTitle": "Linux và Windows, cạnh nhau.",
-    "statementBody": "Hầu hết trình khách SSH Apple giả định một host POSIX. VVTerm phát hiện nền tảng từ xa — Linux, macOS, BSD, hay <strong>Windows</strong> — và điều chỉnh cách xử lý shell, duy trì và số liệu cho khớp.",
+    "statementBody": "Hầu hết client SSH Apple giả định một host POSIX. VVTerm phát hiện nền tảng từ xa — Linux, macOS, BSD, hay <strong>Windows</strong> — và điều chỉnh cách xử lý shell, duy trì và số liệu cho khớp.",
     "benefits": [
       {
         "icon": "lucide:monitor",
@@ -1359,7 +1359,7 @@
       {
         "icon": "lucide:history",
         "title": "Phiên bền bỉ",
-        "body": "Giữ công việc sống sót qua ngắt kết nối với psmux — bộ ghép kênh kiểu tmux cho Windows — được cài cho bạn khi thiếu."
+        "body": "Giữ công việc không bị mất khi ngắt kết nối với psmux — bộ ghép kênh kiểu tmux cho Windows — được cài cho bạn khi thiếu."
       },
       {
         "icon": "lucide:folder-open-dot",
@@ -1386,7 +1386,7 @@
       },
       {
         "question": "Phiên bền bỉ có hoạt động trên Windows không?",
-        "answer": "Có. Trên các host Windows VVTerm dùng <strong>psmux</strong>, một bộ ghép kênh kiểu tmux, nên phiên của bạn sống sót qua ngắt kết nối. Nếu nó chưa được cài, VVTerm có thể thêm nó bằng winget, scoop, choco hoặc cargo."
+        "answer": "Có. Trên các host Windows VVTerm dùng <strong>psmux</strong>, một bộ ghép kênh kiểu tmux, nên phiên của bạn không bị mất khi ngắt kết nối. Nếu nó chưa được cài, VVTerm có thể thêm nó bằng winget, scoop, choco hoặc cargo."
       },
       {
         "question": "Trình duyệt tệp có hoạt động trên Windows không?",
@@ -1411,7 +1411,7 @@
     "title": "Kết nối qua Cloudflare Tunnel SSH — VVTerm",
     "description": "Cấu hình cloudflared cho SSH, công bố một tên host công khai, và kết nối từ VVTerm tới một máy chủ phía sau Cloudflare Tunnel mà không có cổng vào nào mở.",
     "schemaDescription": "Hướng dẫn từng bước để SSH qua Cloudflare Tunnel với VVTerm: cấu hình cloudflared cho SSH, công bố một tên host công khai, và kết nối tới nó mà không có cổng vào nào mở.",
-    "bodyHtml": "\n  <p>\n    Cloudflare Tunnel cho phép một máy chủ phơi bày một dịch vụ qua mạng lưới của Cloudflare mà không mở\n    cổng vào nào. VVTerm có thể kết nối tới một dịch vụ SSH được công bố theo cách này bằng <strong>tên host công khai</strong> của nó, nên một host phía sau NAT hoặc tường lửa nghiêm ngặt vẫn tiếp cận được.\n  </p>\n\n  <h2>Cách hoạt động</h2>\n  <p>\n    Một daemon <code>cloudflared</code> nhẹ trên máy chủ tạo một kết nối <strong>đi ra</strong>\n    tới Cloudflare và đăng ký một tuyến. Cloudflare sau đó ánh xạ một tên host công khai tới dịch vụ SSH cục bộ của bạn.\n    Vì tunnel được thiết lập từ trong ra ngoài, host không bao giờ cần một cổng vào mở — không\n    có gì để phơi bày hay chuyển tiếp.\n  </p>\n\n  <h2>Điều kiện tiên quyết</h2>\n  <ol>\n    <li>Một <strong>tài khoản Cloudflare</strong> với một tên miền được quản lý trong Cloudflare.</li>\n    <li><code>cloudflared</code> được cài trên máy chủ, và một tunnel có tên đã được tạo và xác thực.</li>\n    <li>Tunnel <strong>được cấu hình cho SSH</strong>, định tuyến một tên host công khai tới dịch vụ SSH cục bộ tại <code>localhost:22</code>.</li>\n  </ol>\n  <p>\n    Trong một cấu hình <code>cloudflared</code> điển hình, một quy tắc ingress ánh xạ tên host tới SSH, ví dụ:\n  </p>\n  <pre><code>ingress:\n  - hostname: ssh.example.com\n    service: ssh://localhost:22\n  - service: http_status:404</code></pre>\n  <p>\n    Thêm tên host công khai làm một tuyến DNS cho tunnel, rồi chạy tunnel để tuyến đi vào hoạt động. Nếu bạn\n    dùng Cloudflare Access trước tên host, hãy chắc chắn chính sách của bạn cho phép người dùng sẽ\n    kết nối.\n  </p>\n\n  <h2>Kết nối từ VVTerm</h2>\n  <ol>\n    <li>Trong VVTerm, chạm <strong>Thêm máy chủ</strong> (hoặc chỉnh sửa một máy chủ hiện có).</li>\n    <li>Đặt <strong>host</strong> thành <strong>tên host công khai</strong> của tunnel, ví dụ <code>ssh.example.com</code>.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập trên máy chủ, và giữ xác thực SSH thông thường của bạn — mật khẩu hoặc khóa.</li>\n    <li>Chọn <strong>Cloudflare Tunnel SSH</strong> làm phương thức kết nối.</li>\n    <li>Lưu và chạm vào máy chủ để kết nối.</li>\n  </ol>\n  <p>\n    VVTerm tiếp cận tên host qua Cloudflare và đưa bạn đến shell của máy chủ, hệt như một phiên\n    SSH trực tiếp.\n  </p>\n\n  <h2>Không có cổng vào nào mở</h2>\n  <p>\n    Lợi thế của thiết lập này là những gì bạn <strong>không</strong> phải làm: không phơi bày cổng 22 ra\n    internet, không có quy tắc tường lửa cho SSH đi vào, và không cấu hình router. Kết nối mạng duy nhất\n    host khởi tạo là đi ra tới Cloudflare, điều này giữ bề mặt tấn công nhỏ.\n  </p>\n\n  <h2>Khắc phục sự cố</h2>\n  <ul>\n    <li>Nếu tên host không kết nối được, hãy xác nhận tunnel đang chạy và quy tắc ingress của nó trỏ tới <code>ssh://localhost:22</code>.</li>\n    <li>Kiểm tra tên host công khai có một tuyến DNS gắn với tunnel trong bảng điều khiển Cloudflare.</li>\n    <li>Nếu truy cập bị chặn, hãy xem lại mọi chính sách Cloudflare Access bao trùm tên host.</li>\n  </ul>\n"
+    "bodyHtml": "\n  <p>\n    Cloudflare Tunnel cho phép một máy chủ mở ra một dịch vụ qua mạng lưới của Cloudflare mà không mở\n    cổng vào nào. VVTerm có thể kết nối tới một dịch vụ SSH được công bố theo cách này bằng <strong>tên host công khai</strong> của nó, nên một host phía sau NAT hoặc tường lửa nghiêm ngặt vẫn tiếp cận được.\n  </p>\n\n  <h2>Cách hoạt động</h2>\n  <p>\n    Một daemon <code>cloudflared</code> nhẹ trên máy chủ tạo một kết nối <strong>đi ra</strong>\n    tới Cloudflare và đăng ký một tuyến. Cloudflare sau đó ánh xạ một tên host công khai tới dịch vụ SSH cục bộ của bạn.\n    Vì tunnel được thiết lập từ trong ra ngoài, host không bao giờ cần một cổng vào mở — không\n    có gì để mở ra hay chuyển tiếp.\n  </p>\n\n  <h2>Điều kiện tiên quyết</h2>\n  <ol>\n    <li>Một <strong>tài khoản Cloudflare</strong> với một tên miền được quản lý trong Cloudflare.</li>\n    <li><code>cloudflared</code> được cài trên máy chủ, và một tunnel có tên đã được tạo và xác thực.</li>\n    <li>Tunnel <strong>được cấu hình cho SSH</strong>, định tuyến một tên host công khai tới dịch vụ SSH cục bộ tại <code>localhost:22</code>.</li>\n  </ol>\n  <p>\n    Trong một cấu hình <code>cloudflared</code> điển hình, một quy tắc ingress ánh xạ tên host tới SSH, ví dụ:\n  </p>\n  <pre><code>ingress:\n  - hostname: ssh.example.com\n    service: ssh://localhost:22\n  - service: http_status:404</code></pre>\n  <p>\n    Thêm tên host công khai làm một tuyến DNS cho tunnel, rồi chạy tunnel để tuyến đi vào hoạt động. Nếu bạn\n    dùng Cloudflare Access trước tên host, hãy chắc chắn chính sách của bạn cho phép người dùng sẽ\n    kết nối.\n  </p>\n\n  <h2>Kết nối từ VVTerm</h2>\n  <ol>\n    <li>Trong VVTerm, chạm <strong>Thêm máy chủ</strong> (hoặc chỉnh sửa một máy chủ hiện có).</li>\n    <li>Đặt <strong>host</strong> thành <strong>tên host công khai</strong> của tunnel, ví dụ <code>ssh.example.com</code>.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập trên máy chủ, và giữ xác thực SSH thông thường của bạn — mật khẩu hoặc khóa.</li>\n    <li>Chọn <strong>Cloudflare Tunnel SSH</strong> làm phương thức kết nối.</li>\n    <li>Lưu và chạm vào máy chủ để kết nối.</li>\n  </ol>\n  <p>\n    VVTerm tiếp cận tên host qua Cloudflare và đưa bạn đến shell của máy chủ, hệt như một phiên\n    SSH trực tiếp.\n  </p>\n\n  <h2>Không có cổng vào nào mở</h2>\n  <p>\n    Lợi thế của thiết lập này là những gì bạn <strong>không</strong> phải làm: không mở cổng ra internet 22 ra\n    internet, không có quy tắc tường lửa cho SSH đi vào, và không cấu hình router. Kết nối mạng duy nhất\n    host khởi tạo là đi ra tới Cloudflare, điều này giữ bề mặt tấn công nhỏ.\n  </p>\n\n  <h2>Khắc phục sự cố</h2>\n  <ul>\n    <li>Nếu tên host không kết nối được, hãy xác nhận tunnel đang chạy và quy tắc ingress của nó trỏ tới <code>ssh://localhost:22</code>.</li>\n    <li>Kiểm tra tên host công khai có một tuyến DNS gắn với tunnel trong bảng điều khiển Cloudflare.</li>\n    <li>Nếu truy cập bị chặn, hãy xem lại mọi chính sách Cloudflare Access bao trùm tên host.</li>\n  </ul>\n"
   },
   "guides/how-to-ssh-from-iphone": {
     "heading": "Cách SSH vào máy chủ từ iPhone của bạn",
@@ -1420,7 +1420,7 @@
     "title": "Cách SSH từ iPhone — VVTerm",
     "description": "Cài VVTerm, thêm một máy chủ, chọn xác thực bằng mật khẩu hoặc khóa SSH, kết nối, và dùng thanh công cụ bàn phím để SSH vào bất kỳ máy chủ nào từ iPhone của bạn.",
     "schemaDescription": "Hướng dẫn từng bước để mở phiên SSH đầu tiên của bạn từ một iPhone với VVTerm: cài đặt, thêm một máy chủ, chọn một phương thức xác thực, kết nối, và dùng thanh công cụ bàn phím.",
-    "bodyHtml": "\n  <p>\n    VVTerm biến iPhone của bạn thành một trình khách SSH đầy đủ. Bạn có thể tiếp cận bất kỳ máy chủ nào chấp nhận SSH —\n    một máy Linux, một Mac, một Raspberry Pi, một máy ảo trên đám mây — và làm việc trong một terminal thực được hiển thị bằng GPU.\n    Hướng dẫn này đi qua kết nối đầu tiên từ đầu đến cuối.\n  </p>\n\n  <h2>Trước khi bạn bắt đầu</h2>\n  <p>\n    Bạn cần một iPhone chạy <strong>iOS 16 trở lên</strong> và một máy chủ bạn có thể tiếp cận qua\n    mạng. Hãy chuẩn bị sẵn ba thứ: <strong>tên host hoặc địa chỉ IP</strong> của máy chủ, <strong>cổng</strong> (SSH dùng <code>22</code> theo mặc định), và <strong>tên người dùng</strong> của bạn.\n    Nếu bạn xác thực bằng một khóa thay vì mật khẩu, hãy chuẩn bị sẵn cả khóa riêng tư.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Mở App Store trên iPhone của bạn và cài VVTerm.</li>\n    <li>Khởi chạy ứng dụng và hoàn tất quy trình chào mừng ngắn.</li>\n  </ol>\n  <p>\n    Bậc miễn phí gồm <strong>một máy chủ</strong>, đủ để bạn làm theo hướng dẫn này.\n    Pro gỡ bỏ các giới hạn khi bạn muốn nhiều máy chủ, không gian làm việc và tab kết nối hơn.\n  </p>\n\n  <h2>Thêm máy chủ của bạn</h2>\n  <ol>\n    <li>Chạm <strong>Thêm máy chủ</strong> để mở biểu mẫu máy chủ mới.</li>\n    <li>Đặt cho máy chủ một <strong>tên</strong> để dễ nhận diện về sau.</li>\n    <li>Nhập <strong>host</strong> — một tên host như <code>example.com</code> hoặc một IP như <code>192.168.1.20</code>.</li>\n    <li>Đặt <strong>cổng</strong>. Để nguyên ở <code>22</code> trừ khi máy chủ của bạn lắng nghe ở nơi khác.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập, ví dụ <code>root</code> hoặc <code>ubuntu</code>.</li>\n  </ol>\n\n  <h2>Chọn một phương thức xác thực</h2>\n  <p>VVTerm hỗ trợ ba cách để xác thực, và thông tin đăng nhập của bạn được lưu trong Apple Keychain — không bao giờ trong siêu dữ liệu đồng bộ.</p>\n  <ul>\n    <li><strong>Mật khẩu</strong> — nhập mật khẩu tài khoản. Đơn giản, và là một cách tốt để kiểm tra host và tên người dùng là đúng.</li>\n    <li><strong>Khóa SSH</strong> — dùng một khóa riêng tư để đăng nhập không cần mật khẩu, an toàn hơn. Dán hoặc nhập khóa, và chắc chắn khóa công khai tương ứng có trong <code>~/.ssh/authorized_keys</code> của máy chủ.</li>\n    <li><strong>Khóa SSH + cụm mật khẩu</strong> — giống như trên, nhưng khóa riêng tư được mã hóa bằng một cụm mật khẩu để có thêm một lớp bảo vệ.</li>\n  </ul>\n  <p>\n    Nếu bạn chưa có khóa, VVTerm có thể tạo một khóa cho bạn. Thêm khóa công khai đã tạo vào\n    tệp <code>authorized_keys</code> của máy chủ, rồi chọn khóa đó làm phương thức xác thực của máy chủ.\n  </p>\n\n  <h2>Kết nối</h2>\n  <ol>\n    <li>Lưu máy chủ. Nó xuất hiện trong danh sách máy chủ của bạn.</li>\n    <li>Chạm vào máy chủ để mở một kết nối.</li>\n    <li>Lần đầu bạn kết nối, VVTerm hiển thị dấu vân tay khóa của host để bạn có thể xác minh nó trước khi tin cậy host.</li>\n    <li>Sau khi chấp nhận, terminal mở ra và bạn đến dấu nhắc shell.</li>\n  </ol>\n\n  <h2>Dùng thanh công cụ bàn phím</h2>\n  <p>\n    Bàn phím phần mềm iOS thiếu các phím mà terminal dựa vào, nên VVTerm bổ sung một thanh công cụ phụ kiện\n    ngay phía trên nó. Từ đó bạn có:\n  </p>\n  <ul>\n    <li><strong>Esc</strong> — thiết yếu cho vim, less, và hầu hết các ứng dụng TUI.</li>\n    <li><strong>Tab</strong> — hoàn thành shell và đường dẫn.</li>\n    <li><strong>Ctrl</strong> — chạm nó, rồi một chữ cái, để gửi các chuỗi điều khiển như <code>Ctrl-C</code> hoặc <code>Ctrl-Z</code>.</li>\n    <li><strong>Phím mũi tên</strong> — di chuyển con trỏ và đi qua lịch sử lệnh.</li>\n    <li><strong>Phím chức năng</strong> — F1 đến F12 cho các ứng dụng ánh xạ chúng.</li>\n  </ul>\n  <p>\n    Bạn có thể tùy chỉnh thanh công cụ với các đoạn lệnh của riêng mình, nên các lệnh dùng thường xuyên chỉ cách một\n    chạm.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Phiên của bạn có thể sống sót qua các lần rớt mạng nếu bạn giữ nó sống với tmux, và bạn có thể tiếp cận các máy chủ\n    không được phơi bày trực tiếp bằng <a href=\"/guides/set-up-mosh-on-ios\">Mosh</a>, <a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a>, hoặc <a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>. Khi bạn cần di chuyển tệp,\n    xem <a href=\"/guides/sftp-file-transfer-on-ios\">Truyền tệp qua SFTP trên iOS</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    VVTerm biến iPhone của bạn thành một client SSH đầy đủ. Bạn có thể tiếp cận bất kỳ máy chủ nào chấp nhận SSH —\n    một máy Linux, một Mac, một Raspberry Pi, một máy ảo trên đám mây — và làm việc trong một terminal thực được hiển thị bằng GPU.\n    Hướng dẫn này đi qua kết nối đầu tiên từ đầu đến cuối.\n  </p>\n\n  <h2>Trước khi bạn bắt đầu</h2>\n  <p>\n    Bạn cần một iPhone chạy <strong>iOS 16 trở lên</strong> và một máy chủ bạn có thể tiếp cận qua\n    mạng. Hãy chuẩn bị sẵn ba thứ: <strong>tên host hoặc địa chỉ IP</strong> của máy chủ, <strong>cổng</strong> (SSH dùng <code>22</code> theo mặc định), và <strong>tên người dùng</strong> của bạn.\n    Nếu bạn xác thực bằng một khóa thay vì mật khẩu, hãy chuẩn bị sẵn cả khóa riêng tư.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Mở App Store trên iPhone của bạn và cài VVTerm.</li>\n    <li>Khởi chạy ứng dụng và hoàn tất quy trình chào mừng ngắn.</li>\n  </ol>\n  <p>\n    Bậc miễn phí gồm <strong>một máy chủ</strong>, đủ để bạn làm theo hướng dẫn này.\n    Pro gỡ bỏ các giới hạn khi bạn muốn nhiều máy chủ, không gian làm việc và tab kết nối hơn.\n  </p>\n\n  <h2>Thêm máy chủ của bạn</h2>\n  <ol>\n    <li>Chạm <strong>Thêm máy chủ</strong> để mở biểu mẫu máy chủ mới.</li>\n    <li>Đặt cho máy chủ một <strong>tên</strong> để dễ nhận diện về sau.</li>\n    <li>Nhập <strong>host</strong> — một tên host như <code>example.com</code> hoặc một IP như <code>192.168.1.20</code>.</li>\n    <li>Đặt <strong>cổng</strong>. Để nguyên ở <code>22</code> trừ khi máy chủ của bạn lắng nghe ở nơi khác.</li>\n    <li>Nhập <strong>tên người dùng</strong> bạn đăng nhập, ví dụ <code>root</code> hoặc <code>ubuntu</code>.</li>\n  </ol>\n\n  <h2>Chọn một phương thức xác thực</h2>\n  <p>VVTerm hỗ trợ ba cách để xác thực, và thông tin đăng nhập của bạn được lưu trong Apple Keychain — không bao giờ trong siêu dữ liệu đồng bộ.</p>\n  <ul>\n    <li><strong>Mật khẩu</strong> — nhập mật khẩu tài khoản. Đơn giản, và là một cách tốt để kiểm tra host và tên người dùng là đúng.</li>\n    <li><strong>Khóa SSH</strong> — dùng một khóa riêng tư để đăng nhập không cần mật khẩu, an toàn hơn. Dán hoặc nhập khóa, và chắc chắn khóa công khai tương ứng có trong <code>~/.ssh/authorized_keys</code> của máy chủ.</li>\n    <li><strong>Khóa SSH + cụm mật khẩu</strong> — giống như trên, nhưng khóa riêng tư được mã hóa bằng một cụm mật khẩu để có thêm một lớp bảo vệ.</li>\n  </ul>\n  <p>\n    Nếu bạn chưa có khóa, VVTerm có thể tạo một khóa cho bạn. Thêm khóa công khai đã tạo vào\n    tệp <code>authorized_keys</code> của máy chủ, rồi chọn khóa đó làm phương thức xác thực của máy chủ.\n  </p>\n\n  <h2>Kết nối</h2>\n  <ol>\n    <li>Lưu máy chủ. Nó xuất hiện trong danh sách máy chủ của bạn.</li>\n    <li>Chạm vào máy chủ để mở một kết nối.</li>\n    <li>Lần đầu bạn kết nối, VVTerm hiển thị dấu vân tay khóa của host để bạn có thể xác minh nó trước khi tin cậy host.</li>\n    <li>Sau khi chấp nhận, terminal mở ra và bạn đến dấu nhắc shell.</li>\n  </ol>\n\n  <h2>Dùng thanh công cụ bàn phím</h2>\n  <p>\n    Bàn phím phần mềm iOS thiếu các phím mà terminal dựa vào, nên VVTerm bổ sung một thanh công cụ phụ kiện\n    ngay phía trên nó. Từ đó bạn có:\n  </p>\n  <ul>\n    <li><strong>Esc</strong> — thiết yếu cho vim, less, và hầu hết các ứng dụng TUI.</li>\n    <li><strong>Tab</strong> — hoàn thành shell và đường dẫn.</li>\n    <li><strong>Ctrl</strong> — chạm nó, rồi một chữ cái, để gửi các chuỗi điều khiển như <code>Ctrl-C</code> hoặc <code>Ctrl-Z</code>.</li>\n    <li><strong>Phím mũi tên</strong> — di chuyển con trỏ và đi qua lịch sử lệnh.</li>\n    <li><strong>Phím chức năng</strong> — F1 đến F12 cho các ứng dụng ánh xạ chúng.</li>\n  </ul>\n  <p>\n    Bạn có thể tùy chỉnh thanh công cụ với các đoạn lệnh của riêng mình, nên các lệnh dùng thường xuyên chỉ cách một\n    chạm.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Phiên của bạn có thể không bị mất khi rớt mạng nếu bạn giữ nó bằng tmux, và bạn có thể tiếp cận các máy chủ\n    không mở trực tiếp ra internet bằng <a href=\"/vi/guides/set-up-mosh-on-ios\">Mosh</a>, <a href=\"/vi/guides/tailscale-ssh-setup\">Tailscale SSH</a>, hoặc <a href=\"/vi/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>. Khi bạn cần di chuyển tệp,\n    xem <a href=\"/vi/guides/sftp-file-transfer-on-ios\">Truyền tệp qua SFTP trên iOS</a>.\n  </p>\n"
   },
   "guides": {
     "title": "Hướng dẫn & cách làm VVTerm — SSH, Mosh, Tailscale, SFTP",
@@ -1447,15 +1447,15 @@
       },
       "ssh-from-mac": {
         "title": "Cách SSH từ Mac của bạn với VVTerm",
-        "summary": "Thiết lập một terminal macOS gốc với tab, khóa, và máy chủ đồng bộ qua iCloud."
+        "summary": "Thiết lập một terminal macOS native với tab, khóa, và máy chủ đồng bộ qua iCloud."
       },
       "set-up-mosh-on-ios": {
         "title": "Thiết lập Mosh trên iPhone và iPad",
-        "summary": "Giữ các phiên SSH sống sót qua rớt mạng và giấc ngủ với Mosh."
+        "summary": "Giữ các phiên SSH không bị mất khi rớt mạng và ngủ với Mosh."
       },
       "tailscale-ssh-setup": {
         "title": "Kết nối bằng Tailscale SSH",
-        "summary": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS mà không phơi bày cổng."
+        "summary": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS mà không mở cổng ra internet."
       },
       "cloudflare-tunnel-ssh-setup": {
         "title": "Kết nối qua Cloudflare Tunnel SSH",
@@ -1471,12 +1471,12 @@
   },
   "guides/set-up-mosh-on-ios": {
     "heading": "Thiết lập Mosh trên iPhone và iPad",
-    "intro": "Mosh giữ các phiên SSH sống sót qua rớt mạng, giấc ngủ và thay đổi IP. Đây là cách chuẩn bị máy chủ và bật Mosh trong VVTerm.",
+    "intro": "Mosh giữ các phiên SSH không bị mất qua rớt mạng, giấc ngủ và thay đổi IP. Đây là cách chuẩn bị máy chủ và bật Mosh trong VVTerm.",
     "meta": "Hướng dẫn",
     "title": "Thiết lập Mosh trên iPhone và iPad — VVTerm",
-    "description": "Cài mosh-server, mở các cổng UDP, và bật Mosh cho một máy chủ trong VVTerm để giữ các phiên SSH sống sót qua rớt mạng, giấc ngủ và thay đổi IP trên iOS.",
+    "description": "Cài mosh-server, mở các cổng UDP, và bật Mosh cho một máy chủ trong VVTerm để giữ các phiên SSH không bị mất khi rớt mạng, ngủ máy và đổi IP trên iOS.",
     "schemaDescription": "Hướng dẫn từng bước để dùng Mosh với VVTerm trên iOS và iPadOS: cài mosh-server, mở các cổng UDP, bật Mosh cho một máy chủ, và kết nối với các phiên roaming.",
-    "bodyHtml": "\n  <p>\n    Trên một điện thoại hay máy tính bảng, mạng của bạn thay đổi liên tục — Wi-Fi sang di động, một đường hầm vào tàu điện ngầm,\n    màn hình khóa. Một phiên SSH thuần chết trên mỗi lần như vậy. <strong>Mosh</strong> giải quyết điều đó, và\n    VVTerm tích hợp sẵn nó.\n  </p>\n\n  <h2>Mosh là gì</h2>\n  <p>Mosh (mobile shell) là một giao thức terminal từ xa được thiết kế cho các kết nối di động, không đáng tin cậy. So với SSH thuần nó bổ sung:</p>\n  <ul>\n    <li><strong>Roaming</strong> — phiên theo bạn khi địa chỉ IP của bạn thay đổi, nên chuyển từ Wi-Fi sang di động không làm rớt nó.</li>\n    <li><strong>Sống sót qua rớt mạng và giấc ngủ</strong> — gập máy hay mất sóng, và phiên kết nối lại khi bạn trở lại thay vì treo chết.</li>\n    <li><strong>Echo cục bộ</strong> — phím gõ của bạn xuất hiện tức thì ngay cả trên một đường truyền độ trễ cao, với các chỉnh sửa được áp dụng khi máy chủ phản hồi.</li>\n    <li><strong>Dự phòng SSH</strong> — Mosh dùng SSH để xác thực và bắt đầu phiên, rồi chuyển sang giao thức UDP của riêng nó.</li>\n  </ul>\n\n  <h2>Chuẩn bị máy chủ</h2>\n  <p>Mosh chạy một trợ giúp nhỏ trên host, nên nó phải được cài ở đó trước.</p>\n  <ol>\n    <li>\n      SSH vào máy chủ và cài gói Mosh. Trên Debian hoặc Ubuntu:\n      <pre><code>sudo apt install mosh</code></pre>\n      Trên RHEL, Fedora hoặc CentOS dùng <code>sudo dnf install mosh</code>, và trên macOS dùng <code>brew install mosh</code>.\n    </li>\n    <li>Điều này cung cấp <code>mosh-server</code>, thứ VVTerm khởi chạy qua SSH mỗi lần bạn kết nối.</li>\n  </ol>\n\n  <h2>Mở các cổng UDP</h2>\n  <p>\n    Mosh không dùng cổng TCP 22 cho dữ liệu của nó — nó dùng <strong>UDP</strong>, mặc định trong khoảng <code>60000–61000</code>. Nếu một tường lửa nằm trước máy chủ, hãy cho phép UDP đi vào trên khoảng đó.\n  </p>\n  <ol>\n    <li>\n      Với UFW trên Ubuntu:\n      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>\n    </li>\n    <li>Trên một nhà cung cấp đám mây, thêm cùng khoảng UDP vào nhóm bảo mật hoặc quy tắc tường lửa của instance.</li>\n  </ol>\n  <p>\n    SSH trên cổng TCP thông thường của nó cũng phải tiếp cận được, vì Mosh xác thực qua SSH trước khi\n    bắt đầu phiên UDP của nó.\n  </p>\n\n  <h2>Bật Mosh trong VVTerm</h2>\n  <ol>\n    <li>Mở cài đặt của máy chủ trong VVTerm — khi thêm nó hoặc bằng cách chỉnh sửa một máy chủ hiện có.</li>\n    <li>Chuyển phương thức kết nối sang <strong>Mosh</strong>.</li>\n    <li>Giữ xác thực SSH hiện có của bạn; Mosh tái sử dụng nó để bắt đầu phiên.</li>\n    <li>Lưu, rồi chạm vào máy chủ để kết nối.</li>\n  </ol>\n  <p>\n    VVTerm mở một kết nối SSH, khởi chạy <code>mosh-server</code> trên host, rồi mang phiên của bạn\n    qua giao thức UDP của Mosh.\n  </p>\n\n  <h2>Những gì bạn sẽ nhận thấy khi mạng thay đổi</h2>\n  <p>\n    Với Mosh hoạt động, trải nghiệm thay đổi theo vài cách thấy được. Gõ phím cảm giác tức thì nhờ echo cục\n    bộ, ngay cả trên một đường truyền chậm. Khi bạn chuyển mạng hoặc đánh thức thiết bị, phiên kết nối lại tự\n    nó — không đăng nhập lại, không mất shell. Nếu kết nối tạm thời không tiếp cận được, VVTerm hiển thị phiên đang\n    chờ và tiếp tục nó khi mạng trở lại.\n  </p>\n\n  <h2>Mẹo</h2>\n  <ul>\n    <li>Kết hợp Mosh với tmux để có thiết lập mạnh nhất: Mosh sống sót qua chuyến đi tới máy chủ, và tmux bảo toàn công việc của bạn ngay cả khi chính máy chủ khởi động lại phiên.</li>\n    <li>Nếu một kết nối không bắt đầu được, hãy xác nhận <code>mosh-server</code> được cài và khoảng UDP được mở — đó là hai nguyên nhân phổ biến nhất.</li>\n  </ul>\n"
+    "bodyHtml": "\n  <p>\n    Trên một điện thoại hay máy tính bảng, mạng của bạn thay đổi liên tục — Wi-Fi sang di động, một đường hầm vào tàu điện ngầm,\n    màn hình khóa. Một phiên SSH thuần chết trên mỗi lần như vậy. <strong>Mosh</strong> giải quyết điều đó, và\n    VVTerm tích hợp sẵn nó.\n  </p>\n\n  <h2>Mosh là gì</h2>\n  <p>Mosh (mobile shell) là một giao thức terminal từ xa được thiết kế cho các kết nối di động, không đáng tin cậy. So với SSH thuần nó bổ sung:</p>\n  <ul>\n    <li><strong>Roaming</strong> — phiên theo bạn khi địa chỉ IP của bạn thay đổi, nên chuyển từ Wi-Fi sang di động không làm rớt nó.</li>\n    <li><strong>Sống sót qua rớt mạng và giấc ngủ</strong> — gập máy hay mất sóng, và phiên kết nối lại khi bạn trở lại thay vì treo chết.</li>\n    <li><strong>Echo cục bộ</strong> — phím gõ của bạn xuất hiện tức thì ngay cả trên một đường truyền độ trễ cao, với các chỉnh sửa được áp dụng khi máy chủ phản hồi.</li>\n    <li><strong>Dự phòng SSH</strong> — Mosh dùng SSH để xác thực và bắt đầu phiên, rồi chuyển sang giao thức UDP của riêng nó.</li>\n  </ul>\n\n  <h2>Chuẩn bị máy chủ</h2>\n  <p>Mosh chạy một trợ giúp nhỏ trên host, nên nó phải được cài ở đó trước.</p>\n  <ol>\n    <li>\n      SSH vào máy chủ và cài gói Mosh. Trên Debian hoặc Ubuntu:\n      <pre><code>sudo apt install mosh</code></pre>\n      Trên RHEL, Fedora hoặc CentOS dùng <code>sudo dnf install mosh</code>, và trên macOS dùng <code>brew install mosh</code>.\n    </li>\n    <li>Điều này cung cấp <code>mosh-server</code>, thứ VVTerm khởi chạy qua SSH mỗi lần bạn kết nối.</li>\n  </ol>\n\n  <h2>Mở các cổng UDP</h2>\n  <p>\n    Mosh không dùng cổng TCP 22 cho dữ liệu của nó — nó dùng <strong>UDP</strong>, mặc định trong khoảng <code>60000–61000</code>. Nếu một tường lửa nằm trước máy chủ, hãy cho phép UDP đi vào trên khoảng đó.\n  </p>\n  <ol>\n    <li>\n      Với UFW trên Ubuntu:\n      <pre><code>sudo ufw allow 60000:61000/udp</code></pre>\n    </li>\n    <li>Trên một nhà cung cấp đám mây, thêm cùng khoảng UDP vào nhóm bảo mật hoặc quy tắc tường lửa của instance.</li>\n  </ol>\n  <p>\n    SSH trên cổng TCP thông thường của nó cũng phải tiếp cận được, vì Mosh xác thực qua SSH trước khi\n    bắt đầu phiên UDP của nó.\n  </p>\n\n  <h2>Bật Mosh trong VVTerm</h2>\n  <ol>\n    <li>Mở cài đặt của máy chủ trong VVTerm — khi thêm nó hoặc bằng cách chỉnh sửa một máy chủ hiện có.</li>\n    <li>Chuyển phương thức kết nối sang <strong>Mosh</strong>.</li>\n    <li>Giữ xác thực SSH hiện có của bạn; Mosh tái sử dụng nó để bắt đầu phiên.</li>\n    <li>Lưu, rồi chạm vào máy chủ để kết nối.</li>\n  </ol>\n  <p>\n    VVTerm mở một kết nối SSH, khởi chạy <code>mosh-server</code> trên host, rồi mang phiên của bạn\n    qua giao thức UDP của Mosh.\n  </p>\n\n  <h2>Những gì bạn sẽ nhận thấy khi mạng thay đổi</h2>\n  <p>\n    Với Mosh hoạt động, trải nghiệm thay đổi theo vài cách thấy được. Gõ phím cảm giác tức thì nhờ echo cục\n    bộ, ngay cả trên một đường truyền chậm. Khi bạn chuyển mạng hoặc đánh thức thiết bị, phiên kết nối lại tự\n    nó — không đăng nhập lại, không mất shell. Nếu kết nối tạm thời không tiếp cận được, VVTerm hiển thị phiên đang\n    chờ và tiếp tục nó khi mạng trở lại.\n  </p>\n\n  <h2>Mẹo</h2>\n  <ul>\n    <li>Kết hợp Mosh với tmux để có thiết lập mạnh nhất: Mosh giữ kết nối qua chặng đường tới máy chủ, và tmux bảo toàn công việc của bạn ngay cả khi chính máy chủ khởi động lại phiên.</li>\n    <li>Nếu một kết nối không bắt đầu được, hãy xác nhận <code>mosh-server</code> được cài và khoảng UDP được mở — đó là hai nguyên nhân phổ biến nhất.</li>\n  </ul>\n"
   },
   "guides/sftp-file-transfer-on-ios": {
     "heading": "Truyền tệp qua SFTP trên iOS",
@@ -1485,35 +1485,35 @@
     "title": "Truyền tệp qua SFTP trên iOS — VVTerm",
     "description": "Dùng trình duyệt SFTP tích hợp của VVTerm trên iPhone và iPad để duyệt thư mục, tải lên và tải xuống, đổi tên, di chuyển, xóa, xem trước media, và chỉnh sửa văn bản cùng quyền POSIX.",
     "schemaDescription": "Hướng dẫn từng bước về truyền tệp SFTP trên iOS với VVTerm: mở trình duyệt tệp, duyệt thư mục, tải lên và tải xuống, quản lý tệp, xem trước media, và chỉnh sửa văn bản cùng quyền.",
-    "bodyHtml": "\n  <p>\n    Mọi máy chủ bạn kết nối trong VVTerm cũng có một <strong>trình duyệt tệp SFTP</strong> tích hợp, nên bạn có thể\n    quản lý tệp từ xa mà không rời ứng dụng hay cài một trình khách riêng. Nó hoạt động trên cùng kết nối SSH\n    bạn đã dùng.\n  </p>\n\n  <h2>Mở trình duyệt tệp</h2>\n  <ol>\n    <li>Kết nối tới một máy chủ như thường lệ.</li>\n    <li>Mở chế độ xem <strong>Tệp</strong> cho kết nối đó để chuyển từ terminal sang trình duyệt SFTP.</li>\n    <li>VVTerm liệt kê nội dung của một thư mục khởi đầu — thường là thư mục home của bạn — qua SFTP.</li>\n  </ol>\n\n  <h2>Duyệt thư mục từ xa</h2>\n  <p>\n    Chạm vào một thư mục để mở nó và dùng đường dẫn hoặc nút quay lại để đi lên cây. Tệp hiển thị tên và\n    chi tiết để bạn tìm được thứ mình cần. Việc duyệt chỉ đọc cho đến khi bạn chọn truyền hoặc thay đổi\n    điều gì đó, nên không có rủi ro khi chỉ đơn giản là xem quanh.\n  </p>\n\n  <h2>Tải lên và tải xuống</h2>\n  <ul>\n    <li><strong>Tải xuống</strong> một tệp từ xa về thiết bị của bạn khi bạn muốn một bản sao cục bộ, ví dụ để lưu vào ứng dụng Tệp hoặc chia sẻ ở nơi khác.</li>\n    <li><strong>Tải lên</strong> một tệp từ iPhone hoặc iPad của bạn vào thư mục từ xa hiện tại để đẩy nó lên máy chủ.</li>\n  </ul>\n  <p>Việc truyền chạy qua kết nối SSH được mã hóa, nên tệp không bao giờ rời một kênh bảo mật.</p>\n\n  <h2>Quản lý tệp và thư mục</h2>\n  <p>Trình duyệt xử lý các thao tác tệp hằng ngày bạn mong đợi trên máy chủ:</p>\n  <ul>\n    <li><strong>Tạo thư mục</strong> để sắp xếp các thư mục từ xa.</li>\n    <li><strong>Đổi tên</strong> tệp và thư mục ngay tại chỗ.</li>\n    <li><strong>Di chuyển</strong> các mục sang một thư mục khác.</li>\n    <li><strong>Xóa</strong> tệp và thư mục bạn không còn cần.</li>\n  </ul>\n\n  <h2>Xem trước mà không tải xuống</h2>\n  <p>\n    Bạn có thể <strong>xem trước</strong> nhiều tệp trực tiếp trong VVTerm trước khi quyết định làm gì với chúng —\n    tệp văn bản, hình ảnh và video — nên bạn có thể kiểm tra một tệp cấu hình hoặc một ảnh chụp màn hình mà không phải kéo nó\n    về thiết bị của bạn trước.\n  </p>\n\n  <h2>Chỉnh sửa văn bản và quyền</h2>\n  <ol>\n    <li>Mở một <strong>tệp văn bản</strong> được hỗ trợ để chỉnh sửa nó tại chỗ, rồi lưu các thay đổi thẳng lại máy chủ qua SFTP.</li>\n    <li>Điều chỉnh <strong>quyền POSIX</strong> của một tệp hoặc thư mục — các bit đọc, ghi và thực thi cho chủ sở hữu, nhóm và những người khác — khi bạn cần sửa quyền truy cập mà không phải xuống shell.</li>\n  </ol>\n\n  <h2>Mẹo</h2>\n  <ul>\n    <li>Với các chỉnh sửa cấu hình nhanh, chỉnh sửa một tệp trong trình duyệt SFTP thường nhanh hơn mở một trình chỉnh sửa trong terminal.</li>\n    <li>Dùng xem trước để xác nhận bạn có đúng tệp trước khi tải xuống hoặc xóa nó.</li>\n    <li>Cùng trình duyệt SFTP khả dụng trên iPhone, iPad và Mac, nên quy trình trải dài trên tất cả thiết bị của bạn.</li>\n  </ul>\n"
+    "bodyHtml": "\n  <p>\n    Mọi máy chủ bạn kết nối trong VVTerm cũng có một <strong>trình duyệt tệp SFTP</strong> tích hợp, nên bạn có thể\n    quản lý tệp từ xa mà không rời ứng dụng hay cài một client riêng. Nó hoạt động trên cùng kết nối SSH\n    bạn đã dùng.\n  </p>\n\n  <h2>Mở trình duyệt tệp</h2>\n  <ol>\n    <li>Kết nối tới một máy chủ như thường lệ.</li>\n    <li>Mở chế độ xem <strong>Tệp</strong> cho kết nối đó để chuyển từ terminal sang trình duyệt SFTP.</li>\n    <li>VVTerm liệt kê nội dung của một thư mục khởi đầu — thường là thư mục home của bạn — qua SFTP.</li>\n  </ol>\n\n  <h2>Duyệt thư mục từ xa</h2>\n  <p>\n    Chạm vào một thư mục để mở nó và dùng đường dẫn hoặc nút quay lại để đi lên cây. Tệp hiển thị tên và\n    chi tiết để bạn tìm được thứ mình cần. Việc duyệt chỉ đọc cho đến khi bạn chọn truyền hoặc thay đổi\n    điều gì đó, nên không có rủi ro khi chỉ đơn giản là xem quanh.\n  </p>\n\n  <h2>Tải lên và tải xuống</h2>\n  <ul>\n    <li><strong>Tải xuống</strong> một tệp từ xa về thiết bị của bạn khi bạn muốn một bản sao cục bộ, ví dụ để lưu vào ứng dụng Tệp hoặc chia sẻ ở nơi khác.</li>\n    <li><strong>Tải lên</strong> một tệp từ iPhone hoặc iPad của bạn vào thư mục từ xa hiện tại để đẩy nó lên máy chủ.</li>\n  </ul>\n  <p>Việc truyền chạy qua kết nối SSH được mã hóa, nên tệp không bao giờ rời một kênh bảo mật.</p>\n\n  <h2>Quản lý tệp và thư mục</h2>\n  <p>Trình duyệt xử lý các thao tác tệp hằng ngày bạn mong đợi trên máy chủ:</p>\n  <ul>\n    <li><strong>Tạo thư mục</strong> để sắp xếp các thư mục từ xa.</li>\n    <li><strong>Đổi tên</strong> tệp và thư mục ngay tại chỗ.</li>\n    <li><strong>Di chuyển</strong> các mục sang một thư mục khác.</li>\n    <li><strong>Xóa</strong> tệp và thư mục bạn không còn cần.</li>\n  </ul>\n\n  <h2>Xem trước mà không tải xuống</h2>\n  <p>\n    Bạn có thể <strong>xem trước</strong> nhiều tệp trực tiếp trong VVTerm trước khi quyết định làm gì với chúng —\n    tệp văn bản, hình ảnh và video — nên bạn có thể kiểm tra một tệp cấu hình hoặc một ảnh chụp màn hình mà không phải kéo nó\n    về thiết bị của bạn trước.\n  </p>\n\n  <h2>Chỉnh sửa văn bản và quyền</h2>\n  <ol>\n    <li>Mở một <strong>tệp văn bản</strong> được hỗ trợ để chỉnh sửa nó tại chỗ, rồi lưu các thay đổi thẳng lại máy chủ qua SFTP.</li>\n    <li>Điều chỉnh <strong>quyền POSIX</strong> của một tệp hoặc thư mục — các bit đọc, ghi và thực thi cho chủ sở hữu, nhóm và những người khác — khi bạn cần sửa quyền truy cập mà không phải xuống shell.</li>\n  </ol>\n\n  <h2>Mẹo</h2>\n  <ul>\n    <li>Với các chỉnh sửa cấu hình nhanh, chỉnh sửa một tệp trong trình duyệt SFTP thường nhanh hơn mở một trình chỉnh sửa trong terminal.</li>\n    <li>Dùng xem trước để xác nhận bạn có đúng tệp trước khi tải xuống hoặc xóa nó.</li>\n    <li>Cùng trình duyệt SFTP khả dụng trên iPhone, iPad và Mac, nên quy trình trải dài trên tất cả thiết bị của bạn.</li>\n  </ul>\n"
   },
   "guides/ssh-from-mac": {
     "heading": "Cách SSH từ Mac của bạn với VVTerm",
-    "intro": "Thiết lập một terminal SSH macOS gốc với thanh bên chia đôi, các kết nối theo tab, và máy chủ đồng bộ từ iPhone và iPad của bạn qua iCloud.",
+    "intro": "Thiết lập một terminal SSH macOS native với thanh bên chia đôi, các kết nối theo tab, và máy chủ đồng bộ từ iPhone và iPad của bạn qua iCloud.",
     "meta": "Hướng dẫn",
     "title": "Cách SSH từ Mac của bạn — VVTerm",
     "description": "Cài VVTerm trên Mac của bạn, thêm một máy chủ trong thanh bên, chọn một phương thức xác thực, kết nối trong một tab, và đồng bộ máy chủ của bạn trên các thiết bị Apple qua iCloud.",
     "schemaDescription": "Hướng dẫn từng bước để SSH từ một Mac với VVTerm: cài đặt, thêm một máy chủ trong thanh bên, chọn một phương thức xác thực, kết nối trong một tab, và đồng bộ máy chủ qua iCloud.",
-    "bodyHtml": "\n  <p>\n    VVTerm cho Mac là một terminal SSH gốc được xây dựng như phần còn lại của macOS — một thanh bên chia đôi gồm\n    các máy chủ của bạn bên cạnh một terminal được hiển thị bằng GPU, với một thanh công cụ hợp nhất cho các tab. Hướng dẫn này bao quát\n    kết nối đầu tiên của bạn trên Mac.\n  </p>\n\n  <h2>Trước khi bạn bắt đầu</h2>\n  <p>\n    Bạn cần một Mac dùng <strong>Apple Silicon</strong> chạy <strong>macOS 13 Ventura trở lên</strong>.\n    Hãy chuẩn bị sẵn <strong>host</strong>, <strong>cổng</strong> (<code>22</code> theo mặc định), và <strong>tên người dùng</strong> của máy chủ, cùng một mật khẩu hoặc khóa SSH để xác thực.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Cài VVTerm từ App Store trên Mac của bạn.</li>\n    <li>Mở ứng dụng. Cửa sổ hiển thị một thanh bên cho các máy chủ của bạn và một khu vực chi tiết cho terminal.</li>\n  </ol>\n\n  <h2>Thêm một máy chủ trong thanh bên</h2>\n  <ol>\n    <li>Chạm <strong>Thêm máy chủ</strong> để mở biểu mẫu máy chủ mới.</li>\n    <li>Nhập một <strong>tên</strong>, <strong>host</strong>, <strong>cổng</strong>, và <strong>tên người dùng</strong> của bạn.</li>\n    <li>Tùy chọn sắp xếp máy chủ vào các không gian làm việc và môi trường để các đội máy lớn hơn gọn gàng trong thanh bên.</li>\n    <li>Lưu. Máy chủ xuất hiện trong danh sách thanh bên.</li>\n  </ol>\n\n  <h2>Chọn một phương thức xác thực</h2>\n  <p>\n    Chọn cách bạn muốn đăng nhập. Dù bạn chọn cái nào, bản thân bí mật được lưu trong <strong>Keychain</strong> của macOS, không phải trong siêu dữ liệu máy chủ đồng bộ.\n  </p>\n  <ul>\n    <li><strong>Mật khẩu</strong> — nhập mật khẩu tài khoản trực tiếp.</li>\n    <li><strong>Khóa SSH</strong> — nhập hoặc tạo một khóa riêng tư và thêm khóa công khai tương ứng vào <code>~/.ssh/authorized_keys</code> của máy chủ.</li>\n    <li><strong>Khóa SSH + cụm mật khẩu</strong> — dùng một khóa riêng tư được mã hóa bảo vệ bằng một cụm mật khẩu.</li>\n  </ul>\n\n  <h2>Kết nối trong một tab</h2>\n  <ol>\n    <li>Chọn máy chủ trong thanh bên để mở một kết nối.</li>\n    <li>Xác nhận dấu vân tay khóa host lần đầu bạn kết nối.</li>\n    <li>Terminal mở ra trong khu vực chi tiết, vẽ trên Metal bằng libghostty để có màu chuẩn và đầu ra chính xác.</li>\n  </ol>\n\n  <h2>Mở nhiều tab và khung</h2>\n  <p>\n    Mỗi kết nối nằm trong một tab ở thanh công cụ hợp nhất, nên bạn có thể giữ nhiều máy chủ mở cùng\n    lúc và chuyển giữa chúng. Bạn cũng có thể chia một tab thành các <strong>khung</strong> để có\n    shell cạnh nhau trên cùng một màn hình.\n  </p>\n  <p>\n    Bậc miễn phí gồm <strong>một tab kết nối</strong>. <strong>Pro</strong> mở khóa tab và khung chia\n    không giới hạn — $6.49/tháng, $24.99/năm, hoặc một lần mua trọn đời $49.99, được\n    Apple xử lý.\n  </p>\n\n  <h2>Máy chủ của bạn đồng bộ qua iCloud</h2>\n  <p>\n    Siêu dữ liệu máy chủ — tên, host, cổng, tên người dùng và không gian làm việc — đồng bộ qua <strong>iCloud</strong>,\n    nên một máy chủ bạn thêm trên Mac xuất hiện trên iPhone và iPad của bạn tự động. Mật khẩu và khóa SSH\n    <strong>không</strong> phải là một phần của siêu dữ liệu đó; chúng ở lại trong Apple Keychain và chỉ di chuyển\n    giữa các thiết bị qua iCloud Keychain khi bạn bật nó.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Giữ công việc dài hơi sống sót qua ngắt kết nối với tmux, theo dõi CPU và bộ nhớ trực tiếp với giám sát\n    máy chủ, và tiếp cận các máy không được phơi bày trực tiếp bằng <a href=\"/guides/tailscale-ssh-setup\">Tailscale SSH</a> hoặc <a href=\"/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>.\n  </p>\n"
+    "bodyHtml": "\n  <p>\n    VVTerm cho Mac là một terminal SSH native được xây dựng như phần còn lại của macOS — một thanh bên chia đôi gồm\n    các máy chủ của bạn bên cạnh một terminal được hiển thị bằng GPU, với một thanh công cụ hợp nhất cho các tab. Hướng dẫn này bao quát\n    kết nối đầu tiên của bạn trên Mac.\n  </p>\n\n  <h2>Trước khi bạn bắt đầu</h2>\n  <p>\n    Bạn cần một Mac dùng <strong>Apple Silicon</strong> chạy <strong>macOS 13 Ventura trở lên</strong>.\n    Hãy chuẩn bị sẵn <strong>host</strong>, <strong>cổng</strong> (<code>22</code> theo mặc định), và <strong>tên người dùng</strong> của máy chủ, cùng một mật khẩu hoặc khóa SSH để xác thực.\n  </p>\n\n  <h2>Cài VVTerm</h2>\n  <ol>\n    <li>Cài VVTerm từ App Store trên Mac của bạn.</li>\n    <li>Mở ứng dụng. Cửa sổ hiển thị một thanh bên cho các máy chủ của bạn và một khu vực chi tiết cho terminal.</li>\n  </ol>\n\n  <h2>Thêm một máy chủ trong thanh bên</h2>\n  <ol>\n    <li>Chạm <strong>Thêm máy chủ</strong> để mở biểu mẫu máy chủ mới.</li>\n    <li>Nhập một <strong>tên</strong>, <strong>host</strong>, <strong>cổng</strong>, và <strong>tên người dùng</strong> của bạn.</li>\n    <li>Tùy chọn sắp xếp máy chủ vào các không gian làm việc và môi trường để các đội máy lớn hơn gọn gàng trong thanh bên.</li>\n    <li>Lưu. Máy chủ xuất hiện trong danh sách thanh bên.</li>\n  </ol>\n\n  <h2>Chọn một phương thức xác thực</h2>\n  <p>\n    Chọn cách bạn muốn đăng nhập. Dù bạn chọn cái nào, bản thân bí mật được lưu trong <strong>Keychain</strong> của macOS, không phải trong siêu dữ liệu máy chủ đồng bộ.\n  </p>\n  <ul>\n    <li><strong>Mật khẩu</strong> — nhập mật khẩu tài khoản trực tiếp.</li>\n    <li><strong>Khóa SSH</strong> — nhập hoặc tạo một khóa riêng tư và thêm khóa công khai tương ứng vào <code>~/.ssh/authorized_keys</code> của máy chủ.</li>\n    <li><strong>Khóa SSH + cụm mật khẩu</strong> — dùng một khóa riêng tư được mã hóa bảo vệ bằng một cụm mật khẩu.</li>\n  </ul>\n\n  <h2>Kết nối trong một tab</h2>\n  <ol>\n    <li>Chọn máy chủ trong thanh bên để mở một kết nối.</li>\n    <li>Xác nhận dấu vân tay khóa host lần đầu bạn kết nối.</li>\n    <li>Terminal mở ra trong khu vực chi tiết, vẽ trên Metal bằng libghostty để có màu chuẩn và đầu ra chính xác.</li>\n  </ol>\n\n  <h2>Mở nhiều tab và khung</h2>\n  <p>\n    Mỗi kết nối nằm trong một tab ở thanh công cụ hợp nhất, nên bạn có thể giữ nhiều máy chủ mở cùng\n    lúc và chuyển giữa chúng. Bạn cũng có thể chia một tab thành các <strong>khung</strong> để có\n    shell cạnh nhau trên cùng một màn hình.\n  </p>\n  <p>\n    Bậc miễn phí gồm <strong>một tab kết nối</strong>. <strong>Pro</strong> mở khóa tab và khung chia\n    không giới hạn — $6.49/tháng, $24.99/năm, hoặc một lần mua trọn đời $49.99, được\n    Apple xử lý.\n  </p>\n\n  <h2>Máy chủ của bạn đồng bộ qua iCloud</h2>\n  <p>\n    Siêu dữ liệu máy chủ — tên, host, cổng, tên người dùng và không gian làm việc — đồng bộ qua <strong>iCloud</strong>,\n    nên một máy chủ bạn thêm trên Mac xuất hiện trên iPhone và iPad của bạn tự động. Mật khẩu và khóa SSH\n    <strong>không</strong> phải là một phần của siêu dữ liệu đó; chúng ở lại trong Apple Keychain và chỉ di chuyển\n    giữa các thiết bị qua iCloud Keychain khi bạn bật nó.\n  </p>\n\n  <h2>Bước tiếp theo</h2>\n  <p>\n    Giữ công việc dài hơi không bị mất khi ngắt kết nối với tmux, theo dõi CPU và bộ nhớ trực tiếp với giám sát\n    máy chủ, và tiếp cận các máy không mở trực tiếp ra internet bằng <a href=\"/vi/guides/tailscale-ssh-setup\">Tailscale SSH</a> hoặc <a href=\"/vi/guides/cloudflare-tunnel-ssh-setup\">Cloudflare Tunnel SSH</a>.\n  </p>\n"
   },
   "guides/tailscale-ssh-setup": {
     "heading": "Kết nối bằng Tailscale SSH",
-    "intro": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS từ VVTerm — không chuyển tiếp cổng, không phơi bày cổng, và không có khóa SSH thêm để quản lý.",
+    "intro": "Tiếp cận máy trên tailnet của bạn bằng tên MagicDNS từ VVTerm — không chuyển tiếp cổng, không mở cổng ra internet, và không có khóa SSH thêm để quản lý.",
     "meta": "Hướng dẫn",
     "title": "Kết nối bằng Tailscale SSH — VVTerm",
-    "description": "Bật Tailscale SSH trên host của bạn bằng tailscale up --ssh, đặt ACL, và kết nối tới tên MagicDNS từ VVTerm — không chuyển tiếp cổng hay phơi bày cổng.",
+    "description": "Bật Tailscale SSH trên host của bạn bằng tailscale up --ssh, đặt ACL, và kết nối tới tên MagicDNS từ VVTerm — không chuyển tiếp cổng hay mở cổng ra internet.",
     "schemaDescription": "Hướng dẫn từng bước để dùng Tailscale SSH với VVTerm: cài Tailscale trên host và thiết bị, bật SSH, đặt ACL, và kết nối tới một tên MagicDNS mà không chuyển tiếp cổng.",
     "bodyHtml": "\n  <p>\n    Tailscale đặt các thiết bị của bạn lên một mạng lưới riêng và có thể xử lý xác thực SSH cho bạn với <strong>Tailscale SSH</strong>. Với nó, bạn tiếp cận một máy chủ bằng tên tailnet của nó từ VVTerm — không có cổng\n    công khai, không chuyển tiếp cổng, và không có khóa SSH riêng để phân phối.\n  </p>\n\n  <h2>Cách hoạt động</h2>\n  <p>\n    Mọi máy bạn tham gia vào tailnet đều có một địa chỉ riêng ổn định và một tên <strong>MagicDNS</strong> như <code>myserver.tailnet-name.ts.net</code>. Khi Tailscale SSH được bật, chính Tailscale\n    xác thực các kết nối giữa các thiết bị trong tailnet của bạn dựa trên chính sách truy cập của bạn, nên máy chủ\n    không bao giờ cần một cổng vào mở ra internet công khai.\n  </p>\n\n  <h2>Điều kiện tiên quyết</h2>\n  <ol>\n    <li>Một <strong>tài khoản Tailscale</strong> với host và iPhone, iPad hoặc Mac của bạn đều tham gia cùng một tailnet.</li>\n    <li><strong>Tailscale được cài trên host</strong> bạn muốn tiếp cận.</li>\n    <li>Tailscale đang chạy trên <strong>thiết bị</strong> bạn kết nối từ đó, đăng nhập cùng một tài khoản.</li>\n  </ol>\n\n  <h2>Bật Tailscale SSH trên host</h2>\n  <ol>\n    <li>\n      Trên máy chủ, khởi động Tailscale với cờ SSH:\n      <pre><code>sudo tailscale up --ssh</code></pre>\n    </li>\n    <li>Điều này quảng bá host là chấp nhận các kết nối Tailscale SSH. Xác thực được Tailscale xử lý thay vì bằng các khóa SSH truyền thống.</li>\n    <li>\n      Xác nhận tên tailnet và trạng thái của host:\n      <pre><code>tailscale status</code></pre>\n    </li>\n  </ol>\n\n  <h2>Cho phép SSH trong ACL của bạn</h2>\n  <p>\n    Quyền truy cập Tailscale SSH được điều chỉnh bởi các <strong>quy tắc SSH</strong> trong chính sách kiểm soát truy cập\n    của tailnet của bạn. Trong bảng điều khiển quản trị Tailscale, hãy chắc chắn chính sách của bạn có một mục <code>ssh</code>\n    cho phép người dùng của bạn tiếp cận host với tư cách người dùng đăng nhập mong muốn. Nếu không có quy tắc khớp, kết nối\n    bị từ chối ngay cả khi host trực tuyến. Lưu chính sách trước khi bạn kết nối.\n  </p>\n\n  <h2>Kết nối từ VVTerm</h2>\n  <ol>\n    <li>Trong VVTerm, chạm <strong>Thêm máy chủ</strong> (hoặc chỉnh sửa một máy chủ hiện có).</li>\n    <li>Đặt <strong>host</strong> thành <strong>tên MagicDNS</strong> của máy, ví dụ <code>myserver.tailnet-name.ts.net</code>. Bạn cũng có thể dùng địa chỉ IP tailnet của nó.</li>\n    <li>Giữ cổng ở <code>22</code> và nhập <strong>tên người dùng</strong> bạn muốn đăng nhập trên host.</li>\n    <li>Chọn <strong>Tailscale SSH</strong> làm phương thức kết nối để xác thực được xử lý qua tailnet của bạn.</li>\n    <li>Lưu và chạm vào máy chủ để kết nối.</li>\n  </ol>\n\n  <h2>Không cần chuyển tiếp cổng</h2>\n  <p>\n    Vì lưu lượng đi trên tailnet được mã hóa, bạn <strong>không</strong> mở cổng 22 ra internet,\n    cấu hình một router, hay đục lỗ trên tường lửa. Host có thể nằm phía sau NAT hoặc một tường lửa nghiêm ngặt và\n    vẫn tiếp cận được từ các thiết bị của bạn, ở bất cứ đâu chúng có kết nối.\n  </p>\n\n  <h2>Khắc phục sự cố</h2>\n  <ul>\n    <li>Nếu tên không phân giải được, hãy xác nhận MagicDNS được bật cho tailnet của bạn và host hiển thị là đã kết nối trong <code>tailscale status</code>.</li>\n    <li>Nếu bạn kết nối được nhưng bị từ chối quyền, hãy xem lại các quy tắc <code>ssh</code> trong ACL và người dùng đăng nhập bạn yêu cầu.</li>\n    <li>Nếu thiết bị hoàn toàn không thấy host, hãy chắc chắn cả hai đều đăng nhập cùng một tài khoản Tailscale và trực tuyến.</li>\n  </ul>\n"
   },
   "ipad": {
     "metaTitle": "VVTerm cho iPad — Biến iPad thành một máy trạm SSH",
-    "metaDescription": "Một terminal SSH gốc và trình khách SFTP cho iPad. Phím tắt bàn phím vật lý, đa nhiệm Stage Manager, một thanh công cụ bàn phím terminal tùy chỉnh, duy trì phiên tmux, Mosh roaming, giám sát máy chủ trực tiếp, màn hình ngoài, và máy chủ đồng bộ qua iCloud.",
+    "metaDescription": "Một terminal SSH native và client SFTP cho iPad. Phím tắt bàn phím vật lý, đa nhiệm Stage Manager, một thanh công cụ bàn phím terminal tùy chỉnh, duy trì phiên tmux, Mosh roaming, giám sát máy chủ trực tiếp, màn hình ngoài, và máy chủ đồng bộ qua iCloud.",
     "bcHome": "Trang chủ",
     "bcPlatforms": "Nền tảng",
     "bcIpad": "iPad",
     "heroEyebrow": "VVTerm cho iPad",
     "heroTitle": "Biến iPad thành một<br />máy trạm SSH.",
-    "heroSubhead": "Phím tắt bàn phím vật lý, đa nhiệm Stage Manager, một thanh công cụ terminal, và các phiên Mosh roaming — với một trình duyệt SFTP tích hợp và máy chủ đồng bộ qua iCloud.",
+    "heroSubhead": "Phím tắt bàn phím vật lý, Stage Manager, thanh công cụ terminal và phiên Mosh đi theo bạn — cùng SFTP tích hợp và đồng bộ iCloud.",
     "download": "Tải cho iPad",
     "seePricing": "Xem bảng giá",
     "heroNote": "Yêu cầu iPadOS 16 trở lên",
@@ -1569,7 +1569,7 @@
       },
       {
         "title": "Mosh roaming",
-        "body": "Phiên sống sót qua các lần chuyển từ Wi-Fi sang di động và giấc ngủ, với SSH làm dự phòng."
+        "body": "Phiên được giữ qua các lần chuyển từ Wi-Fi sang di động và giấc ngủ, với SSH làm dự phòng."
       },
       {
         "title": "Máy chủ đồng bộ qua iCloud",
@@ -1614,7 +1614,7 @@
         "answer": "Có. Chạy VVTerm trong Stage Manager bên cạnh các ứng dụng khác, và kết nối một màn hình ngoài để có không gian làm việc lớn hơn. Mosh giữ phiên sống khi bạn di chuyển."
       },
       {
-        "question": "Phiên của tôi có sống sót khi chuyển từ Wi-Fi sang di động không?",
+        "question": "Phiên của tôi có giữ được khi chuyển từ Wi-Fi sang di động không?",
         "answer": "Với Mosh, có. Mosh roaming qua các thay đổi mạng và giấc ngủ và kết nối lại tự nó, chuyển về SSH tiêu chuẩn khi bạn thích."
       },
       {
@@ -1639,20 +1639,20 @@
   },
   "iphone": {
     "metaTitle": "VVTerm cho iPhone — Terminal SSH trong túi bạn",
-    "metaDescription": "Một terminal SSH gốc và trình khách SFTP cho iPhone. Sửa máy chủ trên đường đi với Mosh kết nối lại, duy trì phiên tmux, một thanh công cụ bàn phím tùy chỉnh, giọng nói thành lệnh trên thiết bị, giám sát máy chủ trực tiếp, khóa ứng dụng Face ID, và một trình duyệt SFTP tích hợp.",
+    "metaDescription": "Một terminal SSH native và client SFTP cho iPhone. Sửa máy chủ khi đang di chuyển với Mosh kết nối lại, duy trì phiên tmux, một thanh công cụ bàn phím tùy chỉnh, lệnh thoại trên thiết bị, giám sát máy chủ trực tiếp, khóa ứng dụng Face ID, và một trình duyệt SFTP tích hợp.",
     "bcHome": "Trang chủ",
     "bcPlatforms": "Nền tảng",
     "bcIphone": "iPhone",
     "heroEyebrow": "VVTerm cho iPhone",
     "heroTitle": "Máy chủ của bạn,<br />trong túi bạn.",
-    "heroSubhead": "Xử lý mọi việc trên đường đi với Mosh kết nối lại, một thanh công cụ terminal, giọng nói thành lệnh trên thiết bị, và khóa Face ID — cùng một trình duyệt SFTP tích hợp và máy chủ đồng bộ qua iCloud.",
+    "heroSubhead": "Xử lý nhanh khi đang di chuyển với Mosh tự kết nối lại, thanh công cụ terminal, lệnh thoại trên thiết bị và khóa bằng Face ID — kèm SFTP tích hợp và máy chủ đồng bộ qua iCloud.",
     "download": "Tải cho iPhone",
     "seePricing": "Xem bảng giá",
     "heroNote": "Yêu cầu iOS 16 trở lên",
     "heroAlt": "Terminal SSH VVTerm trên iPhone",
     "statementEyebrow": "Xây cho khoảnh khắc mọi thứ hỏng",
-    "statementTitle": "Một terminal đầy đủ vừa túi.",
-    "statementBody": "Khi có gì đó cần sửa nhanh, VVTerm cho bạn <strong>các phím bạn cần trên một thanh công cụ</strong>, <strong>các phiên Mosh tự kết nối lại</strong>, và <strong>giọng nói thành lệnh</strong> cho lúc gõ trên kính chậm chạp.",
+    "statementTitle": "Một terminal đầy đủ trong túi bạn.",
+    "statementBody": "Khi cần can thiệp nhanh, VVTerm đặt <strong>các phím quan trọng ngay trên thanh công cụ</strong>, giữ <strong>phiên Mosh tự kết nối lại</strong> và cho phép dùng <strong>lệnh thoại</strong> khi bàn phím màn hình không tiện.",
     "tourTitle": "Công việc từ xa, từ bất cứ đâu.",
     "tourLabel": "Chuyến tham quan ứng dụng iPhone",
     "tourCards": [
@@ -1661,8 +1661,8 @@
         "body": "Mosh giữ phiên của bạn sống qua Wi-Fi, di động, và màn hình khóa, rồi tiếp tục ngay."
       },
       {
-        "title": "Giọng nói thành lệnh.",
-        "body": "Đọc lệnh rảnh tay với nhận dạng giọng nói trên thiết bị khi gõ trên kính chậm chạp."
+        "title": "Lệnh thoại.",
+        "body": "Đọc lệnh rảnh tay với nhận dạng giọng nói ngay trên thiết bị khi bàn phím màn hình quá chậm."
       },
       {
         "title": "Khóa ứng dụng Face ID.",
@@ -1676,10 +1676,10 @@
     "connectEyebrow": "Kết nối theo cách của bạn",
     "connectTitle": "Bốn cách để tiếp cận mọi máy.",
     "connectBody": "SSH tiêu chuẩn khi bạn muốn, và <strong>Mosh</strong>, <strong>Tailscale SSH</strong>, hoặc <strong>Cloudflare Tunnel SSH</strong> khi bạn cần — không có chuyển tiếp cổng nào để thiết lập.",
-    "voiceEyebrow": "Giọng nói thành lệnh",
+    "voiceEyebrow": "Lệnh thoại",
     "voiceTitle": "Trò chuyện với terminal của bạn.",
-    "voiceBody": "Đọc lệnh khi gõ trên kính chậm chạp. VVTerm biến giọng nói thành đầu vào shell với <strong>nhận dạng giọng nói trên thiết bị</strong> — các mô hình MLX Whisper hoặc Parakeet, với Apple Speech làm dự phòng. Không có gì được gửi ra khỏi thiết bị để phiên âm.",
-    "voiceAlt": "Giọng nói thành lệnh của VVTerm trên iPhone",
+    "voiceBody": "Đọc lệnh khi bàn phím màn hình quá chậm. VVTerm biến giọng nói thành đầu vào shell bằng <strong>nhận dạng giọng nói trên thiết bị</strong> — các mô hình MLX Whisper hoặc Parakeet, với Apple Speech làm dự phòng. Không có gì được gửi ra khỏi thiết bị để phiên âm.",
+    "voiceAlt": "Lệnh thoại của VVTerm trên iPhone",
     "filesEyebrow": "Tệp, tích hợp sẵn",
     "filesTitle": "SFTP, ngay cạnh shell của bạn.",
     "filesBody": "Duyệt thư mục từ xa, <strong>tải lên và tải xuống</strong>, tạo thư mục, đổi tên, di chuyển và xóa — rồi xem trước văn bản, hình ảnh và video hoặc <strong>chỉnh quyền POSIX</strong>, tất cả từ điện thoại của bạn.",
@@ -1700,7 +1700,7 @@
       },
       {
         "title": "Mosh roaming",
-        "body": "Phiên sống sót qua các lần chuyển từ Wi-Fi sang di động và một điện thoại bị khóa, với SSH làm dự phòng."
+        "body": "Phiên được giữ qua các lần chuyển từ Wi-Fi sang di động và khi điện thoại khóa, với SSH làm dự phòng."
       },
       {
         "title": "Khóa ứng dụng Face ID",
@@ -1735,15 +1735,15 @@
       },
       {
         "question": "Tôi có thực sự sửa được một máy chủ từ điện thoại không?",
-        "answer": "Có. VVTerm là một terminal SSH đầy đủ với các phím bạn cần trên một thanh công cụ, các phiên Mosh tự kết nối lại, và một trình duyệt SFTP để chỉnh sửa tệp nhanh — đủ để xử lý một sự cố trên đường đi."
+        "answer": "Có. VVTerm là một terminal SSH đầy đủ với các phím bạn cần trên một thanh công cụ, các phiên Mosh tự kết nối lại, và một trình duyệt SFTP để chỉnh sửa tệp nhanh — đủ để xử lý một sự cố khi đang di chuyển."
       },
       {
-        "question": "Giọng nói thành lệnh hoạt động thế nào?",
+        "question": "Lệnh thoại hoạt động thế nào?",
         "answer": "Nói một lệnh và VVTerm phiên âm nó trên thiết bị bằng các mô hình MLX Whisper hoặc Parakeet, với Apple Speech làm dự phòng. Không có gì về lệnh của bạn được gửi tới một máy chủ để phiên âm."
       },
       {
-        "question": "Phiên của tôi có sống sót khi chuyển mạng hoặc khóa điện thoại không?",
-        "answer": "Với Mosh, có. Mosh roaming qua Wi-Fi và di động và sống sót qua một màn hình khóa, kết nối lại tự nó. SSH tiêu chuẩn luôn khả dụng khi bạn thích."
+        "question": "Phiên của tôi có giữ được khi chuyển mạng hoặc khóa điện thoại không?",
+        "answer": "Với Mosh, có. Mosh roaming qua Wi-Fi và di động và giữ phiên qua màn hình khóa, kết nối lại tự nó. SSH tiêu chuẩn luôn khả dụng khi bạn thích."
       },
       {
         "question": "Một lệnh đang chạy có tiếp tục nếu tôi bị ngắt kết nối không?",
@@ -1766,14 +1766,14 @@
     "ctaSubtitle": "Tải VVTerm miễn phí và kết nối tới máy chủ đầu tiên của bạn trong vài phút."
   },
   "mac": {
-    "metaTitle": "VVTerm cho Mac — Terminal SSH gốc cho macOS",
-    "metaDescription": "Một terminal SSH gốc và trình khách SFTP cho Mac dùng Apple Silicon. Hiển thị GPU với libghostty, tab và chia khung, duy trì phiên tmux, giám sát máy chủ trực tiếp, tùy chỉnh sâu, Mosh, Tailscale SSH, và máy chủ đồng bộ qua iCloud.",
+    "metaTitle": "VVTerm cho Mac — Terminal SSH native cho macOS",
+    "metaDescription": "Một terminal SSH native và client SFTP cho Mac dùng Apple Silicon. Terminal GPU với libghostty, tab và chia khung, duy trì phiên tmux, giám sát máy chủ trực tiếp, tùy chỉnh sâu, Mosh, Tailscale SSH, và máy chủ đồng bộ qua iCloud.",
     "bcHome": "Trang chủ",
     "bcPlatforms": "Nền tảng",
     "bcMac": "Mac",
     "heroEyebrow": "VVTerm cho Mac",
     "heroTitle": "Một terminal thực thụ<br />cho Mac của bạn.",
-    "heroSubhead": "Hiển thị GPU, dựa trên tab, và xây cho Apple Silicon — với một trình duyệt SFTP tích hợp và máy chủ đồng bộ tới tất cả thiết bị của bạn.",
+    "heroSubhead": "Terminal GPU có tab, được được xây cho Apple Silicon — kèm SFTP tích hợp và máy chủ đồng bộ trên mọi thiết bị của bạn.",
     "download": "Tải cho Mac",
     "seePricing": "Xem bảng giá",
     "heroNote": "Yêu cầu macOS 13 Ventura trở lên · Apple Silicon",
@@ -1861,7 +1861,7 @@
         "answer": "Có. Pro mở khóa tab kết nối không giới hạn, và bạn có thể chia một tab thành nhiều khung để có shell cạnh nhau. Bậc miễn phí gồm một tab kết nối."
       },
       {
-        "question": "Phiên của tôi có sống sót qua một lần ngắt kết nối không?",
+        "question": "Phiên của tôi có giữ được sau một lần ngắt kết nối không?",
         "answer": "Có. VVTerm quản lý một phiên <strong>tmux</strong> trên máy chủ, nên công việc dài hơi vẫn tiếp tục qua rớt mạng và giấc ngủ và gắn lại khi bạn kết nối lại. Nó tự động cài tmux nếu thiếu."
       },
       {
@@ -1890,12 +1890,12 @@
   },
   "platforms": {
     "metaTitle": "Nền tảng — VVTerm cho Mac, iPad và iPhone",
-    "metaDescription": "VVTerm là một terminal SSH gốc và trình khách SFTP cho thiết bị Apple. Khám phá VVTerm cho Mac, iPad và iPhone — xây cho Apple Silicon với đồng bộ iCloud và bảo mật Keychain.",
+    "metaDescription": "VVTerm là một terminal SSH native và client SFTP cho thiết bị Apple. Khám phá VVTerm cho Mac, iPad và iPhone — được xây cho Apple Silicon với đồng bộ iCloud và bảo mật Keychain.",
     "bcHome": "Trang chủ",
     "bcPlatforms": "Nền tảng",
     "eyebrow": "Nền tảng",
     "heroTitle": "Một ứng dụng SSH,<br />mọi thiết bị Apple.",
-    "heroSubhead": "Một terminal gốc cho Mac, iPad và iPhone — với duy trì phiên tmux, giám sát trực tiếp, tùy chỉnh sâu, và máy chủ cùng thông tin đăng nhập đồng bộ qua iCloud.",
+    "heroSubhead": "Terminal native cho Mac, iPad và iPhone — với phiên tmux, giám sát trực tiếp, tùy chỉnh sâu và máy chủ đồng bộ qua iCloud.",
     "seeFeatures": "Xem tất cả tính năng",
     "heroNote": "iOS và iPadOS 16+ · macOS 13 Ventura+ · Apple Silicon",
     "vvtermFor": "VVTerm cho",
@@ -1904,13 +1904,13 @@
     "ctaSubtitle": "Tải VVTerm miễn phí và máy chủ của bạn theo bạn trên Mac, iPad và iPhone.",
     "cards": {
       "mac": {
-        "tagline": "Một terminal SSH gốc cho macOS",
+        "tagline": "Một terminal SSH native cho macOS",
         "summary": "Terminal hiển thị GPU với tab và chia khung, duy trì phiên tmux, một trình duyệt tệp SFTP, giám sát trực tiếp, và máy chủ đồng bộ qua iCloud — xây cho các Mac dùng Apple Silicon.",
         "requirement": "macOS 13 Ventura trở lên · Apple Silicon"
       },
       "ipad": {
         "tagline": "Biến iPad thành một máy trạm SSH thực thụ",
-        "summary": "Phím tắt bàn phím vật lý, đa nhiệm Stage Manager, một thanh công cụ terminal tùy chỉnh, duy trì tmux, và các phiên Mosh sống sót qua rớt mạng.",
+        "summary": "Phím tắt bàn phím vật lý, đa nhiệm Stage Manager, một thanh công cụ terminal tùy chỉnh, duy trì tmux, và các phiên Mosh không bị mất khi rớt mạng.",
         "requirement": "iPadOS 16 trở lên"
       },
       "iphone": {
@@ -1922,18 +1922,18 @@
   },
   "pricing": {
     "title": "Bảng giá VVTerm — Miễn phí, Pro và Trọn đời",
-    "description": "VVTerm miễn phí để bắt đầu với một không gian làm việc, máy chủ và tab kết nối. Lên Pro cho mọi thứ không giới hạn với giá $6.49/tháng hoặc $24.99/năm, hoặc trả một lần với một lần mua trọn đời $49.99.",
+    "description": "VVTerm miễn phí để bắt đầu với một không gian làm việc, máy chủ và tab kết nối. Lên Pro cho không còn giới hạn với giá $6.49/tháng hoặc $24.99/năm, hoặc trả một lần với một lần mua trọn đời $49.99.",
     "bcHome": "Trang chủ",
     "bcPricing": "Bảng giá",
     "heroEyebrow": "Bảng giá",
     "heroTitle": "Miễn phí để bắt đầu.<br />Của bạn để giữ lại.",
-    "heroSubhead": "Bắt đầu miễn phí với một máy chủ trên mọi thiết bị Apple. Nâng cấp lên Pro cho mọi thứ không giới hạn, hoặc trả một lần cho một giấy phép trọn đời — mua hàng và hoàn tiền được Apple xử lý.",
+    "heroSubhead": "Bắt đầu miễn phí với một máy chủ trên mỗi thiết bị Apple. Pro gỡ bỏ giới hạn; Lifetime trả một lần là xong.",
     "download": "Tải miễn phí",
     "comparePlans": "So sánh các gói",
     "heroNote": "Không cần tài khoản · iPhone, iPad và Mac",
     "compareEyebrow": "So sánh các gói",
     "compareTitle": "Mọi gói, đặt cạnh nhau.",
-    "compareBody": "Cùng một terminal gốc trên mọi gói. Pro và <strong>Trọn đời</strong> mở khóa <strong>máy chủ và tab kết nối không giới hạn</strong> và thêm <strong>hỗ trợ ưu tiên</strong>.",
+    "compareBody": "Cùng một terminal native trên mọi gói. Pro và <strong>Trọn đời</strong> mở khóa <strong>máy chủ và tab kết nối không giới hạn</strong> và thêm <strong>hỗ trợ ưu tiên</strong>.",
     "colFeatures": "Tính năng",
     "colFree": "Miễn phí",
     "colPro": "Pro",
@@ -1988,7 +1988,7 @@
         "lifetime": "check"
       },
       {
-        "label": "Giọng nói thành lệnh",
+        "label": "Lệnh thoại",
         "free": "check",
         "pro": "check",
         "lifetime": "check"
@@ -2038,7 +2038,7 @@
     "faqItems": [
       {
         "question": "Tôi nhận được gì khi miễn phí?",
-        "answer": "Bậc miễn phí gồm một không gian làm việc, một máy chủ và một tab kết nối — với SSH tiêu chuẩn, Mosh, Tailscale SSH và Cloudflare Tunnel SSH, terminal GPU, trình duyệt tệp SFTP, đồng bộ iCloud, bảo mật Keychain, và giọng nói thành lệnh. Không cần tài khoản hay thanh toán để bắt đầu."
+        "answer": "Bậc miễn phí gồm một không gian làm việc, một máy chủ và một tab kết nối — với SSH tiêu chuẩn, Mosh, Tailscale SSH và Cloudflare Tunnel SSH, terminal GPU, trình duyệt tệp SFTP, đồng bộ iCloud, bảo mật Keychain, và lệnh thoại. Không cần tài khoản hay thanh toán để bắt đầu."
       },
       {
         "question": "Sự khác biệt giữa Miễn phí và Pro là gì?",
@@ -2062,7 +2062,7 @@
       }
     ],
     "ctaTitle": "Bắt đầu miễn phí. Nâng cấp khi bạn lớn lên.",
-    "ctaSubtitle": "Tải VVTerm trên iPhone, iPad và Mac, rồi lên Pro hoặc mua trọn đời bất cứ khi nào bạn cần thêm."
+    "ctaSubtitle": "Tải VVTerm trên iPhone, iPad và Mac; nâng cấp Pro hoặc Lifetime khi bạn thật sự cần thêm."
   },
   "privacy": {
     "title": "Chính sách quyền riêng tư - VVTerm",
@@ -2078,7 +2078,7 @@
     "s2credP": "Mật khẩu SSH và khóa riêng tư được lưu trong Apple Keychain. Nếu bật đồng bộ iCloud, thông tin đăng nhập đồng bộ qua iCloud Keychain trên các thiết bị của bạn. Chúng tôi không bao giờ nhận các thông tin đăng nhập này, và chúng được bảo vệ bởi bảo mật của thiết bị của bạn.",
     "s2analyticsH": "Dữ liệu phân tích",
     "s2analyticsP1": "Chúng tôi dùng Umami Analytics, một dịch vụ phân tích chú trọng quyền riêng tư, để thu thập số liệu sử dụng ẩn danh trên trang web và trong ứng dụng của chúng tôi. Dữ liệu là ẩn danh, được xử lý trên máy chủ phân tích tự lưu trữ của riêng chúng tôi, và không bao giờ được chia sẻ với các công ty phân tích bên thứ ba hay mạng quảng cáo.",
-    "s2analyticsP2": "Chúng tôi không bao giờ thu thập nội dung các phiên terminal của bạn, các lệnh bạn gõ, địa chỉ máy chủ, tên người dùng, nội dung tệp, hay bất cứ điều gì nhận diện bạn. Bạn có thể tắt phân tích ứng dụng bất cứ lúc nào trong Cài đặt dưới mục \"Help Improve VVTerm\".",
+    "s2analyticsP2": "Chúng tôi không bao giờ thu thập nội dung các phiên terminal của bạn, các lệnh bạn gõ, địa chỉ máy chủ, tên người dùng, nội dung tệp, hay bất cứ điều gì nhận diện bạn. Bạn có thể tắt phân tích ứng dụng bất cứ lúc nào trong Cài đặt dưới mục \"Giúp cải thiện VVTerm\".",
     "s2purchaseH": "Thông tin mua hàng",
     "s2purchaseP": "Nếu bạn mua VVTerm Pro, lần mua của bạn được xử lý qua App Store. Chúng tôi nhận xác nhận về lần mua của bạn nhưng không có quyền truy cập vào chi tiết thanh toán của bạn.",
     "s3h": "3. Cách chúng tôi sử dụng thông tin của bạn",
@@ -2096,7 +2096,7 @@
       "Xóa toàn bộ dữ liệu ứng dụng bằng cách gỡ VVTerm khỏi các thiết bị của bạn",
       "Tắt đồng bộ iCloud trong Cài đặt để giữ dữ liệu chỉ cục bộ",
       "Gỡ thông tin đăng nhập đã lưu khỏi Keychain bất cứ lúc nào",
-      "Tắt số liệu sử dụng ẩn danh trong Cài đặt (\"Help Improve VVTerm\")",
+      "Tắt số liệu sử dụng ẩn danh trong Cài đặt (\"Giúp cải thiện VVTerm\")",
       "Yêu cầu thông tin về dữ liệu chúng tôi có thể đã thu thập"
     ],
     "s6h": "6. Liên hệ với chúng tôi",
@@ -2115,7 +2115,7 @@
     "s2steps": [
       "Đăng nhập bằng Apple ID của bạn",
       "Tìm lần mua VVTerm Pro của bạn",
-      "Chọn \"Request a refund\" và làm theo các hướng dẫn"
+      "Chọn \"Yêu cầu hoàn tiền\" và làm theo hướng dẫn"
     ],
     "s2reportPre": "Truy cập ",
     "s2reportPost": "",
@@ -2142,7 +2142,7 @@
   },
   "resources": {
     "title": "Tài nguyên — Hướng dẫn, tài liệu và so sánh VVTerm",
-    "description": "Học VVTerm: hướng dẫn từng bước, tài liệu sản phẩm, và các bài so sánh đặt cạnh nhau với các trình khách SSH khác cho iPhone, iPad và Mac.",
+    "description": "Học VVTerm: hướng dẫn từng bước, tài liệu sản phẩm, và các bài so sánh đặt cạnh nhau với các client SSH khác cho iPhone, iPad và Mac.",
     "bcHome": "Trang chủ",
     "bcResources": "Tài nguyên",
     "heroEyebrow": "Tài nguyên",
@@ -2156,7 +2156,7 @@
     "docsBody": "Tham khảo về máy chủ, xác thực, trình duyệt SFTP, đồng bộ iCloud, không gian làm việc và tab.",
     "docsCta": "Đọc tài liệu",
     "compareTitle": "So sánh",
-    "compareBody": "Xem VVTerm đối chiếu ra sao với các trình khách SSH khác — nền tảng, giao thức, tệp và giá cả.",
+    "compareBody": "Xem VVTerm đối chiếu ra sao với các client SSH khác — nền tảng, giao thức, tệp và giá cả.",
     "compareCta": "Xem các bài so sánh",
     "ctaTitle": "Sẵn sàng khi bạn sẵn sàng.",
     "ctaSubtitle": "Tải VVTerm miễn phí và kết nối tới máy đầu tiên của bạn trong vài phút."

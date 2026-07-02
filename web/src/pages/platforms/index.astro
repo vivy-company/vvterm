@@ -6,11 +6,13 @@ import DownloadButton from "../../components/DownloadButton.astro";
 import { Icon } from "astro-icon/components";
 import { SITE } from "../../lib/site";
 import { PLATFORMS } from "../../lib/nav";
-import { localizePath, pickPage } from "../../i18n/utils";
+import { localizePath, pickPage, useT, type Locale } from "../../i18n/utils";
 
-const lang = (Astro.currentLocale ?? "en") as "en" | "zh";
+const lang = (Astro.currentLocale ?? "en") as Locale;
 
 const C = pickPage("platforms", lang);
+const t = useT(lang);
+const platformLabel = (name: string) => t("nav.platformLink").replace("{name}", name);
 
 const webPageSchema = {
   "@context": "https://schema.org",
@@ -47,7 +49,7 @@ const webPageSchema = {
           return (
             <a href={localizePath(`/${platform.slug}`, lang)} class="group card flex flex-col p-8 transition hover:border-white/25">
               <Icon class="size-8 text-accent" name={platform.icon} />
-              <h2 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{C.vvtermFor} {platform.name}</h2>
+              <h2 class="mt-5 text-2xl font-semibold tracking-[-0.02em] text-ink">{platformLabel(platform.name)}</h2>
               <p class="mt-3 text-base font-medium text-ink/80">{card.tagline}</p>
               <p class="mt-3 flex-1 text-[15px] leading-relaxed text-muted">{card.summary}</p>
               <p class="mt-5 text-[13px] text-faint">{card.requirement}</p>
