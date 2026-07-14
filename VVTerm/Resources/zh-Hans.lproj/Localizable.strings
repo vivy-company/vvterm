@@ -600,7 +600,7 @@
 "Accessibility" = "辅助功能";
 "Privacy & Security" = "隐私与安全";
 "Human" = "人物";
-"Home" = "家居";
+"Home" = "Home";
 "Fitness" = "健身";
 "Nature" = "自然";
 "Editing" = "编辑";
@@ -1129,7 +1129,7 @@
 "Best value" = "最划算";
 "Best value for ongoing terminal work." = "适合长期终端工作的最划算选择。";
 "Billed yearly" = "按年计费";
-"Blink" = "眨眼";
+"Blink" = "闪烁";
 "Block" = "块";
 "Block Hollow" = "空心块";
 "Browse files on all your servers at once." = "同时浏览所有服务器上的文件。";
@@ -1343,7 +1343,7 @@
 "Pro removes every limit on workspaces, servers, and tabs." = "Pro 移除工作区、服务器和标签页的所有限制。";
 "Pro unlocks unlimited workspaces, servers, and connections." = "Pro 可解锁无限的工作空间、服务器和连接。";
 "Processing" = "加工";
-"Rate VVTerm" = "利率 VV 期限";
+"Rate VVTerm" = "给 VVTerm 评分";
 "Read" = "阅读";
 "Reconnecting (attempt %lld)…" = "正在重新连接（尝试 %lld）...";
 "Reconnecting…" = "正在重新连接...";
