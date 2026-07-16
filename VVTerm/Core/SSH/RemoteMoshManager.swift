@@ -15,6 +15,7 @@ actor RemoteMoshManager {
     private let availabilityTimeout: Duration = .seconds(8)
     private let bootstrapTimeout: Duration = .seconds(25)
     private let installTimeout: Duration = .seconds(180)
+    private let terminateTimeout: Duration = .seconds(5)
 
     private init() {}
 
@@ -54,6 +55,22 @@ actor RemoteMoshManager {
         )
         let output = try await client.execute(command, timeout: bootstrapTimeout)
         return try parseConnectInfo(from: output)
+    }
+
+    nonisolated func terminateCommand(pid: Int32) -> String {
+        let body = "\(RemoteTerminalBootstrap.shellPathExport()); kill \(pid) 2>/dev/null || true"
+        return "sh -lc \(RemoteTerminalBootstrap.shellQuoted(body))"
+    }
+
+    func terminateMoshServer(pid: Int32, using client: SSHClient) async {
+        do {
+            _ = try await client.execute(terminateCommand(pid: pid), timeout: terminateTimeout)
+            logger.info("Terminated orphaned mosh-server [pid: \(pid)]")
+        } catch {
+            logger.warning(
+                "Could not terminate orphaned mosh-server [pid: \(pid)]: \(error.localizedDescription)"
+            )
+        }
     }
 
     func installMoshServer(using client: SSHClient) async throws {

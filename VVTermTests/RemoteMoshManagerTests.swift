@@ -68,6 +68,14 @@ struct RemoteMoshManagerTests {
     }
 
     @Test
+    func terminateCommandKillsTheBootstrappedServerPID() {
+        let command = RemoteMoshManager.shared.terminateCommand(pid: 4321)
+        #expect(command.hasPrefix("sh -lc "))
+        #expect(command.contains("kill 4321"))
+        #expect(command.contains("2>/dev/null || true"))
+    }
+
+    @Test
     func utf8LocaleExportScriptSetsUtf8LocaleVars() {
         let script = RemoteMoshManager.shared.utf8LocaleExportScript()
         #expect(script.contains("locale -a"))

@@ -1,5 +1,5 @@
 import Foundation
-import os.log
+import os
 import MoshCore
 import MoshBootstrap
 
@@ -682,11 +682,12 @@ actor SSHClient {
             let candidateSession = MoshClientSession(endpoint: endpoint)
 
             do {
-                pendingOps = try await SSHClient.runWithTimeout(startupTimeout) {
-                    try await candidateSession.start()
-                    try await candidateSession.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
-                    return try await SSHClient.waitForMoshHostData(from: candidateSession)
-                }
+                pendingOps = try await SSHClient.startMoshCandidate(
+                    session: candidateSession,
+                    cols: cols,
+                    rows: rows,
+                    timeout: startupTimeout
+                )
                 moshSession = candidateSession
                 if let udpToken { startupTrace?.end(udpToken, detail: endpointClass) }
                 if host != configuredHost {
@@ -709,6 +710,11 @@ actor SSHClient {
         }
 
         guard let moshSession else {
+            // Nothing will attach to the detached mosh-server now, so stop it
+            // before falling back rather than stranding it on the remote.
+            if let serverPID = connectInfo.serverPID {
+                await RemoteMoshManager.shared.terminateMoshServer(pid: serverPID, using: self)
+            }
             if let sshError = lastStartupError as? SSHError,
                case .timeout = sshError {
                 throw SSHError.moshUDPTimeout
@@ -767,6 +773,39 @@ actor SSHClient {
             stream: stream,
             transport: .mosh
         )
+    }
+
+    // Not `runWithTimeout`: `start()` parks on an NWConnection continuation that
+    // cancellation cannot resume (an unroutable endpoint stays `.waiting`, never
+    // `.failed`), so a task group would await it forever. Only `stop()` resumes it.
+    private nonisolated static func startMoshCandidate(
+        session: MoshClientSession,
+        cols: Int,
+        rows: Int,
+        timeout: Duration
+    ) async throws -> [MoshHostOp] {
+        let timedOut = OSAllocatedUnfairLock(initialState: false)
+        let attempt = Task { () async throws -> [MoshHostOp] in
+            try await session.start()
+            try await session.enqueue(.resize(cols: Int32(cols), rows: Int32(rows)))
+            return try await waitForMoshHostData(from: session)
+        }
+        let watchdog = Task {
+            try await Task.sleep(for: timeout)
+            timedOut.withLock { $0 = true }
+            await session.stop()
+            attempt.cancel()
+        }
+        defer { watchdog.cancel() }
+
+        do {
+            return try await attempt.value
+        } catch {
+            if timedOut.withLock({ $0 }) {
+                throw SSHError.timeout
+            }
+            throw error
+        }
     }
 
     private nonisolated static func waitForMoshHostData(
