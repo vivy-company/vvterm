@@ -64,7 +64,7 @@ struct TerminalTab: Identifiable, Equatable, Codable {
 // MARK: - Terminal Pane State
 
 /// State for a single terminal pane (leaf in split tree)
-struct TerminalPaneState {
+struct TerminalPaneState: Equatable {
     let paneId: UUID
     let tabId: UUID
     let serverId: UUID
@@ -76,12 +76,8 @@ struct TerminalPaneState {
     var workingDirectory: String?
     var presentationOverrides: TerminalPresentationOverrides
     var seedPaneId: UUID?
-    /// Runtime transport for this pane (never persisted).
-    var activeTransport: ShellTransport
-    /// Set only when this pane is running over SSH fallback from Mosh.
-    var moshFallbackReason: MoshFallbackReason?
-    /// Privacy-safe, non-persisted detail for the active Mosh fallback.
-    var moshFallbackDiagnostics: MoshFallbackDiagnostics?
+    /// Runtime transport and any valid Mosh fallback data for this pane (never persisted).
+    var transportState: ShellTransportState
     /// Minimal non-secret context needed to recognize tmux lifecycle markers
     /// when an existing ET session is resumed after process relaunch.
     var eternalTerminalTmuxResumeContext: EternalTerminalTmuxResumeContext?
@@ -98,13 +94,15 @@ struct TerminalPaneState {
         self.workingDirectory = nil
         self.presentationOverrides = .empty
         self.seedPaneId = nil
-        self.activeTransport = .ssh
-        self.moshFallbackReason = nil
-        self.moshFallbackDiagnostics = nil
+        self.transportState = .ssh
         self.eternalTerminalTmuxResumeContext = nil
     }
 
     mutating func markConnectionEstablished() {
         hasEstablishedConnection = true
     }
+
+    var activeTransport: ShellTransport { transportState.transport }
+    var moshFallbackReason: MoshFallbackReason? { transportState.fallbackReason }
+    var moshFallbackDiagnostics: MoshFallbackDiagnostics? { transportState.fallbackDiagnostics }
 }

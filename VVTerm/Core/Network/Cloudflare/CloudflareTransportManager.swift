@@ -2,7 +2,76 @@ import Foundation
 import Cloudflared
 import os.log
 
+nonisolated struct CloudflareMetadataBodyBudget: Sendable {
+    private(set) var receivedBytes = 0
+    let maximumBytes: Int
+
+    func validateExpectedContentLength(_ expectedContentLength: Int64) throws {
+        guard expectedContentLength < 0 || expectedContentLength <= Int64(maximumBytes) else {
+            throw CloudflareMetadataRequestError.responseTooLarge
+        }
+    }
+
+    mutating func record(byteCount: Int) throws {
+        guard byteCount >= 0,
+              byteCount <= maximumBytes - min(receivedBytes, maximumBytes) else {
+            throw CloudflareMetadataRequestError.responseTooLarge
+        }
+        receivedBytes += byteCount
+    }
+}
+
+nonisolated enum CloudflareMetadataRequestError: LocalizedError {
+    case nonHTTPResponse
+    case responseTooLarge
+
+    var errorDescription: String? {
+        switch self {
+        case .nonHTTPResponse:
+            return "Cloudflare metadata returned a non-HTTP response."
+        case .responseTooLarge:
+            return "Cloudflare metadata response exceeded the allowed size."
+        }
+    }
+}
+
+nonisolated struct CloudflareTransportSession: Sendable {
+    let connect: @Sendable (String, Cloudflared.AuthMethod) async throws -> UInt16
+    let disconnect: @Sendable () async -> Void
+}
+
+typealias CloudflareTransportSessionFactory = @Sendable (
+    any AuthProviding
+) -> CloudflareTransportSession
+
 actor CloudflareTransportManager {
+    private enum SessionState {
+        case idle
+        case preparing(UUID)
+        case connecting(UUID, CloudflareTransportSession)
+        case connected(UUID, CloudflareTransportSession)
+
+        var operationID: UUID? {
+            switch self {
+            case .idle:
+                return nil
+            case .preparing(let operationID),
+                 .connecting(let operationID, _),
+                 .connected(let operationID, _):
+                return operationID
+            }
+        }
+
+        var session: CloudflareTransportSession? {
+            switch self {
+            case .connecting(_, let session), .connected(_, let session):
+                return session
+            case .idle, .preparing:
+                return nil
+            }
+        }
+    }
+
     private struct AccessMetadata: Sendable {
         let teamDomain: String
         let appDomain: String
@@ -11,7 +80,20 @@ actor CloudflareTransportManager {
         let teamDomain: String
         let appDomain: String
     }
-    private final class RedirectBlockingDelegate: NSObject, URLSessionTaskDelegate {
+    private enum RedirectPolicy: Sendable {
+        case follow(maximumRedirects: Int)
+        case block
+    }
+
+    private final class RedirectDelegate: NSObject, URLSessionTaskDelegate, @unchecked Sendable {
+        private let policy: RedirectPolicy
+        private let lock = NSLock()
+        private var redirectCount = 0
+
+        init(policy: RedirectPolicy) {
+            self.policy = policy
+        }
+
         func urlSession(
             _ session: URLSession,
             task: URLSessionTask,
@@ -19,32 +101,123 @@ actor CloudflareTransportManager {
             newRequest request: URLRequest,
             completionHandler: @escaping (URLRequest?) -> Void
         ) {
-            completionHandler(nil)
+            switch policy {
+            case .block:
+                completionHandler(nil)
+            case .follow(let maximumRedirects):
+                let shouldFollow = lock.withLock {
+                    redirectCount += 1
+                    return redirectCount <= maximumRedirects
+                }
+                completionHandler(shouldFollow ? request : nil)
+            }
+        }
+    }
+
+    private struct BoundedMetadataHTTPClient: HTTPClient {
+        let maximumBodyBytes: Int
+        let timeout: TimeInterval
+        let redirectPolicy: RedirectPolicy
+
+        func send(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+            var request = request
+            request.timeoutInterval = timeout
+            let delegate = RedirectDelegate(policy: redirectPolicy)
+            let (bytes, rawResponse) = try await URLSession.shared.bytes(
+                for: request,
+                delegate: delegate
+            )
+            guard let response = rawResponse as? HTTPURLResponse else {
+                throw CloudflareMetadataRequestError.nonHTTPResponse
+            }
+
+            var budget = CloudflareMetadataBodyBudget(maximumBytes: maximumBodyBytes)
+            try budget.validateExpectedContentLength(response.expectedContentLength)
+            var data = Data()
+            data.reserveCapacity(min(maximumBodyBytes, max(0, Int(response.expectedContentLength))))
+            for try await byte in bytes {
+                try budget.record(byteCount: 1)
+                data.append(byte)
+            }
+            return (data, response)
         }
     }
 
     private let callbackScheme = "vvterm-cfaccess"
     private let userAgent = "VVTerm"
     private let discoveryTimeout: TimeInterval = 12
+    private let metadataBodyLimit = 32 * 1_024
+    private let metadataRedirectLimit = 5
     private let disconnectTimeout: Duration = .seconds(4)
     private let metadataKeychain = KeychainStore(service: "app.vivy.vvterm.cloudflare.metadata")
     private let metadataStorageKey = "cache.v1"
-    private var activeSession: SessionActor?
+    private let makeSession: CloudflareTransportSessionFactory
+    private var sessionState: SessionState = .idle
     private var metadataCache: [String: AccessMetadata] = [:]
     private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "CloudflareTransport")
 
+    init(
+        makeSession: @escaping CloudflareTransportSessionFactory = { authProvider in
+            let session = SessionActor(
+                authProvider: authProvider,
+                tunnelProvider: CloudflareTunnelProvider(),
+                retryPolicy: RetryPolicy(maxReconnectAttempts: 1, baseDelayNanoseconds: 500_000_000),
+                oauthFallback: nil,
+                sleep: { delay in
+                    try? await Task.sleep(nanoseconds: delay)
+                }
+            )
+            return CloudflareTransportSession(
+                connect: { hostname, method in
+                    try await session.connect(hostname: hostname, method: method)
+                },
+                disconnect: {
+                    await session.disconnect()
+                }
+            )
+        }
+    ) {
+        self.makeSession = makeSession
+    }
+
     func connect(server: Server, credentials: ServerCredentials) async throws -> UInt16 {
-        await disconnect()
+        let operationID = UUID()
+        let previousSession = sessionState.session
+        sessionState = .preparing(operationID)
+        if let previousSession {
+            await disconnect(previousSession)
+        }
+        guard sessionState.operationID == operationID else {
+            throw CancellationError()
+        }
 
         let hostname = server.host.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !hostname.isEmpty else {
+            sessionState = .idle
             throw SSHError.cloudflareConfigurationRequired(
                 String(localized: "Cloudflare transport requires a valid hostname.")
             )
         }
 
         let accessMode = server.cloudflareAccessMode ?? .oauth
-        let metadata = try await resolveAccessMetadata(for: hostname, server: server, mode: accessMode)
+        let metadata: AccessMetadata
+        do {
+            metadata = try await resolveAccessMetadata(
+                for: hostname,
+                server: server,
+                mode: accessMode,
+                operationID: operationID
+            )
+        } catch {
+            if sessionState.operationID == operationID {
+                sessionState = .idle
+                throw error
+            }
+            throw CancellationError()
+        }
+        guard sessionState.operationID == operationID else {
+            throw CancellationError()
+        }
 
         let authProvider: any AuthProviding
         let authMethod: Cloudflared.AuthMethod
@@ -66,11 +239,13 @@ actor CloudflareTransportManager {
             let clientSecret = credentials.cloudflareClientSecret?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
             guard !clientID.isEmpty else {
+                sessionState = .idle
                 throw SSHError.cloudflareConfigurationRequired(
                     String(localized: "Cloudflare service token client ID is required.")
                 )
             }
             guard !clientSecret.isEmpty else {
+                sessionState = .idle
                 throw SSHError.cloudflareConfigurationRequired(
                     String(localized: "Cloudflare service token client secret is required.")
                 )
@@ -84,64 +259,61 @@ actor CloudflareTransportManager {
             )
         }
 
-        let session = SessionActor(
-            authProvider: authProvider,
-            tunnelProvider: CloudflareTunnelProvider(),
-            retryPolicy: RetryPolicy(maxReconnectAttempts: 1, baseDelayNanoseconds: 500_000_000),
-            oauthFallback: nil,
-            sleep: { delay in
-                try? await Task.sleep(nanoseconds: delay)
-            }
-        )
+        let session = makeSession(authProvider)
+        sessionState = .connecting(operationID, session)
 
         do {
-            let localPort = try await session.connect(hostname: hostname, method: authMethod)
-            activeSession = session
+            let localPort = try await session.connect(hostname, authMethod)
+            guard sessionState.operationID == operationID else {
+                throw CancellationError()
+            }
+            sessionState = .connected(operationID, session)
             return localPort
+        } catch is CancellationError {
+            if sessionState.operationID == operationID {
+                sessionState = .idle
+                await disconnect(session)
+            }
+            throw CancellationError()
         } catch let failure as Failure {
+            guard sessionState.operationID == operationID else {
+                throw CancellationError()
+            }
+            sessionState = .idle
+            await disconnect(session)
             throw mapFailure(failure)
         } catch {
+            guard sessionState.operationID == operationID else {
+                throw CancellationError()
+            }
+            sessionState = .idle
+            await disconnect(session)
             throw SSHError.cloudflareTunnelFailed(error.localizedDescription)
         }
     }
 
     func disconnect() async {
-        guard let activeSession else { return }
-        self.activeSession = nil
+        let session = sessionState.session
+        sessionState = .idle
+        guard let session else { return }
+        await disconnect(session)
+    }
+
+    private func disconnect(_ session: CloudflareTransportSession) async {
         do {
-            try await CloudflareTransportManager.runWithTimeout(disconnectTimeout) {
-                await activeSession.disconnect()
+            try await HardOperationDeadline.run(timeout: disconnectTimeout) {
+                await session.disconnect()
             }
         } catch {
             logger.warning("Timed out while disconnecting Cloudflare transport session")
         }
     }
 
-    private nonisolated static func runWithTimeout<T: Sendable>(
-        _ timeout: Duration,
-        operation: @escaping @Sendable () async throws -> T
-    ) async throws -> T {
-        try await withThrowingTaskGroup(of: T.self) { group in
-            group.addTask {
-                try await operation()
-            }
-            group.addTask {
-                try await Task.sleep(for: timeout)
-                throw SSHError.timeout
-            }
-
-            guard let result = try await group.next() else {
-                throw SSHError.timeout
-            }
-            group.cancelAll()
-            return result
-        }
-    }
-
     private func resolveAccessMetadata(
         for hostname: String,
         server: Server,
-        mode: CloudflareAccessMode
+        mode: CloudflareAccessMode,
+        operationID: UUID
     ) async throws -> AccessMetadata {
         let cacheKey = metadataCacheKey(for: hostname)
         let teamOverride = server.cloudflareTeamDomainOverride?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
@@ -182,9 +354,14 @@ actor CloudflareTransportManager {
 
             do {
                 let discovered = try await discoverAccessMetadata(hostname: hostname)
+                guard sessionState.operationID == operationID else {
+                    throw CancellationError()
+                }
                 metadataCache[cacheKey] = discovered
                 persistMetadata(discovered, for: cacheKey)
                 return discovered
+            } catch is CancellationError {
+                throw CancellationError()
             } catch {
                 throw SSHError.cloudflareConfigurationRequired(
                     String(
@@ -210,7 +387,7 @@ actor CloudflareTransportManager {
 
     private func loadPersistedMetadata(for cacheKey: String) -> AccessMetadata? {
         guard
-            let data = try? metadataKeychain.get(metadataStorageKey),
+            let data = try? metadataKeychain.get(metadataStorageKey, scope: .deviceOnly),
             let persistedMap = try? JSONDecoder().decode([String: PersistedAccessMetadata].self, from: data),
             let persisted = persistedMap[cacheKey]
         else {
@@ -221,7 +398,7 @@ actor CloudflareTransportManager {
 
     private func persistMetadata(_ metadata: AccessMetadata, for cacheKey: String) {
         var persistedMap: [String: PersistedAccessMetadata] = [:]
-        if let existingData = try? metadataKeychain.get(metadataStorageKey),
+        if let existingData = try? metadataKeychain.get(metadataStorageKey, scope: .deviceOnly),
            let decoded = try? JSONDecoder().decode([String: PersistedAccessMetadata].self, from: existingData) {
             persistedMap = decoded
         }
@@ -231,14 +408,14 @@ actor CloudflareTransportManager {
             appDomain: metadata.appDomain
         )
         if let encoded = try? JSONEncoder().encode(persistedMap) {
-            try? metadataKeychain.set(encoded, forKey: metadataStorageKey, iCloudSync: SyncSettings.isEnabled)
+            try? metadataKeychain.set(encoded, forKey: metadataStorageKey, scope: .deviceOnly)
         }
     }
 
     private func clearCachedMetadata(for cacheKey: String) {
         metadataCache.removeValue(forKey: cacheKey)
         guard
-            let existingData = try? metadataKeychain.get(metadataStorageKey),
+            let existingData = try? metadataKeychain.get(metadataStorageKey, scope: .deviceOnly),
             var persistedMap = try? JSONDecoder().decode([String: PersistedAccessMetadata].self, from: existingData),
             persistedMap.removeValue(forKey: cacheKey) != nil
         else {
@@ -246,19 +423,23 @@ actor CloudflareTransportManager {
         }
 
         if persistedMap.isEmpty {
-            try? metadataKeychain.delete(metadataStorageKey)
+            try? metadataKeychain.delete(metadataStorageKey, scope: .deviceOnly)
             return
         }
 
         if let encoded = try? JSONEncoder().encode(persistedMap) {
-            try? metadataKeychain.set(encoded, forKey: metadataStorageKey, iCloudSync: SyncSettings.isEnabled)
+            try? metadataKeychain.set(encoded, forKey: metadataStorageKey, scope: .deviceOnly)
         }
     }
 
     private func discoverMetadata(hostname: String) async throws -> AccessMetadata {
         let appURL = try URLTools.normalizeOriginURL(from: hostname)
         let appInfo = try await AppInfoResolver(
-            client: URLSessionHTTPClient(),
+            client: BoundedMetadataHTTPClient(
+                maximumBodyBytes: metadataBodyLimit,
+                timeout: discoveryTimeout,
+                redirectPolicy: .follow(maximumRedirects: metadataRedirectLimit)
+            ),
             userAgent: userAgent
         ).resolve(appURL: appURL)
         return AccessMetadata(teamDomain: appInfo.authDomain, appDomain: appInfo.appDomain)
@@ -311,10 +492,11 @@ actor CloudflareTransportManager {
         request.timeoutInterval = discoveryTimeout
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
-        let (_, responseRaw) = try await URLSession.shared.data(for: request)
-        guard let response = responseRaw as? HTTPURLResponse else {
-            return nil
-        }
+        let (_, response) = try await BoundedMetadataHTTPClient(
+            maximumBodyBytes: metadataBodyLimit,
+            timeout: discoveryTimeout,
+            redirectPolicy: .follow(maximumRedirects: metadataRedirectLimit)
+        ).send(request)
 
         guard let finalHost = response.url?.host?.trimmingCharacters(in: .whitespacesAndNewlines),
               !finalHost.isEmpty,
@@ -333,20 +515,16 @@ actor CloudflareTransportManager {
         method: String,
         appDomainFallback: String
     ) async throws -> AccessMetadata? {
-        let config = URLSessionConfiguration.ephemeral
-        let delegate = RedirectBlockingDelegate()
-        let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)
-        defer { session.invalidateAndCancel() }
-
         var request = URLRequest(url: appURL)
         request.httpMethod = method
         request.timeoutInterval = discoveryTimeout
         request.setValue(userAgent, forHTTPHeaderField: "User-Agent")
 
-        let (_, responseRaw) = try await session.data(for: request)
-        guard let response = responseRaw as? HTTPURLResponse else {
-            return nil
-        }
+        let (_, response) = try await BoundedMetadataHTTPClient(
+            maximumBodyBytes: metadataBodyLimit,
+            timeout: discoveryTimeout,
+            redirectPolicy: .block
+        ).send(request)
 
         guard let location = response.value(forHTTPHeaderField: "Location"),
               let locationURL = URL(string: location, relativeTo: appURL),

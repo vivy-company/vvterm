@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class SSHSFTPAdapter {
-    typealias BorrowedClientProvider = @MainActor (UUID) -> SSHClient?
+    typealias BorrowedClientProvider = @MainActor @Sendable (UUID) -> SSHClient?
 
     private enum ClientOwnership {
         case borrowed
@@ -16,24 +16,31 @@ final class SSHSFTPAdapter {
 
     private var clients: [UUID: ClientRegistration] = [:]
     private let borrowedClientProvider: BorrowedClientProvider
+    private let credentialRepository: any ServerCredentialTransactionRepository
+    private let connectionOperations: SSHConnectionOperationService
+    private let clientFactory: SSHClientFactory
 
     init(
-        borrowedClientProvider: @escaping BorrowedClientProvider = { serverId in
-            TerminalTabManager.shared.sharedStatsClient(for: serverId)
-        }
+        borrowedClientProvider: @escaping BorrowedClientProvider,
+        credentialRepository: any ServerCredentialTransactionRepository,
+        connectionOperations: SSHConnectionOperationService,
+        clientFactory: SSHClientFactory
     ) {
         self.borrowedClientProvider = borrowedClientProvider
+        self.credentialRepository = credentialRepository
+        self.connectionOperations = connectionOperations
+        self.clientFactory = clientFactory
     }
 
-    func withService<T>(
+    func withService<T: Sendable>(
         for server: Server,
-        operation: @escaping (any RemoteFileService) async throws -> T
+        operation: @MainActor @escaping @Sendable (any RemoteFileService) async throws -> T
     ) async throws -> T {
         let registration = clientRegistration(for: server)
-        let credentials = try KeychainManager.shared.getCredentials(for: server)
+        let credentials = try credentialRepository.getCredentials(for: server)
 
         do {
-            return try await SSHConnectionOperationService.shared.runWithConnection(
+            return try await connectionOperations.runWithConnection(
                 using: registration.client,
                 server: server,
                 credentials: credentials,
@@ -77,7 +84,10 @@ final class SSHSFTPAdapter {
             return existing
         }
 
-        let registration = ClientRegistration(client: SSHClient(), ownership: .owned)
+        let registration = ClientRegistration(
+            client: clientFactory.makeClient(),
+            ownership: .owned
+        )
         clients[server.id] = registration
         return registration
     }

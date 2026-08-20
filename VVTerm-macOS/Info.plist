@@ -27,6 +27,19 @@
     </array>
     <key>CFBundlePackageType</key>
     <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.data</string>
+            </array>
+            <key>UTTypeDescription</key>
+            <string>VVTerm Remote File Entry</string>
+            <key>UTTypeIdentifier</key>
+            <string>app.vivy.vvterm.remote-file-entry</string>
+        </dict>
+    </array>
     <key>CFBundleShortVersionString</key>
     <string>$(MARKETING_VERSION)</string>
     <key>CFBundleVersion</key>

@@ -1,61 +1,98 @@
 import Foundation
 import Combine
 import os.log
-#if os(iOS)
-import UIKit
-#elseif os(macOS)
-import AppKit
-#endif
+
+nonisolated struct TerminalAccessoryObserverCleanupRequest: Sendable {
+    private let cleanup: @MainActor @Sendable () -> Void
+
+    init(cleanup: @escaping @MainActor @Sendable () -> Void) {
+        self.cleanup = cleanup
+    }
+
+    func perform() {
+        Task { @MainActor in
+            cleanup()
+        }
+    }
+}
 
 @MainActor
-final class TerminalAccessoryPreferencesManager: ObservableObject {
-    static let shared = TerminalAccessoryPreferencesManager()
+private final class TerminalAccessoryObserverCleanup {
+    private let syncLifecycle: any TerminalAccessorySyncLifecycle
+    private let resolutionSource: any TerminalAccessoryResolutionSource
+    private var lifecycleObserverID: UUID?
+    private var resolutionObserverID: UUID?
 
-    @Published private(set) var profile: TerminalAccessoryProfile
+    init(
+        syncLifecycle: any TerminalAccessorySyncLifecycle,
+        resolutionSource: any TerminalAccessoryResolutionSource
+    ) {
+        self.syncLifecycle = syncLifecycle
+        self.resolutionSource = resolutionSource
+    }
 
-    private let defaults: UserDefaults
-    private let cloudKit: CloudKitManager
-    private let syncCoordinator = CloudKitSyncCoordinator.shared
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.vvterm",
-        category: "TerminalAccessoryPreferences"
-    )
-
-    private var foregroundObserver: NSObjectProtocol?
-    private var syncToggleObserver: NSObjectProtocol?
-    private var cloudResolutionObserver: NSObjectProtocol?
-    private var pendingSyncTask: Task<Void, Never>?
-    private var lastKnownSyncEnabled: Bool
-    private var lastForegroundSyncAt: Date = .distantPast
-    private let foregroundSyncMinimumInterval: TimeInterval = 20
-
-    init(defaults: UserDefaults = .standard, cloudKit: CloudKitManager? = nil) {
-        self.defaults = defaults
-        self.cloudKit = cloudKit ?? CloudKitManager.shared
-        self.profile = TerminalAccessoryPreferencesManager.loadProfile(from: defaults)
-        self.lastKnownSyncEnabled = SyncSettings.isEnabled
-
-        observeForegroundSync()
-        observeSyncToggleChanges()
-        observeCloudResolutionChanges()
-
-        Task {
-            await syncWithCloud()
-            await syncCoordinator.drainPendingMutations()
+    var request: TerminalAccessoryObserverCleanupRequest {
+        TerminalAccessoryObserverCleanupRequest { [self] in
+            removeObservers()
         }
     }
 
+    func registerLifecycleObserver(_ id: UUID) {
+        lifecycleObserverID = id
+    }
+
+    func registerResolutionObserver(_ id: UUID) {
+        resolutionObserverID = id
+    }
+
+    private func removeObservers() {
+        if let lifecycleObserverID {
+            syncLifecycle.removeObserver(lifecycleObserverID)
+            self.lifecycleObserverID = nil
+        }
+        if let resolutionObserverID {
+            resolutionSource.removeTerminalAccessoryProfileObserver(resolutionObserverID)
+            self.resolutionObserverID = nil
+        }
+    }
+}
+
+@MainActor
+final class TerminalAccessoryPreferencesManager: ObservableObject {
+    @Published private(set) var profile: TerminalAccessoryProfile
+
+    private let dependencies: TerminalAccessoryPreferencesDependencies
+    private let observerCleanupRequest: TerminalAccessoryObserverCleanupRequest
+    private let logger = Logger(
+        subsystem: "app.vivy.vvterm",
+        category: "TerminalAccessoryPreferences"
+    )
+
+    private var pendingSyncTask: Task<Void, Never>?
+    private var startupSyncTask: Task<Void, Never>?
+    private var lifecycleSyncTask: Task<Void, Never>?
+
+    init(dependencies: TerminalAccessoryPreferencesDependencies) {
+        self.dependencies = dependencies
+        let observerCleanup = TerminalAccessoryObserverCleanup(
+            syncLifecycle: dependencies.syncLifecycle,
+            resolutionSource: dependencies.resolutionSource
+        )
+        self.observerCleanupRequest = observerCleanup.request
+        self.profile = dependencies.profileStore.loadProfile(
+            defaultWriterID: dependencies.writerID
+        )
+
+        guard dependencies.startsSynchronization else { return }
+        observeSyncEvents(cleanup: observerCleanup)
+        startupSyncTask = makeCloudSyncTask()
+    }
+
     deinit {
-        if let foregroundObserver {
-            NotificationCenter.default.removeObserver(foregroundObserver)
-        }
-        if let syncToggleObserver {
-            NotificationCenter.default.removeObserver(syncToggleObserver)
-        }
-        if let cloudResolutionObserver {
-            NotificationCenter.default.removeObserver(cloudResolutionObserver)
-        }
         pendingSyncTask?.cancel()
+        startupSyncTask?.cancel()
+        lifecycleSyncTask?.cancel()
+        observerCleanupRequest.perform()
     }
 
     var activeItems: [TerminalAccessoryItemRef] {
@@ -83,12 +120,12 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
 
     /// Free tier is limited to `FreeTierLimits.maxCustomActions` created actions.
     /// Existing actions beyond the limit keep working; only creation is gated.
-    var isCustomActionCreationProGated: Bool {
-        !StoreManager.shared.isPro && customActions.count >= FreeTierLimits.maxCustomActions
+    func isCustomActionCreationProGated(hasProAccess: Bool) -> Bool {
+        !hasProAccess && customActions.count >= FreeTierLimits.maxCustomActions
     }
 
-    var customActionLimit: Int {
-        StoreManager.shared.isPro ? TerminalAccessoryProfile.maxCustomActions : FreeTierLimits.maxCustomActions
+    func customActionLimit(hasProAccess: Bool) -> Int {
+        hasProAccess ? TerminalAccessoryProfile.maxCustomActions : FreeTierLimits.maxCustomActions
     }
 
     func customAction(for id: UUID) -> TerminalAccessoryCustomAction? {
@@ -101,12 +138,13 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
         commandContent: String,
         commandSendMode: TerminalSnippetSendMode,
         shortcutKey: TerminalAccessoryShortcutKey,
-        shortcutModifiers: TerminalAccessoryShortcutModifiers
+        shortcutModifiers: TerminalAccessoryShortcutModifiers,
+        hasProAccess: Bool
     ) throws -> TerminalAccessoryCustomAction {
         guard canCreateCustomAction else {
             throw TerminalAccessoryValidationError.customActionLimitReached
         }
-        guard !isCustomActionCreationProGated else {
+        guard !isCustomActionCreationProGated(hasProAccess: hasProAccess) else {
             throw TerminalAccessoryValidationError.customActionProRequired
         }
 
@@ -119,8 +157,9 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
             throw TerminalAccessoryValidationError.emptyCommandContent
         }
 
-        let now = Date()
+        let now = dependencies.now()
         let action = TerminalAccessoryCustomAction(
+            id: dependencies.makeID(),
             title: String(trimmedTitle.prefix(TerminalAccessoryProfile.maxCustomActionTitleLength)),
             kind: kind,
             commandContent: kind == .command
@@ -136,7 +175,7 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
         applyProfileMutation(at: now) { nextProfile, _ in
             nextProfile.customActions.insert(action, at: 0)
         }
-        AnalyticsTracker.shared.trackCustomActionCreated(kind: kind.rawValue)
+        dependencies.trackCustomActionCreated(kind)
         return action
     }
 
@@ -163,7 +202,7 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
             throw TerminalAccessoryValidationError.customActionNotFound
         }
 
-        let now = Date()
+        let now = dependencies.now()
         applyProfileMutation(at: now) { nextProfile, mutationDate in
             nextProfile.customActions[index].title = String(trimmedTitle.prefix(TerminalAccessoryProfile.maxCustomActionTitleLength))
             nextProfile.customActions[index].kind = kind
@@ -222,8 +261,12 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
         }
     }
 
-    func refreshFromCloud() async {
-        await syncWithCloud()
+    func refreshFromCloud() async throws {
+        startupSyncTask?.cancel()
+        startupSyncTask = nil
+        lifecycleSyncTask?.cancel()
+        lifecycleSyncTask = nil
+        try await synchronizeWithCloud()
     }
 
     private func updateLayoutItems(_ items: [TerminalAccessoryItemRef]) {
@@ -264,14 +307,15 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
     }
 
     private func applyProfileMutation(
-        at mutationDate: Date = Date(),
+        at mutationDate: Date? = nil,
         scheduleCloudSync: Bool = true,
         _ mutate: (inout TerminalAccessoryProfile, Date) -> Void
     ) {
+        let mutationDate = mutationDate ?? dependencies.now()
         var nextProfile = profile
         mutate(&nextProfile, mutationDate)
         nextProfile.updatedAt = mutationDate
-        nextProfile.lastWriterDeviceId = DeviceIdentity.id
+        nextProfile.lastWriterDeviceId = dependencies.writerID
         applyProfile(nextProfile, scheduleCloudSync: scheduleCloudSync)
     }
 
@@ -281,154 +325,100 @@ final class TerminalAccessoryPreferencesManager: ObservableObject {
 
         profile = normalizedProfile
         persistProfile()
-        publishProfileChange()
 
         if scheduleCloudSync {
             scheduleSyncWithCloud()
         }
     }
 
-    private func publishProfileChange() {
-        NotificationCenter.default.post(
-            name: .terminalAccessoryProfileDidChange,
-            object: self,
-            userInfo: ["profile": profile]
-        )
-    }
-
     private func persistProfile() {
-        do {
-            let encoded = try JSONEncoder().encode(profile)
-            defaults.set(encoded, forKey: TerminalAccessoryProfile.defaultsKey)
-        } catch {
-            logger.error("Failed to encode terminal accessory profile: \(error.localizedDescription)")
-        }
-    }
-
-    private static func loadProfile(from defaults: UserDefaults) -> TerminalAccessoryProfile {
-        guard let data = defaults.data(forKey: TerminalAccessoryProfile.defaultsKey) else {
-            let defaultProfile = TerminalAccessoryProfile.defaultValue.normalized()
-            if let encoded = try? JSONEncoder().encode(defaultProfile) {
-                defaults.set(encoded, forKey: TerminalAccessoryProfile.defaultsKey)
-            }
-            return defaultProfile
-        }
-
-        do {
-            let decoded = try JSONDecoder().decode(TerminalAccessoryProfile.self, from: data)
-            let normalized = decoded.normalized()
-            if normalized != decoded, let encoded = try? JSONEncoder().encode(normalized) {
-                defaults.set(encoded, forKey: TerminalAccessoryProfile.defaultsKey)
-            }
-            return normalized
-        } catch {
-            let defaultProfile = TerminalAccessoryProfile.defaultValue.normalized()
-            if let encoded = try? JSONEncoder().encode(defaultProfile) {
-                defaults.set(encoded, forKey: TerminalAccessoryProfile.defaultsKey)
-            }
-            return defaultProfile
-        }
+        dependencies.profileStore.saveProfile(profile)
     }
 
     private func scheduleSyncWithCloud() {
         pendingSyncTask?.cancel()
-        pendingSyncTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: 650_000_000)
+        let waitForSyncDebounce = dependencies.waitForSyncDebounce
+        let isSyncEnabled = dependencies.isSyncEnabled
+        let mutationQueue = dependencies.mutationQueue
+        let logger = logger
+        pendingSyncTask = Task { [weak self, waitForSyncDebounce, isSyncEnabled, mutationQueue, logger] in
+            try? await waitForSyncDebounce()
             guard !Task.isCancelled else { return }
-            await self?.enqueueProfileSync()
+            guard isSyncEnabled(), let profile = self?.profile else { return }
+            do {
+                try mutationQueue.enqueueTerminalAccessoryProfileUpsert(profile)
+            } catch {
+                logger.error(
+                    "Failed to persist terminal accessory sync: \(error.localizedDescription)"
+                )
+                return
+            }
+            guard !Task.isCancelled, isSyncEnabled() else { return }
+            await mutationQueue.drainPendingMutations()
         }
     }
 
-    private func enqueueProfileSync() async {
-        guard SyncSettings.isEnabled else { return }
-        syncCoordinator.enqueueTerminalAccessoryProfileUpsert(profile)
-        await syncCoordinator.drainPendingMutations()
+    private func makeCloudSyncTask() -> Task<Void, Never> {
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.synchronizeWithCloud()
+            } catch is CancellationError {
+                return
+            } catch {
+                guard !Task.isCancelled, self.dependencies.isSyncEnabled() else { return }
+                self.logger.warning("Terminal accessory CloudKit sync failed: \(error.localizedDescription)")
+            }
+        }
     }
 
-    private func syncWithCloud() async {
-        guard SyncSettings.isEnabled else { return }
-
+    private func synchronizeWithCloud() async throws {
+        try Task.checkCancellation()
+        guard dependencies.isSyncEnabled() else { return }
         let localSnapshot = profile
-
-        do {
-            let cloudResolved = try await cloudKit.syncTerminalAccessoryProfile(localSnapshot)
-            let mergedWithCurrent = TerminalAccessoryProfile.merged(local: profile, remote: cloudResolved).normalized()
-            applyProfile(mergedWithCurrent, scheduleCloudSync: false)
-        } catch {
-            logger.warning("Terminal accessory CloudKit sync failed: \(error.localizedDescription)")
-        }
+        let cloudResolved = try await dependencies.cloud.syncTerminalAccessoryProfile(localSnapshot)
+        try Task.checkCancellation()
+        guard dependencies.isSyncEnabled() else { throw CancellationError() }
+        applyCloudResolution(cloudResolved)
+        await dependencies.mutationQueue.drainPendingMutations()
     }
 
-    private func observeForegroundSync() {
-        #if os(iOS)
-        let name = UIApplication.didBecomeActiveNotification
-        #elseif os(macOS)
-        let name = NSApplication.didBecomeActiveNotification
-        #else
-        return
-        #endif
-
-        foregroundObserver = NotificationCenter.default.addObserver(
-            forName: name,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                await self?.syncWithCloudIfNeededForForeground()
-            }
-        }
+    private func applyCloudResolution(_ cloudResolved: TerminalAccessoryProfile) {
+        let mergedWithCurrent = TerminalAccessoryProfile
+            .merged(local: profile, remote: cloudResolved)
+            .normalized()
+        applyProfile(mergedWithCurrent, scheduleCloudSync: false)
     }
 
-    private func syncWithCloudIfNeededForForeground() async {
-        let now = Date()
-        guard now.timeIntervalSince(lastForegroundSyncAt) >= foregroundSyncMinimumInterval else {
-            return
+    private func observeSyncEvents(cleanup: TerminalAccessoryObserverCleanup) {
+        let lifecycleObserverID = dependencies.syncLifecycle.observe { [weak self] event in
+            self?.handleSyncLifecycleEvent(event)
         }
-
-        lastForegroundSyncAt = now
-        await syncWithCloud()
-        await syncCoordinator.drainPendingMutations()
+        cleanup.registerLifecycleObserver(lifecycleObserverID)
+        let resolutionObserverID = dependencies.resolutionSource.observeTerminalAccessoryProfile { [weak self] resolvedProfile in
+            guard let self else { return }
+            let mergedWithCurrent = TerminalAccessoryProfile
+                .merged(local: self.profile, remote: resolvedProfile)
+                .normalized()
+            self.applyProfile(mergedWithCurrent, scheduleCloudSync: false)
+        }
+        cleanup.registerResolutionObserver(resolutionObserverID)
     }
 
-    private func observeSyncToggleChanges() {
-        syncToggleObserver = NotificationCenter.default.addObserver(
-            forName: UserDefaults.didChangeNotification,
-            object: defaults,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                let isEnabled = SyncSettings.isEnabled
-                guard isEnabled != self.lastKnownSyncEnabled else { return }
-                self.lastKnownSyncEnabled = isEnabled
-                if isEnabled {
-                    await self.syncWithCloud()
-                } else {
-                    self.pendingSyncTask?.cancel()
-                    self.pendingSyncTask = nil
-                }
-            }
-        }
-    }
-
-    private func observeCloudResolutionChanges() {
-        cloudResolutionObserver = NotificationCenter.default.addObserver(
-            forName: CloudKitSyncCoordinator.terminalAccessoryProfileDidResolveNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            let resolvedProfile = notification.userInfo?["profile"] as? TerminalAccessoryProfile
-            Task { @MainActor [weak self] in
-                guard let self,
-                      let resolvedProfile else {
-                    return
-                }
-
-                let mergedWithCurrent = TerminalAccessoryProfile
-                    .merged(local: self.profile, remote: resolvedProfile)
-                    .normalized()
-                self.applyProfile(mergedWithCurrent, scheduleCloudSync: false)
-            }
+    private func handleSyncLifecycleEvent(_ event: CloudKitSyncLifecycleEvent) {
+        switch event {
+        case .foreground, .syncEnabled:
+            startupSyncTask?.cancel()
+            startupSyncTask = nil
+            lifecycleSyncTask?.cancel()
+            lifecycleSyncTask = makeCloudSyncTask()
+        case .syncDisabled:
+            pendingSyncTask?.cancel()
+            pendingSyncTask = nil
+            startupSyncTask?.cancel()
+            startupSyncTask = nil
+            lifecycleSyncTask?.cancel()
+            lifecycleSyncTask = nil
         }
     }
 }

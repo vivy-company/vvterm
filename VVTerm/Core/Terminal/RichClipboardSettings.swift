@@ -1,6 +1,6 @@
 import Foundation
 
-enum ImagePasteBehavior: String, CaseIterable, Identifiable, Sendable {
+nonisolated enum ImagePasteBehavior: String, CaseIterable, Identifiable, Sendable {
     case disabled
     case askOnce
     case automatic
@@ -21,7 +21,7 @@ enum ImagePasteBehavior: String, CaseIterable, Identifiable, Sendable {
     }
 }
 
-struct RichClipboardSettings: Sendable {
+nonisolated struct RichClipboardSettings: Sendable {
     static let maximumImageBytes = 50 * 1024 * 1024
 
     let imagePasteBehavior: ImagePasteBehavior

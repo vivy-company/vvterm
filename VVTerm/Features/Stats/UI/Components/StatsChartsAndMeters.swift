@@ -137,7 +137,7 @@ struct NetworkLineChart: View {
     }
 }
 
-private struct NetworkLineShape: Shape {
+private nonisolated struct NetworkLineShape: Shape {
     let points: [CGPoint]
 
     func path(in rect: CGRect) -> Path {
@@ -145,7 +145,7 @@ private struct NetworkLineShape: Shape {
     }
 }
 
-private struct NetworkAreaShape: Shape {
+private nonisolated struct NetworkAreaShape: Shape {
     let points: [CGPoint]
 
     func path(in rect: CGRect) -> Path {
@@ -160,7 +160,7 @@ private struct NetworkAreaShape: Shape {
     }
 }
 
-private enum NetworkPath {
+private nonisolated enum NetworkPath {
     static func smoothLine(_ points: [CGPoint]) -> Path {
         var path = Path()
         guard let first = points.first else { return path }

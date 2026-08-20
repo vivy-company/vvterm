@@ -200,10 +200,10 @@ nonisolated final class WhisperAudioEncoder: Module {
     let blocks: [WhisperEncoderBlock]
     let lnPost: LayerNorm
 
-    init(dims: WhisperModelDimensions) {
+    init(dims: WhisperModelDimensions) throws {
         self.conv1 = Conv1d(inputChannels: dims.n_mels, outputChannels: dims.n_audio_state, kernelSize: 3, padding: 1)
         self.conv2 = Conv1d(inputChannels: dims.n_audio_state, outputChannels: dims.n_audio_state, kernelSize: 3, stride: 2, padding: 1)
-        self.positionalEmbedding = WhisperModel.sinusoids(length: dims.n_audio_ctx, channels: dims.n_audio_state)
+        self.positionalEmbedding = try WhisperModel.sinusoids(length: dims.n_audio_ctx, channels: dims.n_audio_state)
             .asType(.float16)
         self.blocks = (0 ..< dims.n_audio_layer).map { _ in
             WhisperEncoderBlock(nState: dims.n_audio_state, nHead: dims.n_audio_head)
@@ -300,9 +300,9 @@ nonisolated final class WhisperModel: Module {
     let encoder: WhisperAudioEncoder
     let decoder: WhisperTextDecoder
 
-    init(dims: WhisperModelDimensions, dtype: DType) {
+    init(dims: WhisperModelDimensions, dtype: DType) throws {
         self.dims = dims
-        self.encoder = WhisperAudioEncoder(dims: dims)
+        self.encoder = try WhisperAudioEncoder(dims: dims)
         self.decoder = WhisperTextDecoder(dims: dims, dtype: dtype)
         super.init()
     }
@@ -314,8 +314,10 @@ nonisolated final class WhisperModel: Module {
         ])
     }
 
-    static func sinusoids(length: Int, channels: Int, maxTimescale: Double = 10_000) -> MLXArray {
-        precondition(channels % 2 == 0)
+    static func sinusoids(length: Int, channels: Int, maxTimescale: Double = 10_000) throws -> MLXArray {
+        guard length > 0, channels >= 4, channels.isMultiple(of: 2) else {
+            throw MLXModelConfigurationError.invalid("Whisper sinusoid dimensions")
+        }
         let half = channels / 2
         let logIncrement = log(maxTimescale) / Double(half - 1)
         let invTimescales = exp(-MLXArray(0 ..< half).asType(.float32) * Float(logIncrement))

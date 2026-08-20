@@ -1,17 +1,17 @@
 import Foundation
 
-struct TmuxShellLifecycleContext: Hashable, Sendable {
+nonisolated struct TmuxShellLifecycleContext: Hashable, Sendable {
     let ownership: TmuxSessionOwnership
     let markerToken: String
     let presenceProbe: TmuxSessionPresenceProbe
 }
 
-struct EternalTerminalTmuxResumeContext: Codable, Hashable, Sendable {
+nonisolated struct EternalTerminalTmuxResumeContext: Codable, Hashable, Sendable {
     let ownership: TmuxSessionOwnership
     let markerToken: String
 }
 
-struct TmuxSessionPresenceProbe: Hashable, Sendable {
+nonisolated struct TmuxSessionPresenceProbe: Hashable, Sendable {
     let command: String
     let existsMarker: String
     let missingMarker: String
@@ -27,7 +27,7 @@ struct TmuxSessionPresenceProbe: Hashable, Sendable {
     }
 }
 
-struct TerminalShellStartupPlan: Sendable {
+nonisolated struct TerminalShellStartupPlan: Sendable {
     let command: String?
     let tmuxLifecycle: TmuxShellLifecycleContext?
 
@@ -37,7 +37,7 @@ struct TerminalShellStartupPlan: Sendable {
     )
 }
 
-enum TerminalShellEndReason: Hashable, Sendable {
+nonisolated enum TerminalShellEndReason: Hashable, Sendable {
     case transportEnded
     case tmuxDetached(TmuxSessionOwnership)
     case tmuxEnded(TmuxSessionOwnership)
@@ -72,7 +72,7 @@ enum TerminalShellEndReason: Hashable, Sendable {
     }
 }
 
-enum TerminalDisconnectReason: String, Codable, Hashable, Sendable {
+nonisolated enum TerminalDisconnectReason: String, Codable, Hashable, Sendable {
     case transportEnded
     case tmuxDetached
     case externalTmuxEnded
@@ -82,7 +82,7 @@ enum TerminalDisconnectReason: String, Codable, Hashable, Sendable {
     }
 }
 
-enum TerminalTeardownIntent: CaseIterable, Sendable {
+nonisolated enum TerminalTeardownIntent: CaseIterable, Sendable {
     case explicitClose
     case explicitServerDisconnect
     case remoteSessionEnded

@@ -6,7 +6,7 @@ struct TerminalTabsScrollView: View {
     @Binding var selectedTabId: UUID?
     let onClose: (TerminalTab) -> Void
     let onNew: () -> Void
-    @ObservedObject var tabManager: TerminalTabManager
+    @ObservedObject var projection: TerminalServerToolbarTabStripProjection
 
     var body: some View {
         ServerToolbarTabStrip(
@@ -19,15 +19,16 @@ struct TerminalTabsScrollView: View {
             onNext: selectNext,
             onNew: onNew
         ) { tab, tabWidth, glassNamespace in
-            TerminalTabButton(
+            let item = projection.state.items.first { $0.id == tab.id }
+            return TerminalTabButton(
                 tab: tab,
+                item: item,
                 isSelected: selectedTabId == tab.id,
                 width: tabWidth,
                 glassNamespace: glassNamespace,
                 shortcutNumber: tabs.firstIndex(where: { $0.id == tab.id }).map { $0 + 1 },
                 onSelect: { selectedTabId = tab.id },
-                onClose: { onClose(tab) },
-                tabManager: tabManager
+                onClose: { onClose(tab) }
             )
         }
     }
@@ -49,21 +50,17 @@ struct TerminalTabsScrollView: View {
 
 private struct TerminalTabButton: View {
     let tab: TerminalTab
+    let item: TerminalServerToolbarTabItem?
     let isSelected: Bool
     let width: CGFloat
     var glassNamespace: Namespace.ID?
     var shortcutNumber: Int?
     let onSelect: () -> Void
     let onClose: () -> Void
-    @ObservedObject var tabManager: TerminalTabManager
-
-    private var paneState: TerminalPaneState? {
-        tabManager.paneStates[tab.focusedPaneId]
-    }
 
     private var statusColor: Color {
-        guard let state = paneState else { return .secondary }
-        switch state.connectionState {
+        guard let connectionState = item?.connectionState else { return .secondary }
+        switch connectionState {
         case .connected:
             return .green
         case .connecting, .reconnecting:
@@ -81,7 +78,7 @@ private struct TerminalTabButton: View {
             isSelected: isSelected,
             statusColor: statusColor,
             width: width,
-            accessibilityLabel: tabManager.displayTitle(for: tab),
+            accessibilityLabel: item?.title ?? tab.title,
             glassNamespace: glassNamespace,
             shortcutNumber: shortcutNumber,
             onSelect: onSelect,
@@ -90,7 +87,7 @@ private struct TerminalTabButton: View {
     }
 
     private var tabTitle: String {
-        let title = tabManager.displayTitle(for: tab)
+        let title = item?.title ?? tab.title
         guard tab.paneCount > 1 else { return title }
         return "\(title) ⊞"
     }

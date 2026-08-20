@@ -3,19 +3,27 @@ import SwiftUI
 // MARK: - Server Sidebar View (macOS)
 
 struct ServerSidebarView: View {
-    @ObservedObject var serverManager: ServerManager
+    let serverManager: ServerManager
+    let serverFormDependencies: ServerFormDependencies
+    let makeLocalDiscoveryManager: LocalSSHDiscoveryManagerFactory
+    let onOpenSettings: () -> Void
+    @ObservedObject private var stateStore: ServerStateStore
+    @ObservedObject private var workspaceSelectionStore: WorkspaceSelectionStore
     @Binding var selectedWorkspace: Workspace?
     @Binding var selectedServer: Server?
 
-    @ObservedObject private var storeManager = StoreManager.shared
-    @ObservedObject private var tabManager = TerminalTabManager.shared
+    @EnvironmentObject private var storeManager: StoreManager
+    @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
+    private let tabManager: TerminalTabManager
+    @ObservedObject private var terminalNavigation: TerminalSessionNavigationProjection
     #if os(macOS)
     @EnvironmentObject private var commandBridge: MacShellCommandBridge
     #endif
 
     @State private var showingWorkspaceSwitcher = false
     @State private var showingAddServer = false
-    @State private var showingLocalDiscovery = false
+    @State private var localDiscoveryPresentation: LocalDeviceDiscoveryPresentation?
     @State private var showingSupport = false
     @State private var showingProUpgrade = false
     @State private var showingServerSearch = false
@@ -24,6 +32,7 @@ struct ServerSidebarView: View {
     @State private var showingCustomEnvironmentAlert = false
     @State private var editingEnvironment: ServerEnvironment?
     @State private var environmentToDelete: ServerEnvironment?
+    @State private var environmentDeletionError: String?
     @State private var searchText = ""
     @State private var serverToEdit: Server?
     @State private var serverToMove: Server?
@@ -31,17 +40,39 @@ struct ServerSidebarView: View {
     @State private var addServerPrefill: ServerFormPrefill?
     @State private var queuedDiscoveryPrefill: ServerFormPrefill?
 
-    @AppStorage("environmentFilters") private var storedEnvironmentFilters: String = ""
+    init(
+        serverManager: ServerManager,
+        tabManager: TerminalTabManager,
+        terminalNavigation: TerminalSessionNavigationProjection,
+        serverFormDependencies: ServerFormDependencies,
+        workspaceSelectionStore: WorkspaceSelectionStore,
+        makeLocalDiscoveryManager: @escaping LocalSSHDiscoveryManagerFactory,
+        onOpenSettings: @escaping () -> Void,
+        selectedWorkspace: Binding<Workspace?>,
+        selectedServer: Binding<Server?>
+    ) {
+        self.serverManager = serverManager
+        self.serverFormDependencies = serverFormDependencies
+        self.makeLocalDiscoveryManager = makeLocalDiscoveryManager
+        self.onOpenSettings = onOpenSettings
+        _stateStore = ObservedObject(wrappedValue: serverManager.stateStore)
+        _workspaceSelectionStore = ObservedObject(
+            wrappedValue: workspaceSelectionStore
+        )
+        self.tabManager = tabManager
+        _terminalNavigation = ObservedObject(wrappedValue: terminalNavigation)
+        _selectedWorkspace = selectedWorkspace
+        _selectedServer = selectedServer
+    }
 
     // MARK: - Filter State
 
     private var canAddServer: Bool {
-        !serverManager.workspaces.isEmpty
+        !stateStore.workspaces.isEmpty
     }
 
     private var selectedEnvironmentIds: Set<UUID> {
-        guard !storedEnvironmentFilters.isEmpty else { return [] }
-        return Set(storedEnvironmentFilters.split(separator: ",").compactMap { UUID(uuidString: String($0)) })
+        workspaceSelectionStore.environmentFilterIDs(for: selectedWorkspace)
     }
 
     private var allEnvironmentIds: Set<UUID> {
@@ -61,7 +92,17 @@ struct ServerSidebarView: View {
     }
 
     private func updateEnvironmentFilters(_ ids: Set<UUID>) {
-        storedEnvironmentFilters = ids.map(\.uuidString).joined(separator: ",")
+        workspaceSelectionStore.updateEnvironmentFilterIDs(
+            ids,
+            for: selectedWorkspace
+        )
+    }
+
+    private func reconcileEnvironmentFilters() {
+        workspaceSelectionStore.reconcile(
+            workspaces: stateStore.workspaces,
+            legacyMigrationWorkspace: selectedWorkspace
+        )
     }
 
     private func toggleEnvironmentFilter(_ env: ServerEnvironment) {
@@ -88,13 +129,13 @@ struct ServerSidebarView: View {
 
     private var serverCount: Int {
         guard let workspace = selectedWorkspace else { return 0 }
-        return serverManager.servers.filter { $0.workspaceId == workspace.id }.count
+        return stateStore.servers.filter { $0.workspaceId == workspace.id }.count
     }
 
     var filteredServers: [Server] {
         guard let workspace = selectedWorkspace else { return [] }
 
-        var servers = serverManager.servers.filter { $0.workspaceId == workspace.id }
+        var servers = stateStore.servers.filter { $0.workspaceId == workspace.id }
 
         // Apply environment filter
         if isEnvironmentFiltering {
@@ -139,6 +180,8 @@ struct ServerSidebarView: View {
             .padding(.top, 12)
             .padding(.bottom, 4)
 
+            ServerLocalStorageNotice(serverManager: serverManager)
+
             if environmentFiltersVisible {
                 environmentFilterInline
                     .padding(.horizontal, 12)
@@ -163,8 +206,14 @@ struct ServerSidebarView: View {
                     LazyVStack(spacing: 4) {
                         ForEach(filteredServers) { server in
                             ServerRow(
+                                serverManager: serverManager,
+                                terminalNavigation: terminalNavigation,
                                 server: server,
                                 isSelected: selectedServer?.id == server.id,
+                                isLocked: stateStore.isServerLocked(
+                                    server,
+                                    hasProAccess: storeManager.allowsProFeatures
+                                ),
                                 onSelect: { selectServer(server) },
                                 onEdit: { serverToEdit = $0 },
                                 onMove: { serverToMove = $0 },
@@ -181,7 +230,7 @@ struct ServerSidebarView: View {
             }
 
             // Support VVTerm (only when not Pro)
-            if !storeManager.isPro {
+            if !storeManager.allowsProFeatures {
                 supportBanner
             }
 
@@ -200,6 +249,8 @@ struct ServerSidebarView: View {
                 serverManager: serverManager,
                 workspace: selectedWorkspace,
                 prefill: addServerPrefill,
+                dependencies: serverFormDependencies,
+                makeLocalDiscoveryManager: makeLocalDiscoveryManager,
                 onSave: { _ in showingAddServer = false }
             )
             .adaptiveSoftScrollEdges()
@@ -214,10 +265,9 @@ struct ServerSidebarView: View {
             )
             #endif
         }
-        .sheet(isPresented: $showingLocalDiscovery) {
-            LocalDeviceDiscoverySheet(manager: LocalSSHDiscoveryManager()) { discoveredHost in
+        .sheet(item: $localDiscoveryPresentation, onDismiss: resumeDiscoveredServerCreation) { presentation in
+            LocalDeviceDiscoverySheet(manager: presentation.manager) { discoveredHost in
                 queuedDiscoveryPrefill = ServerFormPrefill(discoveredHost: discoveredHost)
-                showingLocalDiscovery = false
             }
             .adaptiveSoftScrollEdges()
         }
@@ -226,6 +276,8 @@ struct ServerSidebarView: View {
                 serverManager: serverManager,
                 workspace: selectedWorkspace,
                 server: server,
+                dependencies: serverFormDependencies,
+                makeLocalDiscoveryManager: makeLocalDiscoveryManager,
                 onSave: { updatedServer in
                     handleSavedServer(updatedServer, originalServer: server)
                     serverToEdit = nil
@@ -308,16 +360,20 @@ struct ServerSidebarView: View {
                     return
                 }
                 Task {
-                    let updatedWorkspace = try? await serverManager.deleteEnvironment(
-                        environment,
-                        in: workspace,
-                        fallback: .production
-                    )
-                    await MainActor.run {
-                        if let updatedWorkspace {
-                            selectedWorkspace = updatedWorkspace
-                        }
-                        environmentToDelete = nil
+                    defer { environmentToDelete = nil }
+                    do {
+                        let result = try await serverManager.deleteEnvironment(
+                            environment,
+                            in: workspace,
+                            fallback: .production
+                        )
+                        selectedWorkspace = result.workspace
+                        selectedServer = WorkspaceSelectionPolicy.server(
+                            current: selectedServer,
+                            available: serverManager.servers
+                        )
+                    } catch {
+                        environmentDeletionError = error.localizedDescription
                     }
                 }
             }
@@ -325,20 +381,30 @@ struct ServerSidebarView: View {
             let name = environmentToDelete?.displayName ?? String(localized: "Custom")
             Text(String(format: String(localized: "Servers in '%@' will be moved to Production."), name))
         }
+        .alert(String(localized: "Environment Not Deleted"), isPresented: Binding(
+            get: { environmentDeletionError != nil },
+            set: { if !$0 { environmentDeletionError = nil } }
+        )) {
+            Button(String(localized: "OK"), role: .cancel) {}
+        } message: {
+            Text(environmentDeletionError ?? "")
+        }
         .proFeatureAlert(
             title: String(localized: "Custom Environments"),
             message: String(localized: "Upgrade to Pro for custom environments"),
             source: .customEnvironment,
             isPresented: $showingCustomEnvironmentAlert
         )
-        .onChange(of: showingLocalDiscovery) { isPresented in
-            guard !isPresented, let queued = queuedDiscoveryPrefill else { return }
-            queuedDiscoveryPrefill = nil
-            presentAddServer(prefill: queued)
-        }
         .onChange(of: selectedWorkspace?.id) { _ in
+            reconcileEnvironmentFilters()
             guard showingWorkspaceSwitcher else { return }
             dismissWorkspacePickerForPendingPrefilledAddServerIfNeeded()
+        }
+        .onChange(of: stateStore.workspaces) { _ in
+            reconcileEnvironmentFilters()
+        }
+        .onAppear {
+            reconcileEnvironmentFilters()
         }
         .onChange(of: showingWorkspaceSwitcher) { isPresented in
             guard !isPresented else { return }
@@ -351,16 +417,16 @@ struct ServerSidebarView: View {
         }
         #if os(macOS)
         .focusedValue(\.openLocalSSHDiscovery, {
-            showingLocalDiscovery = true
+            presentLocalDiscovery()
         })
         // The sidebar is hosted in its own NSHostingController, so the
         // focusedValue above can't reach the scene Commands. Register the action
         // on the shell command bridge too; ContentView republishes it.
         .onAppear {
-            commandBridge.openLocalDiscovery = { showingLocalDiscovery = true }
+            commandBridge.setLocalDiscovery(presentLocalDiscovery)
         }
         .onDisappear {
-            commandBridge.openLocalDiscovery = nil
+            commandBridge.setLocalDiscovery(nil)
         }
         #endif
         .lockedItemAlert(
@@ -371,6 +437,19 @@ struct ServerSidebarView: View {
                 set: { if !$0 { lockedServerAlert = nil } }
             )
         )
+    }
+
+    private func presentLocalDiscovery() {
+        guard localDiscoveryPresentation == nil else { return }
+        localDiscoveryPresentation = LocalDeviceDiscoveryPresentation(
+            makeManager: makeLocalDiscoveryManager
+        )
+    }
+
+    private func resumeDiscoveredServerCreation() {
+        guard let queued = queuedDiscoveryPrefill else { return }
+        queuedDiscoveryPrefill = nil
+        presentAddServer(prefill: queued)
     }
 
     // MARK: - Server Controls (Filter + Search)
@@ -469,7 +548,7 @@ struct ServerSidebarView: View {
                 .buttonStyle(.plain)
 
                 Button {
-                    storedEnvironmentFilters = ""
+                    updateEnvironmentFilters([])
                 } label: {
                     Label("Clear", systemImage: "xmark.circle")
                         .font(.caption)
@@ -481,7 +560,7 @@ struct ServerSidebarView: View {
             VStack(alignment: .leading, spacing: 4) {
                 // "All Environments" option (no filter)
                 Button {
-                    storedEnvironmentFilters = ""
+                    updateEnvironmentFilters([])
                 } label: {
                     HStack(spacing: 7) {
                         if !isEnvironmentFiltering {
@@ -536,7 +615,7 @@ struct ServerSidebarView: View {
                         if !env.isBuiltIn {
                             Menu {
                                 Button {
-                                    if storeManager.isPro {
+                                    if storeManager.allowsProFeatures {
                                         editingEnvironment = env
                                     } else {
                                         showingCustomEnvironmentAlert = true
@@ -545,7 +624,7 @@ struct ServerSidebarView: View {
                                     Label("Edit", systemImage: "pencil")
                                 }
                                 Button(role: .destructive) {
-                                    if storeManager.isPro {
+                                    if storeManager.allowsProFeatures {
                                         environmentToDelete = env
                                     } else {
                                         showingCustomEnvironmentAlert = true
@@ -575,7 +654,7 @@ struct ServerSidebarView: View {
 
                 // Create custom environment
                 Button {
-                    if storeManager.isPro {
+                    if storeManager.allowsProFeatures {
                         showingCreateEnvironment = true
                     } else {
                         showingCustomEnvironmentAlert = true
@@ -589,7 +668,7 @@ struct ServerSidebarView: View {
                             .font(.caption)
                             .lineLimit(1)
                         Spacer(minLength: 8)
-                        if !storeManager.isPro {
+                        if !storeManager.allowsProFeatures {
                             Image(systemName: "star.fill")
                                 .foregroundStyle(.orange)
                                 .font(.system(size: 10))
@@ -645,20 +724,23 @@ struct ServerSidebarView: View {
 
     private func selectServer(_ server: Server) {
         Task { @MainActor in
-            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            guard await appLockManager.ensureServerUnlocked(server) else { return }
             selectedServer = server
         }
     }
 
     private func connectToServer(_ server: Server) {
         Task {
-            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
                 let tab = try await tabManager.openTab(for: server)
                 await MainActor.run {
                     selectedServer = server
-                    tabManager.selectedViewByServer[server.id] = ViewTabConfigurationManager.shared.effectiveDefaultTab()
-                    tabManager.selectedTabByServer[server.id] = tab.id
+                    tabManager.sessionState.selectView(
+                        viewTabConfig.effectiveDefaultTab(),
+                        for: server.id
+                    )
+                    tabManager.sessionState.selectTab(tab.id, for: server.id)
                 }
             } catch {
                 // No-op: user cancelled biometric auth or the tab limit blocked the open.
@@ -670,15 +752,14 @@ struct ServerSidebarView: View {
         let movedAcrossWorkspaces = originalServer.workspaceId != server.workspaceId
 
         if movedAcrossWorkspaces,
-           let destinationWorkspace = serverManager.workspace(withId: server.workspaceId) {
+           let destinationWorkspace = stateStore.workspace(withID: server.workspaceId) {
             selectedWorkspace = destinationWorkspace
             selectedServer = server
-            storedEnvironmentFilters = ""
             return
         }
 
         if isEnvironmentFiltering && !selectedEnvironmentIds.contains(server.environment.id) {
-            storedEnvironmentFilters = ""
+            updateEnvironmentFilters([])
         }
 
         if selectedServer?.id == server.id {
@@ -698,7 +779,7 @@ struct ServerSidebarView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Button {
-                    storedEnvironmentFilters = ""
+                    updateEnvironmentFilters([])
                 } label: {
                     Text("Clear Filters")
                 }
@@ -710,7 +791,7 @@ struct ServerSidebarView: View {
                 Text("No servers found.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-            } else if serverManager.workspaces.isEmpty {
+            } else if stateStore.workspaces.isEmpty {
                 Image(systemName: "folder")
                     .font(.system(size: 32))
                     .foregroundStyle(.tertiary)
@@ -797,7 +878,7 @@ struct ServerSidebarView: View {
 
             Button {
                 #if os(macOS)
-                SettingsWindowManager.shared.show()
+                onOpenSettings()
                 #endif
             } label: {
                 Image(systemName: "gear")
@@ -812,11 +893,12 @@ struct ServerSidebarView: View {
 
     private func presentAddServer(prefill: ServerFormPrefill? = nil) {
         addServerPrefill = prefill
-        guard canAddServer else {
+        switch ServerCreationPresentationPolicy.initialStep(canAddServer: canAddServer) {
+        case .createWorkspace:
             showingWorkspaceSwitcher = true
-            return
+        case .createServer:
+            showingAddServer = true
         }
-        showingAddServer = true
     }
 
     private func dismissWorkspacePickerForPendingPrefilledAddServerIfNeeded() {
@@ -825,7 +907,11 @@ struct ServerSidebarView: View {
     }
 
     private func resumePendingPrefilledAddServerIfNeeded() {
-        guard addServerPrefill != nil, canAddServer, !showingAddServer else { return }
+        guard ServerCreationPresentationPolicy.shouldResumePrefilledServer(
+            hasPrefill: addServerPrefill != nil,
+            canAddServer: canAddServer,
+            isPresentingServer: showingAddServer
+        ) else { return }
         showingAddServer = true
     }
 }

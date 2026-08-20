@@ -1085,7 +1085,7 @@ struct RemoteFileInspectorView: View {
 
     private func sizeLabel(for entry: RemoteFileEntry) -> String {
         guard entry.type != .directory, let size = entry.size else { return "—" }
-        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+        return RemoteFileByteCountFormatter.string(from: size)
     }
 
     private func kindLabel(for entry: RemoteFileEntry) -> String {
@@ -1130,7 +1130,7 @@ struct RemoteFileInspectorView: View {
 
     private func previewSizeLabel(for payload: RemoteFileViewerPayload) -> String? {
         guard let byteCount = payload.previewByteCount else { return nil }
-        return ByteCountFormatter.string(fromByteCount: Int64(byteCount), countStyle: .file)
+        return RemoteFileByteCountFormatter.string(from: byteCount)
     }
 
     private func presentMediaPreview(_ payload: RemoteFileViewerPayload) {

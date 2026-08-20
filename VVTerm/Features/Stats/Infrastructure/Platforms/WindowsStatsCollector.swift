@@ -4,7 +4,7 @@ import Foundation
 
 /// Stats collector for Windows systems via OpenSSH.
 /// Prefers cmd.exe-friendly probes on cmd-hosted sessions and PowerShell on PowerShell-hosted sessions.
-struct WindowsStatsCollector: PlatformStatsCollector {
+nonisolated struct WindowsStatsCollector: PlatformStatsCollector {
     private let shellInfoTimeout: Duration = .seconds(5)
     private let cpuTimeout: Duration = .seconds(8)
     private let memoryTimeout: Duration = .seconds(8)
@@ -120,6 +120,7 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         var stats = ServerStats()
         let environment = await client.remoteEnvironment()
         let preferCMD = environment.shellProfile.family == .cmd
+        let periodicSnapshot = try? await collectPeriodicStatsPowerShell(client: client)
 
         if let cpuUsage = try? await collectCPUUsagePowerShell(client: client) {
             applyCPU(cpuUsage, to: &stats)
@@ -137,7 +138,11 @@ struct WindowsStatsCollector: PlatformStatsCollector {
             applyCPU(cpuPercent, to: &stats)
         }
 
-        if preferCMD {
+        if let memory = periodicSnapshot?.memory {
+            stats.memoryTotal = memory.total
+            stats.memoryUsed = memory.used
+            stats.memoryFree = memory.free
+        } else if preferCMD {
             if let memory = try? await collectMemoryCMD(client: client) {
                 stats.memoryTotal = memory.total
                 stats.memoryUsed = memory.used
@@ -170,7 +175,9 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         stats.memoryCached = 0
         stats.memoryBuffers = 0
 
-        if preferCMD {
+        if let uptime = periodicSnapshot?.uptime {
+            stats.uptime = uptime
+        } else if preferCMD {
             if let uptime = try? await collectUptimeCMD(client: client) {
                 stats.uptime = uptime
             }
@@ -186,7 +193,9 @@ struct WindowsStatsCollector: PlatformStatsCollector {
             stats.uptime = TimeInterval(uptimeOutput.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
         }
 
-        if preferCMD, let tasklistOutput = try? await executeCMD("tasklist /NH", using: client, timeout: processCountTimeout) {
+        if let processCount = periodicSnapshot?.processCount {
+            stats.processCount = processCount
+        } else if preferCMD, let tasklistOutput = try? await executeCMD("tasklist /NH", using: client, timeout: processCountTimeout) {
             stats.processCount = tasklistOutput
                 .components(separatedBy: .newlines)
                 .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -201,7 +210,13 @@ struct WindowsStatsCollector: PlatformStatsCollector {
             stats.processCount = Int(processCountOutput.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
         }
 
-        if let network = try? await (preferCMD ? collectNetworkStatsCMD(client: client) : collectNetworkStats(client: client)) {
+        let network: (rx: UInt64, tx: UInt64)?
+        if let periodicNetwork = periodicSnapshot?.network {
+            network = periodicNetwork
+        } else {
+            network = try? await (preferCMD ? collectNetworkStatsCMD(client: client) : collectNetworkStats(client: client))
+        }
+        if let network {
             let netRx = network.rx
             stats.networkRxTotal = netRx
 
@@ -263,7 +278,7 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         }
         stats.topProcesses = context.getPeriodicProcesses()
 
-        let volumeMetadata = await volumeMetadata(client: client, context: context)
+        let volumeMetadata = await self.volumeMetadata(client: client, context: context)
         if preferCMD {
             if let volumeOutput = try? await executeCMD(
                 "wmic logicaldisk where \"DriveType=3\" get Caption,FileSystem,FreeSpace,Size,VolumeSerialNumber /value",
@@ -311,27 +326,6 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         )
     }
 
-    private func powerShellProcessScript(limit: Int?) -> String {
-        let limitClause = limit.map { " | Select-Object -First \($0)" } ?? ""
-        return """
-        $os = Get-CimInstance Win32_OperatingSystem;
-        $totalMemory = [double]$os.TotalVisibleMemorySize * 1024;
-        $logicalProcessors = [int](Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors;
-        if ($logicalProcessors -le 0) { $logicalProcessors = [Environment]::ProcessorCount };
-        $logicalProcessors = [math]::Max($logicalProcessors, 1);
-        Get-CimInstance Win32_PerfFormattedData_PerfProc_Process |
-          Where-Object { $_.IDProcess -gt 0 -and $_.Name -ne '_Total' -and $_.Name -ne 'Idle' } |
-          Sort-Object PercentProcessorTime -Descending\(limitClause) |
-          ForEach-Object {
-            $cpu = [double]$_.PercentProcessorTime / $logicalProcessors;
-            $memoryBytes = [double]$_.WorkingSet;
-            $memoryPercent = if ($totalMemory -gt 0) { ($memoryBytes / $totalMemory) * 100 } else { 0 };
-            $name = ([string]$_.Name).Replace('|', '/');
-            Write-Output ('{0}|{1}|{2}|{3}|{4}' -f $_.IDProcess, $name, [math]::Round($cpu,1), [math]::Round($memoryPercent,1), [uint64]$memoryBytes)
-          }
-        """
-    }
-
     private func applyCPU(_ cpuPercent: Double, to stats: inout ServerStats) {
         let clamped = min(max(cpuPercent, 0), 100)
         stats.cpuUsage = clamped
@@ -362,6 +356,16 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         if !cpuUsage.coreSamples.isEmpty {
             stats.cpuCores = cpuUsage.coreSamples.count
         }
+    }
+
+    private func collectPeriodicStatsPowerShell(client: SSHClient) async throws -> WindowsPeriodicStatsSnapshot {
+        let output = try await executePowerShell(
+            using: client,
+            script: periodicStatsPowerShellScript(),
+            timeout: memoryTimeout,
+            probeName: "periodic_stats"
+        )
+        return parsePeriodicStats(output)
     }
 
     private func collectCPUUsagePowerShell(client: SSHClient) async throws -> WindowsCPUUsage {
@@ -518,63 +522,6 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         return context.getGPUSamples()
     }
 
-    private func nvidiaSMIQueryScript(fields: String) -> String {
-        """
-        $nvidia = Get-Command nvidia-smi -ErrorAction SilentlyContinue;
-        if ($nvidia) {
-          & $nvidia.Source --query-gpu=\(fields) --format=csv,noheader,nounits 2>$null
-        }
-        """
-    }
-
-    private func windowsGPUCounterScript() -> String {
-        """
-        $rows = @{};
-        function Ensure-Row([string]$phys) {
-          if (-not $rows.ContainsKey($phys)) {
-            $rows[$phys] = @{ Util = 0.0; Used = 0.0; Limit = 0.0 };
-          }
-        }
-        $engineCounter = Get-Counter '\\GPU Engine(*)\\Utilization Percentage' -ErrorAction SilentlyContinue;
-        if ($engineCounter) {
-          foreach ($sample in $engineCounter.CounterSamples) {
-            $instance = [string]$sample.InstanceName;
-            if ($instance -match '_phys_(\\d+)') {
-              $phys = $matches[1];
-              Ensure-Row $phys;
-              $rows[$phys]['Util'] = [double]$rows[$phys]['Util'] + [double]$sample.CookedValue;
-            }
-          }
-        }
-        $memoryUsage = Get-Counter '\\GPU Adapter Memory(*)\\Dedicated Usage' -ErrorAction SilentlyContinue;
-        if ($memoryUsage) {
-          foreach ($sample in $memoryUsage.CounterSamples) {
-            $instance = [string]$sample.InstanceName;
-            if ($instance -match '_phys_(\\d+)') {
-              $phys = $matches[1];
-              Ensure-Row $phys;
-              $rows[$phys]['Used'] = [math]::Max([double]$rows[$phys]['Used'], [double]$sample.CookedValue);
-            }
-          }
-        }
-        $memoryLimit = Get-Counter '\\GPU Adapter Memory(*)\\Dedicated Limit' -ErrorAction SilentlyContinue;
-        if ($memoryLimit) {
-          foreach ($sample in $memoryLimit.CounterSamples) {
-            $instance = [string]$sample.InstanceName;
-            if ($instance -match '_phys_(\\d+)') {
-              $phys = $matches[1];
-              Ensure-Row $phys;
-              $rows[$phys]['Limit'] = [math]::Max([double]$rows[$phys]['Limit'], [double]$sample.CookedValue);
-            }
-          }
-        }
-        $rows.Keys | Sort-Object {[int]$_} | ForEach-Object {
-          $row = $rows[$_];
-          Write-Output ('PERF|windows-phys-{0}|{1}|{2}|{3}' -f $_, [math]::Round([double]$row['Util'], 1), [uint64][math]::Max([double]$row['Used'], 0), [uint64][math]::Max([double]$row['Limit'], 0));
-        }
-        """
-    }
-
     private func executePowerShell(
         using client: SSHClient,
         script: String,
@@ -601,142 +548,7 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         try await client.execute(command, timeout: timeout)
     }
 
-    private func powerShellCommand(using client: SSHClient, script: String) async throws -> String {
-        let environment = await client.remoteEnvironment()
-        if environment.shellProfile.family == .powershell {
-            return script
-        }
-
-        guard let executable = environment.powerShellExecutable else {
-            throw SSHError.unknown("Windows stats require a working PowerShell runtime on the remote host")
-        }
-        let wrapped = RemoteTerminalBootstrap.wrapPowerShellCommand(script, executableName: executable)
-        if environment.shellProfile.family == .cmd {
-            return RemoteTerminalBootstrap.wrapCmdExecCommand(wrapped)
-        }
-        return wrapped
-    }
-
-    // MARK: - Parsers
-
-    func parseProcesses(_ output: String) -> [ProcessInfo] {
-        var processes: [ProcessInfo] = []
-
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { continue }
-
-            let parts = trimmed.components(separatedBy: "|")
-            guard parts.count >= 4 else { continue }
-
-            let pid = Int(parts[0]) ?? 0
-            let name = parts[1]
-            let cpu = parseWindowsDouble(parts[2]) ?? 0
-            let mem = parseWindowsDouble(parts[3]) ?? 0
-            let memoryBytes = parts.count > 4 ? UInt64(parts[4]) : nil
-
-            processes.append(ProcessInfo(
-                pid: pid,
-                name: name,
-                cpuPercent: min(max(cpu.isFinite ? cpu : 0, 0), 100),
-                memoryPercent: min(max(mem.isFinite ? mem : 0, 0), 100),
-                memoryBytes: memoryBytes
-            ))
-        }
-
-        return processes
-    }
-
-    func parseVolumes(
-        _ output: String,
-        metadataByMountPoint: [String: VolumeCollectionMetadata] = [:]
-    ) -> [VolumeInfo] {
-        var volumes: [VolumeInfo] = []
-
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { continue }
-
-            let parts = trimmed.components(separatedBy: "|")
-            guard parts.count >= 3 else { continue }
-
-            let mountPoint = normalizedWindowsMountPoint(parts[0])
-            let used = UInt64(parts[1]) ?? 0
-            let total = UInt64(parts[2]) ?? 0
-            let metadata = metadataByMountPoint[mountPoint]
-
-            if total < 100 * 1024 * 1024 { continue } // Skip volumes < 100MB
-
-            volumes.append(VolumeInfo(
-                platform: .windows,
-                mountPoint: mountPoint,
-                source: mountPoint,
-                fileSystem: metadata?.fileSystem ?? "",
-                stableIdentifier: metadata?.stableIdentifier,
-                used: used,
-                total: total
-            ))
-        }
-
-        return volumes
-    }
-
-    func parseWMICVolumes(
-        _ output: String,
-        metadataByMountPoint: [String: VolumeCollectionMetadata] = [:]
-    ) -> [VolumeInfo] {
-        let entries = parseWMICEntries(output)
-        return entries.compactMap { entry in
-            guard
-                let caption = entry["Caption"],
-                let free = UInt64(entry["FreeSpace"] ?? ""),
-                let total = UInt64(entry["Size"] ?? "")
-            else {
-                return nil
-            }
-
-            if total < 100 * 1024 * 1024 {
-                return nil
-            }
-
-            let mountPoint = normalizedWindowsMountPoint(caption)
-            let metadata = metadataByMountPoint[mountPoint]
-            let fileSystem = metadata?.fileSystem ?? entry["FileSystem"] ?? ""
-            let stableIdentifier = metadata?.stableIdentifier ?? entry["VolumeSerialNumber"]
-            return VolumeInfo(
-                platform: .windows,
-                mountPoint: mountPoint,
-                source: mountPoint,
-                fileSystem: fileSystem,
-                stableIdentifier: stableIdentifier,
-                used: total >= free ? total - free : 0,
-                total: total
-            )
-        }
-    }
-
-    func parseWindowsVolumeMetadata(_ output: String) -> [String: VolumeCollectionMetadata] {
-        var metadata: [String: VolumeCollectionMetadata] = [:]
-        for line in output.components(separatedBy: .newlines) {
-            let fields = line.trimmingCharacters(in: .whitespacesAndNewlines)
-                .components(separatedBy: "|")
-            guard fields.count >= 3 else { continue }
-
-            let mountPoint = normalizedWindowsMountPoint(fields[0])
-            guard mountPoint.count >= 3 else { continue }
-            let fileSystem = fields[1].trimmingCharacters(in: .whitespacesAndNewlines)
-            let identifier = fields[2...]
-                .joined(separator: "|")
-                .trimmingCharacters(in: .whitespacesAndNewlines)
-            metadata[mountPoint] = VolumeCollectionMetadata(
-                stableIdentifier: identifier.isEmpty ? nil : identifier,
-                fileSystem: fileSystem
-            )
-        }
-        return metadata
-    }
-
-    private func volumeMetadata(
+    func volumeMetadata(
         client: SSHClient,
         context: StatsCollectionContext
     ) async -> [String: VolumeCollectionMetadata] {
@@ -755,444 +567,4 @@ struct WindowsStatsCollector: PlatformStatsCollector {
         }
         return context.volumeMetadata(for: .windows)
     }
-
-    private func normalizedWindowsMountPoint(_ rawValue: String) -> String {
-        var drive = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "/", with: "\\")
-            .uppercased()
-        while drive.hasSuffix("\\") {
-            drive.removeLast()
-        }
-        if !drive.hasSuffix(":") {
-            drive += ":"
-        }
-        return "\(drive)\\"
-    }
-
-    func parseWMICProcesses(
-        _ output: String,
-        memoryTotal: UInt64,
-        logicalProcessorCount: Int = 1
-    ) -> [ProcessInfo] {
-        let lines = output
-            .components(separatedBy: .newlines)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
-        guard lines.count > 1 else { return [] }
-
-        var processes: [ProcessInfo] = []
-        for line in lines.dropFirst() {
-            let fields = parseCSVLine(line)
-            guard fields.count >= 5 else { continue }
-
-            let pid = Int(fields[1]) ?? 0
-            let name = fields[2]
-            if pid <= 0 || name.isEmpty || name == "_Total" || name == "Idle" {
-                continue
-            }
-
-            let rawCPU = parseWindowsDouble(fields[3]) ?? 0
-            let workingSet = UInt64(fields[4]) ?? 0
-            let cpuPercent = min(max(rawCPU / Double(max(logicalProcessorCount, 1)), 0), 100)
-            let memoryPercent = memoryTotal > 0 ? (Double(workingSet) / Double(memoryTotal) * 100) : 0
-
-            processes.append(ProcessInfo(
-                pid: pid,
-                name: name,
-                cpuPercent: cpuPercent,
-                memoryPercent: memoryPercent,
-                memoryBytes: workingSet
-            ))
-        }
-
-        return processes
-            .sorted { lhs, rhs in
-                if lhs.cpuPercent == rhs.cpuPercent {
-                    return lhs.memoryPercent > rhs.memoryPercent
-                }
-                return lhs.cpuPercent > rhs.cpuPercent
-            }
-            .map { $0 }
-    }
-
-    func parseWindowsGPUs(_ output: String) -> [GPUDevice] {
-        var devices: [GPUDevice] = []
-
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { continue }
-            let parts = trimmed.components(separatedBy: "|")
-            guard parts.count >= 1 else { continue }
-            let name = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !name.isEmpty else { continue }
-            let vendor = parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespacesAndNewlines) : ""
-            let driver = parts.count > 3 ? parts[3].trimmingCharacters(in: .whitespacesAndNewlines) : ""
-            let pnpDeviceID = parts.count > 4 ? parts[4].trimmingCharacters(in: .whitespacesAndNewlines) : ""
-            let status = parts.count > 5 ? parts[5].trimmingCharacters(in: .whitespacesAndNewlines) : ""
-            let lower = "\(name) \(vendor)".lowercased()
-            let kind: GPUKind
-            if lower.contains("nvidia") {
-                kind = .nvidia
-            } else if lower.contains("amd") || lower.contains("radeon") || lower.contains("advanced micro devices") {
-                kind = .amd
-            } else if lower.contains("intel") {
-                kind = .intel
-            } else {
-                kind = .unknown
-            }
-            guard isPhysicalWindowsGPU(name: name, vendor: vendor, pnpDeviceID: pnpDeviceID, status: status, kind: kind) else {
-                continue
-            }
-            let rawMemory = parts.count > 2 ? (UInt64(parts[2].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0) : 0
-            let memory = normalizedWindowsAdapterRAM(rawMemory, kind: kind)
-
-            devices.append(GPUDevice(
-                id: "windows-phys-\(devices.count)",
-                name: name,
-                vendor: vendor,
-                kind: kind,
-                driverVersion: driver,
-                memoryTotal: memory,
-                source: .wmi
-            ))
-        }
-
-        return devices
-    }
-
-    func parseWindowsNvidiaGPUs(_ output: String) -> [GPUDevice] {
-        parseCSVRows(output).compactMap { fields in
-            guard fields.count >= 9 else { return nil }
-            let index = fields[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            let name = fields[1].trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !index.isEmpty, !name.isEmpty else { return nil }
-            let memoryTotalMB = UInt64(fields[5].trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0
-            return GPUDevice(
-                id: "nvidia-\(index)",
-                name: name,
-                vendor: "NVIDIA",
-                kind: .nvidia,
-                driverVersion: fields[8].trimmingCharacters(in: .whitespacesAndNewlines),
-                memoryTotal: memoryTotalMB * 1_048_576,
-                source: .nvidiaSMI
-            )
-        }
-    }
-
-    func parseWindowsNvidiaSamples(_ output: String, timestamp: Date) -> [GPUSample] {
-        parseCSVRows(output).compactMap { fields in
-            guard fields.count >= 9 else { return nil }
-            let index = fields[0].trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !index.isEmpty else { return nil }
-            let utilization = parseWindowsDouble(fields[3])
-            let memoryUsedMB = UInt64(fields[4].trimmingCharacters(in: .whitespacesAndNewlines))
-            let memoryTotalMB = UInt64(fields[5].trimmingCharacters(in: .whitespacesAndNewlines))
-            let temperature = parseWindowsDouble(fields[6])
-            let power = parseWindowsDouble(fields[7])
-
-            return GPUSample(
-                deviceID: "nvidia-\(index)",
-                utilizationPercent: utilization.map { min(max($0, 0), 100) },
-                memoryUsed: memoryUsedMB.map { $0 * 1_048_576 },
-                memoryTotal: memoryTotalMB.map { $0 * 1_048_576 },
-                temperatureCelsius: temperature,
-                powerWatts: power,
-                processes: [],
-                source: .nvidiaSMI,
-                timestamp: timestamp
-            )
-        }
-    }
-
-    func parseWindowsGPUCounterSamples(_ output: String, timestamp: Date) -> [GPUSample] {
-        output.components(separatedBy: .newlines).compactMap { line in
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return nil }
-            let parts = trimmed.components(separatedBy: "|")
-            guard parts.count >= 5, parts[0] == "PERF" else { return nil }
-
-            let deviceID = parts[1].trimmingCharacters(in: .whitespacesAndNewlines)
-            let utilization = parseWindowsDouble(parts[2])
-            let memoryUsed = UInt64(parts[3].trimmingCharacters(in: .whitespacesAndNewlines))
-            let rawMemoryTotal = UInt64(parts[4].trimmingCharacters(in: .whitespacesAndNewlines))
-            let memoryTotal = rawMemoryTotal.flatMap { $0 > 0 ? $0 : nil }
-            guard utilization != nil || memoryUsed != nil || memoryTotal != nil else { return nil }
-
-            return GPUSample(
-                deviceID: deviceID,
-                utilizationPercent: utilization.map { min(max($0, 0), 100) },
-                memoryUsed: memoryUsed,
-                memoryTotal: memoryTotal,
-                temperatureCelsius: nil,
-                powerWatts: nil,
-                processes: [],
-                source: .wmi,
-                timestamp: timestamp
-            )
-        }
-    }
-
-    func parseWindowsCPUUsage(_ output: String) -> WindowsCPUUsage {
-        var usage = 0.0
-        var user = 0.0
-        var system = 0.0
-        var samples: [CPUCoreSample] = []
-
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { continue }
-            let parts = trimmed.components(separatedBy: "|")
-
-            if parts.count >= 4, parts[0] == "TOTAL" {
-                usage = parseWindowsDouble(parts[1]) ?? 0
-                user = parseWindowsDouble(parts[2]) ?? 0
-                system = parseWindowsDouble(parts[3]) ?? 0
-                continue
-            }
-
-            guard parts.count >= 5, parts[0] == "CORE" else { continue }
-            let identifier = parts[1]
-            let coreUsage = min(max(parseWindowsDouble(parts[2]) ?? 0, 0), 100)
-            let coreUser = min(max(parseWindowsDouble(parts[3]) ?? 0, 0), 100)
-            let coreSystem = min(max(parseWindowsDouble(parts[4]) ?? 0, 0), 100)
-            let displayIndex = (Int(identifier) ?? samples.count) + 1
-            samples.append(CPUCoreSample(
-                identifier: "cpu\(identifier)",
-                displayName: String(format: String(localized: "CPU %lld"), Int64(displayIndex)),
-                usagePercent: coreUsage,
-                userPercent: coreUser,
-                systemPercent: coreSystem,
-                iowaitPercent: 0,
-                stealPercent: 0,
-                idlePercent: max(100 - coreUsage, 0)
-            ))
-        }
-
-        samples.sort { lhs, rhs in
-            numericSuffix(lhs.identifier) < numericSuffix(rhs.identifier)
-        }
-
-        return WindowsCPUUsage(
-            usagePercent: min(max(usage, 0), 100),
-            userPercent: min(max(user, 0), 100),
-            systemPercent: min(max(system, 0), 100),
-            coreSamples: samples
-        )
-    }
-
-    private func parseWMICKeyValueOutput(_ output: String) -> [String: [String]] {
-        var result: [String: [String]] = [:]
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let separator = trimmed.firstIndex(of: "=") else { continue }
-
-            let key = String(trimmed[..<separator])
-            let value = String(trimmed[trimmed.index(after: separator)...])
-            guard !key.isEmpty, !value.isEmpty else { continue }
-            result[key, default: []].append(value)
-        }
-        return result
-    }
-
-    private func parseWMICEntries(_ output: String) -> [[String: String]] {
-        let normalized = output.replacingOccurrences(of: "\r\n", with: "\n")
-        let sections = normalized.components(separatedBy: "\n\n")
-        return sections.compactMap { section in
-            var entry: [String: String] = [:]
-            for rawLine in section.components(separatedBy: .newlines) {
-                let line = rawLine.trimmingCharacters(in: .whitespacesAndNewlines)
-                guard let separator = line.firstIndex(of: "=") else { continue }
-                let key = String(line[..<separator])
-                let value = String(line[line.index(after: separator)...])
-                if !key.isEmpty, !value.isEmpty {
-                    entry[key] = value
-                }
-            }
-            return entry.isEmpty ? nil : entry
-        }
-    }
-
-    private func parseWindowsDouble(_ value: String) -> Double? {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let parsed = Double(trimmed) {
-            return parsed
-        }
-        return Double(trimmed.replacingOccurrences(of: ",", with: "."))
-    }
-
-    private func parseTypeperfValue(_ output: String) -> Double? {
-        let lines = output
-            .components(separatedBy: .newlines)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        guard let lastLine = lines.last else { return nil }
-        let fields = parseCSVLine(lastLine)
-        guard let rawValue = fields.last?.trimmingCharacters(in: CharacterSet(charactersIn: "\"")) else {
-            return nil
-        }
-        return parseWindowsDouble(rawValue)
-    }
-
-    func parseNetstatInterfaceStats(_ output: String) -> (rx: UInt64, tx: UInt64) {
-        for line in output.components(separatedBy: .newlines) {
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard trimmed.lowercased().hasPrefix("bytes") else { continue }
-
-            let parts = trimmed
-                .components(separatedBy: .whitespaces)
-                .filter { !$0.isEmpty }
-            guard parts.count >= 3 else { continue }
-
-            let rx = UInt64(parts[1]) ?? 0
-            let tx = UInt64(parts[2]) ?? 0
-            return (rx, tx)
-        }
-        return (0, 0)
-    }
-
-    private func parseCSVLine(_ line: String) -> [String] {
-        guard !line.isEmpty else { return [] }
-
-        var fields: [String] = []
-        var current = ""
-        var inQuotes = false
-        var iterator = line.makeIterator()
-
-        while let character = iterator.next() {
-            switch character {
-            case "\"":
-                if inQuotes, let next = iterator.next() {
-                    if next == "\"" {
-                        current.append("\"")
-                    } else {
-                        inQuotes = false
-                        if next == "," {
-                            fields.append(current)
-                            current = ""
-                        } else {
-                            current.append(next)
-                        }
-                    }
-                } else {
-                    inQuotes.toggle()
-                }
-            case "," where !inQuotes:
-                fields.append(current)
-                current = ""
-            default:
-                current.append(character)
-            }
-        }
-
-        fields.append(current)
-        return fields
-    }
-
-    private func parseCSVRows(_ output: String) -> [[String]] {
-        output.components(separatedBy: .newlines).compactMap { line in
-            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !trimmed.isEmpty else { return nil }
-            return parseCSVLine(trimmed).map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-        }
-    }
-
-    private func isPhysicalWindowsGPU(
-        name: String,
-        vendor: String,
-        pnpDeviceID: String,
-        status: String,
-        kind: GPUKind
-    ) -> Bool {
-        if !status.isEmpty, status.caseInsensitiveCompare("OK") != .orderedSame {
-            return false
-        }
-
-        let haystack = "\(name) \(vendor) \(pnpDeviceID)".lowercased()
-        let virtualMarkers = [
-            "virtual",
-            "remote display",
-            "indirect display",
-            "mirage",
-            "mirror driver",
-            "microsoft basic render",
-            "microsoft basic display",
-            "vmware",
-            "virtualbox",
-            "hyper-v",
-            "parallels",
-            "citrix",
-            "spice",
-            "qxl",
-            "sudomaker",
-            "gameviewer"
-        ]
-        if virtualMarkers.contains(where: { haystack.contains($0) }) {
-            return false
-        }
-
-        if kind != .unknown {
-            return true
-        }
-
-        return haystack.contains("pci\\ven_")
-    }
-
-    private func normalizedWindowsAdapterRAM(_ rawValue: UInt64, kind: GPUKind) -> UInt64 {
-        guard rawValue > 0 else { return 0 }
-
-        // Win32_VideoController.AdapterRAM is commonly capped/truncated around
-        // 4 GB for modern discrete GPUs. Prefer live NVIDIA/perf samples for
-        // real VRAM and avoid surfacing a precise but wrong profile value.
-        if (kind == .nvidia || kind == .amd) && rawValue >= 3_750_000_000 {
-            return 0
-        }
-
-        return rawValue
-    }
-
-    private func numericSuffix(_ identifier: String) -> Int {
-        let digits = identifier.reversed().prefix { $0.isNumber }.reversed()
-        return Int(String(digits)) ?? Int.max
-    }
-
-    private func parseWMIDate(_ raw: String) -> Date? {
-        guard raw.count >= 21 else { return nil }
-
-        let year = Int(raw.prefix(4)) ?? 0
-        let month = Int(raw.dropFirst(4).prefix(2)) ?? 1
-        let day = Int(raw.dropFirst(6).prefix(2)) ?? 1
-        let hour = Int(raw.dropFirst(8).prefix(2)) ?? 0
-        let minute = Int(raw.dropFirst(10).prefix(2)) ?? 0
-        let second = Int(raw.dropFirst(12).prefix(2)) ?? 0
-
-        let signIndex = raw.index(raw.startIndex, offsetBy: 21)
-        guard signIndex < raw.endIndex else { return nil }
-        let signCharacter = raw[signIndex]
-        let offsetDigits = String(raw.dropFirst(22).prefix(3))
-        let offsetMinutes = Int(offsetDigits) ?? 0
-        let signedOffset = signCharacter == "-" ? -offsetMinutes : offsetMinutes
-
-        var components = DateComponents()
-        components.year = year
-        components.month = month
-        components.day = day
-        components.hour = hour
-        components.minute = minute
-        components.second = second
-        components.timeZone = TimeZone(secondsFromGMT: signedOffset * 60)
-        return Calendar(identifier: .gregorian).date(from: components)
-    }
-
-    private func section(_ sections: [String], _ index: Int) -> String {
-        guard sections.indices.contains(index) else { return "" }
-        return sections[index].trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
-struct WindowsCPUUsage {
-    let usagePercent: Double
-    let userPercent: Double
-    let systemPercent: Double
-    let coreSamples: [CPUCoreSample]
 }

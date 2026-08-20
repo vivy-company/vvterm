@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TerminalAccessoryCustomizationView: View {
     @EnvironmentObject private var preferences: TerminalAccessoryPreferencesManager
+    @EnvironmentObject private var storeManager: StoreManager
     @State private var showingCreateActionSheet = false
     @State private var showingProGateAlert = false
 
@@ -138,7 +139,9 @@ struct TerminalAccessoryCustomizationView: View {
                     Text("Available Custom Actions")
                     Spacer(minLength: 8)
                     Button {
-                        if preferences.isCustomActionCreationProGated {
+                        if preferences.isCustomActionCreationProGated(
+                            hasProAccess: storeManager.allowsProFeatures
+                        ) {
                             showingProGateAlert = true
                         } else {
                             showingCreateActionSheet = true

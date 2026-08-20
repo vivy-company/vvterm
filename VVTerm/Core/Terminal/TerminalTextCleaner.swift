@@ -1,6 +1,6 @@
 //
 //  TerminalTextCleaner.swift
-//  aizen
+//  VVTerm
 //
 
 import Foundation

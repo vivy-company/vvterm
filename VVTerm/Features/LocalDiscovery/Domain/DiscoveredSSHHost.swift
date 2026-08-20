@@ -1,20 +1,11 @@
 import Foundation
 
-enum DiscoverySource: String, CaseIterable, Codable, Hashable, Sendable {
+nonisolated enum DiscoverySource: String, CaseIterable, Codable, Hashable, Sendable {
     case bonjour
     case portScan
-
-    var label: String {
-        switch self {
-        case .bonjour:
-            return String(localized: "Bonjour")
-        case .portScan:
-            return String(localized: "Port Scan")
-        }
-    }
 }
 
-struct DiscoveredSSHHost: Identifiable, Hashable, Sendable {
+nonisolated struct DiscoveredSSHHost: Identifiable, Hashable, Sendable {
     var displayName: String
     var host: String
     var port: Int
@@ -54,7 +45,7 @@ struct DiscoveredSSHHost: Identifiable, Hashable, Sendable {
     }
 }
 
-struct ServerFormPrefill: Equatable, Sendable {
+nonisolated struct ServerFormPrefill: Equatable, Sendable {
     var name: String
     var host: String
     var port: Int

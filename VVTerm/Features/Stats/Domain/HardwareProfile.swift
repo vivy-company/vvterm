@@ -1,6 +1,6 @@
 import Foundation
 
-struct HardwareProfile: Equatable, Sendable {
+nonisolated struct HardwareProfile: Equatable, Sendable {
     var hostname: String
     var osInfo: String
     var architecture: String

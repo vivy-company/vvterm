@@ -39,6 +39,7 @@ struct NoticeBannerView: View {
                     Button(action.title, role: action.role, action: action.handler)
                         .noticeSecondaryButtonStyle()
                         .font(.caption.weight(.semibold))
+                        .accessibilityIdentifier("vvterm.notice.action.\(action.id)")
                 }
 
                 if let dismissAction = item.dismissAction {

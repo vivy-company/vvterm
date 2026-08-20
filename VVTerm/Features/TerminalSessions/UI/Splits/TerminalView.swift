@@ -21,25 +21,23 @@ import UIKit
 struct TerminalTabView: View {
     let tab: TerminalTab
     let server: Server
-    @ObservedObject var tabManager: TerminalTabManager
+    let tabManager: TerminalTabManager
+    let securityActions: TerminalSecurityActions
     let isSelected: Bool
+    let isSplitZoomed: Bool
+    let appearance: TerminalAppearanceSnapshot
+    @ObservedObject var voiceSettingsStore: VoiceSettingsStore
+    @ObservedObject var audioService: AudioService
+    @ObservedObject var voiceRecordingOperation: VoiceRecordingOperationCoordinator
 
     @State private var layoutVersion: Int = 0
     @State private var showingCloseConfirmation = false
     @State private var showingSplitPaneUpgradeAlert = false
 
-    @EnvironmentObject var ghosttyApp: Ghostty.App
-    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var ghosttyApp: GhosttyRuntime
+    @EnvironmentObject private var storeManager: StoreManager
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameKey) private var terminalThemeName = "Aizen Dark"
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameLightKey) private var terminalThemeNameLight = "Aizen Light"
-    @AppStorage(CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) private var usePerAppearanceTheme = true
-    @AppStorage("terminalVoiceButtonEnabled") private var voiceButtonEnabled = true
 
-    @StateObject private var audioService = AudioService()
-    @StateObject private var voiceRecordingOperation = VoiceRecordingOperationCoordinator()
-    @State private var showingVoiceRecording = false
-    @State private var voiceProcessing = false
     @State private var showingPermissionError = false
     @State private var permissionErrorMessage = ""
     #if os(macOS)
@@ -47,21 +45,30 @@ struct TerminalTabView: View {
     #endif
 
     private var dividerColor: Color {
-        ThemeColorParser.splitDividerColor(for: effectiveThemeName)
-    }
-
-    private var effectiveThemeName: String {
-        guard usePerAppearanceTheme else { return terminalThemeName }
-        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+        guard let components = ThemeColorParser.splitDividerComponents(
+            for: appearance.activeTheme.palette.backgroundHex
+        ) else {
+            return Color(white: 0.3)
+        }
+        return Color(
+            .sRGB,
+            red: components.red,
+            green: components.green,
+            blue: components.blue,
+            opacity: components.alpha
+        )
     }
 
     private var focusedTerminal: GhosttyTerminalView? {
-        TerminalTabManager.shared.getTerminal(for: tab.focusedPaneId)
+        tabManager.terminalSurfaceStore.ghosttySurface(for: tab.focusedPaneId)
     }
 
     private var hasFocusedTerminal: Bool {
         focusedTerminal != nil
     }
+
+    private var showingVoiceRecording: Bool { voiceRecordingOperation.isActive }
+    private var voiceProcessing: Bool { voiceRecordingOperation.isProcessing }
 
     /// Split actions for menu commands - only active when this tab is selected
     private var splitActions: TerminalSplitActions? {
@@ -69,15 +76,35 @@ struct TerminalTabView: View {
         return TerminalSplitActions(
             perform: handleSplitCommand,
             isEnabled: { tabManager.canPerformSplitCommand($0, in: tab) },
-            isZoomed: { tabManager.isSplitZoomed(in: tab) }
+            isZoomed: { isSplitZoomed }
         )
     }
 
+    @ViewBuilder
+    private func withTerminalKeyboardAvoidance<Content: View>(_ content: Content) -> some View {
+        #if os(iOS)
+        content.terminalKeyboardAvoidance(
+            focusedPaneId: isSelected ? tab.focusedPaneId : nil,
+            paneIds: tab.allPaneIds,
+            terminalSurfaceChange: tabManager.terminalSurfaceStore.latestChange,
+            terminalProvider: { tabManager.terminalSurfaceStore.ghosttySurface(for: $0) },
+            keyboardCoordinator: tabManager.keyboardCoordinator
+        )
+        #else
+        content.terminalKeyboardAvoidance(
+            focusedPaneId: isSelected ? tab.focusedPaneId : nil,
+            paneIds: tab.allPaneIds,
+            terminalSurfaceChange: tabManager.terminalSurfaceStore.latestChange,
+            terminalProvider: { tabManager.terminalSurfaceStore.ghosttySurface(for: $0) }
+        )
+        #endif
+    }
+
     var body: some View {
-        ZStack {
+        withTerminalKeyboardAvoidance(ZStack {
             // Refresh when terminals register/unregister so overlays can update immediately.
-            let _ = tabManager.terminalRegistryVersion
-            if tabManager.isSplitZoomed(in: tab), tab.hasSplits {
+            let _ = tabManager.terminalSurfaceStore.latestChange
+            if isSplitZoomed, tab.hasSplits {
                 renderPane(tab.focusedPaneId)
             } else if let layout = tab.layout {
                 renderNode(layout)
@@ -94,11 +121,6 @@ struct TerminalTabView: View {
             activePaneId: isSelected ? tab.focusedPaneId : nil,
             splitActions: splitActions
         )
-        .terminalKeyboardAvoidance(
-            focusedPaneId: isSelected ? tab.focusedPaneId : nil,
-            paneIds: tab.allPaneIds,
-            terminalRegistryVersion: tabManager.terminalRegistryVersion,
-            terminalProvider: { tabManager.getTerminal(for: $0) }
         )
         .terminalCloseConfirmationAlert(
             isPresented: $showingCloseConfirmation,
@@ -181,17 +203,21 @@ struct TerminalTabView: View {
             TerminalPaneView(
                 paneId: paneId,
                 server: server,
+                tabManager: tabManager,
+                securityActions: securityActions,
                 isFocused: tab.focusedPaneId == paneId,
                 isTabSelected: isSelected,
                 onFocus: { focusPane(paneId) },
                 onProcessExit: { handlePaneExit(paneId: paneId) },
                 terminalContextMenuActions: terminalContextMenuActions(for: paneId),
                 onPaneKeyboardShortcut: handleSplitCommand,
-                showsVoiceButton: isSelected
-                    && voiceButtonEnabled
-                    && !showingVoiceRecording
-                    && tab.focusedPaneId == paneId
-                    && hasFocusedTerminal,
+                appearance: appearance,
+                showsVoiceButton: TerminalVoiceButtonVisibilityPolicy.isVisible(
+                    settingEnabled: voiceSettingsStore.settings.terminalVoiceButtonEnabled,
+                    tabSelected: isSelected,
+                    paneFocused: tab.focusedPaneId == paneId,
+                    recording: showingVoiceRecording
+                ),
                 onVoiceTrigger: { startVoiceRecording() }
             )
             .id("\(paneId)-\(layoutVersion)")
@@ -213,11 +239,11 @@ struct TerminalTabView: View {
     }
 
     private func handlePaneExit(paneId: UUID) {
-        let startToken = tabManager.connectionStartToken(for: paneId)
+        let startToken = tabManager.transportCoordinator.connectionOwnershipToken(for: paneId)
         tabManager.updatePaneState(paneId, connectionState: .disconnected)
         guard let startToken else { return }
         Task {
-            await tabManager.unregisterSSHClient(
+            await tabManager.transportCoordinator.unregisterSSHClient(
                 for: paneId,
                 ifOwnedBy: startToken
             )
@@ -227,7 +253,7 @@ struct TerminalTabView: View {
     // MARK: - Split Actions
 
     private func splitPane(_ paneId: UUID, placement: TerminalSplitPlacement) {
-        guard StoreManager.shared.isPro else {
+        guard storeManager.allowsProFeatures else {
             showingSplitPaneUpgradeAlert = true
             return
         }
@@ -235,13 +261,29 @@ struct TerminalTabView: View {
         let newPaneId: UUID?
         switch placement {
         case .right:
-            newPaneId = tabManager.splitRight(tab: tab, paneId: paneId)
+            newPaneId = tabManager.splitRight(
+                tab: tab,
+                paneId: paneId,
+                hasProAccess: storeManager.allowsProFeatures
+            )
         case .left:
-            newPaneId = tabManager.splitLeft(tab: tab, paneId: paneId)
+            newPaneId = tabManager.splitLeft(
+                tab: tab,
+                paneId: paneId,
+                hasProAccess: storeManager.allowsProFeatures
+            )
         case .down:
-            newPaneId = tabManager.splitDown(tab: tab, paneId: paneId)
+            newPaneId = tabManager.splitDown(
+                tab: tab,
+                paneId: paneId,
+                hasProAccess: storeManager.allowsProFeatures
+            )
         case .up:
-            newPaneId = tabManager.splitUp(tab: tab, paneId: paneId)
+            newPaneId = tabManager.splitUp(
+                tab: tab,
+                paneId: paneId,
+                hasProAccess: storeManager.allowsProFeatures
+            )
         }
         guard newPaneId != nil else { return }
         layoutVersion += 1
@@ -255,7 +297,7 @@ struct TerminalTabView: View {
             splitDown: { splitPane(paneId, placement: .down) },
             splitUp: { splitPane(paneId, placement: .up) },
             currentTitle: {
-                tabManager.displayTitle(forPane: paneId, fallback: tab.title) ?? tab.title
+                tabManager.titleStore.displayTitle(forPane: paneId, fallback: tab.title) ?? tab.title
             },
             setTitle: { title in
                 tabManager.setPaneTitleOverride(title, for: paneId)
@@ -268,7 +310,11 @@ struct TerminalTabView: View {
     }
 
     private func handleSplitCommand(_ command: TerminalSplitCommand) {
-        switch tabManager.performSplitCommand(command, in: tab) {
+        switch tabManager.performSplitCommand(
+            command,
+            in: tab,
+            hasProAccess: storeManager.allowsProFeatures
+        ) {
         case .performed:
             if command.createsPane {
                 layoutVersion += 1
@@ -291,14 +337,15 @@ struct TerminalTabView: View {
             onCancel: {
                 cancelVoiceRecording()
             },
-            isProcessing: $voiceProcessing
+            isProcessing: voiceProcessing
         )
     }
 
     private var shouldShowVoiceOverlay: Bool {
         guard isSelected, hasFocusedTerminal, showingVoiceRecording else { return false }
         #if os(iOS)
-        return tabManager.paneStates[tab.focusedPaneId]?.connectionState.isConnected == true
+        return tabManager.sessionState
+            .paneState(for: tab.focusedPaneId)?.connectionState.isConnected == true
         #else
         return true
         #endif
@@ -384,11 +431,7 @@ struct TerminalTabView: View {
 
     private func startVoiceRecording() {
         clearPendingVoiceReturnForFocusedPane()
-        voiceRecordingOperation.cancel()
         audioService.cancelRecording()
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-            showingVoiceRecording = true
-        }
         #if os(iOS)
         let terminal = focusedTerminal
         let lifecycleState: @MainActor @Sendable () -> AudioCaptureLifecycleState = { [weak terminal] in
@@ -405,19 +448,23 @@ struct TerminalTabView: View {
             )
         }
         #endif
-        voiceRecordingOperation.start(
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            startVoiceRecordingOperation(lifecycleState: lifecycleState)
+        }
+    }
+
+    private func startVoiceRecordingOperation(
+        lifecycleState: @escaping @MainActor @Sendable () -> AudioCaptureLifecycleState
+    ) {
+        voiceRecordingOperation.startRecording(
             operation: { [audioService] operationID in
                 try await audioService.startRecording(
                     operationID: operationID,
                     lifecycleState: lifecycleState
                 )
             },
-            onSuccess: { _ in },
+            onStarted: {},
             onFailure: { error in
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                    showingVoiceRecording = false
-                }
-                voiceProcessing = false
                 if let recordingError = error as? AudioService.RecordingError {
                     permissionErrorMessage = recordingError.localizedDescription
                 } else {
@@ -431,27 +478,19 @@ struct TerminalTabView: View {
     private func cancelVoiceRecording() {
         voiceRecordingOperation.cancel()
         audioService.cancelRecording()
-        showingVoiceRecording = false
-        voiceProcessing = false
     }
 
     private func finishVoiceRecording() {
         guard !voiceProcessing else { return }
-        voiceProcessing = true
-        voiceRecordingOperation.start(
+        voiceRecordingOperation.startProcessing(
             operation: { [audioService] operationID in
                 await audioService.stopRecording(operationID: operationID)
             },
             onSuccess: { text in
                 let fallback = text.isEmpty ? audioService.partialTranscription : text
                 sendTranscriptionToTerminal(fallback)
-                showingVoiceRecording = false
-                voiceProcessing = false
             },
-            onFailure: { _ in
-                showingVoiceRecording = false
-                voiceProcessing = false
-            }
+            onFailure: { _ in }
         )
     }
 
@@ -466,7 +505,7 @@ struct TerminalTabView: View {
         terminal.sendText(trimmed)
         #if os(iOS)
         if shouldShowReturnControl {
-            tabManager.setTerminalPendingVoiceReturn(true, for: paneId)
+            tabManager.presentationState.applyVoiceEvent(.transcriptionSent, for: paneId)
         }
         #endif
     }
@@ -474,17 +513,17 @@ struct TerminalTabView: View {
     private func publishVoiceRecordingState(_ isRecording: Bool) {
         #if os(iOS)
         for paneId in tab.allPaneIds where !isRecording || paneId != tab.focusedPaneId {
-            tabManager.setTerminalVoiceRecording(false, for: paneId)
+            tabManager.presentationState.applyVoiceEvent(.recordingStopped, for: paneId)
         }
         if isRecording {
-            tabManager.setTerminalVoiceRecording(true, for: tab.focusedPaneId)
+            tabManager.presentationState.applyVoiceEvent(.recordingStarted, for: tab.focusedPaneId)
         }
         #endif
     }
 
     private func clearPendingVoiceReturnForFocusedPane() {
         #if os(iOS)
-        tabManager.setTerminalPendingVoiceReturn(false, for: tab.focusedPaneId)
+        tabManager.presentationState.applyVoiceEvent(.pendingReturnDismissed, for: tab.focusedPaneId)
         #endif
     }
 }
@@ -493,54 +532,87 @@ struct TerminalTabView: View {
 
 /// Renders a single terminal pane (leaf in split tree)
 struct TerminalPaneView: View {
-    private enum ReconnectPreparation: Equatable {
-        case idle
-        case running(TerminalTabManager.ReconnectPreparationToken)
-
-        var isRunning: Bool {
-            if case .running = self { return true }
-            return false
-        }
-    }
     let paneId: UUID
     let server: Server
+    let tabManager: TerminalTabManager
+    @StateObject private var panePresentation: TerminalPanePresentationProjection
+    @ObservedObject private var reconnectCoordinator: TerminalReconnectCoordinator
+    @ObservedObject private var tmuxCoordinator: TerminalTmuxSessionCoordinator
+    let securityActions: TerminalSecurityActions
     let isFocused: Bool
     let isTabSelected: Bool
     let onFocus: () -> Void
     let onProcessExit: () -> Void
     let terminalContextMenuActions: TerminalContextMenuActions
     let onPaneKeyboardShortcut: (TerminalSplitCommand) -> Void
+    let appearance: TerminalAppearanceSnapshot
     let showsVoiceButton: Bool
     let onVoiceTrigger: () -> Void
 
-    @EnvironmentObject var ghosttyApp: Ghostty.App
-    @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject var ghosttyApp: GhosttyRuntime
+    @EnvironmentObject private var appLockManager: AppLockManager
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var isReady = false
     @State private var credentials: ServerCredentials?
     @State private var credentialLoadErrorMessage: String?
-    @State private var reconnectToken = UUID()
     @State private var showingTmuxInstallPrompt = false
-    @State private var showingMoshInstallPrompt = false
+    @State private var moshServerMaintenancePrompt: MoshServerMaintenanceAction?
     @State private var isInstallingMosh = false
     @State private var operationNotice: NoticeItem?
     @State private var dismissFallbackBanner = false
-    @State private var reconnectPreparation = ReconnectPreparation.idle
-    @State private var automaticReconnectRetryTask: Task<Void, Never>?
-    @State private var terminalBackgroundColor: Color = Self.initialTerminalBackgroundColor()
-    @State private var connectWatchdogToken = UUID()
-    @State private var showingRetrustHostConfirmation = false
-    @StateObject private var richPasteUI = TerminalRichPasteUIModel()
-    @ObservedObject private var networkMonitor: NetworkMonitor = .shared
+    @StateObject private var connectWatchdog = TerminalConnectionWatchdog()
+    @State private var securityApprovalRequest: ServerSecurityApprovalRequest?
+    @ObservedObject private var richPasteUI: TerminalRichPasteUIModel
 
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameKey) private var terminalThemeName = "Aizen Dark"
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameLightKey) private var terminalThemeNameLight = "Aizen Light"
-    @AppStorage(CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) private var usePerAppearanceTheme = true
     @AppStorage(TerminalDefaults.sshAutoReconnectKey) private var autoReconnectEnabled = true
 
-    private var paneState: TerminalPaneState? {
-        TerminalTabManager.shared.paneStates[paneId]
+    init(
+        paneId: UUID,
+        server: Server,
+        tabManager: TerminalTabManager,
+        securityActions: TerminalSecurityActions,
+        isFocused: Bool,
+        isTabSelected: Bool,
+        onFocus: @escaping () -> Void,
+        onProcessExit: @escaping () -> Void,
+        terminalContextMenuActions: TerminalContextMenuActions,
+        onPaneKeyboardShortcut: @escaping (TerminalSplitCommand) -> Void,
+        appearance: TerminalAppearanceSnapshot,
+        showsVoiceButton: Bool,
+        onVoiceTrigger: @escaping () -> Void
+    ) {
+        self.paneId = paneId
+        self.server = server
+        self.tabManager = tabManager
+        _panePresentation = StateObject(
+            wrappedValue: TerminalPanePresentationProjection(
+                paneId: paneId,
+                sessionState: tabManager.sessionState
+            )
+        )
+        _reconnectCoordinator = ObservedObject(wrappedValue: tabManager.reconnectCoordinator)
+        _tmuxCoordinator = ObservedObject(wrappedValue: tabManager.tmuxCoordinator)
+        self.securityActions = securityActions
+        self.isFocused = isFocused
+        self.isTabSelected = isTabSelected
+        self.onFocus = onFocus
+        self.onProcessExit = onProcessExit
+        self.terminalContextMenuActions = terminalContextMenuActions
+        self.onPaneKeyboardShortcut = onPaneKeyboardShortcut
+        self.appearance = appearance
+        self.showsVoiceButton = showsVoiceButton
+        self.onVoiceTrigger = onVoiceTrigger
+        _richPasteUI = ObservedObject(
+            wrappedValue: tabManager.richPasteRuntimeStore.runtime(
+                for: paneId,
+                tabManager: tabManager
+            ).uiModel
+        )
+    }
+
+    private var paneState: TerminalPanePresentationState? {
+        panePresentation.state
     }
 
     private var connectionState: ConnectionState {
@@ -548,20 +620,29 @@ struct TerminalPaneView: View {
     }
 
     private var reconnectInFlight: Bool {
-        reconnectPreparation.isRunning
+        reconnectAttempt != nil
     }
 
-    private var isHostKeyVerificationFailure: Bool {
-        guard case .failed(let error) = connectionState else { return false }
-        return error == SSHError.hostKeyVerificationFailed.localizedDescription
-            || error.contains("Host key verification failed")
+    private var reconnectAttempt: TerminalReconnectCoordinator.Attempt? {
+        reconnectCoordinator.attempt(for: paneId)
     }
 
-    private var retrustHostConfirmationMessage: String {
-        let endpoint = "\(server.host):\(server.port)"
-        return String(
-            format: String(localized: "VVTerm saved a different SSH host key for %@. Only continue if you recreated this server or trust the new host."),
-            endpoint
+    private var connectionGeneration: UUID {
+        reconnectCoordinator.connectionGeneration(for: paneId)
+    }
+
+    private var credentialBinding: ServerCredentialBinding {
+        ServerCredentialBinding(server: server)
+    }
+
+    private var showingSecurityApproval: Binding<Bool> {
+        Binding(
+            get: { securityApprovalRequest != nil },
+            set: { isPresented in
+                if !isPresented {
+                    securityApprovalRequest = nil
+                }
+            }
         )
     }
 
@@ -572,12 +653,7 @@ struct TerminalPaneView: View {
 
     /// Check if terminal already exists (reuse case)
     private var terminalExists: Bool {
-        TerminalTabManager.shared.getTerminal(for: paneId) != nil
-    }
-
-    private var effectiveThemeName: String {
-        guard usePerAppearanceTheme else { return terminalThemeName }
-        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+        tabManager.terminalSurfaceStore.surface(for: paneId) != nil
     }
 
     private var fallbackBannerMessage: String? {
@@ -586,28 +662,48 @@ struct TerminalPaneView: View {
         return paneState?.moshFallbackReason?.bannerMessage ?? String(localized: "Using SSH fallback for this session.")
     }
 
-    private var shouldPromptMoshInstall: Bool {
-        guard server.connectionMode == .mosh else { return false }
-        guard paneState?.activeTransport == .sshFallback else { return false }
-        return paneState?.moshFallbackReason?.shouldOfferServerMaintenance == true
+    private var offeredMoshServerMaintenance: MoshServerMaintenanceAction? {
+        guard server.connectionMode == .mosh else { return nil }
+        guard paneState?.activeTransport == .sshFallback else { return nil }
+        return paneState?.transportState.moshServerMaintenanceAction
+    }
+
+    private var showingMoshServerMaintenancePrompt: Binding<Bool> {
+        Binding(
+            get: { moshServerMaintenancePrompt != nil },
+            set: { isPresented in
+                if !isPresented {
+                    moshServerMaintenancePrompt = nil
+                }
+            }
+        )
     }
 
     private var moshServerPromptTitle: String {
-        paneState?.moshFallbackReason == .serverRuntimeBroken
-            ? String(localized: "Repair mosh-server?")
-            : String(localized: "Install mosh-server?")
+        switch moshServerMaintenancePrompt {
+        case .repair:
+            return String(localized: "Repair mosh-server?")
+        case .install, .none:
+            return String(localized: "Install mosh-server?")
+        }
     }
 
     private var moshServerPromptAction: String {
-        paneState?.moshFallbackReason == .serverRuntimeBroken
-            ? String(localized: "Repair")
-            : String(localized: "Install")
+        switch moshServerMaintenancePrompt ?? offeredMoshServerMaintenance {
+        case .repair:
+            return String(localized: "Repair")
+        case .install, .none:
+            return String(localized: "Install")
+        }
     }
 
     private var moshServerPromptMessage: String {
-        paneState?.moshFallbackReason == .serverRuntimeBroken
-            ? String(localized: "Mosh is selected, but the installed mosh-server cannot run. Repair its package installation and reconnect?")
-            : String(localized: "Mosh is selected for this server, but mosh-server is missing on the host.")
+        switch moshServerMaintenancePrompt {
+        case .repair:
+            return String(localized: "Mosh is selected, but the installed mosh-server cannot run. Repair its package installation and reconnect?")
+        case .install, .none:
+            return String(localized: "Mosh is selected for this server, but mosh-server is missing on the host.")
+        }
     }
 
     private var shouldShowMoshDurabilityHint: Bool {
@@ -633,13 +729,13 @@ struct TerminalPaneView: View {
     }
 
     private var isAwaitingTmuxSelection: Bool {
-        TerminalTabManager.shared.tmuxAttachPrompt?.paneId == paneId
+        tmuxCoordinator.attachPrompt?.paneId == paneId
     }
 
     private var noticeSurfaceStyle: NoticeSurfaceStyle {
         .terminal(
-            backgroundColor: terminalBackgroundColor,
-            foregroundColor: ThemeColorParser.previewPalette(for: effectiveThemeName).foreground
+            backgroundColor: Color.fromHex(appearance.activeTheme.palette.backgroundHex),
+            foregroundColor: Color.fromHex(appearance.activeTheme.palette.foregroundHex)
         )
     }
 
@@ -670,13 +766,16 @@ struct TerminalPaneView: View {
             isAwaitingTmuxSelection: isAwaitingTmuxSelection,
             terminalExists: terminalExists,
             isReady: isReady,
-            disconnectedMessage: disconnectedStatusMessage,
-            isHostKeyVerificationFailure: isHostKeyVerificationFailure
+            disconnectedMessage: disconnectedStatusMessage
         )
     }
 
     private var reconnectBannerMessage: String? {
         guard shouldUseReconnectBannerPresentation else { return nil }
+
+        if reconnectAttempt?.phase == .waitingForNetwork {
+            return String(localized: "Waiting for network…")
+        }
 
         if case .reconnecting(let attempt) = connectionState {
             return String(format: String(localized: "Reconnecting (attempt %lld)…"), Int64(attempt))
@@ -697,6 +796,13 @@ struct TerminalPaneView: View {
         }
 
         if let fallbackBannerMessage {
+            let maintenanceAction = offeredMoshServerMaintenance.map { action in
+                NoticeAction(
+                    id: "pane-mosh-maintenance-\(paneId.uuidString)",
+                    title: moshServerPromptAction,
+                    handler: { moshServerMaintenancePrompt = action }
+                )
+            }
             return NoticeItem(
                 id: "pane-fallback-\(paneId.uuidString)",
                 lane: .topBanner,
@@ -704,6 +810,7 @@ struct TerminalPaneView: View {
                 leading: .icon("arrow.trianglehead.2.clockwise"),
                 message: fallbackBannerMessage,
                 detail: paneState?.moshFallbackDiagnostics?.copyText,
+                action: maintenanceAction,
                 dismissAction: { dismissFallbackBanner = true }
             )
         }
@@ -753,7 +860,7 @@ struct TerminalPaneView: View {
             operationSurfaceStyle: noticeSurfaceStyle
         ) {
             ZStack {
-                terminalBackgroundColor
+                Color.fromHex(appearance.activeTheme.palette.backgroundHex)
 
                 if ghosttyApp.readiness == .ready, let credentials = credentials {
                     terminalSurface(credentials: credentials)
@@ -761,11 +868,11 @@ struct TerminalPaneView: View {
 
                 TerminalConnectionStatusView(
                     presentation: connectionStatusPresentation,
-                    connectionAttemptID: connectWatchdogToken,
+                    connectionAttemptID: connectWatchdog.token,
                     surfaceStyle: noticeSurfaceStyle,
                     isActive: shouldFocus,
                     onRetry: retryConnection,
-                    onTrustNewHostKey: { showingRetrustHostConfirmation = true }
+                    onTrustNewHostKey: presentHostKeyTrustConfirmation
                 )
 
                 if shouldShowFloatingVoiceButton {
@@ -779,79 +886,69 @@ struct TerminalPaneView: View {
         .opacity(isFocused ? 1.0 : 0.7)
         .clipped()
         .task {
-            ghosttyApp.startIfNeeded()
-            updateTerminalBackgroundColor()
+            ghosttyApp.startIfNeeded(appearance: appearance)
             // If terminal exists, mark ready immediately
             if terminalExists {
                 isReady = true
             }
-            do {
-                credentials = try KeychainManager.shared.getCredentials(for: server)
-                credentialLoadErrorMessage = nil
-            } catch {
-                credentialLoadErrorMessage = String(localized: "Failed to load credentials")
-            }
+            loadCredentials()
 
             showingTmuxInstallPrompt = TmuxInstallPromptPolicy.shouldPresent(
                 for: paneState?.tmuxStatus
             )
-            if shouldPromptMoshInstall {
-                showingMoshInstallPrompt = true
-            }
             startConnectWatchdog()
-            attemptAutoReconnectIfNeeded()
+            reconcileAutomaticReconnect()
         }
-        .onChange(of: terminalThemeName) { _ in updateTerminalBackgroundColor() }
-        .onChange(of: terminalThemeNameLight) { _ in updateTerminalBackgroundColor() }
-        .onChange(of: usePerAppearanceTheme) { _ in updateTerminalBackgroundColor() }
-        .onChange(of: colorScheme) { _ in updateTerminalBackgroundColor() }
-        .onChange(of: scenePhase) { phase in
-            if phase == .active {
-                attemptAutoReconnectIfNeeded()
-            }
+        .onChange(of: scenePhase) { _ in
+            reconcileAutomaticReconnect()
         }
-        .onChange(of: networkMonitor.readiness) { readiness in
-            if readiness == .ready {
-                TerminalTabManager.shared.notifyEternalTerminalNetworkPathChanged(for: paneId)
-                attemptAutoReconnectIfNeeded()
-            }
+        .onChange(of: autoReconnectEnabled) { _ in
+            reconcileAutomaticReconnect()
         }
         .onChange(of: isReady) { _ in
-            connectWatchdogToken = UUID()
             startConnectWatchdog()
         }
         .onChange(of: connectionState) { state in
             if state.isConnecting || state.isConnected {
-                cancelScheduledAutomaticReconnect()
-                connectWatchdogToken = UUID()
+                reconnectCoordinator.cancelAutomaticRetry(for: paneId)
                 startConnectWatchdog()
             } else if case .disconnected = state {
-                attemptAutoReconnectIfNeeded()
+                connectWatchdog.cancel()
+                reconcileAutomaticReconnect()
             } else if case .failed = state {
-                scheduleAutomaticReconnectAfterFailure()
+                connectWatchdog.cancel()
             }
+        }
+        .onChange(of: connectionGeneration) { _ in
+            isReady = false
+            startConnectWatchdog()
+        }
+        .onChange(of: credentialBinding) { _ in
+            credentials = nil
+            loadCredentials()
         }
         .onChange(of: paneState?.tmuxStatus) { status in
             showingTmuxInstallPrompt = TmuxInstallPromptPolicy.shouldPresent(for: status)
         }
         .onChange(of: isAwaitingTmuxSelection) { isAwaitingSelection in
-            connectWatchdogToken = UUID()
             if !isAwaitingSelection {
                 startConnectWatchdog()
+            } else {
+                connectWatchdog.cancel()
             }
         }
         .onChange(of: paneState?.moshFallbackReason) { _ in
             if paneState?.activeTransport == .sshFallback {
                 dismissFallbackBanner = false
             }
-            if shouldPromptMoshInstall {
-                showingMoshInstallPrompt = true
+            if offeredMoshServerMaintenance == nil {
+                moshServerMaintenancePrompt = nil
             }
         }
         .onChange(of: paneState?.activeTransport) { transport in
             dismissFallbackBanner = transport != .sshFallback ? false : dismissFallbackBanner
-            if shouldPromptMoshInstall {
-                showingMoshInstallPrompt = true
+            if transport != .sshFallback {
+                moshServerMaintenancePrompt = nil
             }
         }
         .task(id: paneState?.activeTransport == .sshFallback ? paneState?.moshFallbackReason : nil) {
@@ -862,12 +959,13 @@ struct TerminalPaneView: View {
             dismissFallbackBanner = true
         }
         .onDisappear {
-            cancelScheduledAutomaticReconnect()
+            reconnectCoordinator.removeAutomaticReconnectContext(for: paneId)
+            connectWatchdog.cancel()
         }
         .alert("Install tmux?", isPresented: $showingTmuxInstallPrompt) {
             Button("Install") {
                 Task {
-                    await TerminalTabManager.shared.startTmuxInstall(for: paneId) {
+                    await tmuxCoordinator.startInstall(for: paneId) {
                         retryConnection()
                     }
                 }
@@ -878,7 +976,7 @@ struct TerminalPaneView: View {
         } message: {
             Text("tmux keeps your terminal session alive across app restarts and disconnects.")
         }
-        .alert(moshServerPromptTitle, isPresented: $showingMoshInstallPrompt) {
+        .alert(moshServerPromptTitle, isPresented: showingMoshServerMaintenancePrompt) {
             Button(moshServerPromptAction) {
                 Task {
                     await installMoshServerAndReconnect()
@@ -888,14 +986,12 @@ struct TerminalPaneView: View {
         } message: {
             Text(moshServerPromptMessage)
         }
-        .alert("Replace Trusted Host?", isPresented: $showingRetrustHostConfirmation) {
-            Button("Cancel", role: .cancel) { }
-            Button("Replace and Reconnect", role: .destructive) {
-                retrustHostAndRetry()
-            }
-        } message: {
-            Text(retrustHostConfirmationMessage)
-        }
+        .sshHostKeyTrustAlert(
+            request: securityApprovalRequest,
+            isPresented: showingSecurityApproval,
+            onCancel: rejectHostKeyChallenge,
+            onApprove: approveHostKeyChallengeAndRetry
+        )
         .terminalRichPastePrompt(using: richPasteUI)
     }
 
@@ -914,29 +1010,29 @@ struct TerminalPaneView: View {
             paneId: paneId,
             server: server,
             credentials: credentials,
-            richPasteUIModel: richPasteUI,
+            tabManager: tabManager,
             isActive: shouldFocus,
             terminalContextMenuActions: terminalContextMenuActions,
             onPaneKeyboardShortcut: onPaneKeyboardShortcut,
             onProcessExit: onProcessExit,
             onReady: { isReady = true },
             onVoiceTrigger: voiceTriggerHandlerForTerminal,
-            onSceneActivation: attemptAutoReconnectIfNeeded
+            onSceneActivation: reconcileAutomaticReconnect
         )
-        .id(reconnectToken)
+        .id(connectionGeneration)
         .allowsHitTesting(connectionState.isConnected)
         #else
         RemoteTerminalPaneWrapper(
             paneId: paneId,
             server: server,
             credentials: credentials,
-            richPasteUIModel: richPasteUI,
+            tabManager: tabManager,
             isActive: shouldFocus,
             terminalContextMenuActions: terminalContextMenuActions,
             onProcessExit: onProcessExit,
             onReady: { isReady = true }
         )
-        .id(reconnectToken)
+        .id(connectionGeneration)
         .contentShape(Rectangle())
         .onTapGesture { onFocus() }
         #endif
@@ -956,138 +1052,79 @@ struct TerminalPaneView: View {
     }
 
     private func disableTmuxForServer() {
-        TerminalTabManager.shared.disableTmux(for: server.id)
+        tmuxCoordinator.disable(for: server.id)
     }
 
-    private func retrustHostAndRetry() {
-        KnownHostsManager.shared.remove(host: server.host, port: server.port)
-        retryConnection()
+    private func presentHostKeyTrustConfirmation() {
+        securityApprovalRequest = securityActions.pendingHostKeyApproval(server)
     }
 
-    private func attemptAutoReconnectIfNeeded() {
-        #if os(iOS)
-        let applicationIsActive = UIApplication.shared.applicationState == .active
-        #else
-        let applicationIsActive = NSApplication.shared.isActive
-        #endif
-        guard TerminalAutoReconnectPolicy.shouldAttempt(
+    private func rejectHostKeyChallenge(_ request: ServerSecurityApprovalRequest) {
+        securityActions.reject(request)
+        if securityApprovalRequest == request {
+            securityApprovalRequest = nil
+        }
+    }
+
+    private func approveHostKeyChallengeAndRetry(_ request: ServerSecurityApprovalRequest) {
+        switch securityActions.approve(request, server) {
+        case .approved:
+            if securityApprovalRequest == request {
+                securityApprovalRequest = nil
+            }
+            retryConnection()
+        case .failed:
+            credentialLoadErrorMessage = String(
+                localized: "SSH host key approval expired. Try again."
+            )
+            if securityApprovalRequest == request {
+                securityApprovalRequest = nil
+            }
+        }
+    }
+
+    private func loadCredentials() {
+        do {
+            credentials = try securityActions.loadCredentials(server)
+            credentialLoadErrorMessage = nil
+        } catch {
+            credentials = nil
+            credentialLoadErrorMessage = String(localized: "Failed to load credentials")
+        }
+    }
+
+    private func reconcileAutomaticReconnect() {
+        reconnectCoordinator.reconcileAutomaticReconnect(
+            for: paneId,
             sceneIsActive: foregroundSceneIsActive,
-            applicationIsActive: applicationIsActive,
-            networkReadiness: networkMonitor.readiness,
-            automaticReconnectAllowed: automaticReconnectAllowed,
-            reconnectInFlight: reconnectInFlight,
-            hasEstablishedConnection: paneState?.hasEstablishedConnection == true,
-            connectionState: connectionState
-        ) else { return }
-        retryConnection(requiresReadyNetwork: true)
+            automaticReconnectAllowed: automaticReconnectAllowed
+        )
     }
 
     private func retryConnection() {
-        retryConnection(requiresReadyNetwork: false)
-    }
-
-    private func retryConnection(requiresReadyNetwork: Bool) {
-        cancelScheduledAutomaticReconnect()
-        guard !requiresReadyNetwork || networkMonitor.readiness == .ready else { return }
-        guard !reconnectPreparation.isRunning else { return }
+        reconnectCoordinator.cancelAutomaticRetry(for: paneId)
+        guard reconnectAttempt == nil else { return }
         guard !connectionState.isConnecting else { return }
-        connectWatchdogToken = UUID()
+        connectWatchdog.cancel()
         credentialLoadErrorMessage = nil
         operationNotice = nil
-        if credentials == nil {
-            do {
-                credentials = try KeychainManager.shared.getCredentials(for: server)
-                credentialLoadErrorMessage = nil
-            } catch {
-                credentialLoadErrorMessage = String(localized: "Failed to load credentials")
-                return
-            }
+        if credentials?.isAuthorized(for: server) != true {
+            credentials = nil
+            loadCredentials()
+            guard credentials != nil else { return }
         }
-        let tabManager = TerminalTabManager.shared
-        guard let preparationToken = tabManager.beginReconnectPreparation(for: paneId) else { return }
         tabManager.clearMoshFallbackDiagnostics(for: paneId)
-        reconnectPreparation = .running(preparationToken)
-        connectWatchdogToken = UUID()
-        Task {
-            defer {
-                tabManager.finishReconnectPreparation(preparationToken)
-                if reconnectPreparation == .running(preparationToken) {
-                    reconnectPreparation = .idle
-                }
-            }
-            guard tabManager.isCurrentReconnectPreparation(preparationToken) else { return }
-            guard !requiresReadyNetwork || networkMonitor.readiness == .ready else { return }
-            #if os(iOS)
-            guard UIApplication.shared.applicationState == .active,
-                  foregroundSceneIsActive else {
-                return
-            }
-            #endif
-            guard tabManager.isCurrentReconnectPreparation(preparationToken) else { return }
-            guard !requiresReadyNetwork || networkMonitor.readiness == .ready else { return }
-
-            if server.connectionMode == .eternalTerminal {
-                await tabManager.unregisterEternalTerminalRuntime(for: paneId)
-            } else {
-                await tabManager.unregisterSSHClient(for: paneId)
-            }
-            guard tabManager.isCurrentReconnectPreparation(preparationToken) else { return }
-            guard tabManager.paneStates[paneId] != nil else { return }
-            #if os(iOS)
-            guard UIApplication.shared.applicationState == .active,
-                  foregroundSceneIsActive else {
-                return
-            }
-            #endif
-            guard tabManager.isCurrentReconnectPreparation(preparationToken) else { return }
-            guard !requiresReadyNetwork || networkMonitor.readiness == .ready else { return }
-
-            isReady = false
-            let hasEstablishedConnection = paneState?.hasEstablishedConnection == true
-            tabManager.updatePaneState(
-                paneId,
-                connectionState: TerminalConnectionAttemptPolicy.state(
-                    attempt: 1,
-                    hasEstablishedConnection: hasEstablishedConnection
-                )
-            )
-            reconnectToken = UUID()
-            connectWatchdogToken = UUID()
-            startConnectWatchdog()
-        }
-    }
-
-    private func scheduleAutomaticReconnectAfterFailure() {
-        guard automaticReconnectRetryTask == nil else { return }
-        guard TerminalAutoReconnectPolicy.shouldScheduleRetry(
-            automaticReconnectAllowed: automaticReconnectAllowed,
-            hasEstablishedConnection: paneState?.hasEstablishedConnection == true,
-            connectionState: connectionState
-        ) else { return }
-
-        automaticReconnectRetryTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(5))
-            guard !Task.isCancelled else { return }
-            automaticReconnectRetryTask = nil
-            attemptAutoReconnectIfNeeded()
-            scheduleAutomaticReconnectAfterFailure()
-        }
-    }
-
-    private func cancelScheduledAutomaticReconnect() {
-        automaticReconnectRetryTask?.cancel()
-        automaticReconnectRetryTask = nil
+        _ = reconnectCoordinator.request(
+            for: paneId,
+            requiresReadyNetwork: false
+        )
     }
 
     private var foregroundSceneIsActive: Bool {
         #if os(iOS)
-        let windowScene = TerminalTabManager.shared
-            .getTerminal(for: paneId)?
-            .window?
-            .windowScene
-        let windowSceneIsActive = windowScene.map {
-            $0.activationState == .foregroundActive
-        }
+        let windowSceneIsActive = tabManager.terminalSurfaceStore
+            .surface(for: paneId)?
+            .isHostingSceneActive
         return TerminalSceneActivityPolicy.isActive(
             environmentIsActive: scenePhase == .active,
             windowSceneIsActive: windowSceneIsActive
@@ -1103,45 +1140,39 @@ struct TerminalPaneView: View {
             isReady: isReady,
             terminalExists: terminalExists,
             isAwaitingUserSelection: isAwaitingTmuxSelection
-        ) else { return }
-        let token = connectWatchdogToken
-        Task {
-            try? await Task.sleep(for: .seconds(20))
-            guard !Task.isCancelled else { return }
-            await MainActor.run {
-                guard token == connectWatchdogToken else { return }
-                guard !isAwaitingTmuxSelection else { return }
-                let stillConnecting = connectionState.isConnecting
-                let stillConnectedWithoutTerminal = connectionState.isConnected && !isReady && !terminalExists
-                guard stillConnecting || stillConnectedWithoutTerminal else { return }
+        ) else {
+            connectWatchdog.cancel()
+            return
+        }
+        connectWatchdog.replace {
+            guard !isAwaitingTmuxSelection else { return }
+            let stillConnecting = connectionState.isConnecting
+            let stillConnectedWithoutTerminal = connectionState.isConnected && !isReady && !terminalExists
+            guard stillConnecting || stillConnectedWithoutTerminal else { return }
 
-                if stillConnectedWithoutTerminal {
-                    TerminalTabManager.shared.updatePaneState(paneId, connectionState: .disconnected)
-                    retryConnection()
-                    return
-                }
-
-                if TerminalTabManager.shared.shellId(for: paneId) != nil
-                    || TerminalTabManager.shared.existingEternalTerminalRuntime(for: paneId) != nil,
-                   connectionState.isConnected {
-                    TerminalTabManager.shared.updatePaneState(paneId, connectionState: .connected)
-                    return
-                }
-
-                let inFlight = TerminalTabManager.shared.isShellStartInFlight(for: paneId)
-                    || TerminalTabManager.shared.existingEternalTerminalRuntime(for: paneId)?.isStartInFlight == true
-                if inFlight {
-                    // Keep polling while a shell start is still in flight so stale locks
-                    // and hung attempts are eventually surfaced to the user.
-                    startConnectWatchdog()
-                    return
-                }
-
-                TerminalTabManager.shared.updatePaneState(
-                    paneId,
-                    connectionState: .failed(String(localized: "Connection timed out. Please retry."))
-                )
+            if stillConnectedWithoutTerminal {
+                tabManager.updatePaneState(paneId, connectionState: .disconnected)
+                retryConnection()
+                return
             }
+
+            if tabManager.transportCoordinator.hasLiveTransport(for: paneId), connectionState.isConnected {
+                tabManager.updatePaneState(paneId, connectionState: .connected)
+                return
+            }
+
+            let inFlight = tabManager.transportCoordinator.isTransportStartInFlight(for: paneId)
+            if inFlight {
+                // Keep polling while a shell start is still in flight so stale locks
+                // and hung attempts are eventually surfaced to the user.
+                startConnectWatchdog()
+                return
+            }
+
+            tabManager.updatePaneState(
+                paneId,
+                connectionState: .failed(.reconnectTimedOut)
+            )
         }
     }
 
@@ -1152,7 +1183,7 @@ struct TerminalPaneView: View {
         defer { isInstallingMosh = false }
 
         do {
-            try await TerminalTabManager.shared.installMoshServer(for: paneId)
+            try await tabManager.transportCoordinator.installMoshServer(for: paneId)
             operationNotice = nil
             retryConnection()
         } catch {
@@ -1166,37 +1197,6 @@ struct TerminalPaneView: View {
                 dismissAction: { operationNotice = nil }
             )
         }
-    }
-
-    private func updateTerminalBackgroundColor() {
-        let themeName = effectiveThemeName
-        Task.detached(priority: .utility) {
-            let resolved = ThemeColorParser.backgroundColor(for: themeName)!
-            await MainActor.run {
-                terminalBackgroundColor = resolved
-                UserDefaults.standard.set(resolved.toHex(), forKey: "terminalBackgroundColor")
-            }
-        }
-    }
-
-    private static func initialTerminalBackgroundColor() -> Color {
-        let defaults = UserDefaults.standard
-
-        if let cachedHex = defaults.string(forKey: "terminalBackgroundColor") {
-            return Color.fromHex(cachedHex)
-        }
-
-        let usePerAppearanceTheme = defaults.object(forKey: CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) as? Bool ?? true
-        let darkThemeName = defaults.string(forKey: CloudKitSyncConstants.terminalThemeNameKey) ?? "Aizen Dark"
-        let lightThemeName = defaults.string(forKey: CloudKitSyncConstants.terminalThemeNameLightKey) ?? "Aizen Light"
-        #if os(macOS)
-        let isDarkAppearance = NSApp?.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-        #else
-        let isDarkAppearance = UITraitCollection.current.userInterfaceStyle == .dark
-        #endif
-        let themeName = usePerAppearanceTheme ? (isDarkAppearance ? darkThemeName : lightThemeName) : darkThemeName
-
-        return ThemeColorParser.backgroundColor(for: themeName)!
     }
 
     private var voiceTriggerButton: some View {

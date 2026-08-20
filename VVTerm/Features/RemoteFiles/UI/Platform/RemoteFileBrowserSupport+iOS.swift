@@ -49,7 +49,7 @@ struct RemoteFileRow: View {
             parts.append(String(localized: "Folder"))
         default:
             if let size = entry.size {
-                parts.append(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
+                parts.append(RemoteFileByteCountFormatter.string(from: size))
             }
         }
 

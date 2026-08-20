@@ -4,12 +4,16 @@ import AppKit
 
 extension WelcomeView {
     var platformContent: some View {
-        WelcomeContent(hasSeenWelcome: $hasSeenWelcome)
+        WelcomeContent(
+            hasSeenWelcome: $hasSeenWelcome,
+            onCompleted: onCompleted
+        )
     }
 }
 
 private struct WelcomeContent: View {
     @Binding var hasSeenWelcome: Bool
+    let onCompleted: () -> Void
     @State private var showingProUpgrade = false
 
     var body: some View {
@@ -46,7 +50,9 @@ private struct WelcomeContent: View {
                         .padding(.bottom, 24)
 
                     VStack(alignment: .leading, spacing: 18) {
-                        ForEach(WelcomeFeatureCatalog.features) { feature in
+                        ForEach(WelcomeFeaturePresentationCatalog.features(
+                            companionPlatformTitle: "Available on iPhone and iPad"
+                        )) { feature in
                             HStack(alignment: .top, spacing: 14) {
                                 Image(systemName: feature.icon)
                                     .font(.system(size: 18, weight: .medium))
@@ -82,7 +88,7 @@ private struct WelcomeContent: View {
             VStack(spacing: 12) {
                 Button {
                     hasSeenWelcome = true
-                    AnalyticsTracker.shared.trackWelcomeCompleted()
+                    onCompleted()
                 } label: {
                     Text("Continue")
                         .frame(maxWidth: 420)

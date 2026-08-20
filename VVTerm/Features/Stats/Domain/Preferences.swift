@@ -1,6 +1,6 @@
 import Foundation
 
-struct StatsPreferences: Codable, Equatable {
+nonisolated struct StatsPreferences: Codable, Equatable, Sendable {
     var schemaVersion: Int
     var style: Style
     var blocks: [Block]
@@ -21,7 +21,7 @@ struct StatsPreferences: Codable, Equatable {
         self.lastWriterDeviceId = lastWriterDeviceId
     }
 
-    enum Style: String, Codable, CaseIterable, Identifiable {
+    enum Style: String, Codable, CaseIterable, Identifiable, Sendable {
         case cardsCompact
         case cardsDetailed
         case classic
@@ -29,7 +29,7 @@ struct StatsPreferences: Codable, Equatable {
         var id: String { rawValue }
     }
 
-    enum BlockID: String, Codable, CaseIterable, Identifiable {
+    enum BlockID: String, Codable, CaseIterable, Identifiable, Sendable {
         case system
         case cpu
         case memory
@@ -42,7 +42,7 @@ struct StatsPreferences: Codable, Equatable {
         var id: String { rawValue }
     }
 
-    struct Block: Codable, Equatable, Identifiable {
+    struct Block: Codable, Equatable, Identifiable, Sendable {
         var id: BlockID
         var isVisible: Bool
         var order: Int
@@ -50,10 +50,9 @@ struct StatsPreferences: Codable, Equatable {
     }
 }
 
-extension StatsPreferences {
-    static let schemaVersion = 1
+nonisolated extension StatsPreferences {
+    nonisolated static let schemaVersion = 1
     static let recordName = "statsPreferences.v1"
-    static let defaultsKey = CloudKitSyncConstants.statsPreferencesStorageKey
 
     static var defaultBlocks: [Block] {
         BlockID.allCases.enumerated().map { index, id in
@@ -61,12 +60,12 @@ extension StatsPreferences {
         }
     }
 
-    static var defaultValue: StatsPreferences {
+    static func defaultValue(lastWriterDeviceId: String) -> StatsPreferences {
         StatsPreferences(
             style: .cardsDetailed,
             blocks: defaultBlocks,
             updatedAt: .distantPast,
-            lastWriterDeviceId: DeviceIdentity.id
+            lastWriterDeviceId: lastWriterDeviceId
         )
     }
 
@@ -122,7 +121,7 @@ extension StatsPreferences {
             style: style,
             blocks: finalBlocks,
             updatedAt: updatedAt,
-            lastWriterDeviceId: lastWriterDeviceId.isEmpty ? DeviceIdentity.id : lastWriterDeviceId
+            lastWriterDeviceId: lastWriterDeviceId
         )
     }
 

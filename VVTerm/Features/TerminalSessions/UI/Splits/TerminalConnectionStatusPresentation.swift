@@ -1,5 +1,95 @@
 import Foundation
 
+extension TerminalTabOpeningError: LocalizedError {
+    nonisolated var errorDescription: String? {
+        switch self {
+        case .alreadyOpening:
+            return String(
+                format: String(localized: "Connection failed: %@"),
+                String(localized: "A tab is already opening for this server.")
+            )
+        }
+    }
+}
+
+nonisolated enum TerminalConnectionFailurePresentation {
+    static func message(for failure: TerminalConnectionFailure) -> String {
+        switch failure {
+        case .reconnectTimedOut:
+            return String(localized: "Connection timed out. Please retry.")
+        case .tmuxStartupFailed:
+            return String(localized: "Unable to start tmux session.")
+        case .eternalTerminal(let failure, let host, let port):
+            return eternalTerminalMessage(for: failure, host: host, port: port)
+        case .external(let message, _, _):
+            return message
+        }
+    }
+
+    static func ansiSSHErrorData(for failure: TerminalConnectionFailure) -> Data? {
+        let line = "\r\n\u{001B}[31mSSH Error: \(message(for: failure))\u{001B}[0m\r\n"
+        return line.data(using: .utf8)
+    }
+
+    private static func eternalTerminalMessage(
+        for failure: EternalTerminalSessionFailure,
+        host: String,
+        port: Int
+    ) -> String {
+        switch failure {
+        case .bootstrapSSH:
+            return String(localized: "Eternal Terminal could not start through SSH. Verify the SSH credentials and that etterminal is installed on the host.")
+        case .bootstrapResponse(let excerpt):
+            let excerpt = excerpt.trimmingCharacters(in: .whitespacesAndNewlines)
+            if excerpt.contains("VVTERM_ET_UNSUPPORTED_NATIVE_WINDOWS") {
+                return String(localized: "Eternal Terminal does not run as a native Windows PowerShell or Command Prompt service. Configure this SSH connection to open inside WSL with Eternal Terminal installed, or use SSH with psmux instead.")
+            }
+            if excerpt.contains("VVTERM_ET_REQUIRES_POSIX_SHELL") {
+                return String(localized: "Eternal Terminal requires a POSIX login shell with /bin/sh. Configure this SSH connection to open a supported Linux, macOS, BSD, or WSL environment, then try again.")
+            }
+            if excerpt.localizedCaseInsensitiveContains("communicating with et daemon") {
+                return String(localized: "Eternal Terminal is installed, but its server daemon is not running or uses a different socket. On Linux, run “sudo systemctl enable --now et”. On macOS with Homebrew, run “brew services start et”. Then try again. If it still fails, ensure etterminal and etserver use the same server FIFO.")
+            }
+            guard !excerpt.isEmpty else {
+                return String(localized: "etterminal did not return valid connection details. Verify the Eternal Terminal installation on the host.")
+            }
+            return String(
+                format: String(localized: "etterminal did not return valid connection details. Host response: %@"),
+                excerpt
+            )
+        case .malformedBootstrapCredentials:
+            return String(localized: "etterminal returned malformed connection details. Update Eternal Terminal on the host and try again.")
+        case .resumeState(let message, _):
+            return message
+        case .transport:
+            return String(
+                format: String(localized: "Could not reach etserver at %@:%d. Verify etserver is running and TCP port %d is open."),
+                host,
+                port,
+                port
+            )
+        case .invalidKey:
+            return String(localized: "etserver rejected the session key. Reconnect to start a new Eternal Terminal session.")
+        case .protocolMismatch:
+            return String(localized: "The Eternal Terminal client and server protocol versions do not match. Update Eternal Terminal on the host.")
+        case .disconnectedBufferFull:
+            return String(localized: "Eternal Terminal could not buffer more input while offline. Reconnect and try again.")
+        case .connectionInProgress:
+            return String(localized: "An Eternal Terminal connection is already starting.")
+        case .connectionClosed:
+            return String(localized: "The Eternal Terminal session closed. Reconnect to start a new session.")
+        case .applicationSuspended:
+            return String(localized: "Eternal Terminal input is paused while VVTerm is in the background.")
+        case .sessionUnrecoverable:
+            return String(localized: "The Eternal Terminal session can no longer recover. Reconnect to start a new session.")
+        case .client:
+            return String(localized: "Eternal Terminal could not establish the session. Verify the server installation and try again.")
+        case .unknown:
+            return String(localized: "Eternal Terminal could not connect. Verify etserver is running and the configured ET port is reachable.")
+        }
+    }
+}
+
 extension TerminalDisconnectReason {
     var statusMessage: String? {
         switch self {
@@ -29,8 +119,7 @@ enum TerminalConnectionStatusPresentation: Hashable {
         isAwaitingTmuxSelection: Bool,
         terminalExists: Bool,
         isReady: Bool,
-        disconnectedMessage: String?,
-        isHostKeyVerificationFailure: Bool
+        disconnectedMessage: String?
     ) -> Self {
         if let credentialLoadErrorMessage {
             return .failed(
@@ -59,10 +148,10 @@ enum TerminalConnectionStatusPresentation: Hashable {
             return .hidden
         case .disconnected:
             return .disconnected(message: disconnectedMessage)
-        case .failed(let error):
+        case .failed(let failure):
             return .failed(
-                message: error,
-                allowsHostKeyReplacement: isHostKeyVerificationFailure
+                message: TerminalConnectionFailurePresentation.message(for: failure),
+                allowsHostKeyReplacement: failure.requiredAction == .approveHostKey
             )
         case .connected, .idle:
             return !isReady && !terminalExists ? .connecting(serverName: serverName) : .hidden
@@ -80,11 +169,15 @@ enum TerminalConnectionStatusDismissalPolicy {
         for presentation: TerminalConnectionStatusPresentation,
         connectionAttemptID: UUID
     ) -> TerminalConnectionStatusPresentationIdentity? {
-        guard presentation != .hidden else { return nil }
-        return TerminalConnectionStatusPresentationIdentity(
-            presentation: presentation,
-            connectionAttemptID: connectionAttemptID
-        )
+        switch presentation {
+        case .hidden, .connecting:
+            return nil
+        case .disconnected, .failed:
+            return TerminalConnectionStatusPresentationIdentity(
+                presentation: presentation,
+                connectionAttemptID: connectionAttemptID
+            )
+        }
     }
 
     static func shouldPresent(
@@ -100,17 +193,6 @@ enum TerminalConnectionStatusDismissalPolicy {
         dismissedIdentity: TerminalConnectionStatusPresentationIdentity?
     ) -> TerminalConnectionStatusPresentationIdentity? {
         currentIdentity == dismissedIdentity ? dismissedIdentity : nil
-    }
-}
-
-extension TerminalConnectionStatusPresentation {
-    var allowsInteractiveDismissal: Bool {
-        switch self {
-        case .disconnected, .failed:
-            return true
-        case .hidden, .connecting:
-            return false
-        }
     }
 }
 
@@ -175,46 +257,6 @@ enum TerminalSceneActivityPolicy {
         windowSceneIsActive: Bool?
     ) -> Bool {
         windowSceneIsActive ?? environmentIsActive
-    }
-}
-
-enum TerminalAutoReconnectPolicy {
-    static func shouldScheduleRetry(
-        automaticReconnectAllowed: Bool,
-        hasEstablishedConnection: Bool,
-        connectionState: ConnectionState
-    ) -> Bool {
-        guard automaticReconnectAllowed, hasEstablishedConnection else { return false }
-        if case .failed = connectionState {
-            return true
-        }
-        return false
-    }
-
-    static func shouldAttempt(
-        sceneIsActive: Bool,
-        applicationIsActive: Bool,
-        networkReadiness: NetworkMonitor.Readiness,
-        automaticReconnectAllowed: Bool,
-        reconnectInFlight: Bool,
-        hasEstablishedConnection: Bool,
-        connectionState: ConnectionState
-    ) -> Bool {
-        let isRecoverableState: Bool
-        switch connectionState {
-        case .disconnected, .failed:
-            isRecoverableState = true
-        case .idle, .connecting, .reconnecting, .connected:
-            isRecoverableState = false
-        }
-
-        return sceneIsActive
-            && applicationIsActive
-            && networkReadiness == .ready
-            && automaticReconnectAllowed
-            && !reconnectInFlight
-            && hasEstablishedConnection
-            && isRecoverableState
     }
 }
 

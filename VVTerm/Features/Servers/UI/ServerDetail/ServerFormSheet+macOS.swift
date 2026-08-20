@@ -100,4 +100,29 @@ extension MoveServerSheet {
         .padding(.vertical, 12)
     }
 }
+
+extension View {
+    func serverFormPlatformStyle(title: String) -> some View {
+        self
+    }
+
+    func serverFormPlatformActions(
+        isEditing: Bool,
+        isSaving: Bool,
+        saveButtonDisabled: Bool,
+        onCancel: @escaping () -> Void,
+        onSave: @escaping () -> Void
+    ) -> some View {
+        self
+    }
+
+    func moveServerPlatformActions(
+        isMoving: Bool,
+        moveButtonDisabled: Bool,
+        onCancel: @escaping () -> Void,
+        onMove: @escaping () -> Void
+    ) -> some View {
+        self
+    }
+}
 #endif

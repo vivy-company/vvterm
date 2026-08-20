@@ -39,8 +39,8 @@ final class RemoteFileTabManager: ObservableObject {
         tabsByServer[serverId] != nil
     }
 
-    func canOpenNewTab(for serverId: UUID) -> Bool {
-        if StoreManager.shared.isPro {
+    func canOpenNewTab(for serverId: UUID, hasProAccess: Bool) -> Bool {
+        if hasProAccess {
             return true
         }
 
@@ -48,7 +48,11 @@ final class RemoteFileTabManager: ObservableObject {
     }
 
     @discardableResult
-    func ensureInitialTab(for server: Server, seedPath: String? = nil) -> RemoteFileTab? {
+    func ensureInitialTab(
+        for server: Server,
+        seedPath: String? = nil,
+        hasProAccess: Bool
+    ) -> RemoteFileTab? {
         if let existingTabs = tabsByServer[server.id] {
             guard !existingTabs.isEmpty else { return nil }
             if let selectedTab = selectedTab(for: server.id) {
@@ -60,12 +64,20 @@ final class RemoteFileTabManager: ObservableObject {
             return fallbackTab
         }
 
-        return openTab(for: server, seedPath: seedPath)
+        return openTab(
+            for: server,
+            seedPath: seedPath,
+            hasProAccess: hasProAccess
+        )
     }
 
     @discardableResult
-    func openTab(for server: Server, seedPath: String? = nil) -> RemoteFileTab? {
-        guard canOpenNewTab(for: server.id) else { return nil }
+    func openTab(
+        for server: Server,
+        seedPath: String? = nil,
+        hasProAccess: Bool
+    ) -> RemoteFileTab? {
+        guard canOpenNewTab(for: server.id, hasProAccess: hasProAccess) else { return nil }
 
         let tab = RemoteFileTab(serverId: server.id, seedPath: seedPath)
         var serverTabs = tabsByServer[server.id] ?? []
@@ -75,8 +87,12 @@ final class RemoteFileTabManager: ObservableObject {
     }
 
     @discardableResult
-    func duplicateTab(_ tab: RemoteFileTab, seedPath: String? = nil) -> RemoteFileTab? {
-        guard canOpenNewTab(for: tab.serverId) else { return nil }
+    func duplicateTab(
+        _ tab: RemoteFileTab,
+        seedPath: String? = nil,
+        hasProAccess: Bool
+    ) -> RemoteFileTab? {
+        guard canOpenNewTab(for: tab.serverId, hasProAccess: hasProAccess) else { return nil }
 
         let duplicate = RemoteFileTab(
             serverId: tab.serverId,

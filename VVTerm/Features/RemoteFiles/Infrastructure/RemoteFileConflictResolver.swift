@@ -11,7 +11,8 @@ struct RemoteFileConflictResolver {
         reservedNames: inout Set<String>
     ) async throws -> RemoteFileConflictResolution {
         let normalizedDirectoryPath = RemoteFilePath.normalize(remoteDirectoryPath)
-        let remotePath = RemoteFilePath.appending(originalName, to: normalizedDirectoryPath)
+        let originalLeaf = try RemoteFileLeaf(validating: originalName)
+        let remotePath = RemoteFilePath.appending(originalLeaf, to: normalizedDirectoryPath)
 
         do {
             let existingEntry = try await service.lstat(at: remotePath)
@@ -69,7 +70,8 @@ struct RemoteFileConflictResolver {
 
             guard !reservedNames.contains(candidateName) else { continue }
 
-            let candidatePath = RemoteFilePath.appending(candidateName, to: remoteDirectoryPath)
+            let candidateLeaf = try RemoteFileLeaf(validating: candidateName)
+            let candidatePath = RemoteFilePath.appending(candidateLeaf, to: remoteDirectoryPath)
             do {
                 _ = try await service.lstat(at: candidatePath)
                 continue

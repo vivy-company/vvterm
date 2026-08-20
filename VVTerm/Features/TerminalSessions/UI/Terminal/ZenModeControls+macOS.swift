@@ -7,9 +7,9 @@ struct ZenModePanel: View {
     let serverName: String
     let statusText: String
     let statusColor: Color
-    let selectedView: String
-    let selectedViewBinding: Binding<String>
-    let viewTabs: [ConnectionViewTab]
+    let selectedView: ConnectionViewTabID
+    let selectedViewBinding: Binding<ConnectionViewTabID>
+    let viewTabs: [ConnectionViewTabID]
     let terminalTabs: [TerminalTab]
     let selectedTerminalTabId: Binding<UUID?>
     let terminalTabTitle: (TerminalTab) -> String
@@ -89,14 +89,14 @@ struct ZenModePanel: View {
             }
 
             ZenModeActionButton(title: "New Tab", systemImage: "plus") {
-                if selectedView == ConnectionViewTab.files.id {
+                if selectedView == .files {
                     onNewFileTab()
                 } else {
                     onNewTerminalTab()
                 }
             }
 
-            if selectedView == ConnectionViewTab.files.id {
+            if selectedView == .files {
                 if fileTabs.isEmpty {
                     Text("No file tabs open.")
                         .font(.callout)
@@ -123,7 +123,7 @@ struct ZenModePanel: View {
             }
         }
 
-        if selectedView == "terminal" {
+        if selectedView == .terminal {
             ZenModeSection("Pane") {
                 ZenModeActionButton(
                     title: "Split Right",
@@ -152,7 +152,7 @@ struct ZenModePanel: View {
             }
         }
 
-        if selectedView == "files" {
+        if selectedView == .files {
             ZenModeSection("Files") {
                 HStack(spacing: 8) {
                     ZenModeActionButton(title: "Parent", systemImage: "arrow.turn.up.left") {
@@ -218,7 +218,7 @@ struct ZenModePanel: View {
 
         return HStack(spacing: 8) {
             Button {
-                selectedViewBinding.wrappedValue = "terminal"
+                selectedViewBinding.wrappedValue = .terminal
                 selectedTerminalTabId.wrappedValue = tab.id
             } label: {
                 HStack(spacing: 10) {
@@ -270,7 +270,7 @@ struct ZenModePanel: View {
 
         return HStack(spacing: 8) {
             Button {
-                selectedViewBinding.wrappedValue = ConnectionViewTab.files.id
+                selectedViewBinding.wrappedValue = .files
                 selectedFileTabId.wrappedValue = tab.id
                 onSelectFileTab(tab)
             } label: {
@@ -310,7 +310,7 @@ struct ZenModePanel: View {
     }
 
     private var activeTabCount: Int {
-        selectedView == ConnectionViewTab.files.id ? fileTabs.count : terminalTabs.count
+        selectedView == .files ? fileTabs.count : terminalTabs.count
     }
 }
 #endif

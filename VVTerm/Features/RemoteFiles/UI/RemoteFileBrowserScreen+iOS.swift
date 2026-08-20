@@ -15,67 +15,71 @@ extension RemoteFileBrowserScreen {
         browserContent(snapshot)
     }
 
-    func platformUploadImportPresentation<Content: View>(_ content: Content) -> some View {
-        content
-            .sheet(item: $uploadImportRequest) { request in
-                RemoteFileImportPicker { result in
-                    handleUploadSelection(result, for: request)
-                }
-                .adaptiveSoftScrollEdges()
-            }
-    }
-
     func platformSearchPresentation<Content: View>(_ content: Content) -> some View {
         content
             .searchable(text: $platformState.searchQuery, prompt: String(localized: "Search Files"))
     }
 
-    func platformSharePresentation<Content: View>(_ content: Content) -> some View {
+    func platformPresentation<Content: View>(_ content: Content) -> some View {
         content
-            .sheet(item: $shareItem) { item in
-                RemoteFileShareSheet(item: item) {
-                    finishSharing(item)
-                }
-                .adaptiveSoftScrollEdges()
+            .sheet(item: iosSheetPresentationBinding, onDismiss: dismissPresentation) { route in
+                iosSheet(for: route)
+                    .adaptiveSoftScrollEdges()
             }
+    }
+
+    var iosSheetPresentationBinding: Binding<RemoteFileBrowserPresentation?> {
+        Binding(
+            get: {
+                guard presentation?.isIOSSheet == true else { return nil }
+                return presentation
+            },
+            set: { route in
+                if let route {
+                    presentation = route
+                } else if presentation?.isIOSSheet == true {
+                    dismissPresentation()
+                }
+            }
+        )
+    }
+
+    @ViewBuilder
+    func iosSheet(for route: RemoteFileBrowserPresentation) -> some View {
+        switch route {
+        case .upload(let destinationPath):
+            RemoteFileImportPicker { result in
+                handleUploadSelection(result, toPresentedDestination: destinationPath)
+            }
+        case .share(let item):
+            RemoteFileShareSheet(item: item) {
+                finishSharing(item)
+            }
+        case .createFolder(let draft):
+            RemoteFileCreateFolderSheet(
+                destinationPath: draft.destinationPath,
+                folderName: createFolderNameBinding,
+                isSubmitting: draft.isSubmitting,
+                onCancel: resetNewFolderPrompt,
+                onCreate: createFolder
+            )
+        case .rename(let draft):
+            renameSheet(entry: draft.entry)
+        case .move(let draft):
+            moveSheet(entry: draft.entry)
+        case .delete(let entry):
+            deleteSheet(entry: entry)
+        case .permissions(let draft):
+            permissionSheet(entry: draft.entry)
+        case .downloadExport, .operationError, .transferCancellation:
+            EmptyView()
+        }
     }
 
     func platformDropPresentation<Content: View>(_ content: Content, snapshot: Snapshot) -> some View {
         content
             .onDrop(of: remoteRowDropTypeIdentifiers, isTargeted: $isDropTargeted) { providers in
                 handleCurrentDirectoryDrop(providers, to: snapshot.currentPath)
-            }
-    }
-
-    func platformNewFolderPresentation<Content: View>(_ content: Content) -> some View {
-        content
-            .sheet(isPresented: newFolderPromptBinding, onDismiss: resetNewFolderPrompt) {
-                if let destinationPath = newFolderDestinationPath {
-                    RemoteFileCreateFolderSheet(
-                        destinationPath: destinationPath,
-                        folderName: $newFolderName,
-                        isSubmitting: isCreateFolderSubmitting,
-                        onCancel: resetNewFolderPrompt,
-                        onCreate: createFolder
-                    )
-                    .adaptiveSoftScrollEdges()
-                }
-            }
-    }
-
-    func platformRenamePresentation<Content: View>(_ content: Content) -> some View {
-        content
-            .sheet(item: $renameTargetEntry, onDismiss: resetRenamePrompt) { entry in
-                renameSheet(entry: entry)
-                    .adaptiveSoftScrollEdges()
-            }
-    }
-
-    func platformDeletePresentation<Content: View>(_ content: Content) -> some View {
-        content
-            .sheet(item: $deleteTargetEntry, onDismiss: { deleteTargetEntry = nil }) { entry in
-                deleteSheet(entry: entry)
-                    .adaptiveSoftScrollEdges()
             }
     }
 
@@ -105,58 +109,32 @@ extension RemoteFileBrowserScreen {
     }
 
     func platformBeginUpload(to remotePath: String) {
-        uploadImportRequest = UploadImportRequest(destinationPath: remotePath)
+        presentation = .upload(destinationPath: remotePath)
     }
 
     func platformBeginDownload(_ entry: RemoteFileEntry) {
         cleanupDownloadExport()
-        if let downloadTransferNoticeID {
-            noticeHost.dismiss(id: downloadTransferNoticeID.uuidString)
-        }
-
-        let transferID = UUID()
-        downloadTransferNoticeID = transferID
-
-        let temporaryURL: URL
-        do {
-            temporaryURL = try temporaryDownloadURL(for: entry)
-        } catch {
-            downloadTransferNoticeID = nil
-            presentOperationError(error)
-            return
-        }
-
-        performTransfer(
-            id: transferID,
-            title: String(localized: "Downloading"),
-            initialMessage: String(localized: "Preparing remote file."),
-            successMessage: String(localized: "Download ready to export."),
-            completionLifetime: .persistent,
-            onSuccess: {
-                guard downloadTransferNoticeID == transferID else { return }
-                downloadExportDocument = RemoteFileDownloadDocument(sourceURL: temporaryURL)
-                downloadExportFilename = entry.name
-                isDownloadExporterPresented = true
-            }
-        ) {
-            try await browser.downloadFile(
-                at: entry.path,
-                to: temporaryURL,
-                server: server
-            )
+        operationCoordinator.prepareFile(
+            entry,
+            purpose: .downloadExport,
+            browser: browser,
+            tab: fileTab,
+            server: server
+        ) { file in
+                presentation = .downloadExport(.init(
+                    document: RemoteFileDownloadDocument(sourceURL: file.url),
+                    filename: file.filename,
+                    transferID: file.id
+                ))
         }
     }
 
     func platformBeginCreateFolder(in remotePath: String) {
-        newFolderDestinationPath = remotePath
-        newFolderName = ""
-        isCreateFolderSubmitting = false
+        presentation = .createFolder(.init(destinationPath: remotePath))
     }
 
     func platformBeginRename(_ entry: RemoteFileEntry) {
-        renameTargetEntry = entry
-        renameName = entry.name
-        isRenameSubmitting = false
+        presentation = .rename(.init(entry: entry, name: entry.name))
     }
 
     func platformDidActivatePreviewEntry(_ entry: RemoteFileEntry) async {
@@ -169,7 +147,7 @@ extension RemoteFileBrowserScreen {
 
     func platformRequestDelete(_ entries: [RemoteFileEntry]) {
         guard entries.count == 1, let entry = entries.first else { return }
-        deleteTargetEntry = entry
+        presentation = .delete(entry)
     }
 
     @ViewBuilder
@@ -265,7 +243,7 @@ extension RemoteFileBrowserScreen {
                         beginEditPermissions(entry)
                     },
                     onDelete: { entry in
-                        deleteTargetEntry = entry
+                        presentation = .delete(entry)
                     },
                     onClose: nil,
                     onSaveText: { entry, text in

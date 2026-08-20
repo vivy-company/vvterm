@@ -1,15 +1,13 @@
 import Foundation
 
 final class MLXParakeetProvider {
-    static let shared = MLXParakeetProvider()
-
     static var isSupported: Bool {
         MLXAudioSupport.isSupported
     }
 
-    private init() {}
+    init() {}
 
-    func transcribe(samples: [Float]) async throws -> String {
+    func transcribe(samples: [Float], modelID: String) async throws -> String {
         #if arch(arm64)
         guard Self.isSupported else {
             throw NSError(
@@ -18,19 +16,26 @@ final class MLXParakeetProvider {
                 userInfo: [NSLocalizedDescriptionKey: MLXAudioSupport.unavailableDescription]
             )
         }
-        let modelId = TranscriptionSettingsStore.currentParakeetModelId()
         let modelDirectory = await MainActor.run {
-            MLXModelManager.modelDirectory(for: .parakeetTDT, modelId: modelId)
+            MLXModelManager.modelDirectory(for: .parakeetTDT, modelId: modelID)
         }
 
-        return try await Task.detached(priority: .userInitiated) {
+        let task = Task.detached(priority: .userInitiated) {
+            try Task.checkCancellation()
             guard !samples.isEmpty else { return "" }
 
-            let model = try ParakeetModelLoader.shared.loadModel(at: modelDirectory)
-            let audio = MLXArray(samples, [samples.count])
-            let result = try model.transcribe(audioData: audio, dtype: .float32, chunkDuration: nil)
-            return result.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        }.value
+            let result = try ParakeetModelLoader.shared.transcribe(
+                samples: samples,
+                modelDirectory: modelDirectory
+            )
+            try Task.checkCancellation()
+            return result
+        }
+        return try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
         #else
         throw NSError(
             domain: "MLXParakeet",
@@ -45,7 +50,9 @@ final class MLXParakeetProvider {
 import MLX
 @preconcurrency import MLXNN
 
-nonisolated final class ParakeetModelLoader {
+/// MLX model loading and inference are serialized by `lock`. No model value
+/// escapes this object, so the lock is the complete mutable-state boundary.
+nonisolated final class ParakeetModelLoader: @unchecked Sendable {
     static let shared = ParakeetModelLoader()
 
     private var cachedModel: ParakeetTDT?
@@ -54,10 +61,20 @@ nonisolated final class ParakeetModelLoader {
 
     private init() {}
 
-    func loadModel(at modelDirectory: URL) throws -> ParakeetTDT {
+    func transcribe(samples: [Float], modelDirectory: URL) throws -> String {
         lock.lock()
         defer { lock.unlock() }
 
+        try Task.checkCancellation()
+        let model = try loadModel(at: modelDirectory)
+        try Task.checkCancellation()
+        let audio = MLXArray(samples, [samples.count])
+        let result = try model.transcribe(audioData: audio, dtype: .float32, chunkDuration: nil)
+        try Task.checkCancellation()
+        return result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func loadModel(at modelDirectory: URL) throws -> ParakeetTDT {
         if let cachedModel, cachedModelURL == modelDirectory {
             return cachedModel
         }
@@ -65,6 +82,7 @@ nonisolated final class ParakeetModelLoader {
         let configURL = modelDirectory.appendingPathComponent("config.json")
         let configData = try Data(contentsOf: configURL)
         let config = try JSONDecoder().decode(ParakeetTDTConfig.self, from: configData)
+        try MLXModelConfigurationValidator.validateParakeet(config)
 
         let weightURLs = Self.weightFileURLs(in: modelDirectory)
         guard !weightURLs.isEmpty else {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4FB0ED9B3F04FE89CE2BD32E /* VVTermLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VVTermLiveActivity.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5C9A7D8E31A1000100D32601 /* VVTermStoreKit.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CC837B372F0E62F2006804BF /* VVTermStoreKit.storekit */; };
 		82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1853ABB6CF8195DF93B55895 /* ZIPFoundation */; };
 		8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A089872E7F6345088D2FA637 /* AppIntents.framework */; };
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
@@ -391,6 +392,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5C9A7D8E31A1000100D32601 /* VVTermStoreKit.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,12 +466,13 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VVTermLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -484,12 +487,13 @@
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = VVTermLiveActivity/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTerm.liveactivity;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -570,7 +574,7 @@
 					"$(SRCROOT)/Vendor/libssh2/macos/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -629,7 +633,8 @@
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphonesimulator*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=macosx*]" = "VVTerm/ghostty-bridging-header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
@@ -711,7 +716,7 @@
 					"$(SRCROOT)/Vendor/libssh2/macos/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
 					"-lghostty",
 					"-lssh2",
@@ -770,7 +775,8 @@
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphonesimulator*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=macosx*]" = "VVTerm/ghostty-bridging-header.h";
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
@@ -921,7 +927,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -930,7 +936,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VVTerm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VVTerm";
 				XROS_DEPLOYMENT_TARGET = 26.2;
@@ -960,7 +967,7 @@
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -969,7 +976,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VVTerm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VVTerm";
 				XROS_DEPLOYMENT_TARGET = 26.2;
@@ -986,7 +994,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -995,7 +1003,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_TARGET_NAME = VVTerm;
 				XROS_DEPLOYMENT_TARGET = 26.2;
@@ -1012,7 +1021,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
-				MARKETING_VERSION = 2.11;
+				MARKETING_VERSION = 2.15;
 				PRODUCT_BUNDLE_IDENTIFIER = app.vivy.VivyTermUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -1021,7 +1030,8 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_TARGET_NAME = VVTerm;
 				XROS_DEPLOYMENT_TARGET = 26.2;

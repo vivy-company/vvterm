@@ -1,6 +1,6 @@
 import Foundation
 
-enum GPUKind: String, Codable, Equatable, Sendable {
+nonisolated enum GPUKind: String, Codable, Equatable, Sendable {
     case nvidia
     case amd
     case intel
@@ -8,7 +8,7 @@ enum GPUKind: String, Codable, Equatable, Sendable {
     case unknown
 }
 
-enum GPUSource: String, Codable, Equatable, Sendable {
+nonisolated enum GPUSource: String, Codable, Equatable, Sendable {
     case nvidiaSMI
     case rocmSMI
     case intelGPU
@@ -18,7 +18,7 @@ enum GPUSource: String, Codable, Equatable, Sendable {
     case unknown
 }
 
-struct GPUDevice: Identifiable, Codable, Equatable, Sendable {
+nonisolated struct GPUDevice: Identifiable, Codable, Equatable, Sendable {
     var id: String
     var name: String
     var vendor: String
@@ -32,7 +32,7 @@ struct GPUDevice: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-struct GPUSample: Identifiable, Codable, Equatable, Sendable {
+nonisolated struct GPUSample: Identifiable, Codable, Equatable, Sendable {
     var id: String { deviceID }
     var deviceID: String
     var utilizationPercent: Double?
@@ -54,7 +54,7 @@ struct GPUSample: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-struct GPUProcess: Identifiable, Codable, Equatable, Sendable {
+nonisolated struct GPUProcess: Identifiable, Codable, Equatable, Sendable {
     var id: Int { pid }
     var pid: Int
     var name: String

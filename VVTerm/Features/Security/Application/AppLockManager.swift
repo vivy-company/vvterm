@@ -3,34 +3,25 @@ import Combine
 
 @MainActor
 final class AppLockManager: ObservableObject {
-    static let shared = AppLockManager()
+    @Published private(set) var lockState: AppLockState
+    @Published private(set) var authenticationState: AppLockAuthenticationState = .idle
+    @Published private(set) var lastFailure: AppLockFailure?
+    @Published private(set) var biometricAvailability: BiometricAvailability
 
-    private enum Keys {
-        static let fullAppLockEnabled = "security.fullAppLockEnabled"
-        static let lockOnBackground = "security.lockOnBackground"
-        static let authGraceSeconds = "security.authGraceSeconds"
-    }
-
-    @Published private(set) var isAppLocked: Bool
-    @Published private(set) var isAuthenticating = false
-    @Published private(set) var lastErrorMessage: String?
-    @Published private(set) var isBiometryAvailable = false
-    @Published private(set) var biometryKind: BiometryKind = .none
-    @Published private(set) var biometryAvailabilityMessage: String?
-
-    @Published var fullAppLockEnabled: Bool {
+    @Published private(set) var fullAppLockEnabled: Bool {
         didSet {
-            defaults.set(fullAppLockEnabled, forKey: Keys.fullAppLockEnabled)
+            dependencies.preferences.fullAppLockEnabled = fullAppLockEnabled
             if !fullAppLockEnabled {
-                clearUnlockState()
-                isAppLocked = false
+                invalidateAuthentication()
+                unlockedServers.removeAll()
+                lockState = .unlocked(at: nil)
             }
         }
     }
 
     @Published var lockOnBackground: Bool {
         didSet {
-            defaults.set(lockOnBackground, forKey: Keys.lockOnBackground)
+            dependencies.preferences.lockOnBackground = lockOnBackground
         }
     }
 
@@ -41,98 +32,109 @@ final class AppLockManager: ObservableObject {
                 authGraceSeconds = clamped
                 return
             }
-            defaults.set(authGraceSeconds, forKey: Keys.authGraceSeconds)
+            dependencies.preferences.authGraceSeconds = authGraceSeconds
         }
     }
 
-    var biometryDisplayName: String {
-        biometryKind.displayName
+    var isAppLocked: Bool { lockState.isLocked }
+    var isAuthenticating: Bool { authenticationState.isAuthenticating }
+
+    var isBiometryAvailable: Bool {
+        if case .available = biometricAvailability {
+            return true
+        }
+        return false
     }
 
-    private let defaults: UserDefaults
-    private let authService: any BiometricAuthServing
-    private var lastAppUnlockAt: Date?
+    var biometryKind: BiometryKind {
+        if case .available(let kind) = biometricAvailability {
+            return kind
+        }
+        return .none
+    }
+
+    private let dependencies: AppLockManagerDependencies
     private var unlockedServers: [UUID: Date] = [:]
 
-    init(defaults: UserDefaults, authService: any BiometricAuthServing) {
-        self.defaults = defaults
-        self.authService = authService
+    init(dependencies: AppLockManagerDependencies) {
+        self.dependencies = dependencies
+        self.biometricAvailability = dependencies.authService.availability()
 
-        let fullLockEnabled = defaults.object(forKey: Keys.fullAppLockEnabled) as? Bool ?? false
+        let fullLockEnabled = dependencies.preferences.fullAppLockEnabled ?? false
         self.fullAppLockEnabled = fullLockEnabled
-        self.lockOnBackground = defaults.object(forKey: Keys.lockOnBackground) as? Bool ?? true
-        let storedGrace = defaults.object(forKey: Keys.authGraceSeconds) as? Int ?? 30
+        self.lockOnBackground = dependencies.preferences.lockOnBackground ?? true
+        let storedGrace = dependencies.preferences.authGraceSeconds ?? 30
         self.authGraceSeconds = max(0, min(storedGrace, 300))
-        self.isAppLocked = fullLockEnabled
-
-        refreshBiometryAvailability()
-    }
-
-    convenience init() {
-        self.init(defaults: .standard, authService: BiometricAuthService.shared)
+        self.lockState = fullLockEnabled
+            ? .locked(generation: dependencies.makeID())
+            : .unlocked(at: nil)
     }
 
     func refreshBiometryAvailability() {
-        let nextIsAvailable: Bool
-        let nextKind: BiometryKind
-        let nextMessage: String?
-
-        switch authService.availability() {
-        case .available(let kind):
-            nextIsAvailable = true
-            nextKind = kind
-            nextMessage = nil
-        case .unavailable(let message):
-            nextIsAvailable = false
-            nextKind = .none
-            nextMessage = message
-        }
-
-        if isBiometryAvailable != nextIsAvailable {
-            isBiometryAvailable = nextIsAvailable
-        }
-        if biometryKind != nextKind {
-            biometryKind = nextKind
-        }
-        if biometryAvailabilityMessage != nextMessage {
-            biometryAvailabilityMessage = nextMessage
+        let nextAvailability = dependencies.authService.availability()
+        if biometricAvailability != nextAvailability {
+            biometricAvailability = nextAvailability
         }
     }
 
     func requestSetFullAppLockEnabled(_ enabled: Bool) async {
-        lastErrorMessage = nil
+        lastFailure = nil
 
         guard enabled != fullAppLockEnabled else { return }
 
         if !enabled {
+            guard await authenticate(
+                reason: .disableAppLock,
+                purpose: .disableFullAppLock
+            ) else { return }
             fullAppLockEnabled = false
             return
         }
 
         refreshBiometryAvailability()
-        guard isBiometryAvailable else {
-            lastErrorMessage = biometryAvailabilityMessage
+        guard case .available(let biometry) = biometricAvailability else {
+            if case .unavailable(let reason) = biometricAvailability {
+                lastFailure = .biometryUnavailable(reason)
+            }
             return
         }
 
-        let reason = String(format: String(localized: "Enable %@ for VVTerm"), biometryDisplayName)
-        guard await authenticate(reason: reason) else { return }
+        guard await authenticate(
+            reason: .enableAppLock(biometry: biometry),
+            purpose: .enableFullAppLock
+        ) else { return }
 
         fullAppLockEnabled = true
-        isAppLocked = false
-        lastAppUnlockAt = Date()
+        lockState = .unlocked(at: dependencies.now())
     }
 
     func ensureAppUnlocked() async -> Bool {
         guard fullAppLockEnabled else { return true }
-        guard isAppLocked else { return true }
+        guard case .locked(let lockGeneration) = lockState else { return true }
 
-        let reason = String(format: String(localized: "Unlock VVTerm with %@"), biometryDisplayName)
-        guard await authenticate(reason: reason) else { return false }
+        guard await authenticate(
+            reason: .unlockApp(biometry: biometryKind),
+            purpose: .unlockApp(lockGeneration: lockGeneration)
+        ) else { return false }
+        guard lockState == .locked(generation: lockGeneration) else { return false }
 
-        isAppLocked = false
-        lastAppUnlockAt = Date()
-        lastErrorMessage = nil
+        lockState = .unlocked(at: dependencies.now())
+        lastFailure = nil
+        return true
+    }
+
+    func authorizeProtectedServerAction(
+        _ server: Server,
+        action: AppLockAuthenticationState.ProtectedServerAction
+    ) async -> Bool {
+        guard server.requiresBiometricUnlock else { return true }
+
+        guard await authenticate(
+            reason: .protectedServerAction(action: action, serverName: server.name),
+            purpose: .protectedServerAction(serverID: server.id, action: action)
+        ) else { return false }
+
+        lastFailure = nil
         return true
     }
 
@@ -140,7 +142,7 @@ final class AppLockManager: ObservableObject {
         guard server.requiresBiometricUnlock else { return true }
         purgeExpiredUnlocks()
 
-        if hasValidGrant(lastAppUnlockAt) {
+        if hasValidGrant(lockState.lastUnlockAt) {
             return true
         }
 
@@ -158,11 +160,13 @@ final class AppLockManager: ObservableObject {
             return true
         }
 
-        let reason = String(format: String(localized: "Unlock server %@"), server.name)
-        guard await authenticate(reason: reason) else { return false }
+        guard await authenticate(
+            reason: .unlockServer(name: server.name),
+            purpose: .unlockServer(serverID: server.id)
+        ) else { return false }
 
-        unlockedServers[server.id] = Date()
-        lastErrorMessage = nil
+        unlockedServers[server.id] = dependencies.now()
+        lastFailure = nil
         return true
     }
 
@@ -177,19 +181,15 @@ final class AppLockManager: ObservableObject {
 
     func lockAppNow() {
         guard fullAppLockEnabled else { return }
-        isAppLocked = true
-        clearUnlockState()
-    }
-
-    private func clearUnlockState() {
-        lastAppUnlockAt = nil
+        lockState = .locked(generation: dependencies.makeID())
+        invalidateAuthentication()
         unlockedServers.removeAll()
     }
 
     private func hasValidGrant(_ date: Date?) -> Bool {
         guard let date else { return false }
         guard authGraceSeconds > 0 else { return false }
-        return Date().timeIntervalSince(date) <= TimeInterval(authGraceSeconds)
+        return dependencies.now().timeIntervalSince(date) <= TimeInterval(authGraceSeconds)
     }
 
     private func purgeExpiredUnlocks() {
@@ -198,27 +198,50 @@ final class AppLockManager: ObservableObject {
             return
         }
 
-        let threshold = Date().addingTimeInterval(-TimeInterval(authGraceSeconds))
+        let threshold = dependencies.now().addingTimeInterval(-TimeInterval(authGraceSeconds))
         unlockedServers = unlockedServers.filter { $0.value >= threshold }
     }
 
-    private func authenticate(reason: String) async -> Bool {
-        guard !isAuthenticating else { return false }
+    private func authenticate(
+        reason: BiometricAuthenticationReason,
+        purpose: AppLockAuthenticationState.Purpose
+    ) async -> Bool {
+        guard authenticationState == .idle else { return false }
 
-        isAuthenticating = true
-        defer { isAuthenticating = false }
+        let attemptID = dependencies.makeID()
+        authenticationState = .authenticating(attemptID: attemptID, purpose: purpose)
+        defer {
+            if authenticationState.accepts(attemptID: attemptID, purpose: purpose) {
+                authenticationState = .idle
+            }
+        }
 
         do {
-            try await authService.authenticate(localizedReason: reason, allowPasscodeFallback: true)
-            return true
-        } catch let error as BiometricAuthError {
-            if !error.isCancellation {
-                lastErrorMessage = error.localizedDescription
+            try await dependencies.authService.authenticate(
+                reason: reason,
+                allowPasscodeFallback: true
+            )
+            return authenticationState.accepts(attemptID: attemptID, purpose: purpose)
+        } catch let failure as BiometricAuthenticationFailure {
+            guard authenticationState.accepts(attemptID: attemptID, purpose: purpose) else {
+                return false
+            }
+            if !failure.isCancellation {
+                lastFailure = .authentication(failure)
             }
             return false
+        } catch is CancellationError {
+            return false
         } catch {
-            lastErrorMessage = error.localizedDescription
+            guard authenticationState.accepts(attemptID: attemptID, purpose: purpose) else {
+                return false
+            }
+            lastFailure = .authentication(.system(message: error.localizedDescription))
             return false
         }
+    }
+
+    private func invalidateAuthentication() {
+        authenticationState = .idle
     }
 }

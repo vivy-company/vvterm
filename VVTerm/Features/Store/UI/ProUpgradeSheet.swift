@@ -1,16 +1,16 @@
 import SwiftUI
-import StoreKit
 
 // MARK: - Pro Upgrade Sheet
 
 struct ProUpgradeSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var storeManager: StoreManager
-    @ObservedObject private var serverManager = ServerManager.shared
+    @EnvironmentObject private var serverManager: ServerManager
     private let source: PaywallSource
     private let onDismiss: (() -> Void)?
 
     @State private var selectedPlan: ProPlanKind = .yearly
+    @State private var yearlyOfferState: ProPlanIntroductoryOfferState = .unavailable
     @State private var showSuccess = false
     @State private var alertInfo: AlertInfo?
     @State private var showCancelSubscriptionAlert = false
@@ -29,66 +29,26 @@ struct ProUpgradeSheet: View {
     }
 
     var body: some View {
-        #if os(iOS)
-        NavigationStack {
-            sheetContent
-                .navigationTitle("")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        VStack(spacing: 1) {
-                            Text(source.paywallTitle)
-                                .font(.headline)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                            Text(source.paywallSubtitle)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                    }
-
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            close()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-        }
-        .adaptiveSoftScrollEdges()
-        #else
-        macSheetContent
-        #endif
+        platformBody(
+            sheetContent: sheetContent,
+            source: source,
+            onClose: close
+        )
     }
 
     private var sheetContent: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                contentStack
-                    .padding(.horizontal, 20)
-                    .padding(.top, 18)
-                    .padding(.bottom, 18)
-            }
-            .scrollIndicators(.visible)
-
-            purchaseFooter
-        }
-        .background(sheetBackground.ignoresSafeArea())
+        platformSheetLayout(
+            content: contentStack,
+            footer: purchaseFooter,
+            source: source
+        )
         .task {
-            storeManager.notePaywallPresented(source: source)
-            await storeManager.loadProducts()
-            selectedPlan = defaultPlan
+            await preparePaywall()
         }
-        .onChangeCompat(of: storeManager.purchaseState) { newState in
+        .onChange(of: storeManager.purchaseState) { newState in
             handlePurchaseStateChange(newState)
         }
-        .onChangeCompat(of: storeManager.restoreState) { newState in
+        .onChange(of: storeManager.restoreState) { newState in
             handleRestoreStateChange(newState)
         }
         .overlay {
@@ -101,7 +61,7 @@ struct ProUpgradeSheet: View {
             set: { isPresented in
                 if !isPresented {
                     if alertInfo?.isRestore == true {
-                        storeManager.restoreState = .idle
+                        storeManager.dismissRestoreResult()
                     }
                     alertInfo = nil
                 }
@@ -109,7 +69,7 @@ struct ProUpgradeSheet: View {
         ), presenting: alertInfo) { info in
             Button("OK") {
                 if info.isRestore {
-                    storeManager.restoreState = .idle
+                    storeManager.dismissRestoreResult()
                 }
                 alertInfo = nil
             }
@@ -136,81 +96,6 @@ struct ProUpgradeSheet: View {
         )
         #endif
     }
-
-    #if os(macOS)
-    private var macSheetContent: some View {
-        VStack(spacing: 0) {
-            ScrollView {
-                contentStack
-                    .padding(.horizontal, 22)
-                    .padding(.top, 18)
-                    .padding(.bottom, 18)
-            }
-            .scrollIndicators(.automatic)
-
-            purchaseFooter
-        }
-        .frame(
-            minWidth: 500,
-            idealWidth: 520,
-            maxWidth: .infinity,
-            minHeight: 620,
-            idealHeight: 780,
-            maxHeight: .infinity
-        )
-        .background(sheetBackground)
-        .background(ProUpgradeWindowConfigurator(source: source))
-        .task {
-            storeManager.notePaywallPresented(source: source)
-            await storeManager.loadProducts()
-            selectedPlan = defaultPlan
-        }
-        .onChangeCompat(of: storeManager.purchaseState) { newState in
-            handlePurchaseStateChange(newState)
-        }
-        .onChangeCompat(of: storeManager.restoreState) { newState in
-            handleRestoreStateChange(newState)
-        }
-        .overlay {
-            if showSuccess {
-                successOverlay
-            }
-        }
-        .alert(alertInfo?.title ?? "", isPresented: .init(
-            get: { alertInfo != nil },
-            set: { isPresented in
-                if !isPresented {
-                    if alertInfo?.isRestore == true {
-                        storeManager.restoreState = .idle
-                    }
-                    alertInfo = nil
-                }
-            }
-        ), presenting: alertInfo) { info in
-            Button("OK") {
-                if info.isRestore {
-                    storeManager.restoreState = .idle
-                }
-                alertInfo = nil
-            }
-        } message: { info in
-            Text(info.message)
-        }
-        .alert(String(localized: "Cancel Subscription?"), isPresented: $showCancelSubscriptionAlert) {
-            Button(String(localized: "Manage Subscription")) {
-                openSubscriptionManagement()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    close()
-                }
-            }
-            Button(String(localized: "Later"), role: .cancel) {
-                close()
-            }
-        } message: {
-            Text("You now have lifetime access. You should cancel your existing subscription to avoid being charged.")
-        }
-    }
-    #endif
 
     private var contentStack: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -274,8 +159,7 @@ struct ProUpgradeSheet: View {
                     ForEach(availablePlans) { plan in
                         if let product = product(for: plan) {
                             PlanSelectionCard(
-                                product: product,
-                                plan: plan,
+                                presentation: presentation(for: plan, product: product),
                                 isSelected: selectedPlan == plan
                             ) {
                                 selectedPlan = plan
@@ -316,12 +200,13 @@ struct ProUpgradeSheet: View {
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
-            .disabled(selectedProduct == nil)
+            .disabled(selectedProduct == nil || storeManager.accessState == .checking)
             .allowsHitTesting(storeManager.purchaseState != .purchasing)
+            .accessibilityLabel(selectedPresentation?.purchaseButtonAccessibilityLabel ?? subscribeButtonTitle)
 
             footerSupportRow
 
-            Text(selectedPlan == .lifetime ? String(localized: "One-time purchase. No subscription renewal.") : String(localized: "Auto-renews until canceled."))
+            Text(selectedPresentation?.renewalDisclosure ?? String(localized: "Auto-renews until canceled."))
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
         }
@@ -421,8 +306,12 @@ struct ProUpgradeSheet: View {
         ProPlanKind.displayOrder.filter { product(for: $0) != nil }
     }
 
-    private var selectedProduct: Product? {
-        product(for: selectedPlan) ?? product(for: defaultPlan)
+    private var selectedProduct: StoreProduct? {
+        product(for: selectedPlan)
+    }
+
+    private var selectedPresentation: ProPlanPresentation? {
+        selectedProduct.map { presentation(for: selectedPlan, product: $0) }
     }
 
     private var defaultPlan: ProPlanKind {
@@ -432,7 +321,7 @@ struct ProUpgradeSheet: View {
         return .yearly
     }
 
-    private func product(for plan: ProPlanKind) -> Product? {
+    private func product(for plan: ProPlanKind) -> StoreProduct? {
         switch plan {
         case .monthly:
             return storeManager.monthlyProduct
@@ -441,6 +330,29 @@ struct ProUpgradeSheet: View {
         case .lifetime:
             return storeManager.lifetimeProduct
         }
+    }
+
+    private func presentation(for plan: ProPlanKind, product: StoreProduct) -> ProPlanPresentation {
+        ProPlanPresentation(
+            plan: plan,
+            displayPrice: product.displayPrice,
+            introductoryOfferState: yearlyOfferState
+        )
+    }
+
+    private func refreshYearlyOfferState() async {
+        guard let yearlyProduct = storeManager.yearlyProduct else {
+            yearlyOfferState = .unavailable
+            return
+        }
+        yearlyOfferState = await storeManager.introductoryOfferState(for: yearlyProduct)
+    }
+
+    private func preparePaywall() async {
+        storeManager.notePaywallPresented(source: source)
+        await storeManager.loadProducts()
+        selectedPlan = defaultPlan
+        await refreshYearlyOfferState()
     }
 
     private var crossPlatformBenefitTitle: String {
@@ -456,11 +368,7 @@ struct ProUpgradeSheet: View {
     }
 
     private var subscribeButtonTitle: String {
-        guard let product = selectedProduct else { return String(localized: "Select a Plan") }
-        if product.id == VVTermProducts.proLifetime {
-            return String(format: String(localized: "Buy %@"), product.displayPrice)
-        }
-        return String(format: String(localized: "Subscribe for %@"), product.displayPrice)
+        selectedPresentation?.purchaseButtonTitle ?? String(localized: "Select a Plan")
     }
 
     // MARK: - Comparison
@@ -559,7 +467,7 @@ struct ProUpgradeSheet: View {
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     close()
-                    EngagementTracker.shared.requestReviewAfterPurchase()
+                    storeManager.requestReviewAfterPurchase()
                 }
             }
         case .failed(let message):
@@ -635,6 +543,8 @@ extension View {
 struct ProUpgradePresentationModifier: ViewModifier {
     @Binding var isPresented: Bool
     let source: PaywallSource
+    @EnvironmentObject var storeManager: StoreManager
+    @EnvironmentObject var serverManager: ServerManager
 
     func body(content: Content) -> some View {
         platformBody(content: content)
@@ -696,63 +606,8 @@ extension PaywallSource {
 
 // MARK: - Plans
 
-private enum ProPlanKind: String, CaseIterable, Identifiable {
-    case monthly
-    case yearly
-    case lifetime
-
-    static let displayOrder: [ProPlanKind] = [.monthly, .yearly, .lifetime]
-
-    var id: String { rawValue }
-
-    var title: String {
-        switch self {
-        case .monthly:
-            return String(localized: "Monthly")
-        case .yearly:
-            return String(localized: "Yearly")
-        case .lifetime:
-            return String(localized: "Lifetime")
-        }
-    }
-
-    var billingCaption: String {
-        switch self {
-        case .monthly:
-            return String(localized: "Billed monthly")
-        case .yearly:
-            return String(localized: "Billed yearly")
-        case .lifetime:
-            return String(localized: "One-time purchase")
-        }
-    }
-
-    var detail: String {
-        switch self {
-        case .monthly:
-            return String(localized: "Flexible access to every Pro feature.")
-        case .yearly:
-            return String(localized: "Best value for ongoing terminal work.")
-        case .lifetime:
-            return String(localized: "Pay once and keep Pro access forever.")
-        }
-    }
-
-    var badge: String? {
-        switch self {
-        case .monthly:
-            return nil
-        case .yearly:
-            return String(localized: "Best value")
-        case .lifetime:
-            return nil
-        }
-    }
-}
-
 private struct PlanSelectionCard: View {
-    let product: Product
-    let plan: ProPlanKind
+    let presentation: ProPlanPresentation
     let isSelected: Bool
     let onSelect: () -> Void
 
@@ -761,11 +616,11 @@ private struct PlanSelectionCard: View {
             HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text(plan.title)
+                        Text(presentation.plan.title)
                             .font(.headline)
                             .fontWeight(.semibold)
 
-                        if let badge = plan.badge {
+                        if let badge = presentation.plan.badge {
                             Text(badge)
                                 .font(.caption2)
                                 .fontWeight(.medium)
@@ -776,11 +631,11 @@ private struct PlanSelectionCard: View {
                         }
                     }
 
-                    Text(priceLine)
+                    Text(presentation.priceLine)
                         .font(.body)
                         .foregroundStyle(.primary)
 
-                    Text(plan.detail)
+                    Text(presentation.detail)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -803,17 +658,9 @@ private struct PlanSelectionCard: View {
             }
         }
         .buttonStyle(.plain)
-    }
-
-    private var priceLine: String {
-        switch plan {
-        case .monthly:
-            return String(format: String(localized: "%@ per month"), product.displayPrice)
-        case .yearly:
-            return String(format: String(localized: "%@ per year"), product.displayPrice)
-        case .lifetime:
-            return String(format: String(localized: "%@ one time"), product.displayPrice)
-        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(presentation.planAccessibilityLabel)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private var cardFill: Color {
@@ -1043,10 +890,4 @@ private struct NativeSectionCard<Content: View>: View {
     private var cardStroke: Color {
         paywallCardBorderColor
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    ProUpgradeSheet()
 }

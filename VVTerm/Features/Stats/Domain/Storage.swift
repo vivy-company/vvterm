@@ -1,6 +1,6 @@
 import Foundation
 
-enum VolumeIdentity: Codable, Hashable, Sendable {
+nonisolated enum VolumeIdentity: Codable, Hashable, Sendable {
     enum Platform: String, Codable, CaseIterable, Sendable {
         case linux
         case darwin
@@ -65,7 +65,7 @@ enum VolumeIdentity: Codable, Hashable, Sendable {
     }
 }
 
-enum VolumeKind: String, Codable, CaseIterable, Sendable {
+nonisolated enum VolumeKind: String, Codable, CaseIterable, Sendable {
     case physical
     case container
     case network
@@ -122,7 +122,7 @@ enum VolumeKind: String, Codable, CaseIterable, Sendable {
     }
 }
 
-enum VolumeVisibilityPolicy {
+nonisolated enum VolumeVisibilityPolicy {
     static func normalized(_ volumes: [VolumeInfo]) -> [VolumeInfo] {
         var result: [VolumeInfo] = []
         var indexByMountKey: [String: Int] = [:]
@@ -181,8 +181,7 @@ enum VolumeVisibilityPolicy {
     }
 }
 
-struct ServerVolumeVisibilityPreferences: Codable, Equatable, Sendable {
-    static let defaultsKey = "stats.serverVolumeVisibility.v1"
+nonisolated struct ServerVolumeVisibilityPreferences: Codable, Equatable, Sendable {
     static let currentSchemaVersion = 2
 
     private var schemaVersion: Int

@@ -3,44 +3,17 @@ import UniformTypeIdentifiers
 
 struct RemoteFileBrowserScreen: View {
     @ObservedObject var browser: RemoteFileBrowserStore
+    @ObservedObject var operationCoordinator: RemoteFileOperationCoordinator
     let server: Server
     let fileTab: RemoteFileTab
+    let appearance: TerminalAppearanceSnapshot
     let initialPath: String?
     let onCurrentPathChange: @MainActor (String?) -> Void
 
     @Environment(\.colorScheme) var colorScheme
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameKey) var terminalThemeName = "Aizen Dark"
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameLightKey) var terminalThemeNameLight = "Aizen Light"
-    @AppStorage(CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) var usePerAppearanceTheme = true
+    @EnvironmentObject var appLockManager: AppLockManager
     @State var presentedPreviewPath: String?
-    @State var uploadDestinationPath: String?
-    @State var uploadImportRequest: UploadImportRequest?
-    @State var downloadExportDocument: RemoteFileDownloadDocument?
-    @State var downloadExportFilename = ""
-    @State var isDownloadExporterPresented = false
-    @State var downloadTransferNoticeID: UUID?
-    @State var shareItem: RemoteFileShareItem?
-    @State var newFolderDestinationPath: String?
-    @State var newFolderName = ""
-    @State var isCreateFolderSubmitting = false
-    @State var renameTargetEntry: RemoteFileEntry?
-    @State var renameName = ""
-    @State var isRenameSubmitting = false
-    @State var moveTargetEntry: RemoteFileEntry?
-    @State var moveDestinationDirectory = ""
-    @State var isMoveSubmitting = false
-    @State var deleteTargetEntry: RemoteFileEntry?
-    @State var permissionTargetEntry: RemoteFileEntry?
-    @State var permissionDraft = RemoteFilePermissionDraft(accessBits: 0)
-    @State var permissionOriginalAccessBits: UInt32 = 0
-    @State var permissionPreservedBits: UInt32 = 0
-    @State var permissionFileTypeBits: UInt32 = 0
-    @State var isPermissionSubmitting = false
-    @State var permissionErrorMessage: String?
-    @State var operationErrorMessage: String?
-    @State var transferCancellationRequest: TransferCancellationRequest?
-    @State var transferTasks: [UUID: Task<Void, Never>] = [:]
-    @State var activeTransferKinds: [UUID: TransferKind] = [:]
+    @State var presentation: RemoteFileBrowserPresentation?
     @State var isDropTargeted = false
     @StateObject var platformState = RemoteFileBrowserPlatformState()
     @StateObject var noticeHost = NoticeHostModel()
@@ -69,69 +42,23 @@ struct RemoteFileBrowserScreen: View {
         let message: String
     }
 
-    struct UploadImportRequest: Identifiable {
-        let id = UUID()
-        let destinationPath: String
-    }
-
-    enum TransferKind {
-        case upload
-        case transfer
-
-        var confirmationTitle: String {
-            switch self {
-            case .upload:
-                return String(localized: "Cancel Upload?")
-            case .transfer:
-                return String(localized: "Cancel Transfer?")
-            }
-        }
-
-        var cancelButtonTitle: String {
-            switch self {
-            case .upload:
-                return String(localized: "Cancel Upload")
-            case .transfer:
-                return String(localized: "Cancel Transfer")
-            }
-        }
-
-        var keepButtonTitle: String {
-            switch self {
-            case .upload:
-                return String(localized: "Keep Uploading")
-            case .transfer:
-                return String(localized: "Continue Transfer")
-            }
-        }
-
-        var confirmationMessage: String {
-            switch self {
-            case .upload:
-                return String(localized: "The current upload will stop.")
-            case .transfer:
-                return String(localized: "The current file transfer will stop.")
-            }
-        }
-    }
-
-    struct TransferCancellationRequest: Identifiable {
-        let id: UUID
-        let kind: TransferKind
-    }
-
     init(
         browser: RemoteFileBrowserStore,
         server: Server,
         fileTab: RemoteFileTab,
+        appearance: TerminalAppearanceSnapshot,
         initialPath: String? = nil,
         onCurrentPathChange: @escaping @MainActor (String?) -> Void = { _ in }
     ) {
         self.browser = browser
         self.server = server
         self.fileTab = fileTab
+        self.appearance = appearance
         self.initialPath = initialPath
         self.onCurrentPathChange = onCurrentPathChange
+        _operationCoordinator = ObservedObject(
+            wrappedValue: browser.operationCoordinator(for: fileTab, server: server)
+        )
     }
 
     var snapshot: Snapshot {
@@ -164,64 +91,18 @@ struct RemoteFileBrowserScreen: View {
     }
 
     var remoteRowDropTypeIdentifiers: [String] {
-        [UTType.vvtermRemoteFileEntry.identifier, UTType.fileURL.identifier]
-    }
-
-    var effectiveThemeName: String {
-        guard usePerAppearanceTheme else { return terminalThemeName }
-        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+        RemoteFileItemProviderAdapter.acceptedTypeIdentifiers
     }
 
     var terminalThemeBackgroundColor: Color {
-        if let color = ThemeColorParser.backgroundColor(for: effectiveThemeName) {
-            return color
-        }
-
-        if let cachedHex = UserDefaults.standard.string(forKey: "terminalBackgroundColor") {
-            return Color.fromHex(cachedHex)
-        }
-
-        return colorScheme == .dark ? .black : .white
-    }
-
-    var operationErrorText: String {
-        operationErrorMessage ?? ""
-    }
-
-    @ViewBuilder
-    var newFolderPromptActions: some View {
-        TextField(String(localized: "Folder Name"), text: $newFolderName)
-
-        Button(String(localized: "Create")) {
-            createFolder()
-        }
-        .disabled(trimmedNewFolderName.isEmpty || isCreateFolderSubmitting)
-
-        Button(String(localized: "Cancel"), role: .cancel) {
-            resetNewFolderPrompt()
-        }
-    }
-
-    var newFolderPromptMessage: Text {
-        Text(String(localized: "Create a folder in the current remote directory."))
-    }
-
-    @ViewBuilder
-    var operationErrorActions: some View {
-        Button(String(localized: "OK"), role: .cancel) {
-            operationErrorMessage = nil
-        }
-    }
-
-    var operationErrorMessageView: Text {
-        Text(operationErrorText)
+        Color.fromHex(appearance.activeTheme.palette.backgroundHex)
     }
 
     @ViewBuilder
     func renameSheet(entry: RemoteFileEntry) -> some View {
         platformRenameSheetSizing(RemoteFileRenameSheet(
             entry: entry,
-            proposedName: $renameName,
+            proposedName: renameNameBinding,
             isSubmitting: isRenameSubmitting,
             onCancel: resetRenamePrompt,
             onRename: { renameEntry() }
@@ -234,7 +115,7 @@ struct RemoteFileBrowserScreen: View {
 
         return platformMoveSheetSizing(RemoteFileMoveSheet(
             entry: entry,
-            destinationDirectory: $moveDestinationDirectory,
+            destinationDirectory: moveDestinationBinding,
             onLoadDirectories: { path in
                 try await fileBrowser.listDirectories(at: path, server: fileServer)
             },
@@ -249,7 +130,7 @@ struct RemoteFileBrowserScreen: View {
         RemoteFileDeleteConfirmationSheet(
             entry: entry,
             message: deleteAlertMessage(for: entry),
-            onCancel: { deleteTargetEntry = nil },
+            onCancel: dismissPresentation,
             onDelete: deleteEntry
         )
     }
@@ -258,7 +139,7 @@ struct RemoteFileBrowserScreen: View {
     func permissionSheet(entry: RemoteFileEntry) -> some View {
         platformPermissionSheetSizing(RemoteFilePermissionEditorSheet(
             entry: entry,
-            draft: $permissionDraft,
+            draft: permissionDraftBinding,
             originalAccessBits: permissionOriginalAccessBits,
             preservedBits: permissionPreservedBits,
             errorMessage: permissionErrorMessage,
@@ -283,62 +164,25 @@ struct RemoteFileBrowserScreen: View {
         }
         .task(id: initialLoadTaskID) {
             await browser.loadInitialPath(for: server, tab: fileTab, initialPath: initialPath)
+            presentDirectorySecurityApprovalIfNeeded()
         }
         .onAppear {
             onCurrentPathChange(browser.lastVisitedPath(for: fileTab))
         }
 
-        let withUploadImport = platformUploadImportPresentation(base)
-
-        let withDownloadExport = downloadExportPresentation(withUploadImport)
-
+        let withDownloadExport = downloadExportPresentation(base)
         let withSearch = platformSearchPresentation(withDownloadExport)
-        let withShare = platformSharePresentation(withSearch)
-        let withDrop = platformDropPresentation(withShare, snapshot: snapshot)
-        let withNewFolder = platformNewFolderPresentation(withDrop)
-
-        let withOperationError = withNewFolder
-        .alert(
-            String(localized: "Files"),
-            isPresented: operationErrorBinding,
-            actions: { operationErrorActions },
-            message: { operationErrorMessageView }
-        )
-
-        let withTransferCancellation = withOperationError
-        .alert(
-            transferCancellationRequest?.kind.confirmationTitle ?? String(localized: "Cancel Transfer?"),
-            isPresented: transferCancellationBinding,
-            presenting: transferCancellationRequest
-        ) { request in
-            Button(request.kind.keepButtonTitle, role: .cancel) {}
-            Button(request.kind.cancelButtonTitle, role: .destructive) {
-                cancelTransfer(id: request.id)
+        let withDrop = platformDropPresentation(withSearch, snapshot: snapshot)
+        let withRoutes = platformPresentation(withDrop)
+            .alert(item: alertPresentationBinding) { route in
+                alert(for: route)
             }
-        } message: { request in
-            Text(request.kind.confirmationMessage)
-        }
 
-        let withRename = platformRenamePresentation(withTransferCancellation)
-
-        let withMove = withRename
-        .sheet(item: $moveTargetEntry, onDismiss: resetMovePrompt) { entry in
-            moveSheet(entry: entry)
-                .adaptiveSoftScrollEdges()
-        }
-
-        let withDelete = platformDeletePresentation(withMove)
-
-        let withPermission = withDelete
-        .sheet(item: $permissionTargetEntry, onDismiss: resetPermissionEditor) { entry in
-            permissionSheet(entry: entry)
-                .adaptiveSoftScrollEdges()
-        }
-
-        let withPathTracking = withPermission
+        let withPathTracking = withRoutes
         .onChange(of: snapshot.currentPath) { newValue in
             onCurrentPathChange(newValue)
-            if let destination = newFolderDestinationPath, destination != newValue {
+            if case .createFolder(let draft) = presentation,
+               draft.destinationPath != newValue {
                 resetNewFolderPrompt()
             }
             platformCurrentPathDidChange()
@@ -349,14 +193,25 @@ struct RemoteFileBrowserScreen: View {
             handlePendingToolbarCommand()
         }
 
-        platformSelectionTrackingPresentation(withToolbarCommands, snapshot: snapshot)
+        let withSecurityObservation = platformSelectionTrackingPresentation(
+            withToolbarCommands,
+            snapshot: snapshot
+        )
+            .onChange(of: snapshot.directoryError) { _ in
+                presentDirectorySecurityApprovalIfNeeded()
+            }
+            .onChange(of: snapshot.viewerError) { _ in
+                presentViewerSecurityApprovalIfNeeded()
+            }
+
+        securityApprovalPresentation(withSecurityObservation)
     }
 
     @ViewBuilder
     func fileNoticeHost<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         NoticeHost(
             topBanner: noticeHost.topBanner,
-            bottomOperations: noticeHost.bottomOperations,
+            bottomOperations: noticeHost.bottomOperations + operationNotices,
             bottomInsetBehavior: .contentBottom
         ) {
             content()
@@ -367,7 +222,7 @@ struct RemoteFileBrowserScreen: View {
     func downloadExportPresentation<Content: View>(_ content: Content) -> some View {
         if #available(iOS 17, macOS 14, *) {
             content.fileExporter(
-                isPresented: $isDownloadExporterPresented,
+                isPresented: downloadExporterBinding,
                 document: downloadExportDocument,
                 contentTypes: [.data],
                 defaultFilename: downloadExportFilename,
@@ -376,7 +231,7 @@ struct RemoteFileBrowserScreen: View {
             )
         } else {
             content.fileExporter(
-                isPresented: $isDownloadExporterPresented,
+                isPresented: downloadExporterBinding,
                 document: downloadExportDocument,
                 contentType: .data,
                 defaultFilename: downloadExportFilename,
@@ -385,55 +240,63 @@ struct RemoteFileBrowserScreen: View {
         }
     }
 
-    var uploadImporterBinding: Binding<Bool> {
+    var alertPresentationBinding: Binding<RemoteFileBrowserPresentation?> {
         Binding(
-            get: { uploadDestinationPath != nil },
-            set: { isPresented in
-                if !isPresented {
-                    uploadDestinationPath = nil
+            get: {
+                guard presentation?.isAlert == true else { return nil }
+                return presentation
+            },
+            set: { route in
+                if let route {
+                    presentation = route
+                } else if presentation?.isAlert == true {
+                    dismissPresentation()
                 }
             }
         )
     }
 
-    var transferCancellationBinding: Binding<Bool> {
-        Binding(
-            get: { transferCancellationRequest != nil },
-            set: { if !$0 { transferCancellationRequest = nil } }
-        )
+    func alert(for route: RemoteFileBrowserPresentation) -> Alert {
+        switch route {
+        case .operationError(let message):
+            Alert(
+                title: Text(String(localized: "Files")),
+                message: Text(message),
+                dismissButton: .cancel(Text(String(localized: "OK")), action: dismissPresentation)
+            )
+        case .transferCancellation(let request):
+            Alert(
+                title: Text(request.kind.confirmationTitle),
+                message: Text(request.kind.confirmationMessage),
+                primaryButton: .cancel(Text(request.kind.keepButtonTitle), action: dismissPresentation),
+                secondaryButton: .destructive(Text(request.kind.cancelButtonTitle)) {
+                    cancelTransfer(id: request.id)
+                }
+            )
+        default:
+            Alert(title: Text(String(localized: "Files")))
+        }
     }
 
-    var newFolderPromptBinding: Binding<Bool> {
+    var downloadExporterBinding: Binding<Bool> {
         Binding(
-            get: { newFolderDestinationPath != nil },
+            get: { presentation?.isDownloadExport == true },
             set: { isPresented in
-                if !isPresented {
-                    resetNewFolderPrompt()
+                if !isPresented, presentation?.isDownloadExport == true {
+                    handleDownloadExportCancellation()
                 }
             }
         )
     }
 
-    var renamePromptBinding: Binding<Bool> {
-        Binding(
-            get: { renameTargetEntry != nil },
-            set: { isPresented in
-                if !isPresented {
-                    resetRenamePrompt()
-                }
-            }
-        )
+    var downloadExportDocument: RemoteFileDownloadDocument? {
+        guard case .downloadExport(let export) = presentation else { return nil }
+        return export.document
     }
 
-    var deletePromptBinding: Binding<Bool> {
-        Binding(
-            get: { deleteTargetEntry != nil },
-            set: { isPresented in
-                if !isPresented {
-                    deleteTargetEntry = nil
-                }
-            }
-        )
+    var downloadExportFilename: String {
+        guard case .downloadExport(let export) = presentation else { return "" }
+        return export.filename
     }
 
     func deleteAlertMessage(for entry: RemoteFileEntry) -> String {
@@ -442,26 +305,6 @@ struct RemoteFileBrowserScreen: View {
             format: String(localized: "This will permanently remove \"%@\" from the remote server. This cannot be undone."),
             itemName
         )
-    }
-
-    var operationErrorBinding: Binding<Bool> {
-        Binding(
-            get: { operationErrorMessage != nil },
-            set: { isPresented in
-                if !isPresented {
-                    operationErrorMessage = nil
-                }
-            }
-        )
-    }
-
-    func remoteOperationErrorMessage(for error: Error) -> String {
-        RemoteFileBrowserError.map(error).errorDescription ?? error.localizedDescription
-    }
-
-    @MainActor
-    func presentOperationError(_ error: Error) {
-        operationErrorMessage = remoteOperationErrorMessage(for: error)
     }
 
     @MainActor
@@ -475,86 +318,6 @@ struct RemoteFileBrowserScreen: View {
                 leading: .icon("checkmark.circle.fill"),
                 message: String(localized: "Path copied to clipboard."),
                 lifetime: .autoDismiss(.seconds(1.5))
-            )
-        )
-    }
-
-    @MainActor
-    func beginTransferStatus(
-        id: UUID,
-        title: String,
-        message: String,
-        completedUnitCount: Int? = nil,
-        totalUnitCount: Int? = nil,
-        fileURL: URL? = nil,
-        fileName: String? = nil,
-        filePath: String? = nil
-    ) {
-        noticeHost.show(
-            NoticeItem(
-                id: id.uuidString,
-                lane: .bottomOperation,
-                level: .info,
-                leading: .activity,
-                title: title,
-                message: message,
-                detail: transferDetail(fileName: fileName, filePath: filePath),
-                progress: transferProgress(
-                    completedUnitCount: completedUnitCount,
-                    totalUnitCount: totalUnitCount
-                ),
-                action: transferCompletionAction(fileURL: fileURL),
-                dismissAction: { requestTransferCancellation(id: id) }
-            )
-        )
-    }
-
-    @MainActor
-    func updateTransferStatus(
-        id: UUID,
-        title: String,
-        message: String,
-        completedUnitCount: Int,
-        totalUnitCount: Int
-    ) {
-        noticeHost.show(
-            NoticeItem(
-                id: id.uuidString,
-                lane: .bottomOperation,
-                level: .info,
-                leading: .activity,
-                title: title,
-                message: message,
-                progress: NoticeProgress(
-                    completedUnitCount: completedUnitCount,
-                    totalUnitCount: totalUnitCount
-                ),
-                dismissAction: { requestTransferCancellation(id: id) }
-            )
-        )
-    }
-
-    @MainActor
-    func completeTransferStatus(
-        id: UUID,
-        title: String,
-        message: String,
-        fileURL: URL? = nil,
-        fileName: String? = nil,
-        filePath: String? = nil,
-        lifetime: NoticeLifetime = .autoDismiss(.seconds(2))
-    ) {
-        noticeHost.show(
-            NoticeItem(
-                id: id.uuidString,
-                lane: .bottomOperation,
-                level: .success,
-                leading: .icon("checkmark.circle.fill"),
-                title: title,
-                message: message,
-                detail: transferDetail(fileName: fileName, filePath: filePath),
-                lifetime: lifetime,
-                action: transferCompletionAction(fileURL: fileURL)
             )
         )
     }
@@ -586,216 +349,174 @@ struct RemoteFileBrowserScreen: View {
         platformTransferCompletionAction(fileURL: fileURL)
     }
 
-    @MainActor
-    func performTransfer(
-        id: UUID = UUID(),
-        cancellationKind: TransferKind = .transfer,
-        title: String,
-        initialMessage: String,
-        successMessage: String,
-        successFileURL: URL? = nil,
-        successFileName: String? = nil,
-        successFilePath: String? = nil,
-        completionLifetime: NoticeLifetime = .autoDismiss(.seconds(2)),
-        onSuccess: (@MainActor () -> Void)? = nil,
-        operation: @escaping (@escaping @MainActor (RemoteFileBrowserStore.TransferProgress) -> Void) async throws -> Void
-    ) {
-        let transferID = id
-        activeTransferKinds[transferID] = cancellationKind
+    var operationNotices: [NoticeItem] {
+        operationCoordinator.operations.map { operation in
+            let message: String
+            let level: NoticeLevel
+            let leading: NoticeLeading
+            let progress: NoticeProgress?
+            let dismissAction: (() -> Void)?
 
-        withAnimation(.easeInOut(duration: 0.2)) {
-            beginTransferStatus(
-                id: transferID,
-                title: title,
-                message: initialMessage
-            )
-        }
-
-        let transferTask = Task {
-            do {
-                try await operation { progress in
-                    let itemName = progress.currentItemName.isEmpty
-                        ? String(localized: "item")
-                        : progress.currentItemName
-                    let progressMessage: String
-                    if progress.completedUnitCount == 0 {
-                        progressMessage = String(
-                            format: String(localized: "Uploading %@"),
-                            itemName
-                        )
-                    } else {
-                        progressMessage = String(
-                            format: String(localized: "%lld of %lld: %@"),
-                            Int64(progress.completedUnitCount),
-                            Int64(progress.totalUnitCount),
-                            itemName
-                        )
-                    }
-                    updateTransferStatus(
-                        id: transferID,
-                        title: title,
-                        message: progressMessage,
-                        completedUnitCount: progress.completedUnitCount,
-                        totalUnitCount: progress.totalUnitCount
-                    )
-                }
-
-                try Task.checkCancellation()
-
-                await MainActor.run {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        completeTransferStatus(
-                            id: transferID,
-                            title: title,
-                            message: successMessage,
-                            fileURL: successFileURL,
-                            fileName: successFileName,
-                            filePath: successFilePath,
-                            lifetime: completionLifetime
-                        )
-                        finishTransfer(id: transferID)
-                    }
-                    onSuccess?()
-                }
-            } catch is CancellationError {
-                await MainActor.run {
-                    noticeHost.dismiss(id: transferID.uuidString)
-                    finishTransfer(id: transferID)
-                }
-            } catch {
-                await MainActor.run {
-                    guard !Task.isCancelled else {
-                        noticeHost.dismiss(id: transferID.uuidString)
-                        finishTransfer(id: transferID)
-                        return
-                    }
-
-                    noticeHost.show(
-                        NoticeItem(
-                            id: transferID.uuidString,
-                            lane: .bottomOperation,
-                            level: .error,
-                            leading: .icon("xmark.octagon.fill"),
-                            title: title,
-                            message: remoteOperationErrorMessage(for: error),
-                            dismissAction: { noticeHost.dismiss(id: transferID.uuidString) }
-                        )
-                    )
-                    finishTransfer(id: transferID)
-                }
+            switch operation.phase {
+            case .running(let currentMessage, let completed, let total):
+                message = currentMessage
+                level = .info
+                leading = .activity
+                progress = transferProgress(
+                    completedUnitCount: completed,
+                    totalUnitCount: total
+                )
+                dismissAction = { requestTransferCancellation(id: operation.id) }
+            case .awaitingSecurityApproval(let currentMessage):
+                message = currentMessage
+                level = .warning
+                leading = .icon("lock.shield.fill")
+                progress = nil
+                dismissAction = { requestTransferCancellation(id: operation.id) }
+            case .succeeded(let currentMessage):
+                message = currentMessage
+                level = .success
+                leading = .icon("checkmark.circle.fill")
+                progress = nil
+                dismissAction = { operationCoordinator.dismiss(operation.id) }
+            case .failed(let currentMessage):
+                message = currentMessage
+                level = .error
+                leading = .icon("xmark.octagon.fill")
+                progress = nil
+                dismissAction = { operationCoordinator.dismiss(operation.id) }
             }
-        }
-        transferTasks[transferID] = transferTask
-    }
 
-    @MainActor
-    func performTransfer(
-        id: UUID = UUID(),
-        cancellationKind: TransferKind = .transfer,
-        title: String,
-        initialMessage: String,
-        successMessage: String,
-        successFileURL: URL? = nil,
-        successFileName: String? = nil,
-        successFilePath: String? = nil,
-        completionLifetime: NoticeLifetime = .autoDismiss(.seconds(2)),
-        onSuccess: (@MainActor () -> Void)? = nil,
-        operation: @escaping () async throws -> Void
-    ) {
-        performTransfer(
-            id: id,
-            cancellationKind: cancellationKind,
-            title: title,
-            initialMessage: initialMessage,
-            successMessage: successMessage,
-            successFileURL: successFileURL,
-            successFileName: successFileName,
-            successFilePath: successFilePath,
-            completionLifetime: completionLifetime,
-            onSuccess: onSuccess
-        ) { _ in
-            try await operation()
+            return NoticeItem(
+                id: operation.id.uuidString,
+                lane: .bottomOperation,
+                level: level,
+                leading: leading,
+                title: operation.title,
+                message: message,
+                detail: transferDetail(
+                    fileName: operation.completion?.fileName,
+                    filePath: operation.completion?.filePath
+                ),
+                progress: progress,
+                action: transferCompletionAction(fileURL: operation.completion?.fileURL),
+                dismissAction: dismissAction
+            )
         }
     }
 
     @MainActor
     func requestTransferCancellation(id: UUID) {
-        guard transferTasks[id] != nil else {
-            noticeHost.dismiss(id: id.uuidString)
+        guard let operation = operationCoordinator.operations.first(where: { $0.id == id }) else {
             return
         }
-
-        transferCancellationRequest = TransferCancellationRequest(
+        presentation = .transferCancellation(RemoteFileTransferCancellationRequest(
             id: id,
-            kind: activeTransferKinds[id] ?? .transfer
-        )
+            kind: operation.kind == .upload ? .upload : .transfer
+        ))
     }
 
     @MainActor
     func cancelTransfer(id: UUID) {
-        transferTasks.removeValue(forKey: id)?.cancel()
-        activeTransferKinds.removeValue(forKey: id)
-        transferCancellationRequest = nil
-        noticeHost.dismiss(id: id.uuidString)
-    }
-
-    @MainActor
-    func finishTransfer(id: UUID) {
-        transferTasks.removeValue(forKey: id)
-        activeTransferKinds.removeValue(forKey: id)
-        if transferCancellationRequest?.id == id {
-            transferCancellationRequest = nil
-        }
-    }
-
-    func performOperation(
-        onFailure: (@MainActor (Error) -> Void)? = nil,
-        operation: @escaping () async throws -> Void
-    ) {
-        Task {
-            do {
-                try await operation()
-            } catch {
-                await MainActor.run {
-                    if let onFailure {
-                        onFailure(error)
-                    } else {
-                        presentOperationError(error)
-                    }
-                }
-            }
-        }
-    }
-
-    func performOperation<Result>(
-        operation: @escaping () async throws -> Result,
-        onSuccess: @escaping @MainActor (Result) -> Void,
-        onFailure: (@MainActor (Error) -> Void)? = nil
-    ) {
-        Task {
-            do {
-                let result = try await operation()
-                await MainActor.run {
-                    onSuccess(result)
-                }
-            } catch {
-                await MainActor.run {
-                    if let onFailure {
-                        onFailure(error)
-                    } else {
-                        presentOperationError(error)
-                    }
-                }
-            }
-        }
+        operationCoordinator.cancel(id)
+        dismissPresentation()
     }
 
     var trimmedNewFolderName: String {
-        newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard case .createFolder(let draft) = presentation else { return "" }
+        return draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    var trimmedRenameName: String {
-        renameName.trimmingCharacters(in: .whitespacesAndNewlines)
+    var isRenameSubmitting: Bool {
+        guard case .rename(let draft) = presentation else { return false }
+        return draft.isSubmitting
+    }
+
+    var isMoveSubmitting: Bool {
+        guard case .move(let draft) = presentation else { return false }
+        return draft.isSubmitting
+    }
+
+    var isPermissionSubmitting: Bool {
+        guard case .permissions(let draft) = presentation else { return false }
+        return draft.isSubmitting
+    }
+
+    var permissionOriginalAccessBits: UInt32 {
+        guard case .permissions(let draft) = presentation else { return 0 }
+        return draft.originalAccessBits
+    }
+
+    var permissionPreservedBits: UInt32 {
+        guard case .permissions(let draft) = presentation else { return 0 }
+        return draft.preservedBits
+    }
+
+    var permissionErrorMessage: String? {
+        guard case .permissions(let draft) = presentation else { return nil }
+        return draft.errorMessage
+    }
+
+    var createFolderNameBinding: Binding<String> {
+        Binding(
+            get: {
+                guard case .createFolder(let draft) = presentation else { return "" }
+                return draft.name
+            },
+            set: { name in
+                guard case .createFolder(var draft) = presentation else { return }
+                draft.name = name
+                presentation = .createFolder(draft)
+            }
+        )
+    }
+
+    var renameNameBinding: Binding<String> {
+        Binding(
+            get: {
+                guard case .rename(let draft) = presentation else { return "" }
+                return draft.name
+            },
+            set: { name in
+                guard case .rename(var draft) = presentation else { return }
+                draft.name = name
+                presentation = .rename(draft)
+            }
+        )
+    }
+
+    var moveDestinationBinding: Binding<String> {
+        Binding(
+            get: {
+                guard case .move(let draft) = presentation else { return "" }
+                return draft.destinationDirectory
+            },
+            set: { destination in
+                guard case .move(var draft) = presentation else { return }
+                draft.destinationDirectory = destination
+                presentation = .move(draft)
+            }
+        )
+    }
+
+    var permissionDraftBinding: Binding<RemoteFilePermissionDraft> {
+        Binding(
+            get: {
+                guard case .permissions(let draft) = presentation else {
+                    return RemoteFilePermissionDraft(accessBits: 0)
+                }
+                return draft.permissions
+            },
+            set: { permissions in
+                guard case .permissions(var draft) = presentation else { return }
+                draft.permissions = permissions
+                presentation = .permissions(draft)
+            }
+        )
+    }
+
+    func dismissPresentation() {
+        presentation = nil
     }
 
     func handlePendingToolbarCommand() {
@@ -999,24 +720,18 @@ struct RemoteFileBrowserScreen: View {
 
         cleanupShareItem()
 
-        performTransfer(
-            title: String(localized: "Sharing"),
-            initialMessage: String(localized: "Preparing remote file."),
-            successMessage: String(localized: "Share sheet ready.")
-        ) {
-            let temporaryURL = try temporaryDownloadURL(for: entry)
-            try await browser.downloadFile(
-                at: entry.path,
-                to: temporaryURL,
-                server: server
-            )
-
-            await MainActor.run {
-                shareItem = RemoteFileShareItem(
-                    sourceURL: temporaryURL,
-                    title: entry.name
-                )
-            }
+        operationCoordinator.prepareFile(
+            entry,
+            purpose: .share,
+            browser: browser,
+            tab: fileTab,
+            server: server
+        ) { file in
+            presentation = .share(RemoteFileShareItem(
+                id: file.id,
+                sourceURL: file.url,
+                title: file.filename
+            ))
         }
     }
 
@@ -1029,20 +744,21 @@ struct RemoteFileBrowserScreen: View {
     }
 
     func beginMove(_ entry: RemoteFileEntry) {
-        moveTargetEntry = entry
-        moveDestinationDirectory = RemoteFilePath.parent(of: entry.path)
-        isMoveSubmitting = false
+        presentation = .move(.init(
+            entry: entry,
+            destinationDirectory: RemoteFilePath.parent(of: entry.path)
+        ))
     }
 
     func beginEditPermissions(_ entry: RemoteFileEntry) {
         guard canEditPermissions(for: entry), let permissions = entry.permissions else { return }
-        permissionTargetEntry = entry
-        permissionDraft = RemoteFilePermissionDraft(accessBits: permissions)
-        permissionOriginalAccessBits = permissions & 0o777
-        permissionPreservedBits = entry.specialPermissionBits
-        permissionFileTypeBits = permissions & UInt32(LIBSSH2_SFTP_S_IFMT)
-        permissionErrorMessage = nil
-        isPermissionSubmitting = false
+        presentation = .permissions(.init(
+            entry: entry,
+            permissions: RemoteFilePermissionDraft(accessBits: permissions),
+            originalAccessBits: permissions & 0o777,
+            preservedBits: entry.specialPermissionBits,
+            fileTypeBits: permissions & UInt32(LIBSSH2_SFTP_S_IFMT)
+        ))
     }
 
     func canEditPermissions(for entry: RemoteFileEntry) -> Bool {
@@ -1062,17 +778,11 @@ struct RemoteFileBrowserScreen: View {
         }
     }
 
-    func handleUploadSelection(_ result: Result<[URL], Error>) {
-        guard let destinationPath = uploadDestinationPath else { return }
-        uploadDestinationPath = nil
+    func handleUploadSelection(_ result: Result<[URL], Error>, toPresentedDestination destinationPath: String) {
+        guard case .upload(let currentDestination) = presentation,
+              currentDestination == destinationPath else { return }
+        dismissPresentation()
         handleUploadSelection(result, to: destinationPath)
-    }
-
-    func handleUploadSelection(_ result: Result<[URL], Error>, for request: UploadImportRequest) {
-        if uploadImportRequest?.id == request.id {
-            uploadImportRequest = nil
-        }
-        handleUploadSelection(result, to: request.destinationPath)
     }
 
     func handleUploadSelection(_ result: Result<[URL], Error>, to destinationPath: String) {
@@ -1090,30 +800,30 @@ struct RemoteFileBrowserScreen: View {
     }
 
     func handleDownloadExportCompletion(_ result: Result<URL, Error>) {
-        isDownloadExporterPresented = false
-        let noticeID = downloadTransferNoticeID?.uuidString
+        guard case .downloadExport(let export) = presentation else { return }
+        let transferID = export.transferID
+        let noticeID = transferID.uuidString
+        operationCoordinator.dismiss(transferID)
 
         switch result {
         case .success:
             cleanupDownloadExport()
-            if let noticeID {
-                noticeHost.show(
-                    NoticeItem(
-                        id: noticeID,
-                        lane: .bottomOperation,
-                        level: .success,
-                        leading: .icon("checkmark.circle.fill"),
-                        title: String(localized: "Downloading"),
-                        message: String(localized: "Export complete."),
-                        lifetime: .autoDismiss(.seconds(2))
-                    )
+            noticeHost.show(
+                NoticeItem(
+                    id: noticeID,
+                    lane: .bottomOperation,
+                    level: .success,
+                    leading: .icon("checkmark.circle.fill"),
+                    title: String(localized: "Downloading"),
+                    message: String(localized: "Export complete."),
+                    lifetime: .autoDismiss(.seconds(2))
                 )
-            }
+            )
         case .failure(let error):
             let nsError = error as NSError
             if nsError.code == NSUserCancelledError {
                 handleDownloadExportCancellation()
-            } else if let noticeID {
+            } else {
                 cleanupDownloadExport()
                 noticeHost.show(
                     NoticeItem(
@@ -1126,94 +836,63 @@ struct RemoteFileBrowserScreen: View {
                         dismissAction: { noticeHost.dismiss(id: noticeID) }
                     )
                 )
-            } else {
-                cleanupDownloadExport()
-                presentOperationError(error)
             }
         }
 
-        downloadTransferNoticeID = nil
     }
 
     func handleDownloadExportCancellation() {
-        isDownloadExporterPresented = false
-        RemoteFileDownloadExportCancellationHandler.handle(
-            noticeID: downloadTransferNoticeID,
-            cleanup: cleanupDownloadExport,
-            dismissNotice: noticeHost.dismiss
-        )
-
-        downloadTransferNoticeID = nil
+        guard case .downloadExport(let export) = presentation else { return }
+        cleanupDownloadExport()
+        operationCoordinator.dismiss(export.transferID)
     }
 
     func beginUploadFlow(urls: [URL], to destinationPath: String, initialMessage: String) {
-        performTransfer(
-            cancellationKind: .upload,
-            title: String(localized: "Uploading"),
+        operationCoordinator.upload(
+            urls: urls,
+            to: destinationPath,
             initialMessage: initialMessage,
-            successMessage: String(localized: "Upload complete.")
-        ) { onProgress in
-            try await browser.uploadFilesResolvingConflicts(
-                at: urls,
-                to: destinationPath,
-                in: fileTab,
-                server: server,
-                onProgress: onProgress
-            )
-        }
+            browser: browser,
+            tab: fileTab,
+            server: server
+        )
     }
 
     func handleCurrentDirectoryDrop(_ providers: [NSItemProvider], to destinationPath: String) -> Bool {
-        if handleRemoteDrop(providers, to: destinationPath) {
-            return true
-        }
-
-        return handleLocalDrop(providers, to: destinationPath)
+        RemoteFileItemProviderAdapter.acceptsRemoteItems(providers)
+            ? handleRemoteDrop(providers, to: destinationPath)
+            : handleLocalDrop(providers, to: destinationPath)
     }
 
     func handleLocalDrop(_ providers: [NSItemProvider], to destinationPath: String) -> Bool {
-        let fileURLProviders = providers.filter { provider in
-            provider.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier)
-        }
-        guard !fileURLProviders.isEmpty else { return false }
-
-        Task {
-            do {
-                let urls = try await loadDroppedURLs(from: fileURLProviders)
-                await MainActor.run {
+        guard RemoteFileItemProviderAdapter.acceptsLocalItems(providers) else { return false }
+        RemoteFileItemProviderAdapter.loadLocalItems(from: providers) { result in
+            switch result {
+            case .success(let urls):
+                if !urls.isEmpty {
                     beginUploadFlow(
                         urls: urls,
                         to: destinationPath,
                         initialMessage: String(localized: "Preparing dropped files.")
                     )
                 }
-            } catch {
-                await MainActor.run {
-                    presentOperationError(error)
-                }
+            case .failure(let error):
+                presentOperationError(error)
             }
         }
-
         return true
     }
 
     func handleRemoteDrop(_ providers: [NSItemProvider], to destinationPath: String) -> Bool {
-        let remoteProviders = providers.filter { provider in
-            provider.hasItemConformingToTypeIdentifier(UTType.vvtermRemoteFileEntry.identifier)
-        }
-        guard !remoteProviders.isEmpty else { return false }
+        guard RemoteFileItemProviderAdapter.acceptsRemoteItems(providers) else { return false }
 
-        performTransfer(
-            title: String(localized: "Transferring"),
-            initialMessage: String(localized: "Preparing remote items."),
-            successMessage: String(localized: "Transfer complete.")
-        ) { onProgress in
-            let payloads = try await loadDroppedRemotePayloads(from: remoteProviders)
-            try await transferDroppedRemoteItems(
-                payloads,
-                to: destinationPath,
-                onProgress: onProgress
-            )
+        operationCoordinator.transferDroppedItems(
+            to: destinationPath,
+            browser: browser,
+            tab: fileTab,
+            server: server
+        ) {
+            try await RemoteFileItemProviderAdapter.loadRemotePayloads(from: providers)
         }
 
         return true
@@ -1225,388 +904,100 @@ struct RemoteFileBrowserScreen: View {
     }
 
     func dragItemProvider(for entry: RemoteFileEntry) -> NSItemProvider {
-        let provider = NSItemProvider()
-        provider.suggestedName = dragSuggestedName(for: [entry])
-        registerRemoteDragPayload(for: [entry], in: provider)
-        registerFileRepresentation(for: entry, in: provider)
-        return provider
-    }
-
-    func registerRemoteDragPayload(for entries: [RemoteFileEntry], in provider: NSItemProvider) {
-        let encodedPayload = Result {
-            try JSONEncoder().encode(RemoteFileDragPayload(serverId: server.id, entries: entries))
+        RemoteFileItemProviderAdapter.makeProvider(
+            payload: RemoteFileDragPayload(serverId: server.id, entries: [entry]),
+            entry: entry
+        ) { entry in
+            try await browser.prepareDragExport(for: entry, server: server)
         }
-        provider.registerDataRepresentation(
-            forTypeIdentifier: UTType.vvtermRemoteFileEntry.identifier,
-            visibility: .ownProcess
-        ) { completion in
-            do {
-                let data = try encodedPayload.get()
-                completion(data, nil)
-            } catch {
-                completion(nil, error)
-            }
-            return nil
-        }
-    }
-
-    func registerFileRepresentation(for entry: RemoteFileEntry, in provider: NSItemProvider) {
-        let typeIdentifier = dragFileTypeIdentifier(for: entry)
-        let preparedTemporaryURL = Result {
-            try temporaryDragExportURL(for: entry)
-        }
-        provider.registerFileRepresentation(
-            forTypeIdentifier: typeIdentifier,
-            fileOptions: [],
-            visibility: .all
-        ) { completion in
-            let progress = Progress(totalUnitCount: 1)
-
-            Task {
-                do {
-                    let temporaryURL = try preparedTemporaryURL.get()
-                    try await browser.downloadItem(entry, to: temporaryURL, server: server)
-                    guard !progress.isCancelled else {
-                        completion(nil, false, CancellationError())
-                        return
-                    }
-                    completion(temporaryURL, false, nil)
-                    progress.completedUnitCount = 1
-                } catch {
-                    completion(nil, false, error)
-                }
-            }
-
-            return progress
-        }
-    }
-
-    func dragFileTypeIdentifier(for entry: RemoteFileEntry) -> String {
-        if entry.type == .directory {
-            return UTType.folder.identifier
-        }
-
-        let pathExtension = URL(fileURLWithPath: entry.name).pathExtension
-        return UTType(filenameExtension: pathExtension)?.identifier ?? UTType.data.identifier
-    }
-
-    func temporaryDragExportURL(for entry: RemoteFileEntry) throws -> URL {
-        let exportDirectory = try temporaryDragExportDirectory()
-        let fallbackName = entry.type == .directory ? "Folder" : "download"
-        let filename = entry.name.isEmpty ? fallbackName : entry.name
-        return exportDirectory.appendingPathComponent(filename, isDirectory: entry.type == .directory)
-    }
-
-    func temporaryDragExportDirectory(named folderName: String? = nil) throws -> URL {
-        let fileManager = FileManager.default
-        let rootDirectory = fileManager.temporaryDirectory
-            .appendingPathComponent("VVTermDraggedItems", isDirectory: true)
-        try fileManager.createDirectory(at: rootDirectory, withIntermediateDirectories: true)
-
-        let trimmedFolderName = folderName?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let directoryName = trimmedFolderName.isEmpty ? UUID().uuidString : trimmedFolderName
-        let exportDirectory = rootDirectory.appendingPathComponent(directoryName, isDirectory: true)
-        try fileManager.createDirectory(at: exportDirectory, withIntermediateDirectories: true)
-        return exportDirectory
-    }
-
-
-    func loadDroppedURLs(from providers: [NSItemProvider]) async throws -> [URL] {
-        var urls: [URL] = []
-
-        for provider in providers {
-            urls.append(try await loadDroppedURL(from: provider))
-        }
-
-        let uniqueURLs = Array(NSOrderedSet(array: urls).compactMap { $0 as? URL })
-        guard !uniqueURLs.isEmpty else {
-            throw RemoteFileBrowserError.failed(String(localized: "No valid files or folders were dropped."))
-        }
-        return uniqueURLs
-    }
-
-    func loadDroppedURL(from provider: NSItemProvider) async throws -> URL {
-        try await withCheckedThrowingContinuation { continuation in
-            provider.loadItem(forTypeIdentifier: UTType.fileURL.identifier, options: nil) { item, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                if let url = item as? URL {
-                    continuation.resume(returning: url)
-                    return
-                }
-
-                if let url = item as? NSURL {
-                    continuation.resume(returning: url as URL)
-                    return
-                }
-
-                if let data = item as? Data,
-                   let url = URL(dataRepresentation: data, relativeTo: nil) {
-                    continuation.resume(returning: url)
-                    return
-                }
-
-                if let text = item as? String,
-                   let url = URL(string: text) {
-                    continuation.resume(returning: url)
-                    return
-                }
-
-                continuation.resume(
-                    throwing: RemoteFileBrowserError.failed(
-                        String(localized: "The dropped item could not be resolved to a local file or folder.")
-                    )
-                )
-            }
-        }
-    }
-
-    func loadDroppedRemotePayloads(from providers: [NSItemProvider]) async throws -> [RemoteFileDragPayload] {
-        var payloads: [RemoteFileDragPayload] = []
-
-        for provider in providers {
-            payloads.append(try await loadDroppedRemotePayload(from: provider))
-        }
-
-        var seenPaths: Set<String> = []
-        let uniquePayloads: [RemoteFileDragPayload] = payloads.compactMap { payload in
-            let uniqueEntries = payload.entries.filter { entry in
-                seenPaths.insert(entry.path).inserted
-            }
-            guard !uniqueEntries.isEmpty else { return nil }
-            return RemoteFileDragPayload(serverId: payload.serverId, entries: uniqueEntries)
-        }
-        guard !uniquePayloads.isEmpty else {
-            throw RemoteFileBrowserError.failed(String(localized: "No valid remote items were dropped."))
-        }
-        return uniquePayloads
-    }
-
-    func loadDroppedRemotePayload(from provider: NSItemProvider) async throws -> RemoteFileDragPayload {
-        try await withCheckedThrowingContinuation { continuation in
-            provider.loadDataRepresentation(forTypeIdentifier: UTType.vvtermRemoteFileEntry.identifier) { data, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-
-                guard let data else {
-                    continuation.resume(
-                        throwing: RemoteFileBrowserError.failed(
-                            String(localized: "The dragged remote item could not be decoded.")
-                        )
-                    )
-                    return
-                }
-
-                Task { @MainActor in
-                    do {
-                        let payload = try JSONDecoder().decode(RemoteFileDragPayload.self, from: data)
-                        continuation.resume(returning: payload)
-                    } catch {
-                        continuation.resume(throwing: error)
-                    }
-                }
-            }
-        }
-    }
-
-    func moveDroppedRemoteItems(
-        _ payloads: [RemoteFileDragPayload],
-        to destinationDirectoryPath: String,
-        onProgress: (@MainActor (RemoteFileBrowserStore.TransferProgress) -> Void)? = nil
-    ) async throws {
-        let uniqueEntries = payloads
-            .flatMap(\.entries)
-            .reduce(into: [RemoteFileEntry]()) { entries, entry in
-                guard !entries.contains(where: { $0.path == entry.path }) else { return }
-                entries.append(entry)
-            }
-        let totalUnitCount = max(1, uniqueEntries.count)
-
-        for (index, sourceEntry) in uniqueEntries.enumerated() {
-            let destinationDirectory = RemoteFilePath.normalize(destinationDirectoryPath)
-            let destinationPath = RemoteFilePath.appending(sourceEntry.name, to: destinationDirectory)
-
-            guard destinationPath != sourceEntry.path else { continue }
-
-            if sourceEntry.type == .directory {
-                let normalizedSource = RemoteFilePath.normalize(sourceEntry.path)
-                if destinationDirectory == normalizedSource || destinationDirectory.hasPrefix(normalizedSource + "/") {
-                    throw RemoteFileBrowserError.failed(
-                        String(localized: "A folder cannot be moved into itself or one of its descendants.")
-                    )
-                }
-            }
-
-            try await browser.renameItem(
-                at: sourceEntry.path,
-                to: destinationPath,
-                in: fileTab,
-                server: server
-            )
-            onProgress?(
-                RemoteFileBrowserStore.TransferProgress(
-                    completedUnitCount: index + 1,
-                    totalUnitCount: totalUnitCount,
-                    currentItemName: sourceEntry.name
-                )
-            )
-        }
-    }
-
-    func transferDroppedRemoteItems(
-        _ payloads: [RemoteFileDragPayload],
-        to destinationDirectoryPath: String,
-        onProgress: (@MainActor (RemoteFileBrowserStore.TransferProgress) -> Void)? = nil
-    ) async throws {
-        let sourceServerIDs = Set(payloads.map(\.serverId))
-        guard sourceServerIDs.count == 1, let sourceServerId = sourceServerIDs.first else {
-            throw RemoteFileBrowserError.failed(
-                String(localized: "A single drop can only contain items from one remote server.")
-            )
-        }
-
-        if sourceServerId == server.id {
-            try await moveDroppedRemoteItems(
-                payloads,
-                to: destinationDirectoryPath,
-                onProgress: onProgress
-            )
-            return
-        }
-
-        let uniqueEntries = payloads
-            .flatMap(\.entries)
-            .reduce(into: [RemoteFileEntry]()) { entries, entry in
-                guard !entries.contains(where: { $0.path == entry.path }) else { return }
-                entries.append(entry)
-            }
-        try await browser.copyEntries(
-            uniqueEntries,
-            from: sourceServerId,
-            to: destinationDirectoryPath,
-            destinationTab: fileTab,
-            destinationServer: server,
-            onProgress: onProgress
-        )
-    }
-
-    func dragSuggestedName(for entries: [RemoteFileEntry]) -> String? {
-        guard entries.count > 1 else {
-            guard let name = entries.first?.name, !name.isEmpty else { return nil }
-            return name
-        }
-
-        return String(
-            format: String(localized: "%lld items"),
-            Int64(entries.count)
-        )
     }
 
     func createFolder() {
-        guard let destinationPath = newFolderDestinationPath else { return }
-        guard !isCreateFolderSubmitting else { return }
+        guard case .createFolder(var draft) = presentation else { return }
+        guard !draft.isSubmitting else { return }
         guard !trimmedNewFolderName.isEmpty else {
             resetNewFolderPrompt()
             return
         }
-        isCreateFolderSubmitting = true
+        draft.isSubmitting = true
+        presentation = .createFolder(draft)
+        let destinationPath = draft.destinationPath
+        let folderNameInput = draft.name
 
-        performOperation(
-            operation: {
-                let folderName = try validatedRemoteName(trimmedNewFolderName)
-                try await browser.createDirectory(
-                    named: folderName,
-                    in: destinationPath,
-                    tab: fileTab,
-                    server: server
-                )
-            },
+        operationCoordinator.createFolder(
+            named: folderNameInput,
+            in: destinationPath,
+            browser: browser,
+            tab: fileTab,
+            server: server,
             onSuccess: { _ in
                 resetNewFolderPrompt()
             },
             onFailure: { error in
-                isCreateFolderSubmitting = false
+                guard case .createFolder(var current) = presentation,
+                      current.destinationPath == destinationPath else { return }
+                current.isSubmitting = false
+                presentation = .createFolder(current)
                 presentOperationError(error)
             }
         )
     }
 
     func renameEntry() {
-        guard let entry = renameTargetEntry, !isRenameSubmitting else { return }
-        isRenameSubmitting = true
+        guard case .rename(var draft) = presentation, !draft.isSubmitting else { return }
+        draft.isSubmitting = true
+        presentation = .rename(draft)
+        let entry = draft.entry
+        let nameInput = draft.name
 
-        performOperation(
-            operation: {
-                let newName = try validatedRemoteName(trimmedRenameName)
-                guard newName != entry.name else {
-                    return false
-                }
-
-                let destinationPath = RemoteFilePath.appending(
-                    newName,
-                    to: RemoteFilePath.parent(of: entry.path)
-                )
-                try await browser.renameItem(
-                    at: entry.path,
-                    to: destinationPath,
-                    in: fileTab,
-                    server: server
-                )
-                return true
-            },
+        operationCoordinator.rename(
+            entry,
+            to: nameInput,
+            browser: browser,
+            tab: fileTab,
+            server: server,
             onSuccess: { _ in
                 resetRenamePrompt()
             },
             onFailure: { error in
-                isRenameSubmitting = false
+                guard case .rename(var current) = presentation,
+                      current.entry.id == entry.id else { return }
+                current.isSubmitting = false
+                presentation = .rename(current)
                 presentOperationError(error)
             }
         )
     }
 
     func moveEntry() {
-        guard let entry = moveTargetEntry, !isMoveSubmitting else { return }
-        isMoveSubmitting = true
+        guard case .move(var draft) = presentation, !draft.isSubmitting else { return }
+        draft.isSubmitting = true
+        presentation = .move(draft)
+        let entry = draft.entry
+        let destinationInput = draft.destinationDirectory
 
-        performOperation(
-            operation: {
-                let sourceDirectory = RemoteFilePath.parent(of: entry.path)
-                let destinationDirectory = try validatedRemoteDirectoryPath(
-                    moveDestinationDirectory,
-                    relativeTo: sourceDirectory
-                )
-                let destinationPath = RemoteFilePath.appending(entry.name, to: destinationDirectory)
-
-                guard destinationPath != entry.path else {
-                    return false
-                }
-
-                try await browser.renameItem(
-                    at: entry.path,
-                    to: destinationPath,
-                    in: fileTab,
-                    server: server
-                )
-                return true
-            },
-            onSuccess: { _ in
+        operationCoordinator.move(
+            entry,
+            to: destinationInput,
+            browser: browser,
+            tab: fileTab,
+            server: server,
+            onSuccess: {
                 resetMovePrompt()
             },
             onFailure: { error in
-                isMoveSubmitting = false
+                guard case .move(var current) = presentation,
+                      current.entry.id == entry.id else { return }
+                current.isSubmitting = false
+                presentation = .move(current)
                 presentOperationError(error)
             }
         )
     }
 
     func deleteEntry() {
-        guard let entry = deleteTargetEntry else { return }
-        deleteTargetEntry = nil
+        guard case .delete(let entry) = presentation else { return }
+        dismissPresentation()
 
         deleteEntries([entry])
     }
@@ -1614,16 +1005,13 @@ struct RemoteFileBrowserScreen: View {
     func deleteEntries(_ entries: [RemoteFileEntry]) {
         guard !entries.isEmpty else { return }
 
-        performOperation {
-            for entry in entries {
-                try await browser.deleteItem(
-                    at: entry.path,
-                    in: fileTab,
-                    server: server,
-                    type: entry.type
-                )
-            }
-        }
+        operationCoordinator.delete(
+            entries,
+            browser: browser,
+            tab: fileTab,
+            server: server,
+            onFailure: { presentOperationError($0) }
+        )
     }
 
     func requestDelete(_ entries: [RemoteFileEntry]) {
@@ -1632,103 +1020,62 @@ struct RemoteFileBrowserScreen: View {
     }
 
     func resetNewFolderPrompt() {
-        newFolderDestinationPath = nil
-        newFolderName = ""
-        isCreateFolderSubmitting = false
+        if case .createFolder = presentation { dismissPresentation() }
     }
 
     func resetRenamePrompt() {
-        renameTargetEntry = nil
-        renameName = ""
-        isRenameSubmitting = false
+        if case .rename = presentation { dismissPresentation() }
     }
 
     func resetMovePrompt() {
-        moveTargetEntry = nil
-        moveDestinationDirectory = ""
-        isMoveSubmitting = false
+        if case .move = presentation { dismissPresentation() }
     }
 
     func applyPermissions() {
-        guard let entry = permissionTargetEntry, !isPermissionSubmitting else { return }
-        permissionErrorMessage = nil
-        isPermissionSubmitting = true
-
-        performOperation(
-            operation: {
-                let requestedPermissions = permissionFileTypeBits | permissionPreservedBits | permissionDraft.accessBits
-                try await browser.setPermissions(entry, permissions: requestedPermissions, in: fileTab, server: server)
-            },
-            onSuccess: { _ in
+        guard case .permissions(var draft) = presentation, !draft.isSubmitting else { return }
+        draft.errorMessage = nil
+        draft.isSubmitting = true
+        presentation = .permissions(draft)
+        let entry = draft.entry
+        operationCoordinator.changePermissions(
+            for: entry,
+            draft: draft.permissions,
+            preservedBits: draft.preservedBits,
+            fileTypeBits: draft.fileTypeBits,
+            browser: browser,
+            tab: fileTab,
+            server: server,
+            onSuccess: {
                 resetPermissionEditor()
             },
             onFailure: { error in
-                isPermissionSubmitting = false
-                permissionErrorMessage = remoteOperationErrorMessage(for: error)
+                guard case .permissions(var current) = presentation,
+                      current.entry.id == entry.id else { return }
+                current.isSubmitting = false
+                current.errorMessage = remoteOperationErrorMessage(for: error)
+                presentation = .permissions(current)
             }
         )
     }
 
     func resetPermissionEditor() {
-        permissionTargetEntry = nil
-        permissionDraft = RemoteFilePermissionDraft(accessBits: 0)
-        permissionOriginalAccessBits = 0
-        permissionPreservedBits = 0
-        permissionFileTypeBits = 0
-        permissionErrorMessage = nil
-        isPermissionSubmitting = false
-    }
-
-    func validatedRemoteName(_ value: String) throws -> String {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            throw RemoteFileBrowserError.failed(String(localized: "Name cannot be empty."))
-        }
-        guard trimmed != ".", trimmed != ".." else {
-            throw RemoteFileBrowserError.failed(String(localized: "This name is not allowed."))
-        }
-        guard !trimmed.contains("/") else {
-            throw RemoteFileBrowserError.failed(String(localized: "Names cannot contain slashes."))
-        }
-        return trimmed
-    }
-
-    func validatedRemoteDirectoryPath(_ value: String, relativeTo currentPath: String) throws -> String {
-        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            throw RemoteFileBrowserError.failed(String(localized: "Destination folder cannot be empty."))
-        }
-        return RemoteFilePath.normalize(trimmed, relativeTo: currentPath)
-    }
-
-    func temporaryDownloadURL(for entry: RemoteFileEntry) throws -> URL {
-        let fileManager = FileManager.default
-        let downloadDirectory = fileManager.temporaryDirectory
-            .appendingPathComponent("VVTermDownloads", isDirectory: true)
-        try fileManager.createDirectory(at: downloadDirectory, withIntermediateDirectories: true)
-
-        let uniquePrefix = UUID().uuidString
-        let filename = entry.name.isEmpty ? "download" : entry.name
-        return downloadDirectory.appendingPathComponent("\(uniquePrefix)-\(filename)")
+        if case .permissions = presentation { dismissPresentation() }
     }
 
     func cleanupDownloadExport() {
-        if let sourceURL = downloadExportDocument?.sourceURL {
-            try? FileManager.default.removeItem(at: sourceURL)
-        }
-        downloadExportDocument = nil
-        downloadExportFilename = ""
+        guard case .downloadExport(let export) = presentation else { return }
+        operationCoordinator.releasePreparedFile(export.transferID)
+        dismissPresentation()
     }
 
     func cleanupShareItem() {
-        if let sourceURL = shareItem?.sourceURL {
-            try? FileManager.default.removeItem(at: sourceURL)
-        }
-        shareItem = nil
+        guard case .share(let item) = presentation else { return }
+        operationCoordinator.releasePreparedFile(item.id)
+        dismissPresentation()
     }
 
     func finishSharing(_ item: RemoteFileShareItem) {
-        guard shareItem?.id == item.id else { return }
+        guard case .share(let current) = presentation, current.id == item.id else { return }
         cleanupShareItem()
     }
 
@@ -1760,7 +1107,7 @@ struct RemoteFileBrowserScreen: View {
 
     func sizeLabel(for entry: RemoteFileEntry) -> String {
         guard entry.type != .directory, let size = entry.size else { return "—" }
-        return ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file)
+        return RemoteFileByteCountFormatter.string(from: size)
     }
 
     func kindLabel(for entry: RemoteFileEntry) -> String {

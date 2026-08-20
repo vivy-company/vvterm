@@ -30,14 +30,11 @@ struct TerminalConnectionStatusView: View {
                             }
                     }
                     .presentationDetents([.height(sheetHeight), .large])
-                    .presentationDragIndicator(
-                        presentation.allowsInteractiveDismissal ? .visible : .hidden
-                    )
-                    .interactiveDismissDisabled(!presentation.allowsInteractiveDismissal)
+                    .presentationDragIndicator(.visible)
                 }
 
-            if let dismissedStatusNotice {
-                NoticeBannerView(item: dismissedStatusNotice, surfaceStyle: surfaceStyle)
+            if let statusNotice {
+                NoticeBannerView(item: statusNotice, surfaceStyle: surfaceStyle)
                     .padding(.horizontal, 12)
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
@@ -50,7 +47,7 @@ struct TerminalConnectionStatusView: View {
                     dismissedIdentity: dismissedIdentity
                 )
         }
-        .animation(.easeInOut(duration: 0.2), value: dismissedStatusNotice?.id)
+        .animation(.easeInOut(duration: 0.2), value: statusNotice?.id)
     }
 
     private var isPresented: Binding<Bool> {
@@ -81,8 +78,8 @@ struct TerminalConnectionStatusView: View {
         dismissedIdentity = currentIdentity
     }
 
-    private var dismissedStatusNotice: NoticeItem? {
-        guard isActive, currentIdentity == dismissedIdentity else { return nil }
+    private var statusNotice: NoticeItem? {
+        guard isActive else { return nil }
 
         switch presentation {
         case .hidden:
@@ -99,6 +96,7 @@ struct TerminalConnectionStatusView: View {
                 )
             )
         case .disconnected(let message):
+            guard currentIdentity == dismissedIdentity else { return nil }
             return NoticeItem(
                 id: "connection-status-disconnected",
                 lane: .topBanner,
@@ -113,6 +111,7 @@ struct TerminalConnectionStatusView: View {
                 )
             )
         case .failed(let message, _):
+            guard currentIdentity == dismissedIdentity else { return nil }
             return NoticeItem(
                 id: "connection-status-failed",
                 lane: .topBanner,
@@ -132,17 +131,8 @@ struct TerminalConnectionStatusView: View {
     @ViewBuilder
     private var sheetContent: some View {
         switch presentation {
-        case .hidden:
+        case .hidden, .connecting:
             EmptyView()
-        case .connecting(let serverName):
-            statusSheet(
-                level: .info,
-                leading: .activity,
-                title: String(
-                    format: String(localized: "Connecting to %@..."),
-                    serverName
-                )
-            )
         case .disconnected(let message):
             statusSheet(
                 level: .warning,
@@ -263,10 +253,8 @@ struct TerminalConnectionStatusView: View {
 
     private var sheetHeight: CGFloat {
         switch presentation {
-        case .hidden:
+        case .hidden, .connecting:
             return 1
-        case .connecting:
-            return 220
         case .disconnected(let message):
             return message == nil ? 310 : 360
         case .failed(_, let allowsHostKeyReplacement):

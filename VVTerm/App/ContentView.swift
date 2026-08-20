@@ -7,25 +7,36 @@ import SwiftUI
 import StoreKit
 #if os(macOS)
 import AppKit
+#elseif os(iOS)
+import UIKit
 #endif
 
 struct ContentView: View {
     let fileTabs: RemoteFileTabManager
     let fileBrowser: RemoteFileBrowserStore
-    @StateObject private var serverManager = ServerManager.shared
-    @StateObject private var tabManager = TerminalTabManager.shared
-    @StateObject private var storeManager = StoreManager.shared
-    @StateObject private var engagementTracker = EngagementTracker.shared
+    let statsDependencies: ServerStatsScreenDependencies
+    let terminalSecurityActions: TerminalSecurityActions
+    let serverFormDependencies: ServerFormDependencies
+    let workspaceSelectionStore: WorkspaceSelectionStore
+    let voiceInputRuntimeStore: VoiceInputRuntimeStore
+    let onOpenSettings: () -> Void
+    private let makeLocalDiscoveryManager: LocalSSHDiscoveryManagerFactory
+    @ObservedObject private var serverManager: ServerManager
+    @ObservedObject private var engagementTracker: EngagementTracker
+    private let tabManager: TerminalTabManager
+    @StateObject private var terminalNavigation: TerminalSessionNavigationProjection
+    @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var storeManager: StoreManager
     @Environment(\.requestReview) private var requestReview
     @Environment(\.colorScheme) private var colorScheme
+    @EnvironmentObject private var terminalThemeManager: TerminalThemeManager
+    @EnvironmentObject private var viewTabConfigurationManager: ViewTabConfigurationManager
 
     #if os(macOS)
     // Re-injected into the AppKit-hosted sidebar/detail panes, since environment
     // values do not cross an NSHostingController boundary automatically.
-    @EnvironmentObject private var ghosttyApp: Ghostty.App
-    @EnvironmentObject private var terminalThemeManager: TerminalThemeManager
+    @EnvironmentObject private var ghosttyApp: GhosttyRuntime
     @EnvironmentObject private var terminalAccessoryPreferencesManager: TerminalAccessoryPreferencesManager
-    @EnvironmentObject private var appLockManager: AppLockManager
     @Environment(\.locale) private var locale
     @Environment(\.privacyModeEnabled) private var privacyModeEnabled
     // Republishes the hosted detail pane's command actions as scene focus
@@ -38,9 +49,39 @@ struct ContentView: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var restoredColumnVisibility: NavigationSplitViewVisibility = .all
     @SceneStorage("vvterm.zenMode.macos") private var isZenModeEnabled = false
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameKey) private var terminalThemeName = "Aizen Dark"
-    @AppStorage(CloudKitSyncConstants.terminalThemeNameLightKey) private var terminalThemeNameLight = "Aizen Light"
-    @AppStorage(CloudKitSyncConstants.terminalUsePerAppearanceThemeKey) private var usePerAppearanceTheme = true
+
+    init(
+        serverManager: ServerManager,
+        engagementTracker: EngagementTracker,
+        tabManager: TerminalTabManager,
+        fileTabs: RemoteFileTabManager,
+        fileBrowser: RemoteFileBrowserStore,
+        statsDependencies: ServerStatsScreenDependencies,
+        terminalSecurityActions: TerminalSecurityActions,
+        serverFormDependencies: ServerFormDependencies,
+        workspaceSelectionStore: WorkspaceSelectionStore,
+        voiceInputRuntimeStore: VoiceInputRuntimeStore,
+        makeLocalDiscoveryManager: @escaping LocalSSHDiscoveryManagerFactory,
+        onOpenSettings: @escaping () -> Void
+    ) {
+        _serverManager = ObservedObject(wrappedValue: serverManager)
+        _engagementTracker = ObservedObject(wrappedValue: engagementTracker)
+        self.tabManager = tabManager
+        _terminalNavigation = StateObject(
+            wrappedValue: TerminalSessionNavigationProjection(
+                sessionState: tabManager.sessionState
+            )
+        )
+        self.fileTabs = fileTabs
+        self.fileBrowser = fileBrowser
+        self.statsDependencies = statsDependencies
+        self.terminalSecurityActions = terminalSecurityActions
+        self.serverFormDependencies = serverFormDependencies
+        self.workspaceSelectionStore = workspaceSelectionStore
+        self.voiceInputRuntimeStore = voiceInputRuntimeStore
+        self.makeLocalDiscoveryManager = makeLocalDiscoveryManager
+        self.onOpenSettings = onOpenSettings
+    }
 
     /// Whether the selected server has an open terminal/file surface.
     private var selectedServerHasOpenConnectionSurface: Bool {
@@ -50,27 +91,28 @@ struct ContentView: View {
 
     /// Whether any server has an open terminal/file surface.
     private var hasOpenConnectionSurfaces: Bool {
-        tabManager.tabsByServer.values.contains { !$0.isEmpty }
+        !terminalNavigation.state.serverIdsWithTabs.isEmpty
             || fileTabs.tabsByServer.values.contains { !$0.isEmpty }
-            || !tabManager.connectedServerIds.isEmpty
+            || !terminalNavigation.state.connectedServerIds.isEmpty
     }
 
     private var canUseZenMode: Bool {
         guard let selected = selectedServer else { return false }
-        return tabManager.connectedServerIds.contains(selected.id)
+        return terminalNavigation.state.connectedServerIds.contains(selected.id)
     }
 
     private var effectiveZenModeEnabled: Bool {
         canUseZenMode && isZenModeEnabled
     }
 
-    private var effectiveTerminalThemeName: String {
-        guard usePerAppearanceTheme else { return terminalThemeName }
-        return colorScheme == .dark ? terminalThemeName : terminalThemeNameLight
+    private var terminalAppearanceSnapshot: TerminalAppearanceSnapshot {
+        terminalThemeManager.appearanceSnapshot(
+            for: colorScheme == .dark ? .dark : .light
+        )
     }
 
     private var macOSWindowBackgroundColor: Color {
-        ThemeColorParser.backgroundColor(for: effectiveTerminalThemeName)!
+        Color.fromHex(terminalAppearanceSnapshot.activeTheme.palette.backgroundHex)
     }
 
     #if os(macOS)
@@ -82,6 +124,22 @@ struct ContentView: View {
     private var zenNavigationTitle: String {
         guard effectiveZenModeEnabled, let selectedServer else { return "" }
         return selectedServer.name
+    }
+
+    private var macSidebarContentIdentity: String {
+        "\(locale.identifier)|\(privacyModeEnabled)"
+    }
+
+    private var macDetailContentIdentity: String {
+        [
+            selectedServer?.id.uuidString ?? "none",
+            String(selectedServerHasOpenConnectionSurface),
+            String(hasOpenConnectionSurfaces),
+            String(describing: storeManager.accessState),
+            colorScheme == .dark ? "dark" : "light",
+            locale.identifier,
+            String(privacyModeEnabled)
+        ].joined(separator: "|")
     }
     #endif
 
@@ -95,26 +153,37 @@ struct ContentView: View {
             // A server is selected
             if selectedServerHasOpenConnectionSurface {
                 // Server has an open connection surface - show its container
-                ConnectionTerminalContainer(
-                    tabManager: tabManager,
-                    fileTabManager: fileTabs,
-                    serverManager: serverManager,
-                    fileBrowser: fileBrowser,
-                    server: server,
-                    isZenModeEnabled: $isZenModeEnabled,
-                    isSidebarVisible: isSidebarVisible,
-                    onToggleSidebar: toggleSidebarInZenMode,
-                    onOpenSettings: nil,
-                    onLeaveRoute: nil,
-                    onDisconnectRoute: nil
-                )
+                TerminalServerToolbarProjectionHost(
+                    serverId: server.id,
+                    tabManager: tabManager
+                ) { toolbarProjection in
+                    ConnectionTerminalContainer(
+                        tabManager: tabManager,
+                        terminalToolbarProjection: toolbarProjection,
+                        fileTabManager: fileTabs,
+                        serverManager: serverManager,
+                        fileBrowser: fileBrowser,
+                        makeLocalDiscoveryManager: makeLocalDiscoveryManager,
+                        statsDependencies: statsDependencies,
+                        terminalSecurityActions: terminalSecurityActions,
+                        serverFormDependencies: serverFormDependencies,
+                        voiceInputRuntimeStore: voiceInputRuntimeStore,
+                        server: server,
+                        isZenModeEnabled: $isZenModeEnabled,
+                        isSidebarVisible: isSidebarVisible,
+                        onToggleSidebar: toggleSidebarInZenMode,
+                        onOpenSettings: onOpenSettings,
+                        onLeaveRoute: nil,
+                        onDisconnectRoute: nil
+                    )
+                }
                 .id(server.id) // Ensure isolation per server
             } else if !hasOpenConnectionSurfaces {
                 // No open connection surfaces - can connect freely
                 ServerConnectEmptyState(server: server) {
                     connectToServer(server)
                 }
-            } else if storeManager.isPro {
+            } else if storeManager.allowsProFeatures {
                 // Pro user already has other open connection surfaces - can connect to more
                 ServerConnectEmptyState(server: server) {
                     connectToServer(server)
@@ -130,19 +199,22 @@ struct ContentView: View {
     }
 
     private func hasOpenConnectionSurface(for serverId: UUID) -> Bool {
-        !tabManager.tabs(for: serverId).isEmpty
+        terminalNavigation.state.tabCountsByServer[serverId, default: 0] > 0
             || !fileTabs.tabs(for: serverId).isEmpty
-            || tabManager.connectedServerIds.contains(serverId)
+            || terminalNavigation.state.connectedServerIds.contains(serverId)
     }
 
     private func connectToServer(_ server: Server) {
         Task {
-            guard await AppLockManager.shared.ensureServerUnlocked(server) else { return }
+            guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
                 let tab = try await tabManager.openTab(for: server)
                 await MainActor.run {
-                    tabManager.selectedViewByServer[server.id] = ViewTabConfigurationManager.shared.effectiveDefaultTab()
-                    tabManager.selectedTabByServer[server.id] = tab.id
+                    tabManager.sessionState.selectView(
+                        viewTabConfigurationManager.effectiveDefaultTab(),
+                        for: server.id
+                    )
+                    tabManager.sessionState.selectTab(tab.id, for: server.id)
                 }
             } catch {
                 // No-op: user cancelled biometric auth or the tab limit blocked the open.
@@ -200,9 +272,10 @@ struct ContentView: View {
     private func withSplitLifecycle<Content: View>(_ content: Content) -> some View {
         content
             .onAppear {
-                if selectedWorkspace == nil {
-                    selectedWorkspace = serverManager.workspaces.first
-                }
+                selectedWorkspace = WorkspaceSelectionPolicy.workspace(
+                    current: selectedWorkspace,
+                    available: serverManager.workspaces
+                )
                 if !canUseZenMode {
                     setZenMode(false)
                 } else if isZenModeEnabled {
@@ -210,9 +283,10 @@ struct ContentView: View {
                 }
             }
             .onChange(of: serverManager.workspaces) { workspaces in
-                if selectedWorkspace == nil {
-                    selectedWorkspace = workspaces.first
-                }
+                selectedWorkspace = WorkspaceSelectionPolicy.workspace(
+                    current: selectedWorkspace,
+                    available: workspaces
+                )
             }
             .onChange(of: columnVisibility) { newValue in
                 if !isZenModeEnabled && newValue != .detailOnly {
@@ -237,6 +311,12 @@ struct ContentView: View {
                 // LEFT: Sidebar with workspace + servers
                 ServerSidebarView(
                     serverManager: serverManager,
+                    tabManager: tabManager,
+                    terminalNavigation: terminalNavigation,
+                    serverFormDependencies: serverFormDependencies,
+                    workspaceSelectionStore: workspaceSelectionStore,
+                    makeLocalDiscoveryManager: makeLocalDiscoveryManager,
+                    onOpenSettings: onOpenSettings,
                     selectedWorkspace: $selectedWorkspace,
                     selectedServer: $selectedServer
                 )
@@ -261,6 +341,8 @@ struct ContentView: View {
         withSplitLifecycle(
             MacShellSplitHost(
                 isSidebarCollapsed: columnVisibility == .detailOnly,
+                sidebarContentIdentity: macSidebarContentIdentity,
+                detailContentIdentity: macDetailContentIdentity,
                 onToggleSidebar: {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         setSidebarVisible(!isSidebarVisible)
@@ -270,6 +352,12 @@ struct ContentView: View {
                     withShellEnvironment(
                         ServerSidebarView(
                             serverManager: serverManager,
+                            tabManager: tabManager,
+                            terminalNavigation: terminalNavigation,
+                            serverFormDependencies: serverFormDependencies,
+                            workspaceSelectionStore: workspaceSelectionStore,
+                            makeLocalDiscoveryManager: makeLocalDiscoveryManager,
+                            onOpenSettings: onOpenSettings,
                             selectedWorkspace: $selectedWorkspace,
                             selectedServer: $selectedServer
                         )
@@ -295,7 +383,9 @@ struct ContentView: View {
             .environmentObject(terminalThemeManager)
             .environmentObject(terminalAccessoryPreferencesManager)
             .environmentObject(appLockManager)
+            .environmentObject(serverManager)
             .environmentObject(storeManager)
+            .environmentObject(viewTabConfigurationManager)
             .environmentObject(commandBridge)
             .environment(\.locale, locale)
             .environment(\.privacyModeEnabled, privacyModeEnabled)
@@ -332,11 +422,8 @@ struct ContentView: View {
 
 // MARK: - Preview
 
-#Preview {
-    ContentView(
-        fileTabs: RemoteFileTabManager(),
-        fileBrowser: RemoteFileBrowserStore()
-    )
+#Preview("App Shell") {
+    AppPreviewComposition().rootView
 }
 
 #if os(macOS)

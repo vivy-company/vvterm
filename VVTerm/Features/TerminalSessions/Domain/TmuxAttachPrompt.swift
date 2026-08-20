@@ -13,7 +13,6 @@ struct TmuxAttachPrompt: Identifiable, Equatable {
     let id: UUID
     let paneId: UUID
     let serverId: UUID
-    let serverName: String
     let existingSessions: [TmuxAttachSessionInfo]
 }
 

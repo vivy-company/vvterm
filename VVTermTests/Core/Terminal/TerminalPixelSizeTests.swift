@@ -15,8 +15,28 @@ struct TerminalPixelSizeTests {
     @Test
     func rejectsZeroNonFiniteAndOverflowingDimensions() {
         #expect(TerminalPixelSize(width: 0, height: 100) == nil)
+        #expect(TerminalPixelSize(width: -1, height: 100) == nil)
         #expect(TerminalPixelSize(width: 0.5, height: 100) == nil)
         #expect(TerminalPixelSize(width: 100, height: .infinity) == nil)
+        #expect(TerminalPixelSize(width: 100, height: .nan) == nil)
+    }
+
+    @Test
+    func acceptsExactWireMaximumAndRejectsOverflow() throws {
+        let maximum = try #require(TerminalPixelSize(
+            width: CGFloat(Int32.max),
+            height: CGFloat(Int32.max)
+        ))
+        #expect(maximum.width == Int(Int32.max))
+        #expect(maximum.height == Int(Int32.max))
+
+        let truncatedMaximum = try #require(TerminalPixelSize(
+            width: CGFloat(Int32.max) + 0.75,
+            height: 100
+        ))
+        #expect(truncatedMaximum.width == Int(Int32.max))
+
         #expect(TerminalPixelSize(width: CGFloat(Int32.max) + 1, height: 100) == nil)
+        #expect(TerminalPixelSize(width: 100, height: CGFloat(Int32.max) + 1) == nil)
     }
 }

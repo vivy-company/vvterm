@@ -4,13 +4,13 @@ import Foundation
 import SwiftUI
 import UIKit
 
-enum TerminalRenderingTransition: Equatable {
+nonisolated enum TerminalRenderingTransition: Equatable, Sendable {
     case none
     case pause
     case resume
 }
 
-enum TerminalRenderingPolicy {
+nonisolated enum TerminalRenderingPolicy {
     static func transition(
         terminalIsActive: Bool,
         sceneIsActive: Bool,
@@ -35,16 +35,18 @@ extension View {
     func terminalKeyboardAvoidance(
         focusedPaneId: UUID?,
         paneIds: [UUID],
-        terminalRegistryVersion: Int,
+        terminalSurfaceChange: TerminalSurfaceStoreChange?,
         terminalProvider: @escaping (UUID) -> GhosttyTerminalView?,
+        keyboardCoordinator: TerminalKeyboardCoordinator,
         enabledOverride: Bool? = nil
     ) -> some View {
         modifier(
             TerminalKeyboardAvoidanceModifier(
                 focusedPaneId: focusedPaneId,
                 paneIds: paneIds,
-                terminalRegistryVersion: terminalRegistryVersion,
+                terminalSurfaceChange: terminalSurfaceChange,
                 terminalProvider: terminalProvider,
+                keyboardCoordinator: keyboardCoordinator,
                 enabledOverride: enabledOverride
             )
         )
@@ -53,12 +55,19 @@ extension View {
 
 @MainActor
 private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
+    private struct BaseGeometry {
+        let windowIdentifier: ObjectIdentifier
+        let boundsFrame: CGRect
+        let terminalFrame: CGRect
+    }
+
     @Published private(set) var layout = TerminalKeyboardAvoidancePolicy.Layout.unobstructed
 
     private weak var terminal: GhosttyTerminalView?
     private var keyboardFrame: CGRect?
     private var cursorRect: CGRect = .zero
     private var preservesTerminalSize = false
+    private var baseGeometry: BaseGeometry?
 
     func update(
         preservesTerminalSize: Bool,
@@ -106,6 +115,7 @@ private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
         terminal?.onKeyboardAvoidanceAccessoryFrameChange = nil
         terminal = nil
         cursorRect = .zero
+        baseGeometry = nil
     }
 
     private func recalculate(animation: Animation?) {
@@ -115,15 +125,40 @@ private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
         }
 
         let currentBoundsFrame = terminal.convert(terminal.bounds, to: window)
-        var baseBoundsFrame = currentBoundsFrame.offsetBy(
+        var resolvedBaseBoundsFrame = currentBoundsFrame.offsetBy(
             dx: 0,
             dy: -layout.verticalOffset
         )
-        // Default docked-keyboard mode now owns its inset instead of relying on
-        // SwiftUI's keyboard safe area. Reconstruct the unobstructed frame from
-        // the previously applied inset so docked -> floating transitions cannot
-        // oscillate between stale and current geometry.
-        baseBoundsFrame.size.height += layout.bottomInset
+        resolvedBaseBoundsFrame.size.height += layout.bottomInset
+        let currentTerminalFrame = terminal.convert(
+            terminal.keyboardAvoidanceTerminalRect(),
+            to: window
+        )
+        var resolvedBaseTerminalFrame = currentTerminalFrame.offsetBy(
+            dx: 0,
+            dy: -layout.verticalOffset
+        )
+        resolvedBaseTerminalFrame.size.height += layout.bottomInset
+
+        let windowIdentifier = ObjectIdentifier(window)
+        let windowChanged = baseGeometry?.windowIdentifier != windowIdentifier
+        let sizeChanged = baseGeometry.map {
+            abs($0.boundsFrame.width - resolvedBaseBoundsFrame.width) >= 0.5
+                || abs($0.boundsFrame.height - resolvedBaseBoundsFrame.height) >= 0.5
+        } ?? true
+        let unobstructed = keyboardFrame == nil && layout == .unobstructed
+        if windowChanged
+            || sizeChanged
+            || unobstructed
+            || baseGeometry == nil {
+            baseGeometry = BaseGeometry(
+                windowIdentifier: windowIdentifier,
+                boundsFrame: resolvedBaseBoundsFrame,
+                terminalFrame: resolvedBaseTerminalFrame
+            )
+        }
+        guard let baseGeometry else { return }
+
         let keyboardFrameInWindow = keyboardFrame.map {
             window.convert($0, from: window.screen.coordinateSpace)
         }
@@ -136,16 +171,10 @@ private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
         )
         let geometry = TerminalKeyboardAvoidancePolicy.resolvedGeometry(
             screenFrame: screenFrameInWindow,
-            terminalFrame: baseBoundsFrame,
+            terminalFrame: baseGeometry.boundsFrame,
             keyboardFrame: keyboardFrameInWindow
         )
-        let currentTerminalFrame = terminal.convert(terminal.keyboardAvoidanceTerminalRect(), to: window)
         let currentCursorFrame = terminal.convert(cursorRect, to: window)
-        var baseTerminalFrame = currentTerminalFrame.offsetBy(
-            dx: 0,
-            dy: -layout.verticalOffset
-        )
-        baseTerminalFrame.size.height += layout.bottomInset
         let baseCursorFrame = currentCursorFrame.offsetBy(
             dx: 0,
             dy: -layout.verticalOffset
@@ -153,7 +182,7 @@ private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
         let newLayout = TerminalKeyboardAvoidancePolicy.layout(
             preservesTerminalSize: preservesTerminalSize,
             geometry: geometry,
-            terminalFrame: baseTerminalFrame,
+            terminalFrame: baseGeometry.terminalFrame,
             cursorFrame: baseCursorFrame,
             accessoryFrame: accessoryFrameInWindow
         )
@@ -185,7 +214,7 @@ private final class TerminalKeyboardAvoidanceViewModel: ObservableObject {
 private struct TerminalKeyboardAvoidanceModifier: ViewModifier {
     let focusedPaneId: UUID?
     let paneIds: [UUID]
-    let terminalRegistryVersion: Int
+    let terminalSurfaceChange: TerminalSurfaceStoreChange?
     let terminalProvider: (UUID) -> GhosttyTerminalView?
     let enabledOverride: Bool?
 
@@ -196,30 +225,33 @@ private struct TerminalKeyboardAvoidanceModifier: ViewModifier {
     init(
         focusedPaneId: UUID?,
         paneIds: [UUID],
-        terminalRegistryVersion: Int,
+        terminalSurfaceChange: TerminalSurfaceStoreChange?,
         terminalProvider: @escaping (UUID) -> GhosttyTerminalView?,
+        keyboardCoordinator: TerminalKeyboardCoordinator,
         enabledOverride: Bool?
     ) {
         self.focusedPaneId = focusedPaneId
         self.paneIds = paneIds
-        self.terminalRegistryVersion = terminalRegistryVersion
+        self.terminalSurfaceChange = terminalSurfaceChange
         self.terminalProvider = terminalProvider
         self.enabledOverride = enabledOverride
-        _keyboardCoordinator = ObservedObject(
-            wrappedValue: TerminalTabManager.shared.keyboardCoordinator
-        )
+        _keyboardCoordinator = ObservedObject(wrappedValue: keyboardCoordinator)
     }
 
-    private var isEnabled: Bool {
+    private var preservesTerminalSize: Bool {
         enabledOverride ?? storedEnabled
     }
 
     func body(content: Content) -> some View {
         content
-            .padding(.bottom, model.layout.bottomInset)
-            .offset(y: model.layout.verticalOffset)
+            .padding(.bottom, preservesTerminalSize ? model.layout.bottomInset : 0)
+            .offset(y: preservesTerminalSize ? model.layout.verticalOffset : 0)
             .clipped()
-            .ignoresSafeArea(.keyboard, edges: .bottom)
+            .modifier(
+                TerminalKeyboardSafeAreaModifier(
+                    isEnabled: preservesTerminalSize
+                )
+            )
             .onAppear {
                 refresh(animation: nil)
             }
@@ -230,13 +262,13 @@ private struct TerminalKeyboardAvoidanceModifier: ViewModifier {
                 }
                 model.detach()
             }
-            .onChange(of: isEnabled) { _ in
+            .onChange(of: preservesTerminalSize) { _ in
                 refresh(animation: keyboardAnimation)
             }
             .onChange(of: focusedPaneId) { _ in
                 refresh(animation: .easeOut(duration: 0.12))
             }
-            .onChange(of: terminalRegistryVersion) { _ in
+            .onChange(of: terminalSurfaceChange) { _ in
                 refresh(animation: nil)
             }
             .onChange(of: keyboardCoordinator.softwareKeyboardEndFrame) { _ in
@@ -255,15 +287,13 @@ private struct TerminalKeyboardAvoidanceModifier: ViewModifier {
             return .linear(duration: duration)
         case .easeInOut:
             return .easeInOut(duration: duration)
-        @unknown default:
-            return .easeInOut(duration: duration)
         }
     }
 
     private func refresh(animation: Animation?) {
         let terminal = focusedPaneId.flatMap(terminalProvider)
         model.update(
-            preservesTerminalSize: isEnabled,
+            preservesTerminalSize: preservesTerminalSize,
             terminal: terminal,
             keyboardFrame: keyboardCoordinator.softwareKeyboardEndFrame,
             animation: animation
@@ -276,7 +306,7 @@ struct RemoteTerminalPaneWrapper: View {
     let paneId: UUID
     let server: Server
     let credentials: ServerCredentials
-    let richPasteUIModel: TerminalRichPasteUIModel
+    let tabManager: TerminalTabManager
     let isActive: Bool
     let terminalContextMenuActions: TerminalContextMenuActions
     let onPaneKeyboardShortcut: (TerminalSplitCommand) -> Void
@@ -285,19 +315,30 @@ struct RemoteTerminalPaneWrapper: View {
     let onVoiceTrigger: (() -> Void)?
     let onSceneActivation: () -> Void
 
+    @EnvironmentObject private var terminalAccessoryPreferencesManager: TerminalAccessoryPreferencesManager
+    @AppStorage("terminalKeyboardDismissButtonEnabled") private var keyboardDismissButtonEnabled = true
+
+    private var terminalAccessoryInputSnapshot: TerminalAccessoryInputSnapshot {
+        TerminalAccessoryInputSnapshot(
+            profile: terminalAccessoryPreferencesManager.profile,
+            showsDismissKeyboardButton: keyboardDismissButtonEnabled
+        )
+    }
+
     var body: some View {
         GeometryReader { geometry in
             RemoteTerminalPaneRepresentable(
                 paneId: paneId,
                 server: server,
                 credentials: credentials,
-                richPasteUIModel: richPasteUIModel,
+                tabManager: tabManager,
                 size: geometry.size,
                 isActive: isActive,
                 terminalContextMenuActions: terminalContextMenuActions,
                 onPaneKeyboardShortcut: onPaneKeyboardShortcut,
                 onProcessExit: onProcessExit,
                 onReady: onReady,
+                terminalAccessoryInputSnapshot: terminalAccessoryInputSnapshot,
                 onVoiceTrigger: onVoiceTrigger
             )
             .background {
@@ -313,7 +354,7 @@ struct RemoteTerminalPaneWrapper: View {
         // A SwiftUI wrapper can briefly outlive registry ownership. Never let
         // that stale wrapper resume or reconnect a terminal now hosted by
         // another scene.
-        guard let terminal = TerminalTabManager.shared.getTerminal(for: paneId),
+        guard let terminal = tabManager.terminalSurfaceStore.ghosttySurface(for: paneId),
               let terminalScene = terminal.window?.windowScene,
               terminalScene === activatedScene else { return }
 
@@ -342,26 +383,17 @@ private struct TerminalSceneActivationObserver: UIViewRepresentable {
 
 private final class TerminalSceneActivationView: UIView {
     var onSceneActivation: (UIScene) -> Void
-    private var observer: NSObjectProtocol?
 
     init(onSceneActivation: @escaping (UIScene) -> Void) {
         self.onSceneActivation = onSceneActivation
         super.init(frame: .zero)
         isUserInteractionEnabled = false
-        observer = NotificationCenter.default.addObserver(
-            forName: UIScene.didActivateNotification,
-            object: nil,
-            queue: .main
-        ) { [weak self] notification in
-            guard let self,
-                  let activatedScene = notification.object as? UIScene,
-                  activatedScene === self.window?.windowScene else { return }
-            DispatchQueue.main.async { [weak self] in
-                guard let self,
-                      activatedScene === self.window?.windowScene else { return }
-                self.onSceneActivation(activatedScene)
-            }
-        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(sceneDidActivate(_:)),
+            name: UIScene.didActivateNotification,
+            object: nil
+        )
     }
 
     @available(*, unavailable)
@@ -369,10 +401,18 @@ private final class TerminalSceneActivationView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    deinit {
-        if let observer {
-            NotificationCenter.default.removeObserver(observer)
+    @objc private func sceneDidActivate(_ notification: Notification) {
+        guard let activatedScene = notification.object as? UIScene,
+              activatedScene === window?.windowScene else { return }
+        Task { @MainActor [weak self, weak activatedScene] in
+            guard let self, let activatedScene,
+                  activatedScene === self.window?.windowScene else { return }
+            self.onSceneActivation(activatedScene)
         }
+    }
+
+    isolated deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }
 
@@ -380,16 +420,17 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
     let paneId: UUID
     let server: Server
     let credentials: ServerCredentials
-    let richPasteUIModel: TerminalRichPasteUIModel
+    let tabManager: TerminalTabManager
     let size: CGSize
     let isActive: Bool
     let terminalContextMenuActions: TerminalContextMenuActions
     let onPaneKeyboardShortcut: (TerminalSplitCommand) -> Void
     let onProcessExit: () -> Void
     let onReady: () -> Void
+    let terminalAccessoryInputSnapshot: TerminalAccessoryInputSnapshot
     let onVoiceTrigger: (() -> Void)?
 
-    @EnvironmentObject var ghosttyApp: Ghostty.App
+    @EnvironmentObject var ghosttyApp: GhosttyRuntime
     @Environment(\.scenePhase) private var scenePhase
 
     func makeCoordinator() -> TerminalPaneConnectionCoordinator {
@@ -397,7 +438,10 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
             paneId: paneId,
             server: server,
             credentials: credentials,
-            richPasteUIModel: richPasteUIModel
+            tabManager: tabManager,
+            sshFailureOutput: { failure in
+                TerminalConnectionFailurePresentation.ansiSSHErrorData(for: failure)
+            }
         )
     }
 
@@ -408,11 +452,12 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
 
         let coordinator = context.coordinator
 
-        if let existingTerminal = TerminalTabManager.shared.getTerminal(for: paneId) {
+        if let existingTerminal = tabManager.terminalSurfaceStore.ghosttySurface(for: paneId) {
             coordinator.terminal = existingTerminal
             coordinator.isTerminalReady = true
             coordinator.preservePane = true
             configureExistingTerminal(existingTerminal, coordinator: coordinator)
+            existingTerminal.acceptsTerminalInput = isActive
 
             if existingTerminal.superview != nil {
                 existingTerminal.removeFromSuperview()
@@ -428,7 +473,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
                 startConnectionIfNeeded(
                     terminal: existingTerminal,
                     coordinator: coordinator,
-                    state: TerminalTabManager.shared.paneStates[paneId]?.connectionState ?? .idle
+                    state: tabManager.sessionState.paneState(for: paneId)?.connectionState ?? .idle
                 )
             }
             return existingTerminal
@@ -441,6 +486,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
             ghosttyApp: app,
             appWrapper: ghosttyApp,
             paneId: paneId.uuidString,
+            terminalAccessoryInputSnapshot: terminalAccessoryInputSnapshot,
             useCustomIO: true
         )
 
@@ -453,7 +499,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
                     startConnectionIfNeeded(
                         terminal: terminalView,
                         coordinator: coordinator,
-                        state: TerminalTabManager.shared.paneStates[paneId]?.connectionState ?? .idle
+                        state: tabManager.sessionState.paneState(for: paneId)?.connectionState ?? .idle
                     )
                 }
             }
@@ -462,22 +508,24 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
         terminalView.onVoiceButtonTapped = onVoiceTrigger
         terminalView.onPwdChange = { [paneId] rawDirectory in
             DispatchQueue.main.async {
-                TerminalTabManager.shared.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
+                tabManager.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
             }
         }
         terminalView.onTitleChange = { [paneId] title in
-            TerminalTabManager.shared.updatePaneTitle(paneId, rawTitle: title)
+            tabManager.updatePaneTitle(paneId, rawTitle: title)
         }
         terminalView.onZoomAction = { [paneId] action in
-            TerminalTabManager.shared.handleTerminalZoom(action, for: paneId)
+            tabManager.handleTerminalZoom(action, for: paneId)
         }
         terminalView.onPaneKeyboardShortcut = onPaneKeyboardShortcut
         terminalView.terminalContextMenuActions = terminalContextMenuActions
-        terminalView.applyPresentationOverrides(TerminalTabManager.shared.presentationOverrides(for: paneId))
+        terminalView.applyPresentationOverrides(
+            tabManager.sessionState.presentationOverrides(for: paneId)
+        )
 
         coordinator.terminal = terminalView
         coordinator.installRichPasteInterception(on: terminalView)
-        TerminalTabManager.shared.registerTerminal(terminalView, for: paneId)
+        tabManager.registerTerminalSurface(terminalView, for: paneId)
 
         terminalView.writeCallback = { [weak coordinator] data in
             coordinator?.sendToTransport(data)
@@ -503,7 +551,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
             return
         }
 
-        guard TerminalTabManager.shared.paneStates[paneId] != nil else {
+        guard tabManager.sessionState.paneState(for: paneId) != nil else {
             terminalView.acceptsTerminalInput = false
             terminalView.writeCallback = nil
             terminalView.onReady = nil
@@ -527,10 +575,13 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
             renderingIsPaused: terminalView.isRenderingPaused
         )
 
-        if terminalView.surfacePresentationOverrides != TerminalTabManager.shared.presentationOverrides(for: paneId) {
-            terminalView.applyPresentationOverrides(TerminalTabManager.shared.presentationOverrides(for: paneId))
+        terminalView.acceptsTerminalInput = isActive
+        let presentationOverrides = tabManager.sessionState.presentationOverrides(for: paneId)
+        if terminalView.surfacePresentationOverrides != presentationOverrides {
+            terminalView.applyPresentationOverrides(presentationOverrides)
         }
         terminalView.onVoiceButtonTapped = onVoiceTrigger
+        terminalView.applyTerminalAccessoryInputSnapshot(terminalAccessoryInputSnapshot)
         terminalView.onPaneKeyboardShortcut = onPaneKeyboardShortcut
         terminalView.terminalContextMenuActions = terminalContextMenuActions
         if size.width > 0, size.height > 0, size != context.coordinator.lastReportedSize {
@@ -549,7 +600,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
             }
         }
 
-        let state = TerminalTabManager.shared.paneStates[paneId]?.connectionState ?? .idle
+        let state = tabManager.sessionState.paneState(for: paneId)?.connectionState ?? .idle
         let shouldStartConnection = TerminalConnectionStartPolicy.shouldStart(
             connectionState: state
         )
@@ -566,8 +617,11 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
     static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
         guard let terminalView = uiView as? GhosttyTerminalView else { return }
 
-        let paneStillExists = TerminalTabManager.shared.paneStates[coordinator.paneId] != nil
+        let paneStillExists = coordinator.tabManager.sessionState
+            .paneState(for: coordinator.paneId) != nil
         if paneStillExists {
+            terminalView.acceptsTerminalInput = false
+            terminalView.pauseRendering()
             coordinator.preservePane = true
             return
         }
@@ -575,7 +629,7 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
         coordinator.terminal = nil
         let paneId = coordinator.paneId
         Task { @MainActor in
-            TerminalTabManager.shared.unregisterTerminal(terminalView, for: paneId)
+            coordinator.tabManager.unregisterTerminalSurface(terminalView, for: paneId)
             coordinator.cancelConnection()
         }
     }
@@ -583,20 +637,23 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
     private func configureExistingTerminal(_ terminal: GhosttyTerminalView, coordinator: TerminalPaneConnectionCoordinator) {
         terminal.onProcessExit = processExitHandler(for: terminal)
         terminal.onVoiceButtonTapped = onVoiceTrigger
+        terminal.applyTerminalAccessoryInputSnapshot(terminalAccessoryInputSnapshot)
         terminal.onPwdChange = { [paneId] rawDirectory in
             DispatchQueue.main.async {
-                TerminalTabManager.shared.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
+                tabManager.updatePaneWorkingDirectory(paneId, rawDirectory: rawDirectory)
             }
         }
         terminal.onTitleChange = { [paneId] title in
-            TerminalTabManager.shared.updatePaneTitle(paneId, rawTitle: title)
+            tabManager.updatePaneTitle(paneId, rawTitle: title)
         }
         terminal.onZoomAction = { [paneId] action in
-            TerminalTabManager.shared.handleTerminalZoom(action, for: paneId)
+            tabManager.handleTerminalZoom(action, for: paneId)
         }
         terminal.onPaneKeyboardShortcut = onPaneKeyboardShortcut
         terminal.terminalContextMenuActions = terminalContextMenuActions
-        terminal.applyPresentationOverrides(TerminalTabManager.shared.presentationOverrides(for: paneId))
+        terminal.applyPresentationOverrides(
+            tabManager.sessionState.presentationOverrides(for: paneId)
+        )
         terminal.writeCallback = { [weak coordinator] data in
             coordinator?.sendToTransport(data)
         }
@@ -609,7 +666,10 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
     private func processExitHandler(for terminal: GhosttyTerminalView) -> () -> Void {
         { [weak terminal] in
             guard let terminal,
-                  TerminalTabManager.shared.getTerminal(for: paneId) === terminal else { return }
+                  tabManager.terminalSurfaceStore.isRegistered(
+                    terminal,
+                    for: paneId
+                  ) else { return }
             onProcessExit()
         }
     }
@@ -619,10 +679,10 @@ private struct RemoteTerminalPaneRepresentable: UIViewRepresentable {
         coordinator: TerminalPaneConnectionCoordinator,
         state: ConnectionState
     ) {
-        guard TerminalTabManager.shared.paneStates[paneId] != nil else { return }
+        guard tabManager.sessionState.paneState(for: paneId) != nil else { return }
         guard !coordinator.hasLiveConnection else { return }
         guard !coordinator.isConnectionStartInFlight else { return }
-        guard UIApplication.shared.applicationState == .active else { return }
+        guard tabManager.reconnectCoordinator.applicationActivityIsActive else { return }
 
         switch state {
         case .connecting, .reconnecting, .connected:

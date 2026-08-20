@@ -3,12 +3,13 @@ import SwiftUI
 // MARK: - Workspace Form Sheet (Create/Edit)
 
 struct WorkspaceFormSheet: View {
-    @ObservedObject var serverManager: ServerManager
+    let serverManager: ServerManager
+    @ObservedObject private var stateStore: ServerStateStore
     let workspace: Workspace?
     let onSave: (Workspace) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject private var storeManager = StoreManager.shared
+    @EnvironmentObject private var storeManager: StoreManager
 
     @State private var name: String = ""
     @State private var selectedColor: Color = .blue
@@ -20,7 +21,7 @@ struct WorkspaceFormSheet: View {
     private var isEditing: Bool { workspace != nil }
 
     private var isAtLimit: Bool {
-        !isEditing && !serverManager.canAddWorkspace
+        !isEditing && !stateStore.canAddWorkspace(hasProAccess: storeManager.allowsProFeatures)
     }
 
     let availableColors: [Color] = [
@@ -33,6 +34,7 @@ struct WorkspaceFormSheet: View {
         onSave: @escaping (Workspace) -> Void
     ) {
         self.serverManager = serverManager
+        _stateStore = ObservedObject(wrappedValue: serverManager.stateStore)
         self.workspace = workspace
         self.onSave = onSave
 
@@ -156,22 +158,19 @@ struct WorkspaceFormSheet: View {
             do {
                 let colorHex = selectedColor.toHex()
 
-                let newWorkspace = Workspace(
-                    id: workspace?.id ?? UUID(),
+                let newWorkspace = stateStore.makeWorkspaceSaveCandidate(
+                    editing: workspace,
                     name: name.trimmingCharacters(in: .whitespacesAndNewlines),
-                    colorHex: colorHex,
-                    icon: workspace?.icon,
-                    order: workspace?.order ?? serverManager.workspaces.count,
-                    environments: workspace?.environments ?? ServerEnvironment.builtInEnvironments,
-                    lastSelectedEnvironmentId: workspace?.lastSelectedEnvironmentId,
-                    lastSelectedServerId: workspace?.lastSelectedServerId,
-                    createdAt: workspace?.createdAt ?? Date()
+                    colorHex: colorHex
                 )
 
                 if isEditing {
                     try await serverManager.updateWorkspace(newWorkspace)
                 } else {
-                    try await serverManager.addWorkspace(newWorkspace)
+                    try await serverManager.addWorkspace(
+                        newWorkspace,
+                        hasProAccess: storeManager.allowsProFeatures
+                    )
                 }
 
                 await MainActor.run {
@@ -217,7 +216,7 @@ struct WorkspaceFormSheet: View {
         guard let workspace else {
             return String(localized: "This will delete the workspace and all servers in it. This cannot be undone.")
         }
-        let count = serverManager.servers(in: workspace, environment: nil).count
+        let count = stateStore.servers(in: workspace, environment: nil).count
         if count == 0 {
             return String(localized: "This will delete the workspace. This cannot be undone.")
         }
@@ -247,13 +246,4 @@ extension Color {
 
         return String(format: "#%02X%02X%02X", r, g, b)
     }
-}
-
-// MARK: - Preview
-
-#Preview {
-    WorkspaceFormSheet(
-        serverManager: ServerManager.shared,
-        onSave: { _ in }
-    )
 }

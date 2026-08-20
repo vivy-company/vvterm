@@ -1,6 +1,6 @@
 //
 //  LoggerExtension.swift
-//  aizen
+//  VVTerm
 //
 //  Unified logging utility for the application
 //
@@ -10,7 +10,7 @@ import os.log
 
 extension Logger {
     /// The app's logging subsystem - must match bundle identifier for proper filtering
-    nonisolated private static let appSubsystem = Bundle.main.bundleIdentifier ?? "win.aizen.app"
+    nonisolated private static let appSubsystem = Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm"
 
     /// Create a logger for a specific category
     nonisolated static func forCategory(_ category: String) -> Logger {
@@ -86,5 +86,11 @@ enum DebugLogConfiguration {
 
     nonisolated private static func normalize(_ value: String) -> String {
         value.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+}
+
+enum LogPrivacy {
+    nonisolated static func errorClass(_ error: Error) -> String {
+        String(reflecting: type(of: error))
     }
 }

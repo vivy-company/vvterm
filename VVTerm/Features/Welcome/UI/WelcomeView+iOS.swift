@@ -4,12 +4,16 @@ import UIKit
 
 extension WelcomeView {
     var platformContent: some View {
-        WelcomeContent(hasSeenWelcome: $hasSeenWelcome)
+        WelcomeContent(
+            hasSeenWelcome: $hasSeenWelcome,
+            onCompleted: onCompleted
+        )
     }
 }
 
 private struct WelcomeContent: View {
     @Binding var hasSeenWelcome: Bool
+    let onCompleted: () -> Void
     @State private var showingProUpgrade = false
 
     var body: some View {
@@ -47,7 +51,9 @@ private struct WelcomeContent: View {
 
                     // Features
                     VStack(alignment: .leading, spacing: 20) {
-                        ForEach(WelcomeFeatureCatalog.features) { feature in
+                        ForEach(WelcomeFeaturePresentationCatalog.features(
+                            companionPlatformTitle: "Available on Mac"
+                        )) { feature in
                             HStack(alignment: .top, spacing: 16) {
                                 Image(systemName: feature.icon)
                                     .font(.system(size: 20, weight: .medium))
@@ -82,7 +88,7 @@ private struct WelcomeContent: View {
             VStack(spacing: 14) {
                 Button {
                     hasSeenWelcome = true
-                    AnalyticsTracker.shared.trackWelcomeCompleted()
+                    onCompleted()
                 } label: {
                     Text("Continue")
                         .font(.headline)

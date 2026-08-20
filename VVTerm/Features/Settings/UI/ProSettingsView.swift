@@ -1,97 +1,36 @@
-//
-//  ProSettingsView.swift
-//  VVTerm
-//
-
-import SwiftUI
 import StoreKit
+import SwiftUI
 
 struct ProSettingsView: View {
-    @ObservedObject private var storeManager = StoreManager.shared
-    @ObservedObject private var serverManager = ServerManager.shared
+    @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var storeManager: StoreManager
+    @EnvironmentObject private var serverManager: ServerManager
     @State private var showingPlans = false
     @State private var showingManageSubscription = false
 
     var body: some View {
         Form {
-            // Upgrade banner (only when not Pro)
-            if !storeManager.isPro {
-                Section {
-                    upgradeBanner
-                }
-                .listRowInsets(EdgeInsets())
+            Section {
+                ProSettingsStatusHero(
+                    state: userState,
+                    onPrimaryAction: handlePrimaryAction
+                )
                 .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
+                .listRowSeparator(.hidden)
             }
 
-            Section("Status") {
-                HStack {
-                    Text("Subscription")
-                    Spacer()
-                    statusBadge
-                }
-
-                if storeManager.isPro {
-                    HStack {
-                        Text("Plan")
-                        Spacer()
-                        Text(planName)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    if let renewalDate = storeManager.subscriptionExpirationDate {
-                        HStack {
-                            Text(storeManager.isLifetime ? String(localized: "Purchased") : String(localized: "Renews"))
-                            Spacer()
-                            Text(renewalDate, style: .date)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                } else {
-                    // Show usage for free tier
-                    HStack {
-                        Text("Servers")
-                        Spacer()
-                        Text(String(format: String(localized: "%lld of %lld used"), Int64(serverManager.servers.count), Int64(serverManager.freeServerLimit)))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    HStack {
-                        Text("Workspaces")
-                        Spacer()
-                        Text(String(format: String(localized: "%lld of %lld used"), Int64(serverManager.workspaces.count), Int64(FreeTierLimits.maxWorkspaces)))
-                            .foregroundStyle(.secondary)
-                    }
-
-                    HStack {
-                        Text("Simultaneous Connections")
-                        Spacer()
-                        Text(String(format: String(localized: "%lld max"), Int64(FreeTierLimits.maxTabs)))
-                            .foregroundStyle(.secondary)
-                    }
-                }
+            if storeManager.accessState == .free {
+                usageSection
             }
 
-            if storeManager.isPro {
-                Section("Features") {
-                    featureRow(icon: "server.rack", title: "Unlimited Servers", enabled: true)
-                    featureRow(icon: "folder", title: "Unlimited Workspaces", enabled: true)
-                    featureRow(icon: "rectangle.stack", title: "Multiple Connections", enabled: true)
-                    featureRow(icon: "paintbrush", title: "Custom Environments", enabled: true)
-                    featureRow(icon: "icloud", title: "iCloud Sync", enabled: true)
-                }
+            if userState.hasProAccess {
+                featuresSection
             }
 
-            if storeManager.isPro && !storeManager.isLifetime {
-                Section("Billing") {
-                    Button("Manage Subscription") {
-                        #if os(iOS)
-                        showingManageSubscription = true
-                        #else
-                        if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                            NSWorkspace.shared.open(url)
-                        }
-                        #endif
-                    }
+            Section("Purchases") {
+                Button("Restore Purchases") {
+                    Task { await storeManager.restorePurchases() }
                 }
             }
 
@@ -108,14 +47,10 @@ struct ProSettingsView: View {
                 .tint(.primary)
                 .foregroundStyle(.primary)
             }
-
-            Section {
-                Button("Restore Purchases") {
-                    Task { await storeManager.restorePurchases() }
-                }
-            }
         }
         .formStyle(.grouped)
+        .adaptiveSoftScrollEdges()
+        .accessibilityIdentifier("vvterm.settings.page.pro")
         .proUpgradePresentation(isPresented: $showingPlans, source: .settings)
         #if os(iOS)
         .manageSubscriptionsSheetCompat(
@@ -125,102 +60,137 @@ struct ProSettingsView: View {
         #endif
     }
 
-    // MARK: - Components
-
-    @ViewBuilder
-    private var statusBadge: some View {
-        Text(storeManager.isPro ? String(localized: "Active") : String(localized: "Free Tier"))
-            .font(.caption2)
-            .fontWeight(.medium)
-            .foregroundStyle(storeManager.isPro ? .green : .secondary)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background((storeManager.isPro ? Color.green : Color.secondary).opacity(0.15), in: Capsule())
+    private var userState: ProSettingsUserState {
+        ProSettingsUserState(snapshot: storeManager.entitlementSnapshot)
     }
 
-    private var planName: String {
-        if storeManager.isLifetime {
-            return String(localized: "Pro Lifetime")
-        }
-        guard let status = storeManager.subscriptionStatus,
-              case .verified(let transaction) = status.transaction else {
-            return String(localized: "Pro")
-        }
-        switch transaction.productID {
-        case VVTermProducts.proMonthly:
-            return String(localized: "Pro Monthly")
-        case VVTermProducts.proYearly:
-            return String(localized: "Pro Yearly")
-        default:
-            return String(localized: "Pro")
-        }
-    }
-
-    @ViewBuilder
-    private func featureRow(icon: String, title: LocalizedStringKey, enabled: Bool) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundStyle(.secondary)
-                .frame(width: 20)
-            Text(title)
-            Spacer()
-            Image(systemName: enabled ? "checkmark.circle.fill" : "xmark.circle")
-                .foregroundStyle(enabled ? .green : .secondary)
-        }
-    }
-
-    // MARK: - Upgrade Banner
-
-    private var upgradeBanner: some View {
-        Button {
-            showingPlans = true
-        } label: {
-            HStack(spacing: 14) {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        .fill(LinearGradient(
-                            colors: [Color.orange, Color(red: 0.95, green: 0.5, blue: 0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 36, height: 36)
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 16, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Upgrade to VVTerm Pro")
-                        .font(.headline)
-                    Text("Unlimited servers & workspaces")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Text("View Plans")
-                    .font(.callout)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(
-                        Capsule()
-                            .fill(Color.orange.opacity(0.15))
+    private var usageSection: some View {
+        Section("Usage") {
+            LabeledContent("Servers") {
+                Text(
+                    String(
+                        format: String(localized: "%lld of %lld used"),
+                        Int64(serverManager.servers.count),
+                        Int64(serverManager.freeServerLimit)
                     )
+                )
+                .foregroundStyle(.secondary)
             }
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .fill(Color.orange.opacity(0.06))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color.orange.opacity(0.2), lineWidth: 1)
-            )
+
+            LabeledContent("Workspaces") {
+                Text(
+                    String(
+                        format: String(localized: "%lld of %lld used"),
+                        Int64(serverManager.workspaces.count),
+                        Int64(FreeTierLimits.maxWorkspaces)
+                    )
+                )
+                .foregroundStyle(.secondary)
+            }
+
+            LabeledContent("Connections") {
+                Text(
+                    String(
+                        format: String(localized: "%lld max"),
+                        Int64(FreeTierLimits.maxTabs)
+                    )
+                )
+                .foregroundStyle(.secondary)
+            }
         }
-        .buttonStyle(.plain)
+    }
+
+    private var featuresSection: some View {
+        Section {
+            ProSettingsFeatureRow(
+                title: "Servers",
+                systemImage: "server.rack",
+                value: "Unlimited"
+            )
+            ProSettingsFeatureRow(
+                title: "Workspaces",
+                systemImage: "folder",
+                value: "Unlimited"
+            )
+            ProSettingsFeatureRow(
+                title: "Connections",
+                systemImage: "rectangle.stack",
+                value: "Unlimited"
+            )
+            ProSettingsFeatureRow(
+                title: "File tabs",
+                systemImage: "doc.on.doc",
+                value: "Unlimited"
+            )
+            ProSettingsFeatureRow(
+                title: "Custom actions",
+                systemImage: "command",
+                value: "Unlimited"
+            )
+            ProSettingsFeatureRow(
+                title: "Split panes",
+                systemImage: "rectangle.split.2x1",
+                value: "Included"
+            )
+            ProSettingsFeatureRow(
+                title: "Docker monitoring",
+                systemImage: "shippingbox",
+                value: "Included"
+            )
+            ProSettingsFeatureRow(
+                title: "Environments",
+                systemImage: "paintbrush",
+                value: "Custom"
+            )
+        } header: {
+            Text("Features")
+        } footer: {
+            Text("One Pro purchase works on iPhone, iPad, and Mac with the same Apple ID.")
+        }
+    }
+
+    private func handlePrimaryAction(_ action: ProSettingsPrimaryAction) {
+        switch action {
+        case .viewPlans:
+            showingPlans = true
+        case .manageSubscription:
+            openSubscriptionManagement()
+        }
+    }
+
+    private func openSubscriptionManagement() {
+        let route: SubscriptionManagementRoute
+        #if os(iOS)
+        if #available(iOS 17.0, *) {
+            route = .resolve(nativeSheetAvailable: true)
+        } else {
+            route = .resolve(nativeSheetAvailable: false)
+        }
+        #else
+        route = .resolve(nativeSheetAvailable: false)
+        #endif
+
+        switch route {
+        case .nativeSheet:
+            showingManageSubscription = true
+        case .web(let url):
+            openURL(url)
+        }
+    }
+}
+
+private struct ProSettingsFeatureRow: View {
+    let title: LocalizedStringResource
+    let systemImage: String
+    let value: LocalizedStringResource
+
+    var body: some View {
+        LabeledContent {
+            Text(value)
+                .foregroundStyle(.secondary)
+        } label: {
+            Label(title, systemImage: systemImage)
+        }
     }
 }
 
@@ -242,9 +212,3 @@ extension View {
     }
 }
 #endif
-
-// MARK: - Preview
-
-#Preview {
-    ProSettingsView()
-}

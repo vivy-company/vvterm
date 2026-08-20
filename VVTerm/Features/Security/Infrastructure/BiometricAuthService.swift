@@ -15,24 +15,50 @@ final class BiometricAuthService: BiometricAuthServing {
             return .available(Self.mapBiometryType(context.biometryType))
         }
 
-        return .unavailable(Self.preflightMessage(for: error))
+        return .unavailable(Self.unavailability(for: error))
     }
 
-    func authenticate(localizedReason: String, allowPasscodeFallback: Bool = true) async throws {
-        let reason = localizedReason.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !reason.isEmpty else {
-            throw BiometricAuthError.failed(String(localized: "Authentication reason is missing."))
-        }
-
+    func authenticate(
+        reason: BiometricAuthenticationReason,
+        allowPasscodeFallback: Bool = true
+    ) async throws {
         let context = LAContext()
         let policy: LAPolicy = allowPasscodeFallback
             ? .deviceOwnerAuthentication
             : .deviceOwnerAuthenticationWithBiometrics
 
         do {
-            _ = try await context.evaluatePolicy(policy, localizedReason: reason)
+            _ = try await context.evaluatePolicy(
+                policy,
+                localizedReason: Self.localizedReason(for: reason)
+            )
         } catch {
-            throw Self.mapEvaluateError(error)
+            throw Self.authenticationFailure(for: error)
+        }
+    }
+
+    static func localizedReason(for reason: BiometricAuthenticationReason) -> String {
+        switch reason {
+        case .enableAppLock(let biometry):
+            return String(
+                format: String(localized: "Enable %@ for VVTerm"),
+                localizedName(for: biometry)
+            )
+        case .disableAppLock:
+            return String(localized: "Authenticate to disable the VVTerm app lock")
+        case .unlockApp(let biometry):
+            return String(
+                format: String(localized: "Unlock VVTerm with %@"),
+                localizedName(for: biometry)
+            )
+        case .unlockServer(let name):
+            return String(format: String(localized: "Unlock server %@"), name)
+        case .protectedServerAction(let action, let serverName):
+            return String(
+                format: String(localized: "Authenticate to %@ server %@"),
+                localizedActionName(for: action),
+                serverName
+            )
         }
     }
 
@@ -47,51 +73,83 @@ final class BiometricAuthService: BiometricAuthServing {
         }
     }
 
-    private static func preflightMessage(for error: NSError?) -> String {
+    private static func localizedName(for biometry: BiometryKind) -> String {
+        switch biometry {
+        case .none:
+            return String(localized: "Biometric Authentication")
+        case .touchID:
+            return String(localized: "Touch ID")
+        case .faceID:
+            return String(localized: "Face ID")
+        }
+    }
+
+    private static func localizedActionName(
+        for action: AppLockAuthenticationState.ProtectedServerAction
+    ) -> String {
+        switch action {
+        case .edit:
+            return String(localized: "edit")
+        case .testConnection:
+            return String(localized: "test")
+        case .save:
+            return String(localized: "save")
+        case .delete:
+            return String(localized: "delete")
+        }
+    }
+
+    static func unavailability(for error: NSError?) -> BiometricUnavailability {
         guard let error else {
-            return String(localized: "Biometric authentication is unavailable on this device.")
+            return .notAvailable
         }
 
-        if let code = LAError.Code(rawValue: error.code) {
+        if error.domain == LAError.errorDomain,
+           let code = LAError.Code(rawValue: error.code) {
             switch code {
             case .biometryNotEnrolled:
-                return String(localized: "Biometric authentication is not set up on this device.")
+                return .notEnrolled
             case .biometryNotAvailable:
-                return String(localized: "Biometric authentication is unavailable on this device.")
+                return .notAvailable
             case .biometryLockout:
-                return String(localized: "Biometric authentication is locked. Unlock the device to try again.")
+                return .locked
             case .passcodeNotSet:
-                return String(localized: "Set a device passcode before using biometric authentication.")
+                return .passcodeNotSet
             default:
                 break
             }
         }
 
-        return error.localizedDescription
+        return .system(message: error.localizedDescription)
     }
 
-    private static func mapEvaluateError(_ error: Error) -> BiometricAuthError {
+    static func authenticationFailure(for error: Error) -> BiometricAuthenticationFailure {
+        if error is CancellationError {
+            return .cancelled
+        }
+
         let nsError = error as NSError
 
-        guard let code = LAError.Code(rawValue: nsError.code) else {
-            return .failed(nsError.localizedDescription)
+        guard nsError.domain == LAError.errorDomain,
+              let code = LAError.Code(rawValue: nsError.code) else {
+            return .system(message: nsError.localizedDescription)
         }
 
         switch code {
         case .userCancel, .systemCancel, .appCancel, .userFallback:
             return .cancelled
         case .biometryNotEnrolled:
-            return .unavailable(String(localized: "Biometric authentication is not set up on this device."))
+            return .notEnrolled
         case .biometryNotAvailable:
-            return .unavailable(String(localized: "Biometric authentication is unavailable on this device."))
+            return .notAvailable
         case .biometryLockout:
-            return .failed(String(localized: "Biometric authentication is locked. Unlock the device and try again."))
+            return .locked
         case .passcodeNotSet:
-            return .unavailable(String(localized: "Set a device passcode before using biometric authentication."))
+            return .passcodeNotSet
         case .authenticationFailed:
-            return .failed(String(localized: "Authentication failed."))
+            return .authenticationFailed
         default:
-            return .failed(nsError.localizedDescription)
+            return .system(message: nsError.localizedDescription)
         }
     }
 }

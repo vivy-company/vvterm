@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Platform Stats Protocol
 
 /// Protocol defining the interface for platform-specific stats collection
-protocol PlatformStatsCollector: Sendable {
+nonisolated protocol PlatformStatsCollector: Sendable {
     /// Collect stats from the remote server
     /// - Parameters:
     ///   - client: SSH client to execute commands
@@ -33,12 +33,12 @@ protocol PlatformStatsCollector: Sendable {
     ) async throws -> StorageDeviceHealthResult
 }
 
-struct VolumeCollectionMetadata: Equatable, Sendable {
+nonisolated struct VolumeCollectionMetadata: Equatable, Sendable {
     let stableIdentifier: String?
     let fileSystem: String
 }
 
-func parseBSDMountVolumeMetadata(_ output: String) -> [String: VolumeCollectionMetadata] {
+nonisolated func parseBSDMountVolumeMetadata(_ output: String) -> [String: VolumeCollectionMetadata] {
     var metadata: [String: VolumeCollectionMetadata] = [:]
     for line in output.components(separatedBy: .newlines) {
         guard let onRange = line.range(of: " on ") else { continue }
@@ -100,7 +100,7 @@ extension PlatformStatsCollector {
 // MARK: - Stats Collection Context
 
 /// Shared context for stats collection (previous values for rate calculations)
-final class StatsCollectionContext: @unchecked Sendable {
+nonisolated final class StatsCollectionContext: @unchecked Sendable {
     var prevNetRx: UInt64 = 0
     var prevNetTx: UInt64 = 0
     var prevTimestamp: Date?
@@ -320,7 +320,7 @@ final class StatsCollectionContext: @unchecked Sendable {
 
 // MARK: - Linux CPU Values (used by Linux-like systems)
 
-struct LinuxCpuValues: Sendable {
+nonisolated struct LinuxCpuValues: Sendable {
     let user: UInt64
     let nice: UInt64
     let system: UInt64
@@ -357,7 +357,7 @@ extension RemotePlatform {
 
 // MARK: - Shared Parsing Utilities
 
-enum StatsParsingUtils {
+nonisolated enum StatsParsingUtils {
     /// Calculate network speed from previous and current values
     static func calculateNetworkSpeed(
         currentRx: UInt64,

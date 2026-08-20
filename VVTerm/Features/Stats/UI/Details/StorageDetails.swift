@@ -2,14 +2,14 @@ import CryptoKit
 import Foundation
 import SwiftUI
 
-enum StorageVolumeEditingState: Equatable {
+nonisolated enum StorageVolumeEditingState: Equatable, Sendable {
     case browsing
     case editing
 
     var isEditing: Bool { self == .editing }
 }
 
-enum StorageVolumeListPolicy {
+nonisolated enum StorageVolumeListPolicy {
     static func matchingVolumes(
         _ volumes: [VolumeInfo],
         searchText: String
@@ -26,7 +26,7 @@ enum StorageVolumeListPolicy {
     }
 }
 
-enum StorageVolumePresentationPolicy {
+nonisolated enum StorageVolumePresentationPolicy {
     static func visibleVolumes(
         from volumes: [VolumeInfo],
         hiddenVolumeIDs: Set<VolumeIdentity>

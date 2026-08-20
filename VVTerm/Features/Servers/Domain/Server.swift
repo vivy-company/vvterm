@@ -1,8 +1,8 @@
 import Foundation
 
-// MARK: - Server Model (CloudKit synced)
+// MARK: - Server Model
 
-struct Server: Identifiable, Codable, Hashable {
+nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     var workspaceId: UUID
     var environment: ServerEnvironment
@@ -173,7 +173,7 @@ struct Server: Identifiable, Codable, Hashable {
     }
 }
 
-enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
+nonisolated enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case standard
     case tailscale
     case mosh
@@ -194,52 +194,30 @@ enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
-enum CloudflareAccessMode: String, Codable, CaseIterable, Identifiable {
+nonisolated enum CloudflareAccessMode: String, Codable, CaseIterable, Identifiable, Sendable {
     case oauth
     case serviceToken
 
     var id: String { rawValue }
 
-    var displayName: String {
-        switch self {
-        case .oauth:
-            return String(localized: "OAuth")
-        case .serviceToken:
-            return String(localized: "Service Token")
-        }
-    }
 }
 
 // MARK: - Authentication Method
 
-enum AuthMethod: String, Codable, CaseIterable, Identifiable {
+nonisolated enum AuthMethod: String, Codable, CaseIterable, Identifiable, Sendable {
     case password
     case sshKey
     case sshKeyWithPassphrase
 
     var id: String { rawValue }
 
-    var displayName: String {
-        switch self {
-        case .password: return String(localized: "Password")
-        case .sshKey: return String(localized: "SSH Key")
-        case .sshKeyWithPassphrase: return String(localized: "SSH Key + Passphrase")
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .password: return "key.fill"
-        case .sshKey: return "lock.doc.fill"
-        case .sshKeyWithPassphrase: return "lock.shield.fill"
-        }
-    }
 }
 
 // MARK: - Server Credentials (for authentication)
 
-struct ServerCredentials: Sendable {
+nonisolated struct ServerCredentials: Sendable {
     let serverId: UUID
+    var credentialBinding: ServerCredentialBinding?
     var password: String?
     var privateKey: Data?
     var publicKey: Data?
@@ -265,6 +243,7 @@ struct SSHKeyEntry: Identifiable, Codable, Hashable {
     var name: String
     var hasPassphrase: Bool
     var createdAt: Date
+    var updatedAt: Date
     var keyType: SSHKeyType?
     var publicKey: String?
 
@@ -273,6 +252,7 @@ struct SSHKeyEntry: Identifiable, Codable, Hashable {
         name: String,
         hasPassphrase: Bool = false,
         createdAt: Date = Date(),
+        updatedAt: Date? = nil,
         keyType: SSHKeyType? = nil,
         publicKey: String? = nil
     ) {
@@ -280,7 +260,29 @@ struct SSHKeyEntry: Identifiable, Codable, Hashable {
         self.name = name
         self.hasPassphrase = hasPassphrase
         self.createdAt = createdAt
+        self.updatedAt = updatedAt ?? createdAt
         self.keyType = keyType
         self.publicKey = publicKey
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case name
+        case hasPassphrase
+        case createdAt
+        case updatedAt
+        case keyType
+        case publicKey
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        hasPassphrase = try container.decode(Bool.self, forKey: .hasPassphrase)
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
+        updatedAt = try container.decodeIfPresent(Date.self, forKey: .updatedAt) ?? createdAt
+        keyType = try container.decodeIfPresent(SSHKeyType.self, forKey: .keyType)
+        publicKey = try container.decodeIfPresent(String.self, forKey: .publicKey)
     }
 }

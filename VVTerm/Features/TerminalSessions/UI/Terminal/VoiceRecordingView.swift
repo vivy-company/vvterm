@@ -11,7 +11,7 @@ struct VoiceRecordingView: View {
     @ObservedObject var audioService: AudioService
     let onStop: () -> Void
     let onCancel: () -> Void
-    @Binding var isProcessing: Bool
+    let isProcessing: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
@@ -50,7 +50,6 @@ struct VoiceRecordingView: View {
                     tint: .secondary,
                     accessibilityLabel: String(localized: "Cancel voice input")
                 ) {
-                    isProcessing = false
                     onCancel()
                 }
 

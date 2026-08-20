@@ -4,9 +4,9 @@ import SwiftUI
 struct IOSZenModePanel: View {
     let width: CGFloat
     let serverName: String
-    let selectedView: String
-    let selectedViewBinding: Binding<String>
-    let viewTabs: [ConnectionViewTab]
+    let selectedView: ConnectionViewTabID
+    let selectedViewBinding: Binding<ConnectionViewTabID>
+    let viewTabs: [ConnectionViewTabID]
     let terminalTabs: [TerminalTab]
     let selectedTerminalTabId: Binding<UUID?>
     let terminalTabTitle: (TerminalTab) -> String
@@ -43,14 +43,14 @@ struct IOSZenModePanel: View {
                         ) {
                             selectedViewBinding.wrappedValue = tab.id
                         }
-                        .accessibilityIdentifier("vvterm.terminal.zen.view.\(tab.id)")
+                        .accessibilityIdentifier("vvterm.terminal.zen.view.\(tab.rawValue)")
                     }
                 }
             }
 
             ZenModeSection("Tabs") {
                 ZenModeActionButton(title: "New Tab", systemImage: "plus") {
-                    if selectedView == ConnectionViewTab.files.id {
+                    if selectedView == .files {
                         onNewFileTab()
                     } else {
                         onNewTerminalTab()
@@ -96,7 +96,7 @@ struct IOSZenModePanel: View {
 
     @ViewBuilder
     private var tabList: some View {
-        if selectedView == ConnectionViewTab.files.id {
+        if selectedView == .files {
             if fileTabs.isEmpty {
                 emptyTabsLabel("No file tabs open.")
             } else {
@@ -130,7 +130,7 @@ struct IOSZenModePanel: View {
 
         return HStack(spacing: 8) {
             Button {
-                selectedViewBinding.wrappedValue = ConnectionViewTab.terminal.id
+                selectedViewBinding.wrappedValue = .terminal
                 selectedTerminalTabId.wrappedValue = tab.id
             } label: {
                 HStack(spacing: 10) {
@@ -169,7 +169,7 @@ struct IOSZenModePanel: View {
 
         return HStack(spacing: 8) {
             Button {
-                selectedViewBinding.wrappedValue = ConnectionViewTab.files.id
+                selectedViewBinding.wrappedValue = .files
                 selectedFileTabId.wrappedValue = tab.id
                 onSelectFileTab(tab)
             } label: {
@@ -220,7 +220,7 @@ struct IOSZenModePanel: View {
     }
 
     private var statusText: String {
-        if selectedView == ConnectionViewTab.files.id {
+        if selectedView == .files {
             return fileTabs.isEmpty
                 ? String(localized: "No open file tabs")
                 : String(format: String(localized: "%lld open file tabs"), Int64(fileTabs.count))
@@ -232,7 +232,7 @@ struct IOSZenModePanel: View {
     }
 
     private var indicatorColor: Color {
-        if selectedView == ConnectionViewTab.files.id {
+        if selectedView == .files {
             return fileTabs.isEmpty ? .secondary : .green
         }
 

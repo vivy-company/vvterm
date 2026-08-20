@@ -1,10 +1,156 @@
-import Foundation
 import Combine
+import Foundation
 import os.log
 
-// MARK: - Server Stats Collector
+nonisolated enum ServerStatsCollectionFailure: Equatable, Sendable {
+    case securityApprovalCancelled
+    case securityApprovalExpired
+    case securityApprovalUnavailable
+    case external(detail: String)
+}
 
-/// Main stats collector that uses a shared SSH connection when available
+nonisolated struct ServerStatsCollectionState: Equatable, Sendable {
+    nonisolated enum Phase: Equatable, Sendable {
+        case idle
+        case starting(attemptID: UUID)
+        case startingPaused(attemptID: UUID)
+        case collecting(attemptID: UUID)
+        case paused(attemptID: UUID)
+        case approvalRequired(ServerStatsApprovalRequest)
+        case failed(ServerStatsCollectionFailure)
+
+        var attemptID: UUID? {
+            switch self {
+            case .starting(let attemptID),
+                 .startingPaused(let attemptID),
+                 .collecting(let attemptID),
+                 .paused(let attemptID):
+                return attemptID
+            case .idle, .approvalRequired, .failed:
+                return nil
+            }
+        }
+    }
+
+    private(set) var phase: Phase = .idle
+
+    var isCollecting: Bool {
+        switch phase {
+        case .starting, .collecting:
+            return true
+        case .idle, .startingPaused, .paused, .approvalRequired, .failed:
+            return false
+        }
+    }
+
+    var isPolling: Bool {
+        if case .collecting = phase { return true }
+        return false
+    }
+
+    var approvalRequest: ServerStatsApprovalRequest? {
+        guard case .approvalRequired(let request) = phase else { return nil }
+        return request
+    }
+
+    mutating func start(attemptID: UUID) {
+        phase = .starting(attemptID: attemptID)
+    }
+
+    @discardableResult
+    mutating func markConnected(attemptID: UUID) -> Bool {
+        switch phase {
+        case .starting(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .collecting(attemptID: attemptID)
+            return true
+        case .startingPaused(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .paused(attemptID: attemptID)
+            return true
+        default:
+            return false
+        }
+    }
+
+    @discardableResult
+    mutating func pause(attemptID: UUID) -> Bool {
+        switch phase {
+        case .starting(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .startingPaused(attemptID: attemptID)
+            return true
+        case .collecting(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .paused(attemptID: attemptID)
+            return true
+        case .startingPaused(let currentAttemptID) where currentAttemptID == attemptID:
+            return true
+        case .paused(let currentAttemptID) where currentAttemptID == attemptID:
+            return true
+        default:
+            return false
+        }
+    }
+
+    @discardableResult
+    mutating func resume(attemptID: UUID) -> Bool {
+        switch phase {
+        case .startingPaused(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .starting(attemptID: attemptID)
+            return true
+        case .paused(let currentAttemptID) where currentAttemptID == attemptID:
+            phase = .collecting(attemptID: attemptID)
+            return true
+        case .starting(let currentAttemptID) where currentAttemptID == attemptID:
+            return true
+        case .collecting(let currentAttemptID) where currentAttemptID == attemptID:
+            return true
+        default:
+            return false
+        }
+    }
+
+    @discardableResult
+    mutating func finish(
+        attemptID: UUID,
+        failure: ServerStatsCollectionFailure? = nil
+    ) -> Bool {
+        guard phase.attemptID == attemptID else { return false }
+        if let failure {
+            phase = .failed(failure)
+        } else {
+            phase = .idle
+        }
+        return true
+    }
+
+    mutating func stop() {
+        phase = .idle
+    }
+
+    @discardableResult
+    mutating func requireApproval(
+        attemptID: UUID,
+        request: ServerStatsApprovalRequest
+    ) -> Bool {
+        guard phase.attemptID == attemptID else { return false }
+        phase = .approvalRequired(request)
+        return true
+    }
+
+    @discardableResult
+    mutating func resolveApproval(
+        _ request: ServerStatsApprovalRequest,
+        failure: ServerStatsCollectionFailure? = nil
+    ) -> Bool {
+        guard phase == .approvalRequired(request) else { return false }
+        if let failure {
+            phase = .failed(failure)
+        } else {
+            phase = .idle
+        }
+        return true
+    }
+}
+
+/// Coordinates one stats collection attempt without owning transport details.
 @MainActor
 final class ServerStatsCollector: ObservableObject {
     @Published var stats = ServerStats()
@@ -15,324 +161,447 @@ final class ServerStatsCollector: ObservableObject {
     @Published var gpuUtilizationHistoryByDeviceID: [String: [StatsPoint]] = [:]
     @Published var dockerCPUHistory: [StatsPoint] = []
     @Published var dockerMemoryHistory: [StatsPoint] = []
-    @Published var isCollecting = false
-    @Published var connectionError: String?
+    @Published private(set) var collectionState = ServerStatsCollectionState()
 
-    private var collectTask: Task<Void, Never>?
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "Stats")
+    private let logger = Logger(subsystem: "app.vivy.vvterm", category: "Stats")
+    private let dependencies: ServerStatsCollectorDependencies
 
-    // Own SSH client for stats collection
-    private var sshClient: SSHClient?
-    private var ownsClient = false
+    private struct CollectionIdentity: Equatable {
+        let serverID: UUID
+        let connectionID: ServerStatsConnectionIdentity
+        let ownership: ServerStatsClientOwnership
+    }
 
-    // Platform detection and collector
-    private var remotePlatform: RemotePlatform = .unknown
-    private var platformCollector: PlatformStatsCollector?
-    private let dockerCollector = DockerStatsCollector()
-    private let context = StatsCollectionContext()
-    private var hardwareProfile: HardwareProfile = .empty
-    private var isDockerCollectionEnabled = false
+    private final class AttemptIdentity: Sendable {}
+
+    @MainActor
+    private final class CollectionAttempt {
+        let id: UUID
+        let attemptIdentity = AttemptIdentity()
+        let serverID: UUID
+        let session: any ServerStatsCollectionSession
+        let identity: CollectionIdentity
+        var collectDocker: Bool
+        var primaryTask: Task<Void, Never>?
+        var operationTasks: [ObjectIdentifier: Task<Void, Never>] = [:]
+
+        init(
+            id: UUID,
+            serverID: UUID,
+            session: any ServerStatsCollectionSession,
+            collectDocker: Bool
+        ) {
+            self.id = id
+            self.serverID = serverID
+            self.session = session
+            self.identity = CollectionIdentity(
+                serverID: serverID,
+                connectionID: session.connectionIdentity,
+                ownership: session.ownership
+            )
+            self.collectDocker = collectDocker
+        }
+
+        func cancelAllTasks() {
+            primaryTask?.cancel()
+            primaryTask = nil
+            let tasks = Array(operationTasks.values)
+            operationTasks.removeAll()
+            tasks.forEach { $0.cancel() }
+        }
+    }
+
+    @MainActor
+    private final class TrackedOperationResult<Output> {
+        var value: Result<Output, Error>?
+
+        #if compiler(<6.4)
+        // Xcode 26.5 crashes while optimizing the isolated destructor of a
+        // generic MainActor class. Xcode 27 fixes the compiler bug.
+        @_optimize(none)
+        deinit {}
+        #endif
+    }
+
+    private var activeAttempt: CollectionAttempt?
+    private var pendingApprovalReference: (any ServerStatsApprovalReference)?
+    private var cleanupTasks: [ObjectIdentifier: Task<Void, Never>] = [:]
+
+    var isCollecting: Bool { collectionState.isCollecting }
+    var isDockerCollectionEnabled: Bool { activeAttempt?.collectDocker ?? false }
+
+    var presentationSnapshot: ServerStatsPresentationSnapshot {
+        ServerStatsPresentationSnapshot(
+            stats: stats,
+            cpuHistory: cpuHistory,
+            memoryHistory: memoryHistory,
+            gpuHistories: gpuUtilizationHistoryByDeviceID,
+            networkRxHistory: networkRxHistory,
+            networkTxHistory: networkTxHistory,
+            dockerCPUHistory: dockerCPUHistory,
+            dockerMemoryHistory: dockerMemoryHistory
+        )
+    }
+
+    var approvalReferenceForPresentation: (any ServerStatsApprovalReference)? {
+        pendingApprovalReference
+    }
+
+    init(dependencies: ServerStatsCollectorDependencies) {
+        self.dependencies = dependencies
+    }
+
+    isolated deinit {
+        activeAttempt?.primaryTask?.cancel()
+        activeAttempt?.operationTasks.values.forEach { $0.cancel() }
+        cleanupTasks.values.forEach { $0.cancel() }
+    }
 
     // MARK: - Collection Control
 
     func startCollecting(
-        for server: Server,
-        using sharedClient: SSHClient? = nil,
+        for target: any ServerStatsCollectionTarget,
+        using sharedConnection: (any ServerStatsConnectionReference)? = nil,
         collectDocker: Bool = false
     ) async {
-        guard !isCollecting else {
-            isDockerCollectionEnabled = collectDocker
+        let ownership: ServerStatsClientOwnership = sharedConnection == nil
+            ? .owned
+            : .shared
+
+        if sharedConnection == nil,
+           let activeAttempt,
+           activeAttempt.serverID == target.serverID,
+           activeAttempt.identity.ownership == .owned {
+            activeAttempt.collectDocker = collectDocker
+            _ = collectionState.resume(attemptID: activeAttempt.id)
             return
         }
-        isCollecting = true
-        isDockerCollectionEnabled = collectDocker
-        connectionError = nil
+
+        let connection = sharedConnection ?? dependencies.makeOwnedConnection()
+        let requestedIdentity = CollectionIdentity(
+            serverID: target.serverID,
+            connectionID: connection.identity,
+            ownership: ownership
+        )
+        if let activeAttempt, activeAttempt.identity == requestedIdentity {
+            activeAttempt.collectDocker = collectDocker
+            _ = collectionState.resume(attemptID: activeAttempt.id)
+            return
+        }
+
+        supersedeActiveAttempt()
+        pendingApprovalReference = nil
+
+        let attemptID = dependencies.makeAttemptID()
+        collectionState.start(attemptID: attemptID)
         resetCollectionState()
 
-        // Use shared client if available, otherwise create one
-        let client: SSHClient
-        let ownsClient: Bool
-        if let sharedClient {
-            client = sharedClient
-            ownsClient = false
-        } else {
-            client = SSHClient()
-            ownsClient = true
-        }
-        configureConnectionState(client: client, ownsClient: ownsClient)
-
-        // Get credentials
-        let credentials: ServerCredentials
+        let session: any ServerStatsCollectionSession
         do {
-            credentials = try KeychainManager.shared.getCredentials(for: server)
+            session = try dependencies.makeSession(target, connection, ownership)
+        } catch let approval as ServerStatsApprovalRequired {
+            requireApproval(attemptID: attemptID, reference: approval.reference)
+            return
         } catch {
-            finishCollection(withError: "No credentials found")
+            _ = collectionState.finish(
+                attemptID: attemptID,
+                failure: .external(detail: error.localizedDescription)
+            )
             return
         }
 
-        // Connect in background
-        collectTask = Task.detached(priority: .utility) { [weak self] in
-            guard let self = self else { return }
+        let attempt = CollectionAttempt(
+            id: attemptID,
+            serverID: target.serverID,
+            session: session,
+            collectDocker: collectDocker
+        )
+        activeAttempt = attempt
+        let attemptIdentity = attempt.attemptIdentity
 
-            do {
-                try await SSHConnectionOperationService.shared.runWithConnection(
-                    using: client,
-                    server: server,
-                    credentials: credentials,
-                    disconnectWhenDone: ownsClient
-                ) { connectedClient in
-                    await MainActor.run {
-                        self.connectionError = nil
-                    }
+        let collectConnection: @MainActor @Sendable () async throws -> Void = { [weak self] in
+            guard self?.markCollectionConnected(
+                attemptID: attemptID,
+                attemptIdentity: attemptIdentity
+            ) == true else { return }
 
-                    while !Task.isCancelled {
-                        let shouldContinue = await MainActor.run { self.isCollecting }
-                        guard shouldContinue else { break }
-
-                        await self.collectStats(client: connectedClient)
-                        try? await Task.sleep(for: .seconds(2))
-                    }
+            while !Task.isCancelled {
+                guard self?.isCurrentCollectionAttempt(attemptIdentity) == true else { return }
+                if self?.collectionState.isPolling == true {
+                    await self?.collectStats(attemptIdentity: attemptIdentity)
                 }
-            } catch {
-                await MainActor.run {
-                    self.finishCollection(withError: error.localizedDescription)
-                }
-            }
-            await MainActor.run { [weak self] in
-                self?.finishCollection()
+                try await self?.dependencies.waitForNextPoll()
             }
         }
+        let task = Task(priority: .utility) { @MainActor [weak self, session] in
+            do {
+                try await session.runCollection(collectConnection)
+                self?.finishCollection(
+                    attemptID: attemptID,
+                    attemptIdentity: attemptIdentity
+                )
+            } catch is CancellationError {
+                // Stop and replacement already invalidated this attempt.
+            } catch let approval as ServerStatsApprovalRequired {
+                self?.requireApproval(
+                    attemptID: attemptID,
+                    attemptIdentity: attemptIdentity,
+                    reference: approval.reference
+                )
+            } catch {
+                self?.finishCollection(
+                    attemptID: attemptID,
+                    attemptIdentity: attemptIdentity,
+                    failure: .external(detail: error.localizedDescription)
+                )
+            }
+        }
+        attempt.primaryTask = task
+    }
+
+    func pauseCollecting() {
+        guard let activeAttempt else { return }
+        _ = collectionState.pause(attemptID: activeAttempt.id)
     }
 
     func stopCollecting() {
-        isCollecting = false
-        collectTask?.cancel()
-        collectTask = nil
-
-        // Disconnect SSH only if we own the connection
-        if ownsClient, let client = sshClient {
-            Task.detached {
-                await client.disconnect()
-            }
+        pendingApprovalReference = nil
+        guard let attempt = activeAttempt else {
+            collectionState.stop()
+            return
         }
-        clearConnectionState()
+
+        activeAttempt = nil
+        collectionState.stop()
+        cancel(attempt)
     }
+
+    func resolveSecurityApproval(
+        _ request: ServerStatsApprovalRequest,
+        failure: ServerStatsCollectionFailure? = nil
+    ) {
+        guard collectionState.resolveApproval(request, failure: failure) else { return }
+        pendingApprovalReference = nil
+    }
+
+    // MARK: - User-Initiated Operations
 
     func terminateProcess(_ process: ProcessInfo) async throws {
         guard process.pid > 1 else {
             throw ProcessControlError.protectedProcess
         }
-
-        guard let client = sshClient else {
-            throw ProcessControlError.notConnected
+        let attempt = try requireActiveAttempt()
+        let refresh: (
+            stats: ServerStats?,
+            failure: ServerStatsCollectionFailure?
+        ) = try await performTrackedOperation(for: attempt) { session in
+            try await session.terminateProcess(process)
+            do {
+                let stats = try await session.collectStats(
+                    collectDocker: attempt.collectDocker
+                )
+                return (stats, nil)
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                return (nil, .external(detail: error.localizedDescription))
+            }
         }
-
-        let command: String
-        switch remotePlatform {
-        case .windows:
-            command = "taskkill /PID \(process.pid) /T /F"
-        case .linux, .darwin, .freebsd, .openbsd, .netbsd, .unknown:
-            command = "kill -TERM \(process.pid)"
+        if let collectedStats = refresh.stats {
+            applyCollectedSnapshot(collectedStats)
+        } else if let failure = refresh.failure {
+            finishCollection(
+                attemptID: attempt.id,
+                attemptIdentity: attempt.attemptIdentity,
+                failure: failure
+            )
         }
-
-        _ = try await client.execute(command, timeout: .seconds(5))
-        await collectStats(client: client)
     }
 
     func loadProcesses() async throws -> [ProcessInfo] {
-        guard let client = sshClient else {
-            throw ProcessControlError.notConnected
+        let attempt = try requireActiveAttempt()
+        let fallback = stats.topProcesses
+        return try await performTrackedOperation(for: attempt) { session in
+            try await session.loadProcesses(fallback: fallback)
         }
-        guard let platformCollector else {
-            return stats.topProcesses
-        }
-
-        let processes = try await platformCollector.collectProcesses(client: client, context: context)
-        return processes.isEmpty ? stats.topProcesses : processes
     }
 
     func loadDockerStats() async throws -> DockerStats {
-        guard let client = sshClient else {
-            throw ProcessControlError.notConnected
+        let attempt = try requireActiveAttempt()
+        let fallback = stats.docker
+        let dockerStats = try await performTrackedOperation(for: attempt) { session in
+            await session.loadDockerStats(fallback: fallback)
         }
-        let dockerStats = await dockerCollector.collect(
-            client: client,
-            platform: remotePlatform,
-            limit: nil,
-            fallback: stats.docker
-        )
-        context.updateDockerStats(dockerStats, timestamp: dockerStats.timestamp)
         stats.docker = dockerStats
         return dockerStats
     }
 
-    /// Loads storage health only when the user opens a volume's detail view.
-    /// The selected volume must still belong to the latest Stats snapshot so a
-    /// stale sheet cannot probe an unrelated raw locator after a mount changes.
     func loadStorageHealth(for volume: VolumeInfo) async throws -> StorageHealthResult {
-        guard let client = sshClient else {
-            throw ProcessControlError.notConnected
-        }
+        let attempt = try requireActiveAttempt()
         guard let currentVolume = VolumeVisibilityPolicy.normalized(stats.volumes)
             .first(where: { $0.identity == volume.identity }) else {
             return .unavailable(.unmapped)
         }
-
-        let platform: RemotePlatform
-        let collector: PlatformStatsCollector
-        if remotePlatform == .unknown {
-            platform = await client.remotePlatform()
-            guard platform != .unknown else { return .unavailable(.unsupported) }
-            let detectedCollector = platform.createCollector()
-            remotePlatform = platform
-            platformCollector = detectedCollector
-            collector = detectedCollector
-        } else {
-            platform = remotePlatform
-            guard let platformCollector else { return .unavailable(.unsupported) }
-            collector = platformCollector
-        }
-
-        let resolution = try await StorageHealthTargetResolver.resolve(
-            client: client,
-            platform: platform,
-            volume: currentVolume
-        )
-        switch resolution {
-        case .topology(let topology):
-            var members: [StorageHealthMemberReport] = []
-            members.reserveCapacity(topology.members.count)
-            for (ordinal, member) in topology.members.enumerated() {
-                try Task.checkCancellation()
-                let result: StorageDeviceHealthResult
-                let memberFindings: [StorageHealthFinding]
-                switch member {
-                case .target(_, let target, let topologyFindings):
-                    result = try await collector.collectStorageHealth(client: client, target: target)
-                    memberFindings = topologyFindings
-                case .unresolved(_, _, let reason):
-                    result = .unavailable(reason)
-                    memberFindings = []
-                }
-                members.append(StorageHealthMemberReport(
-                    id: member.id,
-                    role: member.role,
-                    ordinal: ordinal + 1,
-                    result: result,
-                    findings: memberFindings
-                ))
-            }
-            if topology.kind == .physicalDevice,
-               members.count == 1,
-               case .unavailable(let reason) = members[0].result {
-                return .unavailable(reason)
-            }
-
-            let hasUnavailableMember = members.contains { member in
-                if case .unavailable = member.result { return true }
-                return false
-            }
-            let coverage: StorageHealthCoverage = topology.coverage == .partial || hasUnavailableMember
-                ? .partial
-                : .complete
-            var findings = topology.findings
-            if coverage == .partial,
-               !findings.contains(where: { $0.kind == .partialCoverage }) {
-                findings.append(StorageHealthFinding(
-                    kind: .partialCoverage,
-                    severity: .information,
-                    source: topology.kind == .zfs ? .zfs : .btrfs
-                ))
-            }
-            return .report(StorageHealthVolumeReport(
-                topology: topology.kind,
-                name: topology.name,
-                coverage: coverage,
-                findings: findings,
-                members: members
-            ))
-        case .unavailable(let reason):
-            return .unavailable(reason)
+        return try await performTrackedOperation(for: attempt) { session in
+            try await session.loadStorageHealth(for: currentVolume)
         }
     }
 
-    func performDockerAction(_ action: DockerContainerAction, on container: DockerContainer) async throws -> DockerStats {
-        guard let client = sshClient else {
-            throw ProcessControlError.notConnected
+    func performDockerAction(
+        _ action: DockerContainerAction,
+        on container: DockerContainer
+    ) async throws -> DockerStats {
+        let attempt = try requireActiveAttempt()
+        let fallback = stats.docker
+        let dockerStats = try await performTrackedOperation(for: attempt) { session in
+            try await session.performDockerAction(
+                action,
+                on: container,
+                fallback: fallback
+            )
         }
-
-        try await dockerCollector.perform(action, container: container, client: client, platform: remotePlatform)
-        try? await Task.sleep(for: .milliseconds(500))
-        let dockerStats = await dockerCollector.collect(
-            client: client,
-            platform: remotePlatform,
-            limit: nil,
-            fallback: stats.docker
-        )
-        context.updateDockerStats(dockerStats, timestamp: dockerStats.timestamp)
         stats.docker = dockerStats
         return dockerStats
     }
 
+    // MARK: - Attempt Ownership
+
+    private func requireActiveAttempt() throws -> CollectionAttempt {
+        guard let activeAttempt else { throw ProcessControlError.notConnected }
+        return activeAttempt
+    }
+
+    private func performTrackedOperation<Output>(
+        for attempt: CollectionAttempt,
+        operation: @MainActor @escaping (any ServerStatsCollectionSession) async throws -> Output
+    ) async throws -> Output {
+        guard isCurrentCollectionAttempt(attempt.attemptIdentity) else {
+            throw ProcessControlError.notConnected
+        }
+
+        let result = TrackedOperationResult<Output>()
+        let operationID = ObjectIdentifier(result)
+        let task = Task { @MainActor in
+            do {
+                result.value = .success(try await operation(attempt.session))
+            } catch {
+                result.value = .failure(error)
+            }
+        }
+        attempt.operationTasks[operationID] = task
+        defer { attempt.operationTasks.removeValue(forKey: operationID) }
+
+        await task.value
+        guard isCurrentCollectionAttempt(attempt.attemptIdentity) else {
+            throw ProcessControlError.notConnected
+        }
+        guard let value = result.value else {
+            throw CancellationError()
+        }
+        return try value.get()
+    }
+
+    private func supersedeActiveAttempt() {
+        guard let attempt = activeAttempt else { return }
+        activeAttempt = nil
+        cancel(attempt)
+    }
+
+    private func cancel(_ attempt: CollectionAttempt) {
+        attempt.cancelAllTasks()
+        guard attempt.identity.ownership == .owned else { return }
+
+        let cleanupID = ObjectIdentifier(attempt.attemptIdentity)
+        let session = attempt.session
+        let task = Task { @MainActor [weak self, session] in
+            await session.disconnect()
+            self?.cleanupTasks.removeValue(forKey: cleanupID)
+        }
+        cleanupTasks[cleanupID] = task
+    }
+
+    private func currentCollectionAttempt(
+        _ attemptIdentity: AttemptIdentity
+    ) -> CollectionAttempt? {
+        guard activeAttempt?.attemptIdentity === attemptIdentity else { return nil }
+        return activeAttempt
+    }
+
+    private func isCurrentCollectionAttempt(_ attemptIdentity: AttemptIdentity) -> Bool {
+        activeAttempt?.attemptIdentity === attemptIdentity
+    }
+
+    private func markCollectionConnected(
+        attemptID: UUID,
+        attemptIdentity: AttemptIdentity
+    ) -> Bool {
+        guard currentCollectionAttempt(attemptIdentity) != nil else { return false }
+        return collectionState.markConnected(attemptID: attemptID)
+    }
+
+    private func finishCollection(
+        attemptID: UUID,
+        attemptIdentity: AttemptIdentity,
+        failure: ServerStatsCollectionFailure? = nil
+    ) {
+        guard let attempt = currentCollectionAttempt(attemptIdentity),
+              collectionState.finish(attemptID: attemptID, failure: failure) else { return }
+        activeAttempt = nil
+        cancel(attempt)
+    }
+
+    private func requireApproval(
+        attemptID: UUID,
+        attemptIdentity: AttemptIdentity? = nil,
+        reference: any ServerStatsApprovalReference
+    ) {
+        if let attemptIdentity,
+           currentCollectionAttempt(attemptIdentity) == nil {
+            return
+        }
+        guard collectionState.requireApproval(
+            attemptID: attemptID,
+            request: reference.request
+        ) else { return }
+        let attempt = attemptIdentity.flatMap(currentCollectionAttempt)
+        activeAttempt = nil
+        if let attempt {
+            cancel(attempt)
+        }
+        pendingApprovalReference = reference
+    }
+
     // MARK: - Stats Collection
 
-    private func collectStats(client: SSHClient) async {
+    private func collectStats(attemptIdentity: AttemptIdentity) async {
+        guard let attempt = currentCollectionAttempt(attemptIdentity) else { return }
+
         do {
-            // Detect platform and create collector on first run
-            if remotePlatform == .unknown {
-                remotePlatform = await client.remotePlatform()
-                platformCollector = remotePlatform.createCollector()
-
-                logger.info("Detected remote platform: \(self.remotePlatform.rawValue)")
-
-                // Get initial hardware profile. Individual platform collectors return
-                // partial profiles when optional probes are unavailable.
-                let profile = await self.collectInitialProfile(client: client)
-                await MainActor.run {
-                    self.applyProfile(profile)
-                }
+            if let preparation = await attempt.session.prepareIfNeeded() {
+                guard currentCollectionAttempt(attemptIdentity) != nil else { return }
+                logger.info("Detected remote platform: \(preparation.platformName)")
+                applyProfile(preparation.profile)
             }
 
-            // Collect stats using platform-specific collector
-            guard let collector = platformCollector else { return }
-
-            var newStats = try await collector.collectStats(client: client, context: context)
-
-            // Preserve system info
-            let existingStats = await MainActor.run { self.stats }
-            let collectedCpuCores = newStats.cpuCores
-            newStats.hostname = existingStats.hostname
-            newStats.osInfo = existingStats.osInfo
-            newStats.cpuCores = Self.resolvedCPUCoreCount(
-                existing: existingStats.cpuCores,
-                collected: collectedCpuCores
+            let collectedStats = try await attempt.session.collectStats(
+                collectDocker: attempt.collectDocker
             )
-            newStats.hardware = existingStats.hardware
-            if newStats.gpuSamples.isEmpty, !existingStats.gpuSamples.isEmpty {
-                newStats.gpuSamples = existingStats.gpuSamples
-            }
-            if isDockerCollectionEnabled {
-                newStats.docker = await self.collectDockerStatsIfNeeded(client: client, timestamp: newStats.timestamp)
-            }
-
-            // Update on main thread
-            await MainActor.run {
-                self.applyCollectedStats(newStats)
-            }
-
+            guard currentCollectionAttempt(attemptIdentity) != nil else { return }
+            applyCollectedSnapshot(collectedStats)
+        } catch is CancellationError {
+            return
         } catch {
+            guard currentCollectionAttempt(attemptIdentity) != nil else { return }
             logger.error("Failed to collect stats: \(error.localizedDescription)")
-            await MainActor.run {
-                self.finishCollection(withError: error.localizedDescription)
-            }
+            finishCollection(
+                attemptID: attempt.id,
+                attemptIdentity: attemptIdentity,
+                failure: .external(detail: error.localizedDescription)
+            )
         }
     }
 
     private func resetCollectionState() {
-        context.reset()
-        remotePlatform = .unknown
-        platformCollector = nil
-        hardwareProfile = .empty
         cpuHistory = []
         memoryHistory = []
         networkRxHistory = []
@@ -342,60 +611,37 @@ final class ServerStatsCollector: ObservableObject {
         dockerMemoryHistory = []
     }
 
-    private func collectInitialProfile(client: SSHClient) async -> HardwareProfile? {
-        guard let platformCollector else { return nil }
-
-        if let profile = try? await platformCollector.collectProfile(client: client) {
-            return profile
-        }
-
-        if let systemInfo = try? await platformCollector.getSystemInfo(client: client) {
-            return HardwareProfile(
-                hostname: systemInfo.hostname,
-                osInfo: systemInfo.osInfo,
-                architecture: "",
-                kernelVersion: "",
-                cpuModel: "",
-                cpuVendor: "",
-                cpuCores: systemInfo.cpuCores,
-                cpuThreads: systemInfo.cpuCores,
-                memoryTotal: 0,
-                gpus: [],
-                collectedAt: Date()
-            )
-        }
-
-        return nil
-    }
-
-    private func configureConnectionState(client: SSHClient, ownsClient: Bool) {
-        self.sshClient = client
-        self.ownsClient = ownsClient
-    }
-
-    private func clearConnectionState() {
-        sshClient = nil
-        ownsClient = false
-    }
-
-    private func finishCollection(withError error: String? = nil) {
-        connectionError = error
-        isCollecting = false
-        clearConnectionState()
-    }
-
     private func applyProfile(_ profile: HardwareProfile?) {
-        hardwareProfile = profile ?? .empty
+        let hardwareProfile = profile ?? .empty
         stats.hardware = hardwareProfile
         stats.hostname = hardwareProfile.hostname
         stats.osInfo = hardwareProfile.osInfo
-        let profileCPUCount = hardwareProfile.cpuThreads > 0 ? hardwareProfile.cpuThreads : hardwareProfile.cpuCores
+        let profileCPUCount = hardwareProfile.cpuThreads > 0
+            ? hardwareProfile.cpuThreads
+            : hardwareProfile.cpuCores
         if profileCPUCount > 0 {
             stats.cpuCores = profileCPUCount
         }
         if stats.memoryTotal == 0 {
             stats.memoryTotal = hardwareProfile.memoryTotal
         }
+    }
+
+    private func applyCollectedSnapshot(_ collectedStats: ServerStats) {
+        var newStats = collectedStats
+        let existingStats = stats
+        let collectedCPUCoreCount = newStats.cpuCores
+        newStats.hostname = existingStats.hostname
+        newStats.osInfo = existingStats.osInfo
+        newStats.cpuCores = Self.resolvedCPUCoreCount(
+            existing: existingStats.cpuCores,
+            collected: collectedCPUCoreCount
+        )
+        newStats.hardware = existingStats.hardware
+        if newStats.gpuSamples.isEmpty, !existingStats.gpuSamples.isEmpty {
+            newStats.gpuSamples = existingStats.gpuSamples
+        }
+        applyCollectedStats(newStats)
     }
 
     private func applyCollectedStats(_ newStats: ServerStats) {
@@ -415,21 +661,6 @@ final class ServerStatsCollector: ObservableObject {
         if networkTxHistory.count > 60 { networkTxHistory.removeFirst() }
         if dockerCPUHistory.count > 60 { dockerCPUHistory.removeFirst() }
         if dockerMemoryHistory.count > 60 { dockerMemoryHistory.removeFirst() }
-    }
-
-    private func collectDockerStatsIfNeeded(client: SSHClient, timestamp: Date) async -> DockerStats {
-        guard context.shouldCollectDocker(now: timestamp) else {
-            return context.getDockerStats()
-        }
-
-        let dockerStats = await dockerCollector.collect(
-            client: client,
-            platform: remotePlatform,
-            limit: DockerStatsCollector.periodicContainerLimit,
-            fallback: context.getDockerStats()
-        )
-        context.updateDockerStats(dockerStats, timestamp: timestamp)
-        return dockerStats
     }
 
     private func appendGPUHistory(from newStats: ServerStats) {
@@ -455,16 +686,7 @@ final class ServerStatsCollector: ObservableObject {
     }
 }
 
-private enum ProcessControlError: LocalizedError {
+nonisolated enum ProcessControlError: Error, Equatable, Sendable {
     case notConnected
     case protectedProcess
-
-    var errorDescription: String? {
-        switch self {
-        case .notConnected:
-            return String(localized: "Stats is not connected to the server.")
-        case .protectedProcess:
-            return String(localized: "This process cannot be killed from Stats.")
-        }
-    }
 }

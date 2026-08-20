@@ -86,7 +86,7 @@ VVTerm/
 │   ├── Security/
 │   ├── SSH/
 │   ├── Sync/
-│   ├── Terminal/
+│   ├── Terminal/                 # Includes the shared Ghostty bridge
 │   └── UI/
 ├── Features/                    # Product features
 │   ├── ConnectionViews/
@@ -100,13 +100,10 @@ VVTerm/
 │   ├── Support/
 │   ├── TerminalAccessories/
 │   ├── TerminalPresets/
-│   ├── TerminalSessions/
+│   ├── TerminalSessions/         # Includes Ghostty runtime and platform UI
 │   ├── TerminalThemes/
 │   ├── VoiceInput/
 │   └── Welcome/
-├── GhosttyTerminal/             # Ghostty bridge and terminal host views
-├── Compatibility/               # Version/platform helpers
-├── Generated/                   # Build-time generated sources
 └── Resources/                   # Bundled assets, themes, terminfo, localizations
 ```
 

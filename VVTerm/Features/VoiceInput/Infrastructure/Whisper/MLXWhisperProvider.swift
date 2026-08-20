@@ -1,76 +1,115 @@
 import Foundation
 
 final class MLXWhisperProvider {
-    static let shared = MLXWhisperProvider()
-
     static var isSupported: Bool {
         MLXAudioSupport.isSupported
     }
 
-    private init() {}
+    init() {}
 
-    func transcribe(samples: [Float]) async throws -> String {
+    func transcribe(
+        samples: [Float],
+        modelID: String,
+        languageCode: String
+    ) async throws -> String {
         #if arch(arm64)
-        let modelId = TranscriptionSettingsStore.currentWhisperModelId()
-        let requestedLanguage = Self.requestedLanguage(for: TranscriptionSettingsStore.currentLanguageCode())
         let modelDirectory = await MainActor.run {
-            MLXModelManager.modelDirectory(for: .whisper, modelId: modelId)
+            MLXModelManager.modelDirectory(for: .whisper, modelId: modelID)
         }
-        return try await Task.detached(priority: .userInitiated) {
+        let task = Task.detached(priority: .userInitiated) {
+            try Task.checkCancellation()
             guard !samples.isEmpty else { return "" }
 
-            let model = try WhisperModelLoader.shared.loadModel(at: modelDirectory)
-
-            let mel = try WhisperAudioProcessor.logMelSpectrogram(samples, nMels: model.dims.n_mels, padding: WhisperAudioConstants.nSamples)
-            let melSegment = WhisperAudioProcessor.padOrTrim(mel, length: WhisperAudioConstants.nFrames, axis: 0).asType(.float16)
-            let melBatch = melSegment.reshaped(1, melSegment.dim(0), melSegment.dim(1))
-
-            let audioFeatures = model.encoder(melBatch)
-
-            let language: String?
-            if model.isMultilingual {
-                language = requestedLanguage
-                    ?? Self.detectLanguage(model: model, audioFeatures: audioFeatures, modelId: modelId)
-                    ?? "en"
-            } else {
-                language = nil
-            }
-
-            let tokenizer = try WhisperTokenizer(
-                multilingual: model.isMultilingual,
-                language: language,
-                task: "transcribe",
-                modelId: modelId
+            return try WhisperModelLoader.shared.transcribe(
+                samples: samples,
+                modelDirectory: modelDirectory,
+                modelID: modelID,
+                languageCode: languageCode
             )
-
-            let promptTokens = tokenizer.initialTokens(withoutTimestamps: true)
-            var allTokens = promptTokens
-
-            let promptArray = MLXArray(promptTokens, [1, promptTokens.count])
-            var (logits, kvCache) = model.decoder(promptArray, audioFeatures: audioFeatures, kvCache: nil)
-            var nextToken = try Self.argmaxToken(from: logits)
-            allTokens.append(nextToken)
-
-            let maxTokens = model.dims.n_text_ctx
-            while allTokens.count < maxTokens {
-                if nextToken == tokenizer.eot { break }
-                let tokenArray = MLXArray([nextToken], [1, 1])
-                let result = model.decoder(tokenArray, audioFeatures: audioFeatures, kvCache: kvCache)
-                logits = result.0
-                kvCache = result.1
-                nextToken = try Self.argmaxToken(from: logits)
-                allTokens.append(nextToken)
-            }
-
-            let outputTokens = Array(allTokens.dropFirst(promptTokens.count))
-            return tokenizer.decode(outputTokens).trimmingCharacters(in: .whitespacesAndNewlines)
-        }.value
+        }
+        return try await withTaskCancellationHandler {
+            try await task.value
+        } onCancel: {
+            task.cancel()
+        }
         #else
         throw NSError(domain: "MLXWhisper", code: -1, userInfo: [NSLocalizedDescriptionKey: "MLX Whisper not supported on this architecture"])
         #endif
     }
 
-    private static func requestedLanguage(for languageCode: String) -> String? {
+    #if arch(arm64)
+    nonisolated fileprivate static func transcribe(
+        samples: [Float],
+        model: WhisperModel,
+        modelID: String,
+        languageCode: String
+    ) throws -> String {
+        try Task.checkCancellation()
+        let mel = try WhisperAudioProcessor.logMelSpectrogram(
+            samples,
+            nMels: model.dims.n_mels,
+            padding: WhisperAudioConstants.nSamples
+        )
+        let melSegment = WhisperAudioProcessor.padOrTrim(
+            mel,
+            length: WhisperAudioConstants.nFrames,
+            axis: 0
+        ).asType(.float16)
+        let melBatch = melSegment.reshaped(1, melSegment.dim(0), melSegment.dim(1))
+
+        let audioFeatures = model.encoder(melBatch)
+        try Task.checkCancellation()
+
+        let language: String?
+        if model.isMultilingual {
+            language = requestedLanguage(for: languageCode)
+                ?? detectLanguage(model: model, audioFeatures: audioFeatures, modelId: modelID)
+                ?? "en"
+        } else {
+            language = nil
+        }
+
+        let tokenizer = try WhisperTokenizer(
+            multilingual: model.isMultilingual,
+            language: language,
+            task: "transcribe",
+            modelId: modelID
+        )
+
+        let promptTokens = tokenizer.initialTokens(withoutTimestamps: true)
+        var allTokens = promptTokens
+
+        let promptArray = MLXArray(promptTokens, [1, promptTokens.count])
+        var (logits, kvCache) = model.decoder(
+            promptArray,
+            audioFeatures: audioFeatures,
+            kvCache: nil
+        )
+        var nextToken = try argmaxToken(from: logits)
+        allTokens.append(nextToken)
+
+        let maxTokens = model.dims.n_text_ctx
+        while allTokens.count < maxTokens {
+            try Task.checkCancellation()
+            if nextToken == tokenizer.eot { break }
+            let tokenArray = MLXArray([nextToken], [1, 1])
+            let result = model.decoder(
+                tokenArray,
+                audioFeatures: audioFeatures,
+                kvCache: kvCache
+            )
+            logits = result.0
+            kvCache = result.1
+            nextToken = try argmaxToken(from: logits)
+            allTokens.append(nextToken)
+        }
+
+        let outputTokens = Array(allTokens.dropFirst(promptTokens.count))
+        return tokenizer.decode(outputTokens).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    #endif
+
+    nonisolated private static func requestedLanguage(for languageCode: String) -> String? {
         guard languageCode != TranscriptionSettingsDefaults.autoLanguageCode else { return nil }
         return WhisperTokenizer.supportedLanguages.contains(languageCode) ? languageCode : nil
     }
@@ -112,7 +151,9 @@ final class MLXWhisperProvider {
 import MLX
 import MLXNN
 
-nonisolated final class WhisperModelLoader {
+/// MLX model loading and inference are serialized by `lock`. No model value
+/// escapes this object, so the lock is the complete mutable-state boundary.
+nonisolated final class WhisperModelLoader: @unchecked Sendable {
     static let shared = WhisperModelLoader()
 
     private var cachedModel: WhisperModel?
@@ -121,10 +162,25 @@ nonisolated final class WhisperModelLoader {
 
     private init() {}
 
-    func loadModel(at modelDirectory: URL) throws -> WhisperModel {
+    func transcribe(
+        samples: [Float],
+        modelDirectory: URL,
+        modelID: String,
+        languageCode: String
+    ) throws -> String {
         lock.lock()
         defer { lock.unlock() }
 
+        let model = try loadModel(at: modelDirectory)
+        return try MLXWhisperProvider.transcribe(
+            samples: samples,
+            model: model,
+            modelID: modelID,
+            languageCode: languageCode
+        )
+    }
+
+    private func loadModel(at modelDirectory: URL) throws -> WhisperModel {
         if let cachedModel, cachedModelURL == modelDirectory {
             return cachedModel
         }
@@ -132,6 +188,7 @@ nonisolated final class WhisperModelLoader {
         let configURL = modelDirectory.appendingPathComponent("config.json")
         let configData = try Data(contentsOf: configURL)
         let config = try JSONDecoder().decode(WhisperModelDimensions.self, from: configData)
+        try MLXModelConfigurationValidator.validateWhisper(config)
 
         let weightURLs = Self.weightFileURLs(in: modelDirectory)
         guard !weightURLs.isEmpty else {
@@ -151,7 +208,7 @@ nonisolated final class WhisperModelLoader {
             let arrays = try NPZLoader.loadArrays(from: npzURL)
             weights.merge(arrays) { _, new in new }
         }
-        let model = WhisperModel(dims: config, dtype: .float16)
+        let model = try WhisperModel(dims: config, dtype: .float16)
 
         let nested = Self.nestedDictionary(from: weights)
         try model.update(parameters: nested, verify: .none)

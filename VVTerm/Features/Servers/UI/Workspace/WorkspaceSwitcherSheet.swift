@@ -4,7 +4,9 @@ import SwiftUI
 
 struct WorkspaceSwitcherSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var serverManager: ServerManager
+    @EnvironmentObject private var storeManager: StoreManager
+    let serverManager: ServerManager
+    @ObservedObject private var stateStore: ServerStateStore
     @Binding var selectedWorkspace: Workspace?
 
     @State private var hoveredWorkspace: Workspace?
@@ -13,6 +15,15 @@ struct WorkspaceSwitcherSheet: View {
     @State private var workspaceToDelete: Workspace?
     @State private var workspaceToManageServers: Workspace?
     @State private var lockedWorkspaceAlert: Workspace?
+
+    init(
+        serverManager: ServerManager,
+        selectedWorkspace: Binding<Workspace?>
+    ) {
+        self.serverManager = serverManager
+        _stateStore = ObservedObject(wrappedValue: serverManager.stateStore)
+        _selectedWorkspace = selectedWorkspace
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,12 +36,15 @@ struct WorkspaceSwitcherSheet: View {
             // Workspace list
             ScrollView {
                 VStack(spacing: 2) {
-                    ForEach(serverManager.workspaces) { workspace in
+                    ForEach(stateStore.workspaces) { workspace in
                         WorkspaceSwitcherRow(
                             workspace: workspace,
                             isSelected: selectedWorkspace?.id == workspace.id,
                             isHovered: hoveredWorkspace?.id == workspace.id,
-                            isLocked: serverManager.isWorkspaceLocked(workspace),
+                            isLocked: stateStore.isWorkspaceLocked(
+                                workspace,
+                                hasProAccess: storeManager.allowsProFeatures
+                            ),
                             serverCount: serverCount(for: workspace),
                             onSelect: {
                                 selectedWorkspace = workspace
@@ -127,7 +141,7 @@ struct WorkspaceSwitcherSheet: View {
     }
 
     private func serverCount(for workspace: Workspace) -> Int {
-        serverManager.servers.filter { $0.workspaceId == workspace.id }.count
+        stateStore.servers.filter { $0.workspaceId == workspace.id }.count
     }
 
     private func deleteWarningText(for workspace: Workspace?) -> String {
@@ -295,13 +309,20 @@ struct WorkspaceSwitcherRow: View {
 
 struct LockedWorkspaceServerManagementSheet: View {
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var serverManager: ServerManager
+    let serverManager: ServerManager
+    @ObservedObject private var stateStore: ServerStateStore
     let workspace: Workspace
 
     @State private var serverToMove: Server?
 
+    init(serverManager: ServerManager, workspace: Workspace) {
+        self.serverManager = serverManager
+        _stateStore = ObservedObject(wrappedValue: serverManager.stateStore)
+        self.workspace = workspace
+    }
+
     private var workspaceServers: [Server] {
-        serverManager.servers
+        stateStore.servers
             .filter { $0.workspaceId == workspace.id }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }

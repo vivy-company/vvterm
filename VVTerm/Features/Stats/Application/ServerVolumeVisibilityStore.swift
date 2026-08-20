@@ -2,19 +2,23 @@ import Combine
 import Foundation
 
 @MainActor
-final class ServerVolumeVisibilityStore: ObservableObject {
-    static let shared = ServerVolumeVisibilityStore()
+protocol ServerVolumeVisibilityPreferencesPersisting: AnyObject {
+    func loadPreferences() -> ServerVolumeVisibilityPreferences
+    func savePreferences(_ preferences: ServerVolumeVisibilityPreferences)
+}
 
+@MainActor
+final class ServerVolumeVisibilityStore: ObservableObject {
     @Published private(set) var preferences: ServerVolumeVisibilityPreferences
 
-    private let defaults: UserDefaults
+    private let persistence: any ServerVolumeVisibilityPreferencesPersisting
 
-    init(defaults: UserDefaults = .standard) {
-        self.defaults = defaults
-        preferences = Self.load(from: defaults)
+    init(persistence: any ServerVolumeVisibilityPreferencesPersisting) {
+        self.persistence = persistence
+        preferences = persistence.loadPreferences()
         if preferences.requiresSchemaMigration {
             preferences.markSchemaMigrationComplete()
-            persist()
+            persistence.savePreferences(preferences)
         }
     }
 
@@ -59,29 +63,6 @@ final class ServerVolumeVisibilityStore: ObservableObject {
         next.setVisibilityOverrides(overrides, for: serverID)
         guard next != preferences else { return }
         preferences = next
-        persist()
-    }
-
-    private func persist() {
-        guard !Self.containsFutureSchema(in: defaults) else { return }
-        guard let data = try? JSONEncoder().encode(preferences) else { return }
-        defaults.set(data, forKey: ServerVolumeVisibilityPreferences.defaultsKey)
-    }
-
-    private static func containsFutureSchema(in defaults: UserDefaults) -> Bool {
-        guard let data = defaults.data(forKey: ServerVolumeVisibilityPreferences.defaultsKey),
-              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let schemaVersion = object["schemaVersion"] as? NSNumber else {
-            return false
-        }
-        return schemaVersion.intValue > ServerVolumeVisibilityPreferences.currentSchemaVersion
-    }
-
-    private static func load(from defaults: UserDefaults) -> ServerVolumeVisibilityPreferences {
-        guard let data = defaults.data(forKey: ServerVolumeVisibilityPreferences.defaultsKey),
-              let preferences = try? JSONDecoder().decode(ServerVolumeVisibilityPreferences.self, from: data) else {
-            return ServerVolumeVisibilityPreferences()
-        }
-        return preferences
+        persistence.savePreferences(preferences)
     }
 }

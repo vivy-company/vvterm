@@ -11,13 +11,16 @@ VENDOR_SSH="$PROJECT_ROOT/Vendor/libssh2"
 BUILD_DIR_SSH="$PROJECT_ROOT/.build/ssh"
 
 OPENSSL_VERSION="3.2.0"
+OPENSSL_SHA256="14c826f07c7e433706fb5c69fa9e25dab95684844b4c962a2cf1bf183eb4690e"
 LIBSSH2_VERSION="1.11.1"
+LIBSSH2_SHA256="d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7"
 MACOS_DEPLOYMENT_TARGET="13.3"
 IOS_DEPLOYMENT_TARGET="16.0"
 
 GHOSTTY_REPO="https://github.com/wiedymi/ghostty.git"
-GHOSTTY_REF="${GHOSTTY_REF:-custom-io}"
+GHOSTTY_COMMIT="${GHOSTTY_COMMIT:-268a0a9d761fb19673f05d28042488e2002300f2}"
 BUNDLE_ID="app.vivy.VivyTerm"
+NATIVE_ARTIFACT_MANIFEST="$PROJECT_ROOT/Vendor/native-artifacts.sha256"
 
 KEEP_WORKDIR="${KEEP_WORKDIR:-0}"
 GHOSTTY_WORKDIR=""
@@ -43,11 +46,12 @@ Commands:
   all       Build GhosttyKit + libssh2/OpenSSL (default)
   ghostty   Build GhosttyKit.xcframework and copy .a libs
   ssh       Build libssh2 + OpenSSL (macOS + iOS + simulator)
+  verify    Verify pinned sources and committed native artifact hashes
   clean     Remove .build + Vendor libraries
   help      Show this help message
 
 Env:
-  GHOSTTY_REF=<git-ref>   Build a specific ghostty ref (default: custom-io)
+  GHOSTTY_COMMIT=<sha>    Build a specific full ghostty commit SHA
   KEEP_WORKDIR=1          Keep ghostty build temp dir for debugging
 EOF
 }
@@ -74,6 +78,81 @@ check_deps_ssh() {
     require_cmd make
     require_cmd rsync
     require_cmd xcrun
+    require_cmd shasum
+}
+
+validate_sha256() {
+    local value="$1"
+    [[ "${value}" =~ ^[0-9a-f]{64}$ ]]
+}
+
+validate_git_commit() {
+    local value="$1"
+    [[ "${value}" =~ ^[0-9a-f]{40}$ ]]
+}
+
+verify_sha256() {
+    local path="$1"
+    local expected="$2"
+    local actual
+
+    validate_sha256 "${expected}" || {
+        log_error "Invalid pinned SHA-256 value for ${path}"
+        return 1
+    }
+    actual="$(shasum -a 256 "${path}" | awk '{print $1}')"
+    if [ "${actual}" != "${expected}" ]; then
+        log_error "SHA-256 verification failed for ${path}"
+        return 1
+    fi
+}
+
+download_verified_archive() {
+    local url="$1"
+    local destination="$2"
+    local expected_sha256="$3"
+    local partial="${destination}.download"
+
+    if [ -f "${destination}" ] && verify_sha256 "${destination}" "${expected_sha256}"; then
+        return
+    fi
+
+    curl --fail --location --proto '=https' --tlsv1.2 \
+        --output "${partial}" \
+        "${url}"
+    verify_sha256 "${partial}" "${expected_sha256}"
+    mv -f "${partial}" "${destination}"
+}
+
+write_native_artifact_manifest() {
+    (
+        cd "${PROJECT_ROOT}"
+        find Vendor -type f -name '*.a' -print0 \
+            | sort -z \
+            | xargs -0 shasum -a 256 \
+            > "${NATIVE_ARTIFACT_MANIFEST}"
+    )
+}
+
+verify_native_sources() {
+    validate_git_commit "${GHOSTTY_COMMIT}" || {
+        log_error "GHOSTTY_COMMIT must be a full 40-character lowercase commit SHA"
+        return 1
+    }
+    validate_sha256 "${OPENSSL_SHA256}" || return 1
+    validate_sha256 "${LIBSSH2_SHA256}" || return 1
+
+    local vendored_ghostty_commit
+    vendored_ghostty_commit="$(tr -d '[:space:]' < "${VENDOR_GHOSTTY}/VERSION")"
+    if [ "${vendored_ghostty_commit}" != "${GHOSTTY_COMMIT}" ]; then
+        log_error "Vendored Ghostty does not match GHOSTTY_COMMIT"
+        return 1
+    fi
+
+    (
+        cd "${PROJECT_ROOT}"
+        shasum -a 256 --check "${NATIVE_ARTIFACT_MANIFEST}"
+    )
 }
 
 strip_lib() {
@@ -91,8 +170,21 @@ build_ghosttykit() {
     GHOSTTY_WORKDIR="$(mktemp -d "/tmp/ghosttykit.XXXXXX")"
     local workdir="$GHOSTTY_WORKDIR"
 
-    log_info "Cloning ghostty @ ${GHOSTTY_REF}..."
-    git clone --filter=blob:none --branch "${GHOSTTY_REF}" --depth 1 "${GHOSTTY_REPO}" "${workdir}/ghostty"
+    validate_git_commit "${GHOSTTY_COMMIT}" || {
+        log_error "GHOSTTY_COMMIT must be a full 40-character lowercase commit SHA"
+        return 1
+    }
+    log_info "Fetching ghostty @ ${GHOSTTY_COMMIT}..."
+    git init -q "${workdir}/ghostty"
+    git -C "${workdir}/ghostty" remote add origin "${GHOSTTY_REPO}"
+    GIT_TERMINAL_PROMPT=0 git -C "${workdir}/ghostty" fetch --depth 1 origin "${GHOSTTY_COMMIT}"
+    git -C "${workdir}/ghostty" checkout -q --detach FETCH_HEAD
+    local resolved_ghostty_commit
+    resolved_ghostty_commit="$(git -C "${workdir}/ghostty" rev-parse HEAD)"
+    if [ "${resolved_ghostty_commit}" != "${GHOSTTY_COMMIT}" ]; then
+        log_error "Fetched Ghostty commit does not match the requested commit"
+        return 1
+    fi
 
     local embedded_path="${workdir}/ghostty/src/apprt/embedded.zig"
     if [ -f "${embedded_path}" ]; then
@@ -242,6 +334,7 @@ PY
     while IFS= read -r -d '' lib; do
         strip_lib "${lib}"
     done < <(find "${VENDOR_GHOSTTY}/GhosttyKit.xcframework" -name "*.a" -type f -print0)
+    write_native_artifact_manifest
 
     log_info "GhosttyKit done"
     log_info "  macOS: $(ls -lh "${VENDOR_GHOSTTY}/lib/libghostty.a" | awk '{print $5}')"
@@ -262,17 +355,21 @@ download_sources() {
     mkdir -p "${BUILD_DIR_SSH}"
     cd "${BUILD_DIR_SSH}"
 
-    if [ ! -d "openssl-${OPENSSL_VERSION}" ]; then
-        log_info "Downloading OpenSSL ${OPENSSL_VERSION}..."
-        curl -L -O "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz"
-        tar xzf "openssl-${OPENSSL_VERSION}.tar.gz"
-    fi
+    log_info "Downloading and verifying OpenSSL ${OPENSSL_VERSION}..."
+    download_verified_archive \
+        "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" \
+        "openssl-${OPENSSL_VERSION}.tar.gz" \
+        "${OPENSSL_SHA256}"
+    rm -rf "openssl-${OPENSSL_VERSION}"
+    tar xzf "openssl-${OPENSSL_VERSION}.tar.gz"
 
-    if [ ! -d "libssh2-${LIBSSH2_VERSION}" ]; then
-        log_info "Downloading libssh2 ${LIBSSH2_VERSION}..."
-        curl -L -O "https://www.libssh2.org/download/libssh2-${LIBSSH2_VERSION}.tar.gz"
-        tar xzf "libssh2-${LIBSSH2_VERSION}.tar.gz"
-    fi
+    log_info "Downloading and verifying libssh2 ${LIBSSH2_VERSION}..."
+    download_verified_archive \
+        "https://www.libssh2.org/download/libssh2-${LIBSSH2_VERSION}.tar.gz" \
+        "libssh2-${LIBSSH2_VERSION}.tar.gz" \
+        "${LIBSSH2_SHA256}"
+    rm -rf "libssh2-${LIBSSH2_VERSION}"
+    tar xzf "libssh2-${LIBSSH2_VERSION}.tar.gz"
 }
 
 build_openssl_macos() {
@@ -466,6 +563,7 @@ build_ssh() {
     build_openssl_simulator
     build_libssh2_simulator
     create_modulemap
+    write_native_artifact_manifest
 
     log_info "libssh2 done"
     log_info "  macOS: $(ls -lh "${VENDOR_SSH}/macos/lib/libssh2.a" | awk '{print $5}')"
@@ -481,32 +579,42 @@ clean() {
     log_info "Clean complete"
 }
 
-COMMAND="${1:-all}"
+main() {
+    local command="${1:-all}"
 
-case "${COMMAND}" in
-    all)
-        check_deps_ghostty
-        check_deps_ssh
-        build_ghosttykit
-        build_ssh
-        ;;
-    ghostty)
-        check_deps_ghostty
-        build_ghosttykit
-        ;;
-    ssh)
-        check_deps_ssh
-        build_ssh
-        ;;
-    clean)
-        clean
-        ;;
-    help|--help|-h)
-        print_usage
-        ;;
-    *)
-        log_error "Unknown command: ${COMMAND}"
-        print_usage
-        exit 1
-        ;;
- esac
+    case "${command}" in
+        all)
+            check_deps_ghostty
+            check_deps_ssh
+            build_ghosttykit
+            build_ssh
+            ;;
+        ghostty)
+            check_deps_ghostty
+            build_ghosttykit
+            ;;
+        ssh)
+            check_deps_ssh
+            build_ssh
+            ;;
+        verify)
+            require_cmd shasum
+            verify_native_sources
+            ;;
+        clean)
+            clean
+            ;;
+        help|--help|-h)
+            print_usage
+            ;;
+        *)
+            log_error "Unknown command: ${command}"
+            print_usage
+            return 1
+            ;;
+    esac
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
+fi

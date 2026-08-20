@@ -1,37 +1,79 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+enum SSHKeySettingsFailurePresentation {
+    static func message(
+        for operation: SSHKeySettingsCoordinator.Operation,
+        failure: SSHKeySettingsFailure
+    ) -> String {
+        let format = switch operation {
+        case .importKey:
+            String(localized: "Failed to save key: %@")
+        case .generateKey:
+            String(localized: "Failed to generate key: %@")
+        case .deleteKey:
+            String(localized: "Failed to delete key: %@")
+        }
+        return String(format: format, details(for: failure))
+    }
+
+    static func details(for failure: SSHKeySettingsFailure) -> String {
+        switch failure {
+        case .keychain(let status):
+            "Keychain error: \(status)"
+        case .keychainEncodingFailed:
+            "Failed to encode data for Keychain"
+        case .keychainDecodingFailed:
+            "Failed to decode data from Keychain"
+        case .keychainItemNotFound:
+            "Item not found in Keychain"
+        case .credentialServerMismatch:
+            "Credentials do not belong to this server"
+        case .keychainCopyVerificationFailed:
+            "VVTerm could not verify the copied Keychain item"
+        case .keyGenerationFailed:
+            String(localized: "Failed to generate SSH key")
+        case .keyEncodingFailed:
+            String(localized: "Failed to encode key data")
+        case .rsaExportFailed:
+            String(localized: "Failed to export RSA key")
+        case .invalidKeyData:
+            String(localized: "Invalid key data")
+        case .unavailable:
+            String(localized: "The SSH key operation could not be completed.")
+        }
+    }
+}
+
 // MARK: - Keychain Settings View
 
 struct KeychainSettingsView: View {
-    @State private var storedKeys: [SSHKeyEntry] = []
+    @EnvironmentObject private var coordinator: SSHKeySettingsCoordinator
     @State private var showingAddKey = false
     @State private var showingGenerateKey = false
-    @State private var showingDeleteConfirmation = false
     @State private var keyToDelete: SSHKeyEntry?
     @State var keyToShowDetails: SSHKeyEntry?
-    @State private var error: String?
 
     var body: some View {
         Group {
-            if storedKeys.isEmpty {
+            if coordinator.keys.isEmpty {
                 emptyKeysView
             } else {
                 Form {
                     Section {
-                        ForEach(storedKeys) { key in
+                        ForEach(coordinator.keys) { key in
                             platformKeyRow(for: key)
                         }
                     } footer: {
                         Text("Keys are stored securely in your device's Keychain. Passphrases are stored separately.")
                     }
 
-                    if let error = error {
+                    if let deleteError {
                         Section {
                             HStack {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.orange)
-                                Text(error)
+                                Text(deleteError)
                                     .font(.caption)
                             }
                         }
@@ -60,17 +102,15 @@ struct KeychainSettingsView: View {
         }
         .adaptiveSoftScrollEdges()
         .onAppear {
-            loadKeys()
+            coordinator.clearFailure(for: .deleteKey)
+            coordinator.loadKeys()
         }
         .sheet(isPresented: $showingAddKey) {
-            AddSSHKeySheet(onSave: { _ in
-                loadKeys()
-            })
-            .adaptiveSoftScrollEdges()
+            AddSSHKeySheet(onSave: { _ in })
+                .adaptiveSoftScrollEdges()
         }
         .sheet(isPresented: $showingGenerateKey) {
             GenerateSSHKeySheet(onSave: { entry in
-                loadKeys()
                 keyToShowDetails = entry
             })
             .adaptiveSoftScrollEdges()
@@ -81,12 +121,15 @@ struct KeychainSettingsView: View {
         }
         .alert(
             "Delete SSH Key",
-            isPresented: $showingDeleteConfirmation,
+            isPresented: Binding(
+                get: { keyToDelete != nil },
+                set: { if !$0 { keyToDelete = nil } }
+            ),
             presenting: keyToDelete
         ) { key in
             Button("Cancel", role: .cancel) {}
             Button("Delete", role: .destructive) {
-                deleteKey(key)
+                coordinator.deleteKey(key)
             }
         } message: { key in
             Text(String(format: String(localized: "Are you sure you want to delete '%@'? This cannot be undone."), key.name))
@@ -129,18 +172,14 @@ struct KeychainSettingsView: View {
         }
     }
 
-    private func loadKeys() {
-        storedKeys = KeychainManager.shared.getStoredSSHKeys()
-    }
-
-    private func deleteKey(_ key: SSHKeyEntry) {
-        do {
-            try KeychainManager.shared.deleteStoredSSHKey(key.id)
-            loadKeys()
-            error = nil
-        } catch {
-            self.error = String(format: String(localized: "Failed to delete key: %@"), error.localizedDescription)
+    private var deleteError: String? {
+        guard let failure = coordinator.failure(for: .deleteKey) else {
+            return nil
         }
+        return SSHKeySettingsFailurePresentation.message(
+            for: .deleteKey,
+            failure: failure
+        )
     }
 
     private func copyToClipboard(_ text: String) {
@@ -168,7 +207,6 @@ struct KeychainSettingsView: View {
 
         Button(role: .destructive) {
             keyToDelete = key
-            showingDeleteConfirmation = true
         } label: {
             Label("Delete", systemImage: "trash")
         }
@@ -235,6 +273,7 @@ struct AddSSHKeySheet: View {
     let onSave: (SSHKeyEntry) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var coordinator: SSHKeySettingsCoordinator
 
     @State private var name: String = ""
     @State private var keyContent: String = ""
@@ -278,9 +317,9 @@ struct AddSSHKeySheet: View {
                     Text("If your key is encrypted with a passphrase, enter it here. Leave empty for keys without passphrase.")
                 }
 
-                if let error = error {
+                if let presentedError {
                     Section {
-                        Text(error)
+                        Text(presentedError)
                             .foregroundStyle(.red)
                     }
                 }
@@ -310,6 +349,9 @@ struct AddSSHKeySheet: View {
             }
         }
         .adaptiveSoftScrollEdges()
+        .onAppear {
+            coordinator.clearFailure(for: .importKey)
+        }
     }
 
     private var isValid: Bool {
@@ -370,18 +412,29 @@ struct AddSSHKeySheet: View {
             return
         }
 
-        do {
-            let entry = try KeychainManager.shared.storeSSHKeyEntry(
-                name: name,
-                privateKey: keyData,
-                passphrase: passphrase.isEmpty ? nil : passphrase
-            )
-            onSave(entry)
-            dismiss()
-        } catch {
-            self.error = String(format: String(localized: "Failed to save key: %@"), error.localizedDescription)
+        guard let entry = coordinator.storeImportedKey(
+            name: name,
+            privateKey: keyData,
+            passphrase: passphrase.isEmpty ? nil : passphrase
+        ) else {
             isSaving = false
+            return
         }
+        onSave(entry)
+        dismiss()
+    }
+
+    private var presentedError: String? {
+        if let error {
+            return error
+        }
+        guard let failure = coordinator.failure(for: .importKey) else {
+            return nil
+        }
+        return SSHKeySettingsFailurePresentation.message(
+            for: .importKey,
+            failure: failure
+        )
     }
 }
 
@@ -391,13 +444,13 @@ struct GenerateSSHKeySheet: View {
     let onSave: (SSHKeyEntry) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var coordinator: SSHKeySettingsCoordinator
 
     @State private var name: String = ""
     @State private var keyType: SSHKeyType = .ed25519
     @State private var passphrase: String = ""
     @State private var confirmPassphrase: String = ""
     @State private var isGenerating = false
-    @State private var error: String?
 
     var body: some View {
         NavigationStack {
@@ -433,9 +486,9 @@ struct GenerateSSHKeySheet: View {
                     Text("Protect your key with a passphrase. Leave empty for no protection.")
                 }
 
-                if let error = error {
+                if let generationError {
                     Section {
-                        Text(error)
+                        Text(generationError)
                             .foregroundStyle(.red)
                     }
                 }
@@ -459,6 +512,9 @@ struct GenerateSSHKeySheet: View {
             }
         }
         .adaptiveSoftScrollEdges()
+        .onAppear {
+            coordinator.clearFailure(for: .generateKey)
+        }
     }
 
     private var isValidForGeneration: Bool {
@@ -467,31 +523,30 @@ struct GenerateSSHKeySheet: View {
 
     private func generateKey() {
         isGenerating = true
-        error = nil
 
         Task {
-            do {
-                let comment = name.replacingOccurrences(of: " ", with: "_")
-                let key = try SSHKeyGenerator.generate(type: keyType, comment: comment)
-                let entry = try KeychainManager.shared.storeSSHKeyEntry(
-                    name: name,
-                    privateKey: key.privateKey,
-                    passphrase: passphrase.isEmpty ? nil : passphrase,
-                    keyType: key.keyType,
-                    publicKey: key.publicKey
-                )
-                await MainActor.run {
-                    self.isGenerating = false
-                    onSave(entry)
-                    dismiss()
-                }
-            } catch {
-                await MainActor.run {
-                    self.error = String(format: String(localized: "Failed to generate key: %@"), error.localizedDescription)
-                    self.isGenerating = false
-                }
+            if let entry = coordinator.generateAndStoreKey(
+                name: name,
+                passphrase: passphrase.isEmpty ? nil : passphrase,
+                keyType: keyType
+            ) {
+                isGenerating = false
+                onSave(entry)
+                dismiss()
+            } else {
+                isGenerating = false
             }
         }
+    }
+
+    private var generationError: String? {
+        guard let failure = coordinator.failure(for: .generateKey) else {
+            return nil
+        }
+        return SSHKeySettingsFailurePresentation.message(
+            for: .generateKey,
+            failure: failure
+        )
     }
 }
 
@@ -645,6 +700,9 @@ struct PublicKeyDisplaySheet: View {
 
 // MARK: - Preview
 
-#Preview {
-    KeychainSettingsView()
-}
+#if DEBUG
+    #Preview {
+        KeychainSettingsView()
+            .environmentObject(SSHKeySettingsCoordinator.preview)
+    }
+#endif

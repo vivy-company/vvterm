@@ -6,43 +6,6 @@
 import SwiftUI
 #if os(macOS)
 import AppKit
-
-// MARK: - About Window Controller
-
-final class AboutWindowController {
-    static let shared = AboutWindowController()
-
-    private var window: NSWindow?
-
-    private init() {}
-
-    func show() {
-        if let window = window {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            return
-        }
-
-        let aboutView = AboutView()
-        let hostingView = NSHostingView(rootView: aboutView)
-        hostingView.setFrameSize(hostingView.fittingSize)
-
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: hostingView.fittingSize.width, height: hostingView.fittingSize.height),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = String(localized: "About VVTerm")
-        window.contentView = hostingView
-        window.center()
-        window.isReleasedWhenClosed = false
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-
-        self.window = window
-    }
-}
 #endif
 
 struct AboutView: View {

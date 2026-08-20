@@ -1,6 +1,6 @@
 import Foundation
 
-struct DockerStats: Equatable {
+nonisolated struct DockerStats: Equatable, Sendable {
     var availability: DockerAvailability = .unknown
     var containers: [DockerContainer] = []
     var timestamp: Date = Date()
@@ -67,31 +67,16 @@ struct DockerStats: Equatable {
     }
 }
 
-enum DockerAvailability: Equatable {
+nonisolated enum DockerAvailability: Equatable, Sendable {
     case unknown
     case available
     case commandMissing
     case daemonUnavailable(String)
     case permissionDenied(String)
     case unavailable(String)
-
-    var message: String {
-        switch self {
-        case .unknown:
-            return String(localized: "Waiting for Docker")
-        case .available:
-            return ""
-        case .commandMissing:
-            return String(localized: "Docker command not found")
-        case .daemonUnavailable(let message),
-             .permissionDenied(let message),
-             .unavailable(let message):
-            return message
-        }
-    }
 }
 
-struct DockerContainer: Identifiable, Equatable {
+nonisolated struct DockerContainer: Identifiable, Equatable, Sendable {
     let id: String
     let name: String
     let image: String
@@ -125,7 +110,7 @@ struct DockerContainer: Identifiable, Equatable {
     }
 }
 
-enum DockerContainerState: String, Equatable {
+nonisolated enum DockerContainerState: String, Equatable, Sendable {
     case running
     case exited
     case paused
@@ -140,7 +125,7 @@ enum DockerContainerState: String, Equatable {
     }
 }
 
-enum DockerHealthStatus: String, Equatable {
+nonisolated enum DockerHealthStatus: String, Equatable, Sendable {
     case healthy
     case unhealthy
     case starting
@@ -160,7 +145,7 @@ enum DockerHealthStatus: String, Equatable {
     }
 }
 
-enum DockerContainerAction: String, Equatable, Sendable {
+nonisolated enum DockerContainerAction: String, Equatable, Sendable {
     case start
     case stop
     case restart

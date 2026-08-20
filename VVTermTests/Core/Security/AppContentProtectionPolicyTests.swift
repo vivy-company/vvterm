@@ -64,4 +64,19 @@ struct AppContentProtectionPolicyTests {
             )
         )
     }
+
+    @Test
+    func privacyModeMasksDiscoveredHostText() {
+        let host = DiscoveredSSHHost(
+            displayName: "Secret server",
+            host: "private.example.com",
+            port: 2222,
+            sources: [.bonjour]
+        )
+
+        #expect(host.visibleDisplayName(privacyModeEnabled: true) == SensitiveContentMask.placeholder)
+        #expect(host.visibleEndpoint(privacyModeEnabled: true) == SensitiveContentMask.placeholder)
+        #expect(host.visibleDisplayName(privacyModeEnabled: false) == "Secret server")
+        #expect(host.visibleEndpoint(privacyModeEnabled: false) == "private.example.com:2222")
+    }
 }

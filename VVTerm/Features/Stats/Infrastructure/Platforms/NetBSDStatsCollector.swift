@@ -3,7 +3,7 @@ import Foundation
 // MARK: - NetBSD Stats Collector
 
 /// Stats collector for NetBSD systems
-struct NetBSDStatsCollector: PlatformStatsCollector {
+nonisolated struct NetBSDStatsCollector: PlatformStatsCollector {
     private let periodicProcessLimit = 24
 
     func getSystemInfo(client: SSHClient) async throws -> (hostname: String, osInfo: String, cpuCores: Int) {

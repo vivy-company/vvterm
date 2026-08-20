@@ -3,6 +3,7 @@ import SwiftUI
 struct TerminalCustomActionFormView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var preferences: TerminalAccessoryPreferencesManager
+    @EnvironmentObject private var storeManager: StoreManager
 
     let action: TerminalAccessoryCustomAction?
 
@@ -213,7 +214,8 @@ struct TerminalCustomActionFormView: View {
                     commandContent: commandContent,
                     commandSendMode: commandSendMode,
                     shortcutKey: shortcutKey,
-                    shortcutModifiers: shortcutModifiers
+                    shortcutModifiers: shortcutModifiers,
+                    hasProAccess: storeManager.allowsProFeatures
                 )
             }
             dismiss()

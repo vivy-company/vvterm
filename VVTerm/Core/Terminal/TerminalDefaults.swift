@@ -10,7 +10,7 @@ import UIKit
 import AppKit
 #endif
 
-enum TerminalCursorStyle: String, CaseIterable, Codable, Identifiable {
+nonisolated enum TerminalCursorStyle: String, CaseIterable, Codable, Identifiable, Sendable {
     case block
     case bar
     case underline
@@ -91,7 +91,7 @@ nonisolated enum TerminalZoomShortcutRouting {
     }
 }
 
-enum TerminalOptionAsAltMode: String, CaseIterable, Identifiable {
+nonisolated enum TerminalOptionAsAltMode: String, CaseIterable, Identifiable, Sendable {
     case none
     case left
     case right
@@ -117,17 +117,17 @@ enum TerminalOptionAsAltMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum TerminalOptionKeySide {
+nonisolated enum TerminalOptionKeySide: Sendable {
     case left
     case right
 }
 
-struct TerminalZoomResult: Hashable {
+nonisolated struct TerminalZoomResult: Hashable, Sendable {
     let presentationOverrides: TerminalPresentationOverrides
     let effectiveFontSize: Double
 }
 
-struct TerminalPresentationOverrides: Codable, Hashable, Sendable {
+nonisolated struct TerminalPresentationOverrides: Codable, Hashable, Sendable {
     nonisolated static let empty = TerminalPresentationOverrides()
 
     var fontSize: Double?
@@ -140,11 +140,14 @@ struct TerminalPresentationOverrides: Codable, Hashable, Sendable {
         fontSize == nil
     }
 
-    func resolvedFontSize(defaults: UserDefaults = .standard) -> Double {
+    @MainActor func resolvedFontSize(defaults: UserDefaults = .standard) -> Double {
         fontSize ?? TerminalDefaults.storedFontSize(defaults: defaults)
     }
 
-    func applyingZoom(_ action: TerminalZoomAction, defaults: UserDefaults = .standard) -> TerminalPresentationOverrides {
+    @MainActor func applyingZoom(
+        _ action: TerminalZoomAction,
+        defaults: UserDefaults = .standard
+    ) -> TerminalPresentationOverrides {
         var overrides = self
         let currentFontSize = resolvedFontSize(defaults: defaults)
 
@@ -161,7 +164,7 @@ struct TerminalPresentationOverrides: Codable, Hashable, Sendable {
     }
 }
 
-enum TerminalZoomPresentation {
+nonisolated enum TerminalZoomPresentation {
     static let pinchZoomInThreshold = 1.12
     static let pinchZoomOutThreshold = 0.89
     static let magnificationStepThreshold = 0.12
@@ -181,7 +184,7 @@ enum TerminalZoomPresentation {
     }
 }
 
-enum TerminalDefaults {
+nonisolated enum TerminalDefaults {
     static let fontNameKey = "terminalFontName"
     static let fontSizeKey = "terminalFontSize"
     static let cursorStyleKey = "terminalCursorStyle"
@@ -190,26 +193,26 @@ enum TerminalDefaults {
     static let keepScreenAwakeKey = "terminalKeepScreenAwake"
     static let optionAsAltModeKey = "terminalOptionAsAltMode"
     static let preserveTerminalSizeForKeyboardKey = "terminalPreserveSizeForKeyboard"
-    static let legacyDefaultFontName = "JetBrainsMono Nerd Font"
-    static let minimumFontSize = 4.0
-    static let maximumFontSize = 32.0
-    static let fontSizeStep = 1.0
-    static let defaultCursorStyle: TerminalCursorStyle = .block
-    static let defaultCursorBlink = true
-    static let defaultKeepScreenAwake = true
+    nonisolated static let legacyDefaultFontName = "JetBrainsMono Nerd Font"
+    nonisolated static let minimumFontSize = 4.0
+    nonisolated static let maximumFontSize = 32.0
+    nonisolated static let fontSizeStep = 1.0
+    nonisolated static let defaultCursorStyle: TerminalCursorStyle = .block
+    nonisolated static let defaultCursorBlink = true
+    nonisolated static let defaultKeepScreenAwake = true
     #if os(macOS)
-    static let defaultPrimaryFontName = "Menlo"
-    static let macOSFallbackFontFamilies = [
+    nonisolated static let defaultPrimaryFontName = "Menlo"
+    nonisolated static let macOSFallbackFontFamilies = [
         "Apple SD Gothic Neo",
         legacyDefaultFontName
     ]
     #endif
 
-    static func applyIfNeeded() {
+    @MainActor static func applyIfNeeded() {
         applyIfNeeded(defaults: .standard)
     }
 
-    static func applyIfNeeded(defaults: UserDefaults) {
+    @MainActor static func applyIfNeeded(defaults: UserDefaults) {
         seedFontDefaultsIfNeeded(defaults: defaults)
         seedCursorDefaultsIfNeeded(defaults: defaults)
 
@@ -223,7 +226,7 @@ enum TerminalDefaults {
         min(max(fontSize.rounded(), minimumFontSize), maximumFontSize)
     }
 
-    static func storedFontSize(defaults: UserDefaults = .standard) -> Double {
+    @MainActor static func storedFontSize(defaults: UserDefaults = .standard) -> Double {
         let stored = defaults.object(forKey: fontSizeKey) as? Double ?? defaultFontSize
         return clampedFontSize(stored)
     }
@@ -241,7 +244,7 @@ enum TerminalDefaults {
         return TerminalOptionAsAltMode(rawValue: rawValue) ?? .none
     }
 
-    static var defaultFontSize: Double {
+    @MainActor static var defaultFontSize: Double {
         #if os(macOS)
         return 12.0
         #elseif os(iOS)
@@ -268,7 +271,7 @@ enum TerminalDefaults {
     }
     #endif
 
-    private static func seedFontDefaultsIfNeeded(defaults: UserDefaults) {
+    @MainActor private static func seedFontDefaultsIfNeeded(defaults: UserDefaults) {
         #if os(macOS)
         seedMacOSFontDefaultsIfNeeded(defaults: defaults)
         #else
@@ -300,7 +303,7 @@ enum TerminalDefaults {
     }
 
     #if os(macOS)
-    private static func seedMacOSFontDefaultsIfNeeded(defaults: UserDefaults) {
+    @MainActor private static func seedMacOSFontDefaultsIfNeeded(defaults: UserDefaults) {
         let storedFontName = defaults.string(forKey: fontNameKey)
         let normalizedStoredFontName = storedFontName?.trimmingCharacters(in: .whitespacesAndNewlines)
         let storedFontSize = defaults.object(forKey: fontSizeKey) as? Double
@@ -335,7 +338,7 @@ enum TerminalDefaults {
         fontAvailability(storedFontName) ? storedFontName : defaultPrimaryFontName
     }
 
-    private static func isAvailableMacOSFont(named fontName: String) -> Bool {
+    @MainActor private static func isAvailableMacOSFont(named fontName: String) -> Bool {
         NSFont(name: fontName, size: 12) != nil
     }
     #endif

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - FreeBSD Stats Collector
 
 /// Stats collector for FreeBSD systems (including TrueNAS, pfSense, OPNsense)
-struct FreeBSDStatsCollector: PlatformStatsCollector {
+nonisolated struct FreeBSDStatsCollector: PlatformStatsCollector {
     private let periodicProcessLimit = 24
 
     func getSystemInfo(client: SSHClient) async throws -> (hostname: String, osInfo: String, cpuCores: Int) {

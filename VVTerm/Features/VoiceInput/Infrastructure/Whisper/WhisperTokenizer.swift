@@ -1,6 +1,6 @@
 import Foundation
 
-struct WhisperEncoding {
+nonisolated struct WhisperEncoding: Sendable {
     let baseTokens: [Data]
     let baseVocabCount: Int
     let specialTokens: [String: Int]
@@ -18,7 +18,7 @@ nonisolated final class WhisperTokenizer {
         "as", "tt", "haw", "ln", "ha", "ba", "jw", "su", "yue"
     ]
 
-    private static var cachedEncodings: [String: WhisperEncoding] = [:]
+    private static let encodingCache = WhisperEncodingCache()
 
     let encoding: WhisperEncoding
     let language: String?
@@ -96,63 +96,58 @@ nonisolated final class WhisperTokenizer {
     }
 
     private static func loadEncoding(name: String, numLanguages: Int, modelId: String?) throws -> WhisperEncoding {
-        if let cached = cachedEncodings[name] {
-            return cached
-        }
-
-        guard let url = resourceURL(name: name, fileExtension: "tiktoken", modelId: modelId) else {
-            throw NSError(domain: "WhisperTokenizer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing tokenizer resource: \(name).tiktoken"])
-        }
-
-        let content = try String(contentsOf: url, encoding: .utf8)
-        var baseTokens: [Data] = []
-
-        for line in content.split(whereSeparator: { $0 == "\n" || $0 == "\r" }) {
-            let parts = line.split(separator: " ")
-            guard parts.count == 2, let rank = Int(parts[1]) else { continue }
-            let tokenData = Data(base64Encoded: String(parts[0])) ?? Data()
-            if rank >= baseTokens.count {
-                baseTokens.append(contentsOf: Array(repeating: Data(), count: rank - baseTokens.count + 1))
+        try encodingCache.value(for: name) {
+            guard let url = resourceURL(name: name, fileExtension: "tiktoken", modelId: modelId) else {
+                throw NSError(domain: "WhisperTokenizer", code: 1, userInfo: [NSLocalizedDescriptionKey: "Missing tokenizer resource: \(name).tiktoken"])
             }
-            baseTokens[rank] = tokenData
+
+            let content = try String(contentsOf: url, encoding: .utf8)
+            var baseTokens: [Data] = []
+
+            for line in content.split(whereSeparator: { $0 == "\n" || $0 == "\r" }) {
+                let parts = line.split(separator: " ")
+                guard parts.count == 2, let rank = Int(parts[1]) else { continue }
+                let tokenData = Data(base64Encoded: String(parts[0])) ?? Data()
+                if rank >= baseTokens.count {
+                    baseTokens.append(contentsOf: Array(repeating: Data(), count: rank - baseTokens.count + 1))
+                }
+                baseTokens[rank] = tokenData
+            }
+
+            let baseVocabCount = baseTokens.count
+            var specialTokens: [String: Int] = [:]
+            var nVocab = baseVocabCount
+
+            let languageTokens = supportedLanguages.prefix(numLanguages).map { "<|\($0)|>" }
+            let timestampTokens = (0...1500).map { String(format: "<|%.2f|>", Double($0) * 0.02) }
+
+            var specials: [String] = [
+                "<|endoftext|>",
+                "<|startoftranscript|>",
+            ]
+            specials.append(contentsOf: languageTokens)
+            specials.append(contentsOf: [
+                "<|translate|>",
+                "<|transcribe|>",
+                "<|startoflm|>",
+                "<|startofprev|>",
+                "<|nospeech|>",
+                "<|notimestamps|>",
+            ])
+            specials.append(contentsOf: timestampTokens)
+
+            for token in specials {
+                specialTokens[token] = nVocab
+                nVocab += 1
+            }
+
+            return WhisperEncoding(
+                baseTokens: baseTokens,
+                baseVocabCount: baseVocabCount,
+                specialTokens: specialTokens,
+                nVocab: nVocab
+            )
         }
-
-        let baseVocabCount = baseTokens.count
-        var specialTokens: [String: Int] = [:]
-        var nVocab = baseVocabCount
-
-        let languageTokens = supportedLanguages.prefix(numLanguages).map { "<|\($0)|>" }
-        let timestampTokens = (0...1500).map { String(format: "<|%.2f|>", Double($0) * 0.02) }
-
-        var specials: [String] = [
-            "<|endoftext|>",
-            "<|startoftranscript|>",
-        ]
-        specials.append(contentsOf: languageTokens)
-        specials.append(contentsOf: [
-            "<|translate|>",
-            "<|transcribe|>",
-            "<|startoflm|>",
-            "<|startofprev|>",
-            "<|nospeech|>",
-            "<|notimestamps|>",
-        ])
-        specials.append(contentsOf: timestampTokens)
-
-        for token in specials {
-            specialTokens[token] = nVocab
-            nVocab += 1
-        }
-
-        let encoding = WhisperEncoding(
-            baseTokens: baseTokens,
-            baseVocabCount: baseVocabCount,
-            specialTokens: specialTokens,
-            nVocab: nVocab
-        )
-
-        cachedEncodings[name] = encoding
-        return encoding
     }
 
     private static func resourceURL(name: String, fileExtension: String, modelId: String?) -> URL? {
@@ -192,5 +187,26 @@ nonisolated final class WhisperTokenizer {
         } catch {
             return nil
         }
+    }
+}
+
+/// Access to the immutable tokenizer encodings is serialized by `lock`.
+private nonisolated final class WhisperEncodingCache: @unchecked Sendable {
+    private let lock = NSLock()
+    private var values: [String: WhisperEncoding] = [:]
+
+    func value(
+        for key: String,
+        load: () throws -> WhisperEncoding
+    ) rethrows -> WhisperEncoding {
+        lock.lock()
+        defer { lock.unlock() }
+
+        if let value = values[key] {
+            return value
+        }
+        let value = try load()
+        values[key] = value
+        return value
     }
 }

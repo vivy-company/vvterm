@@ -282,7 +282,6 @@ nonisolated public struct DecodingConfig {
     public let encoderConfig: ConformerConfig
     public let vocabulary: [String]
     public let durations: [Int]
-    public let maxSymbols: Int
     public let blankTokenId: Int
     public let numClasses: Int
     public let numExtraOutputs: Int
@@ -290,21 +289,17 @@ nonisolated public struct DecodingConfig {
     private let encoder: Conformer
     private let decoder: PredictNetwork
     private let joint: JointNetwork
-    private let decoderConfig: PredictConfig
-    private let jointConfig: JointConfig
 
     public init(config: ParakeetTDTConfig) throws {
+        try MLXModelConfigurationValidator.validateParakeet(config)
         guard config.decoding.modelType == "tdt" else {
             throw ParakeetError.invalidModelType("Model must be a TDT model")
         }
 
         self.preprocessConfig = config.preprocessor
         self.encoderConfig = config.encoder
-        self.decoderConfig = config.decoder
-        self.jointConfig = config.joint
         self.vocabulary = config.joint.vocabulary
         self.durations = config.decoding.durations
-        self.maxSymbols = config.decoding.greedy?["max_symbols"] as? Int ?? 10
         let vocabSize = config.decoder.vocabSize
         self.numClasses = config.joint.numClasses > 0 ? config.joint.numClasses : vocabSize
         self.numExtraOutputs = config.joint.numExtraOutputs > 0 ? config.joint.numExtraOutputs : config.decoding.durations.count
@@ -442,10 +437,19 @@ nonisolated public struct DecodingConfig {
             let length = Int(actualLengths[batch].item(Int32.self))
 
             var step = 0
-            var newSymbols = 0
             var currentLastToken = actualLastToken[batch]
+            var decodeIterations = 0
+            let scaledIterationLimit = length.multipliedReportingOverflow(by: 4)
+            let maximumDecodeIterations = min(
+                max(scaledIterationLimit.overflow ? 10_000_000 : scaledIterationLimit.partialValue, 1_024),
+                10_000_000
+            )
 
             while step < length {
+                decodeIterations += 1
+                guard decodeIterations <= maximumDecodeIterations else {
+                    throw ParakeetError.audioProcessingError("Decode iteration limit exceeded")
+                }
                 let decoderInput = currentLastToken.map { token in
                     MLXArray([token]).expandedDimensions(axis: 0)
                 }
@@ -520,24 +524,12 @@ nonisolated public struct DecodingConfig {
                     }
                 }
 
-                let stepDuration = durations[min(decision, max(durations.count - 1, 0))]
-                step += stepDuration
-
-                newSymbols += 1
-
-                if stepDuration != 0 {
-                    newSymbols = 0
-                } else {
-                    if newSymbols >= maxSymbols {
-                        step += 1
-                        newSymbols = 0
-                    }
+                let stepDuration = max(durations[min(decision, durations.count - 1)], 1)
+                let nextStep = step.addingReportingOverflow(stepDuration)
+                guard !nextStep.overflow else {
+                    throw ParakeetError.audioProcessingError("Decode step overflow")
                 }
-
-                if newSymbols > 100 {
-                    break
-                }
-
+                step = nextStep.partialValue
             }
 
             results.append(hypothesis)

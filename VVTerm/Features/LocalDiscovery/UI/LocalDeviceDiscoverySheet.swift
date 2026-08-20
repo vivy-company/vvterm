@@ -5,6 +5,21 @@ import UIKit
 import AppKit
 #endif
 
+typealias LocalSSHDiscoveryManagerFactory = @MainActor () -> LocalSSHDiscoveryManager
+
+@MainActor
+struct LocalDeviceDiscoveryPresentation: Identifiable {
+    let manager: LocalSSHDiscoveryManager
+
+    init(makeManager: LocalSSHDiscoveryManagerFactory) {
+        manager = makeManager()
+    }
+
+    var id: ObjectIdentifier {
+        ObjectIdentifier(manager)
+    }
+}
+
 struct LocalDeviceDiscoverySheet: View {
     let onUse: (DiscoveredSSHHost) -> Void
 
@@ -21,10 +36,6 @@ struct LocalDeviceDiscoverySheet: View {
     ) {
         self.onUse = onUse
         _manager = StateObject(wrappedValue: manager)
-    }
-
-    init(onUse: @escaping (DiscoveredSSHHost) -> Void) {
-        self.init(manager: LocalSSHDiscoveryManager(), onUse: onUse)
     }
 
     var body: some View {
@@ -428,7 +439,3 @@ private struct DiscoveryHostSwitcherRow: View {
     }
 }
 #endif
-
-#Preview {
-    LocalDeviceDiscoverySheet(onUse: { _ in })
-}

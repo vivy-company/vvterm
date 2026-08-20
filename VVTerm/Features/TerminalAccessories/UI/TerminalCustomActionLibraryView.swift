@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TerminalCustomActionLibraryView: View {
     @EnvironmentObject private var preferences: TerminalAccessoryPreferencesManager
+    @EnvironmentObject private var storeManager: StoreManager
 
     @State private var showingCreateSheet = false
     @State private var showingProGateAlert = false
@@ -70,7 +71,10 @@ struct TerminalCustomActionLibraryView: View {
                     String(
                         format: String(localized: "%lld/%lld custom actions. Tap a row to edit."),
                         Int64(preferences.customActions.count),
-                        Int64(max(preferences.customActions.count, preferences.customActionLimit))
+                        Int64(max(
+                            preferences.customActions.count,
+                            preferences.customActionLimit(hasProAccess: storeManager.allowsProFeatures)
+                        ))
                     )
                 )
                 .font(.caption)
@@ -85,7 +89,9 @@ struct TerminalCustomActionLibraryView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    if preferences.isCustomActionCreationProGated {
+                    if preferences.isCustomActionCreationProGated(
+                        hasProAccess: storeManager.allowsProFeatures
+                    ) {
                         showingProGateAlert = true
                     } else {
                         showingCreateSheet = true

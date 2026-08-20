@@ -1,312 +1,100 @@
-//
-//  SettingsView.swift
-//  VVTerm
-//
-
 import SwiftUI
-#if os(macOS)
-import AppKit
-
-private extension View {
-    @ViewBuilder
-    func removingSidebarToggle() -> some View {
-        if #available(macOS 14.0, *) {
-            toolbar(removing: .sidebarToggle)
-        } else {
-            self
-        }
-    }
-}
-#endif
-
-// MARK: - Settings Selection
-
-enum SettingsSelection: Hashable {
-    case pro
-    case general
-    case terminal
-    case transcription
-    case keychain
-    case sync
-    case about
-}
-
-// MARK: - Settings View
 
 struct SettingsView: View {
-    @AppStorage(TerminalDefaults.fontNameKey) private var terminalFontName = TerminalDefaults.defaultFontName
-    @AppStorage(TerminalDefaults.fontSizeKey) private var terminalFontSize = TerminalDefaults.defaultFontSize
+    let statsPreferencesStore: PreferencesStore
+    let voiceModelManagers: VoiceSettingsModelManagerOwner
+    let analyticsOptOutAction: AnalyticsOptOutAction
 
-    @State private var selection: SettingsSelection? = .pro
-    @StateObject private var storeManager = StoreManager.shared
+    @AppStorage(TerminalDefaults.fontNameKey) var terminalFontName = TerminalDefaults.defaultFontName
+    @AppStorage(TerminalDefaults.fontSizeKey) var terminalFontSize = TerminalDefaults.defaultFontSize
+    @AppStorage(SettingsRoutePersistence.selectedRouteKey)
+    var selectedRouteRaw = SettingsRoute.defaultRoute.rawValue
+    @State var searchText = ""
 
-    #if os(iOS)
-    @Environment(\.dismiss) private var dismiss
-    #endif
+    @EnvironmentObject var storeManager: StoreManager
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        #if os(macOS)
-        NavigationSplitView {
-            List(selection: $selection) {
-                // Pro at top (not part of selection - has its own styling)
-                Button {
-                    selection = .pro
-                } label: {
-                    proNavigationRow
-                }
-                .buttonStyle(.plain)
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-
-                Divider()
-                    .listRowSeparator(.hidden)
-                    .listRowBackground(Color.clear)
-
-                settingsRow("General", icon: "gear", tag: .general)
-                settingsRow("Terminal", icon: "terminal", tag: .terminal)
-                settingsRow("Transcription", icon: "waveform", tag: .transcription)
-                settingsRow("SSH Keys", icon: "key", tag: .keychain)
-                settingsRow("Sync", icon: "icloud", tag: .sync)
-                settingsRow("About", icon: "info.circle", tag: .about)
-            }
-            .listStyle(.sidebar)
-            .frame(minWidth: 240, maxHeight: .infinity)
-            .navigationSplitViewColumnWidth(240)
-            .removingSidebarToggle()
-        } detail: {
-            detailView
-        }
-        .toolbar {
-            ToolbarItem(placement: .principal) { Text("") }
-        }
-        .navigationSplitViewStyle(.balanced)
-        .frame(minWidth: 700, minHeight: 500)
-        #else
-        NavigationStack {
-            List {
-                // Pro card at top
-                Section {
-                    NavigationLink {
-                        ProSettingsView()
-                            .navigationTitle("VVTerm Pro")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        HStack(spacing: 12) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .fill(LinearGradient(
-                                        colors: [Color.orange, Color(red: 0.95, green: 0.5, blue: 0.2)],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    ))
-                                    .frame(width: 36, height: 36)
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 16, weight: .bold))
-                                    .foregroundStyle(.white)
-                            }
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("VVTerm Pro")
-                                    .font(.headline)
-                                Text(storeManager.isPro ? String(localized: "Manage subscription") : String(localized: "Upgrade for unlimited features"))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            Spacer()
-
-                            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE_PLAN"))
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(
-                                    Capsule()
-                                        .fill(storeManager.isPro
-                                            ? Color.orange
-                                            : Color.primary.opacity(0.12)
-                                        )
-                                )
-                        }
-                        .padding(.vertical, 4)
-                    }
-                }
-
-                Section {
-                    NavigationLink {
-                        GeneralSettingsView()
-                            .navigationTitle("General")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("General", systemImage: "gear")
-                    }
-
-                    NavigationLink {
-                        TerminalSettingsView(fontName: $terminalFontName, fontSize: $terminalFontSize)
-                            .navigationTitle("Terminal")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("Terminal", systemImage: "terminal")
-                    }
-
-                    NavigationLink {
-                        TranscriptionSettingsView()
-                            .navigationTitle("Transcription")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("Transcription", systemImage: "waveform")
-                    }
-
-                    NavigationLink {
-                        KeychainSettingsView()
-                            .navigationTitle("SSH Keys")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("SSH Keys", systemImage: "key")
-                    }
-
-                    NavigationLink {
-                        SyncSettingsView()
-                            .navigationTitle("Sync")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("Sync", systemImage: "icloud")
-                    }
-
-                    NavigationLink {
-                        AboutSettingsView()
-                            .navigationTitle("About")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .adaptiveSoftScrollEdges()
-                    } label: {
-                        Label("About", systemImage: "info.circle")
-                    }
-                }
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .adaptiveSoftScrollEdges()
-        #endif
+        platformBody
     }
 
-    #if os(macOS)
-    @ViewBuilder
-    private var detailView: some View {
-        switch selection {
-        case .pro:
-                            ProSettingsView()
-                                .navigationTitle("VVTerm Pro")
-                                .navigationSubtitle(storeManager.isPro
-                                    ? String(localized: "Manage your subscription")
-                                    : String(localized: "Upgrade for unlimited features")
-                                )
-        case .general:
-                            GeneralSettingsView()
-                                .navigationTitle("General")
-                                .navigationSubtitle(String(localized: "Appearance and preferences"))
-        case .terminal:
-                            TerminalSettingsView(fontName: $terminalFontName, fontSize: $terminalFontSize)
-                                .navigationTitle("Terminal")
-                                .navigationSubtitle(String(localized: "Font, theme, and connection settings"))
-        case .transcription:
-                            TranscriptionSettingsView()
-                                .navigationTitle("Transcription")
-                                .navigationSubtitle(String(localized: "Speech-to-text engine and models"))
-        case .keychain:
-                            KeychainSettingsView()
-                                .navigationTitle("SSH Keys")
-                                .navigationSubtitle(String(localized: "Manage stored SSH keys"))
-        case .sync:
-                            SyncSettingsView()
-                                .navigationTitle("Sync")
-                                .navigationSubtitle(String(localized: "iCloud sync and data management"))
-        case .about:
-                            AboutSettingsView()
-                                .navigationTitle("About")
-                                .navigationSubtitle(String(localized: "Version and links"))
-        case .none:
-                            ProSettingsView()
-                                .navigationTitle("VVTerm Pro")
-                                .navigationSubtitle(storeManager.isPro
-                                    ? String(localized: "Manage your subscription")
-                                    : String(localized: "Upgrade for unlimited features")
-                                )
-        }
+    var selectedRoute: SettingsRoute {
+        SettingsRoutePersistence.route(for: selectedRouteRaw)
     }
 
-    private var proNavigationRow: some View {
-        HStack(spacing: 10) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(LinearGradient(
-                        colors: [Color.orange, Color(red: 0.95, green: 0.5, blue: 0.2)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 24, height: 24)
-                Image(systemName: "sparkles")
-                    .font(.system(size: 11, weight: .bold))
-                    .foregroundStyle(.white)
-            }
-
-            Text("Premium")
-                .fontWeight(.medium)
-
-            Spacer()
-
-            Text(storeManager.isPro ? String(localized: "PRO") : String(localized: "FREE_PLAN"))
-                .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(storeManager.isPro ? .white : .primary.opacity(0.7))
-                .padding(.horizontal, 8)
-                .padding(.vertical, 3)
-                .background(
-                    Capsule()
-                        .fill(storeManager.isPro
-                            ? Color.orange
-                            : Color.primary.opacity(0.12)
-                        )
-                )
-        }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
-                )
+    func visibleRoutes(in group: SettingsGroup) -> [SettingsRoute] {
+        SettingsRouteCatalog.visibleRoutes(
+            from: SettingsRouteCatalog.routes(in: group),
+            matching: searchText
         )
     }
 
-    private func settingsRow(_ title: LocalizedStringKey, icon: String, tag: SettingsSelection) -> some View {
-        Label(title, systemImage: icon)
-            .tag(tag)
+    func visibleRoutes(from routes: [SettingsRoute]) -> [SettingsRoute] {
+        SettingsRouteCatalog.visibleRoutes(from: routes, matching: searchText)
     }
-    #endif
-}
 
-// MARK: - Preview
+    var visibleDetailRoute: SettingsRoute? {
+        SettingsRouteCatalog.visibleDetailRoute(
+            selectedRoute: selectedRoute,
+            matching: searchText
+        )
+    }
 
-#Preview {
-    SettingsView()
+    @ViewBuilder
+    func destination(for route: SettingsRoute) -> some View {
+        switch route {
+        case .pro:
+            ProSettingsView()
+        case .appearanceAndLanguage:
+            AppearanceLanguageSettingsView()
+        case .navigationAndStats:
+            NavigationStatsSettingsView(statsPreferencesStore: statsPreferencesStore)
+        case .privacyAndAppLock:
+            PrivacyAppLockSettingsView(analyticsOptOutAction: analyticsOptOutAction)
+        case .terminalAppearance:
+            TerminalAppearanceSettingsView(fontName: $terminalFontName, fontSize: $terminalFontSize)
+        case .keyboardAndInput:
+            TerminalKeyboardInputSettingsView()
+        case .sessionsAndConnections:
+            TerminalSessionsConnectionsSettingsView()
+        case .clipboardAndPaste:
+            TerminalClipboardPasteSettingsView()
+        case .sshKeys:
+            KeychainSettingsView()
+        case .trustedHosts:
+            TrustedHostsSettingsView()
+        case .iCloudSync:
+            SyncSettingsView()
+        case .transcription:
+            TranscriptionSettingsView(modelManagers: voiceModelManagers)
+        case .aboutAndSupport:
+            AboutSettingsView()
+        }
+    }
+
+    @ViewBuilder
+    func routeLabel(for route: SettingsRoute) -> some View {
+        HStack(spacing: 10) {
+            Label(route.title, systemImage: route.icon)
+            Spacer(minLength: 8)
+            if route == .pro {
+                Text(storeStatusLabel)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(storeManager.accessState == .pro ? .green : .secondary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("vvterm.settings.route.\(route.rawValue)")
+    }
+
+    var storeStatusLabel: String {
+        switch storeManager.accessState {
+        case .checking:
+            String(localized: "Checking...")
+        case .free:
+            String(localized: "FREE_PLAN")
+        case .pro:
+            String(localized: "PRO")
+        }
+    }
 }

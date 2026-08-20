@@ -33,90 +33,109 @@ struct CloudflareOAuthFlow: OAuthFlow {
 }
 
 actor CloudflareWebAuthenticationSessionActor: OAuthWebSession {
-    private var currentSession: ASWebAuthenticationSession?
-    private var ignoreNextCompletion = false
+    private struct ActiveSession {
+        let generation: UUID
+        let session: any CloudflareWebAuthenticationSessionRunning
+    }
+
+    private let makeSession: CloudflareWebAuthenticationSessionFactory
+    private var activeSession: ActiveSession?
     private var userDidCancel = false
-    private var presentationContextProvider: CloudflarePresentationContextProvider?
+
+    init(
+        makeSession: @escaping CloudflareWebAuthenticationSessionFactory = { url, completion in
+            CloudflareWebAuthenticationSession(url: url, completion: completion)
+        }
+    ) {
+        self.makeSession = makeSession
+    }
 
     func start(url: URL) async throws {
-        if currentSession != nil {
-            await resetForRestart()
-        }
-
+        let generation = UUID()
         userDidCancel = false
-        ignoreNextCompletion = false
 
-        let provider = await ensurePresentationContextProvider()
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: nil) { [weak self] _, error in
-            Task {
-                await self?.handleCompletion(error: error)
+        let session = await makeSession(url) { [weak self] didCancel in
+            Task { [weak self] in
+                await self?.handleCompletion(generation: generation, didCancel: didCancel)
             }
         }
 
-        await MainActor.run {
-            session.presentationContextProvider = provider
-            session.prefersEphemeralWebBrowserSession = false
+        let previousSession = activeSession
+        activeSession = ActiveSession(generation: generation, session: session)
+        await previousSession?.session.cancel()
+
+        guard isActive(session, generation: generation) else {
+            await session.cancel()
+            return
         }
 
-        currentSession = session
-        let didStart = await MainActor.run { session.start() }
+        let didStart = await session.start()
+        guard isActive(session, generation: generation) else {
+            await session.cancel()
+            return
+        }
+
         if !didStart {
-            currentSession = nil
+            activeSession = nil
             throw Failure.auth("Failed to start Cloudflare login session")
         }
     }
 
     func stop() async {
-        guard let session = currentSession else { return }
-        ignoreNextCompletion = true
-        await MainActor.run {
-            session.cancel()
-        }
-        currentSession = nil
+        let session = activeSession?.session
+        activeSession = nil
+        await session?.cancel()
     }
 
     func didCancelLogin() async -> Bool {
         userDidCancel
     }
 
-    private func resetForRestart() async {
-        ignoreNextCompletion = true
-        if let session = currentSession {
-            await MainActor.run {
-                session.cancel()
-            }
-        }
-        currentSession = nil
-        userDidCancel = false
+    private func handleCompletion(generation: UUID, didCancel: Bool) {
+        guard activeSession?.generation == generation else { return }
+        activeSession = nil
+        userDidCancel = didCancel
     }
 
-    private func ensurePresentationContextProvider() async -> CloudflarePresentationContextProvider {
-        if let presentationContextProvider {
-            return presentationContextProvider
+    private func isActive(
+        _ session: any CloudflareWebAuthenticationSessionRunning,
+        generation: UUID
+    ) -> Bool {
+        guard let activeSession else { return false }
+        return activeSession.generation == generation && activeSession.session === session
+    }
+}
+
+@MainActor
+protocol CloudflareWebAuthenticationSessionRunning: AnyObject, Sendable {
+    func start() -> Bool
+    func cancel()
+}
+
+typealias CloudflareWebAuthenticationSessionFactory = @MainActor @Sendable (
+    URL,
+    @escaping @Sendable (Bool) -> Void
+) -> any CloudflareWebAuthenticationSessionRunning
+
+@MainActor
+private final class CloudflareWebAuthenticationSession: CloudflareWebAuthenticationSessionRunning {
+    private let session: ASWebAuthenticationSession
+    private let presentationContextProvider = CloudflarePresentationContextProvider()
+
+    init(url: URL, completion: @escaping @Sendable (Bool) -> Void) {
+        self.session = ASWebAuthenticationSession(url: url, callbackURLScheme: nil) { _, error in
+            completion(error != nil)
         }
-        let provider = await MainActor.run {
-            CloudflarePresentationContextProvider()
-        }
-        presentationContextProvider = provider
-        return provider
+        session.presentationContextProvider = presentationContextProvider
+        session.prefersEphemeralWebBrowserSession = false
     }
 
-    private func handleCompletion(error: Error?) {
-        defer {
-            currentSession = nil
-        }
+    func start() -> Bool {
+        session.start()
+    }
 
-        if ignoreNextCompletion {
-            ignoreNextCompletion = false
-            return
-        }
-
-        if let authError = error as? ASWebAuthenticationSessionError,
-           authError.code == .canceledLogin {
-            userDidCancel = true
-        } else if error != nil {
-            userDidCancel = true
-        }
+    func cancel() {
+        session.cancel()
     }
 }
 

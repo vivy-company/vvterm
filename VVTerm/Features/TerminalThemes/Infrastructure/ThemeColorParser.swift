@@ -25,7 +25,7 @@ struct ThemeColorParser {
     /// Extracts background color from a Ghostty theme file
     /// - Parameter themeName: The name of the theme (e.g., "Aizen Dark")
     /// - Returns: The background Color if found, nil otherwise
-    nonisolated static func backgroundColor(for themeName: String) -> Color? {
+    static func backgroundColor(for themeName: String) -> Color? {
         guard let content = themeContent(for: themeName),
               let colorHex = value(for: "background", in: content) else {
             return nil
@@ -34,40 +34,37 @@ struct ThemeColorParser {
         return Color.fromHex(colorHex)
     }
 
-    nonisolated static func previewPalette(for themeName: String) -> TerminalThemePreviewPalette {
+    static func previewPalette(for themeName: String) -> TerminalThemePreviewPalette {
+        let palette = appearancePalette(for: themeName)
+
+        return TerminalThemePreviewPalette(
+            background: Color.fromHex(palette.backgroundHex),
+            foreground: Color.fromHex(palette.foregroundHex),
+            cursor: Color.fromHex(palette.cursorHex),
+            cursorText: Color.fromHex(palette.cursorTextHex)
+        )
+    }
+
+    nonisolated static func appearancePalette(for themeName: String) -> TerminalThemePalette {
         guard let content = themeContent(for: themeName) else {
             return .fallback
         }
 
-        let fallback = TerminalThemePreviewPalette.fallback
-        let background = color(for: "background", in: content) ?? fallback.background
-        let foreground = color(for: "foreground", in: content) ?? fallback.foreground
-        let cursor = color(for: "cursor-color", in: content) ?? foreground
-        let cursorText = color(for: "cursor-text", in: content) ?? background
-
-        return TerminalThemePreviewPalette(
-            background: background,
-            foreground: foreground,
-            cursor: cursor,
-            cursorText: cursorText
-        )
+        return appearancePalette(themeContent: content)
     }
 
-    /// Computes the split divider color based on the background color
-    /// Uses Ghostty's algorithm: darken by 8% for light backgrounds, 40% for dark
-    nonisolated static func splitDividerColor(for themeName: String) -> Color {
-        guard let content = themeContent(for: themeName),
-              let backgroundHex = value(for: "background", in: content),
-              let components = splitDividerComponents(for: backgroundHex) else {
-            return Color(white: 0.3)
-        }
+    nonisolated static func appearancePalette(themeContent content: String) -> TerminalThemePalette {
+        let fallback = TerminalThemePalette.fallback
+        let background = normalizedHexValue(for: "background", in: content) ?? fallback.backgroundHex
+        let foreground = normalizedHexValue(for: "foreground", in: content) ?? fallback.foregroundHex
+        let cursor = normalizedHexValue(for: "cursor-color", in: content) ?? foreground
+        let cursorText = normalizedHexValue(for: "cursor-text", in: content) ?? background
 
-        return Color(
-            .sRGB,
-            red: components.red,
-            green: components.green,
-            blue: components.blue,
-            opacity: components.alpha
+        return TerminalThemePalette(
+            backgroundHex: background,
+            foregroundHex: foreground,
+            cursorHex: cursor,
+            cursorTextHex: cursorText
         )
     }
 
@@ -129,22 +126,25 @@ struct ThemeColorParser {
         }
 
         let selectionForeground = value(for: "selection-foreground", in: content)
+            .flatMap(TerminalThemeValidator.normalizeHexColor(_:))
         let foreground = value(for: "foreground", in: content)
+            .flatMap(TerminalThemeValidator.normalizeHexColor(_:))
         let selectionBackground = value(for: "selection-background", in: content)
+            .flatMap(TerminalThemeValidator.normalizeHexColor(_:))
 
         let fg = normalizeHex(selectionForeground ?? foreground ?? fallbackForegroundHex)
         let bg = normalizeHex(selectionBackground ?? fallbackSelectionBackgroundHex)
         return "fg=#\(fg),bg=#\(bg)"
     }
 
-    private struct CachedThemeContent {
+    private nonisolated struct CachedThemeContent: Sendable {
         let path: String
         let modificationDate: Date?
         let content: String
     }
 
     private nonisolated(unsafe) static var contentCache: [String: CachedThemeContent] = [:]
-    private static let contentCacheLock = NSLock()
+    private nonisolated static let contentCacheLock = NSLock()
 
     nonisolated static func invalidateCache() {
         contentCacheLock.lock()
@@ -176,9 +176,13 @@ struct ThemeColorParser {
     }
 
     private nonisolated static func themeFilePath(for themeName: String) -> String? {
+        guard let themeName = try? TerminalThemeValidator.validateAndNormalizeThemeName(themeName) else {
+            return nil
+        }
+
         // Try custom themes first.
-        let customThemeFile = TerminalThemeStoragePaths.customThemeFilePath(for: themeName)
-        if FileManager.default.fileExists(atPath: customThemeFile) {
+        if let customThemeFile = TerminalThemeStoragePaths.customThemeFilePath(for: themeName),
+           FileManager.default.fileExists(atPath: customThemeFile) {
             return customThemeFile
         }
 
@@ -226,7 +230,15 @@ struct ThemeColorParser {
         return nil
     }
 
-    private nonisolated static func color(for key: String, in content: String) -> Color? {
+    private nonisolated static func normalizedHexValue(
+        for key: String,
+        in content: String
+    ) -> String? {
+        value(for: key, in: content)
+            .flatMap(TerminalThemeValidator.normalizeHexColor(_:))
+    }
+
+    private static func color(for key: String, in content: String) -> Color? {
         guard let colorHex = value(for: key, in: content) else { return nil }
         return Color.fromHex(colorHex)
     }
@@ -237,5 +249,20 @@ struct ThemeColorParser {
             return String(trimmed.dropFirst())
         }
         return trimmed
+    }
+}
+
+@MainActor
+struct ThemeColorParserPaletteResolver: TerminalThemePaletteResolving {
+    func palette(forThemeNamed name: String) -> TerminalThemePalette {
+        ThemeColorParser.appearancePalette(for: name)
+    }
+
+    func palette(forThemeContent content: String) -> TerminalThemePalette {
+        ThemeColorParser.appearancePalette(themeContent: content)
+    }
+
+    func invalidateCache() {
+        ThemeColorParser.invalidateCache()
     }
 }

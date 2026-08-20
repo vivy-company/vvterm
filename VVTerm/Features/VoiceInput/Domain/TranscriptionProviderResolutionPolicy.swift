@@ -1,4 +1,4 @@
-enum TranscriptionProviderResolutionPolicy {
+nonisolated enum TranscriptionProviderResolutionPolicy {
     static func resolve(
         requested: TranscriptionProvider,
         mlxSupported: Bool,

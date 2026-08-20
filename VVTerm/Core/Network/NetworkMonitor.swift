@@ -94,29 +94,38 @@ final class NetworkMonitor: ObservableObject {
 
     private func startMonitoring() {
         monitor.pathUpdateHandler = { [weak self] path in
-            let readiness: Readiness = path.status == .satisfied ? .ready : .unavailable
-            let connectionType: ConnectionType
-            if path.usesInterfaceType(.wifi) {
-                connectionType = .wifi
-            } else if path.usesInterfaceType(.cellular) {
-                connectionType = .cellular
-            } else if path.usesInterfaceType(.wiredEthernet) {
-                connectionType = .ethernet
-            } else {
-                connectionType = .unknown
-            }
-
-            let nextSnapshot = Snapshot(
-                readiness: readiness,
-                connectionType: connectionType,
-                isExpensive: path.isExpensive,
-                isConstrained: path.isConstrained
-            )
+            let nextSnapshot = Self.snapshot(for: path)
             DispatchQueue.main.async { [weak self] in
                 self?.apply(nextSnapshot)
             }
         }
         monitor.start(queue: queue)
+    }
+
+    /// Reconciles state from the monitor's latest path after foregrounding.
+    /// Background delivery can be suspended even though `currentPath` advanced.
+    func refreshCurrentPath() {
+        apply(Self.snapshot(for: monitor.currentPath))
+    }
+
+    private nonisolated static func snapshot(for path: NWPath) -> Snapshot {
+        let connectionType: ConnectionType
+        if path.usesInterfaceType(.wifi) {
+            connectionType = .wifi
+        } else if path.usesInterfaceType(.cellular) {
+            connectionType = .cellular
+        } else if path.usesInterfaceType(.wiredEthernet) {
+            connectionType = .ethernet
+        } else {
+            connectionType = .unknown
+        }
+
+        return Snapshot(
+            readiness: path.status == .satisfied ? .ready : .unavailable,
+            connectionType: connectionType,
+            isExpensive: path.isExpensive,
+            isConstrained: path.isConstrained
+        )
     }
 
     private func apply(_ nextSnapshot: Snapshot) {

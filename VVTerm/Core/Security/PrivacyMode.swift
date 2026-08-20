@@ -1,10 +1,10 @@
 import SwiftUI
 
-enum PrivacyModeSettings {
+nonisolated enum PrivacyModeSettings {
     static let enabledKey = "security.privacyModeEnabled"
 }
 
-enum AppContentProtectionPolicy {
+nonisolated enum AppContentProtectionPolicy {
     static func shouldPrepareForSceneDeactivation(
         fullAppLockEnabled: Bool,
         privacyModeEnabled: Bool,
@@ -29,7 +29,7 @@ enum AppContentProtectionPolicy {
     }
 }
 
-enum SensitiveContentMask {
+nonisolated enum SensitiveContentMask {
     static let placeholder = "••••••••"
 
     static func value(_ value: String, privacyModeEnabled: Bool) -> String {
@@ -48,7 +48,7 @@ extension EnvironmentValues {
     }
 }
 
-extension Server {
+nonisolated extension Server {
     var displayAddressWithPort: String {
         "\(username)@\(host):\(port)"
     }
@@ -62,16 +62,16 @@ extension Server {
     }
 }
 
-extension DiscoveredSSHHost {
+nonisolated extension DiscoveredSSHHost {
     var displayEndpoint: String {
         "\(host):\(port)"
     }
 
-    func visibleDisplayName(privacyModeEnabled _: Bool) -> String {
-        return displayName
+    func visibleDisplayName(privacyModeEnabled: Bool) -> String {
+        SensitiveContentMask.value(displayName, privacyModeEnabled: privacyModeEnabled)
     }
 
-    func visibleEndpoint(privacyModeEnabled _: Bool) -> String {
-        displayEndpoint
+    func visibleEndpoint(privacyModeEnabled: Bool) -> String {
+        SensitiveContentMask.value(displayEndpoint, privacyModeEnabled: privacyModeEnabled)
     }
 }

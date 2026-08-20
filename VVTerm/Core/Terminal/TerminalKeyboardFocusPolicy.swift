@@ -1,4 +1,4 @@
-enum TerminalKeyboardFocusReason {
+nonisolated enum TerminalKeyboardFocusReason: Sendable {
     case explicitUserRequest
     case initialActivation
     case reconnectRestore
@@ -7,8 +7,8 @@ enum TerminalKeyboardFocusReason {
     case hardwareKeyboard
 }
 
-struct TerminalKeyboardFocusPolicy {
-    private enum Mode {
+nonisolated struct TerminalKeyboardFocusPolicy: Sendable {
+    nonisolated private enum Mode: Sendable {
         case automaticTyping(restoreOnReconnect: Bool)
         case forcedSoftwareTyping
         case browse

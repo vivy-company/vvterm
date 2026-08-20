@@ -71,7 +71,8 @@ struct ProFeatureLock: View {
 struct LimitReachedAlert: ViewModifier {
     let limitType: LimitType
     @Binding var isPresented: Bool
-    @ObservedObject private var serverManager = ServerManager.shared
+    @EnvironmentObject private var serverManager: ServerManager
+    @EnvironmentObject private var storeManager: StoreManager
     @State private var showUpgrade = false
 
     enum LimitType {
@@ -94,7 +95,7 @@ struct LimitReachedAlert: ViewModifier {
             case .servers:
                 return String(
                     format: String(localized: "You've reached the free limit of %@. Pro unlocks unlimited servers, workspaces, simultaneous connections, and split panes."),
-                    FreeTierLimits.serverLimitDescription(serverLimit)
+                    FreeTierLimitPresentation.serverCountDescription(serverLimit)
                 )
             case .workspaces:
                 return String(format: String(localized: "You've reached the free limit of %lld workspace. Pro unlocks unlimited workspaces, servers, simultaneous connections, and split panes."), Int64(FreeTierLimits.maxWorkspaces))
@@ -126,7 +127,7 @@ struct LimitReachedAlert: ViewModifier {
             } message: {
                 Text(limitType.message(serverLimit: serverManager.freeServerLimit))
             }
-            .onChangeCompat(of: isPresented) { presented in
+            .onChange(of: isPresented) { presented in
                 if presented {
                     trackLimitHit()
                 }
@@ -150,9 +151,9 @@ struct LimitReachedAlert: ViewModifier {
             limit = FreeTierLimits.maxTabs
         }
 
-        AnalyticsTracker.shared.trackLimitHit(
-            source: limitType.paywallSource.rawValue,
-            generation: serverManager.freePlanGeneration.rawValue,
+        storeManager.noteLimitHit(
+            source: limitType.paywallSource,
+            generation: serverManager.freePlanGeneration,
             current: current,
             limit: limit
         )
@@ -242,7 +243,7 @@ struct ProGateView<Content: View, LockedContent: View>: View {
     }
 
     var body: some View {
-        if storeManager.isPro {
+        if storeManager.allowsProFeatures {
             content()
         } else {
             lockedContent()
@@ -292,7 +293,7 @@ struct LockedItemAlert: ViewModifier {
     let itemType: ItemType
     let itemName: String
     @Binding var isPresented: Bool
-    @ObservedObject private var serverManager = ServerManager.shared
+    @EnvironmentObject private var serverManager: ServerManager
     @State private var showUpgrade = false
 
     enum ItemType {
@@ -311,7 +312,7 @@ struct LockedItemAlert: ViewModifier {
             case .server:
                 return String(
                     format: String(localized: "This server exceeds your free plan limit of %@. Renew your Pro subscription to access all your servers."),
-                    FreeTierLimits.serverLimitDescription(serverLimit)
+                    FreeTierLimitPresentation.serverCountDescription(serverLimit)
                 )
             case .workspace:
                 return String(format: String(localized: "This workspace exceeds your free plan limit of %lld workspace. Renew your Pro subscription to access all your workspaces."), Int64(FreeTierLimits.maxWorkspaces))

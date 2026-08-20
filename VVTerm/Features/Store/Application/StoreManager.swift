@@ -1,76 +1,203 @@
-import StoreKit
 import Foundation
 import Combine
 import os.log
+
+nonisolated enum StoreAccessState: Equatable, Sendable {
+    case checking
+    case free
+    case pro
+}
+
+nonisolated struct StoreEntitlementSnapshot: Equatable, Sendable {
+    static let checking = StoreEntitlementSnapshot(
+        accessState: .checking,
+        hasLifetimeAccess: false,
+        subscriptionStatus: nil
+    )
+
+    static let free = StoreEntitlementSnapshot(
+        accessState: .free,
+        hasLifetimeAccess: false,
+        subscriptionStatus: nil
+    )
+
+    let accessState: StoreAccessState
+    let hasLifetimeAccess: Bool
+    let subscriptionStatus: StoreSubscriptionStatus?
+
+    var hasStoreAccess: Bool {
+        accessState == .pro
+    }
+}
 
 // MARK: - Store Manager
 
 @MainActor
 final class StoreManager: ObservableObject {
-    static let shared = StoreManager()
-    static let reviewModeCode = ReviewModeCode.value
+    private final class StartupToken {}
+    private final class TransactionListenerToken {}
 
-    @Published var isPro: Bool = false
-    @Published var isLifetime: Bool = false
-    @Published var subscriptionStatus: Product.SubscriptionInfo.Status?
-    @Published var products: [Product] = []
-    @Published var purchaseState: PurchaseState = .idle
-    @Published var restoreState: RestoreState = .idle
-    @Published private(set) var isReviewModeEnabled: Bool = false
+    @Published private(set) var entitlementSnapshot = StoreEntitlementSnapshot.checking
+    @Published private(set) var products: [StoreProduct] = []
+    @Published private(set) var purchaseState: PurchaseState = .idle
+    @Published private(set) var restoreState: RestoreState = .idle
     @Published private(set) var lastPurchasedProductId: String?
     private(set) var activePaywallSource: PaywallSource = .general
     private(set) var hasPresentedPaywallThisLaunch = false
 
-    private var updateListenerTask: Task<Void, Error>?
-    private var reviewModeExpiryTask: Task<Void, Never>?
-    private var reviewModeExpiresAt: Date?
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "Store")
-    private let reviewModeDuration: TimeInterval = 60 * 60 * 5
+    private var startupTask: Task<Void, Never>?
+    private var startupToken: StartupToken?
+    private var updateListenerTask: Task<Void, Never>?
+    private var transactionListenerToken: TransactionListenerToken?
+    private var productOperationID: UUID?
+    private var entitlementOperationID: UUID?
+    private var purchaseOperationID: UUID?
+    private var restoreOperationID: UUID?
+    private let client: any StoreClient
+    private let effects: StoreManagerEffects
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "app.vivy.VVTerm",
+        category: "Store"
+    )
+
+    var isPro: Bool {
+        entitlementSnapshot.hasStoreAccess
+    }
+
+    var accessState: StoreAccessState {
+        entitlementSnapshot.accessState
+    }
+
+    /// Do not enforce Free limits before StoreKit resolves entitlements.
+    var allowsProFeatures: Bool {
+        accessState != .free
+    }
+
+    var isLifetime: Bool {
+        entitlementSnapshot.hasLifetimeAccess
+    }
+
+    var subscriptionStatus: StoreSubscriptionStatus? {
+        entitlementSnapshot.subscriptionStatus
+    }
 
     // MARK: - Sorted Products
 
-    var monthlyProduct: Product? {
+    var monthlyProduct: StoreProduct? {
         products.first { $0.id == VVTermProducts.proMonthly }
     }
 
-    var yearlyProduct: Product? {
+    var yearlyProduct: StoreProduct? {
         products.first { $0.id == VVTermProducts.proYearly }
     }
 
-    var lifetimeProduct: Product? {
+    var lifetimeProduct: StoreProduct? {
         products.first { $0.id == VVTermProducts.proLifetime }
     }
 
     // MARK: - Initialization
 
-    private init() {
-        updateListenerTask = listenForTransactions()
-        Task {
-            await loadProducts()
-            await checkEntitlements()
+    init(
+        client: any StoreClient,
+        effects: StoreManagerEffects
+    ) {
+        self.client = client
+        self.effects = effects
+    }
+
+    func start() {
+        guard startupTask == nil, updateListenerTask == nil else { return }
+        startTransactionListener()
+        let token = StartupToken()
+        startupToken = token
+        let productOperationID = UUID()
+        self.productOperationID = productOperationID
+        let entitlementOperationID = UUID()
+        self.entitlementOperationID = entitlementOperationID
+        let client = self.client
+        let logger = self.logger
+        startupTask = Task { [weak self, client, logger, token] in
+            let loadedProducts = await Self.loadProducts(using: client, logger: logger)
+            guard !Task.isCancelled else { return }
+            self?.applyStartupProducts(
+                loadedProducts,
+                token: token,
+                operationID: productOperationID
+            )
+
+            let result = await client.entitlements(
+                subscriptionProductIds: Self.subscriptionProductIds
+            )
+            guard !Task.isCancelled else { return }
+            self?.applyStartupEntitlementResult(
+                result,
+                token: token,
+                operationID: entitlementOperationID
+            )
         }
     }
 
+    func stop() {
+        startupToken = nil
+        transactionListenerToken = nil
+        productOperationID = nil
+        entitlementOperationID = nil
+        purchaseOperationID = nil
+        restoreOperationID = nil
+        startupTask?.cancel()
+        updateListenerTask?.cancel()
+        startupTask = nil
+        updateListenerTask = nil
+    }
+
     deinit {
+        startupTask?.cancel()
         updateListenerTask?.cancel()
     }
 
     // MARK: - Load Products
 
     func loadProducts() async {
+        let operationID = UUID()
+        productOperationID = operationID
+        guard let loadedProducts = await Self.loadProducts(using: client, logger: logger) else {
+            if productOperationID == operationID {
+                productOperationID = nil
+            }
+            return
+        }
+        guard productOperationID == operationID else { return }
+        products = loadedProducts
+        productOperationID = nil
+    }
+
+    private static func loadProducts(
+        using client: any StoreClient,
+        logger: Logger
+    ) async -> [StoreProduct]? {
         let maxRetries = 3
         for attempt in 0..<maxRetries {
             do {
-                products = try await Product.products(for: VVTermProducts.allProducts)
-                logger.info("Loaded \(self.products.count) products")
-                return
+                let products = try await client.products(for: VVTermProducts.allProducts)
+                try Task.checkCancellation()
+                logger.info("Loaded \(products.count) products")
+                return products
+            } catch is CancellationError {
+                return nil
             } catch {
                 logger.error("Failed to load products (attempt \(attempt + 1)/\(maxRetries)): \(error.localizedDescription)")
                 if attempt < maxRetries - 1 {
-                    try? await Task.sleep(nanoseconds: UInt64(pow(2.0, Double(attempt))) * 1_000_000_000)
+                    do {
+                        try await Task.sleep(
+                            nanoseconds: UInt64(pow(2.0, Double(attempt))) * 1_000_000_000
+                        )
+                    } catch {
+                        return nil
+                    }
                 }
             }
         }
+        return nil
     }
 
     // MARK: - Paywall Presentation
@@ -78,61 +205,97 @@ final class StoreManager: ObservableObject {
     func notePaywallPresented(source: PaywallSource) {
         activePaywallSource = source
         hasPresentedPaywallThisLaunch = true
-        EngagementTracker.shared.notePaywallPresented()
-        AnalyticsTracker.shared.trackPaywallViewed(source: source.rawValue)
+        effects.record(.paywallPresented(source: source))
     }
 
-    func notePaywallCTATapped(product: Product) {
-        AnalyticsTracker.shared.trackPaywallCTATapped(
-            source: activePaywallSource.rawValue,
-            productId: product.id
-        )
+    func notePaywallCTATapped(product: StoreProduct) {
+        effects.record(.paywallCTATapped(
+            source: activePaywallSource,
+            productID: product.id
+        ))
+    }
+
+    func requestReviewAfterPurchase() {
+        effects.record(.reviewRequestedAfterPurchase)
+    }
+
+    func noteLimitHit(
+        source: PaywallSource,
+        generation: FreePlanGeneration,
+        current: Int,
+        limit: Int
+    ) {
+        effects.record(.limitHit(
+            source: source,
+            generation: generation,
+            current: current,
+            limit: limit
+        ))
+    }
+
+    func introductoryOfferState(for product: StoreProduct) async -> ProPlanIntroductoryOfferState {
+        await client.introductoryOfferState(productId: product.id)
     }
 
     // MARK: - Purchase
 
-    func purchase(_ product: Product) async {
+    func purchase(_ product: StoreProduct) async {
+        let operationID = UUID()
+        purchaseOperationID = operationID
+        defer {
+            if purchaseOperationID == operationID {
+                purchaseOperationID = nil
+            }
+        }
+        let source = activePaywallSource
         purchaseState = .purchasing
         lastPurchasedProductId = nil
-        AnalyticsTracker.shared.trackPurchaseStarted(
-            source: activePaywallSource.rawValue,
-            productId: product.id
-        )
+        effects.record(.purchaseStarted(
+            source: source,
+            productID: product.id
+        ))
         logger.info("Purchasing \(product.id)")
 
         do {
-            let result = try await product.purchase()
+            let result = try await client.purchase(productId: product.id)
+            guard purchaseOperationID == operationID else { return }
 
             switch result {
-            case .success(let verification):
-                let transaction = try checkVerified(verification)
-                await transaction.finish()
+            case .verified:
                 await checkEntitlements()
-                applySuccessfulPurchase(of: product)
+                guard purchaseOperationID == operationID else { return }
+                applySuccessfulPurchase(of: product, source: source)
+
+            case .unverified(let productId):
+                logger.error(
+                    "StoreKit transaction verification failed for product \(productId, privacy: .public)"
+                )
+                throw StoreError.verificationFailed
 
             case .userCancelled:
-                AnalyticsTracker.shared.trackPurchaseCancelled(
-                    source: activePaywallSource.rawValue,
-                    productId: product.id
-                )
+                effects.record(.purchaseCancelled(
+                    source: source,
+                    productID: product.id
+                ))
                 applyIdlePurchaseState(logMessage: "Purchase cancelled by user")
 
             case .pending:
-                AnalyticsTracker.shared.trackPurchasePending(
-                    source: activePaywallSource.rawValue,
-                    productId: product.id
-                )
+                effects.record(.purchasePending(
+                    source: source,
+                    productID: product.id
+                ))
                 applyIdlePurchaseState(logMessage: "Purchase pending")
 
-            @unknown default:
+            case .unknown:
                 purchaseState = .idle
             }
         } catch {
-            AnalyticsTracker.shared.trackPurchaseFailed(
-                source: activePaywallSource.rawValue,
-                productId: product.id,
+            guard purchaseOperationID == operationID else { return }
+            effects.record(.purchaseFailed(
+                source: source,
+                productID: product.id,
                 reason: String(describing: type(of: error))
-            )
+            ))
             purchaseState = .failed(error.localizedDescription)
             logger.error("Purchase failed: \(error.localizedDescription)")
         }
@@ -141,13 +304,23 @@ final class StoreManager: ObservableObject {
     // MARK: - Restore Purchases
 
     func restorePurchases() async {
+        let operationID = UUID()
+        restoreOperationID = operationID
+        defer {
+            if restoreOperationID == operationID {
+                restoreOperationID = nil
+            }
+        }
         restoreState = .restoring
         logger.info("Restoring purchases")
         do {
-            try await AppStore.sync()
+            try await client.sync()
+            guard restoreOperationID == operationID else { return }
             await checkEntitlements()
+            guard restoreOperationID == operationID else { return }
             applyRestoreResult(hasAccess: isPro)
         } catch {
+            guard restoreOperationID == operationID else { return }
             restoreState = .failed(error.localizedDescription)
             logger.error("Failed to restore purchases: \(error.localizedDescription)")
         }
@@ -156,95 +329,114 @@ final class StoreManager: ObservableObject {
     // MARK: - Check Entitlements
 
     func checkEntitlements() async {
-        refreshReviewModeState()
-        var hasAccess = false
-        var hasLifetime = false
-
-        for await result in Transaction.currentEntitlements {
-            if case .verified(let transaction) = result {
-                switch transaction.productID {
-                case VVTermProducts.proMonthly,
-                     VVTermProducts.proYearly:
-                    hasAccess = true
-                case VVTermProducts.proLifetime:
-                    hasAccess = true
-                    hasLifetime = true
-                default:
-                    break
-                }
+        let operationID = UUID()
+        entitlementOperationID = operationID
+        let result = await client.entitlements(
+            subscriptionProductIds: Self.subscriptionProductIds
+        )
+        guard !Task.isCancelled else {
+            if entitlementOperationID == operationID {
+                entitlementOperationID = nil
             }
+            return
+        }
+        guard entitlementOperationID == operationID else { return }
+        applyEntitlementResult(result)
+        entitlementOperationID = nil
+    }
+
+    func dismissRestoreResult() {
+        guard restoreState != .restoring else { return }
+        restoreState = .idle
+    }
+
+    private func applyStartupEntitlementResult(
+        _ result: StoreEntitlementResult,
+        token: StartupToken,
+        operationID: UUID
+    ) {
+        guard startupToken === token, entitlementOperationID == operationID else { return }
+        applyEntitlementResult(result)
+        entitlementOperationID = nil
+    }
+
+    private func applyStartupProducts(
+        _ products: [StoreProduct]?,
+        token: StartupToken,
+        operationID: UUID
+    ) {
+        guard startupToken === token, productOperationID == operationID else { return }
+        if let products {
+            self.products = products
+        }
+        productOperationID = nil
+    }
+
+    private func applyEntitlementResult(_ result: StoreEntitlementResult) {
+        let hasLifetime = result.verifiedProductIds.contains(VVTermProducts.proLifetime)
+        let hasVerifiedSubscription = result.verifiedProductIds.contains(VVTermProducts.proMonthly)
+            || result.verifiedProductIds.contains(VVTermProducts.proYearly)
+        let hasRecoverableSubscription = result.subscriptionEntitlements.contains {
+            $0.isVerified && ($0.state == .inBillingRetryPeriod || $0.state == .inGracePeriod)
         }
 
-        // Check subscription status for billing retry / grace period
-        var activeStatus: Product.SubscriptionInfo.Status?
-        if let product = monthlyProduct ?? yearlyProduct,
-           let statuses = try? await product.subscription?.status {
-            activeStatus = statuses.first {
-                $0.state == .subscribed || $0.state == .inGracePeriod
-            } ?? statuses.first
-
-            if !hasAccess {
-                for status in statuses {
-                    if case .verified = status.transaction,
-                       status.state == .inBillingRetryPeriod || status.state == .inGracePeriod {
-                        hasAccess = true
-                        break
-                    }
-                }
-            }
-        }
-
-        applyEntitlements(hasAccess: hasAccess, hasLifetime: hasLifetime, status: activeStatus)
+        applyEntitlements(
+            hasAccess: hasLifetime || hasVerifiedSubscription || hasRecoverableSubscription,
+            hasLifetime: hasLifetime,
+            status: result.subscriptionStatus
+        )
     }
 
     // MARK: - Transaction Listener
 
-    private func listenForTransactions() -> Task<Void, Error> {
-        Task.detached {
-            for await result in Transaction.updates {
-                if case .verified(let transaction) = result {
-                    await self.checkEntitlements()
-                    await transaction.finish()
+    private func startTransactionListener() {
+        guard updateListenerTask == nil else { return }
+        let updates = client.transactionUpdates()
+        let token = TransactionListenerToken()
+        transactionListenerToken = token
+        let client = self.client
+        let logger = self.logger
+        updateListenerTask = Task { [weak self, client, logger, token] in
+            for await update in updates {
+                guard !Task.isCancelled else { return }
+                switch update {
+                case .verified:
+                    guard let self else { return }
+                    let operationID = UUID()
+                    self.entitlementOperationID = operationID
+                    let result = await client.entitlements(
+                        subscriptionProductIds: Self.subscriptionProductIds
+                    )
+                    guard !Task.isCancelled else { return }
+                    self.applyTransactionEntitlementResult(
+                        result,
+                        token: token,
+                        operationID: operationID
+                    )
+                case .unverified(let productId):
+                    logger.error(
+                        "Ignored unverified StoreKit update for product \(productId, privacy: .public)"
+                    )
                 }
             }
         }
     }
 
-    // MARK: - Verification
-
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
-        switch result {
-        case .unverified(let unverifiedValue, let verificationError):
-            if let transaction = unverifiedValue as? Transaction {
-                logger.error(
-                    """
-                    StoreKit transaction verification failed for product \
-                    \(transaction.productID, privacy: .public), transaction \
-                    \(String(transaction.id), privacy: .public): \
-                    \(String(describing: verificationError), privacy: .public)
-                    """
-                )
-            } else {
-                logger.error(
-                    """
-                    StoreKit verification failed for \
-                    \(String(describing: T.self), privacy: .public): \
-                    \(String(describing: verificationError), privacy: .public)
-                    """
-                )
-            }
-            throw StoreError.verificationFailed
-        case .verified(let safe):
-            return safe
-        }
+    private func applyTransactionEntitlementResult(
+        _ result: StoreEntitlementResult,
+        token: TransactionListenerToken,
+        operationID: UUID
+    ) {
+        guard transactionListenerToken === token,
+              entitlementOperationID == operationID else { return }
+        applyEntitlementResult(result)
+        entitlementOperationID = nil
     }
 
     // MARK: - Subscription Info
 
     var subscriptionExpirationDate: Date? {
-        guard let status = subscriptionStatus else { return nil }
-        guard case .verified(let transaction) = status.transaction else { return nil }
-        return transaction.expirationDate
+        subscriptionStatus?.expirationDate
     }
 
     var isSubscriptionActive: Bool {
@@ -257,65 +449,13 @@ final class StoreManager: ObservableObject {
         return status.state == .subscribed || status.state == .inGracePeriod
     }
 
-    // MARK: - Review Mode
-
-    @discardableResult
-    func enableReviewMode(code: String) -> Bool {
-        let trimmed = code.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.caseInsensitiveCompare(Self.reviewModeCode) == .orderedSame else {
-            logger.warning("Review mode activation failed (invalid code)")
-            return false
-        }
-        setReviewModeEnabled(true)
-        return true
-    }
-
-    func setReviewModeEnabled(_ enabled: Bool) {
-        guard isReviewModeEnabled != enabled else { return }
-        isReviewModeEnabled = enabled
-
-        if enabled {
-            isPro = true
-            isLifetime = false
-            subscriptionStatus = nil
-            reviewModeExpiresAt = Date().addingTimeInterval(reviewModeDuration)
-            scheduleReviewModeExpiry()
-            logger.info("Review mode enabled")
-        } else {
-            reviewModeExpiresAt = nil
-            reviewModeExpiryTask?.cancel()
-            reviewModeExpiryTask = nil
-            logger.info("Review mode disabled")
-            Task { await checkEntitlements() }
-        }
-    }
-
-    private func scheduleReviewModeExpiry() {
-        reviewModeExpiryTask?.cancel()
-        guard let expiresAt = reviewModeExpiresAt else { return }
-        let delay = max(0, expiresAt.timeIntervalSinceNow)
-        reviewModeExpiryTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            await MainActor.run {
-                self?.refreshReviewModeState()
-            }
-        }
-    }
-
-    private func refreshReviewModeState() {
-        guard isReviewModeEnabled else { return }
-        if let expiresAt = reviewModeExpiresAt, Date() >= expiresAt {
-            setReviewModeEnabled(false)
-        }
-    }
-
-    private func applySuccessfulPurchase(of product: Product) {
+    private func applySuccessfulPurchase(of product: StoreProduct, source: PaywallSource) {
         lastPurchasedProductId = product.id
         purchaseState = .purchased
-        AnalyticsTracker.shared.trackPurchaseSucceeded(
-            source: activePaywallSource.rawValue,
-            productId: product.id
-        )
+        effects.record(.purchaseSucceeded(
+            source: source,
+            productID: product.id
+        ))
         logger.info("Purchase successful: \(product.id)")
     }
 
@@ -332,12 +472,19 @@ final class StoreManager: ObservableObject {
     private func applyEntitlements(
         hasAccess: Bool,
         hasLifetime: Bool,
-        status: Product.SubscriptionInfo.Status?
+        status: StoreSubscriptionStatus?
     ) {
-        isPro = hasAccess || isReviewModeEnabled
-        isLifetime = hasLifetime
-        subscriptionStatus = status
-        AnalyticsTracker.shared.trackAppLaunched(isPro: isPro)
-        logger.info("Entitlements checked: isPro=\(hasAccess), isLifetime=\(hasLifetime), reviewMode=\(self.isReviewModeEnabled)")
+        entitlementSnapshot = StoreEntitlementSnapshot(
+            accessState: hasAccess ? .pro : .free,
+            hasLifetimeAccess: hasLifetime,
+            subscriptionStatus: status
+        )
+        effects.record(.entitlementsUpdated(isPro: isPro))
+        logger.info("Entitlements checked: isPro=\(hasAccess), isLifetime=\(hasLifetime)")
     }
+
+    private static let subscriptionProductIds = [
+        VVTermProducts.proMonthly,
+        VVTermProducts.proYearly
+    ]
 }

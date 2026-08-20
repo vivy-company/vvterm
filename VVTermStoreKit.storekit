@@ -192,7 +192,12 @@
           "groupNumber" : 1,
           "internalID" : "YEARLY001",
           "introductoryOffers" : [
-
+            {
+              "displayPrice" : "0",
+              "internalID" : "YEARLYTRIAL001",
+              "paymentMode" : "free",
+              "subscriptionPeriod" : "P1W"
+            }
           ],
           "localizations" : [
             {

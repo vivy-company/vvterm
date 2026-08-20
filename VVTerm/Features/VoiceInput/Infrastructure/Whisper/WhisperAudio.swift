@@ -3,7 +3,7 @@ import Foundation
 import MLX
 import MLXFFT
 
-enum WhisperAudioConstants {
+nonisolated enum WhisperAudioConstants {
     nonisolated static let sampleRate = 16_000
     nonisolated static let nFFT = 400
     nonisolated static let hopLength = 160
@@ -12,7 +12,7 @@ enum WhisperAudioConstants {
     nonisolated static let nFrames = nSamples / hopLength
 }
 
-enum WhisperAudioError: LocalizedError {
+nonisolated enum WhisperAudioError: LocalizedError {
     case missingMelFilters
     case invalidNpy
 
@@ -27,7 +27,7 @@ enum WhisperAudioError: LocalizedError {
 }
 
 nonisolated final class WhisperAudioProcessor {
-    private static var melFiltersCache: MLXArray?
+    private static let melFiltersCache = WhisperMelFilterCache()
 
     static func logMelSpectrogram(_ samples: [Float], nMels: Int = 80, padding: Int = 0) throws -> MLXArray {
         var audio = MLXArray(samples, [samples.count])
@@ -78,22 +78,20 @@ nonisolated final class WhisperAudioProcessor {
     }
 
     private static func melFilters(_ nMels: Int) throws -> MLXArray {
-        if let cached = melFiltersCache { return cached }
+        try melFiltersCache.value(for: nMels) {
+            guard nMels == 80 else { throw WhisperAudioError.invalidNpy }
 
-        guard nMels == 80 else { throw WhisperAudioError.invalidNpy }
+            guard let url = resourceURL(name: "mel_80", fileExtension: "npy") else {
+                throw WhisperAudioError.missingMelFilters
+            }
 
-        guard let url = resourceURL(name: "mel_80", fileExtension: "npy") else {
-            throw WhisperAudioError.missingMelFilters
+            let data = try Data(contentsOf: url)
+            let (shape, offset) = try parseNpyHeader(data)
+            guard shape == [80, 201] else { throw WhisperAudioError.invalidNpy }
+
+            let raw = data.subdata(in: offset ..< data.count)
+            return MLXArray(raw, shape, dtype: .float32)
         }
-
-        let data = try Data(contentsOf: url)
-        let (shape, offset) = try parseNpyHeader(data)
-        guard shape == [80, 201] else { throw WhisperAudioError.invalidNpy }
-
-        let raw = data.subdata(in: offset ..< data.count)
-        let array = MLXArray(raw, shape, dtype: .float32)
-        melFiltersCache = array
-        return array
     }
 
     private static func hanning(_ size: Int) -> MLXArray {
@@ -180,6 +178,24 @@ nonisolated final class WhisperAudioProcessor {
             return url
         }
         return Bundle.main.url(forResource: name, withExtension: fileExtension)
+    }
+}
+
+/// Access to immutable mel-filter arrays is serialized by `lock`.
+private nonisolated final class WhisperMelFilterCache: @unchecked Sendable {
+    private let lock = NSLock()
+    private var values: [Int: MLXArray] = [:]
+
+    func value(for key: Int, load: () throws -> MLXArray) rethrows -> MLXArray {
+        lock.lock()
+        defer { lock.unlock() }
+
+        if let value = values[key] {
+            return value
+        }
+        let value = try load()
+        values[key] = value
+        return value
     }
 }
 #endif

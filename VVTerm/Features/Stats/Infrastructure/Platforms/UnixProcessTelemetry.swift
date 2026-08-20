@@ -3,7 +3,7 @@ import Foundation
 /// Shared Unix process telemetry with one cross-platform contract:
 /// CPU is the share of total machine capacity during the latest interval and
 /// memory is resident physical memory as bytes and a percentage of physical RAM.
-enum UnixProcessTelemetry {
+nonisolated enum UnixProcessTelemetry {
     struct ProcessRow {
         let pid: Int
         let user: String

@@ -3,7 +3,7 @@ import Foundation
 // MARK: - OpenBSD Stats Collector
 
 /// Stats collector for OpenBSD systems
-struct OpenBSDStatsCollector: PlatformStatsCollector {
+nonisolated struct OpenBSDStatsCollector: PlatformStatsCollector {
     private let periodicProcessLimit = 24
 
     func getSystemInfo(client: SSHClient) async throws -> (hostname: String, osInfo: String, cpuCores: Int) {

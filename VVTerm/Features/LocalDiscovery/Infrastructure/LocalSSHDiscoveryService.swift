@@ -2,22 +2,6 @@ import Foundation
 import Network
 import Darwin
 
-enum LocalSSHDiscoverySourceStatus: Sendable {
-    case bonjourStarted
-    case bonjourFinished
-    case probeStarted
-    case probeFinished
-}
-
-enum LocalSSHDiscoveryEvent: Sendable {
-    case scanningStarted
-    case sourceStatus(LocalSSHDiscoverySourceStatus)
-    case hostFound(DiscoveredSSHHost)
-    case permissionDenied
-    case failed(String)
-    case scanningFinished
-}
-
 @MainActor
 final class LocalSSHDiscoveryService: NSObject {
     private let bonjourTypes = ["_ssh._tcp.", "_sftp-ssh._tcp."]
@@ -32,21 +16,51 @@ final class LocalSSHDiscoveryService: NSObject {
     private var seenServices: Set<String> = []
     private var probeTask: Task<Void, Never>?
     private var timeoutTask: Task<Void, Never>?
+    private var runOwnership = LocalSSHDiscoveryRunOwnership()
+    private var browserRunIDs: [ObjectIdentifier: UUID] = [:]
+    private var serviceRunIDs: [ObjectIdentifier: UUID] = [:]
+    private let makeRunID: () -> UUID
+
+    init(makeRunID: @escaping () -> UUID = UUID.init) {
+        self.makeRunID = makeRunID
+        super.init()
+    }
+
+    var ownerReleaseStopRequest: LocalSSHDiscoveryStopRequest {
+        LocalSSHDiscoveryStopRequest {
+            self.stopScan()
+        }
+    }
 
     func startScan() -> AsyncStream<LocalSSHDiscoveryEvent> {
         stopScan()
+        let runID = makeRunID()
 
         return AsyncStream { continuation in
+            runOwnership.start(runID: runID)
             streamContinuation = continuation
+            let terminationStopRequest = LocalSSHDiscoveryStopRequest { [weak self] in
+                self?.stopScan(runID: runID)
+            }
+            continuation.onTermination = { _ in
+                terminationStopRequest.perform()
+            }
 
             continuation.yield(.scanningStarted)
-            startBonjourBrowsing()
-            startPortScanning()
-            startTimeoutTimer()
+            startBonjourBrowsing(runID: runID)
+            startPortScanning(runID: runID)
+            startTimeoutTimer(runID: runID)
         }
     }
 
     func stopScan() {
+        guard let runID = runOwnership.activeRunID else { return }
+        stopScan(runID: runID)
+    }
+
+    private func stopScan(runID: UUID) {
+        guard runOwnership.stop(runID: runID) else { return }
+
         timeoutTask?.cancel()
         timeoutTask = nil
 
@@ -58,49 +72,59 @@ final class LocalSSHDiscoveryService: NSObject {
             browser.stop()
         }
         browsers.removeAll()
+        browserRunIDs.removeAll()
 
         for service in servicesByName.values {
             service.delegate = nil
             service.stop()
         }
         servicesByName.removeAll()
+        serviceRunIDs.removeAll()
         seenServices.removeAll()
 
         streamContinuation?.finish()
         streamContinuation = nil
     }
 
-    private func startTimeoutTimer() {
+    private func startTimeoutTimer(runID: UUID) {
         let duration = scanDuration
         timeoutTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(duration))
-            self?.finishScan()
+            do {
+                try await Task.sleep(for: .seconds(duration))
+            } catch {
+                return
+            }
+            guard !Task.isCancelled else { return }
+            self?.finishScan(runID: runID)
         }
     }
 
-    private func finishScan() {
-        streamContinuation?.yield(.sourceStatus(.bonjourFinished))
-        streamContinuation?.yield(.sourceStatus(.probeFinished))
-        streamContinuation?.yield(.scanningFinished)
-        stopScan()
+    private func finishScan(runID: UUID) {
+        guard runOwnership.owns(runID: runID) else { return }
+        emit(.sourceStatus(.bonjourFinished), runID: runID)
+        emit(.sourceStatus(.probeFinished), runID: runID)
+        emit(.scanningFinished, runID: runID)
+        stopScan(runID: runID)
     }
 
-    private func emit(_ event: LocalSSHDiscoveryEvent) {
+    private func emit(_ event: LocalSSHDiscoveryEvent, runID: UUID) {
+        guard runOwnership.owns(runID: runID) else { return }
         streamContinuation?.yield(event)
     }
 
-    private func startBonjourBrowsing() {
-        emit(.sourceStatus(.bonjourStarted))
+    private func startBonjourBrowsing(runID: UUID) {
+        emit(.sourceStatus(.bonjourStarted), runID: runID)
         for serviceType in bonjourTypes {
             let browser = NetServiceBrowser()
             browser.delegate = self
             browsers.append(browser)
+            browserRunIDs[ObjectIdentifier(browser)] = runID
             browser.searchForServices(ofType: serviceType, inDomain: "local.")
         }
     }
 
-    private func startPortScanning() {
-        emit(.sourceStatus(.probeStarted))
+    private func startPortScanning(runID: UUID) {
+        emit(.sourceStatus(.probeStarted), runID: runID)
 
         let timeout = portScanTimeout
         let concurrency = max(1, portScanConcurrency)
@@ -110,7 +134,7 @@ final class LocalSSHDiscoveryService: NSObject {
             let candidates = Self.localSubnetCandidates()
 
             guard !candidates.isEmpty else {
-                emit(.sourceStatus(.probeFinished))
+                emit(.sourceStatus(.probeFinished), runID: runID)
                 return
             }
 
@@ -126,7 +150,8 @@ final class LocalSSHDiscoveryService: NSObject {
                 await withTaskGroup(of: (host: String, latencyMs: Int)?.self) { group in
                     for host in chunk {
                         group.addTask {
-                            await Self.probeSSHHost(host, timeout: timeout)
+                            guard !Task.isCancelled else { return nil }
+                            return await Self.probeSSHHost(host, timeout: timeout)
                         }
                     }
 
@@ -139,14 +164,14 @@ final class LocalSSHDiscoveryService: NSObject {
                             sources: [.portScan],
                             latencyMs: found.latencyMs
                         )
-                        self.emit(.hostFound(discovered))
+                        self.emit(.hostFound(discovered), runID: runID)
                     }
                 }
 
                 startIndex = endIndex
             }
 
-            emit(.sourceStatus(.probeFinished))
+            emit(.sourceStatus(.probeFinished), runID: runID)
         }
     }
 
@@ -172,28 +197,27 @@ final class LocalSSHDiscoveryService: NSObject {
             let endpoint = NWEndpoint.hostPort(host: NWEndpoint.Host(host), port: nwPort)
             let connection = NWConnection(to: endpoint, using: .tcp)
             let queue = DispatchQueue(label: "com.vivy.vvterm.discovery.probe.\(host)")
-            var completed = false
-
-            let complete: (Bool) -> Void = { ready in
-                guard !completed else { return }
-                completed = true
-                continuation.resume(returning: ready)
-                connection.cancel()
-            }
+            let completionState = ReachabilityCompletionState()
 
             connection.stateUpdateHandler = { state in
                 switch state {
                 case .ready:
-                    complete(true)
+                    guard completionState.completeOnce() else { return }
+                    continuation.resume(returning: true)
+                    connection.cancel()
                 case .failed, .cancelled:
-                    complete(false)
+                    guard completionState.completeOnce() else { return }
+                    continuation.resume(returning: false)
+                    connection.cancel()
                 default:
                     break
                 }
             }
 
             queue.asyncAfter(deadline: .now() + timeout) {
-                complete(false)
+                guard completionState.completeOnce() else { return }
+                continuation.resume(returning: false)
+                connection.cancel()
             }
 
             connection.start(queue: queue)
@@ -254,7 +278,7 @@ final class LocalSSHDiscoveryService: NSObject {
         return enumerateHosts(address: address, netmask: mask)
     }
 
-    nonisolated private static func enumerateHosts(address: UInt32, netmask: UInt32) -> [String] {
+    nonisolated static func enumerateHosts(address: UInt32, netmask: UInt32) -> [String] {
         let prefixLength = netmask.nonzeroBitCount
 
         if prefixLength < 24 {
@@ -268,22 +292,39 @@ final class LocalSSHDiscoveryService: NSObject {
         return hosts(in: network, broadcast: broadcast, excluding: address)
     }
 
-    nonisolated private static func hosts(
+    nonisolated static func hosts(
         in network: UInt32,
         broadcast: UInt32,
         excluding currentAddress: UInt32
     ) -> [String] {
-        guard broadcast > network + 1 else { return [] }
+        guard network < broadcast else { return [] }
 
-        let start = network + 1
-        let end = broadcast - 1
-        guard end >= start else { return [] }
+        let (start, startOverflow) = network.addingReportingOverflow(1)
+        let (end, endOverflow) = broadcast.subtractingReportingOverflow(1)
+        guard !startOverflow, !endOverflow, start <= end else { return [] }
+
+        let (distance, distanceOverflow) = end.subtractingReportingOverflow(start)
+        let (candidateCount, countOverflow) = distance.addingReportingOverflow(1)
+        let maximumCandidateCount: UInt32 = 254
+        guard !distanceOverflow,
+              !countOverflow,
+              candidateCount <= maximumCandidateCount,
+              let capacity = Int(exactly: candidateCount) else {
+            return []
+        }
 
         var result: [String] = []
-        result.reserveCapacity(Int(end - start + 1))
+        result.reserveCapacity(capacity)
 
-        for ip in start...end where ip != currentAddress {
-            result.append(ipv4String(fromHostOrderAddress: ip))
+        var address = start
+        while true {
+            if address != currentAddress {
+                result.append(ipv4String(fromHostOrderAddress: address))
+            }
+            guard address != end else { break }
+            let (nextAddress, overflow) = address.addingReportingOverflow(1)
+            guard !overflow else { return [] }
+            address = nextAddress
         }
         return result
     }
@@ -316,10 +357,14 @@ extension LocalSSHDiscoveryService: NetServiceBrowserDelegate {
     func netServiceBrowserWillSearch(_ browser: NetServiceBrowser) {}
 
     func netServiceBrowser(_ browser: NetServiceBrowser, didNotSearch errorDict: [String: NSNumber]) {
+        guard let runID = browserRunIDs[ObjectIdentifier(browser)],
+              runOwnership.owns(runID: runID) else {
+            return
+        }
         let errorCode = errorDict["NSNetServicesErrorCode"]?.intValue ?? 0
         // Policy denied values seen from local-network restricted states.
         if errorCode == -65570 || errorCode == -72008 {
-            emit(.permissionDenied)
+            emit(.permissionDenied, runID: runID)
         }
     }
 
@@ -328,11 +373,16 @@ extension LocalSSHDiscoveryService: NetServiceBrowserDelegate {
         didFind service: NetService,
         moreComing: Bool
     ) {
+        guard let runID = browserRunIDs[ObjectIdentifier(browser)],
+              runOwnership.owns(runID: runID) else {
+            return
+        }
         let key = "\(service.name)|\(service.type)|\(service.domain)"
         guard seenServices.insert(key).inserted else { return }
 
         service.delegate = self
         servicesByName[key] = service
+        serviceRunIDs[ObjectIdentifier(service)] = runID
         service.resolve(withTimeout: serviceResolveTimeout)
     }
 }
@@ -341,6 +391,12 @@ extension LocalSSHDiscoveryService: NetServiceBrowserDelegate {
 
 extension LocalSSHDiscoveryService: NetServiceDelegate {
     func netServiceDidResolveAddress(_ sender: NetService) {
+        guard let runID = serviceRunIDs[ObjectIdentifier(sender)],
+              runOwnership.owns(runID: runID) else {
+            sender.delegate = nil
+            sender.stop()
+            return
+        }
         let hostName = sender.hostName?
             .trimmingCharacters(in: CharacterSet(charactersIn: "."))
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -360,14 +416,22 @@ extension LocalSSHDiscoveryService: NetServiceDelegate {
             port: port,
             sources: [.bonjour]
         )
-        emit(.hostFound(discovered))
+        emit(.hostFound(discovered), runID: runID)
 
         let key = "\(sender.name)|\(sender.type)|\(sender.domain)"
         servicesByName[key] = nil
+        serviceRunIDs[ObjectIdentifier(sender)] = nil
+        sender.delegate = nil
         sender.stop()
     }
 
     func netService(_ sender: NetService, didNotResolve errorDict: [String: NSNumber]) {
+        guard let runID = serviceRunIDs[ObjectIdentifier(sender)],
+              runOwnership.owns(runID: runID) else {
+            sender.delegate = nil
+            sender.stop()
+            return
+        }
         let fallback = Self.sanitizedLocalHostName(from: sender.name)
         let fallbackHost = "\(fallback).local"
         let port = sender.port > 0 ? sender.port : 22
@@ -377,10 +441,12 @@ extension LocalSSHDiscoveryService: NetServiceDelegate {
             port: port,
             sources: [.bonjour]
         )
-        emit(.hostFound(discovered))
+        emit(.hostFound(discovered), runID: runID)
 
         let key = "\(sender.name)|\(sender.type)|\(sender.domain)"
         servicesByName[key] = nil
+        serviceRunIDs[ObjectIdentifier(sender)] = nil
+        sender.delegate = nil
         sender.stop()
     }
 }

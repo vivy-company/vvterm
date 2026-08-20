@@ -10,12 +10,12 @@ import Foundation
 
 // MARK: - Split Direction
 
-enum TerminalSplitDirection: String, Codable, Equatable {
+nonisolated enum TerminalSplitDirection: String, Codable, Equatable, Sendable {
     case horizontal  // left | right
     case vertical    // top / bottom
 }
 
-enum TerminalSplitPlacement: Equatable {
+nonisolated enum TerminalSplitPlacement: Equatable, Sendable {
     case right
     case left
     case down
@@ -40,14 +40,14 @@ enum TerminalSplitPlacement: Equatable {
     }
 }
 
-enum TerminalSplitFocusDirection: Equatable {
+nonisolated enum TerminalSplitFocusDirection: Equatable, Sendable {
     case above
     case below
     case left
     case right
 }
 
-enum TerminalSplitResizeDirection: Equatable {
+nonisolated enum TerminalSplitResizeDirection: Equatable, Sendable {
     case up
     case down
     case left
@@ -76,24 +76,24 @@ enum TerminalSplitResizeDirection: Equatable {
 
 /// A split node stores pane IDs, not connection objects.
 /// This allows the view hierarchy to change without losing terminal state.
-indirect enum TerminalSplitNode: Equatable, Codable {
+nonisolated indirect enum TerminalSplitNode: Equatable, Codable, Sendable {
     case leaf(paneId: UUID)
     case split(Split)
 
-    struct Split: Equatable, Codable {
+    nonisolated struct Split: Equatable, Codable, Sendable {
         let direction: TerminalSplitDirection
         let ratio: Double  // 0.0 to 1.0, left/top percentage
         let left: TerminalSplitNode
         let right: TerminalSplitNode
     }
 
-    private enum CodingKeys: String, CodingKey {
+    nonisolated private enum CodingKeys: String, CodingKey {
         case type
         case paneId
         case split
     }
 
-    private enum NodeType: String, Codable {
+    nonisolated private enum NodeType: String, Codable {
         case leaf
         case split
     }
@@ -442,7 +442,7 @@ indirect enum TerminalSplitNode: Equatable, Codable {
     }
 }
 
-private struct PaneFrame {
+nonisolated private struct PaneFrame: Sendable {
     static let unit = PaneFrame(minX: 0, minY: 0, width: 1, height: 1)
 
     let minX: Double
@@ -456,12 +456,12 @@ private struct PaneFrame {
     var midY: Double { minY + height / 2 }
 }
 
-private struct NeighborCandidate {
+nonisolated private struct NeighborCandidate: Sendable {
     let paneId: UUID
     let score: NeighborScore
 }
 
-private struct NeighborScore: Comparable {
+nonisolated private struct NeighborScore: Comparable, Sendable {
     let primaryGap: Double
     let perpendicularGap: Double
     let perpendicularCenterDistance: Double
