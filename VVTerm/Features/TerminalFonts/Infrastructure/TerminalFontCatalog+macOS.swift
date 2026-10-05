@@ -7,7 +7,7 @@ extension TerminalFontCatalog {
         appOwnedFamilies: [TerminalFontFamily]
     ) -> TerminalFontCatalog {
         let bundledFamilies = Set(TerminalDefaults.bundledFontFamilyNames)
-        let familyNames = Set(NSFontManager.shared.availableFontFamilies).union(bundledFamilies)
+        let familyNames = Set(NSFontManager.shared.availableFontFamilies)
 
         // Mac-installed fonts belong to System, regardless of their file path.
         // Only VVTerm's imported records add Custom families during the merge.
