@@ -58,20 +58,11 @@ nonisolated struct ZmxRemoteSessionBackend: RemoteSessionBackend {
     ) async throws -> [RemoteSessionDescriptor] {
         try requireSupported(runtime)
         let output = try await client.executeChecked(
-            ZmxRemoteSessionCommandBuilder.listCommand(scope: scope, runtime: runtime),
+            ZmxRemoteSessionCommandBuilder.listCommand(runtime: runtime),
             timeout: .seconds(12),
             maxOutputBytes: ZmxRemoteSessionParser.maximumOutputBytes
         )
-        let sessions = try ZmxRemoteSessionParser.parseSessionList(output)
-        switch scope {
-        case .userVisible:
-            return sessions
-        case .managedCleanup:
-            guard sessions.allSatisfy({ $0.attachment.ownership == .managed }) else {
-                throw SSHError.unknown("zmx returned an unowned cleanup session")
-            }
-            return sessions
-        }
+        return try ZmxRemoteSessionParser.parseSessionList(output, scope: scope)
     }
 
     func launchPlan(
@@ -123,7 +114,6 @@ nonisolated struct ZmxRemoteSessionBackend: RemoteSessionBackend {
             try requireSupported(runtime)
             let output = try await client.execute(
                 ZmxRemoteSessionCommandBuilder.listCommand(
-                    scope: .userVisible,
                     runtime: runtime
                 ),
                 timeout: .seconds(8),

@@ -38,17 +38,8 @@ nonisolated enum ZmxRemoteSessionCommandBuilder {
         return RemoteTerminalBootstrap.wrapPOSIXShellCommand(script)
     }
 
-    static func listCommand(
-        scope: RemoteSessionListScope,
-        runtime: RemoteSessionRuntime
-    ) throws -> String {
-        let arguments = switch scope {
-        case .userVisible:
-            ["list"]
-        case .managedCleanup:
-            ["list", "--where", managedOwnershipLabel]
-        }
-        return try render(arguments: arguments, runtime: runtime)
+    static func listCommand(runtime: RemoteSessionRuntime) throws -> String {
+        try render(arguments: ["list"], runtime: runtime)
     }
 
     static func launchCommand(
@@ -62,11 +53,12 @@ nonisolated enum ZmxRemoteSessionCommandBuilder {
             listCommand: list,
             identifier: identifier
         )
-        let managedList = try shortManagedListCommand(runtime: runtime)
-        let isManaged = exactPresenceExpression(
-            listCommand: managedList,
-            identifier: identifier
+        let ownerQuery = try render(
+            arguments: ["get", identifier, "vvterm_owner"],
+            runtime: runtime
         )
+        // zmx list has no ownership filter. Query the label on this session.
+        let isManaged = "vvtermZmxOwner=$(\(ownerQuery) 2>/dev/null) && [ \"$vvtermZmxOwner\" = 'managed' ]"
         let workingDirectory = request.workingDirectory == "~"
             ? nil
             : request.workingDirectory
@@ -213,15 +205,6 @@ nonisolated enum ZmxRemoteSessionCommandBuilder {
 
     private static func shortListCommand(runtime: RemoteSessionRuntime) throws -> String {
         try render(arguments: ["list", "--short"], runtime: runtime)
-    }
-
-    private static func shortManagedListCommand(
-        runtime: RemoteSessionRuntime
-    ) throws -> String {
-        try render(
-            arguments: ["list", "--short", "--where", managedOwnershipLabel],
-            runtime: runtime
-        )
     }
 
     private static func quotedMarker(

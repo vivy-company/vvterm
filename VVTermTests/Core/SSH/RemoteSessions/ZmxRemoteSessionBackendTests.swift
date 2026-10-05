@@ -78,7 +78,6 @@ struct ZmxRemoteSessionBackendTests {
             in: output
         ) == nil)
         let listCommand = try ZmxRemoteSessionCommandBuilder.listCommand(
-            scope: .userVisible,
             runtime: runtime()
         )
         #expect(listCommand.contains("'list'"))
@@ -86,19 +85,147 @@ struct ZmxRemoteSessionBackendTests {
     }
 
     @Test
-    func listScopesUseUserAndManagedBackendQueries() throws {
+    func listUsesSupportedFullMetadataQuery() throws {
         let userVisible = try ZmxRemoteSessionCommandBuilder.listCommand(
-            scope: .userVisible,
             runtime: runtime()
         )
-        let managedCleanup = try ZmxRemoteSessionCommandBuilder.listCommand(
-            scope: .managedCleanup,
-            runtime: runtime()
-        )
-
+        #expect(userVisible.contains("'list'"))
+        #expect(!userVisible.contains("'--short'"))
         #expect(!userVisible.contains("'--where'"))
-        #expect(managedCleanup.contains("'--where' 'vvterm_owner=managed'"))
     }
+
+    @Test(arguments: ["", "  "])
+    func currentDirectoryDecodesRemoteFileURI(_ prefix: String) throws {
+        let output = "\(prefix)name=team session\tclients=0\tcwd=file://FlyingNAS/srv/team%20project/%E4%B8%AD"
+        #expect(ZmxRemoteSessionParser.parseWorkingDirectory(
+            for: try identifier("team session"), in: output
+        ) == "/srv/team project/中")
+    }
+
+    @Test
+    func managedLaunchUsesSupportedOwnershipQuery() throws {
+        let request = RemoteSessionLaunchRequest(
+            intent: .ensureManaged(identifier: try identifier("shared"), initialCommand: nil),
+            workingDirectory: "~",
+            lifecycleEnvelope: deterministicRemoteSessionLifecycleEnvelope,
+            transport: .ssh,
+            themeStyle: deterministicRemoteSessionThemeStyle
+        )
+        let command = try ZmxRemoteSessionCommandBuilder.launchCommand(
+            request: request, runtime: runtime()
+        )
+        #expect(!command.contains("--where"))
+        #expect(command.contains("'get' 'shared' 'vvterm_owner'"))
+    }
+
+    @Test
+    func cleanupFiltersMixedOwnershipAfterValidatingAllRows() throws {
+        let output = """
+          name=main\tclients=0\tcwd=file://host/tmp
+          name=owned\tclients=0\tvvterm_owner=managed
+          name=vvterm-user-created\tclients=0\tvvterm_owner=other
+          name=active-owned\tclients=2\tvvterm_owner=managed
+        """
+        let visible = try ZmxRemoteSessionParser.parseSessionList(output, scope: .userVisible)
+        let cleanup = try ZmxRemoteSessionParser.parseSessionList(output, scope: .managedCleanup)
+        #expect(visible.count == 4)
+        #expect(cleanup.map(\.id.rawValue) == ["owned", "active-owned"])
+        #expect(cleanup.map(\.cleanupDisposition) == [.safeToDelete, .inUse])
+        #expect(try ZmxRemoteSessionParser.parseSessionList(
+            "name=main\tclients=0", scope: .managedCleanup
+        ).isEmpty)
+        #expect(throws: SSHError.self) {
+            try ZmxRemoteSessionParser.parseSessionList(
+                output + "\nname=broken\tclients=invalid", scope: .managedCleanup
+            )
+        }
+    }
+
+    @Test(arguments: [
+        "file://host/srv/a%25b%23c", "file:///srv/a%25b%23c"
+    ])
+    func currentDirectoryPrefersCwdAndDecodesOnce(_ uri: String) throws {
+        let output = "name=main\tclients=0\tstart_dir=/old\tcwd=\(uri)"
+        #expect(ZmxRemoteSessionParser.parseWorkingDirectory(
+            for: try identifier("main"), in: output
+        ) == "/srv/a%b#c")
+    }
+
+    @Test(arguments: [
+        "https://host/tmp", "relative", "file:relative", "file://host",
+        "file://user@host/tmp", "file://host/tmp?query", "file://host/tmp#fragment",
+        "file://host/tmp/%00", "file://host/tmp/%0A", "file://host/tmp/%FF"
+    ])
+    func currentDirectoryRejectsInvalidCwdWithoutUsingStaleStartDirectory(_ uri: String) throws {
+        #expect(ZmxRemoteSessionParser.parseWorkingDirectory(
+            for: try identifier("main"),
+            in: "name=main\tclients=0\tstart_dir=/old\tcwd=\(uri)"
+        ) == nil)
+    }
+
+    #if os(macOS)
+    @Test(arguments: ["external", "wrong-owner", "query-failure", "managed", "missing"])
+    func managedLaunchPreservesExternalSessions(_ mode: String) throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let executable = directory.appendingPathComponent("zmx")
+        let fixture = #"""
+        #!/bin/sh
+        state=$(dirname "$0")
+        printf '%s\n' "$*" >> "$state/calls"
+        case "$1" in
+          list) if [ -f "$state/exists" ]; then printf '%s\n' shared; fi ;;
+          get)
+            case "$(cat "$state/owner")" in
+              managed) printf managed ;;
+              query-failure) printf managed; exit 1 ;;
+              wrong-owner) printf other ;;
+              *) exit 1 ;;
+            esac ;;
+          attach)
+            touch "$state/exists"
+            shift 2
+            if [ "$#" -gt 0 ]; then "$@"; fi ;;
+          set) printf managed > "$state/owner" ;;
+          *) exit 1 ;;
+        esac
+        """#
+        try fixture.write(to: executable, atomically: true, encoding: .utf8)
+        try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: executable.path)
+        try mode.write(to: directory.appendingPathComponent("owner"), atomically: true, encoding: .utf8)
+        if mode != "missing" {
+            try "".write(to: directory.appendingPathComponent("exists"), atomically: true, encoding: .utf8)
+        }
+        let request = RemoteSessionLaunchRequest(
+            intent: .ensureManaged(identifier: try identifier("shared"), initialCommand: ":"),
+            workingDirectory: "~",
+            lifecycleEnvelope: deterministicRemoteSessionLifecycleEnvelope,
+            transport: .ssh,
+            themeStyle: deterministicRemoteSessionThemeStyle
+        )
+        let command = try ZmxRemoteSessionCommandBuilder.launchCommand(
+            request: request, runtime: runtime(executablePath: executable.path)
+        )
+        let process = Process()
+        let pipe = Pipe()
+        process.executableURL = URL(fileURLWithPath: "/bin/sh")
+        process.arguments = ["-c", command]
+        process.standardOutput = pipe
+        try process.run()
+        process.waitUntilExit()
+        let output = String(decoding: pipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
+        let calls = try String(contentsOf: directory.appendingPathComponent("calls"), encoding: .utf8)
+        let mayAttach = mode == "managed" || mode == "missing"
+        #expect(process.terminationStatus == 0)
+        #expect(calls.contains("attach shared") == mayAttach)
+        #expect(calls.contains("set . vvterm_owner=managed") == (mode == "missing"))
+        #expect(output.contains(RemoteSessionLifecycleMarker.sequence(
+            envelope: deterministicRemoteSessionLifecycleEnvelope,
+            event: mayAttach ? .detached : .creationFailed
+        )))
+    }
+    #endif
 
     @Test
     func managedNamesFitZmxSocketBudgetAndRemainDeviceScoped() throws {
@@ -291,10 +418,10 @@ struct ZmxRemoteSessionBackendTests {
         try RemoteSessionIdentifier(backendIdentifier: .zmx, validating: rawValue)
     }
 
-    private func runtime() throws -> RemoteSessionRuntime {
+    private func runtime(executablePath: String = "/opt/homebrew/bin/zmx") throws -> RemoteSessionRuntime {
         RemoteSessionRuntime(probe: RemoteSessionProbe(
             backendIdentifier: .zmx,
-            executable: try RemoteSessionExecutable(validating: "/opt/homebrew/bin/zmx"),
+            executable: try RemoteSessionExecutable(validating: executablePath),
             implementationVariant: "zmx",
             rawVersion: "zmx 0.7.0",
             semanticVersion: RemoteSessionSemanticVersion("0.7.0"),

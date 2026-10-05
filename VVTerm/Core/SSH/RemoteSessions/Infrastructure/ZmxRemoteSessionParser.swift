@@ -34,7 +34,10 @@ nonisolated enum ZmxRemoteSessionParser {
         )
     }
 
-    static func parseSessionList(_ output: String) throws -> [RemoteSessionDescriptor] {
+    static func parseSessionList(
+        _ output: String,
+        scope: RemoteSessionListScope = .userVisible
+    ) throws -> [RemoteSessionDescriptor] {
         guard output.utf8.count <= maximumOutputBytes else {
             throw SSHError.outputLimitExceeded
         }
@@ -43,7 +46,7 @@ nonisolated enum ZmxRemoteSessionParser {
             throw SSHError.outputLimitExceeded
         }
         var seen: Set<RemoteSessionIdentifier> = []
-        return try lines.map { rawLine in
+        let sessions = try lines.map { rawLine in
             let parsed = try parseSessionLine(rawLine)
             let identifier = try RemoteSessionIdentifier(
                 backendIdentifier: .zmx,
@@ -63,6 +66,12 @@ nonisolated enum ZmxRemoteSessionParser {
                     attachedClientCount: parsed.attachedClientCount
                 )
             )
+        }
+        switch scope {
+        case .userVisible:
+            return sessions
+        case .managedCleanup:
+            return sessions.filter { $0.attachment.ownership == .managed }
         }
     }
 
@@ -109,11 +118,24 @@ nonisolated enum ZmxRemoteSessionParser {
         }) else {
             return nil
         }
-        guard let field = sessionFields(line)
-            .first(where: { $0.hasPrefix("start_dir=") }) else {
+        let fields = sessionFields(line)
+        let path: String
+        if let field = fields.first(where: { $0.hasPrefix("cwd=") }) {
+            let rawURI = String(field.dropFirst("cwd=".count))
+            guard let uri = URLComponents(string: rawURI),
+                  uri.scheme?.lowercased() == "file",
+                  uri.user == nil, uri.password == nil, uri.port == nil,
+                  uri.query == nil, uri.fragment == nil,
+                  let decodedPath = uri.percentEncodedPath.removingPercentEncoding else {
+                return nil
+            }
+            path = decodedPath
+        } else if let field = fields.first(where: { $0.hasPrefix("start_dir=") }) {
+            // zmx 0.7 reports a plain path under its original field name.
+            path = String(field.dropFirst("start_dir=".count))
+        } else {
             return nil
         }
-        let path = String(field.dropFirst("start_dir=".count))
         guard path.hasPrefix("/"),
               (try? RemoteSessionExecutable(validating: path)) != nil else {
             return nil
