@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wiedymi/swift-cloudflared.git",
       "state" : {
-        "revision" : "1be78afe5dae7a20ce0837ce34085f03a77f7587",
-        "version" : "0.1.2"
+        "revision" : "522105f4735f4885e9f22ccb6d92cd2c092e8052",
+        "version" : "0.1.3"
       }
     },
     {
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wiedymi/swift-et",
       "state" : {
-        "revision" : "7a1f2213099d2fa756b9206ac84360ef1b67de14",
-        "version" : "0.1.6"
+        "revision" : "01b0a9f606ebf78cd8968cbdae66a1aba3e55496",
+        "version" : "0.1.7"
       }
     },
     {
@@ -61,7 +61,7 @@
       "location" : "https://github.com/wiedymi/swift-umami",
       "state" : {
         "branch" : "main",
-        "revision" : "e7a14c16d745ec1d7e4355f35407f8407808475a"
+        "revision" : "8841251e863f1d0606be79e68d9bd0af6e5195a3"
       }
     },
     {
