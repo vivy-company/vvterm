@@ -200,14 +200,8 @@ extension GhosttyTerminalView {
         }
         updateZoomIndicatorLayout()
 
-        // Check for terminal size changes and notify via callback (for SSH PTY resize)
-        if didUpdate, let size = terminalSize() {
-            let cols = Int(size.columns)
-            let rows = Int(size.rows)
-            if cols > 0, rows > 0 {
-                onResize?(cols, rows)
-            }
-        }
+        // Font metrics can change the grid while pixel bounds stay the same.
+        reportGridResizeIfNeeded()
     }
 
     // MARK: - Process Lifecycle
@@ -249,6 +243,8 @@ extension GhosttyTerminalView {
 
         // Trigger app tick to process any pending updates
         ghosttyAppWrapper?.appTick()
+        reportGridResizeIfNeeded()
+        requestRender()
 
         // Force Metal layer to redraw
         if let metalLayer = layer as? CAMetalLayer {

@@ -51,6 +51,8 @@ class GhosttyTerminalView: NSView, NSUserInterfaceValidations {
 
     /// Callback when terminal size changes (cols, rows) - used for SSH PTY resize
     var onResize: ((Int, Int) -> Void)?
+    // The remote PTY's last reported grid cannot be derived from pixel bounds.
+    private var lastReportedGrid = (cols: 0, rows: 0)
 
     /// Callback invoked when a magnification gesture requests terminal pane zoom.
     var onZoomAction: ((TerminalZoomAction) -> TerminalZoomResult?)?
@@ -72,7 +74,13 @@ class GhosttyTerminalView: NSView, NSUserInterfaceValidations {
     var clipboardConfirmationRetryCount = 0
 
     /// Cell size in points for row-to-pixel conversion (used by scroll view)
-    var cellSize: NSSize = .zero
+    var cellSize: NSSize = .zero {
+        didSet {
+            guard cellSize != oldValue, !isShuttingDown else { return }
+            needsLayout = true
+            requestRender()
+        }
+    }
 
     /// Current scrollbar state from Ghostty core (used by scroll view)
     var scrollbar: Ghostty.Action.Scrollbar?
@@ -216,6 +224,13 @@ class GhosttyTerminalView: NSView, NSUserInterfaceValidations {
 
     // Track last size sent to Ghostty to avoid redundant updates
     var lastSurfaceSize: CGSize = .zero
+
+    func reportGridResizeIfNeeded() {
+        guard !isShuttingDown, let onResize, let grid = currentTerminalGridSize else { return }
+        guard grid != lastReportedGrid else { return }
+        lastReportedGrid = grid
+        onResize(grid.cols, grid.rows)
+    }
 
     // MARK: - Custom I/O API (for SSH clients)
 
