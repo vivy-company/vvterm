@@ -82,8 +82,14 @@ extension Ghostty {
             let platformInputConfig = ""
             #endif
 
+            let primaryFamily = escapedFontFamilyValue(fontSelection.primaryFamily)
+
             return """
             \(fontFamilyLines(fontSelection.fontFamilies))
+            # Keep fallback fonts from replacing the primary family's missing styles.
+            font-family-bold = "\(primaryFamily)"
+            font-family-italic = "\(primaryFamily)"
+            font-family-bold-italic = "\(primaryFamily)"
             \(fontCodepointMapLine(cjkFamily: fontSelection.cjkFamily))
             font-size = \(Int(fontSize))
             window-inherit-font-size = false

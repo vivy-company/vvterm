@@ -56,6 +56,32 @@ struct GhosttyConfigBuilderTests {
 
     #endif
 
+    @Test(arguments: ["JetBrainsMono Nerd Font", "Hack Nerd Font", "A\"B\\C\nD\rE"],
+          [nil, "Apple SD Gothic Neo"] as [String?])
+    func styledTextUsesPrimaryFamilyInsteadOfCJKFallback(primaryFamily: String, cjkFamily: String?) {
+        let content = Ghostty.ConfigBuilder.configContent(
+            fontSelection: selection(primaryFamily, cjk: cjkFamily),
+            fontSize: 15,
+            shellName: "fish",
+            theme: "Aizen Dark"
+        )
+        let primary = Ghostty.ConfigBuilder.escapedFontFamilyValue(primaryFamily)
+        let lines = content.split(separator: "\n").map(String.init)
+
+        for style in ["bold", "italic", "bold-italic"] {
+            let key = "font-family-\(style) ="
+            #expect(lines.filter { $0.hasPrefix(key) } == ["\(key) \"\(primary)\""])
+        }
+        #if os(macOS)
+        #expect(lines.contains("font-family = \"Apple SD Gothic Neo\""))
+        #else
+        if cjkFamily != nil {
+            #expect(lines.contains("font-family = \"Apple SD Gothic Neo\""))
+        }
+        #endif
+        #expect(content.contains("font-codepoint-map =") == (cjkFamily != nil))
+    }
+
     @Test
     func fontFamilyLinesPreserveOrderedFallbackStack() {
         let lines = Ghostty.ConfigBuilder.fontFamilyLines([
