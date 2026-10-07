@@ -4,6 +4,23 @@ import UIKit
 
 final class SessionsNavigationUITests: TerminalReconnectUITestCase {
     @MainActor
+    func testExpandedSidebarSearchStaysInItsColumn() throws {
+        let app = launchSessions()
+        defer { app.terminate() }
+        let workspace = app.buttons["vvterm.sidebar.workspace"]
+        guard workspace.waitForExistence(timeout: 5), workspace.isHittable else {
+            throw XCTSkip("This check needs an expanded sidebar.")
+        }
+        let list = app.descendants(matching: .any)["vvterm.serverList.list"].firstMatch
+        let search = app.searchFields["Search servers"]
+        XCTAssertTrue(search.waitForExistence(timeout: 5))
+        XCTAssertGreaterThanOrEqual(search.frame.minX, list.frame.minX)
+        XCTAssertLessThanOrEqual(search.frame.maxX, list.frame.maxX)
+        XCTAssertGreaterThanOrEqual(search.frame.minY, workspace.frame.maxY,
+                                   "Sidebar search must stay below its toolbar, not across the bottom.")
+    }
+
+    @MainActor
     func testIPadSidebarWorkspaceAndToolbarActions() throws {
         guard UIDevice.current.userInterfaceIdiom == .pad else { throw XCTSkip("iPad sidebar") }
         let app = XCUIApplication()
@@ -21,7 +38,8 @@ final class SessionsNavigationUITests: TerminalReconnectUITestCase {
         let addServer = app.buttons["vvterm.serverList.add"]
         XCTAssertTrue(addServer.isHittable)
         XCTAssertLessThan(settings.frame.maxX, addServer.frame.minX)
-        XCTAssertGreaterThanOrEqual(workspace.frame.minY, settings.frame.maxY)
+        XCTAssertGreaterThan(workspace.frame.minX, settings.frame.maxX)
+        XCTAssertLessThan(workspace.frame.maxX, addServer.frame.minX)
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = "Native iPad sidebar"
         shot.lifetime = .keepAlways

@@ -11,6 +11,7 @@ import SwiftUI
 struct ServerListRow: View {
     @ObservedObject var serverManager: ServerManager
     let server: Server
+    var isSidebar = false
     let onTap: () -> Void
     let onEdit: () -> Void
     var onMove: (() -> Void)? = nil
@@ -50,10 +51,13 @@ struct ServerListRow: View {
                     Text(server.name)
                         .font(.body)
                         .fontWeight(.medium)
+                        .lineLimit(isSidebar ? 1 : nil)
                         .foregroundStyle(isLocked ? .secondary : .primary)
 
                     Text(server.visibleAddress(privacyModeEnabled: privacyModeEnabled))
                         .font(.caption)
+                        .lineLimit(isSidebar ? 1 : nil)
+                        .truncationMode(isSidebar ? .middle : .tail)
                         .foregroundStyle(.secondary)
                 }
 

@@ -90,11 +90,6 @@ struct ServerListScreen: View {
 
     private var serverList: some View {
         List {
-            if isSidebar {
-                workspaceToolbarButton
-                    .accessibilityIdentifier("vvterm.sidebar.workspace")
-                    .listRowBackground(compactRowBackground)
-            }
             if !isSidebar || !filteredServers.isEmpty {
                 serversSection
                     .listRowBackground(compactRowBackground)
@@ -123,8 +118,7 @@ struct ServerListScreen: View {
                 if #available(iOS 26.0, *) {
                     serverList
                         .contentMargins(.top, 8, for: .scrollContent)
-                        .searchable(text: $searchText, prompt: "Search servers")
-                        .searchToolbarBehavior(.minimize)
+                        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search servers")
                 } else {
                     serverList
                         .searchable(text: $searchText, placement: .navigationBarDrawer, prompt: "Search servers")
@@ -138,6 +132,10 @@ struct ServerListScreen: View {
                     }
                 }
                 .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        workspaceToolbarButton
+                            .accessibilityIdentifier("vvterm.sidebar.workspace")
+                    }
                     ToolbarItem(placement: .primaryAction) {
                         Button(action: { presentAddServer() }) {
                             Label("Add Server", systemImage: "plus")
@@ -381,13 +379,11 @@ struct ServerListScreen: View {
                     .lineLimit(1)
                     .truncationMode(.tail)
 
-                if isSidebar { Spacer(minLength: 8) }
-
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: isSidebar ? .infinity : 220, alignment: isSidebar ? .leading : .center)
+            .frame(maxWidth: 220, alignment: .center)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(selectedWorkspaceName)
@@ -408,6 +404,7 @@ struct ServerListScreen: View {
                     ServerListRow(
                         serverManager: serverManager,
                         server: server,
+                        isSidebar: isSidebar,
                         onTap: { onServerSelected(server) },
                         onEdit: { serverFormIntent = .edit(server) },
                         onMove: { serverToMove = server },

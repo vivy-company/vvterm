@@ -28,6 +28,7 @@ struct iOSContentView: View {
     private let tabManager: TerminalTabManager
     @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
     @Environment(\.requestReview) private var requestReview
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var selectedWorkspace: Workspace?
     @State private var selectedEnvironment: ServerEnvironment?
@@ -70,6 +71,12 @@ struct iOSContentView: View {
         viewTabConfig.effectiveDefaultTab()
     }
 
+    private var usesAdaptiveNavigation: Bool {
+        // Keep one native navigation owner as a Duo changes display and width.
+        if #available(iOS 27.1, *) { return true }
+        return UIDevice.current.userInterfaceIdiom == .pad
+    }
+
     private var terminalPresentation: Binding<Bool> {
         Binding(
             get: { terminalRoute != nil },
@@ -81,7 +88,7 @@ struct iOSContentView: View {
         )
     }
 
-    private func serverList(onSelection: @escaping () -> Void) -> some View {
+    private func serverList(isSidebar: Bool = false, onSelection: @escaping () -> Void) -> some View {
         ServerListScreen(
             serverManager: serverManager,
             tabManager: tabManager,
@@ -96,7 +103,7 @@ struct iOSContentView: View {
             selectedWorkspace: $selectedWorkspace,
             selectedEnvironment: $selectedEnvironment,
             selectedServerID: terminalRoute?.serverId,
-            isSidebar: UIDevice.current.userInterfaceIdiom == .pad,
+            isSidebar: isSidebar,
             onServerSelected: { server in
                 beginConnection(to: server)
                 onSelection()
@@ -150,13 +157,22 @@ struct iOSContentView: View {
 
     private var navigationContent: some View {
         Group {
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                AdaptiveServerNavigation(hasSelection: terminalRoute != nil) { showDetail in
-                    serverList(onSelection: showDetail)
-                } detail: { toggleSidebar in
-                    terminalDestination(onToggleSidebar: toggleSidebar)
+            if usesAdaptiveNavigation {
+                GeometryReader { geometry in
+                    let singleColumn = ServerNavigationLayoutPolicy.prefersSingleColumn(
+                        availableWidth: geometry.size.width,
+                        isPhone: UIDevice.current.userInterfaceIdiom == .phone
+                    )
+                    let showsSidebar = !singleColumn && horizontalSizeClass == .regular
+                    AdaptiveServerNavigation(
+                        hasSelection: terminalRoute != nil, prefersSingleColumn: singleColumn
+                    ) { showDetail in
+                        serverList(isSidebar: showsSidebar, onSelection: showDetail)
+                    } detail: { toggleSidebar in
+                        terminalDestination(onToggleSidebar: showsSidebar ? toggleSidebar : nil)
+                    }
                 }
-                // UIKit owns the column safe areas, including iPad window controls.
+                // UIKit owns column safe areas, including side controls on Duo.
                 .ignoresSafeArea(.container)
             } else {
                 NavigationStack {
@@ -229,7 +245,7 @@ struct iOSContentView: View {
     }
 
     private func beginConnection(to server: Server) {
-        if UIDevice.current.userInterfaceIdiom == .pad {
+        if usesAdaptiveNavigation {
             if !tabManager.sessionState.tabs(for: server.id).isEmpty || !fileTabs.tabs(for: server.id).isEmpty {
                 terminalRoute = .active(serverId: server.id)
                 return
