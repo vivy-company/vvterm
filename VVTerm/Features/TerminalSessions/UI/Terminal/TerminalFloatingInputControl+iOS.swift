@@ -200,7 +200,8 @@ struct TerminalFloatingInputControl: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .ignoresSafeArea(.container, edges: .bottom)
+        // Measure the full container; the layout applies its safe-area insets once.
+        .ignoresSafeArea(.container)
         .animation(controlAnimation, value: phase)
         .animation(controlAnimation, value: preferences.hiddenSide)
     }

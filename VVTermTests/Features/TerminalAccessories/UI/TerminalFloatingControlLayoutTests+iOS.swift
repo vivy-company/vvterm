@@ -25,6 +25,29 @@ final class TerminalFloatingControlLayoutTests: XCTestCase {
         )
     }
 
+    func testSideToolbarInsetsApplyOnceToDragLimits() {
+        let size = CGSize(width: 1000, height: 700)
+        let insets = EdgeInsets(top: 30, leading: 20, bottom: 0, trailing: 100)
+        let bounds = TerminalFloatingControlLayout.anchorBounds(
+            containerSize: size,
+            safeAreaInsets: insets,
+            mainButtonSize: TerminalFloatingControlLayout.compactButtonSize
+        )
+        XCTAssertEqual(bounds.minX, 66)
+        XCTAssertEqual(bounds.maxX, 854)
+        XCTAssertEqual(bounds.minY, 76)
+        XCTAssertEqual(bounds.maxY, 654)
+        let placement = TerminalFloatingControlLayout.placement(
+            for: .compact,
+            anchorCenter: CGPoint(x: bounds.maxX, y: bounds.maxY),
+            secondaryActionCount: 3,
+            containerSize: size,
+            safeAreaInsets: insets
+        )
+        XCTAssertLessThanOrEqual(placement.frame.maxX, size.width - insets.trailing)
+        XCTAssertLessThanOrEqual(placement.frame.maxY, size.height)
+    }
+
     func testPlacementClampsSecondaryActionCountForEachStyle() {
         let anchor = CGPoint(x: 195, y: 400)
 

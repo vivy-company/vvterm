@@ -33,6 +33,35 @@ final class TerminalFloatingInputControlUITests: TerminalKeyboardUITestCase {
     }
 
     @MainActor
+    func testCompactControlCanReachLandscapeRightAndBottomEdges() {
+        let app = launchFloatingControlHarness()
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+        let voice = app.buttons["vvterm.terminal.floating.voiceInput"]
+        XCTAssertTrue(voice.waitForExistence(timeout: 5))
+        XCTAssertTrue(waitUntil { app.frame.width > app.frame.height })
+        let rightX = voice.frame.midX
+        voice.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.2, thenDragTo: app.coordinate(
+                withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)
+            ))
+        XCTAssertTrue(waitUntil { abs(voice.frame.midY - app.frame.midY) < 45 })
+        // Use the visible control's side limit so the gesture does not request hiding.
+        voice.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            .press(forDuration: 0.2, thenDragTo: app.coordinate(
+                withNormalizedOffset: CGVector(
+                    dx: (rightX - app.frame.minX) / app.frame.width,
+                    dy: (app.frame.height - 40) / app.frame.height
+                )
+            ))
+        XCTAssertTrue(waitUntil {
+            voice.exists && app.frame.maxY - voice.frame.maxY <= 26
+                && app.frame.maxX - voice.frame.maxX < 100
+        }, "The control has an extra inset at the right or bottom edge.")
+        XCTAssertFalse(app.buttons["vvterm.terminal.floating.stopVoice"].exists)
+    }
+
+    @MainActor
     func testCompactControlMovesFreelyWithoutStartingVoiceAndRestoresKeyboard() {
         let app = launchFloatingControlHarness()
         let control = app.descendants(matching: .any)[
