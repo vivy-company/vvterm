@@ -266,76 +266,10 @@ extension RemoteFileBrowserScreen {
             }
         }
         .toolbar {
-            if #available(iOS 26, *) {
-                ToolbarItem(placement: .bottomBar) {
-                    toolbarButton(
-                        systemName: "arrow.turn.up.left",
-                        isDisabled: snapshot.currentPath == "/"
-                    ) {
-                        Task { await browser.goUp(in: fileTab, server: server) }
-                    }
-                }
-
-                ToolbarSpacer(.fixed)
-
-                ToolbarItem(placement: .bottomBar) {
-                    toolbarButton(systemName: "arrow.up.doc") {
-                        beginUpload(to: snapshot.currentPath)
-                    }
-                }
-
-                ToolbarSpacer(.fixed)
-
-                ToolbarItem(placement: .bottomBar) {
-                    toolbarButton(systemName: "folder.badge.plus") {
-                        beginCreateFolder(in: snapshot.currentPath)
-                    }
-                }
-
-                ToolbarSpacer(.fixed)
-
-                ToolbarItem(placement: .bottomBar) {
-                    toolbarButton(systemName: "document.on.document") {
-                        copyPathToClipboard(snapshot.currentPath)
-                    }
-                }
-
-                ToolbarSpacer(.fixed)
-
-                ToolbarItem(placement: .bottomBar) {
-                    browserMenu()
-                }
+            if #available(iOS 27.1, *) {
+                AdaptiveActionsToolbar { browserMenu() }
             } else {
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarButton(
-                        systemName: "arrow.turn.up.left",
-                        isDisabled: snapshot.currentPath == "/"
-                    ) {
-                        Task { await browser.goUp(in: fileTab, server: server) }
-                    }
-                }
-
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarButton(systemName: "arrow.up.doc") {
-                        beginUpload(to: snapshot.currentPath)
-                    }
-                }
-
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarButton(systemName: "folder.badge.plus") {
-                        beginCreateFolder(in: snapshot.currentPath)
-                    }
-                }
-
-                ToolbarItemGroup(placement: .bottomBar) {
-                    toolbarButton(systemName: "document.on.document") {
-                        copyPathToClipboard(snapshot.currentPath)
-                    }
-                }
-
-                ToolbarItemGroup(placement: .bottomBar) {
-                    browserMenu()
-                }
+                ToolbarItem(placement: .topBarTrailing) { browserMenu() }
             }
         }
         .onChange(of: snapshot.currentPath) { _ in
@@ -422,6 +356,29 @@ extension RemoteFileBrowserScreen {
 
     func browserMenu() -> some View {
         Menu {
+            Button {
+                Task { await browser.goUp(in: fileTab, server: server) }
+            } label: {
+                Label("Up", systemImage: "arrow.turn.up.left")
+            }
+            .disabled(snapshot.currentPath == "/")
+            .accessibilityIdentifier("vvterm.files.up")
+            Button {
+                beginUpload(to: snapshot.currentPath)
+            } label: {
+                Label("Upload", systemImage: "arrow.up.doc")
+            }
+            Button {
+                beginCreateFolder(in: snapshot.currentPath)
+            } label: {
+                Label("New Folder", systemImage: "folder.badge.plus")
+            }
+            Button {
+                copyPathToClipboard(snapshot.currentPath)
+            } label: {
+                Label("Copy Path", systemImage: "document.on.document")
+            }
+            Divider()
             Toggle(
                 String(localized: "Show Hidden Files"),
                 isOn: Binding(
@@ -441,25 +398,13 @@ extension RemoteFileBrowserScreen {
                     Text(option.displayName).tag(option)
                 }
             }
+            Divider()
+            connectionActions
         } label: {
-            Image(systemName: "line.3.horizontal.decrease.circle")
-                .font(.system(size: 20, weight: .semibold))
-                .frame(width: 36, height: 36)
+            Label("More", systemImage: "ellipsis.circle")
         }
+        .labelStyle(.iconOnly)
+        .accessibilityIdentifier("vvterm.terminal.moreMenu")
     }
-
-    func toolbarButton(
-        systemName: String,
-        isDisabled: Bool = false,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 18, weight: .semibold))
-                .frame(width: 36, height: 36)
-        }
-        .disabled(isDisabled)
-    }
-
 }
 #endif

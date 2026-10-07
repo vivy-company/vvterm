@@ -1,12 +1,13 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct RemoteFileBrowserScreen: View {
+struct RemoteFileBrowserScreen<ConnectionActions: View>: View {
     @ObservedObject var browser: RemoteFileBrowserStore
     @ObservedObject var operationCoordinator: RemoteFileOperationCoordinator
     let server: Server
     let fileTab: RemoteFileTab
     let initialPath: String?
+    let connectionActions: ConnectionActions
     let onCurrentPathChange: @MainActor (String?) -> Void
 
     @Environment(\.colorScheme) var colorScheme
@@ -46,12 +47,14 @@ struct RemoteFileBrowserScreen: View {
         server: Server,
         fileTab: RemoteFileTab,
         initialPath: String? = nil,
+        @ViewBuilder connectionActions: () -> ConnectionActions,
         onCurrentPathChange: @escaping @MainActor (String?) -> Void = { _ in }
     ) {
         self.browser = browser
         self.server = server
         self.fileTab = fileTab
         self.initialPath = initialPath
+        self.connectionActions = connectionActions()
         self.onCurrentPathChange = onCurrentPathChange
         _operationCoordinator = ObservedObject(
             wrappedValue: browser.operationCoordinator(for: fileTab, server: server)

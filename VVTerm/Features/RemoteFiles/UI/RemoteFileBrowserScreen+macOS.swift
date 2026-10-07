@@ -5,7 +5,8 @@ import UniformTypeIdentifiers
 import AppKit
 import Combine
 
-extension RemoteFileBrowserScreen {
+@MainActor
+final class RemoteFileBrowserPlatformState: ObservableObject {
     enum InlineEditor: Equatable {
         case createFolder(parentPath: String, proposedName: String, isSubmitting: Bool)
         case rename(entryPath: String, originalName: String, proposedName: String, isSubmitting: Bool)
@@ -36,11 +37,7 @@ extension RemoteFileBrowserScreen {
             return entryPath
         }
     }
-}
-
-@MainActor
-final class RemoteFileBrowserPlatformState: ObservableObject {
-    @Published var inlineEditor: RemoteFileBrowserScreen.InlineEditor?
+    @Published var inlineEditor: InlineEditor?
     @Published var selectedPaths: Set<String> = []
 }
 

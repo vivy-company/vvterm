@@ -3,6 +3,26 @@ import XCTest
 
 final class ConnectionViewNavigationUITests: TerminalReconnectUITestCase {
     @MainActor
+    func testFilesOptionsKeepCommandsInOneMenu() throws {
+        let (app, _) = launchProductionSSHTestHarness()
+        defer { app.terminate() }
+        let picker = app.segmentedControls.firstMatch
+        if picker.exists {
+            picker.buttons.containing(.image, identifier: "folder").firstMatch.tap()
+        } else {
+            app.buttons["vvterm.connectionView.files"].tap()
+        }
+        let options = app.buttons["vvterm.terminal.moreMenu"]
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        XCTAssertTrue(options.isHittable)
+        XCTAssertLessThanOrEqual(options.frame.width, 60)
+        options.tap()
+        for title in ["Upload", "New Folder", "Copy Path"] {
+            XCTAssertTrue(app.buttons[title].waitForExistence(timeout: 5))
+        }
+    }
+
+    @MainActor
     func testHorizontalViewPickerKeepsPositionWhenFilesAddsSearch() throws {
         guard #available(iOS 27.1, *) else {
             throw XCTSkip("Stable leading placement applies to iOS 27.1 and later.")

@@ -301,7 +301,18 @@ struct ConnectionTerminalContainer: View {
                 browser: fileBrowser,
                 server: server,
                 fileTab: selectedFileTab,
-                initialPath: selectedFileTab.seedPath
+                initialPath: selectedFileTab.seedPath,
+                connectionActions: {
+                    #if os(iOS)
+                    TerminalSessionMenuActions(
+                        style: .menu, isTerminalSelected: false, zenMode: .unavailable,
+                        composer: nil, canOpenSessions: canOpenSessions, canDisconnect: true,
+                        perform: { onSessionCommand?($0) }
+                    )
+                    #else
+                    EmptyView()
+                    #endif
+                }
             ) { currentPath in
                 fileTabManager.updateLastKnownPath(currentPath, for: selectedFileTab.id)
             }

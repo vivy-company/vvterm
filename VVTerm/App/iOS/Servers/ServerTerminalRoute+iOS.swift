@@ -342,22 +342,24 @@ struct ServerTerminalRoute: View {
             }
         }
 
-        Menu {
-            TerminalSessionMenuActions(
-                style: .menu,
-                isTerminalSelected: selectedServer != nil && selectedView == .terminal,
-                zenMode: canEnterZenMode ? (isZenModeEnabled ? .active : .inactive) : .unavailable,
-                composer: focusedPaneId.map {
-                    tabManager.richPasteRuntimeStore.runtime(for: $0, tabManager: tabManager).composer
-                },
-                canOpenSessions: onSessionServerSelected != nil,
-                canDisconnect: selectedServer != nil,
-                perform: performSessionCommand
-            )
-        } label: {
-            Image(systemName: "ellipsis.circle")
+        if selectedView != .files || selectedFileTab == nil {
+            Menu {
+                TerminalSessionMenuActions(
+                    style: .menu,
+                    isTerminalSelected: selectedServer != nil && selectedView == .terminal,
+                    zenMode: canEnterZenMode ? (isZenModeEnabled ? .active : .inactive) : .unavailable,
+                    composer: focusedPaneId.map {
+                        tabManager.richPasteRuntimeStore.runtime(for: $0, tabManager: tabManager).composer
+                    },
+                    canOpenSessions: onSessionServerSelected != nil,
+                    canDisconnect: selectedServer != nil,
+                    perform: performSessionCommand
+                )
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .accessibilityIdentifier("vvterm.terminal.moreMenu")
         }
-        .accessibilityIdentifier("vvterm.terminal.moreMenu")
     }
 
     private func performSessionCommand(_ command: TerminalSessionCommand) {
