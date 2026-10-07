@@ -155,10 +155,12 @@ struct ServerTerminalRoute: View {
         let _ = TerminalRouteUITestRenderProbe.recordUpdate()
         #endif
         content
+            .navigationTitle("")
             .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { navigationToolbar }
             .toolbar(isZenModeEnabled ? .hidden : .visible, for: .navigationBar)
+            .toolbar(isZenModeEnabled ? .hidden : .automatic, for: .bottomBar)
             .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
             .limitReachedAlert(.fileTabs, isPresented: $showingFileTabLimitAlert)
             .sheet(item: $presentedRouteSheet, onDismiss: updateTerminalRouteActivation) { sheet in
@@ -273,7 +275,6 @@ struct ServerTerminalRoute: View {
                 canOpenSessions: onSessionServerSelected != nil,
                 onSessionCommand: performSessionCommand
             )
-            .navigationTitle(server.name)
         } else if route.isConnecting {
             connectingStateView(
                 serverName: route.connectingServer?.name ?? String(localized: "Server")
@@ -300,58 +301,63 @@ struct ServerTerminalRoute: View {
         }
 
         if let server = selectedServer, viewTabConfig.currentVisibleTabs.count > 1 {
-            ToolbarItem(placement: .principal) {
-                ConnectionViewSegmentedPicker(
+            if #available(iOS 27.1, *) {
+                ConnectionViewPickerToolbar(
                     selection: selectedViewBinding(for: server.id),
                     tabs: viewTabConfig.currentVisibleTabs
                 )
-                .fixedSize()
-            }
-        } else if let server = selectedServer {
-            ToolbarItem(placement: .principal) {
-                HStack(spacing: 7) {
-                    ServerIconView(server: server, size: 19)
-                    Text(server.name)
-                        .font(.headline)
-                        .lineLimit(1)
+            } else {
+                ToolbarItem(placement: .principal) {
+                    ConnectionViewSegmentedPicker(
+                        selection: selectedViewBinding(for: server.id),
+                        tabs: viewTabConfig.currentVisibleTabs
+                    )
+                    .fixedSize()
                 }
             }
         }
 
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if let server = selectedServer, selectedView == .terminal {
-                Button {
-                    openNewTab(for: server)
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
+        if #available(iOS 27.1, *) {
+            AdaptiveActionsToolbar { connectionActions }
+        } else {
+            ToolbarItemGroup(placement: .navigationBarTrailing) { connectionActions }
+        }
+    }
 
-            if let server = selectedServer, selectedView == .files {
-                Button {
-                    openNewFileTab(for: server)
-                } label: {
-                    Image(systemName: "plus")
-                }
-            }
-
-            Menu {
-                TerminalSessionMenuActions(
-                    style: .menu,
-                    isTerminalSelected: selectedServer != nil && selectedView == .terminal,
-                    zenMode: canEnterZenMode ? (isZenModeEnabled ? .active : .inactive) : .unavailable,
-                    composer: focusedPaneId.map {
-                        tabManager.richPasteRuntimeStore.runtime(for: $0, tabManager: tabManager).composer
-                    },
-                    canOpenSessions: onSessionServerSelected != nil,
-                    canDisconnect: selectedServer != nil,
-                    perform: performSessionCommand
-                )
+    @ViewBuilder
+    private var connectionActions: some View {
+        if let server = selectedServer, selectedView == .terminal {
+            Button {
+                openNewTab(for: server)
             } label: {
-                Image(systemName: "ellipsis.circle")
+                Image(systemName: "plus")
             }
-            .accessibilityIdentifier("vvterm.terminal.moreMenu")
         }
+
+        if let server = selectedServer, selectedView == .files {
+            Button {
+                openNewFileTab(for: server)
+            } label: {
+                Image(systemName: "plus")
+            }
+        }
+
+        Menu {
+            TerminalSessionMenuActions(
+                style: .menu,
+                isTerminalSelected: selectedServer != nil && selectedView == .terminal,
+                zenMode: canEnterZenMode ? (isZenModeEnabled ? .active : .inactive) : .unavailable,
+                composer: focusedPaneId.map {
+                    tabManager.richPasteRuntimeStore.runtime(for: $0, tabManager: tabManager).composer
+                },
+                canOpenSessions: onSessionServerSelected != nil,
+                canDisconnect: selectedServer != nil,
+                perform: performSessionCommand
+            )
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityIdentifier("vvterm.terminal.moreMenu")
     }
 
     private func performSessionCommand(_ command: TerminalSessionCommand) {

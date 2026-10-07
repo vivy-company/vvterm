@@ -551,6 +551,9 @@ final class TerminalSettingsNavigationUITests: TerminalReconnectUITestCase {
             app: app
         )
 
+        XCTAssertFalse(app.navigationBars.staticTexts["DEV-199 Loopback"].exists,
+                       "Connection screens must keep the server name out of the toolbar title.")
+
         openProductionTerminalMenu(in: app)
         let settings = app.buttons["vvterm.terminal.settings"]
         XCTAssertTrue(settings.waitForExistence(timeout: 5), diagnosticText(in: app))

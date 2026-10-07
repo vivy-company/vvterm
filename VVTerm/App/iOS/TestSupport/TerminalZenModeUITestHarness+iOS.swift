@@ -89,22 +89,34 @@ struct TerminalZenModeUITestHarness: View {
                 .navigationTitle("Test Server")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
+                    if testsViewPicker {
+                        if #available(iOS 27.1, *) {
+                            ConnectionViewPickerToolbar(selection: $selectedView, tabs: ConnectionViewTabID.allCases)
+                        } else {
+                            ToolbarItem(placement: .principal) {
+                                ConnectionViewSegmentedPicker(selection: $selectedView, tabs: ConnectionViewTabID.allCases)
+                            }
+                        }
+                    }
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Chrome") {}
                             .accessibilityIdentifier("vvterm.zenTest.chrome")
                     }
 
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Menu {
-                            sessionActions(style: .menu)
-
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                        }
-                        .accessibilityIdentifier("vvterm.terminal.moreMenu")
+                    if #available(iOS 27.1, *), testsViewPicker {
+                        AdaptiveActionsToolbar { testToolbarActions }
+                    } else {
+                        ToolbarItemGroup(placement: .navigationBarTrailing) { testToolbarActions }
                     }
                 }
                 .toolbar(isZenModeEnabled ? .hidden : .visible, for: .navigationBar)
+                .toolbar(isZenModeEnabled ? .hidden : .automatic, for: .bottomBar)
+                .overlay(alignment: .bottomLeading) {
+                    if testsViewPicker {
+                        ViewPickerDiagnostics(selection: selectedView)
+                            .allowsHitTesting(false)
+                    }
+                }
         }
         .task {
             ghosttyApp.startIfNeeded()
@@ -116,10 +128,28 @@ struct TerminalZenModeUITestHarness: View {
         }
     }
 
+    @ViewBuilder
+    private var testToolbarActions: some View {
+        if testsViewPicker {
+            Button {} label: { Image(systemName: "plus") }
+                .accessibilityIdentifier("vvterm.viewPickerTest.add")
+        }
+        Menu {
+            sessionActions(style: .menu)
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityIdentifier("vvterm.terminal.moreMenu")
+    }
+
     private var simulatesKeyboardFrames: Bool {
         Foundation.ProcessInfo.processInfo.arguments.contains(
             "--vvterm-ui-test-simulate-keyboard-frames"
         )
+    }
+
+    private var testsViewPicker: Bool {
+        Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-view-picker")
     }
 
     private func configureTerminalTest() {
@@ -332,6 +362,30 @@ struct TerminalZenModeUITestHarness: View {
     private func sendReturnFromVoiceTest() {
         guard terminalView?.sendReturnKey() == true else { return }
         voicePresentation = .idle
+    }
+}
+
+private struct ViewPickerDiagnostics: View {
+    let selection: ConnectionViewTabID
+
+    var body: some View {
+        if #available(iOS 27.1, *) {
+            AxisDiagnostics(selection: selection)
+        } else {
+            Text("horizontal \(selection.rawValue)")
+                .accessibilityIdentifier("vvterm.viewPickerTest.selection")
+        }
+    }
+
+    @available(iOS 27.1, *)
+    private struct AxisDiagnostics: View {
+        let selection: ConnectionViewTabID
+        @Environment(\.toolbarVerticalEdge) private var edge
+
+        var body: some View {
+            Text("\(edge == nil ? "horizontal" : "vertical") \(selection.rawValue)")
+                .accessibilityIdentifier("vvterm.viewPickerTest.selection")
+        }
     }
 }
 #endif
