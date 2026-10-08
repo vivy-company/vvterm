@@ -69,12 +69,12 @@ struct AppearanceSettings: View {
         }
         .formStyle(.grouped)
         #if os(iOS)
-        .environment(\.editMode, $editMode)
         .toolbar {
-            Button(editMode.isEditing ? String(localized: "Done") : String(localized: "Edit")) {
-                editMode = editMode.isEditing ? .inactive : .active
+            ToolbarItem(placement: .primaryAction) {
+                EditButton()
             }
         }
+        .environment(\.editMode, $editMode)
         #endif
         .onChange(of: store.preferences) { newPreferences in
             preferences = newPreferences
