@@ -665,9 +665,19 @@ struct KeyDetailsSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
+                #if os(iOS)
+                ToolbarItem(placement: .cancellationAction) {
+                    if #available(iOS 26, *) {
+                        Button(role: .cancel) { dismiss() }
+                    } else {
+                        Button("Done") { dismiss() }
+                    }
+                }
+                #else
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+                #endif
             }
         }
         .adaptiveSoftScrollEdges()
