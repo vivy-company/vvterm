@@ -31,20 +31,11 @@ struct RemoteFileRenameSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Cancel")) {
-                            onCancel()
-                        }
+                        SheetDismissButton(title: "Cancel", action: onCancel)
                     }
 
                     ToolbarItem(placement: .confirmationAction) {
-                        Button {
-                            onRename()
-                        } label: {
-                            RemoteFileSheetActionLabel(
-                                title: String(localized: "Rename"),
-                                isSubmitting: isSubmitting
-                            )
-                        }
+                        SheetConfirmationButton(title: "Rename", isWorking: isSubmitting, action: onRename)
                         .disabled(trimmedProposedName.isEmpty || isSubmitting)
                     }
                 }
@@ -60,9 +51,7 @@ struct RemoteFileRenameSheet: View {
             HStack {
                 Spacer()
 
-                Button(String(localized: "Cancel")) {
-                    onCancel()
-                }
+                SheetDismissButton(title: "Cancel", action: onCancel)
                 .keyboardShortcut(.cancelAction)
 
                 Button {
@@ -130,20 +119,11 @@ struct RemoteFileCreateFolderSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Cancel")) {
-                            onCancel()
-                        }
+                        SheetDismissButton(title: "Cancel", action: onCancel)
                     }
 
                     ToolbarItem(placement: .confirmationAction) {
-                        Button {
-                            onCreate()
-                        } label: {
-                            RemoteFileSheetActionLabel(
-                                title: String(localized: "Create"),
-                                isSubmitting: isSubmitting
-                            )
-                        }
+                        SheetConfirmationButton(title: "Create", isWorking: isSubmitting, action: onCreate)
                         .disabled(trimmedFolderName.isEmpty || isSubmitting)
                     }
                 }
@@ -159,9 +139,7 @@ struct RemoteFileCreateFolderSheet: View {
             HStack {
                 Spacer()
 
-                Button(String(localized: "Cancel")) {
-                    onCancel()
-                }
+                SheetDismissButton(title: "Cancel", action: onCancel)
                 .keyboardShortcut(.cancelAction)
 
                 Button {
@@ -249,20 +227,11 @@ struct RemoteFileMoveSheet: View {
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
-                            Button(String(localized: "Cancel")) {
-                                onCancel()
-                            }
+                            SheetDismissButton(title: "Cancel", action: onCancel)
                         }
 
                         ToolbarItem(placement: .confirmationAction) {
-                            Button {
-                                onMove()
-                            } label: {
-                                RemoteFileSheetActionLabel(
-                                    title: String(localized: "Move"),
-                                    isSubmitting: isSubmitting
-                                )
-                            }
+                            SheetConfirmationButton(title: "Move", isWorking: isSubmitting, action: onMove)
                             .disabled(destinationDirectory.isEmpty || isSubmitting)
                         }
                     }
@@ -277,9 +246,7 @@ struct RemoteFileMoveSheet: View {
                 HStack {
                     Spacer()
 
-                    Button(String(localized: "Cancel")) {
-                        onCancel()
-                    }
+                    SheetDismissButton(title: "Cancel", action: onCancel)
                     .keyboardShortcut(.cancelAction)
 
                     Button {
@@ -486,9 +453,7 @@ struct RemoteFileDeleteConfirmationSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Cancel")) {
-                            onCancel()
-                        }
+                        SheetDismissButton(title: "Cancel", action: onCancel)
                     }
 
                     ToolbarItem(placement: .confirmationAction) {
@@ -509,9 +474,7 @@ struct RemoteFileDeleteConfirmationSheet: View {
             HStack {
                 Spacer()
 
-                Button(String(localized: "Cancel")) {
-                    onCancel()
-                }
+                SheetDismissButton(title: "Cancel", action: onCancel)
                 .keyboardShortcut(.cancelAction)
 
                 Button(String(localized: "Delete"), role: .destructive) {
@@ -583,20 +546,11 @@ struct RemoteFilePermissionEditorSheet: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button(String(localized: "Cancel")) {
-                            onCancel()
-                        }
+                        SheetDismissButton(title: "Cancel", action: onCancel)
                     }
 
                     ToolbarItem(placement: .confirmationAction) {
-                        Button {
-                            onApply()
-                        } label: {
-                            RemoteFileSheetActionLabel(
-                                title: String(localized: "Apply"),
-                                isSubmitting: isSubmitting
-                            )
-                        }
+                        SheetConfirmationButton(title: "Apply", isWorking: isSubmitting, action: onApply)
                         .disabled(!permissionsChanged || isSubmitting)
                     }
                 }
@@ -609,9 +563,7 @@ struct RemoteFilePermissionEditorSheet: View {
             Divider()
 
             HStack {
-                Button(String(localized: "Cancel")) {
-                    onCancel()
-                }
+                SheetDismissButton(title: "Cancel", action: onCancel)
                 .keyboardShortcut(.cancelAction)
 
                 Spacer()

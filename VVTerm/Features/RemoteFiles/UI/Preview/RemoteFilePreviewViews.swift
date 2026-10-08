@@ -1229,10 +1229,8 @@ private struct RemoteFileExpandedMediaPreview: View {
                 .navigationTitle(item.title)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button(String(localized: "Done")) {
-                            dismiss()
-                        }
+                    ToolbarItem(placement: .cancellationAction) {
+                        SheetDismissButton(title: "Done") { dismiss() }
                     }
                 }
         }
