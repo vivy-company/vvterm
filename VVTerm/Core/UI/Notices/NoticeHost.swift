@@ -209,8 +209,7 @@ struct NoticeHost<Content: View>: View {
                     // The terminal can extend under system chrome. Keep notices
                     // within the remaining content width, including side bars.
                     .frame(width: bounds.width, height: bounds.height)
-                    .padding(.leading, bounds.minX)
-                    .padding(.trailing, max(0, proxy.size.width - bounds.maxX))
+                    .position(x: bounds.midX, y: bounds.midY)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: topBanner?.id)

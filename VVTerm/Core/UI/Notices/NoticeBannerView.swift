@@ -24,8 +24,6 @@ struct NoticeBannerView: View {
                         .lineLimit(item.title == nil ? 2 : 1)
                 }
 
-                Spacer(minLength: 8)
-
                 if item.detail != nil {
                     Button(String(localized: "Details")) {
                         isShowingDetail = true
@@ -55,7 +53,6 @@ struct NoticeBannerView: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .frame(maxWidth: NoticeMetrics.bannerMaxWidth, alignment: .leading)
             .noticeSurface(
                 style: surfaceStyle,
                 prominence: .emphasized,
@@ -65,6 +62,7 @@ struct NoticeBannerView: View {
             )
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("vvterm.notice.banner")
+            .frame(maxWidth: NoticeMetrics.bannerMaxWidth)
         }
         .sheet(isPresented: $isShowingDetail) {
             if let detail = item.detail {

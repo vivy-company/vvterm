@@ -117,6 +117,8 @@ final class NoticePresentationUITests: XCTestCase {
         XCTAssertTrue(banner.waitForExistence(timeout: 5))
         XCTAssertFalse(close.waitForExistence(timeout: 1))
         XCTAssertLessThan(banner.frame.maxY, app.frame.midY)
+        XCTAssertEqual(banner.frame.midX, app.frame.midX, accuracy: 2)
+        XCTAssertLessThan(banner.frame.width, app.frame.width * 0.8)
     }
 
     @MainActor

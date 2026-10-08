@@ -4,6 +4,16 @@ import Testing
 
 struct NoticeLayoutPolicyTests {
     @Test
+    func foldedDetailCentersBetweenSidebarAndControlRail() {
+        let bounds = NoticeLayoutPolicy.horizontalBounds(
+            size: CGSize(width: 1000, height: 700),
+            safeAreaInsets: EdgeInsets(top: 0, leading: 500, bottom: 0, trailing: 80)
+        )
+        #expect(bounds.width == 420)
+        #expect(bounds.midX == 710)
+    }
+
+    @Test
     func sideBarInsetKeepsNoticesInsideContent() {
         let bounds = NoticeLayoutPolicy.horizontalBounds(
             size: CGSize(width: 600, height: 400),

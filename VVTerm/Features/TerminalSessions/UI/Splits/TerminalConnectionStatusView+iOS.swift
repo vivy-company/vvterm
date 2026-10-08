@@ -12,7 +12,7 @@ struct TerminalConnectionStatusView: View {
     @State private var dismissedIdentity: TerminalConnectionStatusPresentationIdentity?
 
     var body: some View {
-        ZStack(alignment: .top) {
+        NoticeHost(topBanner: statusNotice, bannerSurfaceStyle: surfaceStyle) {
             Color.clear
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .allowsHitTesting(false)
@@ -32,13 +32,6 @@ struct TerminalConnectionStatusView: View {
                     .presentationDetents([.height(sheetHeight), .large])
                     .presentationDragIndicator(.visible)
                 }
-
-            if let statusNotice {
-                NoticeBannerView(item: statusNotice, surfaceStyle: surfaceStyle)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
         }
         .onChange(of: currentIdentity) { identity in
             dismissedIdentity = TerminalConnectionStatusDismissalPolicy
