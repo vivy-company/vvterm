@@ -21,7 +21,7 @@ struct RemoteSessionAttachPromptSheet: View {
                 actionRow
             }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .cancellationAction) {
                     closeButton
                 }
             }
@@ -246,30 +246,27 @@ struct RemoteSessionAttachPromptSheet: View {
         #endif
     }
 
+    #if os(iOS)
     private var closeButton: some View {
-        Button {
-            confirm(.plainShell)
-        } label: {
-            #if os(macOS)
-            Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .semibold))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-                .frame(width: 28, height: 28)
-                .background(
-                    Circle()
-                        .fill(Color.primary.opacity(0.08))
-                )
-            #else
-            Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .semibold))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-            #endif
+        Group {
+            if #available(iOS 26, *) {
+                Button(role: .cancel) { confirm(.plainShell) }
+            } else {
+                Button {
+                    confirm(.plainShell)
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 16, weight: .semibold))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .buttonStyle(.plain)
         .accessibilityLabel("Close")
+        .accessibilityIdentifier("tmuxCloseButton")
     }
+    #endif
 
     @ViewBuilder
     private var noSessionsView: some View {

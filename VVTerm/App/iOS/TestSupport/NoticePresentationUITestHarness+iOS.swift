@@ -139,11 +139,7 @@ private struct ConnectionBannerHandoffHarness: View {
             )
         }
         .sheet(item: $remoteSessionPrompt) { prompt in
-            NavigationStack {
-                Text("Choose how to continue the connection.")
-                    .navigationTitle("Choose \(prompt.backendName) session")
-                    .navigationBarTitleDisplayMode(.inline)
-            }
+            RemoteSessionAttachPromptSheet(prompt: prompt) { _ in remoteSessionPrompt = nil }
         }
         .task {
             try? await Task.sleep(for: .seconds(3))

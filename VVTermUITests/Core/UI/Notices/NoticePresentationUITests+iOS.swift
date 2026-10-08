@@ -137,6 +137,17 @@ final class NoticePresentationUITests: XCTestCase {
     }
 
     @MainActor
+    func testRemoteSessionSheetCanCloseWithNativeDismissButton() throws {
+        let app = launchNoticeHarness(additionalArguments: ["--vvterm-ui-test-connection-banner-handoff"])
+        let title = app.navigationBars["Choose tmux session"]
+        let close = app.buttons["tmuxCloseButton"]
+        XCTAssertTrue(title.waitForExistence(timeout: 10))
+        XCTAssertTrue(close.waitForExistence(timeout: 5))
+        close.tap()
+        XCTAssertTrue(title.waitForNonExistence(timeout: 5))
+    }
+
+    @MainActor
     func testInitialConnectionBannerYieldsToTmuxSelectionSheet() throws {
         let app = launchNoticeHarness(
             additionalArguments: ["--vvterm-ui-test-connection-banner-handoff"]
