@@ -27,10 +27,8 @@ struct NavigationStatsSettingsView: View {
                     .onMove(perform: viewTabConfig.moveTab)
                 }
 
-                Button {
+                Button("Reset to Defaults") {
                     viewTabConfig.resetToDefaults()
-                } label: {
-                    Label("Reset to Defaults", systemImage: "arrow.counterclockwise")
                 }
             } header: {
                 HStack {
