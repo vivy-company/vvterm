@@ -123,12 +123,28 @@ struct WorkspaceFormSheet: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
+                    #if os(iOS)
+                    if #available(iOS 26, *) {
+                        Button(role: .cancel) { dismiss() }
+                    } else {
+                        Button("Cancel") { dismiss() }
+                    }
+                    #else
                     Button("Cancel") { dismiss() }
+                    #endif
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? String(localized: "Save") : String(localized: "Create")) {
-                        saveWorkspace()
+                    Button(role: confirmationRole, action: saveWorkspace) {
+                        #if os(iOS)
+                        Label(isEditing ? String(localized: "Save") : String(localized: "Create"), systemImage: "checkmark")
+                            .labelStyle(.iconOnly)
+                        #else
+                        Text(isEditing ? String(localized: "Save") : String(localized: "Create"))
+                        #endif
                     }
+                    #if os(iOS)
+                    .tint(.blue)
+                    #endif
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving || isAtLimit)
                 }
             }
@@ -149,6 +165,13 @@ struct WorkspaceFormSheet: View {
     }
 
     // MARK: - Actions
+
+    private var confirmationRole: ButtonRole? {
+        #if os(iOS)
+        if #available(iOS 26, *) { return .confirm }
+        #endif
+        return nil
+    }
 
     private func saveWorkspace() {
         isSaving = true
