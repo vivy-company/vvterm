@@ -358,12 +358,28 @@ struct AddSSHKeySheet: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
+                    #if os(iOS)
+                    if #available(iOS 26, *) {
+                        Button(role: .cancel) { dismiss() }
+                    } else {
+                        Button("Cancel") { dismiss() }
+                    }
+                    #else
                     Button("Cancel") { dismiss() }
+                    #endif
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveKey()
+                    Button(role: confirmationRole, action: saveKey) {
+                        #if os(iOS)
+                        Label("Save", systemImage: "checkmark")
+                            .labelStyle(.iconOnly)
+                        #else
+                        Text("Save")
+                        #endif
                     }
+                    #if os(iOS)
+                    .tint(.blue)
+                    #endif
                     .disabled(!isValid || isSaving)
                 }
             }
@@ -379,6 +395,13 @@ struct AddSSHKeySheet: View {
         .onAppear {
             coordinator.clearFailure(for: .importKey)
         }
+    }
+
+    private var confirmationRole: ButtonRole? {
+        #if os(iOS)
+        if #available(iOS 26, *) { return .confirm }
+        #endif
+        return nil
     }
 
     private var isValid: Bool {
