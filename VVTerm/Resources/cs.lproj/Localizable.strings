@@ -863,7 +863,7 @@
 "1 window" = "1 okno";
 "%lld windows" = "%lld oken";
 "New session" = "Nová relace";
-"Skip" = "Přeskočit";
+"Skip %@" = "Přeskočit %@";
 "Open Installation Guide" = "Otevřít průvodce instalací";
 "Create VVTerm session" = "Vytvořit relaci VVTerm";
 "Ask every time" = "Ptát se pokaždé";

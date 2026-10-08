@@ -862,7 +862,7 @@
 "1 window" = "1 window";
 "%lld windows" = "%lld windows";
 "New session" = "New session";
-"Skip" = "Skip";
+"Skip %@" = "Skip %@";
 "Open Installation Guide" = "Open Installation Guide";
 "Create VVTerm session" = "Create VVTerm session";
 "Ask every time" = "Ask every time";

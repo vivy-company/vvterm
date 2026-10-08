@@ -859,7 +859,7 @@
 "1 window" = "1 个窗口";
 "%lld windows" = "%lld 个窗口";
 "New session" = "新建会话";
-"Skip" = "跳过";
+"Skip %@" = "跳过 %@";
 "Open Installation Guide" = "打开安装指南";
 "Create VVTerm session" = "创建 VVTerm 会话";
 "Ask every time" = "每次都询问";

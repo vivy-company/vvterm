@@ -907,7 +907,7 @@
 "1 window" = "1 cửa sổ";
 "%lld windows" = "%lld cửa sổ";
 "New session" = "Phiên mới";
-"Skip" = "Bỏ qua";
+"Skip %@" = "Bỏ qua %@";
 "Open Installation Guide" = "Mở hướng dẫn cài đặt";
 "Create VVTerm session" = "Tạo phiên VVTerm";
 "Ask every time" = "Hỏi mỗi lần";

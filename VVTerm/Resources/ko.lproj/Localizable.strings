@@ -862,7 +862,7 @@
 "1 window" = "창 1개";
 "%lld windows" = "창 %lld개";
 "New session" = "새 세션";
-"Skip" = "건너뛰기";
+"Skip %@" = "%@ 건너뛰기";
 "Open Installation Guide" = "설치 가이드 열기";
 "Create VVTerm session" = "VVTerm 세션 생성";
 "Ask every time" = "매번 확인";

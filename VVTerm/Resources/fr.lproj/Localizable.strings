@@ -864,7 +864,7 @@
 "1 window" = "1 fenêtre";
 "%lld windows" = "%lld fenêtres";
 "New session" = "Nouvelle session";
-"Skip" = "Ignorer";
+"Skip %@" = "Ignorer %@";
 "Open Installation Guide" = "Ouvrir le guide d’installation";
 "Create VVTerm session" = "Créer une session VVTerm";
 "Ask every time" = "Demander à chaque fois";
