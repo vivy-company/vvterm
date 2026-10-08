@@ -383,7 +383,8 @@ struct ServerListScreen: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: 220, alignment: .center)
+            // Let the native title view fill the space between sidebar actions.
+            .frame(maxWidth: isSidebar ? .infinity : 220, alignment: .center)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(selectedWorkspaceName)

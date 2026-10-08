@@ -40,6 +40,9 @@ final class SessionsNavigationUITests: TerminalReconnectUITestCase {
         XCTAssertLessThan(settings.frame.maxX, addServer.frame.minX)
         XCTAssertGreaterThan(workspace.frame.minX, settings.frame.maxX)
         XCTAssertLessThan(workspace.frame.maxX, addServer.frame.minX)
+        let actionGapCenter = (settings.frame.maxX + addServer.frame.minX) / 2
+        XCTAssertEqual(workspace.frame.midX, actionGapCenter, accuracy: 8,
+                       "Workspace selection must center between Settings and Add, including in a window.")
         let shot = XCTAttachment(screenshot: app.screenshot())
         shot.name = "Native iPad sidebar"
         shot.lifetime = .keepAlways
