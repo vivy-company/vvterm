@@ -869,7 +869,7 @@
 "1 window" = "1 вікно";
 "%lld windows" = "%lld вікон";
 "New session" = "Нова сесія";
-"Continue without a remote session" = "Продовжити без віддаленої сесії";
+"Skip" = "Пропустити";
 "Open Installation Guide" = "Відкрити посібник зі встановлення";
 "Create VVTerm session" = "Створити сесію VVTerm";
 "Ask every time" = "Питати щоразу";

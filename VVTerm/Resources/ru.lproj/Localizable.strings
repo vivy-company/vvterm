@@ -862,7 +862,7 @@
 "1 window" = "1 окно";
 "%lld windows" = "%lld окон";
 "New session" = "Новая сессия";
-"Continue without a remote session" = "Продолжить без удалённой сессии";
+"Skip" = "Пропустить";
 "Open Installation Guide" = "Открыть руководство по установке";
 "Create VVTerm session" = "Создать сессию VVTerm";
 "Ask every time" = "Спрашивать каждый раз";

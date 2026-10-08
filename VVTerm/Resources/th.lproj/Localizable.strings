@@ -862,7 +862,7 @@
 "1 window" = "1 หน้าต่าง";
 "%lld windows" = "%lld หน้าต่าง";
 "New session" = "เซสชันใหม่";
-"Continue without a remote session" = "ดำเนินการต่อโดยไม่ใช้เซสชันระยะไกล";
+"Skip" = "ข้าม";
 "Open Installation Guide" = "เปิดคู่มือการติดตั้ง";
 "Create VVTerm session" = "สร้างเซสชัน VVTerm";
 "Ask every time" = "ถามทุกครั้ง";

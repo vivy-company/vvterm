@@ -863,7 +863,7 @@
 "1 window" = "1 акно";
 "%lld windows" = "%lld вокнаў";
 "New session" = "Новая сесія";
-"Continue without a remote session" = "Працягнуць без аддаленай сесіі";
+"Skip" = "Прапусціць";
 "Open Installation Guide" = "Адкрыць інструкцыю па ўсталяванні";
 "Create VVTerm session" = "Стварыць сесію VVTerm";
 "Ask every time" = "Пытаць кожны раз";

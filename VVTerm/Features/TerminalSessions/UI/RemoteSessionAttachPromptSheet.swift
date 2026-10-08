@@ -175,7 +175,7 @@ struct RemoteSessionAttachPromptSheet: View {
             Button {
                 confirm(.plainShell)
             } label: {
-                Label("Continue without a remote session", systemImage: "arrow.right.circle")
+                Label("Skip", systemImage: "arrow.right.circle")
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: 38)
                     .font(.callout.weight(.semibold))
@@ -230,7 +230,7 @@ struct RemoteSessionAttachPromptSheet: View {
             Button {
                 confirm(.plainShell)
             } label: {
-                Label("Continue without a remote session", systemImage: "arrow.right.circle")
+                Label("Skip", systemImage: "arrow.right.circle")
                     .frame(maxWidth: .infinity)
                     .frame(minHeight: 52)
                     .font(.headline)

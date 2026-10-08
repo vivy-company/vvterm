@@ -862,7 +862,7 @@
 "1 window" = "1個のウィンドウ";
 "%lld windows" = "%lld個のウィンドウ";
 "New session" = "新しいセッション";
-"Continue without a remote session" = "リモートセッションなしで続行";
+"Skip" = "スキップ";
 "Open Installation Guide" = "インストールガイドを開く";
 "Create VVTerm session" = "VVTermセッションを作成";
 "Ask every time" = "毎回確認する";
