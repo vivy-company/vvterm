@@ -130,13 +130,10 @@ struct SyncSettingsDetailsSections: View {
                     String(localized: "Copied")
                 )
             } label: {
-                Label(
+                Text(
                     copiedDiagnostics == diagnostics
                         ? String(localized: "Copied")
-                        : String(localized: "Copy Diagnostics"),
-                    systemImage: copiedDiagnostics == diagnostics
-                        ? "checkmark"
-                        : "doc.on.doc"
+                        : String(localized: "Copy Diagnostics")
                 )
             }
             .accessibilityIdentifier("vvterm.settings.sync.copyDiagnostics")
