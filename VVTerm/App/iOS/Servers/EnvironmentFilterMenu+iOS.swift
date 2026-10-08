@@ -85,15 +85,23 @@ struct EnvironmentFilterMenu: View {
             HStack(spacing: 6) {
                 Circle()
                     .fill(selected?.color ?? .secondary)
-                    .frame(width: 8, height: 8)
+                    .frame(width: 10, height: 10)
                 Text(selected?.displayShortName ?? String(localized: "All"))
-                Image(systemName: "chevron.down")
+                EnvironmentDisclosureIcon()
             }
+            .font(.subheadline)
             .padding(.vertical, 4)
             .foregroundStyle(.primary)
             .textCase(nil)
         }
         .buttonStyle(.plain)
+        // Native collapsible sidebar sections extend their disclosure past the header text inset.
+        .padding(.trailing, disclosureHeaderAdjustment)
+    }
+
+    private var disclosureHeaderAdjustment: CGFloat {
+        if #available(iOS 17, *) { return -8 }
+        return 0
     }
 
     private func environmentButton(_ env: ServerEnvironment) -> some View {
@@ -113,6 +121,19 @@ struct EnvironmentFilterMenu: View {
                 }
             }
         }
+    }
+}
+
+private struct EnvironmentDisclosureIcon: View {
+    @ScaledMetric(relativeTo: .body) private var width: CGFloat = 12
+
+    var body: some View {
+        Image(systemName: "chevron.down")
+            .resizable()
+            .scaledToFit()
+            .frame(width: width)
+            .font(.footnote.weight(.semibold))
+            .foregroundStyle(Color.primary)
     }
 }
 #endif
