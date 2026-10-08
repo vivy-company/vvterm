@@ -11,13 +11,13 @@
 		5C9A7D8E31A1000100D32601 /* VVTermStoreKit.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CC837B372F0E62F2006804BF /* VVTermStoreKit.storekit */; };
 		82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1853ABB6CF8195DF93B55895 /* ZIPFoundation */; };
 		8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A089872E7F6345088D2FA637 /* AppIntents.framework */; };
-		D39900000000000000000002 /* GhosttyKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D39900000000000000000001 /* GhosttyKit.xcframework */; };
 		CC83449F2F0D18CF006804BF /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B12F0CD850006804BF /* MLX */; };
 		CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B22F0CD851006804BF /* MLXNN */; };
 		CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */ = {isa = PBXBuildFile; productRef = CC8312B32F0CD852006804BF /* MLXFFT */; };
 		D1A7B0C12EAB100100A00001 /* MoshCore in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00011 /* MoshCore */; };
 		D1A7B0C12EAB100100A00002 /* MoshBootstrap in Frameworks */ = {isa = PBXBuildFile; productRef = D1A7B0C12EAB100100A00012 /* MoshBootstrap */; };
 		D2C4F00131AA100100B00001 /* Cloudflared in Frameworks */ = {isa = PBXBuildFile; productRef = D2C4F00131AA100100B00011 /* Cloudflared */; };
+		D39900000000000000000002 /* Vendor/libghostty/GhosttyKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = D39900000000000000000001 /* Vendor/libghostty/GhosttyKit.xcframework */; };
 		E7C4A10031BB100100C00001 /* Umami in Frameworks */ = {isa = PBXBuildFile; productRef = E7C4A10031BB100100C00011 /* Umami */; };
 		E8A1E70031C1000100E00001 /* ETSession in Frameworks */ = {isa = PBXBuildFile; productRef = E8A1E70031C1000100E00011 /* ETSession */; };
 		E8A1E70031C1000100E00002 /* ETBootstrap in Frameworks */ = {isa = PBXBuildFile; productRef = E8A1E70031C1000100E00012 /* ETBootstrap */; };
@@ -68,7 +68,7 @@
 		CC8312922F0CD84E006804BF /* VVTermTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VVTermTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC83129C2F0CD84E006804BF /* VVTermUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VVTermUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC837B372F0E62F2006804BF /* VVTermStoreKit.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = VVTermStoreKit.storekit; sourceTree = "<group>"; };
-		D39900000000000000000001 /* GhosttyKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Vendor/libghostty/GhosttyKit.xcframework; sourceTree = "<group>"; };
+		D39900000000000000000001 /* Vendor/libghostty/GhosttyKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = Vendor/libghostty/GhosttyKit.xcframework; sourceTree = "<group>"; };
 		F3220D94C71F0D68A0DF623E /* VVTermLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = VVTermLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -79,26 +79,6 @@
 				Info.plist,
 			);
 			target = 0EA2F32A1035EAEEB6704E32 /* VVTermLiveActivity */;
-		};
-		CC8312A42F0CD84E006804BF /* Exceptions for "VVTerm" folder in "VVTerm" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				App/AGENTS.md,
-				Core/AGENTS.md,
-				Core/SSH/AGENTS.md,
-				Core/Security/AGENTS.md,
-				Core/Sync/AGENTS.md,
-				Core/Terminal/AGENTS.md,
-				Core/UI/AGENTS.md,
-				Features/AGENTS.md,
-				Features/RemoteFiles/AGENTS.md,
-				Features/Servers/AGENTS.md,
-				Features/Stats/AGENTS.md,
-				Features/Store/AGENTS.md,
-				Features/TerminalSessions/AGENTS.md,
-				Info.plist,
-			);
-			target = CC83127D2F0CD84D006804BF /* VVTerm */;
 		};
 		A60100000000000000000001 /* Exceptions for "VVTermTests" folder in "VVTermTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -113,6 +93,26 @@
 				AGENTS.md,
 			);
 			target = CC83129B2F0CD84E006804BF /* VVTermUITests */;
+		};
+		CC8312A42F0CD84E006804BF /* Exceptions for "VVTerm" folder in "VVTerm" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				App/AGENTS.md,
+				Core/AGENTS.md,
+				Core/Security/AGENTS.md,
+				Core/SSH/AGENTS.md,
+				Core/Sync/AGENTS.md,
+				Core/Terminal/AGENTS.md,
+				Core/UI/AGENTS.md,
+				Features/AGENTS.md,
+				Features/RemoteFiles/AGENTS.md,
+				Features/Servers/AGENTS.md,
+				Features/Stats/AGENTS.md,
+				Features/Store/AGENTS.md,
+				Features/TerminalSessions/AGENTS.md,
+				Info.plist,
+			);
+			target = CC83127D2F0CD84D006804BF /* VVTerm */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -169,7 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E5D7C9695EF4C72AD9AB276 /* AppIntents.framework in Frameworks */,
-				D39900000000000000000002 /* GhosttyKit.xcframework in Frameworks */,
+				D39900000000000000000002 /* Vendor/libghostty/GhosttyKit.xcframework in Frameworks */,
 				82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */,
 				CC8344A12F0D18CF006804BF /* MLXFFT in Frameworks */,
 				CC8344A02F0D18CF006804BF /* MLXNN in Frameworks */,
@@ -205,7 +205,7 @@
 			isa = PBXGroup;
 			children = (
 				CC837B372F0E62F2006804BF /* VVTermStoreKit.storekit */,
-				D39900000000000000000001 /* GhosttyKit.xcframework */,
+				D39900000000000000000001 /* Vendor/libghostty/GhosttyKit.xcframework */,
 				CC8312802F0CD84D006804BF /* VVTerm */,
 				07A189989926A7D4F3FAE363 /* VVTermShared */,
 				7448DABBC8B1AB31C2800F73 /* VVTermLiveActivity */,
@@ -564,15 +564,9 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				"EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
 				GENERATE_INFOPLIST_FILE = NO;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/include";
 				"INFOPLIST_FILE[sdk=iphoneos*]" = "VVTerm-iOS/Info.plist";
 				"INFOPLIST_FILE[sdk=iphonesimulator*]" = "VVTerm-iOS/Info.plist";
 				"INFOPLIST_FILE[sdk=macosx*]" = "VVTerm-macOS/Info.plist";
@@ -595,15 +589,9 @@
 				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/ios/lib",
-				);
-				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/ios-simulator/lib",
-				);
-				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/macos/lib",
-				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/ios/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/ios-simulator/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/macos/lib";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 3.2.2;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
@@ -660,8 +648,8 @@
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphoneos*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphonesimulator*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=macosx*]" = "VVTerm/ghostty-bridging-header.h";
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
@@ -697,15 +685,9 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				"EXCLUDED_ARCHS[sdk=macosx*]" = x86_64;
 				GENERATE_INFOPLIST_FILE = NO;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/include";
 				"INFOPLIST_FILE[sdk=iphoneos*]" = "VVTerm-iOS/Info.plist";
 				"INFOPLIST_FILE[sdk=iphonesimulator*]" = "VVTerm-iOS/Info.plist";
 				"INFOPLIST_FILE[sdk=macosx*]" = "VVTerm-macOS/Info.plist";
@@ -728,15 +710,9 @@
 				ITSAppUsesNonExemptEncryption = YES;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/ios/lib",
-				);
-				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/ios-simulator/lib",
-				);
-				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/macos/lib",
-				);
+				"LIBRARY_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/ios/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/ios-simulator/lib";
+				"LIBRARY_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/macos/lib";
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 3.2.2;
 				"OTHER_LDFLAGS[sdk=iphoneos*]" = (
@@ -793,8 +769,8 @@
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphoneos*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=iphonesimulator*]" = "VVTerm/ghostty-bridging-header.h";
 				"SWIFT_OBJC_BRIDGING_HEADER[sdk=macosx*]" = "VVTerm/ghostty-bridging-header.h";
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				XROS_DEPLOYMENT_TARGET = 26.2;
@@ -932,15 +908,9 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/include";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 3.2.2;
@@ -951,8 +921,8 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VVTerm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VVTerm";
@@ -969,15 +939,9 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QW4U57CXJX;
 				GENERATE_INFOPLIST_FILE = YES;
-				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
-				"HEADER_SEARCH_PATHS[sdk=macosx*]" = (
-					"$(SRCROOT)/Vendor/libssh2/include",
-				);
+				"HEADER_SEARCH_PATHS[sdk=iphoneos*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(SRCROOT)/Vendor/libssh2/include";
+				"HEADER_SEARCH_PATHS[sdk=macosx*]" = "$(SRCROOT)/Vendor/libssh2/include";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.1;
 				MACOSX_DEPLOYMENT_TARGET = 13.3;
 				MARKETING_VERSION = 3.2.2;
@@ -988,8 +952,8 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VVTerm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VVTerm";
@@ -1015,8 +979,8 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_TARGET_NAME = VVTerm;
@@ -1042,8 +1006,8 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
 				TEST_TARGET_NAME = VVTerm;
