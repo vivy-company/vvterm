@@ -132,9 +132,7 @@ struct ServerListScreen: View {
                     }
                 }
                 .toolbar {
-                    // A center action uses the space between leading and trailing items.
-                    // A principal title is centered on the whole bar, including window controls.
-                    ToolbarItem(placement: UIDevice.current.userInterfaceIdiom == .pad ? .secondaryAction : .principal) {
+                    ToolbarItem(placement: .principal) {
                         workspaceToolbarButton
                             .accessibilityIdentifier("vvterm.sidebar.workspace")
                     }
@@ -153,7 +151,6 @@ struct ServerListScreen: View {
                         .accessibilityIdentifier("vvterm.serverList.settings")
                     }
                 }
-                .toolbarRole(UIDevice.current.userInterfaceIdiom == .pad ? .editor : .navigationStack)
         } else {
             serverList
                 .listStyle(.sidebar)
