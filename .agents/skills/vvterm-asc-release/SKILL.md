@@ -1,6 +1,6 @@
 ---
 name: vvterm-asc-release
-description: Inspect VVTerm builds and prepare or distribute App Store and TestFlight releases through ASC CLI when requested. Not for device installation, pricing changes, or unrelated account administration.
+description: Inspect VVTerm builds and prepare or distribute App Store and TestFlight releases through ASC CLI, maintaining the repository changelog during release work. Not for device installation, pricing changes, or unrelated account administration.
 ---
 
 # VVTerm ASC Release Work
@@ -29,8 +29,17 @@ Use `asc` throughout. Perform only the requested parts of this workflow. Checkin
 - A group assignment is not proof of tester access. Check beta-review and distribution state. Submit for beta review only when authorized by the requested distribution workflow; if new declarations or decisions are needed, ask instead of guessing.
 - Do not notify testers, change release scheduling, submit for App Store review, or release publicly unless that action is authorized. TestFlight distribution does not authorize a public App Store release.
 
+## Maintain the Repository Changelog
+
+- During release preparation or distribution, update `CHANGELOG.md` at the repository root. Create it during the next release if it is absent; build inspection or monitoring alone does not create or change it.
+- Use one entry per marketing version, newest first. Summarize verified user-visible changes since the previous release's source revision. Use existing entries, release tags, or verified release/build source data to find that revision. If it cannot be established, report the missing basis instead of inventing release history.
+- For a new file, start with `# Changelog`. Add a `## VERSION` entry with concise bullets grouped under `Added`, `Changed`, and `Fixed` where useful. Preserve existing entries and formatting when the file already exists. Update an existing version entry instead of duplicating it for another build or platform.
+- Keep entries public and factual. Do not include internal issue details, personal information, secrets, future plans, or claims that an unpublished version is already released. Do not backfill older releases unless requested.
+- Keep the entry consistent with App Store What's New, while keeping TestFlight test instructions separate. Review the changelog diff before finishing. Commit or push it only when the user has authorized those actions.
+
 ## Verify and Finish
 
 - Read back the version's attached build, each edited localization, requested group assignments, and distribution/review state.
+- For release work, confirm that `CHANGELOG.md` contains the target version's verified changes and report whether it was created or updated.
 - If a write times out, inspect live state before retrying; it may already have completed. Retry only missing work.
 - Report exact version/build, completed actions, and any waiting or blocked states. Stop once requested changes are verified. Do not add pricing, listing, or account cleanup work.
