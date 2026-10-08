@@ -20,7 +20,7 @@ struct TrustedHostsSettingsView: View {
                         Button(role: .destructive) {
                             resetTarget = .all
                         } label: {
-                            Label("Reset Trusted SSH Hosts", systemImage: "trash")
+                            Text("Reset Trusted SSH Hosts")
                         }
                     }
                 }
