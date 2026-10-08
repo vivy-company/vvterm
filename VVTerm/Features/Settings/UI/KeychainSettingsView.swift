@@ -138,16 +138,43 @@ struct KeychainSettingsView: View {
 
     @ViewBuilder
     private var emptyKeysView: some View {
-        let actions = HStack(spacing: 12) {
-            Button("Generate New Key") {
-                showingGenerateKey = true
-            }
-            .buttonStyle(.borderedProminent)
+        let generateButton = Button {
+            showingGenerateKey = true
+        } label: {
+            Label("Generate New Key", systemImage: "wand.and.stars")
+                .labelStyle(.titleAndIcon)
+                .font(.body.weight(.medium))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(.tint, in: RoundedRectangle(cornerRadius: 8))
+                .foregroundStyle(.white)
+        }
+        .buttonStyle(.plain)
 
-            Button("Import Key") {
-                showingAddKey = true
+        let importButton = Button {
+            showingAddKey = true
+        } label: {
+            Label("Import Key", systemImage: "square.and.arrow.down")
+                .labelStyle(.titleAndIcon)
+                .font(.body.weight(.medium))
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+                .background(Color.primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+                .foregroundStyle(.tint)
+        }
+        .buttonStyle(.plain)
+
+        let actions = ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) {
+                generateButton
+                importButton
             }
-            .buttonStyle(.bordered)
+            .fixedSize(horizontal: true, vertical: false)
+
+            VStack(spacing: 12) {
+                generateButton
+                importButton
+            }
         }
 
         if #available(iOS 17.0, macOS 14.0, *) {
