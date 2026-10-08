@@ -84,14 +84,14 @@ struct EnvironmentFilterMenu: View {
         } label: {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(selected?.color ?? .secondary)
+                    .fill(selected?.color ?? Color.primary)
                     .frame(width: 10, height: 10)
                 Text(selected?.displayShortName ?? String(localized: "All"))
                 EnvironmentDisclosureIcon()
             }
             .font(.subheadline)
             .padding(.vertical, 4)
-            .foregroundStyle(.primary)
+            .foregroundStyle(Color.primary)
             .textCase(nil)
         }
         .buttonStyle(.plain)
