@@ -122,6 +122,21 @@ final class NoticePresentationUITests: XCTestCase {
     }
 
     @MainActor
+    func testConnectionBannerCentersInContentBesideControlRail() throws {
+        let app = launchNoticeHarness(additionalArguments: [
+            "--vvterm-ui-test-notice-connecting", "--vvterm-ui-test-notice-control-rail"
+        ])
+        let banner = app.descendants(matching: .any)
+            .matching(identifier: "vvterm.notice.banner").firstMatch
+        let rail = app.descendants(matching: .any)
+            .matching(identifier: "vvterm.noticeTest.controlRail").firstMatch
+        XCTAssertTrue(banner.waitForExistence(timeout: 10))
+        XCTAssertTrue(rail.waitForExistence(timeout: 5))
+        XCTAssertEqual(banner.frame.midX, (app.frame.minX + rail.frame.minX) / 2, accuracy: 2)
+        XCTAssertLessThanOrEqual(banner.frame.maxX, rail.frame.minX - 12)
+    }
+
+    @MainActor
     func testInitialConnectionBannerYieldsToTmuxSelectionSheet() throws {
         let app = launchNoticeHarness(
             additionalArguments: ["--vvterm-ui-test-connection-banner-handoff"]

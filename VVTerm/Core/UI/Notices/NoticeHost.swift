@@ -164,9 +164,6 @@ struct NoticeHost<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay {
                 GeometryReader { proxy in
-                    let bounds = NoticeLayoutPolicy.horizontalBounds(
-                        size: proxy.size, safeAreaInsets: proxy.safeAreaInsets
-                    )
                     ZStack {
                         VStack(spacing: 0) {
                             if let topBanner {
@@ -206,10 +203,9 @@ struct NoticeHost<Content: View>: View {
                             }
                         }
                     }
-                    // The terminal can extend under system chrome. Keep notices
-                    // within the remaining content width, including side bars.
-                    .frame(width: bounds.width, height: bounds.height)
-                    .position(x: bounds.midX, y: bounds.midY)
+                    // SwiftUI already proposes the available detail width. Subtracting
+                    // horizontal safe-area insets again shifts notices off center.
+                    .frame(width: proxy.size.width, height: proxy.size.height)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: topBanner?.id)

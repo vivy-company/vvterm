@@ -211,6 +211,14 @@ private struct NoticeConnectingHarness: View {
                 onTrustNewHostKey: {}
             )
         }
+        .safeAreaInset(edge: .trailing, spacing: 0) {
+            if Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-notice-control-rail") {
+                Color.gray.frame(width: 80)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Control rail")
+                    .accessibilityIdentifier("vvterm.noticeTest.controlRail")
+            }
+        }
         .preferredColorScheme(.dark)
     }
 }
