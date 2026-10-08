@@ -36,17 +36,29 @@ extension View {
                     .tint(.secondary)
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button(action: onSave) {
+                Button(role: serverFormConfirmationRole(isEditing: isEditing), action: onSave) {
                     if isSaving {
                         ProgressView()
                             .controlSize(.small)
+                    } else if isEditing {
+                        Label("Save", systemImage: "checkmark")
+                            .labelStyle(.iconOnly)
                     } else {
-                        Text(isEditing ? String(localized: "Save") : String(localized: "Add"))
+                        Text(String(localized: "Add"))
                     }
                 }
+                .tint(isEditing ? Color.blue : nil)
+                .accessibilityLabel(isEditing ? Text("Save") : Text("Add"))
                 .disabled(saveButtonDisabled)
             }
         }
+    }
+
+    private func serverFormConfirmationRole(isEditing: Bool) -> ButtonRole? {
+        if #available(iOS 26, *), isEditing {
+            return .confirm
+        }
+        return nil
     }
 
     func moveServerPlatformActions(
