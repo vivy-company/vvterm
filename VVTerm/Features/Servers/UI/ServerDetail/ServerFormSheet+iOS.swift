@@ -31,31 +31,33 @@ extension View {
     ) -> some View {
         toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel", action: onCancel)
-                    .disabled(isSaving)
-                    .tint(.secondary)
+                if #available(iOS 26, *) {
+                    Button(role: .cancel, action: onCancel)
+                        .disabled(isSaving)
+                } else {
+                    Button("Cancel", action: onCancel)
+                        .disabled(isSaving)
+                }
             }
             ToolbarItem(placement: .confirmationAction) {
-                Button(role: serverFormConfirmationRole(isEditing: isEditing), action: onSave) {
+                Button(role: serverFormConfirmationRole, action: onSave) {
                     if isSaving {
                         ProgressView()
                             .controlSize(.small)
-                    } else if isEditing {
-                        Label("Save", systemImage: "checkmark")
-                            .labelStyle(.iconOnly)
                     } else {
-                        Text(String(localized: "Add"))
+                        Label(isEditing ? String(localized: "Save") : String(localized: "Add"), systemImage: "checkmark")
+                            .labelStyle(.iconOnly)
                     }
                 }
-                .tint(isEditing ? Color.blue : nil)
+                .tint(.blue)
                 .accessibilityLabel(isEditing ? Text("Save") : Text("Add"))
                 .disabled(saveButtonDisabled)
             }
         }
     }
 
-    private func serverFormConfirmationRole(isEditing: Bool) -> ButtonRole? {
-        if #available(iOS 26, *), isEditing {
+    private var serverFormConfirmationRole: ButtonRole? {
+        if #available(iOS 26, *) {
             return .confirm
         }
         return nil
