@@ -49,13 +49,15 @@ extension ThemeBuilderSheet {
                 .navigationTitle(title)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { dismiss() }
-                            .tint(.secondary)
+                        if #available(iOS 26, *) {
+                            Button(role: .cancel) { dismiss() }
+                        } else {
+                            Button("Cancel") { dismiss() }
+                                .tint(.secondary)
+                        }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            save()
-                        }
+                        SheetConfirmationButton(title: "Save", action: save)
                         .disabled(!canSave)
                     }
                     if onDeleteRequest != nil {

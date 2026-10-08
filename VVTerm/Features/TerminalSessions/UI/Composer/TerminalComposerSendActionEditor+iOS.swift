@@ -59,9 +59,9 @@ struct TerminalComposerSendActionEditor: View {
         .navigationBarTitleDisplayMode(.inline)
         .adaptiveSoftScrollEdges()
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+            ToolbarItem(placement: .cancellationAction) { SheetDismissButton(title: "Cancel") { dismiss() } }
             ToolbarItem(placement: .confirmationAction) {
-                Button("Save") { onSave(action) }
+                SheetConfirmationButton(title: "Save") { onSave(action) }
                     .disabled(!TerminalComposerSendActions(actions: [action]).isValid)
                     .accessibilityIdentifier("vvterm.composer.save-action")
             }

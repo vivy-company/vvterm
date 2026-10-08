@@ -147,12 +147,10 @@ struct TerminalCustomActionFormView: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    SheetDismissButton(title: "Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        saveAction()
-                    }
+                    SheetConfirmationButton(title: "Save", action: saveAction)
                     .disabled(!canSave)
                 }
             }

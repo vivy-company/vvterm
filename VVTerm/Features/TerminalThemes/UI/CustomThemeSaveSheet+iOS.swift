@@ -18,12 +18,10 @@ extension CustomThemeSaveSheet {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { dismiss() }
+                        SheetDismissButton(title: "Cancel") { dismiss() }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            save()
-                        }
+                        SheetConfirmationButton(title: "Save", action: save)
                         .disabled(!canSave)
                     }
                 }

@@ -89,12 +89,10 @@ struct EnvironmentFormSheet: View {
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    SheetDismissButton(title: "Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isEditing ? "Save" : "Create") {
-                        saveEnvironment()
-                    }
+                    SheetConfirmationButton(title: isEditing ? "Save" : "Create", action: saveEnvironment)
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isSaving)
                 }
             }
