@@ -6,6 +6,7 @@ private struct StatsSheetCloseToolbarModifier: ViewModifier {
     let placement: StatsSheetClosePlacement
 
     private var closePlacement: ToolbarItemPlacement {
+        if #available(iOS 26, *) { return .cancellationAction }
         switch placement {
         case .automatic, .trailing:
             return .topBarTrailing
@@ -18,14 +19,7 @@ private struct StatsSheetCloseToolbarModifier: ViewModifier {
         content
             .toolbar {
                 ToolbarItem(placement: closePlacement) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.secondary)
-                    }
+                    SheetDismissButton(fallbackLabel: .icon) { dismiss() }
                     .accessibilityLabel(Text("Close"))
                 }
             }

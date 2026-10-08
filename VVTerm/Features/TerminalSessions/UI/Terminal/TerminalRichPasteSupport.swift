@@ -558,7 +558,7 @@ struct TerminalRichPastePromptSheet: View {
                     actionRow
                 }
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
+                    ToolbarItem(placement: .cancellationAction) {
                         closeButton
                     }
                 }
@@ -584,10 +584,12 @@ struct TerminalRichPastePromptSheet: View {
     }
 
     private var closeButton: some View {
+        #if os(iOS)
+        SheetDismissButton(fallbackLabel: .icon, action: cancelAndDismiss)
+        #else
         Button {
             cancelAndDismiss()
         } label: {
-            #if os(macOS)
             Image(systemName: "xmark")
                 .font(.system(size: 16, weight: .semibold))
                 .symbolRenderingMode(.hierarchical)
@@ -597,15 +599,10 @@ struct TerminalRichPastePromptSheet: View {
                     Circle()
                         .fill(Color.primary.opacity(0.08))
                 )
-            #else
-            Image(systemName: "xmark")
-                .font(.system(size: 16, weight: .semibold))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-            #endif
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Close")
+        #endif
     }
 
     private var contentBody: some View {

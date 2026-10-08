@@ -412,9 +412,7 @@ struct LockedWorkspaceServerManagementSheet: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Done") {
-                    dismiss()
-                }
+                SheetDismissButton(title: "Done") { dismiss() }
             }
         }
         #endif

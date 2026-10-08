@@ -25,13 +25,8 @@ struct SessionsScreen: View {
             .navigationTitle("Sessions")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .symbolRenderingMode(.hierarchical)
-                            .foregroundStyle(.secondary)
-                    }
+                ToolbarItem(placement: .cancellationAction) {
+                    SheetDismissButton(fallbackLabel: .icon) { dismiss() }
                     .accessibilityLabel("Close")
                 }
             }

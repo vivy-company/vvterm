@@ -11,14 +11,7 @@ extension ServerIconChooserSheet {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button {
-                            close()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.secondary)
-                        }
+                        SheetDismissButton(fallbackLabel: .icon) { close() }
                         .accessibilityLabel("Close")
                         .accessibilityIdentifier("vvterm.serverIcon.close")
                     }

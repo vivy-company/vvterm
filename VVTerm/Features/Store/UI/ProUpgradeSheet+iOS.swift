@@ -27,13 +27,8 @@ extension ProUpgradeSheet {
                         }
                     }
 
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: onClose) {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.secondary)
-                        }
+                    ToolbarItem(placement: .cancellationAction) {
+                        SheetDismissButton(fallbackLabel: .icon, action: onClose)
                     }
                 }
         }

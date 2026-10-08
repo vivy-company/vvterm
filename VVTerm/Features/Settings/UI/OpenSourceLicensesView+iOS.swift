@@ -8,15 +8,8 @@ extension OpenSourceLicensesView {
                 .navigationTitle(Text("Open Source & Licenses"))
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            dismiss()
-                        } label: {
-                            Image(systemName: "xmark")
-                                .font(.system(size: 16, weight: .semibold))
-                                .symbolRenderingMode(.hierarchical)
-                                .foregroundStyle(.secondary)
-                        }
+                    ToolbarItem(placement: .cancellationAction) {
+                        SheetDismissButton(fallbackLabel: .icon) { dismiss() }
                         .accessibilityLabel(Text("Close"))
                         .accessibilityIdentifier("vvterm.openSourceLicenses.close")
                     }

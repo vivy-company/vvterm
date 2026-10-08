@@ -767,9 +767,15 @@ struct PublicKeyDisplaySheet: View {
             .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
+                #if os(iOS)
+                ToolbarItem(placement: .cancellationAction) {
+                    SheetDismissButton(title: "Done") { dismiss() }
+                }
+                #else
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
                 }
+                #endif
             }
         }
         .adaptiveSoftScrollEdges()

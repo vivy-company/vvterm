@@ -20,10 +20,8 @@ struct TerminalConnectionStatusView: View {
                     NavigationStack {
                         sheetContent
                             .toolbar {
-                                ToolbarItem(placement: .confirmationAction) {
-                                    Button(action: dismissCurrentPresentation) {
-                                        Image(systemName: "xmark")
-                                    }
+                                ToolbarItem(placement: .cancellationAction) {
+                                    SheetDismissButton(fallbackLabel: .icon, action: dismissCurrentPresentation)
                                     .accessibilityLabel(String(localized: "Close"))
                                     .accessibilityIdentifier("vvterm.connectionStatus.close")
                                 }

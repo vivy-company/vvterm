@@ -304,11 +304,7 @@ struct WorkspacePickerSheet: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button {
-                    onDismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                }
+                SheetDismissButton(fallbackLabel: .icon) { onDismiss() }
             }
 
             ToolbarItem(placement: .primaryAction) {
