@@ -118,6 +118,8 @@ final class NoticePresentationUITests: XCTestCase {
         XCTAssertFalse(close.waitForExistence(timeout: 1))
         XCTAssertLessThan(banner.frame.maxY, app.frame.midY)
         XCTAssertEqual(banner.frame.midX, app.frame.midX, accuracy: 2)
+        XCTAssertGreaterThanOrEqual(banner.frame.minX, app.frame.minX + 12)
+        XCTAssertLessThanOrEqual(banner.frame.maxX, app.frame.maxX - 12)
         XCTAssertLessThan(banner.frame.width, app.frame.width * 0.8)
     }
 

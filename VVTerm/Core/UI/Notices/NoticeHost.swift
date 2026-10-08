@@ -164,8 +164,9 @@ struct NoticeHost<Content: View>: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .overlay {
                 GeometryReader { proxy in
-                    ZStack {
-                        VStack(spacing: 0) {
+                    Color.clear
+                        .allowsHitTesting(false)
+                        .overlay(alignment: .top) {
                             if let topBanner {
                                 NoticeBannerView(item: topBanner, surfaceStyle: bannerSurfaceStyle)
                                     .frame(maxWidth: .infinity)
@@ -174,13 +175,8 @@ struct NoticeHost<Content: View>: View {
                                     .transition(.move(edge: .top).combined(with: .opacity))
                                     .allowsHitTesting(true)
                             }
-
-                            Spacer(minLength: 0)
                         }
-
-                        VStack(spacing: 0) {
-                            Spacer(minLength: 0)
-
+                        .overlay(alignment: .bottom) {
                             if !bottomOperations.isEmpty {
                                 VStack(alignment: .trailing, spacing: 8) {
                                     if bottomOperations.count > 1 {
@@ -194,7 +190,7 @@ struct NoticeHost<Content: View>: View {
                                                 .zIndex(operationZIndex(for: item))
                                                 .transition(.move(edge: .bottom).combined(with: .opacity))
                                                 .allowsHitTesting(true)
-                                            }
+                                        }
                                     }
                                 }
                                 .frame(maxWidth: NoticeMetrics.operationMaxWidth, alignment: .trailing)
@@ -202,10 +198,6 @@ struct NoticeHost<Content: View>: View {
                                 .padding(.bottom, bottomPadding(for: proxy.safeAreaInsets))
                             }
                         }
-                    }
-                    // SwiftUI already proposes the available detail width. Subtracting
-                    // horizontal safe-area insets again shifts notices off center.
-                    .frame(width: proxy.size.width, height: proxy.size.height)
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: topBanner?.id)
