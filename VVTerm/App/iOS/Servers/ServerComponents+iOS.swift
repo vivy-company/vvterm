@@ -214,21 +214,22 @@ struct WorkspacePickerSheet: View {
                         }
 
                         Text(workspace.name)
-                            .foregroundStyle(isLocked ? .secondary : .primary)
+                            .foregroundStyle(isLocked ? Color.secondary : Color.primary)
 
                         Spacer()
 
                         if isLocked {
                             LockedBadge()
                         } else {
+                            let count = serverManager.servers(in: workspace, environment: nil).count
+                            Text(count == 1 ? String(localized: "1 server") : LocalizedFormat.string("%lld servers", Int64(count)))
+                                .font(.caption)
+                                .foregroundStyle(Color.secondary)
+
                             if selectedWorkspace?.id == workspace.id {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(Color.primary)
                             }
-
-                            Text(serverManager.servers(in: workspace, environment: nil).count, format: .number)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
                         }
                     }
                     .opacity(isLocked ? 0.7 : 1.0)
