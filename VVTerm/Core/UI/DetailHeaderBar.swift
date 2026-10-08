@@ -61,6 +61,18 @@ struct DetailCloseButton: View {
     var color: Color = .secondary
 
     var body: some View {
+        #if os(iOS)
+        if #available(iOS 26, *) {
+            SheetDismissButton(action: action)
+        } else {
+            legacyButton
+        }
+        #else
+        legacyButton
+        #endif
+    }
+
+    private var legacyButton: some View {
         Button(action: action) {
             Image(systemName: "xmark")
                 .font(.system(size: size))

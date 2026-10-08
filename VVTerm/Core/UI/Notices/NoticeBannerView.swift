@@ -118,9 +118,7 @@ private struct NoticeDetailView: View {
             .navigationTitle(String(localized: "Diagnostics"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(String(localized: "Close")) {
-                        dismiss()
-                    }
+                    SheetDismissButton { dismiss() }
                     .accessibilityIdentifier("vvterm.notice.detailClose")
                 }
 
