@@ -2,6 +2,47 @@ import XCTest
 @testable import VVTerm
 
 final class StatsGridLayoutPolicyTests: XCTestCase {
+    func testFoldSeparatesColumnsAtItsActualPosition() {
+        let columns = StatsGridLayoutPolicy.columns(
+            for: 840, minimumColumnWidth: 320, spacing: 18, division: 440...460
+        )
+        XCTAssertEqual(columns.count, 2)
+        XCTAssertEqual(columns[0].minX, 0)
+        XCTAssertEqual(columns[0].maxX, 431)
+        XCTAssertEqual(columns[1].minX, 469)
+        XCTAssertEqual(columns[1].maxX, 840)
+    }
+
+    func testFoldKeepsTwoColumnsEvenBelowNormalGridBreakpoint() {
+        let columns = StatsGridLayoutPolicy.columns(
+            for: 600, minimumColumnWidth: 320, spacing: 18, division: 300...320
+        )
+        XCTAssertEqual(columns.count, 2)
+        XCTAssertEqual(columns[0].width, 291)
+        XCTAssertEqual(columns[1].width, 271)
+    }
+
+    func testDivisionOutsideContentDoesNotAddAColumn() {
+        let divisions: [ClosedRange<CGFloat>] = [-30 ... -10, 400 ... 420, 0 ... 10, 380 ... 400]
+        for division in divisions {
+            let columns = StatsGridLayoutPolicy.columns(
+                for: 400, minimumColumnWidth: 320, spacing: 18, division: division
+            )
+            XCTAssertEqual(columns.count, 1)
+            XCTAssertEqual(columns[0].width, 400)
+        }
+    }
+
+    func testNormalGridKeepsEqualColumnsAndSpacing() {
+        let columns = StatsGridLayoutPolicy.columns(
+            for: 1000, minimumColumnWidth: 320, spacing: 18, division: nil
+        )
+        XCTAssertEqual(columns.count, 3)
+        XCTAssertEqual(columns[0].width, columns[2].width)
+        XCTAssertEqual(columns[1].minX - columns[0].maxX, 18, accuracy: 0.001)
+        XCTAssertEqual(columns[2].maxX, 1000, accuracy: 0.001)
+    }
+
     func testCompactBreakpointsSelectOneTwoAndThreeColumns() {
         assertBreakpoints(
             minimumColumnWidth: 292,

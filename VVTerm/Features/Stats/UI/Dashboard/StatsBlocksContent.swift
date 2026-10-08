@@ -34,6 +34,32 @@ struct StatsAppearancePreviewContent: View {
 }
 
 nonisolated enum StatsGridLayoutPolicy {
+    static func columns(
+        for availableWidth: CGFloat,
+        minimumColumnWidth: CGFloat,
+        spacing: CGFloat,
+        division: ClosedRange<CGFloat>?
+    ) -> [CGRect] {
+        let width = availableWidth.isFinite ? max(0, availableWidth) : max(0, minimumColumnWidth)
+        let gap = spacing.isFinite ? max(0, spacing) : 0
+        if let division,
+           division.lowerBound.isFinite, division.upperBound.isFinite {
+            let leadingEnd = division.lowerBound - gap / 2
+            let trailingStart = division.upperBound + gap / 2
+            if leadingEnd > 0, trailingStart < width {
+                return [
+                    CGRect(x: 0, y: 0, width: leadingEnd, height: 0),
+                    CGRect(x: trailingStart, y: 0, width: width - trailingStart, height: 0)
+                ]
+            }
+        }
+        let count = columnCount(for: width, minimumColumnWidth: minimumColumnWidth, spacing: gap)
+        let columnWidth = max(0, (width - CGFloat(count - 1) * gap) / CGFloat(count))
+        return (0..<count).map {
+            CGRect(x: CGFloat($0) * (columnWidth + gap), y: 0, width: columnWidth, height: 0)
+        }
+    }
+
     static func minimumGridWidth(
         for columnCount: Int,
         minimumColumnWidth: CGFloat,
@@ -68,10 +94,11 @@ nonisolated enum StatsGridLayoutPolicy {
     }
 }
 
-private struct StatsCardsGridLayout: Layout {
+struct StatsCardsGridLayout: Layout {
     let minimumColumnWidth: CGFloat
     let spacing: CGFloat
     let preferredColumnSpans: [Int]
+    var division: ClosedRange<CGFloat>? = nil
 
     func makeCache(subviews: Subviews) -> Cache {
         Cache()
@@ -98,7 +125,9 @@ private struct StatsCardsGridLayout: Layout {
         cache: inout Cache
     ) {
         let resolvedMeasurement: Measurement
-        if let cachedMeasurement = cache.measurement, cachedMeasurement.size.width == bounds.width {
+        if let cachedMeasurement = cache.measurement,
+           cachedMeasurement.size.width == bounds.width,
+           cachedMeasurement.division == division {
             resolvedMeasurement = cachedMeasurement
         } else {
             resolvedMeasurement = measurement(for: bounds.width, subviews: subviews)
@@ -110,8 +139,8 @@ private struct StatsCardsGridLayout: Layout {
         }
 
         for item in resolvedMeasurement.items {
-            let width = resolvedMeasurement.width(forColumnSpan: item.columnSpan)
-            let x = bounds.minX + CGFloat(item.column) * (resolvedMeasurement.columnWidth + spacing)
+            let width = resolvedMeasurement.width(for: item)
+            let x = bounds.minX + resolvedMeasurement.columns[item.column].minX
             subviews[item.index].place(
                 at: CGPoint(x: x, y: rowOffsets[item.row]),
                 anchor: .topLeading,
@@ -122,13 +151,13 @@ private struct StatsCardsGridLayout: Layout {
 
     private func measurement(for proposedWidth: CGFloat?, subviews: Subviews) -> Measurement {
         let availableWidth = resolvedWidth(proposedWidth)
-        let columnCount = StatsGridLayoutPolicy.columnCount(
+        let columns = StatsGridLayoutPolicy.columns(
             for: availableWidth,
             minimumColumnWidth: minimumColumnWidth,
-            spacing: spacing
+            spacing: spacing,
+            division: division
         )
-        let totalSpacing = CGFloat(columnCount - 1) * spacing
-        let columnWidth = max(0, (availableWidth - totalSpacing) / CGFloat(columnCount))
+        let columnCount = columns.count
         var items: [Item] = []
         var rowHeights: [CGFloat] = []
         var row = 0
@@ -148,7 +177,7 @@ private struct StatsCardsGridLayout: Layout {
                 rowHeights.append(0)
             }
 
-            let itemWidth = columnWidth * CGFloat(columnSpan) + spacing * CGFloat(columnSpan - 1)
+            let itemWidth = columns[column + columnSpan - 1].maxX - columns[column].minX
             let size = subviews[index].sizeThatFits(ProposedViewSize(width: itemWidth, height: nil))
             rowHeights[row] = max(rowHeights[row], size.height)
             items.append(Item(index: index, row: row, column: column, columnSpan: columnSpan))
@@ -164,10 +193,10 @@ private struct StatsCardsGridLayout: Layout {
             + CGFloat(max(0, rowHeights.count - 1)) * spacing
         return Measurement(
             size: CGSize(width: availableWidth, height: totalHeight),
-            columnWidth: columnWidth,
+            division: division,
+            columns: columns,
             items: items,
-            rowHeights: rowHeights,
-            spacing: spacing
+            rowHeights: rowHeights
         )
     }
 
@@ -195,13 +224,12 @@ private struct StatsCardsGridLayout: Layout {
 
     struct Measurement {
         let size: CGSize
-        let columnWidth: CGFloat
+        let division: ClosedRange<CGFloat>?
+        let columns: [CGRect]
         let items: [Item]
         let rowHeights: [CGFloat]
-        let spacing: CGFloat
-
-        func width(forColumnSpan span: Int) -> CGFloat {
-            columnWidth * CGFloat(span) + spacing * CGFloat(span - 1)
+        func width(for item: Item) -> CGFloat {
+            columns[item.column + item.columnSpan - 1].maxX - columns[item.column].minX
         }
     }
 }
@@ -303,12 +331,19 @@ struct StatsBlocksContent: View {
     }
 
     private func responsiveGrid(style: StatsVisualStyle) -> some View {
+        StatsFoldAwareGrid { division in
+            cardsGrid(style: style, division: division)
+        }
+    }
+
+    private func cardsGrid(style: StatsVisualStyle, division: ClosedRange<CGFloat>?) -> some View {
         StatsCardsGridLayout(
             minimumColumnWidth: style.gridMinimumColumnWidth,
             spacing: style.cardSpacing,
             preferredColumnSpans: renderedBlocks.map { blockID in
                 blockID == .docker && isDockerUnlocked ? 2 : 1
-            }
+            },
+            division: division
         ) {
             ForEach(renderedBlocks, id: \.self) { blockID in
                 statsBlock(blockID, style: style)
