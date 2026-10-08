@@ -7,12 +7,12 @@ struct TerminalClipboardPasteSettingsView: View {
     @AppStorage("terminalCopyFlattenCommands") private var copyFlattenCommands = false
     @AppStorage("terminalCopyRemoveBoxDrawing") private var copyRemoveBoxDrawing = false
     @AppStorage("terminalCopyStripAnsiCodes") private var copyStripAnsiCodes = true
-    @AppStorage("terminalImagePasteBehavior") private var imagePasteBehaviorRaw = ImagePasteBehavior.askOnce.rawValue
+    @AppStorage(ImagePasteBehavior.userDefaultsKey) private var imagePasteBehaviorRaw = ImagePasteBehavior.defaultValue.rawValue
     @AppStorage(TerminalRemoteClipboardPolicy.userDefaultsKey)
     private var remoteClipboardPolicyRaw = TerminalRemoteClipboardPolicy.defaultValue.rawValue
 
     private var imagePasteBehavior: ImagePasteBehavior {
-        ImagePasteBehavior(rawValue: imagePasteBehaviorRaw) ?? .askOnce
+        ImagePasteBehavior(rawValue: imagePasteBehaviorRaw) ?? ImagePasteBehavior.defaultValue
     }
 
     private var imagePasteBehaviorBinding: Binding<ImagePasteBehavior> {

@@ -6,6 +6,7 @@ nonisolated enum ImagePasteBehavior: String, CaseIterable, Identifiable, Sendabl
     case automatic
 
     static let userDefaultsKey = "terminalImagePasteBehavior"
+    static let defaultValue: Self = .automatic
 
     var id: String { rawValue }
 
@@ -42,7 +43,7 @@ nonisolated struct RichClipboardSettings: Sendable {
             return behavior
         }
 
-        return .askOnce
+        return ImagePasteBehavior.defaultValue
     }
 
     static func persistImagePasteBehavior(

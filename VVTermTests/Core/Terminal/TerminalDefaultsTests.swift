@@ -169,7 +169,7 @@ struct TerminalDefaultsTests {
         #expect(defaults.string(forKey: TerminalDefaults.fontNameKey) == TerminalDefaults.defaultFontName)
         #expect(defaults.object(forKey: TerminalDefaults.fontSizeKey) as? Double == TerminalDefaults.defaultFontSize)
         #endif
-        #expect(defaults.object(forKey: ImagePasteBehavior.userDefaultsKey) as? String == ImagePasteBehavior.askOnce.rawValue)
+        #expect(defaults.object(forKey: ImagePasteBehavior.userDefaultsKey) as? String == ImagePasteBehavior.automatic.rawValue)
     }
 
     @Test
