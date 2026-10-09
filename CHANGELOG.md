@@ -8,6 +8,7 @@
 - Updated iOS sheets with native dismiss and confirmation controls.
 - Simplified workspace selection and server environment filters on iOS.
 - Grouped iOS file actions in the More menu.
+- Centered the view selector in the horizontal iOS toolbar.
 - Improved SSH key setup buttons and shortened session actions to show the session tool name.
 - Images upload automatically when pasted by default. Existing image paste settings are preserved.
 
