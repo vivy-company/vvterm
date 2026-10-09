@@ -23,9 +23,9 @@ final class ConnectionViewNavigationUITests: TerminalReconnectUITestCase {
     }
 
     @MainActor
-    func testHorizontalViewPickerKeepsPositionWhenFilesAddsSearch() throws {
+    func testHorizontalViewPickerStaysCenteredWhenFilesAddsSearch() throws {
         guard #available(iOS 27.1, *) else {
-            throw XCTSkip("Stable leading placement applies to iOS 27.1 and later.")
+            throw XCTSkip("This toolbar applies to iOS 27.1 and later.")
         }
         let (app, _) = launchProductionSSHTestHarness()
         defer { app.terminate() }
@@ -34,7 +34,9 @@ final class ConnectionViewNavigationUITests: TerminalReconnectUITestCase {
             throw XCTSkip("This test needs a horizontal toolbar.")
         }
         let initialFrame = picker.frame
-        XCTAssertLessThan(initialFrame.midX, app.frame.midX)
+        let navigationBar = app.navigationBars.firstMatch
+        XCTAssertTrue(navigationBar.exists)
+        XCTAssertEqual(initialFrame.midX, navigationBar.frame.midX, accuracy: 1)
         let files = picker.buttons.containing(.image, identifier: "folder").firstMatch
         let terminal = picker.buttons.containing(.image, identifier: "terminal").firstMatch
         for _ in 0..<2 {

@@ -24,9 +24,7 @@ struct ConnectionViewPickerToolbar: ToolbarContent {
                 }
             }
         } else {
-            // Search can move a principal item. Keep destinations beside navigation.
-            ToolbarSpacer(.fixed, placement: .topBarLeading)
-            ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: .principal) {
                 ConnectionViewSegmentedPicker(selection: $selection, tabs: tabs)
                     .fixedSize()
             }
