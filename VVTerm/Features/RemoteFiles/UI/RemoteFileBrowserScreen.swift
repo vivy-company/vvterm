@@ -775,9 +775,11 @@ struct RemoteFileBrowserScreen<ConnectionActions: View>: View {
     }
 
     func handleUploadSelection(_ result: Result<[URL], Error>, toPresentedDestination destinationPath: String) {
-        guard case .upload(let currentDestination) = presentation,
-              currentDestination == destinationPath else { return }
-        dismissPresentation()
+        if case .upload(let currentDestination) = presentation,
+           currentDestination == destinationPath {
+            dismissPresentation()
+        }
+        // The native picker can return its result after SwiftUI clears the sheet.
         handleUploadSelection(result, to: destinationPath)
     }
 
