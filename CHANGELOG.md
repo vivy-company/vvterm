@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.2
+
+### Fixed
+
+- Fixed file uploads not starting after selecting files in the iOS Files tab.
+
 ## 3.3.1
 
 ### Fixed
