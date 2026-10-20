@@ -128,7 +128,7 @@ operations, safe recovery messages, disabled setup before sign-in, and the local
 removal warning/dismissal. The library's native protocol test also passed against
 Teleport 18.11.4 with an injected software key. These checks do not prove Secure
 Enclave, biometric prompts, signed Keychain persistence, or app-to-server traffic.
-See the library's [exact validation limits](https://github.com/wiedymi/swift-teleport/blob/9d7378c6450ed68e4e6fc0a5f3c6aea1fc97ecea/docs/VALIDATION.md).
+See the library's [exact validation limits](https://github.com/wiedymi/swift-teleport/blob/04ae4765a6abf5228c8a4badc39355a23ac89ab1/docs/VALIDATION.md).
 
 ## Documentation
 
