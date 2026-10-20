@@ -79,7 +79,7 @@
 
     <!-- Face ID -->
     <key>NSFaceIDUsageDescription</key>
-    <string>VVTerm uses Face ID to unlock the app and protected servers.</string>
+    <string>VVTerm uses Face ID to unlock the app and protected servers, and to approve Teleport sign-in.</string>
 
     <!-- Live Activities -->
     <key>NSSupportsLiveActivities</key>

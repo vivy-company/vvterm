@@ -54,6 +54,15 @@ private struct TeleportProfileContent: View {
             } else {
                 loginControls
             }
+            TeleportDeviceCredentialControls(service: service, model: model)
+            if let result = model.credentialResult {
+                switch result {
+                case .registered:
+                    Text("Device credential registered. Use your password and Face ID or Touch ID to sign in.")
+                case .deleted:
+                    Text("Local device credential removed. Remove its server entry in Teleport separately.")
+                }
+            }
             if let error = model.errorMessage {
                 Text(error)
                     .foregroundStyle(.red)
@@ -110,6 +119,12 @@ private struct TeleportProfileContent: View {
                     .disabled(model.isBusy)
                 Button("Sign in") {
                     model.login(password: password, otp: otp)
+                    password = ""
+                    otp = ""
+                }
+                .disabled(model.isBusy || password.isEmpty)
+                Button("Sign in with device biometrics") {
+                    model.loginWithSecureEnclave(password: password)
                     password = ""
                     otp = ""
                 }
@@ -184,7 +199,9 @@ private struct TeleportProfileContent: View {
         switch model.operation {
         case .idle: ""
         case .loading: "Checking access…"
-        case .passwordLogin, .browserLogin: "Signing in…"
+        case .passwordLogin, .browserLogin, .biometricLogin: "Signing in…"
+        case .registeringCredential: "Setting up device credential…"
+        case .deletingCredential: "Removing local credential…"
         case .loadingNodes: "Loading nodes…"
         case .signingOut: "Signing out…"
         }

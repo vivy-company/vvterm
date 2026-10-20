@@ -2368,3 +2368,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Tento profil Teleport se přihlašuje. Dokončete nebo zrušte přihlášení a zkuste to znovu.";
 "Approve with a passkey or security key" = "Potvrdit přístupovým nebo bezpečnostním klíčem";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Přihlášení biometrií zařízení";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Heslo Teleport je stále nutné. Pro obnovení přístupu si ponechte jiný způsob přihlášení.";
+"Set up device credential…" = "Nastavit přihlašovací údaj zařízení…";
+"Sign in to this local account before setup." = "Před nastavením se přihlaste k tomuto místnímu účtu.";
+"Remove local device credential…" = "Odebrat místní přihlašovací údaj…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Místní odebrání neodstraní záznam v Teleport ani nezruší vydaný přístup. Před novým nastavením odeberte záznam na serveru Teleport.";
+"Remove this device's Teleport credential?" = "Odebrat přihlašovací údaj Teleport tohoto zařízení?";
+"Remove local credential" = "Odebrat místní přihlašovací údaj";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Přihlaste se jinak a před novým nastavením odeberte záznam na serveru Teleport. Současný přístup zůstává platný.";
+"Device credential name" = "Název přihlašovacího údaje zařízení";
+"Fresh one-time code (if required)" = "Nový jednorázový kód (je-li nutný)";
+"Set up with one-time code" = "Nastavit pomocí jednorázového kódu";
+"Set up with browser approval" = "Nastavit schválením v prohlížeči";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Použijte nový kód nebo existující přístupový či bezpečnostní klíč. Face ID nebo Touch ID chrání nový klíč. Zůstává na tomto zařízení, odděleně od klíčů SSH.";
+"Set up Teleport credential" = "Nastavit přihlašovací údaj Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Přihlašovací údaj zařízení zaregistrován. Přihlaste se heslem a Face ID nebo Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Místní přihlašovací údaj odebrán. Jeho záznam na serveru Teleport odeberte samostatně.";
+"Sign in with device biometrics" = "Přihlásit biometrií zařízení";
+"Setting up device credential…" = "Nastavování přihlašovacího údaje…";
+"Removing local credential…" = "Odebírání místního údaje…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Schvalte přihlášení Teleport pomocí Face ID nebo Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Nastavte přihlášení Teleport pomocí Face ID nebo Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave není k dispozici. Použijte jiný způsob přihlášení.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID nebo Touch ID není k dispozici. Zkontrolujte nastavení systému nebo se přihlaste jinak.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Místní klíč zařízení chybí nebo jej nelze použít. Přihlaste se jinak. Před novým nastavením odeberte jeho záznam v Teleport.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Místní přihlašovací údaj již existuje. Použijte biometrii zařízení nebo před novým nastavením odeberte místní klíč a jeho záznam v Teleport.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Uložení přihlašovacího údaje selhalo. Přihlaste se jinak. Zkontrolujte, zda v Teleport není záznam neúspěšného nastavení.";

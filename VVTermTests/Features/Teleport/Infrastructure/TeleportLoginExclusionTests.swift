@@ -40,6 +40,39 @@ private actor TeleportLoginPause {
 @MainActor
 struct TeleportLoginExclusionTests {
     @Test
+    func credentialChangeExcludesAnotherLoginAndReleasesAfterFailure() async throws {
+        let keychain = KeychainStore(service: "test.teleport.credential", backing: InMemoryKeychainStoreBacking())
+        let service = makeService(keychain: keychain)
+        let profile = try TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice")
+        let pause = TeleportLoginPause()
+        let setup = Task {
+            try await service.performAuthentication(profile: profile) { _ in
+                await pause.pause()
+                throw TeleportLoginTestStop.stopped
+            } as Void
+        }
+        defer {
+            setup.cancel()
+            Task { await pause.release() }
+        }
+        await pause.waitUntilEntered()
+        do {
+            _ = try await service.performLogin(profile: profile) { _ in
+                throw TeleportLoginTestStop.stopped
+            }
+            Issue.record("Setup must exclude a second sign-in for the same account")
+        } catch TeleportAccessError.loginInProgress {}
+        await pause.release()
+        _ = await setup.result
+        do {
+            try await service.performAuthentication(profile: profile) { _ in
+                throw TeleportLoginTestStop.stopped
+            } as Void
+            Issue.record("The test operation must stop")
+        } catch TeleportLoginTestStop.stopped {}
+    }
+
+    @Test
     func canonicalProfileCannotStartASecondLoginAndCanRetryAfterCompletion() async throws {
         let keychain = KeychainStore(service: "test.teleport.login", backing: InMemoryKeychainStoreBacking())
         let service = makeService(keychain: keychain)

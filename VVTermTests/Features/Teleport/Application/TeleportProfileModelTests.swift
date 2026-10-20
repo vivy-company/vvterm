@@ -17,6 +17,62 @@ private final class TeleportOperationReleaseProbe: Sendable {
 
 @MainActor
 struct TeleportProfileModelTests {
+    enum DeviceOperation: CaseIterable { case login, registration, removal }
+
+    @Test(arguments: DeviceOperation.allCases)
+    func cancelledQueuedDeviceOperationDoesNotApplyAResult(operation: DeviceOperation) async throws {
+        let model = try makeModel()
+        switch operation {
+        case .login: model.loginWithSecureEnclave(password: "private password")
+        case .registration: model.registerSecureEnclaveCredential(name: "Test device", otp: "123456")
+        case .removal: model.deleteSecureEnclaveCredential()
+        }
+        model.cancel()
+        // The new task must check cancellation before reaching the service.
+        await Task.yield()
+        #expect(model.operation == .idle)
+        #expect(model.errorMessage == nil)
+        #expect(model.credentialResult == nil)
+        #expect(model.canRegisterCredential == false)
+    }
+
+    @Test
+    func cancelledQueuedSetupDoesNotCreateBrowser() async throws {
+        let model = try makeModel()
+        var factoryCalls = 0
+        await withCheckedContinuation { completion in
+            var probe: TeleportOperationReleaseProbe? = TeleportOperationReleaseProbe(completion)
+            model.registerSecureEnclaveCredential(name: "Test device") { [probe] _ in
+                withExtendedLifetime(probe) { factoryCalls += 1 }
+                throw TeleportError.transport("cancelled work must not execute")
+            }
+            model.cancel()
+            probe = nil
+        }
+        #expect(factoryCalls == 0)
+        #expect(model.operation == .idle)
+        #expect(model.errorMessage == nil)
+        #expect(model.credentialResult == nil)
+    }
+
+    @Test
+    func setupBrowserFailureUsesSafeRecoveryText() async throws {
+        let model = try makeModel()
+        let failure = TeleportError.transport("private callback token")
+        await withCheckedContinuation { completion in
+            var probe: TeleportOperationReleaseProbe? = TeleportOperationReleaseProbe(completion)
+            model.registerSecureEnclaveCredential(name: "Test device") { [probe] _ in
+                withExtendedLifetime(probe) {}
+                throw failure
+            }
+            probe = nil
+        }
+        #expect(model.operation == .idle)
+        #expect(model.errorMessage == TeleportAccessError.message(for: failure))
+        #expect(model.errorMessage?.contains("private callback token") == false)
+        #expect(model.credentialResult == nil)
+    }
+
     @Test(arguments: [false, true])
     func cancelledQueuedLoginDoesNotCreateBrowserOrApplyError(localMFA: Bool) async throws {
         let model = try makeModel()

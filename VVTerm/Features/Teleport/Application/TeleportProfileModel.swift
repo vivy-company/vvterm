@@ -4,6 +4,10 @@ import TeleportKit
 
 @MainActor
 final class TeleportProfileModel: ObservableObject {
+    typealias BrowserFactory = @MainActor (
+        @escaping @MainActor @Sendable () -> Void
+    ) throws -> any TeleportBrowserSession
+
     enum BrowserLogin: Sendable {
         case localMFA(password: String)
         case sso(TeleportConnector)
@@ -14,15 +18,21 @@ final class TeleportProfileModel: ObservableObject {
         case loading
         case passwordLogin
         case browserLogin
+        case biometricLogin
+        case registeringCredential
+        case deletingCredential
         case loadingNodes
         case signingOut
     }
+
+    enum CredentialResult { case registered, deleted }
 
     @Published private(set) var summary: TeleportAccessSummary?
     @Published private(set) var discovery: TeleportDiscovery?
     @Published private(set) var nodePage: TeleportNodePage?
     @Published private(set) var operation = Operation.idle
     @Published private(set) var errorMessage: String?
+    @Published private(set) var credentialResult: CredentialResult?
 
     private let profile: TeleportProfileConfiguration
     private let service: TeleportAccessService
@@ -35,6 +45,11 @@ final class TeleportProfileModel: ObservableObject {
     }
 
     var isBusy: Bool { operation != .idle }
+
+    var canRegisterCredential: Bool {
+        discovery?.authenticationType == "local"
+            && (summary.map { $0.account == profile.account && $0.validBefore > Date() } ?? false)
+    }
 
     var connectors: [TeleportConnector] {
         guard let discovery else { return [] }
@@ -72,15 +87,10 @@ final class TeleportProfileModel: ObservableObject {
 
     func login(
         browser method: BrowserLogin,
-        makeBrowserSession: @escaping @MainActor (
-            @escaping @MainActor @Sendable () -> Void
-        ) throws -> any TeleportBrowserSession
+        makeBrowserSession: @escaping BrowserFactory
     ) {
         perform(.browserLogin) { model in
-            let browser = try makeBrowserSession { [weak model] in
-                model?.cancel()
-            }
-            model.browser = browser
+            let browser = try model.startBrowser(makeBrowserSession)
             defer { browser.cancel() }
             let summary: TeleportAccessSummary
             switch method {
@@ -99,6 +109,42 @@ final class TeleportProfileModel: ObservableObject {
             model.summary = summary
             model.nodePage = nil
             try await model.readNodes(startKey: "")
+        }
+    }
+
+    func loginWithSecureEnclave(password: String) {
+        perform(.biometricLogin) { model in
+            let summary = try await model.service.loginWithSecureEnclave(
+                profile: model.profile, password: password,
+                prompt: String(localized: "Approve Teleport sign-in with Face ID or Touch ID.")
+            )
+            try Task.checkCancellation()
+            model.summary = summary
+            model.nodePage = nil
+            try await model.readNodes(startKey: "")
+        }
+    }
+
+    func registerSecureEnclaveCredential(
+        name: String, otp: String = "", makeBrowserSession: BrowserFactory? = nil
+    ) {
+        perform(.registeringCredential) { model in
+            let browser = try makeBrowserSession.map { try model.startBrowser($0) }
+            defer { browser?.cancel() }
+            try await model.service.registerSecureEnclaveCredential(
+                profile: model.profile, name: name, otp: otp, presenter: browser,
+                prompt: String(localized: "Set up Teleport sign-in with Face ID or Touch ID.")
+            )
+            try Task.checkCancellation()
+            model.credentialResult = .registered
+        }
+    }
+
+    func deleteSecureEnclaveCredential() {
+        perform(.deletingCredential) { model in
+            try await model.service.deleteSecureEnclaveCredential(profile: model.profile)
+            try Task.checkCancellation()
+            model.credentialResult = .deleted
         }
     }
 
@@ -131,12 +177,19 @@ final class TeleportProfileModel: ObservableObject {
         nodePage = page
     }
 
+    private func startBrowser(_ factory: BrowserFactory) throws -> any TeleportBrowserSession {
+        let browser = try factory { [weak self] in self?.cancel() }
+        self.browser = browser
+        return browser
+    }
+
     private func perform(
         _ operation: Operation,
         work: @escaping @MainActor (TeleportProfileModel) async throws -> Void
     ) {
         cancel()
         errorMessage = nil
+        credentialResult = nil
         self.operation = operation
         operationTask = Task { [weak self] in
             guard let self else { return }

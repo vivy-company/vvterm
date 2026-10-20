@@ -2412,3 +2412,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Hồ sơ Teleport này đang đăng nhập. Hãy hoàn tất hoặc hủy rồi thử lại.";
 "Approve with a passkey or security key" = "Phê duyệt bằng khóa truy cập hoặc khóa bảo mật";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Đăng nhập bằng sinh trắc học thiết bị";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Bạn vẫn cần mật khẩu Teleport. Hãy giữ một cách đăng nhập khác để khôi phục quyền truy cập.";
+"Set up device credential…" = "Thiết lập thông tin xác thực thiết bị…";
+"Sign in to this local account before setup." = "Đăng nhập vào tài khoản cục bộ này trước khi thiết lập.";
+"Remove local device credential…" = "Xóa thông tin xác thực thiết bị cục bộ…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Xóa cục bộ không xóa mục trong Teleport hay thu hồi quyền truy cập đã cấp. Hãy xóa mục trên máy chủ Teleport trước khi thiết lập lại.";
+"Remove this device's Teleport credential?" = "Xóa thông tin xác thực Teleport của thiết bị này?";
+"Remove local credential" = "Xóa thông tin xác thực cục bộ";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Đăng nhập bằng cách khác, rồi xóa mục trên máy chủ Teleport trước khi thiết lập lại. Quyền truy cập hiện tại vẫn có hiệu lực.";
+"Device credential name" = "Tên thông tin xác thực thiết bị";
+"Fresh one-time code (if required)" = "Mã dùng một lần mới (nếu cần)";
+"Set up with one-time code" = "Thiết lập bằng mã dùng một lần";
+"Set up with browser approval" = "Thiết lập bằng phê duyệt trên trình duyệt";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Dùng mã mới hoặc khóa truy cập hay khóa bảo mật hiện có. Face ID hoặc Touch ID bảo vệ khóa mới. Khóa này ở trên thiết bị này, tách biệt với khóa SSH.";
+"Set up Teleport credential" = "Thiết lập thông tin xác thực Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Đã đăng ký thông tin xác thực thiết bị. Đăng nhập bằng mật khẩu và Face ID hoặc Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Đã xóa thông tin xác thực thiết bị cục bộ. Hãy xóa riêng mục trên máy chủ Teleport.";
+"Sign in with device biometrics" = "Đăng nhập bằng sinh trắc học thiết bị";
+"Setting up device credential…" = "Đang thiết lập thông tin xác thực thiết bị…";
+"Removing local credential…" = "Đang xóa thông tin xác thực cục bộ…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Phê duyệt đăng nhập Teleport bằng Face ID hoặc Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Thiết lập đăng nhập Teleport bằng Face ID hoặc Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Không có Secure Enclave. Hãy dùng cách đăng nhập khác.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Không có Face ID hoặc Touch ID. Hãy kiểm tra cài đặt hệ thống hoặc đăng nhập bằng cách khác.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Khóa thiết bị cục bộ bị thiếu hoặc không dùng được. Đăng nhập bằng cách khác. Xóa mục Teleport của khóa trước khi thiết lập lại.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Đã có thông tin xác thực cục bộ. Dùng sinh trắc học thiết bị, hoặc xóa khóa cục bộ và mục Teleport của khóa trước khi thiết lập lại.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Lưu trữ thông tin xác thực thiết bị thất bại. Đăng nhập bằng cách khác. Kiểm tra Teleport để tìm mục do thiết lập thất bại để lại.";

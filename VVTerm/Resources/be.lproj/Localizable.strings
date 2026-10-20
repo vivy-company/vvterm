@@ -2368,3 +2368,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Для гэтага профілю Teleport ужо выконваецца ўваход. Завяршыце або скасуйце яго і паспрабуйце зноў.";
 "Approve with a passkey or security key" = "Пацвердзіць з дапамогай ключа доступу або ключа бяспекі";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Уваход з біяметрыяй прылады";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Пароль Teleport усё яшчэ патрэбны. Захавайце іншы спосаб уваходу для аднаўлення доступу.";
+"Set up device credential…" = "Наладзіць уліковыя даныя прылады…";
+"Sign in to this local account before setup." = "Перад наладжваннем увайдзіце ў гэты лакальны ўліковы запіс.";
+"Remove local device credential…" = "Выдаліць лакальныя даныя прылады…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Лакальнае выдаленне не выдаляе запіс Teleport і не адклікае выдадзены доступ. Перад паўторным наладжваннем выдаліце запіс на серверы Teleport.";
+"Remove this device's Teleport credential?" = "Выдаліць даныя Teleport гэтай прылады?";
+"Remove local credential" = "Выдаліць лакальныя даныя";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Увайдзіце іншым спосабам і перад паўторным наладжваннем выдаліце запіс на серверы Teleport. Бягучы доступ застанецца сапраўдным.";
+"Device credential name" = "Назва ўліковых даных прылады";
+"Fresh one-time code (if required)" = "Новы аднаразовы код (калі патрэбны)";
+"Set up with one-time code" = "Наладзіць з аднаразовым кодам";
+"Set up with browser approval" = "Наладзіць з пацвярджэннем у браўзеры";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Выкарыстайце новы код, наяўны ключ доступу або ключ бяспекі. Face ID ці Touch ID абараняе новы ключ. Ён застаецца на гэтай прыладзе асобна ад ключоў SSH.";
+"Set up Teleport credential" = "Наладзіць уліковыя даныя Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Даныя прылады зарэгістраваны. Увайдзіце з паролем і Face ID ці Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Лакальныя даныя прылады выдалены. Асобна выдаліце іх запіс на серверы Teleport.";
+"Sign in with device biometrics" = "Увайсці з біяметрыяй прылады";
+"Setting up device credential…" = "Наладжванне даных прылады…";
+"Removing local credential…" = "Выдаленне лакальных даных…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Пацвердзіце ўваход у Teleport праз Face ID ці Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Наладзьце ўваход у Teleport праз Face ID ці Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave недаступны. Выкарыстайце іншы спосаб уваходу.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID ці Touch ID недаступны. Праверце налады сістэмы або ўвайдзіце іншым спосабам.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Лакальны ключ прылады адсутнічае або непрыдатны. Увайдзіце іншым спосабам. Перад паўторным наладжваннем выдаліце яго запіс у Teleport.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Лакальныя даныя ўжо існуюць. Выкарыстайце біяметрыю прылады або перад паўторным наладжваннем выдаліце лакальны ключ і яго запіс у Teleport.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Не ўдалося захаваць даныя прылады. Увайдзіце іншым спосабам. Праверце Teleport на наяўнасць запісу няўдалага наладжвання.";

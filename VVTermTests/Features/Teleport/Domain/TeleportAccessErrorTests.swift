@@ -37,4 +37,17 @@ struct TeleportAccessErrorTests {
         #expect(TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.browserMFA))
             == TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))
     }
+
+    @Test
+    func deviceFailuresGiveDifferentSafeRecoveryActions() {
+        let errors: [TeleportError] = [
+            .secureEnclaveUnavailable, .biometricsUnavailable, .deviceCredentialMissing,
+            .deviceCredentialExists, .deviceCredentialStorage,
+        ]
+        let messages = errors.map(TeleportAccessError.message(for:))
+        #expect(Set(messages).count == errors.count)
+        #expect(messages.allSatisfy { !$0.isEmpty })
+        #expect(TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.authenticatorRequirements))
+            == TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))
+    }
 }

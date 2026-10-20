@@ -97,11 +97,38 @@ from an existing passkey or security key. The latter button appears when the
 proxy advertises WebAuthn. The server still decides whether browser MFA is
 enabled. Browser MFA is separate from GitHub, OIDC, and SAML sign-in; those
 buttons use the advertised SSO connector. Both paths use the system
-authentication browser and device-only identity storage. New passkey
-registration and native Apple passkey sign-in are not part of this support.
-The new local browser MFA path has unit checks only. Its pinned server test was
-blocked by the image download. Physical keys, system browser approval, and real
-provider SSO still need live checks; see TeleportKit's validation notes.
+authentication browser and device-only identity storage. Native access to saved
+Apple passkeys is not part of this support.
+The local browser MFA path has callback and protocol unit checks. Its pinned
+Chromium fixture download did not complete. Physical keys, system browser
+approval, and real provider SSO still need live checks; see TeleportKit's
+validation notes.
+
+Local accounts can also set up a device-bound Secure Enclave credential in the
+profile's **Device biometric sign-in** controls. Sign in first, then use a fresh
+one-time code or browser approval from an existing credential to authorize setup.
+The server decides which approval is required. Later sign-in still needs the
+Teleport password, plus Face ID or Touch ID. TeleportKit owns registration,
+WebAuthn, key use, and certificate checks. VVTerm supplies the setup and recovery
+screens, browser, prompt text, and storage settings.
+
+The library stores this authentication key under the injected identity Keychain
+service plus `.secure-enclave`, in the app's default signing access group. It is
+device-only and separate from App Lock and SSH/TLS keys. The iOS Face ID usage
+text covers Teleport. Existing Keychain signing settings are used; no Associated
+Domains capability is needed. Biometric enrollment changes or device replacement
+can make the local key unusable. Keep another sign-in method. Local removal does
+not remove the server credential, sign out, or revoke issued access. Remove a
+stale or failed setup entry through Teleport before setup again. Hardware SSH
+key policies and Device Trust remain unsupported.
+
+Current focused app checks passed: 25 macOS tests, 22 iOS Simulator tests, and
+one iOS form/recovery UI test. They cover cancellation, exclusive credential
+operations, safe recovery messages, disabled setup before sign-in, and the local
+removal warning/dismissal. The library's native protocol test also passed against
+Teleport 18.11.4 with an injected software key. These checks do not prove Secure
+Enclave, biometric prompts, signed Keychain persistence, or app-to-server traffic.
+See the library's [exact validation limits](https://github.com/wiedymi/swift-teleport/blob/670d819ce7013af4e993ca55c3a12a93d1f34b13/docs/VALIDATION.md).
 
 ## Documentation
 

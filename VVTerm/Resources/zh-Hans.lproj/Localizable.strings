@@ -2364,3 +2364,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "此 Teleport 配置正在登录。请完成或取消登录，然后重试。";
 "Approve with a passkey or security key" = "使用通行密钥或安全密钥批准";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "设备生物识别登录";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "仍需输入 Teleport 密码。请保留其他登录方式以恢复访问。";
+"Set up device credential…" = "设置设备凭据…";
+"Sign in to this local account before setup." = "请先登录此本地账户，再设置设备。";
+"Remove local device credential…" = "移除本地设备凭据…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "本地移除不会删除 Teleport 条目，也不会撤销已签发的访问权限。重新设置前，请先在 Teleport 中删除服务器条目。";
+"Remove this device's Teleport credential?" = "移除此设备的 Teleport 凭据？";
+"Remove local credential" = "移除本地凭据";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "请使用其他方式登录，然后在 Teleport 中删除服务器条目，再重新设置。当前访问权限仍有效。";
+"Device credential name" = "设备凭据名称";
+"Fresh one-time code (if required)" = "新的动态验证码（如需要）";
+"Set up with one-time code" = "使用动态验证码设置";
+"Set up with browser approval" = "使用浏览器批准设置";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "使用新的验证码或现有通行密钥或安全密钥。面容 ID 或触控 ID 会保护新密钥。该密钥仅保留在此设备上，与 SSH 密钥分开。";
+"Set up Teleport credential" = "设置 Teleport 凭据";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "设备凭据已注册。请使用密码和面容 ID 或触控 ID 登录。";
+"Local device credential removed. Remove its server entry in Teleport separately." = "本地设备凭据已移除。请另行在 Teleport 中删除对应的服务器条目。";
+"Sign in with device biometrics" = "使用设备生物识别登录";
+"Setting up device credential…" = "正在设置设备凭据…";
+"Removing local credential…" = "正在移除本地凭据…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "使用面容 ID 或触控 ID 批准 Teleport 登录。";
+"Set up Teleport sign-in with Face ID or Touch ID." = "使用面容 ID 或触控 ID 设置 Teleport 登录。";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave 不可用。请使用其他登录方式。";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "面容 ID 或触控 ID 不可用。请检查系统设置或使用其他方式登录。";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "本地设备密钥缺失或不可用。请使用其他方式登录。重新设置前，请删除其 Teleport 条目。";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "本地凭据已存在。请使用设备生物识别登录，或在重新设置前移除本地密钥及其 Teleport 条目。";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "设备凭据存储失败。请使用其他方式登录，并检查 Teleport 中是否存在设置失败留下的条目。";

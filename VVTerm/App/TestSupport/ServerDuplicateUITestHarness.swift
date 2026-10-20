@@ -83,6 +83,7 @@ struct ServerDuplicateUITestHarness: View {
                 if Self.usesTeleportFormHarness {
                     Button("Add Server") { formIntent = .create(prefill: nil) }
                         .accessibilityIdentifier("vvterm.teleportFormTest.add")
+                    TeleportDeviceCredentialUITestControls()
                 }
                 if !Self.usesTeleportFormHarness || !serverManager.servers.isEmpty {
                     #if os(iOS)

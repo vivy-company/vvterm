@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm verwendet Face ID, um die App und geschützte Server zu entsperren.";
+"NSFaceIDUsageDescription" = "VVTerm verwendet Face ID zum Entsperren der App und geschützter Server sowie zum Bestätigen der Teleport-Anmeldung.";
 "NSLocalNetworkUsageDescription" = "VVTerm verwendet dein lokales Netzwerk, um SSH-Server zu finden, aufzuwecken und zu verbinden.";
 "NSMicrophoneUsageDescription" = "VVTerm benötigt Mikrofonzugriff, um Sprachbefehle in Terminaleingaben umzuwandeln.";
 "NSSpeechRecognitionUsageDescription" = "VVTerm verwendet Spracherkennung, um Sprache in Terminalbefehle umzuwandeln.";

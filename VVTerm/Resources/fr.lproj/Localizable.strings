@@ -2369,3 +2369,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "La connexion à ce profil Teleport est en cours. Terminez-la ou annulez-la, puis réessayez.";
 "Approve with a passkey or security key" = "Approuver avec une clé d’accès ou de sécurité";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Connexion biométrique de l’appareil";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Votre mot de passe Teleport reste nécessaire. Gardez un autre moyen de connexion pour la récupération.";
+"Set up device credential…" = "Configurer l’identifiant de l’appareil…";
+"Sign in to this local account before setup." = "Connectez-vous à ce compte local avant la configuration.";
+"Remove local device credential…" = "Supprimer l’identifiant local de l’appareil…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "La suppression locale ne supprime pas l’entrée Teleport et ne révoque pas les accès accordés. Supprimez l’entrée du serveur dans Teleport avant de recommencer.";
+"Remove this device's Teleport credential?" = "Supprimer l’identifiant Teleport de cet appareil ?";
+"Remove local credential" = "Supprimer l’identifiant local";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Connectez-vous autrement, puis supprimez l’entrée du serveur dans Teleport avant de recommencer. L’accès actuel reste valide.";
+"Device credential name" = "Nom de l’identifiant de l’appareil";
+"Fresh one-time code (if required)" = "Nouveau code à usage unique (si nécessaire)";
+"Set up with one-time code" = "Configurer avec un code à usage unique";
+"Set up with browser approval" = "Configurer avec l’approbation du navigateur";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Utilisez un nouveau code, une clé d’accès ou une clé de sécurité existante. Face ID ou Touch ID protège la nouvelle clé. Elle reste sur cet appareil, séparée des clés SSH.";
+"Set up Teleport credential" = "Configurer l’identifiant Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Identifiant de l’appareil enregistré. Connectez-vous avec votre mot de passe et Face ID ou Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Identifiant local de l’appareil supprimé. Supprimez séparément son entrée dans Teleport.";
+"Sign in with device biometrics" = "Se connecter avec la biométrie de l’appareil";
+"Setting up device credential…" = "Configuration de l’identifiant de l’appareil…";
+"Removing local credential…" = "Suppression de l’identifiant local…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Approuvez la connexion Teleport avec Face ID ou Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Configurez la connexion Teleport avec Face ID ou Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave n’est pas disponible. Utilisez un autre moyen de connexion.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID ou Touch ID n’est pas disponible. Vérifiez les réglages système ou connectez-vous autrement.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "La clé locale de l’appareil est absente ou inutilisable. Connectez-vous autrement. Supprimez son entrée Teleport avant de recommencer.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Un identifiant local existe déjà. Utilisez la biométrie de l’appareil ou supprimez la clé locale et son entrée Teleport avant de recommencer.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Échec du stockage de l’identifiant de l’appareil. Connectez-vous autrement. Recherchez une entrée de configuration échouée dans Teleport.";

@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm використовує Face ID для розблокування застосунку та захищених серверів.";
+"NSFaceIDUsageDescription" = "VVTerm використовує Face ID для розблокування застосунку й захищених серверів та підтвердження входу до Teleport.";
 "NSLocalNetworkUsageDescription" = "VVTerm використовує локальну мережу, щоб знаходити, пробуджувати й підключати SSH-сервери.";
 "NSMicrophoneUsageDescription" = "VVTerm потрібен доступ до мікрофона, щоб перетворювати голосові команди на введення в терміналі.";
 "NSSpeechRecognitionUsageDescription" = "VVTerm використовує розпізнавання мовлення для перетворення голосу на команди термінала.";

@@ -2369,3 +2369,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Trwa logowanie do tego profilu Teleport. Dokończ je lub anuluj, a następnie spróbuj ponownie.";
 "Approve with a passkey or security key" = "Zatwierdź kluczem dostępu lub kluczem bezpieczeństwa";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Logowanie biometrią urządzenia";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Hasło Teleport jest nadal wymagane. Zachowaj inną metodę logowania do odzyskiwania dostępu.";
+"Set up device credential…" = "Skonfiguruj dane urządzenia…";
+"Sign in to this local account before setup." = "Przed konfiguracją zaloguj się do tego konta lokalnego.";
+"Remove local device credential…" = "Usuń lokalne dane urządzenia…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Usunięcie lokalne nie usuwa wpisu w Teleport ani nie unieważnia dostępu. Usuń wpis na serwerze Teleport przed ponowną konfiguracją.";
+"Remove this device's Teleport credential?" = "Usunąć dane Teleport tego urządzenia?";
+"Remove local credential" = "Usuń lokalne dane logowania";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Zaloguj się inaczej, a potem usuń wpis na serwerze Teleport przed ponowną konfiguracją. Obecny dostęp pozostaje ważny.";
+"Device credential name" = "Nazwa danych urządzenia";
+"Fresh one-time code (if required)" = "Nowy kod jednorazowy (jeśli wymagany)";
+"Set up with one-time code" = "Skonfiguruj kodem jednorazowym";
+"Set up with browser approval" = "Skonfiguruj przez zatwierdzenie w przeglądarce";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Użyj nowego kodu lub istniejącego klucza dostępu albo klucza bezpieczeństwa. Face ID lub Touch ID chroni nowy klucz. Pozostaje on na tym urządzeniu, oddzielnie od kluczy SSH.";
+"Set up Teleport credential" = "Skonfiguruj dane Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Zarejestrowano dane urządzenia. Loguj się hasłem i Face ID lub Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Usunięto lokalne dane urządzenia. Oddzielnie usuń ich wpis na serwerze Teleport.";
+"Sign in with device biometrics" = "Zaloguj biometrią urządzenia";
+"Setting up device credential…" = "Konfigurowanie danych urządzenia…";
+"Removing local credential…" = "Usuwanie lokalnych danych…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Zatwierdź logowanie Teleport przez Face ID lub Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Skonfiguruj logowanie Teleport przez Face ID lub Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave jest niedostępne. Użyj innej metody logowania.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID lub Touch ID jest niedostępne. Sprawdź ustawienia systemu lub zaloguj się inaczej.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Brak lokalnego klucza urządzenia lub nie można go użyć. Zaloguj się inaczej. Usuń jego wpis w Teleport przed ponowną konfiguracją.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Lokalne dane już istnieją. Użyj biometrii urządzenia lub usuń lokalny klucz i jego wpis w Teleport przed ponowną konfiguracją.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Zapis danych urządzenia nie powiódł się. Zaloguj się inaczej. Sprawdź Teleport pod kątem wpisu nieudanej konfiguracji.";

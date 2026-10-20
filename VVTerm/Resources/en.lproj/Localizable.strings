@@ -2366,3 +2366,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "This Teleport profile is signing in. Finish or cancel it, then try again.";
 "Approve with a passkey or security key" = "Approve with a passkey or security key";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Device biometric sign-in";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Your Teleport password is still required. Keep another sign-in method for recovery.";
+"Set up device credential…" = "Set up device credential…";
+"Sign in to this local account before setup." = "Sign in to this local account before setup.";
+"Remove local device credential…" = "Remove local device credential…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again.";
+"Remove this device's Teleport credential?" = "Remove this device's Teleport credential?";
+"Remove local credential" = "Remove local credential";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid.";
+"Device credential name" = "Device credential name";
+"Fresh one-time code (if required)" = "Fresh one-time code (if required)";
+"Set up with one-time code" = "Set up with one-time code";
+"Set up with browser approval" = "Set up with browser approval";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys.";
+"Set up Teleport credential" = "Set up Teleport credential";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Device credential registered. Use your password and Face ID or Touch ID to sign in.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Local device credential removed. Remove its server entry in Teleport separately.";
+"Sign in with device biometrics" = "Sign in with device biometrics";
+"Setting up device credential…" = "Setting up device credential…";
+"Removing local credential…" = "Removing local credential…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Approve Teleport sign-in with Face ID or Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Set up Teleport sign-in with Face ID or Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave is not available. Use another sign-in method.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID or Touch ID is not available. Check system settings or sign in another way.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry.";

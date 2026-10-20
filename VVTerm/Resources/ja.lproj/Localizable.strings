@@ -2367,3 +2367,32 @@
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "このTeleportプロファイルはサインイン中です。完了するかキャンセルしてから、もう一度お試しください。";
 "Approve with a passkey or security key" = "パスキーまたはセキュリティキーで承認";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "デバイスの生体認証でサインイン";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Teleportのパスワードも必要です。復旧用に別のサインイン方法を残してください。";
+"Set up device credential…" = "デバイス認証情報を設定…";
+"Sign in to this local account before setup." = "設定前にこのローカルアカウントにサインインしてください。";
+"Remove local device credential…" = "ローカルのデバイス認証情報を削除…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "ローカルで削除してもTeleportの登録や発行済みのアクセス権は無効になりません。再設定の前にTeleportでサーバーの登録を削除してください。";
+"Remove this device's Teleport credential?" = "このデバイスのTeleport認証情報を削除しますか？";
+"Remove local credential" = "ローカル認証情報を削除";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "別の方法でサインインし、再設定の前にTeleportでサーバーの登録を削除してください。現在のアクセス権は引き続き有効です。";
+"Device credential name" = "デバイス認証情報の名前";
+"Fresh one-time code (if required)" = "新しいワンタイムコード（必要な場合）";
+"Set up with one-time code" = "ワンタイムコードで設定";
+"Set up with browser approval" = "ブラウザの承認で設定";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "新しいコードか既存のパスキーまたはセキュリティキーを使用します。Face IDまたはTouch IDが新しい鍵を保護します。この鍵はSSH鍵とは別にこのデバイス内に残ります。";
+"Set up Teleport credential" = "Teleport認証情報を設定";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "デバイス認証情報を登録しました。パスワードとFace IDまたはTouch IDでサインインしてください。";
+"Local device credential removed. Remove its server entry in Teleport separately." = "ローカルのデバイス認証情報を削除しました。サーバーの登録はTeleportで別途削除してください。";
+"Sign in with device biometrics" = "デバイスの生体認証でサインイン";
+"Setting up device credential…" = "デバイス認証情報を設定中…";
+"Removing local credential…" = "ローカル認証情報を削除中…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Face IDまたはTouch IDでTeleportのサインインを承認してください。";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Face IDまたはTouch IDでTeleportのサインインを設定してください。";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclaveを利用できません。別のサインイン方法を使用してください。";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face IDまたはTouch IDを利用できません。システム設定を確認するか、別の方法でサインインしてください。";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "ローカルのデバイス鍵がないか、使用できません。別の方法でサインインしてください。再設定の前にTeleportの登録を削除してください。";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "ローカル認証情報がすでに存在します。デバイスの生体認証を使用するか、再設定の前にローカルの鍵とTeleportの登録を削除してください。";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "デバイス認証情報の保存に失敗しました。別の方法でサインインしてください。設定失敗時の登録がTeleportに残っていないか確認してください。";

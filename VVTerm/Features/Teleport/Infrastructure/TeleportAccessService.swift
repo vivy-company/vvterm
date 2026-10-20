@@ -66,6 +66,33 @@ actor TeleportAccessService {
         }
     }
 
+    func loginWithSecureEnclave(
+        profile: TeleportProfileConfiguration, password: String, prompt: String
+    ) async throws -> TeleportAccessSummary {
+        try await performLogin(profile: profile) { client in
+            try await client.loginWithSecureEnclave(
+                username: profile.account, password: password, prompt: prompt
+            )
+        }
+    }
+
+    func registerSecureEnclaveCredential(
+        profile: TeleportProfileConfiguration, name: String, otp: String,
+        presenter: (any TeleportBrowserPresenter)?, prompt: String
+    ) async throws {
+        try await performAuthentication(profile: profile) { client in
+            try await client.registerSecureEnclaveCredential(
+                name: name, otp: otp, browser: presenter, prompt: prompt
+            )
+        }
+    }
+
+    func deleteSecureEnclaveCredential(profile: TeleportProfileConfiguration) async throws {
+        try await performAuthentication(profile: profile) { client in
+            try await client.deleteSecureEnclaveCredential(username: profile.account)
+        }
+    }
+
     func login(
         profile: TeleportProfileConfiguration,
         connector: TeleportConnector,
@@ -82,6 +109,15 @@ actor TeleportAccessService {
         profile: TeleportProfileConfiguration,
         operation: @Sendable (TeleportClient) async throws -> TeleportIdentity
     ) async throws -> TeleportAccessSummary {
+        TeleportAccessSummary(identity: try await performAuthentication(profile: profile, operation: operation))
+    }
+
+    /// Enrollment and local removal use the same exclusive owner as sign-in.
+    /// This prevents another form from changing a credential during a login.
+    func performAuthentication<Value: Sendable>(
+        profile: TeleportProfileConfiguration,
+        operation: @Sendable (TeleportClient) async throws -> Value
+    ) async throws -> Value {
         try Task.checkCancellation()
         if case .signingIn = profiles[profile.identifier] {
             throw TeleportAccessError.loginInProgress
@@ -93,9 +129,9 @@ actor TeleportAccessService {
                 profiles[profile.identifier] = .ready(client)
             }
         }
-        let identity = try await operation(client)
+        let result = try await operation(client)
         try validateCurrentClient(client, profileID: profile.identifier)
-        return TeleportAccessSummary(identity: identity)
+        return result
     }
 
     func nodes(for profile: TeleportProfileConfiguration, startKey: String = "") async throws -> TeleportNodePage {
@@ -174,7 +210,7 @@ actor TeleportAccessService {
             guard let url = URL(string: profile.proxyURL) else {
                 throw TeleportError.invalidConfiguration("proxy origin")
             }
-            let client = TeleportClient(proxy: try TeleportProxy(url: url), identityStore: identityStore(profile.identifier))
+            let client = try makeClient(proxy: TeleportProxy(url: url), profileID: profile.identifier)
             profiles[profile.identifier] = .ready(client)
             return client
         }
@@ -194,9 +230,18 @@ actor TeleportAccessService {
         case .ready(let client), .signingIn(let client): return client
         case .signingOut: throw TeleportError.authenticationRequired
         case nil:
-            let client = TeleportClient(proxy: identity.proxy, identityStore: store)
+            let client = try makeClient(proxy: identity.proxy, profileID: profileID)
             profiles[profileID] = .ready(client)
             return client
         }
+    }
+
+    private func makeClient(proxy: TeleportProxy, profileID: String) throws -> TeleportClient {
+        TeleportClient(
+            proxy: proxy, identityStore: identityStore(profileID),
+            secureEnclave: try TeleportSecureEnclaveConfiguration(
+                keychainService: keychain.service + ".secure-enclave"
+            )
+        )
     }
 }

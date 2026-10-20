@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm ใช้ Face ID เพื่อปลดล็อกแอปและเซิร์ฟเวอร์ที่มีการป้องกัน";
+"NSFaceIDUsageDescription" = "VVTerm ใช้ Face ID เพื่อปลดล็อกแอปและเซิร์ฟเวอร์ที่มีการป้องกัน และอนุมัติการลงชื่อเข้า Teleport";
 "NSLocalNetworkUsageDescription" = "VVTerm ใช้เครือข่ายภายในเพื่อค้นหา ปลุก และเชื่อมต่อเซิร์ฟเวอร์ SSH";
 "NSMicrophoneUsageDescription" = "VVTerm ต้องใช้ไมโครโฟนเพื่อแปลงคำสั่งเสียงเป็นข้อความป้อนเข้าเทอร์มินัล";
 "NSSpeechRecognitionUsageDescription" = "VVTerm ใช้การรู้จำเสียงเพื่อแปลงเสียงเป็นคำสั่งเทอร์มินัล";

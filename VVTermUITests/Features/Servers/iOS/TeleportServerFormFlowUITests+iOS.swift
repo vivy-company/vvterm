@@ -63,6 +63,34 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         XCTAssertFalse(app.textFields["vvterm.serverForm.host"].exists)
         XCTAssertFalse(app.secureTextFields.firstMatch.exists)
         app.navigationBars["Edit Server"].buttons["Cancel"].tap()
+        checkLocalCredentialRecovery(in: app)
+    }
+
+    @MainActor
+    private func checkLocalCredentialRecovery(in app: XCUIApplication) {
+        let controls = app.descendants(matching: .any).matching(identifier: "vvterm.teleport.credential.controls").firstMatch
+        reveal(controls, in: app, scrollingUp: false)
+        controls.tap()
+        let setup = app.buttons["vvterm.teleport.credential.setup"]
+        XCTAssertTrue(setup.waitForExistence(timeout: 5))
+        XCTAssertFalse(setup.isEnabled, "Setup needs a valid signed-in identity")
+        let remove = app.buttons["vvterm.teleport.credential.remove"]
+        reveal(remove, in: app, scrollingUp: true)
+        XCTAssertTrue(remove.waitForExistence(timeout: 5))
+        XCTAssertTrue(remove.isEnabled)
+        remove.tap()
+        let warning = app.staticTexts["Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid."]
+        XCTAssertTrue(warning.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Remove local credential"].exists)
+        let cancel = app.buttons.matching(identifier: "Cancel").allElementsBoundByIndex.first { $0.isHittable }
+        if let cancel {
+            cancel.tap()
+        } else {
+            // Native popover confirmations omit Cancel. A tap outside closes them.
+            app.navigationBars["Server Duplicate Test"].tap()
+        }
+        XCTAssertTrue(warning.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(remove.isEnabled)
     }
 
     @MainActor

@@ -52,6 +52,16 @@ nonisolated enum TeleportAccessError: Error {
             return String(localized: "The Teleport node was not found. Choose its exact node ID again.")
         case .ambiguousNode:
             return String(localized: "More than one Teleport node has this name. Use its exact node ID.")
+        case .secureEnclaveUnavailable:
+            return String(localized: "Secure Enclave is not available. Use another sign-in method.")
+        case .biometricsUnavailable:
+            return String(localized: "Face ID or Touch ID is not available. Check system settings or sign in another way.")
+        case .deviceCredentialMissing:
+            return String(localized: "The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again.")
+        case .deviceCredentialExists:
+            return String(localized: "A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again.")
+        case .deviceCredentialStorage:
+            return String(localized: "Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry.")
         default:
             return String(localized: "Teleport connection failed. Check the profile and sign in again.")
         }
