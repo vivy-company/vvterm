@@ -68,7 +68,7 @@ final class AdaptiveServerNavigationTests: XCTestCase {
                        "Wide layouts must return column adaptation to UIKit.")
     }
 
-    func testNewOSUsesWiderPhoneSidebarAndNativeTabletSizing() throws {
+    func testNewOSUsesNativeColumnSizing() throws {
         guard #available(iOS 27.1, *) else {
             throw XCTSkip("Native fold adaptation requires iOS 27.1.")
         }
@@ -97,13 +97,8 @@ final class AdaptiveServerNavigationTests: XCTestCase {
         }
         let native = UISplitViewController(style: .doubleColumn)
         XCTAssertEqual(actual.minimumPrimaryColumnWidth, native.minimumPrimaryColumnWidth)
-        if UIDevice.current.userInterfaceIdiom == .phone {
-            XCTAssertEqual(actual.maximumPrimaryColumnWidth, 400)
-            XCTAssertEqual(actual.preferredPrimaryColumnWidth, 400)
-        } else {
-            XCTAssertEqual(actual.maximumPrimaryColumnWidth, native.maximumPrimaryColumnWidth)
-            XCTAssertEqual(actual.preferredPrimaryColumnWidth, native.preferredPrimaryColumnWidth)
-        }
+        XCTAssertEqual(actual.maximumPrimaryColumnWidth, native.maximumPrimaryColumnWidth)
+        XCTAssertEqual(actual.preferredPrimaryColumnWidth, native.preferredPrimaryColumnWidth)
         XCTAssertEqual(actual.preferredPrimaryColumnWidthFraction, native.preferredPrimaryColumnWidthFraction)
     }
 

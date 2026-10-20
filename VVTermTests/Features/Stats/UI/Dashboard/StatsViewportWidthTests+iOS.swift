@@ -6,9 +6,9 @@ import XCTest
 
 @MainActor
 final class StatsViewportWidthTests: XCTestCase {
-    func testCardsStayOnEachSideWhenFoldPositionChanges() async throws {
+    func testCardsAdaptToFoldAndContentWidthChanges() async throws {
         let probe = FoldCardMeasurement()
-        func grid(division: ClosedRange<CGFloat>?) -> some View {
+        func grid(width: CGFloat, division: ClosedRange<CGFloat>?) -> some View {
             StatsCardsGridLayout(
                 minimumColumnWidth: 320, spacing: 18,
                 preferredColumnSpans: [1, 1, 2], division: division
@@ -25,24 +25,32 @@ final class StatsViewportWidthTests: XCTestCase {
                         }
                 }
             }
-            .frame(width: 840)
+            .frame(width: width)
         }
-        let host = UIHostingController(rootView: grid(division: 440...460))
+        let host = UIHostingController(rootView: grid(width: 840, division: 440...460))
         let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 840, height: 600))
         window.rootViewController = host
         window.isHidden = false
         defer { window.isHidden = true; window.rootViewController = nil }
-        for division in [CGFloat(440)...460, CGFloat(380)...400] {
-            host.rootView = grid(division: division)
+        for (width, division) in [(CGFloat(840), CGFloat(440)...460), (400, 90...110), (840, 380...400)] {
+            host.rootView = grid(width: width, division: division)
             host.view.layoutIfNeeded()
             try await Task.sleep(for: .milliseconds(100))
             host.view.layoutIfNeeded()
             let left = try XCTUnwrap(probe.frames[0])
             let right = try XCTUnwrap(probe.frames[1])
             let nextRow = try XCTUnwrap(probe.frames[2])
-            XCTAssertEqual(left.maxX, division.lowerBound - 9, accuracy: 1)
-            XCTAssertEqual(right.minX, division.upperBound + 9, accuracy: 1)
-            XCTAssertEqual(right.maxX, 840, accuracy: 1)
+            if width == 400 {
+                XCTAssertEqual(left.width, width, accuracy: 1)
+                XCTAssertEqual(right.width, width, accuracy: 1)
+                XCTAssertEqual(right.minX, left.minX, accuracy: 1)
+                XCTAssertGreaterThan(right.minY, left.maxY,
+                                     "Narrow content must stack cards even when the fold is inside it.")
+            } else {
+                XCTAssertEqual(left.maxX, division.lowerBound - 9, accuracy: 1)
+                XCTAssertEqual(right.minX, division.upperBound + 9, accuracy: 1)
+                XCTAssertEqual(right.maxX, width, accuracy: 1)
+            }
             XCTAssertEqual(nextRow.width, left.width, accuracy: 1,
                            "A wide card must not span the fold.")
             XCTAssertGreaterThan(nextRow.minY, left.maxY)

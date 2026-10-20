@@ -13,13 +13,31 @@ final class StatsGridLayoutPolicyTests: XCTestCase {
         XCTAssertEqual(columns[1].maxX, 840)
     }
 
-    func testFoldKeepsTwoColumnsEvenBelowNormalGridBreakpoint() {
+    func testFoldDoesNotForceColumnsBelowMinimumWidth() {
         let columns = StatsGridLayoutPolicy.columns(
             for: 600, minimumColumnWidth: 320, spacing: 18, division: 300...320
         )
+        XCTAssertEqual(columns.count, 1)
+        XCTAssertEqual(columns[0].width, 600)
+    }
+
+    func testNarrowContentUsesOneColumnWhenFoldIsNearEitherEdge() {
+        for division in [CGFloat(90)...110, CGFloat(290)...310] {
+            let columns = StatsGridLayoutPolicy.columns(
+                for: 400, minimumColumnWidth: 320, spacing: 18, division: division
+            )
+            XCTAssertEqual(columns.count, 1)
+            XCTAssertEqual(columns[0], CGRect(x: 0, y: 0, width: 400, height: 0))
+        }
+    }
+
+    func testFoldUsesTwoColumnsWhenBothMeetMinimumWidth() {
+        let columns = StatsGridLayoutPolicy.columns(
+            for: 678, minimumColumnWidth: 320, spacing: 18, division: 329...349
+        )
         XCTAssertEqual(columns.count, 2)
-        XCTAssertEqual(columns[0].width, 291)
-        XCTAssertEqual(columns[1].width, 271)
+        XCTAssertEqual(columns[0].width, 320)
+        XCTAssertEqual(columns[1].width, 320)
     }
 
     func testDivisionOutsideContentDoesNotAddAColumn() {

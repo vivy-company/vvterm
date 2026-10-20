@@ -46,7 +46,8 @@ nonisolated enum StatsGridLayoutPolicy {
            division.lowerBound.isFinite, division.upperBound.isFinite {
             let leadingEnd = division.lowerBound - gap / 2
             let trailingStart = division.upperBound + gap / 2
-            if leadingEnd > 0, trailingStart < width {
+            if leadingEnd > 0, trailingStart < width,
+               leadingEnd >= minimumColumnWidth, width - trailingStart >= minimumColumnWidth {
                 return [
                     CGRect(x: 0, y: 0, width: leadingEnd, height: 0),
                     CGRect(x: trailingStart, y: 0, width: width - trailingStart, height: 0)

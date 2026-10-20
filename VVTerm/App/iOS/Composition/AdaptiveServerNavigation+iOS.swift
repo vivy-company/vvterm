@@ -20,14 +20,12 @@ struct AdaptiveServerNavigation<Sidebar: View, Detail: View>: UIViewControllerRe
         if #available(iOS 27.1, *), UIDevice.current.userInterfaceIdiom == .phone {
             split.preferredSplitBehavior = .overlay
             split.preferredDisplayMode = hasSelection ? .secondaryOnly : .oneOverSecondary
-            split.maximumPrimaryColumnWidth = 400
-            split.preferredPrimaryColumnWidth = 400
         }
         // The detail toolbar provides the toggle in both expanded and collapsed layouts.
         split.displayModeButtonVisibility = .never
         coordinator.sidebar.view.backgroundColor = .clear
         split.primaryBackgroundStyle = .sidebar
-        // Keep native minimum sizing for fold adaptation on the new OS.
+        // Native column sizing lets UIKit align the columns with the fold.
         if #unavailable(iOS 27.1) {
             split.minimumPrimaryColumnWidth = 260
             split.maximumPrimaryColumnWidth = 380
