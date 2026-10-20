@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.3.3
+
+### Fixed
+
+- Restored native sidebar sizing for the iPhone Duo half-open layout.
+- Fixed Stats cards being forced into narrow columns near the fold.
+
 ## 3.3.2
 
 ### Fixed
