@@ -189,26 +189,28 @@ struct ServerRow: View {
                         .foregroundStyle(server.environment.color)
                         .lineLimit(1)
                 }
-
-                if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
-                    TeleportAccessBadge(configuration: configuration, service: teleportAccess)
-                        .id(configuration)
-                }
             }
 
             Spacer(minLength: 8)
 
-            if isLocked {
-                LockedBadge()
-            } else if tabCount > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "terminal")
-                        .font(.system(size: 11, weight: .medium))
-                    Text("\(tabCount)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
+            HStack(spacing: 8) {
+                if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+                    TeleportAccessBadge(configuration: configuration, service: teleportAccess)
+                        .id(configuration)
                 }
-                .foregroundStyle(sessionIndicatorColor)
+
+                if isLocked {
+                    LockedBadge()
+                } else if tabCount > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "terminal")
+                            .font(.system(size: 11, weight: .medium))
+                        Text("\(tabCount)")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                    }
+                    .foregroundStyle(sessionIndicatorColor)
+                }
             }
         }
         .padding(.leading, 8)

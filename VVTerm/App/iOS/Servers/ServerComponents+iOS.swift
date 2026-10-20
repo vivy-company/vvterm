@@ -66,21 +66,23 @@ struct ServerListRow: View {
                         .lineLimit(isSidebar ? 1 : nil)
                         .truncationMode(isSidebar ? .middle : .tail)
                         .foregroundStyle(.secondary)
-
-                    if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
-                        TeleportAccessBadge(configuration: configuration, service: teleportAccess)
-                            .id(configuration)
-                    }
                 }
 
                 Spacer()
 
-                if isLocked {
-                    LockedBadge()
-                } else {
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                HStack(spacing: 8) {
+                    if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+                        TeleportAccessBadge(configuration: configuration, service: teleportAccess)
+                            .id(configuration)
+                    }
+
+                    if isLocked {
+                        LockedBadge()
+                    } else {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
             }
             .contentShape(Rectangle())
