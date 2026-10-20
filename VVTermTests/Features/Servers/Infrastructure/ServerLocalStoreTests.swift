@@ -5,6 +5,71 @@ import Testing
 @MainActor
 struct ServerLocalStoreTests {
     @Test
+    func savedTeleportEntryDoesNotMakeOtherServersUnreadable() throws {
+        let fixture = try makeDefaults()
+        defer { fixture.defaults.removePersistentDomain(forName: fixture.suiteName) }
+        let store = ServerLocalStore(defaults: fixture.defaults)
+        let workspaceID = UUID()
+        let ordinary = (0..<5).map {
+            Server(workspaceId: workspaceID, name: "SSH \($0)", host: "host\($0).example.test", username: "deploy")
+        }
+        let configuration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        let teleport = Server(
+            workspaceId: workspaceID, name: "Saved Teleport", host: configuration.nodeID,
+            username: "deploy", connectionMode: .teleport, teleportConfiguration: configuration
+        )
+        let expected = ordinary + [teleport]
+        var objects = try #require(JSONSerialization.jsonObject(
+            with: JSONEncoder().encode(expected)
+        ) as? [[String: Any]])
+        objects[ordinary.count].removeValue(forKey: "transportConfiguration")
+        objects[ordinary.count]["teleportConfiguration"] = try JSONSerialization.jsonObject(
+            with: JSONEncoder().encode(configuration)
+        )
+        fixture.defaults.set(
+            try JSONSerialization.data(withJSONObject: objects), forKey: ServerLocalStore.serversStorageKey
+        )
+        guard case .loaded(let servers) = store.loadServers() else {
+            Issue.record("Expected all six saved servers to remain readable")
+            return
+        }
+        #expect(servers == expected)
+        try store.storeServers(servers)
+        let savedData = try #require(fixture.defaults.data(forKey: ServerLocalStore.serversStorageKey))
+        let saved = try #require(JSONSerialization.jsonObject(with: savedData) as? [[String: Any]])
+        #expect(saved.count == 6)
+        #expect(saved.allSatisfy { $0["teleportConfiguration"] == nil })
+        #expect(try JSONDecoder().decode([Server].self, from: savedData) == expected)
+    }
+
+    @Test
+    func unknownTransportSurvivesLocalAndPendingMutationStorage() throws {
+        let fixture = try makeDefaults()
+        defer { fixture.defaults.removePersistentDomain(forName: fixture.suiteName) }
+        let store = ServerLocalStore(defaults: fixture.defaults)
+        let ordinary = Server(
+            workspaceId: UUID(), name: "SSH", host: "host.example.test", username: "deploy"
+        )
+        let future = Server(
+            workspaceId: ordinary.workspaceId, name: "Future", host: "node-id", username: "deploy",
+            connectionMode: .unsupported("future-provider"),
+            transportConfiguration: .unsupported(type: "future-provider", version: 1, settings: Data([0, 255]))
+        )
+        try store.storeServers([ordinary, future])
+        guard case .loaded(let servers) = store.loadServers() else {
+            Issue.record("Expected both supported and unsupported records")
+            return
+        }
+        #expect(servers == [ordinary, future])
+        #expect(!servers[1].isTransportSupported)
+        let pending = try ServerPendingCloudKitPayloadCodec.encode(.serverUpsert(future))
+        #expect(try ServerPendingCloudKitPayloadCodec.decode(pending) == .serverUpsert(future))
+    }
+
+    @Test
     func missingDataIsDifferentFromAnEmptyCollection() throws {
         let fixture = try makeDefaults()
         let defaults = fixture.defaults

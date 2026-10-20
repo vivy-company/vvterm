@@ -7,6 +7,9 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
     case eternalTerminal
     case cloudflare
     case teleport
+    case unsupported
+
+    static let allCases: [Self] = [.standard, .tailscale, .mosh, .eternalTerminal, .cloudflare, .teleport]
 
     var id: String { rawValue }
 
@@ -24,10 +27,16 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
             return .cloudflare
         case .teleport:
             return .teleport
+        case .unsupported:
+            return .unsupported("unsupported")
         }
     }
 
     init(server: Server) {
+        guard server.isTransportSupported else {
+            self = .unsupported
+            return
+        }
         switch server.connectionMode {
         case .standard:
             self = .standard
@@ -41,6 +50,8 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
             self = .cloudflare
         case .teleport:
             self = .teleport
+        case .unsupported:
+            self = .unsupported
         }
     }
 }
@@ -181,6 +192,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     private var hasValidEndpoint: Bool {
+        guard transportSelection != .unsupported else { return false }
         if transportSelection == .teleport {
             return teleportConfiguration != nil
                 && !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty

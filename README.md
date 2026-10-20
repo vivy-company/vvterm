@@ -86,11 +86,25 @@ VVTerm supplies its pinned upstream libssh2 engine. The engine has no local
 patches and uses upstream defaults, which disable legacy DSA, SHA-1 SSH
 algorithms, and several old ciphers and encrypted key formats.
 
-Teleport profiles store issued identities only in the device Keychain. Profile,
-root-cluster, exact node ID, and OS login settings can sync through CloudKit.
+Teleport profiles store issued identities only in the device Keychain. Proxy,
+account, root cluster, exact node ID, and OS login settings can sync through CloudKit.
+Local server data uses JSON. New transport settings share one versioned
+`transportConfiguration` payload in local data and CloudKit. Each transport keeps
+its own typed settings; adding another transport does not require another CloudKit
+field. Unknown types or versions stay stored and cannot connect as ordinary SSH.
+Released Cloudflare and Eternal Terminal fields retain their existing format.
 Sign-out disconnects this device's sessions for the same proxy and account.
 It does not revoke credentials on the server or other devices. Each profile
 requires trusted HTTPS and a new local sign-in on each device.
+
+The integration is still a draft. Older released VVTerm builds cannot read new
+transport records and can reject a CloudKit server batch that includes them.
+Update all devices before testing synced transport profiles. A generic payload
+cannot change those older binaries. The old Teleport draft settings remain readable
+so existing test entries survive; new writes use the generic field. The production
+CloudKit schema needs the generic Data field before release. CloudKit stores the
+payload as one Data value; the app decodes its settings. Updates apply to the whole
+payload, like the current server sync.
 
 Local accounts can use a password and TOTP, or a password with browser approval
 from an existing passkey or security key. The latter button appears when the

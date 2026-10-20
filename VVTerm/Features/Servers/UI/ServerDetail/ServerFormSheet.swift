@@ -15,6 +15,8 @@ extension ServerTransportSelection {
             return String(localized: "Cloudflare")
         case .teleport:
             return String(localized: "Teleport")
+        case .unsupported:
+            return String(localized: "Unsupported connection type")
         }
     }
 
@@ -32,6 +34,8 @@ extension ServerTransportSelection {
             return "shield.lefthalf.filled"
         case .teleport:
             return "network"
+        case .unsupported:
+            return "questionmark.circle"
         }
     }
 
@@ -640,6 +644,9 @@ struct ServerFormSheet: View {
     private var authSection: some View {
         Section {
             Picker("Transport", selection: $form.transportSelection) {
+                if form.transportSelection == .unsupported {
+                    Text("Unsupported connection type").tag(ServerTransportSelection.unsupported)
+                }
                 ForEach(ServerTransportSelection.allCases) { transport in
                     Label(transport.displayName, systemImage: transport.icon)
                         .tag(transport)

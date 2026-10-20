@@ -69,7 +69,8 @@ nonisolated enum ServerConnectionTestPlan: Equatable, Sendable {
     case mosh(portRange: ClosedRange<Int>)
     case eternalTerminal(port: UInt16)
 
-    init(server: Server) {
+    init?(server: Server) {
+        guard server.isTransportSupported else { return nil }
         switch server.connectionMode {
         case .standard, .tailscale, .cloudflare, .teleport:
             self = .sshOnly
@@ -79,6 +80,8 @@ nonisolated enum ServerConnectionTestPlan: Equatable, Sendable {
             let port = server.eternalTerminalPort
             let resolvedPort: UInt16 = (1...Int(UInt16.max)).contains(port) ? UInt16(port) : 2_022
             self = .eternalTerminal(port: resolvedPort)
+        case .unsupported:
+            return nil
         }
     }
 }
@@ -162,7 +165,12 @@ nonisolated struct AppServerConnectionTester: ServerConnectionTesting {
     }
 
     func test(server: Server, credentials: ServerCredentials) async -> ServerConnectionTestResult {
-        let plan = ServerConnectionTestPlan(server: server)
+        guard let plan = ServerConnectionTestPlan(server: server) else {
+            return .failure(.init(
+                reason: .message(String(localized: "This connection type is not supported. Update VVTerm before connecting.")),
+                requiresCloudflareOverrides: false, hostKeyChallenge: nil
+            ))
+        }
         let detectedSystem = ServerConnectionDetectedSystemCapture()
         let remoteSystemDetector = remoteSystemDetector
         do {

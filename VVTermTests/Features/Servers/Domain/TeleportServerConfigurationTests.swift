@@ -88,7 +88,7 @@ struct TeleportServerConfigurationTests {
             with: JSONEncoder().encode(server)
         ) as? [String: Any])
         object.removeValue(forKey: "connectionMode")
-        object.removeValue(forKey: "teleportConfiguration")
+        object.removeValue(forKey: "transportConfiguration")
         let data = try JSONSerialization.data(withJSONObject: object)
         let decoded = try JSONDecoder().decode(Server.self, from: data)
         #expect(decoded.connectionMode == .standard)
@@ -111,7 +111,7 @@ struct TeleportServerConfigurationTests {
         var object = try #require(JSONSerialization.jsonObject(
             with: JSONEncoder().encode(server)
         ) as? [String: Any])
-        object.removeValue(forKey: "teleportConfiguration")
+        object.removeValue(forKey: "transportConfiguration")
         #expect(throws: DecodingError.self) {
             try JSONDecoder().decode(Server.self, from: JSONSerialization.data(withJSONObject: object))
         }

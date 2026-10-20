@@ -7,6 +7,28 @@ struct ServerMutationCommandRepositoryTests {
     private let now = Date(timeIntervalSinceReferenceDate: 5_000)
 
     @Test
+    func unknownTransportSettingsSurviveInsertAndUpdate() throws {
+        let workspace = makeWorkspace()
+        let input = Server(
+            workspaceId: workspace.id, name: "Future", host: "node-id", username: "deploy",
+            connectionMode: .unsupported("future-provider"),
+            transportConfiguration: .unsupported(type: "future-provider", version: 1, settings: Data([0, 255]))
+        )
+        let inserted = try repository.execute(
+            .insertServer(input), servers: [], workspaces: [workspace], now: now
+        )
+        var edited = try #require(inserted.servers.first)
+        #expect(edited.transportConfiguration == input.transportConfiguration)
+        edited.name = "Renamed"
+        let updated = try repository.execute(
+            .updateServer(edited), servers: inserted.servers, workspaces: [workspace], now: now
+        )
+        #expect(updated.servers.first?.transportConfiguration == input.transportConfiguration)
+        #expect(updated.servers.first?.connectionMode == input.connectionMode)
+        #expect(updated.servers.first?.isTransportSupported == false)
+    }
+
+    @Test
     func teleportConfigurationSurvivesInsertAndUpdateCommands() throws {
         let workspace = makeWorkspace()
         let configuration = try TeleportServerConfiguration(

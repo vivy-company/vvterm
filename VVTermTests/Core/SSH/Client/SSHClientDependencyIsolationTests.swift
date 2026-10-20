@@ -38,6 +38,24 @@ private actor SSHMoshBootstrapSpy: SSHMoshBootstrapping {
 @MainActor
 struct SSHClientDependencyIsolationTests {
     @Test
+    func unsupportedTransportFailsBeforeConnectionWork() async {
+        let client = SSHClient.testing()
+        let server = Server(
+            workspaceId: UUID(), name: "Future connection", host: "example.test", username: "test",
+            connectionMode: .unsupported("future-transport")
+        )
+        do {
+            _ = try await client.connect(to: server, credentials: ServerCredentials(serverId: server.id))
+            Issue.record("An unsupported transport must not open a connection")
+        } catch SSHError.connectionFailed(let message) {
+            #expect(message.contains("not supported"))
+        } catch {
+            Issue.record("Unexpected error: \(error)")
+        }
+        #expect(await !client.isConnected)
+    }
+
+    @Test
     func disconnectedClientReportsThatNoShellRequestWasSent() async {
         let client = SSHClient.testing()
 

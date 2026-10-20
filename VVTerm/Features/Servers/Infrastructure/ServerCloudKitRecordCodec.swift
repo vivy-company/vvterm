@@ -6,7 +6,7 @@ nonisolated enum ServerCloudKitRecordCodec {
     static let recordType = "Server"
     static let recordKeys = [
         "workspaceId", "name", "host", "port", "eternalTerminalPort", "username",
-        "connectionMode", "authMethod", "teleportConfiguration", "cloudflareAccessMode",
+        "connectionMode", "authMethod", "transportConfiguration", "teleportConfiguration", "cloudflareAccessMode",
         "iconSelection", "detectedSystemKind", "detectedSystemDisplayName",
         "appleHardwareModelIdentifier",
         "cloudflareTeamDomainOverride", "cloudflareAppDomainOverride", "tags", "notes",
@@ -43,28 +43,54 @@ nonisolated enum ServerCloudKitRecordCodec {
             logger.error("Server \(id): missing or invalid port")
             return nil
         }
-        let connectionMode = (record["connectionMode"] as? String)
-            .flatMap(SSHConnectionMode.init(rawValue:)) ?? .standard
-        let authMethod: AuthMethod?
-        let teleportConfiguration: TeleportServerConfiguration?
-        if connectionMode == .teleport {
-            guard let data = record["teleportConfiguration"] as? Data,
+        let connectionMode: SSHConnectionMode
+        if let value = record["connectionMode"] {
+            guard let rawValue = value as? String else {
+                logger.error("Server \(id): invalid transport type")
+                return nil
+            }
+            connectionMode = SSHConnectionMode(rawValue: rawValue)
+        } else {
+            connectionMode = .standard
+        }
+        let transportConfiguration: ServerTransportConfiguration?
+        if let value = record["transportConfiguration"] {
+            guard let data = value as? Data,
+                  data.count <= ServerTransportConfiguration.maximumEncodedSize,
+                  let configuration = try? JSONDecoder().decode(
+                    ServerTransportConfiguration.self, from: data
+                  ) else {
+                logger.error("Server \(id): invalid transport configuration")
+                return nil
+            }
+            transportConfiguration = configuration
+        } else if connectionMode == .teleport, let value = record["teleportConfiguration"] {
+            guard let data = value as? Data,
+                  data.count <= ServerTransportConfiguration.maximumSettingsSize,
                   let configuration = try? JSONDecoder().decode(
                     TeleportServerConfiguration.self, from: data
                   ) else {
-                logger.error("Server \(id): invalid Teleport configuration")
+                logger.error("Server \(id): invalid saved transport configuration")
                 return nil
             }
-            teleportConfiguration = configuration
-            authMethod = nil
+            transportConfiguration = .teleport(configuration)
         } else {
+            transportConfiguration = nil
+        }
+        guard connectionMode != .teleport || transportConfiguration != nil else {
+            logger.error("Server \(id): missing transport configuration")
+            return nil
+        }
+        let authMethod: AuthMethod?
+        if connectionMode.usesSSHAuthentication {
             guard let rawValue = record["authMethod"] as? String,
                   let method = AuthMethod(rawValue: rawValue) else {
                 logger.error("Server \(id): invalid authMethod")
                 return nil
             }
             authMethod = method
-            teleportConfiguration = nil
+        } else {
+            authMethod = nil
         }
 
         let environment: ServerEnvironment
@@ -118,7 +144,7 @@ nonisolated enum ServerCloudKitRecordCodec {
             username: username,
             connectionMode: connectionMode,
             authMethod: authMethod,
-            teleportConfiguration: teleportConfiguration,
+            transportConfiguration: transportConfiguration,
             iconSelection: ServerIconSelection(
                 persistedValue: record["iconSelection"] as? String
             ),
@@ -146,7 +172,18 @@ nonisolated enum ServerCloudKitRecordCodec {
         for server: Server,
         in zoneID: CKRecordZone.ID,
         now: Date
-    ) -> CKRecord {
+    ) throws -> CKRecord {
+        if server.connectionMode == .teleport, server.transportConfiguration == nil {
+            throw EncodingError.invalidValue(server, .init(
+                codingPath: [], debugDescription: "Teleport requires transport settings."
+            ))
+        }
+        let transportData = try server.transportConfiguration.map { try JSONEncoder().encode($0) }
+        guard transportData.map({ $0.count <= ServerTransportConfiguration.maximumEncodedSize }) ?? true else {
+            throw EncodingError.invalidValue(server, .init(
+                codingPath: [], debugDescription: "Transport configuration exceeds its size limit."
+            ))
+        }
         let recordID = CKRecord.ID(
             recordName: server.id.uuidString,
             zoneID: zoneID
@@ -162,9 +199,9 @@ nonisolated enum ServerCloudKitRecordCodec {
             ? nil
             : server.connectionMode.rawValue
         record["authMethod"] = server.authMethod?.rawValue
-        if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
-            record["teleportConfiguration"] = try? JSONEncoder().encode(configuration)
-        }
+        // Assign nil too: changed-keys updates must remove settings after a transport change.
+        record["transportConfiguration"] = transportData
+        record["teleportConfiguration"] = nil
         record["iconSelection"] = server.iconSelection.persistedValue
         record["detectedSystemKind"] = server.detectedSystemIdentity?.kind.rawValue
         record["detectedSystemDisplayName"] = server.detectedSystemIdentity?.displayName

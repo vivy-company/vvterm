@@ -4,6 +4,21 @@ import Testing
 
 struct ServerFormModelTests {
     @Test
+    func unsupportedTransportCannotBeSavedAsSSH() {
+        let server = Server(
+            workspaceId: UUID(), name: "Future connection", host: "example.test", username: "test",
+            connectionMode: .unsupported("future-transport")
+        )
+        let model = ServerFormModel(
+            server: server, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        #expect(model.transportSelection == .unsupported)
+        #expect(!model.isValid)
+        #expect(!ServerTransportSelection.allCases.contains(.unsupported))
+    }
+
+    @Test
     func teleportDraftSavesBeforeLoginWithoutOrdinaryCredentialsOrDirectPorts() throws {
         var model = validTeleportModel()
         model.host = ""

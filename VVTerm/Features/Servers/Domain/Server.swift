@@ -14,22 +14,28 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
     var username: String
     var connectionMode: SSHConnectionMode {
         didSet {
-            if connectionMode == .teleport {
-                authMethod = nil
-            } else {
-                teleportConfiguration = nil
-                if authMethod == nil { authMethod = .password }
-            }
+            guard connectionMode != oldValue else { return }
+            transportConfiguration = nil
+            authMethod = connectionMode.usesSSHAuthentication ? (authMethod ?? .password) : nil
         }
     }
     var authMethod: AuthMethod? {
         didSet {
-            if connectionMode == .teleport { authMethod = nil }
+            if !connectionMode.usesSSHAuthentication { authMethod = nil }
         }
     }
+    var transportConfiguration: ServerTransportConfiguration?
     var teleportConfiguration: TeleportServerConfiguration? {
-        didSet {
-            if connectionMode != .teleport { teleportConfiguration = nil }
+        get { connectionMode == .teleport ? transportConfiguration?.teleport : nil }
+        set {
+            transportConfiguration = connectionMode == .teleport ? newValue.map { .teleport($0) } : nil
+        }
+    }
+    var isTransportSupported: Bool {
+        switch (connectionMode, transportConfiguration) {
+        case (.teleport, .teleport): true
+        case (.standard, nil), (.tailscale, nil), (.mosh, nil), (.eternalTerminal, nil), (.cloudflare, nil): true
+        default: false
         }
     }
     var iconSelection: ServerIconSelection
@@ -63,6 +69,7 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         connectionMode: SSHConnectionMode = .standard,
         authMethod: AuthMethod? = .password,
         teleportConfiguration: TeleportServerConfiguration? = nil,
+        transportConfiguration: ServerTransportConfiguration? = nil,
         iconSelection: ServerIconSelection = .automatic,
         detectedSystemIdentity: RemoteSystemIdentity? = nil,
         cloudflareAccessMode: CloudflareAccessMode? = nil,
@@ -93,8 +100,9 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
             : 2022
         self.username = username
         self.connectionMode = connectionMode
-        self.authMethod = connectionMode == .teleport ? nil : (authMethod ?? .password)
-        self.teleportConfiguration = connectionMode == .teleport ? teleportConfiguration : nil
+        self.authMethod = connectionMode.usesSSHAuthentication ? (authMethod ?? .password) : nil
+        self.transportConfiguration = transportConfiguration
+            ?? (connectionMode == .teleport ? teleportConfiguration.map { .teleport($0) } : nil)
         self.iconSelection = iconSelection
         self.detectedSystemIdentity = detectedSystemIdentity
         self.cloudflareAccessMode = cloudflareAccessMode
@@ -138,6 +146,7 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         case username
         case connectionMode
         case authMethod
+        case transportConfiguration
         case teleportConfiguration
         case iconSelection
         case detectedSystemIdentity
@@ -173,14 +182,35 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         eternalTerminalPort = (1...65535).contains(decodedETPort) ? decodedETPort : 2022
         username = try container.decode(String.self, forKey: .username)
         connectionMode = try container.decodeIfPresent(SSHConnectionMode.self, forKey: .connectionMode) ?? .standard
-        if connectionMode == .teleport {
-            authMethod = nil
-            teleportConfiguration = try container.decode(
+        if container.contains(.transportConfiguration) {
+            transportConfiguration = try container.decode(
+                ServerTransportConfiguration.self, forKey: .transportConfiguration
+            )
+        } else if connectionMode == .teleport, container.contains(.teleportConfiguration) {
+            // A device build saved this format before the generic transport field existed.
+            let configuration = try container.decode(
                 TeleportServerConfiguration.self, forKey: .teleportConfiguration
             )
+            guard try JSONEncoder().encode(configuration).count <= ServerTransportConfiguration.maximumSettingsSize else {
+                throw DecodingError.dataCorrupted(.init(
+                    codingPath: decoder.codingPath,
+                    debugDescription: "Saved transport configuration exceeds its size limit."
+                ))
+            }
+            transportConfiguration = .teleport(configuration)
         } else {
+            transportConfiguration = nil
+        }
+        if connectionMode == .teleport, transportConfiguration == nil {
+            throw DecodingError.keyNotFound(CodingKeys.transportConfiguration, .init(
+                codingPath: decoder.codingPath,
+                debugDescription: "Teleport requires transport settings."
+            ))
+        }
+        if connectionMode.usesSSHAuthentication {
             authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .password
-            teleportConfiguration = nil
+        } else {
+            authMethod = nil
         }
         iconSelection = (try? container.decode(
             ServerIconSelection.self,
@@ -253,15 +283,13 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         try container.encode(username, forKey: .username)
         try container.encode(connectionMode, forKey: .connectionMode)
         try container.encodeIfPresent(authMethod, forKey: .authMethod)
-        if connectionMode == .teleport {
-            guard let teleportConfiguration else {
-                throw EncodingError.invalidValue(self, .init(
-                    codingPath: encoder.codingPath,
-                    debugDescription: "Teleport requires a profile and exact node configuration."
-                ))
-            }
-            try container.encode(teleportConfiguration, forKey: .teleportConfiguration)
+        if connectionMode == .teleport, transportConfiguration == nil {
+            throw EncodingError.invalidValue(self, .init(
+                codingPath: encoder.codingPath,
+                debugDescription: "Teleport requires transport settings."
+            ))
         }
+        try container.encodeIfPresent(transportConfiguration, forKey: .transportConfiguration)
         try container.encode(iconSelection, forKey: .iconSelection)
         try container.encodeIfPresent(
             detectedSystemIdentity,
@@ -301,20 +329,54 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
     }
 }
 
-nonisolated enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable, Sendable {
+nonisolated enum SSHConnectionMode: RawRepresentable, Codable, CaseIterable, Identifiable, Hashable, Sendable {
     case standard
     case tailscale
     case mosh
     case eternalTerminal
     case cloudflare
     case teleport
+    case unsupported(String)
+
+    static let allCases: [Self] = [.standard, .tailscale, .mosh, .eternalTerminal, .cloudflare, .teleport]
+
+    init(rawValue: String) {
+        switch rawValue {
+        case "standard": self = .standard
+        case "tailscale": self = .tailscale
+        case "mosh": self = .mosh
+        case "eternalTerminal": self = .eternalTerminal
+        case "cloudflare": self = .cloudflare
+        case "teleport": self = .teleport
+        default: self = .unsupported(rawValue)
+        }
+    }
+
+    var rawValue: String {
+        switch self {
+        case .standard: "standard"
+        case .tailscale: "tailscale"
+        case .mosh: "mosh"
+        case .eternalTerminal: "eternalTerminal"
+        case .cloudflare: "cloudflare"
+        case .teleport: "teleport"
+        case .unsupported(let value): value
+        }
+    }
+
+    var usesSSHAuthentication: Bool {
+        switch self {
+        case .teleport, .unsupported: false
+        default: true
+        }
+    }
 
     var id: String { rawValue }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        let rawValue = (try? container.decode(String.self)) ?? Self.standard.rawValue
-        self = Self(rawValue: rawValue) ?? .standard
+        let rawValue = try container.decode(String.self)
+        self = Self(rawValue: rawValue)
     }
 
     func encode(to encoder: Encoder) throws {

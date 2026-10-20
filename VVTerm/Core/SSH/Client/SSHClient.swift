@@ -213,6 +213,9 @@ actor SSHClient {
 
     func connect(to server: Server, credentials: ServerCredentials,
                  preferredPlatform: RemotePlatform? = nil) async throws -> SSHSession {
+        guard server.isTransportSupported else {
+            throw SSHError.connectionFailed(String(localized: "This connection type is not supported. Update VVTerm before connecting."))
+        }
         let key = connectionKey(for: server)
 
         connectionPreparation: while true {
