@@ -434,9 +434,10 @@ struct ServerFormSheet: View {
             }
             .onAppear {
                 reconcileAssignmentWorkspace()
-                loadTeleportProfile()
+                updateTeleportProfile()
+                teleportModel?.load()
             }
-            .onChange(of: activeTeleportProfile) { _ in loadTeleportProfile() }
+            .onChange(of: activeTeleportProfile) { _ in updateTeleportProfile() }
             .onChange(of: operations.connectionTestFailure) { failure in
                 if failure?.requiresCloudflareOverrides == true {
                     showCloudflareOverrides = true
@@ -649,14 +650,14 @@ struct ServerFormSheet: View {
             .accessibilityIdentifier("vvterm.serverForm.transport")
 
             if form.transportSelection == .teleport {
-                TextField("Proxy URL", text: $form.teleportProxyURL, prompt: Text("https://teleport.example.com"))
+                TextField("Teleport URL", text: $form.teleportProxyURL, prompt: Text("https://teleport.example.com"))
                     .accessibilityIdentifier("vvterm.serverForm.teleport.proxy")
                     .autocorrectionDisabled()
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
                     #endif
-                TextField("Account", text: $form.teleportAccount)
+                TextField("Username", text: $form.teleportAccount, prompt: Text("Teleport username"))
                     .accessibilityIdentifier("vvterm.serverForm.teleport.account")
                     .autocorrectionDisabled()
                     #if os(iOS)
@@ -695,7 +696,7 @@ struct ServerFormSheet: View {
                     }
                     .disabled(!form.isValid || isTestingConnection || isSaving)
                 } label: {
-                    Text("Advanced Teleport settings")
+                    Text("Advanced")
                         .accessibilityIdentifier("vvterm.serverForm.teleport.advanced")
                 }
             }
@@ -947,7 +948,7 @@ struct ServerFormSheet: View {
         form.sshPublicKey = loadedKey.publicKey
     }
 
-    private func loadTeleportProfile() {
+    private func updateTeleportProfile() {
         guard let profile = activeTeleportProfile, let teleportAccess else {
             teleportModel?.cancel()
             teleportModel = nil
@@ -957,7 +958,6 @@ struct ServerFormSheet: View {
             teleportModel?.cancel()
             teleportModel = TeleportProfileModel(profile: profile, service: teleportAccess)
         }
-        teleportModel?.load()
     }
 
     // MARK: - Connection Test

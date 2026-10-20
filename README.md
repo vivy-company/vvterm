@@ -121,17 +121,17 @@ Chromium fixture download did not complete. Physical keys, system browser
 approval, and real provider SSO still need live checks; see TeleportKit's
 validation notes.
 
-To add a Teleport server, select **Teleport**, enter the proxy URL and account,
-then sign in. Choose a node and its OS login. A sole node on the first complete
-result page and a sole OS login fill empty fields. Existing choices are kept. Node selection supplies the root cluster
-and exact node ID. Manual values and an optional SSO connector are under
-**Advanced Teleport settings**. The server list shows local access expiry and a
+To add a server, select **Teleport**, enter its URL and your Teleport username,
+then tap **Continue**. Choose a sign-in method and sign in. Only that method's
+fields appear. Then choose the server and SSH login. A single available choice
+fills an empty field; existing choices stay. Manual IDs and an optional SSO
+connector are under **Advanced**. The server list shows local access expiry and a
 distinct Teleport icon. Access status refreshes on display, in the foreground, and
 once per minute while visible. Expiry is never stored in CloudKit.
 
 Local accounts can also set up a device-bound Secure Enclave credential in the
-profile's **Device biometric sign-in** section. Setup stays inside the server form
-so the server draft remains open. Sign in first, then use a fresh
+profile's **Biometric sign-in → Manage** menu. **Use Face ID or Touch ID** opens
+its password field. Setup stays inside the server form. Sign in first, then use a fresh
 one-time code or browser approval from an existing credential to authorize setup.
 Wait for a new authenticator code after login; Teleport rejects a reused code.
 Setup first checks server policy. If a code is required, enter its 6–8 digits

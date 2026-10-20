@@ -27,6 +27,7 @@ struct TeleportProfileModelTests {
             if operation == .idle { break }
         }
         #expect(model.errorMessage == TeleportAccessError.message(for: TeleportAccessError.deviceSetupCodeRequired))
+        #expect(model.failure?.operation == .registeringCredential)
         #expect(model.credentialResult == nil)
     }
 
@@ -131,6 +132,7 @@ struct TeleportProfileModelTests {
         }
         #expect(model.operation == .idle)
         #expect(model.errorMessage == TeleportAccessError.message(for: failure))
+        #expect(model.failure?.operation.isDeviceAuthentication == true)
         #expect(model.errorMessage?.contains("private callback token") == false)
         #expect(model.credentialResult == nil)
     }

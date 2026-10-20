@@ -1,14 +1,20 @@
 #if DEBUG
+import Foundation
 import SwiftUI
 import TeleportKit
 
-/// Renders the production recovery controls without starting authentication.
+/// Uses the production controls without starting authentication.
 @MainActor
 struct TeleportDeviceCredentialUITestControls: View {
+    enum Content { case device, signIn }
     private let service: TeleportAccessService
+    private let content: Content
     @StateObject private var model: TeleportProfileModel
+    @State private var password = ""
+    @State private var isSigningIn = false
 
-    init(signedIn: Bool = false) {
+    init(signedIn: Bool = false, content: Content = .device) {
+        self.content = content
         let service = TeleportAccessService(
             keychain: KeychainStore(service: "test.teleport.credential.ui", backing: UnusedKeychain()),
             makeBrowserSession: { _, _ in preconditionFailure("This UI check must not open a browser") },
@@ -17,29 +23,37 @@ struct TeleportDeviceCredentialUITestControls: View {
         self.service = service
         do {
             let profile = try TeleportProfileConfiguration(proxyURL: "https://proxy.example.invalid", account: "test-user")
-            if signedIn {
-                _model = StateObject(wrappedValue: TeleportProfileModel(
-                    profile: profile, service: service,
-                    summary: TeleportAccessSummary(
-                        account: profile.account, clusterName: "test-cluster",
-                        validBefore: .distantFuture, allowedLogins: ["test-login"]
-                    ),
-                    discovery: TeleportDiscovery(
-                        clusterName: "test-cluster", serverVersion: "18.11.4",
-                        authenticationType: "local", secondFactor: "otp", connectors: []
-                    ),
-                    credentialResult: .codeRequired
-                ))
-            } else {
-                _model = StateObject(wrappedValue: TeleportProfileModel(profile: profile, service: service))
-            }
+            _model = StateObject(wrappedValue: TeleportProfileModel(
+                profile: profile, service: service,
+                summary: signedIn ? TeleportAccessSummary(
+                    account: profile.account, clusterName: "test-cluster",
+                    validBefore: .distantFuture, allowedLogins: ["test-login"]
+                ) : nil,
+                discovery: TeleportDiscovery(
+                    clusterName: "test-cluster", serverVersion: "18.11.4",
+                    authenticationType: "local", secondFactor: "otp", connectors: [],
+                    webAuthnConfigured: content == .signIn
+                ),
+                credentialResult: signedIn ? .codeRequired : nil
+            ))
         } catch {
             preconditionFailure("Invalid fixed Teleport UI profile")
         }
     }
 
     var body: some View {
-        TeleportDeviceCredentialControls(service: service, model: model, password: .constant(""), onSignIn: {})
+        switch content {
+        case .device:
+            TeleportDeviceCredentialControls(
+                service: service, model: model, password: $password,
+                isSigningIn: $isSigningIn, onSignIn: {}
+            )
+        case .signIn:
+            TeleportProfileSection(
+                model: model, service: service, clusterName: .constant(""),
+                nodeID: .constant(""), login: .constant(""), onSelectNode: { _ in }
+            )
+        }
     }
 
     private nonisolated enum Failure: Error { case unexpectedStorageAccess }
@@ -67,6 +81,9 @@ struct TeleportDeviceCredentialUITestControls: View {
 struct TeleportCredentialSetupFormUITestFixture: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    private var testsSignIn: Bool {
+        Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-teleport-sign-in")
+    }
 
     var body: some View {
         NavigationStack {
@@ -75,7 +92,9 @@ struct TeleportCredentialSetupFormUITestFixture: View {
                     TextField("Name", text: $name)
                         .accessibilityIdentifier("vvterm.teleport.setupTest.draftName")
                 }
-                TeleportDeviceCredentialUITestControls(signedIn: true)
+                TeleportDeviceCredentialUITestControls(
+                    signedIn: !testsSignIn, content: testsSignIn ? .signIn : .device
+                )
             }
             .navigationTitle("Add Server")
             .toolbar {

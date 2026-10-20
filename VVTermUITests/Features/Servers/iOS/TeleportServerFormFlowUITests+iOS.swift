@@ -27,14 +27,19 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         draftName.typeText("My Teleport server\n")
         let controls = app.staticTexts["vvterm.teleport.credential.controls"]
         reveal(controls, in: app, scrollingUp: true)
+        app.buttons["vvterm.teleport.credential.use"].tap()
+        XCTAssertTrue(app.secureTextFields["vvterm.teleport.credential.password"].waitForExistence(timeout: 5))
 
         for _ in 0..<2 {
+            app.buttons["vvterm.teleport.credential.manage"].tap()
             let setup = app.buttons["vvterm.teleport.credential.setup"]
             reveal(setup, in: app, scrollingUp: true)
             XCTAssertTrue(setup.isEnabled)
             setup.tap()
             let credentialName = app.textFields["vvterm.teleport.credential.name"]
             XCTAssertTrue(credentialName.waitForExistence(timeout: 5))
+            XCTAssertFalse(app.secureTextFields["vvterm.teleport.credential.password"].exists)
+            XCTAssertFalse(app.buttons["vvterm.teleport.credential.use"].exists)
             XCTAssertTrue(draftName.exists, "Setup must stay inside Add Server")
             XCTAssertEqual(draftName.value as? String, "My Teleport server")
             let enable = app.buttons["vvterm.teleport.credential.enable"]
@@ -46,6 +51,10 @@ final class TeleportServerFormFlowUITests: XCTestCase {
             code.typeText("123456\n")
             reveal(enable, in: app, scrollingUp: true)
             XCTAssertTrue(enable.isEnabled)
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Compact device setup"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
             let cancel = app.buttons["vvterm.teleport.credential.cancel"]
             reveal(cancel, in: app, scrollingUp: true)
             cancel.tap()
@@ -53,6 +62,56 @@ final class TeleportServerFormFlowUITests: XCTestCase {
             reveal(draftName, in: app, scrollingUp: false)
             XCTAssertEqual(draftName.value as? String, "My Teleport server")
         }
+    }
+
+    @MainActor
+    func testSignInShowsOnlyTheSelectedMethod() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--vvterm-ui-test-server-duplicate-harness", "--vvterm-ui-test-teleport-server-form",
+            "--vvterm-ui-test-teleport-sign-in", "-AppleLanguages", "(en)", "-AppleLocale", "en_US",
+            "-hasSeenWelcome", "YES", "-iCloudSyncEnabled", "NO",
+            "-security.privacyModeEnabled", "NO", "-security.fullAppLockEnabled", "NO"
+        ]
+        app.launch()
+        defer { app.terminate() }
+        let open = app.buttons["vvterm.teleport.setupTest.open"]
+        XCTAssertTrue(open.waitForExistence(timeout: 10))
+        reveal(open, in: app, scrollingUp: true)
+        open.tap()
+
+        let password = app.secureTextFields["vvterm.teleport.password"]
+        let code = app.secureTextFields["vvterm.teleport.otp"]
+        XCTAssertTrue(password.waitForExistence(timeout: 5))
+        XCTAssertTrue(code.exists)
+        XCTAssertFalse(app.buttons["vvterm.teleport.credential.remove"].exists)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Compact sign-in"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        code.tap()
+        code.typeText("123456\n")
+
+        let method = app.descendants(matching: .any).matching(identifier: "vvterm.teleport.signInMethod").firstMatch
+        method.tap()
+        app.buttons["Passkey or security key"].tap()
+        XCTAssertTrue(code.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(password.exists)
+
+        let useBiometrics = app.buttons["vvterm.teleport.credential.use"]
+        reveal(useBiometrics, in: app, scrollingUp: true)
+        useBiometrics.tap()
+        let devicePassword = app.secureTextFields["vvterm.teleport.credential.password"]
+        XCTAssertTrue(devicePassword.waitForExistence(timeout: 5))
+        XCTAssertFalse(password.exists)
+        XCTAssertFalse(code.exists)
+        app.buttons["Use another method"].tap()
+        reveal(code, in: app, scrollingUp: false)
+        XCTAssertTrue(code.exists)
+        XCTAssertTrue(password.exists)
+        XCTAssertFalse(devicePassword.exists)
+        XCTAssertTrue((code.value as? String) == code.placeholderValue || (code.value as? String) == "")
     }
 
     @MainActor
@@ -127,6 +186,8 @@ final class TeleportServerFormFlowUITests: XCTestCase {
     private func checkLocalCredentialRecovery(in app: XCUIApplication) {
         let controls = app.staticTexts["vvterm.teleport.credential.controls"]
         reveal(controls, in: app, scrollingUp: false)
+        let manage = app.buttons["vvterm.teleport.credential.manage"]
+        manage.tap()
         let setup = app.buttons["vvterm.teleport.credential.setup"]
         XCTAssertTrue(setup.waitForExistence(timeout: 5))
         XCTAssertFalse(setup.isEnabled, "Setup needs a valid signed-in identity")
@@ -135,9 +196,12 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         XCTAssertTrue(remove.waitForExistence(timeout: 5))
         XCTAssertTrue(remove.isEnabled)
         remove.tap()
-        let warning = app.staticTexts["Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid."]
+        let warning = app.staticTexts.matching(NSPredicate(
+            format: "label == %@",
+            "Access stays valid. Keep another sign-in method. Remove the device entry in Teleport before setup again."
+        )).firstMatch
         XCTAssertTrue(warning.waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Remove local credential"].exists)
+        XCTAssertTrue(app.buttons["Remove local key"].exists)
         let cancel = app.buttons.matching(identifier: "Cancel").allElementsBoundByIndex.first { $0.isHittable }
         if let cancel {
             cancel.tap()
@@ -146,7 +210,7 @@ final class TeleportServerFormFlowUITests: XCTestCase {
             app.navigationBars["Server Duplicate Test"].tap()
         }
         XCTAssertTrue(warning.waitForNonExistence(timeout: 5))
-        XCTAssertTrue(remove.isEnabled)
+        XCTAssertTrue(manage.isEnabled)
     }
 
     @MainActor

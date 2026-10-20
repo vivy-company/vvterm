@@ -23,6 +23,13 @@ final class TeleportProfileModel: ObservableObject {
         case deletingCredential
         case loadingNodes
         case signingOut
+
+        var isDeviceAuthentication: Bool {
+            switch self {
+            case .biometricLogin, .registeringCredential, .deletingCredential: true
+            default: false
+            }
+        }
     }
 
     enum CredentialResult: Equatable { case codeRequired, registered, deleted }
@@ -31,7 +38,7 @@ final class TeleportProfileModel: ObservableObject {
     @Published private(set) var discovery: TeleportDiscovery?
     @Published private(set) var nodePage: TeleportNodePage?
     @Published private(set) var operation = Operation.idle
-    @Published private(set) var errorMessage: String?
+    @Published private(set) var failure: (operation: Operation, message: String)?
     @Published private(set) var credentialResult: CredentialResult?
 
     let profile: TeleportProfileConfiguration
@@ -48,7 +55,7 @@ final class TeleportProfileModel: ObservableObject {
     /// UI fixtures supply display facts without creating credentials or contacting a server.
     convenience init(
         profile: TeleportProfileConfiguration, service: TeleportAccessService,
-        summary: TeleportAccessSummary, discovery: TeleportDiscovery,
+        summary: TeleportAccessSummary?, discovery: TeleportDiscovery,
         credentialResult: CredentialResult? = nil
     ) {
         self.init(profile: profile, service: service)
@@ -59,6 +66,7 @@ final class TeleportProfileModel: ObservableObject {
     #endif
 
     var isBusy: Bool { operation != .idle }
+    var errorMessage: String? { failure?.message }
 
     nonisolated static func isValidOneTimeCode(_ code: String) -> Bool {
         (6...8).contains(code.utf8.count) && code.utf8.allSatisfy { (48...57).contains($0) }
@@ -210,6 +218,8 @@ final class TeleportProfileModel: ObservableObject {
     }
 
     private func readNodes(startKey: String) async throws {
+        try Task.checkCancellation()
+        operation = .loadingNodes
         let page = try await service.nodes(for: profile, startKey: startKey)
         try Task.checkCancellation()
         nodePage = page
@@ -226,7 +236,7 @@ final class TeleportProfileModel: ObservableObject {
         work: @escaping @MainActor (TeleportProfileModel) async throws -> Void
     ) {
         cancel()
-        errorMessage = nil
+        failure = nil
         if operation != .registeringCredential || credentialResult != .codeRequired {
             credentialResult = nil
         }
@@ -239,7 +249,7 @@ final class TeleportProfileModel: ObservableObject {
                 try Task.checkCancellation()
             } catch {
                 guard !Task.isCancelled else { return }
-                errorMessage = TeleportAccessError.message(for: error)
+                failure = (self.operation, TeleportAccessError.message(for: error))
             }
             guard !Task.isCancelled else { return }
             browser?.cancel()

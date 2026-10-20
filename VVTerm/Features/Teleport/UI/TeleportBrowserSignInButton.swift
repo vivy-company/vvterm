@@ -23,7 +23,7 @@ struct TeleportBrowserSignInButton: View {
         } label: {
             switch method {
             case .localMFA:
-                Text("Approve with a passkey or security key")
+                Text("Sign in")
             case .sso(let connector):
                 Text("Sign in with \(connector.displayName)")
             }
