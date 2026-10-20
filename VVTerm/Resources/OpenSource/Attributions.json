@@ -125,7 +125,7 @@
         "identity": "swift-teleport",
         "location": "https://github.com/wiedymi/swift-teleport",
         "state": {
-          "revision": "d6632db3976c2c8390ef1a0cfbd64b898e4ed351"
+          "revision": "dd0ee2c49aab323a5fd8de6d17359c2d8e03ed3c"
         },
         "classification": "openSource",
         "attributionID": "swift-teleport"
@@ -486,7 +486,7 @@
       "id": "swift-teleport",
       "name": "TeleportKit",
       "role": "networkTransport",
-      "projectURL": "https://github.com/wiedymi/swift-teleport/tree/d6632db3976c2c8390ef1a0cfbd64b898e4ed351",
+      "projectURL": "https://github.com/wiedymi/swift-teleport/tree/dd0ee2c49aab323a5fd8de6d17359c2d8e03ed3c",
       "licenseName": "MIT and Apache-2.0 protocol schemas",
       "licenseResource": "TeleportKit.txt"
     }

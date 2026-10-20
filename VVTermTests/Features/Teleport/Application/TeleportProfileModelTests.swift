@@ -17,13 +17,13 @@ private final class TeleportOperationReleaseProbe: Sendable {
 
 @MainActor
 struct TeleportProfileModelTests {
-    @Test
-    func cancelledQueuedLoginDoesNotCreateBrowserOrApplyError() async throws {
+    @Test(arguments: [false, true])
+    func cancelledQueuedLoginDoesNotCreateBrowserOrApplyError(localMFA: Bool) async throws {
         let model = try makeModel()
         var factoryCalls = 0
         await withCheckedContinuation { completion in
             var probe: TeleportOperationReleaseProbe? = TeleportOperationReleaseProbe(completion)
-            model.login(connector: makeConnector()) { [probe] _ in
+            model.login(browser: makeBrowserMethod(localMFA: localMFA)) { [probe] _ in
                 withExtendedLifetime(probe) { factoryCalls += 1 }
                 throw TeleportError.transport("cancelled work must not execute")
             }
@@ -37,13 +37,13 @@ struct TeleportProfileModelTests {
         #expect(model.summary == nil)
     }
 
-    @Test
-    func browserCreationFailureUsesRedactedMessage() async throws {
+    @Test(arguments: [false, true])
+    func browserCreationFailureUsesRedactedMessage(localMFA: Bool) async throws {
         let model = try makeModel()
         let failure = TeleportError.transport("private callback token")
         await withCheckedContinuation { completion in
             var probe: TeleportOperationReleaseProbe? = TeleportOperationReleaseProbe(completion)
-            model.login(connector: makeConnector()) { [probe] _ in
+            model.login(browser: makeBrowserMethod(localMFA: localMFA)) { [probe] _ in
                 withExtendedLifetime(probe) {}
                 throw failure
             }
@@ -70,7 +70,8 @@ struct TeleportProfileModelTests {
         )
     }
 
-    private func makeConnector() -> TeleportConnector {
-        TeleportConnector(kind: .oidc, id: "test", displayName: "Test")
+    private func makeBrowserMethod(localMFA: Bool) -> TeleportProfileModel.BrowserLogin {
+        if localMFA { return .localMFA(password: "private password") }
+        return .sso(TeleportConnector(kind: .oidc, id: "test", displayName: "Test"))
     }
 }

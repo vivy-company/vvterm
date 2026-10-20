@@ -2366,3 +2366,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "มีโหนด Teleport หลายโหนดที่ใช้ชื่อนี้ ให้ใช้ ID โหนดที่ตรงกัน";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "กำลังลงชื่อเข้าใช้โปรไฟล์ Teleport นี้ โปรดดำเนินการให้เสร็จหรือยกเลิก แล้วลองอีกครั้ง";
+"Approve with a passkey or security key" = "อนุมัติด้วยพาสคีย์หรือคีย์ความปลอดภัย";

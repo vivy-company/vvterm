@@ -2367,3 +2367,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "Гэтае імя маюць некалькі вузлоў Teleport. Выкарыстайце дакладны ID вузла.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Для гэтага профілю Teleport ужо выконваецца ўваход. Завяршыце або скасуйце яго і паспрабуйце зноў.";
+"Approve with a passkey or security key" = "Пацвердзіць з дапамогай ключа доступу або ключа бяспекі";

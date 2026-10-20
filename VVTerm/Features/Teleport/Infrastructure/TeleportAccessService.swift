@@ -58,6 +58,16 @@ actor TeleportAccessService {
 
     func login(
         profile: TeleportProfileConfiguration,
+        password: String,
+        presenter: any TeleportBrowserPresenter
+    ) async throws -> TeleportAccessSummary {
+        try await performLogin(profile: profile) { client in
+            try await client.login(username: profile.account, password: password, browser: presenter)
+        }
+    }
+
+    func login(
+        profile: TeleportProfileConfiguration,
         connector: TeleportConnector,
         presenter: any TeleportBrowserPresenter
     ) async throws -> TeleportAccessSummary {

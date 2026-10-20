@@ -2365,3 +2365,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "More than one Teleport node has this name. Use its exact node ID.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "This Teleport profile is signing in. Finish or cancel it, then try again.";
+"Approve with a passkey or security key" = "Approve with a passkey or security key";

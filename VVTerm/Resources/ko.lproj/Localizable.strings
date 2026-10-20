@@ -2365,3 +2365,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "같은 이름의 Teleport 노드가 여러 개 있습니다. 정확한 노드 ID를 사용하세요.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "이 Teleport 프로필에 로그인하는 중입니다. 로그인을 완료하거나 취소한 후 다시 시도하세요.";
+"Approve with a passkey or security key" = "패스키 또는 보안 키로 승인";

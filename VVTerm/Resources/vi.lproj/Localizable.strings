@@ -2411,3 +2411,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "Nhiều nút Teleport có cùng tên này. Dùng ID chính xác của nút.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Hồ sơ Teleport này đang đăng nhập. Hãy hoàn tất hoặc hủy rồi thử lại.";
+"Approve with a passkey or security key" = "Phê duyệt bằng khóa truy cập hoặc khóa bảo mật";

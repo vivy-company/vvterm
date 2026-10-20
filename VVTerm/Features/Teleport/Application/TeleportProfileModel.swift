@@ -4,6 +4,11 @@ import TeleportKit
 
 @MainActor
 final class TeleportProfileModel: ObservableObject {
+    enum BrowserLogin: Sendable {
+        case localMFA(password: String)
+        case sso(TeleportConnector)
+    }
+
     enum Operation: Equatable {
         case idle
         case loading
@@ -66,7 +71,7 @@ final class TeleportProfileModel: ObservableObject {
     }
 
     func login(
-        connector: TeleportConnector,
+        browser method: BrowserLogin,
         makeBrowserSession: @escaping @MainActor (
             @escaping @MainActor @Sendable () -> Void
         ) throws -> any TeleportBrowserSession
@@ -77,9 +82,17 @@ final class TeleportProfileModel: ObservableObject {
             }
             model.browser = browser
             defer { browser.cancel() }
-            let summary = try await model.service.login(
-                profile: model.profile, connector: connector, presenter: browser
-            )
+            let summary: TeleportAccessSummary
+            switch method {
+            case .localMFA(let password):
+                summary = try await model.service.login(
+                    profile: model.profile, password: password, presenter: browser
+                )
+            case .sso(let connector):
+                summary = try await model.service.login(
+                    profile: model.profile, connector: connector, presenter: browser
+                )
+            }
             try Task.checkCancellation()
             browser.cancel()
             model.browser = nil

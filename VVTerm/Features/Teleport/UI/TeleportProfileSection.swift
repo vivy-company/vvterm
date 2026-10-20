@@ -114,9 +114,18 @@ private struct TeleportProfileContent: View {
                     otp = ""
                 }
                 .disabled(model.isBusy || password.isEmpty)
+                if discovery.webAuthnConfigured {
+                    TeleportBrowserSignInButton(
+                        method: .localMFA(password: password), service: service, model: model
+                    ) {
+                        password = ""
+                        otp = ""
+                    }
+                    .disabled(model.isBusy || password.isEmpty)
+                }
             }
             ForEach(model.connectors, id: \.profileButtonID) { connector in
-                TeleportBrowserSignInButton(connector: connector, service: service, model: model) {
+                TeleportBrowserSignInButton(method: .sso(connector), service: service, model: model) {
                     password = ""
                     otp = ""
                 }

@@ -2368,3 +2368,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "Plusieurs nœuds Teleport portent ce nom. Utilisez l’ID exact du nœud.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "La connexion à ce profil Teleport est en cours. Terminez-la ou annulez-la, puis réessayez.";
+"Approve with a passkey or security key" = "Approuver avec une clé d’accès ou de sécurité";

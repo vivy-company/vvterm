@@ -31,4 +31,10 @@ struct TeleportAccessErrorTests {
         #expect(TeleportAccessError.message(for: TeleportError.authenticationRequired) != denied)
         #expect(TeleportAccessError.message(for: TeleportError.invalidCertificate("untrusted")) != denied)
     }
+
+    @Test
+    func unavailableBrowserMFAUsesTheFixedPolicyMessage() {
+        #expect(TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.browserMFA))
+            == TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))
+    }
 }

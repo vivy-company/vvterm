@@ -2367,3 +2367,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "Tento název má více uzlů Teleportu. Použijte přesné ID uzlu.";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "Tento profil Teleport se přihlašuje. Dokončete nebo zrušte přihlášení a zkuste to znovu.";
+"Approve with a passkey or security key" = "Potvrdit přístupovým nebo bezpečnostním klíčem";

@@ -2366,3 +2366,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "同じ名前の Teleport ノードが複数あります。正確なノード ID を使用してください。";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "このTeleportプロファイルはサインイン中です。完了するかキャンセルしてから、もう一度お試しください。";
+"Approve with a passkey or security key" = "パスキーまたはセキュリティキーで承認";

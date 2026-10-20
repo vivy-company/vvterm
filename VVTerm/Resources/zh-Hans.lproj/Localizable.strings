@@ -2363,3 +2363,4 @@
 "More than one Teleport node has this name. Use its exact node ID." = "多个 Teleport 节点使用此名称。请使用准确的节点 ID。";
 
 "This Teleport profile is signing in. Finish or cancel it, then try again." = "此 Teleport 配置正在登录。请完成或取消登录，然后重试。";
+"Approve with a passkey or security key" = "使用通行密钥或安全密钥批准";

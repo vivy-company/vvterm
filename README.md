@@ -92,6 +92,17 @@ Sign-out disconnects this device's sessions for the same proxy and account.
 It does not revoke credentials on the server or other devices. Each profile
 requires trusted HTTPS and a new local sign-in on each device.
 
+Local accounts can use a password and TOTP, or a password with browser approval
+from an existing passkey or security key. The latter button appears when the
+proxy advertises WebAuthn. The server still decides whether browser MFA is
+enabled. Browser MFA is separate from GitHub, OIDC, and SAML sign-in; those
+buttons use the advertised SSO connector. Both paths use the system
+authentication browser and device-only identity storage. New passkey
+registration and native Apple passkey sign-in are not part of this support.
+The new local browser MFA path has unit checks only. Its pinned server test was
+blocked by the image download. Physical keys, system browser approval, and real
+provider SSO still need live checks; see TeleportKit's validation notes.
+
 ## Documentation
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow
