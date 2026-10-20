@@ -1126,7 +1126,7 @@
 			repositoryURL = "https://github.com/wiedymi/swift-teleport";
 			requirement = {
 				kind = revision;
-				revision = dd0ee2c49aab323a5fd8de6d17359c2d8e03ed3c;
+				revision = 670d819ce7013af4e993ca55c3a12a93d1f34b13;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
