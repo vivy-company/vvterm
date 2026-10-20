@@ -6,19 +6,15 @@ nonisolated struct TeleportAccessSummary: Sendable {
     let clusterName: String
     let validBefore: Date
     let allowedLogins: [String]
+}
 
-    init(identity: TeleportIdentity) {
+extension TeleportAccessSummary {
+    nonisolated init(identity: TeleportIdentity) {
         account = identity.username
         clusterName = identity.clusterName
         validBefore = identity.validBefore
         allowedLogins = identity.allowedLogins
     }
-}
-
-nonisolated struct TeleportNodeSelection: Sendable {
-    let clusterName: String
-    let nodeID: String
-    let login: String
 }
 
 @MainActor

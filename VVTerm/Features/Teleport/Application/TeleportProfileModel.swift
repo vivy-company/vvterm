@@ -44,7 +44,26 @@ final class TeleportProfileModel: ObservableObject {
         self.service = service
     }
 
+    #if DEBUG
+    /// UI fixtures supply display facts without creating credentials or contacting a server.
+    convenience init(
+        profile: TeleportProfileConfiguration, service: TeleportAccessService,
+        summary: TeleportAccessSummary, discovery: TeleportDiscovery
+    ) {
+        self.init(profile: profile, service: service)
+        self.summary = summary
+        self.discovery = discovery
+    }
+    #endif
+
     var isBusy: Bool { operation != .idle }
+
+    nonisolated static func singleNode(
+        in nodes: [TeleportNode], hasMore: Bool, currentNodeID: String, isFirstPage: Bool
+    ) -> TeleportNode? {
+        guard currentNodeID.isEmpty, isFirstPage, !hasMore, nodes.count == 1 else { return nil }
+        return nodes[0]
+    }
 
     var canRegisterCredential: Bool {
         discovery?.authenticationType == "local"

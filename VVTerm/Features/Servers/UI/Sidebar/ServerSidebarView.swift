@@ -210,6 +210,7 @@ struct ServerSidebarView: View {
                                 serverManager: serverManager,
                                 terminalNavigation: terminalNavigation,
                                 server: server,
+                                teleportAccess: serverFormDependencies.teleportAccess,
                                 isSelected: selectedServer?.id == server.id,
                                 isLocked: stateStore.isServerLocked(
                                     server,

@@ -4,34 +4,48 @@ import TeleportKit
 struct TeleportProfileSection: View {
     let profile: TeleportProfileConfiguration
     let service: TeleportAccessService
-    let onSelectNode: (TeleportNodeSelection) -> Void
+    @Binding var clusterName: String
+    @Binding var nodeID: String
+    @Binding var login: String
+    let onSelectNode: (String) -> Void
 
     var body: some View {
-        TeleportProfileContent(profile: profile, service: service, onSelectNode: onSelectNode)
-            .id(profile)
+        TeleportProfileContent(
+            profile: profile, service: service, clusterName: $clusterName,
+            nodeID: $nodeID, login: $login, onSelectNode: onSelectNode
+        )
+        .id(profile)
     }
 }
 
 /// A changed profile has a new view identity and a new task owner.
 private struct TeleportProfileContent: View {
     let profile: TeleportProfileConfiguration
-    let onSelectNode: (TeleportNodeSelection) -> Void
+    let onSelectNode: (String) -> Void
     private let service: TeleportAccessService
+    @Binding private var clusterName: String
+    @Binding private var nodeID: String
+    @Binding private var login: String
     @StateObject private var model: TeleportProfileModel
     @State private var password = ""
     @State private var otp = ""
-    @State private var selectedNodeID = ""
-    @State private var selectedLogin = ""
+    @State private var hasReadNodePage = false
     @State private var showingSignOutConfirmation = false
 
     init(
         profile: TeleportProfileConfiguration,
         service: TeleportAccessService,
-        onSelectNode: @escaping (TeleportNodeSelection) -> Void
+        clusterName: Binding<String>,
+        nodeID: Binding<String>,
+        login: Binding<String>,
+        onSelectNode: @escaping (String) -> Void
     ) {
         self.profile = profile
         self.service = service
         self.onSelectNode = onSelectNode
+        _clusterName = clusterName
+        _nodeID = nodeID
+        _login = login
         _model = StateObject(wrappedValue: TeleportProfileModel(profile: profile, service: service))
     }
 
@@ -102,10 +116,25 @@ private struct TeleportProfileContent: View {
             otp = ""
         }
         .onChange(of: model.summary?.allowedLogins ?? []) { logins in
-            if !logins.contains(selectedLogin) { selectedLogin = logins.first ?? "" }
+            if login.isEmpty, logins.count == 1 { login = logins[0] }
         }
-        .onChange(of: model.nodePage?.nodes.map(\.id) ?? []) { ids in
-            if !ids.contains(selectedNodeID) { selectedNodeID = "" }
+        .onChange(of: model.operation) { operation in
+            switch operation {
+            case .loading, .passwordLogin, .browserLogin, .biometricLogin:
+                hasReadNodePage = false
+            default:
+                break
+            }
+        }
+        .onChange(of: model.nodePage) { page in
+            guard let page else { return }
+            defer { hasReadNodePage = true }
+            // A final page alone does not mean that the cluster has only one node.
+            if let node = TeleportProfileModel.singleNode(
+                in: page.nodes, hasMore: page.hasMore, currentNodeID: nodeID, isFirstPage: !hasReadNodePage
+            ) {
+                selectNode(node)
+            }
         }
     }
 
@@ -123,20 +152,24 @@ private struct TeleportProfileContent: View {
                     otp = ""
                 }
                 .disabled(model.isBusy || password.isEmpty)
-                Button("Sign in with device biometrics") {
-                    model.loginWithSecureEnclave(password: password)
-                    password = ""
-                    otp = ""
-                }
-                .disabled(model.isBusy || password.isEmpty)
-                if discovery.webAuthnConfigured {
-                    TeleportBrowserSignInButton(
-                        method: .localMFA(password: password), service: service, model: model
-                    ) {
+                DisclosureGroup("Other sign-in options") {
+                    Button("Sign in with Face ID or Touch ID") {
+                        model.loginWithSecureEnclave(password: password)
                         password = ""
                         otp = ""
                     }
                     .disabled(model.isBusy || password.isEmpty)
+                    Text("Set up this device after your first sign-in.")
+                        .foregroundStyle(.secondary)
+                    if discovery.webAuthnConfigured {
+                        TeleportBrowserSignInButton(
+                            method: .localMFA(password: password), service: service, model: model
+                        ) {
+                            password = ""
+                            otp = ""
+                        }
+                        .disabled(model.isBusy || password.isEmpty)
+                    }
                 }
             }
             ForEach(model.connectors, id: \.profileButtonID) { connector in
@@ -159,40 +192,61 @@ private struct TeleportProfileContent: View {
             if page.nodes.isEmpty {
                 Text("No nodes are available in this page.")
                     .foregroundStyle(.secondary)
-            } else {
-                Picker("Node", selection: $selectedNodeID) {
-                    Text("Select a node").tag("")
+            }
+            if !page.nodes.isEmpty || !nodeID.isEmpty {
+                Picker("Node", selection: Binding(
+                    get: { nodeID },
+                    set: { id in
+                        if let node = page.nodes.first(where: { $0.id == id }) {
+                            selectNode(node)
+                        }
+                    }
+                )) {
+                    if nodeID.isEmpty {
+                        Text("Select a node").tag("")
+                    } else if !page.nodes.contains(where: { $0.id == nodeID }) {
+                        Text("Current node (not in this page)").tag(nodeID)
+                    }
                     ForEach(page.nodes, id: \.id) { node in
-                        Text("\(node.name) (\(node.id))").tag(node.id)
+                        Text(nodeLabel(node, in: page.nodes)).tag(node.id)
                     }
                 }
-                .disabled(model.isBusy)
-                Picker("OS login", selection: $selectedLogin) {
-                    if summary.allowedLogins.isEmpty {
-                        Text("No permitted login").tag("")
+                .accessibilityIdentifier("vvterm.teleport.node")
+                .disabled(model.isBusy || summary.validBefore <= Date())
+                Picker("OS login", selection: $login) {
+                    if login.isEmpty {
+                        Text(summary.allowedLogins.isEmpty ? "No permitted login" : "Select an OS login").tag("")
+                    } else if !summary.allowedLogins.contains(login) {
+                        Text("\(login) (not permitted)").tag(login)
                     }
                     ForEach(summary.allowedLogins, id: \.self) { login in
                         Text(login).tag(login)
                     }
                 }
-                .disabled(model.isBusy)
-                Button("Use selected node") {
-                    guard let node = page.nodes.first(where: { $0.id == selectedNodeID }),
-                          summary.allowedLogins.contains(selectedLogin),
-                          summary.validBefore > Date() else { return }
-                    onSelectNode(TeleportNodeSelection(
-                        clusterName: node.clusterName, nodeID: node.id, login: selectedLogin
-                    ))
-                }
-                .disabled(model.isBusy || selectedNodeID.isEmpty || selectedLogin.isEmpty || summary.validBefore <= Date())
+                .accessibilityIdentifier("vvterm.teleport.login")
+                .disabled(model.isBusy || summary.validBefore <= Date())
             }
             if page.hasMore {
                 Button("More nodes") { model.loadNodes(startKey: page.nextKey) }
                     .disabled(model.isBusy)
             }
         }
-        Button("Refresh nodes") { model.loadNodes() }
+        Button("Refresh nodes") {
+            hasReadNodePage = false
+            model.loadNodes()
+        }
             .disabled(model.isBusy || summary.validBefore <= Date())
+    }
+
+    private func selectNode(_ node: TeleportNode) {
+        clusterName = node.clusterName
+        nodeID = node.id
+        onSelectNode(node.name)
+    }
+
+    private func nodeLabel(_ node: TeleportNode, in nodes: [TeleportNode]) -> String {
+        nodes.contains { $0.name == node.name && $0.id != node.id }
+            ? "\(node.name) (\(node.id))" : node.name
     }
 
     private var progressLabel: LocalizedStringKey {

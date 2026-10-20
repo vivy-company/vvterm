@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ServerRow: View {
     let server: Server
+    let teleportAccess: TeleportAccessService?
     let isSelected: Bool
     let isLocked: Bool
     let onSelect: () -> Void
@@ -23,6 +24,7 @@ struct ServerRow: View {
         serverManager: ServerManager,
         terminalNavigation: TerminalSessionNavigationProjection,
         server: Server,
+        teleportAccess: TeleportAccessService?,
         isSelected: Bool,
         isLocked: Bool,
         onSelect: @escaping () -> Void,
@@ -36,6 +38,7 @@ struct ServerRow: View {
         _serverManager = ObservedObject(wrappedValue: serverManager)
         _terminalNavigation = ObservedObject(wrappedValue: terminalNavigation)
         self.server = server
+        self.teleportAccess = teleportAccess
         self.isSelected = isSelected
         self.isLocked = isLocked
         self.onSelect = onSelect
@@ -165,6 +168,12 @@ struct ServerRow: View {
                     .lineLimit(1)
 
                 HStack(spacing: 5) {
+                    if server.connectionMode == .teleport {
+                        Image(systemName: ServerTransportSelection.teleport.icon)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .accessibilityLabel("Teleport")
+                    }
                     Text(server.visibleHost(privacyModeEnabled: privacyModeEnabled))
                         .font(.caption2)
                         .foregroundStyle(Color.secondary.opacity(0.7))
@@ -179,6 +188,11 @@ struct ServerRow: View {
                         .font(.caption2)
                         .foregroundStyle(server.environment.color)
                         .lineLimit(1)
+                }
+
+                if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+                    TeleportAccessBadge(configuration: configuration, service: teleportAccess)
+                        .id(configuration)
                 }
             }
 

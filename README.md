@@ -118,8 +118,17 @@ Chromium fixture download did not complete. Physical keys, system browser
 approval, and real provider SSO still need live checks; see TeleportKit's
 validation notes.
 
+To add a Teleport server, select **Teleport**, enter the proxy URL and account,
+then sign in. Choose a node and its OS login. A sole node on the first complete
+result page and a sole OS login fill empty fields. Existing choices are kept. Node selection supplies the root cluster
+and exact node ID. Manual values and an optional SSO connector are under
+**Advanced Teleport settings**. The server list shows local access expiry and a
+distinct Teleport icon. Access status refreshes on display, in the foreground, and
+once per minute while visible. Expiry is never stored in CloudKit.
+
 Local accounts can also set up a device-bound Secure Enclave credential in the
-profile's **Device biometric sign-in** controls. Sign in first, then use a fresh
+profile's **Device biometric sign-in** controls. Setup stays inside the server form
+so the server draft remains open. Sign in first, then use a fresh
 one-time code or browser approval from an existing credential to authorize setup.
 The server decides which approval is required. Later sign-in still needs the
 Teleport password, plus Face ID or Touch ID. TeleportKit owns registration,
@@ -136,13 +145,11 @@ not remove the server credential, sign out, or revoke issued access. Remove a
 stale or failed setup entry through Teleport before setup again. Hardware SSH
 key policies and Device Trust remain unsupported.
 
-Before the library readability update, app checks passed: 25 macOS tests,
-22 iOS Simulator tests, and one iOS form/recovery UI test. They cover cancellation, exclusive credential
-operations, safe recovery messages, disabled setup before sign-in, and the local
-removal warning/dismissal. The library's native protocol test also passed against
-Teleport 18.11.4 with an injected software key. These checks do not prove Secure
-Enclave, biometric prompts, signed Keychain persistence, or app-to-server traffic.
-See the library's [exact validation limits](https://github.com/wiedymi/swift-teleport/blob/04ae4765a6abf5228c8a4badc39355a23ac89ab1/docs/VALIDATION.md).
+Focused app tests cover transport settings, local and CloudKit storage, node
+selection, cancellation, setup, and recovery. UI fixtures do not create keys or
+contact a server. Software-key protocol checks passed against Teleport 18.11.4.
+Physical-device checks are still required for Secure Enclave, biometric prompts,
+signed Keychain behavior, browser MFA, and real-provider SSO.
 
 ## Documentation
 

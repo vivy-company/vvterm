@@ -11,6 +11,7 @@ import SwiftUI
 struct ServerListRow: View {
     @ObservedObject var serverManager: ServerManager
     let server: Server
+    let teleportAccess: TeleportAccessService?
     var isSidebar = false
     let onTap: () -> Void
     let onEdit: () -> Void
@@ -54,11 +55,22 @@ struct ServerListRow: View {
                         .lineLimit(isSidebar ? 1 : nil)
                         .foregroundStyle(isLocked ? .secondary : .primary)
 
-                    Text(server.visibleAddress(privacyModeEnabled: privacyModeEnabled))
+                    HStack(spacing: 4) {
+                        if server.connectionMode == .teleport {
+                            Image(systemName: ServerTransportSelection.teleport.icon)
+                                .accessibilityLabel("Teleport")
+                        }
+                        Text(server.visibleAddress(privacyModeEnabled: privacyModeEnabled))
+                    }
                         .font(.caption)
                         .lineLimit(isSidebar ? 1 : nil)
                         .truncationMode(isSidebar ? .middle : .tail)
                         .foregroundStyle(.secondary)
+
+                    if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+                        TeleportAccessBadge(configuration: configuration, service: teleportAccess)
+                            .id(configuration)
+                    }
                 }
 
                 Spacer()

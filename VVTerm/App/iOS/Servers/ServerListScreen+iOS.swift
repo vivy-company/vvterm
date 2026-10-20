@@ -407,6 +407,7 @@ struct ServerListScreen: View {
                     ServerListRow(
                         serverManager: serverManager,
                         server: server,
+                        teleportAccess: serverFormDependencies.teleportAccess,
                         isSidebar: isSidebar,
                         onTap: { onServerSelected(server) },
                         onEdit: { serverFormIntent = .edit(server) },

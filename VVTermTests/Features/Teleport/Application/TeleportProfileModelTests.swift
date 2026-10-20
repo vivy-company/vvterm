@@ -17,6 +17,25 @@ private final class TeleportOperationReleaseProbe: Sendable {
 
 @MainActor
 struct TeleportProfileModelTests {
+    @Test
+    func onlyOneCompleteInitialResultCanFillAnEmptyNode() throws {
+        let first = try TeleportNode(id: "first", name: "First", clusterName: "cluster")
+        let second = try TeleportNode(id: "second", name: "Second", clusterName: "cluster")
+        let single = [first]
+        #expect(TeleportProfileModel.singleNode(in: single, hasMore: false, currentNodeID: "", isFirstPage: true) == first)
+        #expect(TeleportProfileModel.singleNode(in: single, hasMore: false, currentNodeID: "saved", isFirstPage: true) == nil)
+        #expect(TeleportProfileModel.singleNode(in: single, hasMore: false, currentNodeID: "", isFirstPage: false) == nil)
+        #expect(TeleportProfileModel.singleNode(
+            in: [first], hasMore: true, currentNodeID: "", isFirstPage: true
+        ) == nil)
+        #expect(TeleportProfileModel.singleNode(
+            in: [first, second], hasMore: false, currentNodeID: "", isFirstPage: true
+        ) == nil)
+        #expect(TeleportProfileModel.singleNode(
+            in: [], hasMore: false, currentNodeID: "", isFirstPage: true
+        ) == nil)
+    }
+
     enum DeviceOperation: CaseIterable { case login, registration, removal }
 
     @Test(arguments: DeviceOperation.allCases)

@@ -33,7 +33,7 @@ extension ServerTransportSelection {
         case .cloudflare:
             return "shield.lefthalf.filled"
         case .teleport:
-            return "network"
+            return "arrow.up.forward.circle"
         case .unsupported:
             return "questionmark.circle"
         }
@@ -305,10 +305,14 @@ struct ServerFormSheet: View {
         if form.transportSelection == .teleport,
            let profile = form.teleportProfile,
            let teleportAccess {
-            TeleportProfileSection(profile: profile, service: teleportAccess) { selection in
-                form.teleportClusterName = selection.clusterName
-                form.teleportNodeID = selection.nodeID
-                form.username = selection.login
+            TeleportProfileSection(
+                profile: profile, service: teleportAccess,
+                clusterName: $form.teleportClusterName,
+                nodeID: $form.teleportNodeID, login: $form.username
+            ) { nodeName in
+                if form.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    form.name = nodeName
+                }
             }
         }
         iconSection
@@ -579,20 +583,7 @@ struct ServerFormSheet: View {
                 .textContentType(.name)
                 #endif
 
-            if form.transportSelection == .teleport {
-                TextField("Root Cluster", text: $form.teleportClusterName)
-                    .accessibilityIdentifier("vvterm.serverForm.teleport.cluster")
-                    .autocorrectionDisabled()
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                TextField("Node ID", text: $form.teleportNodeID)
-                    .accessibilityIdentifier("vvterm.serverForm.teleport.nodeID")
-                    .autocorrectionDisabled()
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-            } else {
+            if form.transportSelection != .teleport {
                 HStack(spacing: 12) {
                     TextField("Host", text: $form.host, prompt: Text(String(localized: "203.0.113.10")))
                         .accessibilityIdentifier("vvterm.serverForm.host")
@@ -612,23 +603,17 @@ struct ServerFormSheet: View {
                         .multilineTextAlignment(.trailing)
                         .frame(width: 76)
                 }
-            }
 
-            TextField(
-                form.transportSelection == .teleport ? String(localized: "OS Login") : String(localized: "Username"),
-                text: $form.username,
-                prompt: Text(form.transportSelection == .teleport ? "deploy" : String(localized: "root"))
-            )
-                .accessibilityIdentifier("vvterm.serverForm.username")
-                #if os(iOS)
-                .textContentType(.username)
-                #endif
-                .autocorrectionDisabled()
-                #if os(iOS)
-                .textInputAutocapitalization(.never)
-                #endif
+                TextField("Username", text: $form.username, prompt: Text(String(localized: "root")))
+                    .accessibilityIdentifier("vvterm.serverForm.username")
+                    #if os(iOS)
+                    .textContentType(.username)
+                    #endif
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    #endif
 
-            if form.transportSelection != .teleport {
                 Button {
                     presentLocalDiscovery()
                 } label: {
@@ -668,19 +653,42 @@ struct ServerFormSheet: View {
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
                     #endif
-                TextField("SSO Connector (Optional)", text: $form.teleportConnectorID)
-                    .accessibilityIdentifier("vvterm.serverForm.teleport.connector")
-                    .autocorrectionDisabled()
-                    #if os(iOS)
-                    .textInputAutocapitalization(.never)
-                    #endif
-                Text("Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices.")
+                Text("Sign in, then choose a node and OS login. Profile settings sync between devices. Issued access stays on this device.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Button("Test Connection") {
-                    Task { await runConnectionTest(force: true) }
+                DisclosureGroup {
+                    TextField("Root Cluster", text: $form.teleportClusterName)
+                        .accessibilityIdentifier("vvterm.serverForm.teleport.cluster")
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                    TextField("Node ID", text: $form.teleportNodeID)
+                        .accessibilityIdentifier("vvterm.serverForm.teleport.nodeID")
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                    TextField("OS Login", text: $form.username)
+                        .accessibilityIdentifier("vvterm.serverForm.username")
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                    TextField("SSO Connector (Optional)", text: $form.teleportConnectorID)
+                        .accessibilityIdentifier("vvterm.serverForm.teleport.connector")
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        #endif
+                    Button("Test Connection") {
+                        Task { await runConnectionTest(force: true) }
+                    }
+                    .disabled(!form.isValid || isTestingConnection || isSaving)
+                } label: {
+                    Text("Advanced Teleport settings")
+                        .accessibilityIdentifier("vvterm.serverForm.teleport.advanced")
                 }
-                .disabled(!form.isValid || isTestingConnection || isSaving)
             }
 
             if form.transportSelection == .eternalTerminal {

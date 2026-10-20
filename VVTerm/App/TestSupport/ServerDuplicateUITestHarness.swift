@@ -30,6 +30,7 @@ struct ServerDuplicateUITestHarness: View {
 
     @State private var formIntent: ServerFormIntent?
     @State private var wakeActionCount = 0
+    @State private var showingCredentialSetupTest = false
 
     private static var usesTeleportFormHarness: Bool {
         Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-teleport-server-form")
@@ -83,13 +84,18 @@ struct ServerDuplicateUITestHarness: View {
                 if Self.usesTeleportFormHarness {
                     Button("Add Server") { formIntent = .create(prefill: nil) }
                         .accessibilityIdentifier("vvterm.teleportFormTest.add")
-                    TeleportDeviceCredentialUITestControls()
+                    if !showingCredentialSetupTest {
+                        TeleportDeviceCredentialUITestControls()
+                    }
+                    Button("Check credential setup") { showingCredentialSetupTest = true }
+                        .accessibilityIdentifier("vvterm.teleport.setupTest.open")
                 }
                 if !Self.usesTeleportFormHarness || !serverManager.servers.isEmpty {
                     #if os(iOS)
                     ServerListRow(
                         serverManager: serverManager,
                         server: sourceServer,
+                        teleportAccess: dependencies.teleportAccess,
                         onTap: {},
                         onEdit: { formIntent = .edit(sourceServer) },
                         onMove: {},
@@ -114,6 +120,9 @@ struct ServerDuplicateUITestHarness: View {
         }
         .sheet(item: $formIntent) { intent in
             formSheet(for: intent)
+        }
+        .sheet(isPresented: $showingCredentialSetupTest) {
+            TeleportCredentialSetupFormUITestFixture()
         }
         .accessibilityIdentifier("vvterm.serverDuplicateTest.root")
     }
