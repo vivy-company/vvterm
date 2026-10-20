@@ -5,6 +5,35 @@ import Testing
 
 struct ServerCloudKitRecordCodecTests {
     @Test
+    func teleportCloudRecordSyncsMetadataAndDoesNotRequireAnSSHAuthMethod() throws {
+        let configuration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        let server = Server(
+            workspaceId: UUID(), name: "Teleport", host: configuration.nodeID,
+            username: "deploy", connectionMode: .teleport,
+            teleportConfiguration: configuration
+        )
+        let now = Date(timeIntervalSinceReferenceDate: 3_000)
+        let record = ServerCloudKitRecordCodec.record(
+            for: server, in: CKRecordZone.ID(zoneName: "test-zone"), now: now
+        )
+        #expect(record["authMethod"] == nil)
+        let decoded = try #require(ServerCloudKitRecordCodec.server(from: record, now: now))
+        #expect(decoded.teleportConfiguration == configuration)
+        #expect(decoded.authMethod == nil)
+        #expect(decoded.username == "deploy")
+        let metadata = try #require(record["teleportConfiguration"] as? Data)
+        let object = try #require(JSONSerialization.jsonObject(with: metadata) as? [String: Any])
+        #expect(Set(object.keys) == ["profile", "clusterName", "nodeID"])
+        let profile = try #require(object["profile"] as? [String: Any])
+        #expect(Set(profile.keys) == ["proxyURL", "account"])
+        record["teleportConfiguration"] = nil
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: now) == nil)
+    }
+
+    @Test
     func serverRecordPreservesIdentityAndRoundTripsFields() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let server = makeServer()

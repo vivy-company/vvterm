@@ -2322,3 +2322,47 @@
 "Sidebar" = "Seitenleiste";
 
 "Terminal tab %lld" = "Terminal-Tab %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Stammcluster";
+"Node ID" = "Knoten-ID";
+"OS Login" = "Betriebssystembenutzer";
+"Proxy URL" = "Proxy-URL";
+"SSO Connector (Optional)" = "SSO-Connector (optional)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Melde dich beim Proxy an und wähle dann einen Knoten und dessen Betriebssystembenutzer. Nur Profil- und Knoteneinstellungen werden zwischen Geräten synchronisiert.";
+"Access expires" = "Zugriff läuft ab";
+"Sign in again to renew access." = "Melde dich erneut an, um den Zugriff zu erneuern.";
+"Sign in again" = "Erneut anmelden";
+"Sign out" = "Abmelden";
+"Check access" = "Zugriff prüfen";
+"Teleport access" = "Teleport-Zugriff";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Der erteilte Zugriff wird nur auf diesem Gerät gespeichert. Passwörter und Einmalcodes werden nicht gespeichert.";
+"Sign out of Teleport?" = "Von Teleport abmelden?";
+"This disconnects all sessions for this Teleport profile on this device." = "Dadurch werden alle Sitzungen dieses Teleport-Profils auf diesem Gerät getrennt.";
+"One-time code (if needed)" = "Einmalcode (falls erforderlich)";
+"Sign in" = "Anmelden";
+"Sign in with %@" = "Mit %@ anmelden";
+"No supported sign-in method is available for this profile." = "Für dieses Profil ist keine unterstützte Anmeldemethode verfügbar.";
+"No nodes are available in this page." = "Auf dieser Seite sind keine Knoten verfügbar.";
+"Node" = "Knoten";
+"Select a node" = "Knoten auswählen";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Betriebssystembenutzer";
+"No permitted login" = "Kein zulässiger Benutzer";
+"Use selected node" = "Ausgewählten Knoten verwenden";
+"More nodes" = "Weitere Knoten";
+"Refresh nodes" = "Knoten aktualisieren";
+"Checking access…" = "Zugriff wird geprüft…";
+"Signing in…" = "Anmeldung läuft…";
+"Loading nodes…" = "Knoten werden geladen…";
+"Signing out…" = "Abmeldung läuft…";
+"Teleport connection failed. Check the profile and sign in again." = "Die Teleport-Verbindung ist fehlgeschlagen. Prüfe das Profil und melde dich erneut an.";
+"Sign in to this Teleport profile before connecting." = "Melde dich vor dem Verbinden bei diesem Teleport-Profil an.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport hat den Zugriff verweigert. Prüfe Konto, Code und Knotenberechtigungen.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Dieser Teleport-Server oder diese Richtlinie wird nicht unterstützt. Wende dich an die Administration.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Die Teleport-Zertifikatsprüfung ist fehlgeschlagen. Prüfe Proxy, Konto und Cluster.";
+"The Teleport node was not found. Choose its exact node ID again." = "Der Teleport-Knoten wurde nicht gefunden. Wähle seine genaue Knoten-ID erneut aus.";
+"More than one Teleport node has this name. Use its exact node ID." = "Mehrere Teleport-Knoten haben diesen Namen. Verwende die genaue Knoten-ID.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Dieses Teleport-Profil wird angemeldet. Schließen Sie die Anmeldung ab oder brechen Sie sie ab und versuchen Sie es erneut.";

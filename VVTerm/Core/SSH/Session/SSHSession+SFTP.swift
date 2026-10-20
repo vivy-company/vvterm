@@ -4,6 +4,8 @@ extension SSHSession {
     // MARK: - Remote Files
 
     func listDirectory(at path: String, maxEntries: Int? = nil) async throws -> [SFTPFileEntry] {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         let handle = try await openDirectoryHandle(at: normalizedPath, sftp: sftp)
@@ -14,7 +16,7 @@ extension SSHSession {
         var nameBuffer = [CChar](repeating: 0, count: 4096)
 
         while entries.count < limit {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             var attributes = LIBSSH2_SFTP_ATTRIBUTES()
 
             let bytesRead = nameBuffer.withUnsafeMutableBufferPointer { buffer -> Int in
@@ -87,12 +89,17 @@ extension SSHSession {
     }
 
     func readlink(at path: String) async throws -> String {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         return try await readSymlinkTarget(at: path, linkType: Int32(LIBSSH2_SFTP_READLINK), sftp: sftp)
     }
 
     func readFile(at path: String, maxBytes: Int, offset: UInt64 = 0) async throws -> Data {
         guard maxBytes > 0 else { return Data() }
+
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
 
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
@@ -112,7 +119,7 @@ extension SSHSession {
         data.reserveCapacity(min(maxBytes, 32 * 1024))
 
         while data.count < maxBytes {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let remaining = maxBytes - data.count
             let chunkSize = min(32 * 1024, remaining)
             var buffer = [CChar](repeating: 0, count: chunkSize)
@@ -148,6 +155,8 @@ extension SSHSession {
     }
 
     func downloadFile(at path: String, to localURL: URL, maxBytes: UInt64) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         let handle = try await openFileHandle(
@@ -172,7 +181,7 @@ extension SSHSession {
         var totalBytesWritten: UInt64 = 0
         do {
             while true {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 var buffer = [UInt8](repeating: 0, count: 64 * 1024)
 
                 let bytesRead = buffer.withUnsafeMutableBufferPointer { bufferPtr -> Int in
@@ -219,6 +228,8 @@ extension SSHSession {
     }
 
     func writeFile(_ data: Data, to path: String, permissions: Int32 = 0o644) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         let handle = try await openFileHandle(
@@ -231,7 +242,7 @@ extension SSHSession {
         do {
             var totalBytesWritten = 0
             while totalBytesWritten < data.count {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
 
                 let bytesWritten = data.withUnsafeBytes { rawBuffer -> Int in
                     guard let baseAddress = rawBuffer.baseAddress else { return 0 }
@@ -277,6 +288,8 @@ extension SSHSession {
         expectedBytes: UInt64,
         permissions: Int32 = 0o644
     ) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let descriptor = Darwin.open(localURL.path, O_RDONLY | O_NOFOLLOW)
         guard descriptor >= 0 else {
             throw SFTPTransportError.resourceLimitExceeded
@@ -304,7 +317,7 @@ extension SSHSession {
         do {
             var totalBytesWritten: UInt64 = 0
             while let chunk = try localFile.read(upToCount: 64 * 1_024), !chunk.isEmpty {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 let chunkBytes = UInt64(chunk.count)
                 guard chunkBytes <= expectedBytes - min(totalBytesWritten, expectedBytes) else {
                     throw SFTPTransportError.resourceLimitExceeded
@@ -312,7 +325,7 @@ extension SSHSession {
 
                 var chunkOffset = 0
                 while chunkOffset < chunk.count {
-                    try Task.checkCancellation()
+                    try validateNativeFileOperation()
                     let bytesWritten = chunk.withUnsafeBytes { rawBuffer -> Int in
                         guard let baseAddress = rawBuffer.baseAddress else { return 0 }
                         let writeAddress = baseAddress
@@ -362,6 +375,7 @@ extension SSHSession {
     private func removePartialFile(at path: String, sftp: OpaquePointer) async {
         let pathLength = UInt32(path.utf8.count)
         for _ in 0..<32 {
+            guard isActive, atomicSocket.isUsable else { return }
             let result = path.withCString { pathPointer in
                 libssh2_sftp_unlink_ex(sftp, pathPointer, pathLength)
             }
@@ -372,18 +386,22 @@ extension SSHSession {
     }
 
     func resolveHomeDirectory() async throws -> String {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let path = try await readSymlinkTarget(at: ".", linkType: Int32(LIBSSH2_SFTP_REALPATH), sftp: sftp)
         return path.isEmpty ? "/" : path
     }
 
     func fileSystemCapacity(at path: String) async throws -> SFTPFilesystemCapacity {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         var status = LIBSSH2_SFTP_STATVFS()
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             let result = normalizedPath.withCString { pathPtr in
                 libssh2_sftp_statvfs(
@@ -422,6 +440,8 @@ extension SSHSession {
     }
 
     func createDirectory(at path: String, permissions: Int32 = 0o755) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         try await performSFTPMutation(
@@ -441,6 +461,8 @@ extension SSHSession {
     }
 
     func setPermissions(at path: String, permissions: UInt32) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         var attributes = LIBSSH2_SFTP_ATTRIBUTES()
@@ -448,7 +470,7 @@ extension SSHSession {
         attributes.permissions = UInt(permissions)
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             let result = normalizedPath.withCString { pathPtr in
                 libssh2_sftp_stat_ex(
@@ -474,6 +496,8 @@ extension SSHSession {
     }
 
     func renameItem(at sourcePath: String, to destinationPath: String) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedSource = SFTPRemotePath.normalize(sourcePath)
         let normalizedDestination = SFTPRemotePath.normalize(destinationPath)
@@ -519,6 +543,8 @@ extension SSHSession {
     }
 
     func deleteFile(at path: String) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         try await performSFTPMutation(
@@ -537,6 +563,8 @@ extension SSHSession {
     }
 
     func deleteDirectory(at path: String) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         try await performSFTPMutation(
@@ -564,7 +592,7 @@ extension SSHSession {
         }
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             if let sftpSession = libssh2_sftp_init(session) {
                 self.sftpSession = sftpSession
@@ -623,7 +651,7 @@ extension SSHSession {
 
         let pathLength = UInt32(path.utf8.count)
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             if let handle = path.withCString({ pathPtr in
                 libssh2_sftp_open_ex(
@@ -660,7 +688,7 @@ extension SSHSession {
 
         let pathLength = UInt32(path.utf8.count)
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             let result = path.withCString { pathPtr in
                 mutation(sftp, pathPtr, pathLength)
@@ -680,12 +708,14 @@ extension SSHSession {
     }
 
     private func stat(at path: String, statType: Int32) async throws -> SFTPFileEntry {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         let sftp = try await ensureSFTPSession()
         let normalizedPath = SFTPRemotePath.normalize(path)
         var attributes = LIBSSH2_SFTP_ATTRIBUTES()
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             let result = normalizedPath.withCString { pathPtr in
                 libssh2_sftp_stat_ex(
@@ -739,7 +769,7 @@ extension SSHSession {
         var buffer = [CChar](repeating: 0, count: 4096)
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
 
             let result = buffer.withUnsafeMutableBufferPointer { bufferPtr -> Int in
                 guard let baseAddress = bufferPtr.baseAddress else {

@@ -13,6 +13,8 @@ extension ServerTransportSelection {
             return String(localized: "Eternal Terminal")
         case .cloudflare:
             return String(localized: "Cloudflare")
+        case .teleport:
+            return String(localized: "Teleport")
         }
     }
 
@@ -28,6 +30,8 @@ extension ServerTransportSelection {
             return "arrow.trianglehead.2.clockwise.rotate.90"
         case .cloudflare:
             return "shield.lefthalf.filled"
+        case .teleport:
+            return "network"
         }
     }
 
@@ -61,6 +65,7 @@ struct ServerFormSheet: View {
     private let now: @Sendable () -> Date
     private let makeID: @Sendable () -> UUID
     private let remoteSessionBackends: [RemoteSessionBackendMetadata]
+    private let teleportAccess: TeleportAccessService?
 
     var isEditing: Bool { intent.isEditing }
 
@@ -86,6 +91,7 @@ struct ServerFormSheet: View {
         self.now = dependencies.now
         self.makeID = dependencies.makeID
         remoteSessionBackends = dependencies.remoteSessionBackends
+        teleportAccess = dependencies.teleportAccess
         let saveUseCase = ServerSaveUseCase(mutations: serverManager)
         self.onSave = onSave
         _operations = StateObject(
@@ -208,6 +214,7 @@ struct ServerFormSheet: View {
     private var automaticConnectionTestSnapshot: ServerFormModel.ConnectionSnapshot? {
         let snapshot = form.connectionSnapshot
         guard hasAuthorizedSourceAccess,
+              form.transportSelection != .teleport,
               form.iconSelection == .automatic,
               form.isValid,
               !isLoadingCredentials,
@@ -291,6 +298,15 @@ struct ServerFormSheet: View {
         limitSection
         serverSection
         authSection
+        if form.transportSelection == .teleport,
+           let profile = form.teleportProfile,
+           let teleportAccess {
+            TeleportProfileSection(profile: profile, service: teleportAccess) { selection in
+                form.teleportClusterName = selection.clusterName
+                form.teleportNodeID = selection.nodeID
+                form.username = selection.login
+            }
+        }
         iconSection
         sessionSection
         RemoteShellStartupActionSection(
@@ -304,7 +320,7 @@ struct ServerFormSheet: View {
         securitySection
         assignmentSection
         notesSection
-        if isEditing {
+        if isEditing && form.transportSelection != .teleport {
             advancedSection
         }
         errorSection
@@ -418,6 +434,7 @@ struct ServerFormSheet: View {
             .onChange(of: form.eternalTerminalPort) { _ in resetConnectionTestState() }
             .onChange(of: form.username) { _ in resetConnectionTestState() }
             .onChange(of: form.transportSelection) { _ in handleCredentialIntentChange() }
+            .onChange(of: form.teleportConfiguration) { _ in resetConnectionTestState() }
             .onChange(of: form.authMethod) { _ in handleCredentialIntentChange() }
     }
 
@@ -558,27 +575,47 @@ struct ServerFormSheet: View {
                 .textContentType(.name)
                 #endif
 
-            HStack(spacing: 12) {
-                TextField("Host", text: $form.host, prompt: Text(String(localized: "203.0.113.10")))
-                    .accessibilityIdentifier("vvterm.serverForm.host")
-                    #if os(iOS)
-                    .textContentType(.URL)
-                    #endif
+            if form.transportSelection == .teleport {
+                TextField("Root Cluster", text: $form.teleportClusterName)
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.cluster")
                     .autocorrectionDisabled()
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
                     #endif
-
-                TextField("Port", text: $form.port, prompt: Text(String(localized: "22")))
+                TextField("Node ID", text: $form.teleportNodeID)
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.nodeID")
+                    .autocorrectionDisabled()
                     #if os(iOS)
-                    .keyboardType(.numberPad)
+                    .textInputAutocapitalization(.never)
                     #endif
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 76)
+            } else {
+                HStack(spacing: 12) {
+                    TextField("Host", text: $form.host, prompt: Text(String(localized: "203.0.113.10")))
+                        .accessibilityIdentifier("vvterm.serverForm.host")
+                        #if os(iOS)
+                        .textContentType(.URL)
+                        #endif
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        #endif
+
+                    TextField("Port", text: $form.port, prompt: Text(String(localized: "22")))
+                        #if os(iOS)
+                        .keyboardType(.numberPad)
+                        #endif
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 76)
+                }
             }
 
-            TextField("Username", text: $form.username, prompt: Text(String(localized: "root")))
+            TextField(
+                form.transportSelection == .teleport ? String(localized: "OS Login") : String(localized: "Username"),
+                text: $form.username,
+                prompt: Text(form.transportSelection == .teleport ? "deploy" : String(localized: "root"))
+            )
+                .accessibilityIdentifier("vvterm.serverForm.username")
                 #if os(iOS)
                 .textContentType(.username)
                 #endif
@@ -587,10 +624,12 @@ struct ServerFormSheet: View {
                 .textInputAutocapitalization(.never)
                 #endif
 
-            Button {
-                presentLocalDiscovery()
-            } label: {
-                Label(String(localized: "Pick from Local Discovery..."), systemImage: "dot.radiowaves.left.and.right")
+            if form.transportSelection != .teleport {
+                Button {
+                    presentLocalDiscovery()
+                } label: {
+                    Label(String(localized: "Pick from Local Discovery..."), systemImage: "dot.radiowaves.left.and.right")
+                }
             }
         } header: {
             sectionHeader("Server")
@@ -605,6 +644,36 @@ struct ServerFormSheet: View {
                     Label(transport.displayName, systemImage: transport.icon)
                         .tag(transport)
                 }
+            }
+            .accessibilityIdentifier("vvterm.serverForm.transport")
+
+            if form.transportSelection == .teleport {
+                TextField("Proxy URL", text: $form.teleportProxyURL, prompt: Text("https://teleport.example.com"))
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.proxy")
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    #endif
+                TextField("Account", text: $form.teleportAccount)
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.account")
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    #endif
+                TextField("SSO Connector (Optional)", text: $form.teleportConnectorID)
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.connector")
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    #endif
+                Text("Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Button("Test Connection") {
+                    Task { await runConnectionTest(force: true) }
+                }
+                .disabled(!form.isValid || isTestingConnection || isSaving)
             }
 
             if form.transportSelection == .eternalTerminal {
@@ -657,13 +726,14 @@ struct ServerFormSheet: View {
                 }
             }
 
-            if form.transportSelection != .tailscale {
+            if form.transportSelection != .tailscale && form.transportSelection != .teleport {
                 Picker("Method", selection: $form.authMethod) {
                     ForEach(AuthMethod.allCases) { method in
                         Label(method.displayName, systemImage: method.icon)
                             .tag(method)
                     }
                 }
+                .accessibilityIdentifier("vvterm.serverForm.authMethod")
 
                 switch form.authMethod {
                 case .password:
@@ -679,7 +749,7 @@ struct ServerFormSheet: View {
                     keyInputView
                     SecureField("Key Passphrase", text: $form.sshPassphrase, prompt: Text(String(localized: "Optional")))
                 }
-            } else {
+            } else if form.transportSelection == .tailscale {
                 Text(String(localized: "Uses server-side Tailscale SSH policy. No password or SSH key is required."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -956,7 +1026,8 @@ struct ServerFormSheet: View {
         operations.save(
             mutation: intent.mutation(for: newServer),
             credentials: form.makeCredentials(serverID: serverID),
-            systemDetection: form.iconSelection == .automatic
+            systemDetection: form.transportSelection != .teleport
+                && form.iconSelection == .automatic
                 && !operations.hasCompletedConnectionTest(for: form.connectionSnapshot)
                 ? .attempt
                 : .skip,

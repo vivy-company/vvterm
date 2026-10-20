@@ -1,0 +1,59 @@
+import Foundation
+import TeleportKit
+
+nonisolated struct TeleportAccessSummary: Sendable {
+    let account: String
+    let clusterName: String
+    let validBefore: Date
+    let allowedLogins: [String]
+
+    init(identity: TeleportIdentity) {
+        account = identity.username
+        clusterName = identity.clusterName
+        validBefore = identity.validBefore
+        allowedLogins = identity.allowedLogins
+    }
+}
+
+nonisolated struct TeleportNodeSelection: Sendable {
+    let clusterName: String
+    let nodeID: String
+    let login: String
+}
+
+@MainActor
+protocol TeleportBrowserSession: TeleportBrowserPresenter {
+    func cancel()
+}
+
+nonisolated enum TeleportAccessError: Error {
+    case loginInProgress
+
+    static func message(for error: any Error) -> String {
+        if let accessError = error as? TeleportAccessError {
+            switch accessError {
+            case .loginInProgress:
+                return String(localized: "This Teleport profile is signing in. Finish or cancel it, then try again.")
+            }
+        }
+        guard let error = error as? TeleportError else {
+            return String(localized: "Teleport connection failed. Check the profile and sign in again.")
+        }
+        switch error {
+        case .authenticationRequired:
+            return String(localized: "Sign in to this Teleport profile before connecting.")
+        case .accessDenied, .httpStatus(401), .httpStatus(403):
+            return String(localized: "Teleport denied access. Check the account, code, and node permissions.")
+        case .unsupportedPolicy, .unsupportedVersion:
+            return String(localized: "This Teleport server or policy is not supported. Contact your administrator.")
+        case .invalidCertificate:
+            return String(localized: "Teleport certificate validation failed. Check the proxy, account, and cluster.")
+        case .nodeNotFound:
+            return String(localized: "The Teleport node was not found. Choose its exact node ID again.")
+        case .ambiguousNode:
+            return String(localized: "More than one Teleport node has this name. Use its exact node ID.")
+        default:
+            return String(localized: "Teleport connection failed. Check the profile and sign in again.")
+        }
+    }
+}

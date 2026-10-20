@@ -2324,3 +2324,47 @@
 "Sidebar" = "Pasek boczny";
 
 "Terminal tab %lld" = "Karta terminala %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Klaster główny";
+"Node ID" = "ID węzła";
+"OS Login" = "Użytkownik systemu";
+"Proxy URL" = "URL proxy";
+"SSO Connector (Optional)" = "Łącznik SSO (opcjonalny)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Zaloguj się do proxy, a następnie wybierz węzeł i użytkownika systemu. Między urządzeniami synchronizują się tylko ustawienia profilu i węzła.";
+"Access expires" = "Dostęp wygasa";
+"Sign in again to renew access." = "Zaloguj się ponownie, aby odnowić dostęp.";
+"Sign in again" = "Zaloguj się ponownie";
+"Sign out" = "Wyloguj się";
+"Check access" = "Sprawdź dostęp";
+"Teleport access" = "Dostęp Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Przyznany dostęp jest przechowywany tylko na tym urządzeniu. Hasła i kody jednorazowe nie są zapisywane.";
+"Sign out of Teleport?" = "Wylogować się z Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Spowoduje to rozłączenie wszystkich sesji tego profilu Teleport na tym urządzeniu.";
+"One-time code (if needed)" = "Kod jednorazowy (jeśli wymagany)";
+"Sign in" = "Zaloguj się";
+"Sign in with %@" = "Zaloguj się przez %@";
+"No supported sign-in method is available for this profile." = "Ten profil nie ma obsługiwanej metody logowania.";
+"No nodes are available in this page." = "Na tej stronie nie ma dostępnych węzłów.";
+"Node" = "Węzeł";
+"Select a node" = "Wybierz węzeł";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Użytkownik systemu";
+"No permitted login" = "Brak dozwolonego użytkownika";
+"Use selected node" = "Użyj wybranego węzła";
+"More nodes" = "Więcej węzłów";
+"Refresh nodes" = "Odśwież węzły";
+"Checking access…" = "Sprawdzanie dostępu…";
+"Signing in…" = "Logowanie…";
+"Loading nodes…" = "Wczytywanie węzłów…";
+"Signing out…" = "Wylogowywanie…";
+"Teleport connection failed. Check the profile and sign in again." = "Połączenie z Teleport nie powiodło się. Sprawdź profil i zaloguj się ponownie.";
+"Sign in to this Teleport profile before connecting." = "Przed połączeniem zaloguj się do tego profilu Teleport.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport odmówił dostępu. Sprawdź konto, kod i uprawnienia do węzła.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Ten serwer lub zasady Teleport nie są obsługiwane. Skontaktuj się z administratorem.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Weryfikacja certyfikatu Teleport nie powiodła się. Sprawdź proxy, konto i klaster.";
+"The Teleport node was not found. Choose its exact node ID again." = "Nie znaleziono węzła Teleport. Wybierz ponownie jego dokładny identyfikator.";
+"More than one Teleport node has this name. Use its exact node ID." = "Więcej niż jeden węzeł Teleport ma tę nazwę. Użyj dokładnego identyfikatora węzła.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Trwa logowanie do tego profilu Teleport. Dokończ je lub anuluj, a następnie spróbuj ponownie.";

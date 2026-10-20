@@ -2322,3 +2322,47 @@
 "Sidebar" = "Боковая панель";
 
 "Terminal tab %lld" = "Вкладка терминала %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Корневой кластер";
+"Node ID" = "ID узла";
+"OS Login" = "Пользователь системы";
+"Proxy URL" = "URL прокси";
+"SSO Connector (Optional)" = "Коннектор SSO (необязательно)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Войдите на прокси, затем выберите узел и пользователя системы. Между устройствами синхронизируются только настройки профиля и узла.";
+"Access expires" = "Доступ истекает";
+"Sign in again to renew access." = "Войдите снова, чтобы продлить доступ.";
+"Sign in again" = "Войти снова";
+"Sign out" = "Выйти";
+"Check access" = "Проверить доступ";
+"Teleport access" = "Доступ Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Выданный доступ хранится только на этом устройстве. Пароли и одноразовые коды не сохраняются.";
+"Sign out of Teleport?" = "Выйти из Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Все сеансы этого профиля Teleport на этом устройстве будут отключены.";
+"One-time code (if needed)" = "Одноразовый код (если нужен)";
+"Sign in" = "Войти";
+"Sign in with %@" = "Войти через %@";
+"No supported sign-in method is available for this profile." = "Для этого профиля нет поддерживаемого способа входа.";
+"No nodes are available in this page." = "На этой странице нет доступных узлов.";
+"Node" = "Узел";
+"Select a node" = "Выберите узел";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Пользователь системы";
+"No permitted login" = "Нет разрешённого пользователя";
+"Use selected node" = "Использовать выбранный узел";
+"More nodes" = "Ещё узлы";
+"Refresh nodes" = "Обновить узлы";
+"Checking access…" = "Проверка доступа…";
+"Signing in…" = "Вход…";
+"Loading nodes…" = "Загрузка узлов…";
+"Signing out…" = "Выход…";
+"Teleport connection failed. Check the profile and sign in again." = "Не удалось подключиться к Teleport. Проверьте профиль и войдите снова.";
+"Sign in to this Teleport profile before connecting." = "Перед подключением войдите в этот профиль Teleport.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport отказал в доступе. Проверьте учётную запись, код и права доступа к узлу.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Этот сервер или политика Teleport не поддерживается. Обратитесь к администратору.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Не удалось проверить сертификат Teleport. Проверьте прокси, учётную запись и кластер.";
+"The Teleport node was not found. Choose its exact node ID again." = "Узел Teleport не найден. Снова выберите его точный ID.";
+"More than one Teleport node has this name. Use its exact node ID." = "Это имя есть у нескольких узлов Teleport. Используйте точный ID узла.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Выполняется вход в этот профиль Teleport. Завершите или отмените его, затем повторите попытку.";

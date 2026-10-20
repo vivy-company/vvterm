@@ -2323,3 +2323,47 @@
 "Sidebar" = "Boční panel";
 
 "Terminal tab %lld" = "Karta terminálu %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Kořenový cluster";
+"Node ID" = "ID uzlu";
+"OS Login" = "Uživatel systému";
+"Proxy URL" = "URL proxy";
+"SSO Connector (Optional)" = "Konektor SSO (volitelný)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Přihlaste se k proxy a vyberte uzel a jeho uživatele systému. Mezi zařízeními se synchronizují pouze nastavení profilu a uzlu.";
+"Access expires" = "Platnost přístupu končí";
+"Sign in again to renew access." = "Obnovte přístup opětovným přihlášením.";
+"Sign in again" = "Přihlásit se znovu";
+"Sign out" = "Odhlásit se";
+"Check access" = "Ověřit přístup";
+"Teleport access" = "Přístup Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Udělený přístup se ukládá pouze v tomto zařízení. Hesla a jednorázové kódy se neukládají.";
+"Sign out of Teleport?" = "Odhlásit se z Teleportu?";
+"This disconnects all sessions for this Teleport profile on this device." = "Tím se odpojí všechny relace tohoto profilu Teleport v tomto zařízení.";
+"One-time code (if needed)" = "Jednorázový kód (je-li potřeba)";
+"Sign in" = "Přihlásit se";
+"Sign in with %@" = "Přihlásit se přes %@";
+"No supported sign-in method is available for this profile." = "Pro tento profil není k dispozici podporovaný způsob přihlášení.";
+"No nodes are available in this page." = "Na této stránce nejsou dostupné žádné uzly.";
+"Node" = "Uzel";
+"Select a node" = "Vybrat uzel";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Uživatel systému";
+"No permitted login" = "Žádný povolený uživatel";
+"Use selected node" = "Použít vybraný uzel";
+"More nodes" = "Další uzly";
+"Refresh nodes" = "Obnovit uzly";
+"Checking access…" = "Ověřování přístupu…";
+"Signing in…" = "Přihlašování…";
+"Loading nodes…" = "Načítání uzlů…";
+"Signing out…" = "Odhlašování…";
+"Teleport connection failed. Check the profile and sign in again." = "Připojení k Teleportu selhalo. Zkontrolujte profil a přihlaste se znovu.";
+"Sign in to this Teleport profile before connecting." = "Před připojením se přihlaste k tomuto profilu Teleport.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport zamítl přístup. Zkontrolujte účet, kód a oprávnění uzlu.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Tento server nebo zásady Teleportu nejsou podporovány. Kontaktujte správce.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Ověření certifikátu Teleportu selhalo. Zkontrolujte proxy, účet a cluster.";
+"The Teleport node was not found. Choose its exact node ID again." = "Uzel Teleportu nebyl nalezen. Znovu vyberte jeho přesné ID.";
+"More than one Teleport node has this name. Use its exact node ID." = "Tento název má více uzlů Teleportu. Použijte přesné ID uzlu.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Tento profil Teleport se přihlašuje. Dokončete nebo zrušte přihlášení a zkuste to znovu.";

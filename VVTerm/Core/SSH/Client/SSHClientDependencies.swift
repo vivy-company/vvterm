@@ -41,15 +41,18 @@ nonisolated struct SSHClientFactory: Sendable {
     private let runtimeSettings: @Sendable () -> SSHRuntimeSettings
     private let hostKeyVerifier: any SSHHostKeyVerifying
     private let moshBootstrap: any SSHMoshBootstrapping
+    private let prepareConnection: SSHPreparedConnectionProvider?
 
     init(
         runtimeSettings: @escaping @Sendable () -> SSHRuntimeSettings,
         hostKeyVerifier: any SSHHostKeyVerifying,
-        moshBootstrap: any SSHMoshBootstrapping
+        moshBootstrap: any SSHMoshBootstrapping,
+        prepareConnection: SSHPreparedConnectionProvider? = nil
     ) {
         self.runtimeSettings = runtimeSettings
         self.hostKeyVerifier = hostKeyVerifier
         self.moshBootstrap = moshBootstrap
+        self.prepareConnection = prepareConnection
     }
 
     func makeClient(connectTimeout: Duration = .seconds(30)) -> SSHClient {
@@ -57,7 +60,8 @@ nonisolated struct SSHClientFactory: Sendable {
             connectTimeout: connectTimeout,
             runtimeSettings: runtimeSettings(),
             hostKeyVerifier: hostKeyVerifier,
-            moshBootstrap: moshBootstrap
+            moshBootstrap: moshBootstrap,
+            prepareConnection: prepareConnection
         )
     }
 }
@@ -80,7 +84,8 @@ nonisolated enum SSHClientLiveComposition {
     static func makeFactory(
         defaults: UserDefaults,
         knownHostsManager: KnownHostsManager,
-        remoteMoshManager: RemoteMoshManager
+        remoteMoshManager: RemoteMoshManager,
+        prepareConnection: SSHPreparedConnectionProvider? = nil
     ) -> SSHClientFactory {
         let runtimeSettings = SSHRuntimeSettingsSource(defaults: defaults)
         return SSHClientFactory(
@@ -88,7 +93,8 @@ nonisolated enum SSHClientLiveComposition {
                 runtimeSettings.current()
             },
             hostKeyVerifier: knownHostsManager,
-            moshBootstrap: remoteMoshManager
+            moshBootstrap: remoteMoshManager,
+            prepareConnection: prepareConnection
         )
     }
 }
@@ -122,12 +128,14 @@ extension SSHClientFactory {
             keepAliveIntervalSeconds: SSHRuntimeSettings.defaultKeepAliveIntervalSeconds
         ),
         hostKeyVerifier: any SSHHostKeyVerifying = TestingSSHHostKeyVerifier(),
-        moshBootstrap: any SSHMoshBootstrapping = TestingSSHMoshBootstrap()
+        moshBootstrap: any SSHMoshBootstrapping = TestingSSHMoshBootstrap(),
+        prepareConnection: SSHPreparedConnectionProvider? = nil
     ) -> SSHClientFactory {
         SSHClientFactory(
             runtimeSettings: { runtimeSettings },
             hostKeyVerifier: hostKeyVerifier,
-            moshBootstrap: moshBootstrap
+            moshBootstrap: moshBootstrap,
+            prepareConnection: prepareConnection
         )
     }
 }
@@ -140,13 +148,15 @@ extension SSHClient {
             keepAliveIntervalSeconds: SSHRuntimeSettings.defaultKeepAliveIntervalSeconds
         ),
         hostKeyVerifier: any SSHHostKeyVerifying = TestingSSHHostKeyVerifier(),
-        moshBootstrap: any SSHMoshBootstrapping = TestingSSHMoshBootstrap()
+        moshBootstrap: any SSHMoshBootstrapping = TestingSSHMoshBootstrap(),
+        prepareConnection: SSHPreparedConnectionProvider? = nil
     ) -> SSHClient {
         SSHClient(
             connectTimeout: connectTimeout,
             runtimeSettings: runtimeSettings,
             hostKeyVerifier: hostKeyVerifier,
-            moshBootstrap: moshBootstrap
+            moshBootstrap: moshBootstrap,
+            prepareConnection: prepareConnection
         )
     }
 }

@@ -71,36 +71,52 @@ extension SSHSession {
 
     func connect() async throws {
         try Task.checkCancellation()
+        guard !hasBeenCleaned, !connectionStartupInFlight, libssh2Session == nil else {
+            throw SSHError.notConnected
+        }
+        guard config.connectionMode != .teleport || preparedConnection != nil else {
+            throw SSHError.connectionFailed("Teleport requires a prepared SSH stream")
+        }
         try LibSSH2Runtime.ensureInitialized()
+        connectionStartupInFlight = true
+        defer {
+            connectionStartupInFlight = false
+            if !isActive { cleanup() }
+        }
         socket = -1
         connectedPeerAddress = nil
 
-        socket = try await SSHAddressConnector.connect(
-            host: config.dialHost,
-            port: config.dialPort,
-            trace: startupTrace
-        )
+        if let preparedConnection {
+            socket = try preparedConnection.takeSocketDescriptor()
+            guard socket >= 0 else {
+                throw SSHError.connectionFailed("The prepared SSH stream has no socket")
+            }
+            atomicSocket.install(socket)
+            let flags = fcntl(socket, F_GETFL)
+            guard flags >= 0, fcntl(socket, F_SETFL, flags | O_NONBLOCK) == 0 else {
+                throw SSHError.connectionFailed("Cannot configure the prepared SSH stream")
+            }
+        } else {
+            socket = try await SSHAddressConnector.connect(
+                host: config.dialHost,
+                port: config.dialPort,
+                trace: startupTrace
+            )
+            atomicSocket.install(socket)
+            connectedPeerAddress = resolveNumericPeerAddress(for: socket)
 
-        // Disable Nagle's algorithm for low-latency interactive typing
-        // Without this, small packets (keystrokes) are batched causing 40-200ms delays
-        var noDelay: Int32 = 1
-        setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, &noDelay, socklen_t(MemoryLayout<Int32>.size))
-
-        // Optimize socket buffers for interactive SSH:
-        // - Small send buffer (8KB) reduces buffering delay for keystrokes
-        // - Larger receive buffer (64KB) improves throughput for command output
-        var sendBufSize: Int32 = 8192
-        var recvBufSize: Int32 = 65536
-        setsockopt(socket, SOL_SOCKET, SO_SNDBUF, &sendBufSize, socklen_t(MemoryLayout<Int32>.size))
-        setsockopt(socket, SOL_SOCKET, SO_RCVBUF, &recvBufSize, socklen_t(MemoryLayout<Int32>.size))
+            // TCP tuning does not apply to provider-owned Unix socket streams.
+            var noDelay: Int32 = 1
+            setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, &noDelay, socklen_t(MemoryLayout<Int32>.size))
+            var sendBufSize: Int32 = 8192
+            var recvBufSize: Int32 = 65536
+            setsockopt(socket, SOL_SOCKET, SO_SNDBUF, &sendBufSize, socklen_t(MemoryLayout<Int32>.size))
+            setsockopt(socket, SOL_SOCKET, SO_RCVBUF, &recvBufSize, socklen_t(MemoryLayout<Int32>.size))
+        }
 
         // Prevent SIGPIPE on broken connections (handle errors in code instead)
         var noSigPipe: Int32 = 1
         setsockopt(socket, SOL_SOCKET, SO_NOSIGPIPE, &noSigPipe, socklen_t(MemoryLayout<Int32>.size))
-
-        // Store in atomic storage for emergency I/O interruption.
-        atomicSocket.install(socket)
-        connectedPeerAddress = resolveNumericPeerAddress(for: socket)
 
         // Create libssh2 session (use _ex variant since macros not available in Swift)
         let sessionAbstract = Unmanaged.passUnretained(keyboardInteractiveContext).toOpaque()
@@ -122,13 +138,25 @@ extension SSHSession {
         libssh2_session_method_pref(session, LIBSSH2_METHOD_MAC_CS, fastMACs)
         libssh2_session_method_pref(session, LIBSSH2_METHOD_MAC_SC, fastMACs)
 
-        // Set blocking mode for handshake
-        libssh2_session_set_blocking(session, 1)
+        let isPrepared = preparedConnection != nil
+        libssh2_session_set_blocking(session, isPrepared ? 0 : 1)
+        try configureHostKeyMethods(session: session, requiresCertificate: isPrepared)
 
         // Perform SSH handshake
         try Task.checkCancellation()
         let handshakeToken = startupTrace?.begin(.sshHandshake)
-        let handshakeResult = libssh2_session_handshake(session, socket)
+        let startupDeadline = ContinuousClock.now.advanced(by: .seconds(config.connectionTimeout))
+        let handshakeResult: Int32
+        if isPrepared {
+            handshakeResult = try await completePreparedStartupCall(
+                session: session,
+                deadline: startupDeadline
+            ) {
+                libssh2_session_handshake(session, socket)
+            }
+        } else {
+            handshakeResult = libssh2_session_handshake(session, socket)
+        }
         guard handshakeResult == 0 else {
             if let handshakeToken { startupTrace?.end(handshakeToken, outcome: "failed") }
             cleanup()
@@ -150,7 +178,15 @@ extension SSHSession {
         try Task.checkCancellation()
         let authenticationToken = startupTrace?.begin(.authentication)
         do {
-            try authenticate()
+            if let preparedConnection {
+                try await authenticatePreparedConnection(
+                    preparedConnection,
+                    session: session,
+                    deadline: startupDeadline
+                )
+            } else {
+                try authenticate()
+            }
             if let authenticationToken { startupTrace?.end(authenticationToken) }
         } catch {
             if let authenticationToken { startupTrace?.end(authenticationToken, outcome: "failed") }
@@ -162,6 +198,103 @@ extension SSHSession {
 
         isActive = true
         logger.info("SSH session established")
+    }
+
+    private func configureHostKeyMethods(session: OpaquePointer, requiresCertificate: Bool) throws {
+        var algorithms: UnsafeMutablePointer<UnsafePointer<CChar>?>?
+        let count = libssh2_session_supported_algs(session, LIBSSH2_METHOD_HOSTKEY, &algorithms)
+        defer { if let algorithms { libssh2_free(session, algorithms) } }
+        guard count > 0, let algorithms else {
+            throw SSHError.hostKeyVerificationFailed
+        }
+        let supported = (0..<Int(count)).compactMap { index in
+            algorithms[index].map { String(cString: $0) }
+        }
+        guard let preference = Self.hostKeyMethodPreference(
+            supported: supported,
+            requiresCertificate: requiresCertificate
+        ), libssh2_session_method_pref(session, LIBSSH2_METHOD_HOSTKEY, preference) == 0 else {
+            throw SSHError.hostKeyVerificationFailed
+        }
+    }
+
+    /// A saved-host session must not store a certificate fingerprint as a
+    /// permanent host key, and a provider must never fall back to a raw key.
+    nonisolated static func hostKeyMethodPreference(
+        supported: [String],
+        requiresCertificate: Bool
+    ) -> String? {
+        let selected = supported.filter { method in
+            requiresCertificate
+                ? method.hasSuffix("-cert-v01@openssh.com")
+                    && method != "ssh-rsa-cert-v01@openssh.com"
+                    && method != "ssh-dss-cert-v01@openssh.com"
+                : !method.contains("-cert-")
+        }
+        guard !selected.isEmpty else { return nil }
+        if requiresCertificate { return selected.joined(separator: ",") }
+
+        // Keep prior direct host-key selection across the engine update so
+        // existing multi-key servers do not acquire a different fingerprint.
+        let previousOrder = [
+            "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521",
+            "ssh-ed25519", "rsa-sha2-512", "rsa-sha2-256", "ssh-rsa",
+        ]
+        let ordered = previousOrder.filter { selected.contains($0) }
+            + selected.filter { !previousOrder.contains($0) }
+        return ordered.joined(separator: ",")
+    }
+
+    private func completePreparedStartupCall(
+        session: OpaquePointer,
+        deadline: ContinuousClock.Instant,
+        call: () -> Int32
+    ) async throws -> Int32 {
+        while true {
+            try Task.checkCancellation()
+            guard atomicSocket.isUsable, libssh2Session == session else {
+                throw SSHError.notConnected
+            }
+            guard ContinuousClock.now < deadline else { throw SSHError.timeout }
+            let result = call()
+            guard result == LIBSSH2_ERROR_EAGAIN else { return result }
+            if libssh2_session_block_directions(session) == 0 {
+                // A provider implementation can return EAGAIN without a socket
+                // direction. Still suspend and preserve cancellation/deadlines.
+                try await Task.sleep(for: .milliseconds(1))
+            } else {
+                await waitForSocket()
+            }
+        }
+    }
+
+    private func authenticatePreparedConnection(
+        _ connection: any SSHPreparedConnection,
+        session: OpaquePointer,
+        deadline: ContinuousClock.Instant
+    ) async throws {
+        let certificate = connection.sshCertificate
+        let privateKey = connection.sshPrivateKey
+        guard !certificate.isEmpty, !privateKey.isEmpty else {
+            throw SSHError.authenticationFailed
+        }
+        let result = try await completePreparedStartupCall(session: session, deadline: deadline) {
+            certificate.withUnsafeBytes { certificateBytes in
+                privateKey.withUnsafeBytes { keyBytes in
+                    libssh2_userauth_publickey_frommemory(
+                        session,
+                        config.username,
+                        config.username.utf8.count,
+                        certificateBytes.bindMemory(to: CChar.self).baseAddress,
+                        certificate.count,
+                        keyBytes.bindMemory(to: CChar.self).baseAddress,
+                        privateKey.count,
+                        nil
+                    )
+                }
+            }
+        }
+        guard result == 0 else { throw SSHError.authenticationFailed }
     }
 
     private func authenticate() throws {
@@ -196,7 +329,8 @@ extension SSHSession {
             return
         }
 
-        switch config.authMethod {
+        guard let authMethod = config.authMethod else { throw SSHError.authenticationFailed }
+        switch authMethod {
         case .password:
             guard let password = config.credentials.password else {
                 logger.error("No password provided")
@@ -290,6 +424,18 @@ extension SSHSession {
     private func verifyHostKey() throws {
         guard let session = libssh2Session else {
             throw SSHError.notConnected
+        }
+
+        if let preparedConnection {
+            var length: size_t = 0
+            var type: Int32 = 0
+            guard let bytes = libssh2_session_hostkey(session, &length, &type),
+                  length > 0,
+                  length <= 262_144 else {
+                throw SSHError.hostKeyVerificationFailed
+            }
+            try preparedConnection.verifyHostCertificate(Data(bytes: bytes, count: length))
+            return
         }
 
         let (fingerprint, keyType) = try hostKeyFingerprint(for: session)

@@ -7,6 +7,31 @@ struct ServerMutationCommandRepositoryTests {
     private let now = Date(timeIntervalSinceReferenceDate: 5_000)
 
     @Test
+    func teleportConfigurationSurvivesInsertAndUpdateCommands() throws {
+        let workspace = makeWorkspace()
+        let configuration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        let input = Server(
+            workspaceId: workspace.id, name: "Teleport", host: configuration.nodeID,
+            username: "deploy", connectionMode: .teleport,
+            teleportConfiguration: configuration
+        )
+        let inserted = try repository.execute(
+            .insertServer(input), servers: [], workspaces: [workspace], now: now
+        )
+        var edited = try #require(inserted.servers.first)
+        #expect(edited.teleportConfiguration == configuration)
+        edited.name = "Renamed"
+        let updated = try repository.execute(
+            .updateServer(edited), servers: inserted.servers, workspaces: [workspace], now: now
+        )
+        #expect(updated.servers.first?.teleportConfiguration == configuration)
+        #expect(updated.servers.first?.authMethod == nil)
+    }
+
+    @Test
     func insertServerNormalizesLocalMetadata() throws {
         let workspace = makeWorkspace()
         let input = Server(

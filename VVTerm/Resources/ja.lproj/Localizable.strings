@@ -2322,3 +2322,47 @@
 "Sidebar" = "サイドバー";
 
 "Terminal tab %lld" = "ターミナルタブ %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "ルートクラスター";
+"Node ID" = "ノード ID";
+"OS Login" = "OS ユーザー名";
+"Proxy URL" = "プロキシ URL";
+"SSO Connector (Optional)" = "SSO コネクター（任意）";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "プロキシにサインインしてから、ノードとその OS ユーザー名を選択してください。デバイス間ではプロファイルとノードの設定のみが同期されます。";
+"Access expires" = "アクセスの有効期限";
+"Sign in again to renew access." = "アクセスを更新するには、再度サインインしてください。";
+"Sign in again" = "再度サインイン";
+"Sign out" = "サインアウト";
+"Check access" = "アクセスを確認";
+"Teleport access" = "Teleport アクセス";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "発行されたアクセス情報はこのデバイスのみに保存されます。パスワードとワンタイムコードは保存されません。";
+"Sign out of Teleport?" = "Teleport からサインアウトしますか？";
+"This disconnects all sessions for this Teleport profile on this device." = "このデバイス上の、この Teleport プロファイルのすべてのセッションが切断されます。";
+"One-time code (if needed)" = "ワンタイムコード（必要な場合）";
+"Sign in" = "サインイン";
+"Sign in with %@" = "%@ でサインイン";
+"No supported sign-in method is available for this profile." = "このプロファイルでは、対応するサインイン方法を利用できません。";
+"No nodes are available in this page." = "このページに利用可能なノードはありません。";
+"Node" = "ノード";
+"Select a node" = "ノードを選択";
+"%@ (%@)" = "%@（%@）";
+"OS login" = "OS ユーザー名";
+"No permitted login" = "許可されたユーザー名がありません";
+"Use selected node" = "選択したノードを使用";
+"More nodes" = "ほかのノード";
+"Refresh nodes" = "ノードを更新";
+"Checking access…" = "アクセスを確認中…";
+"Signing in…" = "サインイン中…";
+"Loading nodes…" = "ノードを読み込み中…";
+"Signing out…" = "サインアウト中…";
+"Teleport connection failed. Check the profile and sign in again." = "Teleport に接続できませんでした。プロファイルを確認して、再度サインインしてください。";
+"Sign in to this Teleport profile before connecting." = "接続する前に、この Teleport プロファイルにサインインしてください。";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport がアクセスを拒否しました。アカウント、コード、ノードの権限を確認してください。";
+"This Teleport server or policy is not supported. Contact your administrator." = "この Teleport サーバーまたはポリシーには対応していません。管理者にお問い合わせください。";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Teleport 証明書の検証に失敗しました。プロキシ、アカウント、クラスターを確認してください。";
+"The Teleport node was not found. Choose its exact node ID again." = "Teleport ノードが見つかりません。正確なノード ID を再度選択してください。";
+"More than one Teleport node has this name. Use its exact node ID." = "同じ名前の Teleport ノードが複数あります。正確なノード ID を使用してください。";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "このTeleportプロファイルはサインイン中です。完了するかキャンセルしてから、もう一度お試しください。";

@@ -12,8 +12,26 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
     /// TCP port exposed by etserver. SSH still uses `port` for bootstrap.
     var eternalTerminalPort: Int
     var username: String
-    var connectionMode: SSHConnectionMode
-    var authMethod: AuthMethod
+    var connectionMode: SSHConnectionMode {
+        didSet {
+            if connectionMode == .teleport {
+                authMethod = nil
+            } else {
+                teleportConfiguration = nil
+                if authMethod == nil { authMethod = .password }
+            }
+        }
+    }
+    var authMethod: AuthMethod? {
+        didSet {
+            if connectionMode == .teleport { authMethod = nil }
+        }
+    }
+    var teleportConfiguration: TeleportServerConfiguration? {
+        didSet {
+            if connectionMode != .teleport { teleportConfiguration = nil }
+        }
+    }
     var iconSelection: ServerIconSelection
     var detectedSystemIdentity: RemoteSystemIdentity?
     var cloudflareAccessMode: CloudflareAccessMode?
@@ -43,7 +61,8 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         eternalTerminalPort: Int = 2022,
         username: String,
         connectionMode: SSHConnectionMode = .standard,
-        authMethod: AuthMethod = .password,
+        authMethod: AuthMethod? = .password,
+        teleportConfiguration: TeleportServerConfiguration? = nil,
         iconSelection: ServerIconSelection = .automatic,
         detectedSystemIdentity: RemoteSystemIdentity? = nil,
         cloudflareAccessMode: CloudflareAccessMode? = nil,
@@ -74,7 +93,8 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
             : 2022
         self.username = username
         self.connectionMode = connectionMode
-        self.authMethod = authMethod
+        self.authMethod = connectionMode == .teleport ? nil : (authMethod ?? .password)
+        self.teleportConfiguration = connectionMode == .teleport ? teleportConfiguration : nil
         self.iconSelection = iconSelection
         self.detectedSystemIdentity = detectedSystemIdentity
         self.cloudflareAccessMode = cloudflareAccessMode
@@ -98,6 +118,9 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
     }
 
     var displayAddress: String {
+        if connectionMode == .teleport, let teleportConfiguration {
+            return "\(username)@\(teleportConfiguration.nodeID)"
+        }
         if port == 22 {
             return "\(username)@\(host)"
         }
@@ -115,6 +138,7 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         case username
         case connectionMode
         case authMethod
+        case teleportConfiguration
         case iconSelection
         case detectedSystemIdentity
         case cloudflareAccessMode
@@ -149,7 +173,15 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         eternalTerminalPort = (1...65535).contains(decodedETPort) ? decodedETPort : 2022
         username = try container.decode(String.self, forKey: .username)
         connectionMode = try container.decodeIfPresent(SSHConnectionMode.self, forKey: .connectionMode) ?? .standard
-        authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .password
+        if connectionMode == .teleport {
+            authMethod = nil
+            teleportConfiguration = try container.decode(
+                TeleportServerConfiguration.self, forKey: .teleportConfiguration
+            )
+        } else {
+            authMethod = try container.decodeIfPresent(AuthMethod.self, forKey: .authMethod) ?? .password
+            teleportConfiguration = nil
+        }
         iconSelection = (try? container.decode(
             ServerIconSelection.self,
             forKey: .iconSelection
@@ -220,7 +252,16 @@ nonisolated struct Server: Identifiable, Codable, Hashable, Sendable {
         try container.encode(eternalTerminalPort, forKey: .eternalTerminalPort)
         try container.encode(username, forKey: .username)
         try container.encode(connectionMode, forKey: .connectionMode)
-        try container.encode(authMethod, forKey: .authMethod)
+        try container.encodeIfPresent(authMethod, forKey: .authMethod)
+        if connectionMode == .teleport {
+            guard let teleportConfiguration else {
+                throw EncodingError.invalidValue(self, .init(
+                    codingPath: encoder.codingPath,
+                    debugDescription: "Teleport requires a profile and exact node configuration."
+                ))
+            }
+            try container.encode(teleportConfiguration, forKey: .teleportConfiguration)
+        }
         try container.encode(iconSelection, forKey: .iconSelection)
         try container.encodeIfPresent(
             detectedSystemIdentity,
@@ -266,6 +307,7 @@ nonisolated enum SSHConnectionMode: String, Codable, CaseIterable, Identifiable,
     case mosh
     case eternalTerminal
     case cloudflare
+    case teleport
 
     var id: String { rawValue }
 

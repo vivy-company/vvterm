@@ -4,6 +4,61 @@ import Testing
 
 struct ServerFormModelTests {
     @Test
+    func teleportDraftSavesBeforeLoginWithoutOrdinaryCredentialsOrDirectPorts() throws {
+        var model = validTeleportModel()
+        model.host = ""
+        model.port = "not-a-TCP-port"
+        model.password = "unused-test-input"
+        model.autoWakeOnLANEnabled = true
+        #expect(model.isValid)
+        let serverID = UUID()
+        let server = model.makeServer(id: serverID, workspaceID: UUID(), createdAt: .distantPast)
+        let credentials = model.makeCredentials(serverID: serverID)
+        #expect(server.connectionMode == .teleport)
+        #expect(server.authMethod == nil)
+        #expect(server.teleportConfiguration?.nodeID == "node-id")
+        #expect(server.teleportConfiguration?.profile.account == "alice")
+        #expect(!server.autoWakeOnLANEnabled)
+        #expect(model.wakeOnLANSavePlan(existingServer: nil) == .clearConfiguration)
+        #expect(credentials.password == nil)
+        #expect(credentials.privateKey == nil)
+        #expect(credentials.passphrase == nil)
+        #expect(credentials.cloudflareClientID == nil)
+        model.username = " "
+        #expect(!model.isValid)
+        model.username = "deploy"
+        model.teleportClusterName = ""
+        #expect(!model.isValid)
+    }
+
+    @Test
+    func teleportProfileChangesInvalidateConnectionResultsAndSystemDetection() {
+        var model = validTeleportModel()
+        model.applyDetectedSystemIdentity(RemoteSystemIdentity(kind: .ubuntu))
+        let snapshot = model.connectionSnapshot
+        #expect(model.currentDetectedSystemIdentity != nil)
+        model.teleportAccount = "bob"
+        #expect(model.connectionSnapshot != snapshot)
+        #expect(model.currentDetectedSystemIdentity == nil)
+    }
+
+    private func validTeleportModel() -> ServerFormModel {
+        var model = ServerFormModel(
+            defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux,
+            defaultRemoteSessionStartupBehavior: .ask
+        )
+        model.name = "Teleport node"
+        model.transportSelection = .teleport
+        model.teleportProxyURL = "https://proxy.example.test"
+        model.teleportAccount = "alice"
+        model.teleportClusterName = "root.example.test"
+        model.teleportNodeID = "node-id"
+        model.username = "deploy"
+        return model
+    }
+
+    @Test
     func modelBuildsServerAndCredentialsFromOneDraft() throws {
         let workspaceID = UUID()
         let serverID = UUID()

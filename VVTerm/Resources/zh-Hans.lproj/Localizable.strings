@@ -2319,3 +2319,47 @@
 "Sidebar" = "侧边栏";
 
 "Terminal tab %lld" = "终端标签页 %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "根集群";
+"Node ID" = "节点 ID";
+"OS Login" = "系统用户名";
+"Proxy URL" = "代理 URL";
+"SSO Connector (Optional)" = "SSO 连接器（可选）";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "登录代理后，选择节点及其系统用户名。设备之间仅同步配置和节点设置。";
+"Access expires" = "访问权限到期时间";
+"Sign in again to renew access." = "请重新登录以续期访问权限。";
+"Sign in again" = "重新登录";
+"Sign out" = "退出登录";
+"Check access" = "检查访问权限";
+"Teleport access" = "Teleport 访问权限";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "获取的访问凭据仅存储在此设备上。密码和一次性验证码不会保存。";
+"Sign out of Teleport?" = "退出 Teleport？";
+"This disconnects all sessions for this Teleport profile on this device." = "这将断开此设备上该 Teleport 配置的所有会话。";
+"One-time code (if needed)" = "一次性验证码（如需要）";
+"Sign in" = "登录";
+"Sign in with %@" = "通过 %@ 登录";
+"No supported sign-in method is available for this profile." = "此配置没有可用的受支持登录方式。";
+"No nodes are available in this page." = "此页没有可用节点。";
+"Node" = "节点";
+"Select a node" = "选择节点";
+"%@ (%@)" = "%@（%@）";
+"OS login" = "系统用户名";
+"No permitted login" = "没有获准使用的用户名";
+"Use selected node" = "使用所选节点";
+"More nodes" = "更多节点";
+"Refresh nodes" = "刷新节点";
+"Checking access…" = "正在检查访问权限…";
+"Signing in…" = "正在登录…";
+"Loading nodes…" = "正在加载节点…";
+"Signing out…" = "正在退出登录…";
+"Teleport connection failed. Check the profile and sign in again." = "Teleport 连接失败。请检查配置并重新登录。";
+"Sign in to this Teleport profile before connecting." = "连接前，请先登录此 Teleport 配置。";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport 拒绝访问。请检查账户、验证码和节点权限。";
+"This Teleport server or policy is not supported. Contact your administrator." = "不支持此 Teleport 服务器或策略。请联系管理员。";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Teleport 证书验证失败。请检查代理、账户和集群。";
+"The Teleport node was not found. Choose its exact node ID again." = "未找到 Teleport 节点。请重新选择其准确的节点 ID。";
+"More than one Teleport node has this name. Use its exact node ID." = "多个 Teleport 节点使用此名称。请使用准确的节点 ID。";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "此 Teleport 配置正在登录。请完成或取消登录，然后重试。";

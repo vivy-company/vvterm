@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A810A00131E1000100A00001 /* TeleportKit in Frameworks */ = {isa = PBXBuildFile; productRef = A810A00131E1000100A00011 /* TeleportKit */; };
+		A810A00131E1000100A00002 /* TeleportKit in Frameworks */ = {isa = PBXBuildFile; productRef = A810A00131E1000100A00011 /* TeleportKit */; };
 		4FB0ED9B3F04FE89CE2BD32E /* VVTermLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F3220D94C71F0D68A0DF623E /* VVTermLiveActivity.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5C9A7D8E31A1000100D32601 /* VVTermStoreKit.storekit in Resources */ = {isa = PBXBuildFile; fileRef = CC837B372F0E62F2006804BF /* VVTermStoreKit.storekit */; };
 		82B734D4923B7DD325984127 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 1853ABB6CF8195DF93B55895 /* ZIPFoundation */; };
@@ -180,6 +182,7 @@
 				E8A1E70031C1000100E00001 /* ETSession in Frameworks */,
 				E8A1E70031C1000100E00002 /* ETBootstrap in Frameworks */,
 				E7C4A10031BB100100C00001 /* Umami in Frameworks */,
+				A810A00131E1000100A00001 /* TeleportKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +191,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8A1E70031C1000100E00003 /* ETSession in Frameworks */,
+				A810A00131E1000100A00002 /* TeleportKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,6 +283,7 @@
 			);
 			name = VVTerm;
 			packageProductDependencies = (
+				A810A00131E1000100A00011 /* TeleportKit */,
 				1853ABB6CF8195DF93B55895 /* ZIPFoundation */,
 				CC8312B12F0CD850006804BF /* MLX */,
 				CC8312B22F0CD851006804BF /* MLXNN */,
@@ -312,6 +317,7 @@
 			);
 			name = VVTermTests;
 			packageProductDependencies = (
+				A810A00131E1000100A00011 /* TeleportKit */,
 				E8A1E70031C1000100E00011 /* ETSession */,
 			);
 			productName = VVTermTests;
@@ -390,6 +396,7 @@
 			mainGroup = CC8312752F0CD84D006804BF;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				A810A00131E1000100A00021 /* XCRemoteSwiftPackageReference "swift-teleport" */,
 				CC8312B02F0CD84F006804BF /* XCRemoteSwiftPackageReference "mlx-swift" */,
 				8BEE7D9B1BB9C3D15D55C283 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				D2C4F00131AA100100B00021 /* XCRemoteSwiftPackageReference "swift-cloudflared" */,
@@ -1114,6 +1121,14 @@
 				revision = 6b7390b412fa46c59c54311bc688dd743b014a7b;
 			};
 		};
+		A810A00131E1000100A00021 /* XCRemoteSwiftPackageReference "swift-teleport" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wiedymi/swift-teleport";
+			requirement = {
+				kind = revision;
+				revision = d6632db3976c2c8390ef1a0cfbd64b898e4ed351;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1166,6 +1181,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = E8A1E70031C1000100E00021 /* XCRemoteSwiftPackageReference "swift-et" */;
 			productName = ETBootstrap;
+		};
+		A810A00131E1000100A00011 /* TeleportKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A810A00131E1000100A00021 /* XCRemoteSwiftPackageReference "swift-teleport" */;
+			productName = TeleportKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

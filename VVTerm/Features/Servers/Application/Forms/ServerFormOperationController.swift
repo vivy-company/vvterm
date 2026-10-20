@@ -52,6 +52,33 @@ struct ServerFormDependencies {
     let defaultRemoteSessionStartupBehavior: @MainActor () -> RemoteSessionStartupBehavior
     let now: @Sendable () -> Date
     let makeID: @Sendable () -> UUID
+    let teleportAccess: TeleportAccessService?
+
+    init(
+        credentials: any ServerCredentialRepository,
+        connectionTester: any ServerConnectionTesting,
+        wakeOnLANMACAddressResolver: any WakeOnLANMACAddressResolving,
+        hostKeys: any ServerHostKeyRepository,
+        remoteSessionBackends: [RemoteSessionBackendMetadata],
+        defaultRemoteSessionEnabled: @escaping @MainActor () -> Bool,
+        defaultRemoteSessionBackendIdentifier: @escaping @MainActor () -> RemoteSessionBackendIdentifier,
+        defaultRemoteSessionStartupBehavior: @escaping @MainActor () -> RemoteSessionStartupBehavior,
+        now: @escaping @Sendable () -> Date,
+        makeID: @escaping @Sendable () -> UUID,
+        teleportAccess: TeleportAccessService? = nil
+    ) {
+        self.credentials = credentials
+        self.connectionTester = connectionTester
+        self.wakeOnLANMACAddressResolver = wakeOnLANMACAddressResolver
+        self.hostKeys = hostKeys
+        self.remoteSessionBackends = remoteSessionBackends
+        self.defaultRemoteSessionEnabled = defaultRemoteSessionEnabled
+        self.defaultRemoteSessionBackendIdentifier = defaultRemoteSessionBackendIdentifier
+        self.defaultRemoteSessionStartupBehavior = defaultRemoteSessionStartupBehavior
+        self.now = now
+        self.makeID = makeID
+        self.teleportAccess = teleportAccess
+    }
 }
 
 nonisolated enum ServerFormOperationFailure: Equatable, Sendable {

@@ -6,7 +6,7 @@ nonisolated enum ServerCloudKitRecordCodec {
     static let recordType = "Server"
     static let recordKeys = [
         "workspaceId", "name", "host", "port", "eternalTerminalPort", "username",
-        "connectionMode", "authMethod", "cloudflareAccessMode",
+        "connectionMode", "authMethod", "teleportConfiguration", "cloudflareAccessMode",
         "iconSelection", "detectedSystemKind", "detectedSystemDisplayName",
         "appleHardwareModelIdentifier",
         "cloudflareTeamDomainOverride", "cloudflareAppDomainOverride", "tags", "notes",
@@ -43,10 +43,28 @@ nonisolated enum ServerCloudKitRecordCodec {
             logger.error("Server \(id): missing or invalid port")
             return nil
         }
-        guard let authMethodRaw = record["authMethod"] as? String,
-              let authMethod = AuthMethod(rawValue: authMethodRaw) else {
-            logger.error("Server \(id): invalid authMethod")
-            return nil
+        let connectionMode = (record["connectionMode"] as? String)
+            .flatMap(SSHConnectionMode.init(rawValue:)) ?? .standard
+        let authMethod: AuthMethod?
+        let teleportConfiguration: TeleportServerConfiguration?
+        if connectionMode == .teleport {
+            guard let data = record["teleportConfiguration"] as? Data,
+                  let configuration = try? JSONDecoder().decode(
+                    TeleportServerConfiguration.self, from: data
+                  ) else {
+                logger.error("Server \(id): invalid Teleport configuration")
+                return nil
+            }
+            teleportConfiguration = configuration
+            authMethod = nil
+        } else {
+            guard let rawValue = record["authMethod"] as? String,
+                  let method = AuthMethod(rawValue: rawValue) else {
+                logger.error("Server \(id): invalid authMethod")
+                return nil
+            }
+            authMethod = method
+            teleportConfiguration = nil
         }
 
         let environment: ServerEnvironment
@@ -57,8 +75,6 @@ nonisolated enum ServerCloudKitRecordCodec {
             environment = .production
         }
 
-        let connectionMode = (record["connectionMode"] as? String)
-            .flatMap(SSHConnectionMode.init(rawValue:)) ?? .standard
         let cloudflareAccessMode = (record["cloudflareAccessMode"] as? String)
             .flatMap(CloudflareAccessMode.init(rawValue:))
         let legacyStartupBehavior = (record["tmuxStartupBehaviorOverride"] as? String)
@@ -102,6 +118,7 @@ nonisolated enum ServerCloudKitRecordCodec {
             username: username,
             connectionMode: connectionMode,
             authMethod: authMethod,
+            teleportConfiguration: teleportConfiguration,
             iconSelection: ServerIconSelection(
                 persistedValue: record["iconSelection"] as? String
             ),
@@ -144,7 +161,10 @@ nonisolated enum ServerCloudKitRecordCodec {
         record["connectionMode"] = server.connectionMode == .standard
             ? nil
             : server.connectionMode.rawValue
-        record["authMethod"] = server.authMethod.rawValue
+        record["authMethod"] = server.authMethod?.rawValue
+        if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+            record["teleportConfiguration"] = try? JSONEncoder().encode(configuration)
+        }
         record["iconSelection"] = server.iconSelection.persistedValue
         record["detectedSystemKind"] = server.detectedSystemIdentity?.kind.rawValue
         record["detectedSystemDisplayName"] = server.detectedSystemIdentity?.displayName

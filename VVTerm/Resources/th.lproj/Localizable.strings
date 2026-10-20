@@ -2322,3 +2322,47 @@
 "Sidebar" = "แถบด้านข้าง";
 
 "Terminal tab %lld" = "แท็บเทอร์มินัล %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "คลัสเตอร์ราก";
+"Node ID" = "ID โหนด";
+"OS Login" = "ชื่อผู้ใช้ระบบ";
+"Proxy URL" = "URL พร็อกซี";
+"SSO Connector (Optional)" = "ตัวเชื่อมต่อ SSO (ไม่บังคับ)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "ลงชื่อเข้าใช้พร็อกซี แล้วเลือกโหนดและชื่อผู้ใช้ระบบ ซิงค์ระหว่างอุปกรณ์เฉพาะการตั้งค่าโปรไฟล์และโหนดเท่านั้น";
+"Access expires" = "สิทธิ์เข้าถึงหมดอายุ";
+"Sign in again to renew access." = "ลงชื่อเข้าใช้อีกครั้งเพื่อต่ออายุสิทธิ์เข้าถึง";
+"Sign in again" = "ลงชื่อเข้าใช้อีกครั้ง";
+"Sign out" = "ลงชื่อออก";
+"Check access" = "ตรวจสอบสิทธิ์เข้าถึง";
+"Teleport access" = "สิทธิ์เข้าถึง Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "ข้อมูลสิทธิ์เข้าถึงที่ได้รับจะเก็บไว้ในอุปกรณ์นี้เท่านั้น จะไม่บันทึกรหัสผ่านและรหัสใช้ครั้งเดียว";
+"Sign out of Teleport?" = "ลงชื่อออกจาก Teleport หรือไม่?";
+"This disconnects all sessions for this Teleport profile on this device." = "การดำเนินการนี้จะตัดการเชื่อมต่อทุกเซสชันของโปรไฟล์ Teleport นี้บนอุปกรณ์นี้";
+"One-time code (if needed)" = "รหัสใช้ครั้งเดียว (หากจำเป็น)";
+"Sign in" = "ลงชื่อเข้าใช้";
+"Sign in with %@" = "ลงชื่อเข้าใช้ด้วย %@";
+"No supported sign-in method is available for this profile." = "ไม่มีวิธีลงชื่อเข้าใช้ที่รองรับสำหรับโปรไฟล์นี้";
+"No nodes are available in this page." = "ไม่มีโหนดที่ใช้ได้ในหน้านี้";
+"Node" = "โหนด";
+"Select a node" = "เลือกโหนด";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "ชื่อผู้ใช้ระบบ";
+"No permitted login" = "ไม่มีชื่อผู้ใช้ที่ได้รับอนุญาต";
+"Use selected node" = "ใช้โหนดที่เลือก";
+"More nodes" = "โหนดเพิ่มเติม";
+"Refresh nodes" = "รีเฟรชโหนด";
+"Checking access…" = "กำลังตรวจสอบสิทธิ์เข้าถึง…";
+"Signing in…" = "กำลังลงชื่อเข้าใช้…";
+"Loading nodes…" = "กำลังโหลดโหนด…";
+"Signing out…" = "กำลังลงชื่อออก…";
+"Teleport connection failed. Check the profile and sign in again." = "เชื่อมต่อ Teleport ไม่สำเร็จ ตรวจสอบโปรไฟล์แล้วลงชื่อเข้าใช้อีกครั้ง";
+"Sign in to this Teleport profile before connecting." = "ลงชื่อเข้าใช้โปรไฟล์ Teleport นี้ก่อนเชื่อมต่อ";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport ปฏิเสธสิทธิ์เข้าถึง ตรวจสอบบัญชี รหัส และสิทธิ์ของโหนด";
+"This Teleport server or policy is not supported. Contact your administrator." = "ไม่รองรับเซิร์ฟเวอร์หรือนโยบาย Teleport นี้ ติดต่อผู้ดูแลระบบ";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "ตรวจสอบใบรับรอง Teleport ไม่สำเร็จ ตรวจสอบพร็อกซี บัญชี และคลัสเตอร์";
+"The Teleport node was not found. Choose its exact node ID again." = "ไม่พบโหนด Teleport เลือก ID โหนดที่ตรงกันอีกครั้ง";
+"More than one Teleport node has this name. Use its exact node ID." = "มีโหนด Teleport หลายโหนดที่ใช้ชื่อนี้ ให้ใช้ ID โหนดที่ตรงกัน";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "กำลังลงชื่อเข้าใช้โปรไฟล์ Teleport นี้ โปรดดำเนินการให้เสร็จหรือยกเลิก แล้วลองอีกครั้ง";

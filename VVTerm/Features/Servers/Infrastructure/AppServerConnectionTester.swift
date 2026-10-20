@@ -71,7 +71,7 @@ nonisolated enum ServerConnectionTestPlan: Equatable, Sendable {
 
     init(server: Server) {
         switch server.connectionMode {
-        case .standard, .tailscale, .cloudflare:
+        case .standard, .tailscale, .cloudflare, .teleport:
             self = .sshOnly
         case .mosh:
             self = .mosh(portRange: 60_001...61_000)
@@ -92,6 +92,8 @@ nonisolated enum ServerConnectionApprovalPolicy {
         for error: Error,
         server: Server
     ) -> ServerConnectionApprovalRequirement? {
+        // Teleport trusts a signed host certificate, never a stored host fingerprint.
+        guard server.connectionMode != .teleport else { return nil }
         if let sshError = error as? SSHError,
            case .hostKeyApprovalRequired = sshError {
             return .hostKey(host: server.host, port: server.port)
@@ -111,7 +113,8 @@ extension ServerFormDependencies {
         defaultRemoteSessionBackendIdentifier: @escaping @MainActor () -> RemoteSessionBackendIdentifier,
         defaultRemoteSessionStartupBehavior: @escaping @MainActor () -> RemoteSessionStartupBehavior,
         now: @escaping @Sendable () -> Date,
-        makeID: @escaping @Sendable () -> UUID
+        makeID: @escaping @Sendable () -> UUID,
+        teleportAccess: TeleportAccessService? = nil
     ) -> Self {
         Self(
             credentials: credentials,
@@ -131,7 +134,8 @@ extension ServerFormDependencies {
             defaultRemoteSessionBackendIdentifier: defaultRemoteSessionBackendIdentifier,
             defaultRemoteSessionStartupBehavior: defaultRemoteSessionStartupBehavior,
             now: now,
-            makeID: makeID
+            makeID: makeID,
+            teleportAccess: teleportAccess
         )
     }
 }

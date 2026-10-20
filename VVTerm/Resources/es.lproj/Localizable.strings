@@ -2322,3 +2322,47 @@
 "Sidebar" = "Barra lateral";
 
 "Terminal tab %lld" = "Pestaña de terminal %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Clúster raíz";
+"Node ID" = "ID del nodo";
+"OS Login" = "Usuario del sistema";
+"Proxy URL" = "URL del proxy";
+"SSO Connector (Optional)" = "Conector SSO (opcional)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Inicia sesión en el proxy y selecciona un nodo y su usuario del sistema. Solo se sincronizan los ajustes del perfil y del nodo entre dispositivos.";
+"Access expires" = "El acceso caduca";
+"Sign in again to renew access." = "Vuelve a iniciar sesión para renovar el acceso.";
+"Sign in again" = "Volver a iniciar sesión";
+"Sign out" = "Cerrar sesión";
+"Check access" = "Comprobar acceso";
+"Teleport access" = "Acceso a Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "El acceso concedido solo se guarda en este dispositivo. No se guardan contraseñas ni códigos de un solo uso.";
+"Sign out of Teleport?" = "¿Cerrar sesión en Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Se desconectarán todas las sesiones de este perfil de Teleport en este dispositivo.";
+"One-time code (if needed)" = "Código de un solo uso (si es necesario)";
+"Sign in" = "Iniciar sesión";
+"Sign in with %@" = "Iniciar sesión con %@";
+"No supported sign-in method is available for this profile." = "No hay un método de inicio de sesión compatible para este perfil.";
+"No nodes are available in this page." = "No hay nodos disponibles en esta página.";
+"Node" = "Nodo";
+"Select a node" = "Seleccionar un nodo";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Usuario del sistema";
+"No permitted login" = "No hay un usuario permitido";
+"Use selected node" = "Usar el nodo seleccionado";
+"More nodes" = "Más nodos";
+"Refresh nodes" = "Actualizar nodos";
+"Checking access…" = "Comprobando acceso…";
+"Signing in…" = "Iniciando sesión…";
+"Loading nodes…" = "Cargando nodos…";
+"Signing out…" = "Cerrando sesión…";
+"Teleport connection failed. Check the profile and sign in again." = "La conexión a Teleport falló. Comprueba el perfil y vuelve a iniciar sesión.";
+"Sign in to this Teleport profile before connecting." = "Inicia sesión en este perfil de Teleport antes de conectarte.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport denegó el acceso. Comprueba la cuenta, el código y los permisos del nodo.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Este servidor o esta política de Teleport no es compatible. Contacta con tu administrador.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "La validación del certificado de Teleport falló. Comprueba el proxy, la cuenta y el clúster.";
+"The Teleport node was not found. Choose its exact node ID again." = "No se encontró el nodo de Teleport. Vuelve a seleccionar su ID exacto.";
+"More than one Teleport node has this name. Use its exact node ID." = "Varios nodos de Teleport tienen este nombre. Usa el ID exacto del nodo.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Este perfil de Teleport está iniciando sesión. Complete o cancele el inicio de sesión y vuelva a intentarlo.";

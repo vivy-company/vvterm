@@ -184,8 +184,8 @@ final class KeychainManager {
 
         logger.info("Getting credentials for server \(server.id.uuidString), authMethod: \(String(describing: server.authMethod))")
 
-        if server.connectionMode == .tailscale {
-            logger.info("Server \(server.id.uuidString) uses tailscale mode; skipping keychain credential lookup")
+        if server.connectionMode == .tailscale || server.connectionMode == .teleport {
+            logger.info("Server \(server.id.uuidString) uses profile authentication; skipping SSH credential lookup")
             return credentials
         }
 
@@ -210,6 +210,8 @@ final class KeychainManager {
                 credentials.passphrase = sshData.passphrase
                 credentials.publicKey = sshData.publicKey
             }
+        case nil:
+            break
         }
 
         if server.connectionMode == .cloudflare, server.cloudflareAccessMode == .serviceToken,
@@ -230,7 +232,7 @@ final class KeychainManager {
         }
 
         let scope = preferredStorageScope
-        if server.connectionMode != .tailscale {
+        if server.connectionMode != .tailscale && server.connectionMode != .teleport {
             switch server.authMethod {
             case .password:
                 if let password = credentials.password {
@@ -250,6 +252,8 @@ final class KeychainManager {
                         scope: scope
                     )
                 }
+            case nil:
+                break
             }
         }
 

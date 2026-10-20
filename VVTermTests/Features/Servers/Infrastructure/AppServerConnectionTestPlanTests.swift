@@ -95,6 +95,15 @@ private nonisolated struct ConnectionTestHostKeyRepositoryFake: ServerHostKeyRep
 
 struct AppServerConnectionTestPlanTests {
     @Test
+    func teleportUsesOnlySSHAndNeverOffersAHostKeyApprovalOverride() {
+        let server = makeServer(mode: .teleport)
+        #expect(ServerConnectionTestPlan(server: server) == .sshOnly)
+        #expect(ServerConnectionApprovalPolicy.requirement(
+            for: SSHError.hostKeyApprovalRequired, server: server
+        ) == nil)
+    }
+
+    @Test
     func standardUsesOnlyTheSSHProbe() {
         #expect(ServerConnectionTestPlan(server: makeServer(mode: .standard)) == .sshOnly)
     }

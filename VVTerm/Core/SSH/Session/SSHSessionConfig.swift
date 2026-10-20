@@ -9,7 +9,7 @@ nonisolated struct SSHSessionConfig: Sendable {
     let hostKeyPort: Int
     let username: String
     let connectionMode: SSHConnectionMode
-    let authMethod: AuthMethod
+    let authMethod: AuthMethod?
     let credentials: ServerCredentials
 
     var connectionTimeout: TimeInterval = 30
@@ -24,7 +24,7 @@ nonisolated struct SSHSessionConfig: Sendable {
         hostKeyPort: Int? = nil,
         username: String,
         connectionMode: SSHConnectionMode,
-        authMethod: AuthMethod,
+        authMethod: AuthMethod?,
         credentials: ServerCredentials,
         connectionTimeout: TimeInterval = 30,
         keepAlive: SSHKeepAlivePolicy = .enabled(

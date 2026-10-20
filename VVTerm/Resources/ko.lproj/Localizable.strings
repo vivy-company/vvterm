@@ -2321,3 +2321,47 @@
 "Sidebar" = "사이드바";
 
 "Terminal tab %lld" = "터미널 탭 %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "루트 클러스터";
+"Node ID" = "노드 ID";
+"OS Login" = "OS 사용자 이름";
+"Proxy URL" = "프록시 URL";
+"SSO Connector (Optional)" = "SSO 커넥터(선택 사항)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "프록시에 로그인한 다음 노드와 해당 OS 사용자 이름을 선택하세요. 기기 간에는 프로필과 노드 설정만 동기화됩니다.";
+"Access expires" = "접근 만료 시간";
+"Sign in again to renew access." = "접근 권한을 갱신하려면 다시 로그인하세요.";
+"Sign in again" = "다시 로그인";
+"Sign out" = "로그아웃";
+"Check access" = "접근 확인";
+"Teleport access" = "Teleport 접근";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "발급된 접근 정보는 이 기기에만 저장됩니다. 암호와 일회용 코드는 저장되지 않습니다.";
+"Sign out of Teleport?" = "Teleport에서 로그아웃할까요?";
+"This disconnects all sessions for this Teleport profile on this device." = "이 기기에서 이 Teleport 프로필의 모든 세션 연결이 끊어집니다.";
+"One-time code (if needed)" = "일회용 코드(필요한 경우)";
+"Sign in" = "로그인";
+"Sign in with %@" = "%@로 로그인";
+"No supported sign-in method is available for this profile." = "이 프로필에 지원되는 로그인 방법이 없습니다.";
+"No nodes are available in this page." = "이 페이지에 사용 가능한 노드가 없습니다.";
+"Node" = "노드";
+"Select a node" = "노드 선택";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "OS 사용자 이름";
+"No permitted login" = "허용된 사용자 이름 없음";
+"Use selected node" = "선택한 노드 사용";
+"More nodes" = "노드 더 보기";
+"Refresh nodes" = "노드 새로 고침";
+"Checking access…" = "접근 확인 중…";
+"Signing in…" = "로그인 중…";
+"Loading nodes…" = "노드 불러오는 중…";
+"Signing out…" = "로그아웃 중…";
+"Teleport connection failed. Check the profile and sign in again." = "Teleport 연결에 실패했습니다. 프로필을 확인하고 다시 로그인하세요.";
+"Sign in to this Teleport profile before connecting." = "연결하기 전에 이 Teleport 프로필에 로그인하세요.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport가 접근을 거부했습니다. 계정, 코드 및 노드 권한을 확인하세요.";
+"This Teleport server or policy is not supported. Contact your administrator." = "이 Teleport 서버 또는 정책은 지원되지 않습니다. 관리자에게 문의하세요.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Teleport 인증서 검증에 실패했습니다. 프록시, 계정 및 클러스터를 확인하세요.";
+"The Teleport node was not found. Choose its exact node ID again." = "Teleport 노드를 찾을 수 없습니다. 정확한 노드 ID를 다시 선택하세요.";
+"More than one Teleport node has this name. Use its exact node ID." = "같은 이름의 Teleport 노드가 여러 개 있습니다. 정확한 노드 ID를 사용하세요.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "이 Teleport 프로필에 로그인하는 중입니다. 로그인을 완료하거나 취소한 후 다시 시도하세요.";

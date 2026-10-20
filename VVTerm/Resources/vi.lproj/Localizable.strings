@@ -2367,3 +2367,47 @@
 "Sidebar" = "Thanh bên";
 
 "Terminal tab %lld" = "Thẻ terminal %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Cụm gốc";
+"Node ID" = "ID nút";
+"OS Login" = "Tên người dùng hệ điều hành";
+"Proxy URL" = "URL proxy";
+"SSO Connector (Optional)" = "Trình kết nối SSO (tùy chọn)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Đăng nhập vào proxy, rồi chọn nút và tên người dùng hệ điều hành. Chỉ cài đặt hồ sơ và nút được đồng bộ giữa các thiết bị.";
+"Access expires" = "Quyền truy cập hết hạn";
+"Sign in again to renew access." = "Đăng nhập lại để gia hạn quyền truy cập.";
+"Sign in again" = "Đăng nhập lại";
+"Sign out" = "Đăng xuất";
+"Check access" = "Kiểm tra quyền truy cập";
+"Teleport access" = "Quyền truy cập Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Thông tin truy cập được cấp chỉ lưu trên thiết bị này. Mật khẩu và mã dùng một lần không được lưu.";
+"Sign out of Teleport?" = "Đăng xuất khỏi Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Thao tác này ngắt mọi phiên của hồ sơ Teleport này trên thiết bị này.";
+"One-time code (if needed)" = "Mã dùng một lần (nếu cần)";
+"Sign in" = "Đăng nhập";
+"Sign in with %@" = "Đăng nhập bằng %@";
+"No supported sign-in method is available for this profile." = "Hồ sơ này không có phương thức đăng nhập được hỗ trợ.";
+"No nodes are available in this page." = "Không có nút nào khả dụng trên trang này.";
+"Node" = "Nút";
+"Select a node" = "Chọn một nút";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Tên người dùng hệ điều hành";
+"No permitted login" = "Không có tên người dùng được phép";
+"Use selected node" = "Dùng nút đã chọn";
+"More nodes" = "Thêm nút";
+"Refresh nodes" = "Làm mới nút";
+"Checking access…" = "Đang kiểm tra quyền truy cập…";
+"Signing in…" = "Đang đăng nhập…";
+"Loading nodes…" = "Đang tải nút…";
+"Signing out…" = "Đang đăng xuất…";
+"Teleport connection failed. Check the profile and sign in again." = "Kết nối Teleport thất bại. Kiểm tra hồ sơ rồi đăng nhập lại.";
+"Sign in to this Teleport profile before connecting." = "Đăng nhập vào hồ sơ Teleport này trước khi kết nối.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport từ chối truy cập. Kiểm tra tài khoản, mã và quyền của nút.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Máy chủ hoặc chính sách Teleport này không được hỗ trợ. Liên hệ quản trị viên.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Xác thực chứng chỉ Teleport thất bại. Kiểm tra proxy, tài khoản và cụm.";
+"The Teleport node was not found. Choose its exact node ID again." = "Không tìm thấy nút Teleport. Chọn lại ID chính xác của nút.";
+"More than one Teleport node has this name. Use its exact node ID." = "Nhiều nút Teleport có cùng tên này. Dùng ID chính xác của nút.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Hồ sơ Teleport này đang đăng nhập. Hãy hoàn tất hoặc hủy rồi thử lại.";

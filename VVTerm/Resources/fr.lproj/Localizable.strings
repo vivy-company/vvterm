@@ -2324,3 +2324,47 @@
 "Sidebar" = "Barre latérale";
 
 "Terminal tab %lld" = "Onglet de terminal %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Cluster racine";
+"Node ID" = "ID du nœud";
+"OS Login" = "Utilisateur du système";
+"Proxy URL" = "URL du proxy";
+"SSO Connector (Optional)" = "Connecteur SSO (facultatif)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Connectez-vous au proxy, puis sélectionnez un nœud et son utilisateur système. Seuls les réglages du profil et du nœud sont synchronisés entre les appareils.";
+"Access expires" = "Expiration de l’accès";
+"Sign in again to renew access." = "Reconnectez-vous pour renouveler l’accès.";
+"Sign in again" = "Se reconnecter";
+"Sign out" = "Se déconnecter";
+"Check access" = "Vérifier l’accès";
+"Teleport access" = "Accès Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "L’accès accordé est stocké uniquement sur cet appareil. Les mots de passe et les codes à usage unique ne sont pas enregistrés.";
+"Sign out of Teleport?" = "Se déconnecter de Teleport ?";
+"This disconnects all sessions for this Teleport profile on this device." = "Toutes les sessions de ce profil Teleport sur cet appareil seront déconnectées.";
+"One-time code (if needed)" = "Code à usage unique (si nécessaire)";
+"Sign in" = "Se connecter";
+"Sign in with %@" = "Se connecter avec %@";
+"No supported sign-in method is available for this profile." = "Aucune méthode de connexion prise en charge n’est disponible pour ce profil.";
+"No nodes are available in this page." = "Aucun nœud n’est disponible sur cette page.";
+"Node" = "Nœud";
+"Select a node" = "Sélectionner un nœud";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Utilisateur du système";
+"No permitted login" = "Aucun utilisateur autorisé";
+"Use selected node" = "Utiliser le nœud sélectionné";
+"More nodes" = "Plus de nœuds";
+"Refresh nodes" = "Actualiser les nœuds";
+"Checking access…" = "Vérification de l’accès…";
+"Signing in…" = "Connexion…";
+"Loading nodes…" = "Chargement des nœuds…";
+"Signing out…" = "Déconnexion…";
+"Teleport connection failed. Check the profile and sign in again." = "La connexion à Teleport a échoué. Vérifiez le profil et reconnectez-vous.";
+"Sign in to this Teleport profile before connecting." = "Connectez-vous à ce profil Teleport avant d’établir la connexion.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport a refusé l’accès. Vérifiez le compte, le code et les autorisations du nœud.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Ce serveur ou cette politique Teleport n’est pas pris en charge. Contactez votre administrateur.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "La validation du certificat Teleport a échoué. Vérifiez le proxy, le compte et le cluster.";
+"The Teleport node was not found. Choose its exact node ID again." = "Le nœud Teleport est introuvable. Sélectionnez à nouveau son ID exact.";
+"More than one Teleport node has this name. Use its exact node ID." = "Plusieurs nœuds Teleport portent ce nom. Utilisez l’ID exact du nœud.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "La connexion à ce profil Teleport est en cours. Terminez-la ou annulez-la, puis réessayez.";
