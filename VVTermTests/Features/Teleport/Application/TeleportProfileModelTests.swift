@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import TeleportKit
 import Testing
@@ -17,6 +18,35 @@ private final class TeleportOperationReleaseProbe: Sendable {
 
 @MainActor
 struct TeleportProfileModelTests {
+    @Test(arguments: ["12345", "123456789", "12a456", "１２３４５６", " 123456", "123456\n"])
+    func invalidSetupCodeDoesNotReachCredentialStorage(code: String) async throws {
+        #expect(!TeleportProfileModel.isValidOneTimeCode(code))
+        let model = try makeModel()
+        model.registerSecureEnclaveCredential(name: "Test device", otp: code)
+        for await operation in model.$operation.values {
+            if operation == .idle { break }
+        }
+        #expect(model.errorMessage == TeleportAccessError.message(for: TeleportAccessError.deviceSetupCodeRequired))
+        #expect(model.credentialResult == nil)
+    }
+
+    @Test(arguments: ["123456", "1234567", "12345678"])
+    func setupCodeAcceptsOnlySupportedASCIIDigitLengths(code: String) {
+        #expect(TeleportProfileModel.isValidOneTimeCode(code))
+    }
+
+    @Test
+    func emptySetupCodeIsLeftToTheLibraryPolicyCheck() async throws {
+        let model = try makeModel()
+        model.registerSecureEnclaveCredential(name: "Test device")
+        for await operation in model.$operation.values {
+            if operation == .idle { break }
+        }
+        // The empty test store stops registration at identity lookup, after app input checks.
+        #expect(model.errorMessage == TeleportAccessError.message(for: TeleportError.authenticationRequired))
+        #expect(model.credentialResult == nil)
+    }
+
     @Test
     func onlyOneCompleteInitialResultCanFillAnEmptyNode() throws {
         let first = try TeleportNode(id: "first", name: "First", clusterName: "cluster")
@@ -37,6 +67,19 @@ struct TeleportProfileModelTests {
     }
 
     enum DeviceOperation: CaseIterable { case login, registration, removal }
+
+    @Test
+    func setupCancelDoesNotCancelSignOutInAnotherSection() throws {
+        let model = try makeModel()
+        model.signOut()
+        model.cancelCredentialSetup()
+        #expect(model.operation == .signingOut)
+        model.cancel()
+
+        model.registerSecureEnclaveCredential(name: "Test device")
+        model.cancelCredentialSetup()
+        #expect(model.operation == .idle)
+    }
 
     @Test(arguments: DeviceOperation.allCases)
     func cancelledQueuedDeviceOperationDoesNotApplyAResult(operation: DeviceOperation) async throws {

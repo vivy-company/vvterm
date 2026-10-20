@@ -24,22 +24,29 @@ protocol TeleportBrowserSession: TeleportBrowserPresenter {
 
 nonisolated enum TeleportAccessError: Error {
     case loginInProgress
+    case deviceSetupCodeRequired
 
     static func message(for error: any Error) -> String {
         if let accessError = error as? TeleportAccessError {
             switch accessError {
             case .loginInProgress:
                 return String(localized: "This Teleport profile is signing in. Finish or cancel it, then try again.")
+            case .deviceSetupCodeRequired:
+                return String(localized: "Enter a fresh code from your authenticator app to set up device sign-in. Wait for a new code after login.")
             }
         }
         guard let error = error as? TeleportError else {
             return String(localized: "Teleport connection failed. Check the profile and sign in again.")
         }
         switch error {
+        case .oneTimeCodeRequired:
+            return message(for: TeleportAccessError.deviceSetupCodeRequired)
         case .authenticationRequired:
             return String(localized: "Sign in to this Teleport profile before connecting.")
         case .accessDenied, .httpStatus(401), .httpStatus(403):
             return String(localized: "Teleport denied access. Check the account, code, and node permissions.")
+        case .unsupportedPolicy(.browserMFA):
+            return String(localized: "Browser approval is not available for this account. Use a password and code, or check your registered passkeys and server settings.")
         case .unsupportedPolicy, .unsupportedVersion:
             return String(localized: "This Teleport server or policy is not supported. Contact your administrator.")
         case .invalidCertificate:

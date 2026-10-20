@@ -27,7 +27,8 @@ struct TeleportDeviceCredentialUITestControls: View {
                     discovery: TeleportDiscovery(
                         clusterName: "test-cluster", serverVersion: "18.11.4",
                         authenticationType: "local", secondFactor: "otp", connectors: []
-                    )
+                    ),
+                    credentialResult: .codeRequired
                 ))
             } else {
                 _model = StateObject(wrappedValue: TeleportProfileModel(profile: profile, service: service))
@@ -38,7 +39,7 @@ struct TeleportDeviceCredentialUITestControls: View {
     }
 
     var body: some View {
-        TeleportDeviceCredentialControls(service: service, model: model)
+        TeleportDeviceCredentialControls(service: service, model: model, password: .constant(""), onSignIn: {})
     }
 
     private nonisolated enum Failure: Error { case unexpectedStorageAccess }
@@ -73,8 +74,8 @@ struct TeleportCredentialSetupFormUITestFixture: View {
                 Section {
                     TextField("Name", text: $name)
                         .accessibilityIdentifier("vvterm.teleport.setupTest.draftName")
-                    TeleportDeviceCredentialUITestControls(signedIn: true)
                 }
+                TeleportDeviceCredentialUITestControls(signedIn: true)
             }
             .navigationTitle("Add Server")
             .toolbar {

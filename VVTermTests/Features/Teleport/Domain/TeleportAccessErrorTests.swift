@@ -33,9 +33,9 @@ struct TeleportAccessErrorTests {
     }
 
     @Test
-    func unavailableBrowserMFAUsesTheFixedPolicyMessage() {
+    func unavailableBrowserMFAGivesItsOwnSafeRecoveryMessage() {
         #expect(TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.browserMFA))
-            == TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))
+            != TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))
     }
 
     @Test

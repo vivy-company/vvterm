@@ -57,6 +57,8 @@ struct ServerFormSheet: View {
 
     @State private var form: ServerFormModel
     @StateObject private var operations: ServerFormOperationController
+    // Keep authentication alive when its form sections move off screen.
+    @State private var teleportModel: TeleportProfileModel?
     @State private var showCloudflareOverrides: Bool = false
 
     @State private var showingServerLimitAlert = false
@@ -74,6 +76,10 @@ struct ServerFormSheet: View {
     var isEditing: Bool { intent.isEditing }
 
     private var sourceServer: Server? { intent.sourceServer }
+
+    private var activeTeleportProfile: TeleportProfileConfiguration? {
+        form.transportSelection == .teleport ? form.teleportProfile : nil
+    }
 
     private var hostKeyTrustRequest: ServerSecurityApprovalRequest? {
         operations.hostKeyChallenge.map(ServerSecurityApprovalRequest.hostKey)
@@ -302,11 +308,11 @@ struct ServerFormSheet: View {
         limitSection
         serverSection
         authSection
-        if form.transportSelection == .teleport,
-           let profile = form.teleportProfile,
+        if let profile = activeTeleportProfile,
+           let teleportModel, teleportModel.profile == profile,
            let teleportAccess {
             TeleportProfileSection(
-                profile: profile, service: teleportAccess,
+                model: teleportModel, service: teleportAccess,
                 clusterName: $form.teleportClusterName,
                 nodeID: $form.teleportNodeID, login: $form.username
             ) { nodeName in
@@ -428,7 +434,9 @@ struct ServerFormSheet: View {
             }
             .onAppear {
                 reconcileAssignmentWorkspace()
+                loadTeleportProfile()
             }
+            .onChange(of: activeTeleportProfile) { _ in loadTeleportProfile() }
             .onChange(of: operations.connectionTestFailure) { failure in
                 if failure?.requiresCloudflareOverrides == true {
                     showCloudflareOverrides = true
@@ -436,6 +444,7 @@ struct ServerFormSheet: View {
             }
             .onDisappear {
                 operations.cancel()
+                teleportModel?.cancel()
             }
             .onChange(of: form.host) { _ in resetConnectionTestState() }
             .onChange(of: form.port) { _ in resetConnectionTestState() }
@@ -936,6 +945,19 @@ struct ServerFormSheet: View {
             form.sshPassphrase = passphrase
         }
         form.sshPublicKey = loadedKey.publicKey
+    }
+
+    private func loadTeleportProfile() {
+        guard let profile = activeTeleportProfile, let teleportAccess else {
+            teleportModel?.cancel()
+            teleportModel = nil
+            return
+        }
+        if teleportModel?.profile != profile {
+            teleportModel?.cancel()
+            teleportModel = TeleportProfileModel(profile: profile, service: teleportAccess)
+        }
+        teleportModel?.load()
     }
 
     // MARK: - Connection Test

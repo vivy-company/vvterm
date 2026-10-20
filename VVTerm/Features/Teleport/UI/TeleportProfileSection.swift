@@ -2,7 +2,7 @@ import SwiftUI
 import TeleportKit
 
 struct TeleportProfileSection: View {
-    let profile: TeleportProfileConfiguration
+    let model: TeleportProfileModel
     let service: TeleportAccessService
     @Binding var clusterName: String
     @Binding var nodeID: String
@@ -11,47 +11,59 @@ struct TeleportProfileSection: View {
 
     var body: some View {
         TeleportProfileContent(
-            profile: profile, service: service, clusterName: $clusterName,
+            model: model, service: service, clusterName: $clusterName,
             nodeID: $nodeID, login: $login, onSelectNode: onSelectNode
         )
-        .id(profile)
+        .id(model.profile)
     }
 }
 
-/// A changed profile has a new view identity and a new task owner.
+/// Profile changes clear the sign-in fields. The server form owns authentication tasks.
 private struct TeleportProfileContent: View {
-    let profile: TeleportProfileConfiguration
     let onSelectNode: (String) -> Void
     private let service: TeleportAccessService
     @Binding private var clusterName: String
     @Binding private var nodeID: String
     @Binding private var login: String
-    @StateObject private var model: TeleportProfileModel
+    @ObservedObject private var model: TeleportProfileModel
     @State private var password = ""
     @State private var otp = ""
     @State private var hasReadNodePage = false
     @State private var showingSignOutConfirmation = false
 
     init(
-        profile: TeleportProfileConfiguration,
+        model: TeleportProfileModel,
         service: TeleportAccessService,
         clusterName: Binding<String>,
         nodeID: Binding<String>,
         login: Binding<String>,
         onSelectNode: @escaping (String) -> Void
     ) {
-        self.profile = profile
         self.service = service
         self.onSelectNode = onSelectNode
         _clusterName = clusterName
         _nodeID = nodeID
         _login = login
-        _model = StateObject(wrappedValue: TeleportProfileModel(profile: profile, service: service))
+        _model = ObservedObject(wrappedValue: model)
     }
 
     var body: some View {
+        Group {
+            accessSection
+            TeleportDeviceCredentialControls(
+                service: service, model: model, password: $password,
+                onSignIn: {
+                    model.loginWithSecureEnclave(password: password)
+                    password = ""
+                    otp = ""
+                }
+            )
+        }
+    }
+
+    private var accessSection: some View {
         Section {
-            LabeledContent("Account", value: profile.account)
+            LabeledContent("Account", value: model.profile.account)
             if let summary = model.summary {
                 LabeledContent("Cluster", value: summary.clusterName)
                 LabeledContent("Access expires") {
@@ -67,15 +79,6 @@ private struct TeleportProfileContent: View {
                     .disabled(model.isBusy)
             } else {
                 loginControls
-            }
-            TeleportDeviceCredentialControls(service: service, model: model)
-            if let result = model.credentialResult {
-                switch result {
-                case .registered:
-                    Text("Device credential registered. Use your password and Face ID or Touch ID to sign in.")
-                case .deleted:
-                    Text("Local device credential removed. Remove its server entry in Teleport separately.")
-                }
             }
             if let error = model.errorMessage {
                 Text(error)
@@ -108,12 +111,6 @@ private struct TeleportProfileContent: View {
             }
         } message: {
             Text("This disconnects all sessions for this Teleport profile on this device.")
-        }
-        .onAppear { model.load() }
-        .onDisappear {
-            model.cancel()
-            password = ""
-            otp = ""
         }
         .onChange(of: model.summary?.allowedLogins ?? []) { logins in
             if login.isEmpty, logins.count == 1 { login = logins[0] }
@@ -152,16 +149,8 @@ private struct TeleportProfileContent: View {
                     otp = ""
                 }
                 .disabled(model.isBusy || password.isEmpty)
-                DisclosureGroup("Other sign-in options") {
-                    Button("Sign in with Face ID or Touch ID") {
-                        model.loginWithSecureEnclave(password: password)
-                        password = ""
-                        otp = ""
-                    }
-                    .disabled(model.isBusy || password.isEmpty)
-                    Text("Set up this device after your first sign-in.")
-                        .foregroundStyle(.secondary)
-                    if discovery.webAuthnConfigured {
+                if discovery.webAuthnConfigured {
+                    DisclosureGroup("Sign in with a passkey or security key") {
                         TeleportBrowserSignInButton(
                             method: .localMFA(password: password), service: service, model: model
                         ) {

@@ -25,7 +25,7 @@ final class TeleportProfileModel: ObservableObject {
         case signingOut
     }
 
-    enum CredentialResult { case registered, deleted }
+    enum CredentialResult: Equatable { case codeRequired, registered, deleted }
 
     @Published private(set) var summary: TeleportAccessSummary?
     @Published private(set) var discovery: TeleportDiscovery?
@@ -34,7 +34,7 @@ final class TeleportProfileModel: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published private(set) var credentialResult: CredentialResult?
 
-    private let profile: TeleportProfileConfiguration
+    let profile: TeleportProfileConfiguration
     private let service: TeleportAccessService
     private var operationTask: Task<Void, Never>?
     private var browser: (any TeleportBrowserSession)?
@@ -48,15 +48,21 @@ final class TeleportProfileModel: ObservableObject {
     /// UI fixtures supply display facts without creating credentials or contacting a server.
     convenience init(
         profile: TeleportProfileConfiguration, service: TeleportAccessService,
-        summary: TeleportAccessSummary, discovery: TeleportDiscovery
+        summary: TeleportAccessSummary, discovery: TeleportDiscovery,
+        credentialResult: CredentialResult? = nil
     ) {
         self.init(profile: profile, service: service)
         self.summary = summary
         self.discovery = discovery
+        self.credentialResult = credentialResult
     }
     #endif
 
     var isBusy: Bool { operation != .idle }
+
+    nonisolated static func isValidOneTimeCode(_ code: String) -> Bool {
+        (6...8).contains(code.utf8.count) && code.utf8.allSatisfy { (48...57).contains($0) }
+    }
 
     nonisolated static func singleNode(
         in nodes: [TeleportNode], hasMore: Bool, currentNodeID: String, isFirstPage: Bool
@@ -148,12 +154,21 @@ final class TeleportProfileModel: ObservableObject {
         name: String, otp: String = "", makeBrowserSession: BrowserFactory? = nil
     ) {
         perform(.registeringCredential) { model in
+            guard otp.isEmpty || Self.isValidOneTimeCode(otp) else {
+                throw TeleportAccessError.deviceSetupCodeRequired
+            }
             let browser = try makeBrowserSession.map { try model.startBrowser($0) }
             defer { browser?.cancel() }
-            try await model.service.registerSecureEnclaveCredential(
-                profile: model.profile, name: name, otp: otp, presenter: browser,
-                prompt: String(localized: "Set up Teleport sign-in with Face ID or Touch ID.")
-            )
+            do {
+                try await model.service.registerSecureEnclaveCredential(
+                    profile: model.profile, name: name, otp: otp, presenter: browser,
+                    prompt: String(localized: "Set up Teleport sign-in with Face ID or Touch ID.")
+                )
+            } catch TeleportError.oneTimeCodeRequired {
+                try Task.checkCancellation()
+                model.credentialResult = .codeRequired
+                return
+            }
             try Task.checkCancellation()
             model.credentialResult = .registered
         }
@@ -190,6 +205,10 @@ final class TeleportProfileModel: ObservableObject {
         operation = .idle
     }
 
+    func cancelCredentialSetup() {
+        if operation == .registeringCredential { cancel() }
+    }
+
     private func readNodes(startKey: String) async throws {
         let page = try await service.nodes(for: profile, startKey: startKey)
         try Task.checkCancellation()
@@ -208,7 +227,9 @@ final class TeleportProfileModel: ObservableObject {
     ) {
         cancel()
         errorMessage = nil
-        credentialResult = nil
+        if operation != .registeringCredential || credentialResult != .codeRequired {
+            credentialResult = nil
+        }
         self.operation = operation
         operationTask = Task { [weak self] in
             guard let self else { return }

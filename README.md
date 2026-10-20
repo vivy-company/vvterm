@@ -113,6 +113,9 @@ enabled. Browser MFA is separate from GitHub, OIDC, and SAML sign-in; those
 buttons use the advertised SSO connector. Both paths use the system
 authentication browser and device-only identity storage. Native access to saved
 Apple passkeys is not part of this support.
+Browser approval needs a separate passkey or security key registered in Teleport.
+Use the same account in the browser and VVTerm. Start a new sign-in attempt if
+the browser page is old or the app attempt was cancelled.
 The local browser MFA path has callback and protocol unit checks. Its pinned
 Chromium fixture download did not complete. Physical keys, system browser
 approval, and real provider SSO still need live checks; see TeleportKit's
@@ -127,9 +130,12 @@ distinct Teleport icon. Access status refreshes on display, in the foreground, a
 once per minute while visible. Expiry is never stored in CloudKit.
 
 Local accounts can also set up a device-bound Secure Enclave credential in the
-profile's **Device biometric sign-in** controls. Setup stays inside the server form
+profile's **Device biometric sign-in** section. Setup stays inside the server form
 so the server draft remains open. Sign in first, then use a fresh
 one-time code or browser approval from an existing credential to authorize setup.
+Wait for a new authenticator code after login; Teleport rejects a reused code.
+Setup first checks server policy. If a code is required, enter its 6–8 digits
+before you can continue. Servers that require no existing approval need no code.
 The server decides which approval is required. Later sign-in still needs the
 Teleport password, plus Face ID or Touch ID. TeleportKit owns registration,
 WebAuthn, key use, and certificate checks. VVTerm supplies the setup and recovery
@@ -144,6 +150,8 @@ can make the local key unusable. Keep another sign-in method. Local removal does
 not remove the server credential, sign out, or revoke issued access. Remove a
 stale or failed setup entry through Teleport before setup again. Hardware SSH
 key policies and Device Trust remain unsupported.
+This app-owned credential is not saved as an Apple passkey. Use the device
+biometric sign-in button for it; the browser cannot use this private key.
 
 Focused app tests cover transport settings, local and CloudKit storage, node
 selection, cancellation, setup, and recovery. UI fixtures do not create keys or
