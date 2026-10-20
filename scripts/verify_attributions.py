@@ -183,8 +183,8 @@ def verify_native_dependencies(
         },
         {
             "id": "libssh2",
-            "sourceURL": "https://www.libssh2.org/download/",
-            "version": shell_value(source, "LIBSSH2_VERSION"),
+            "sourceURL": "https://github.com/libssh2/libssh2",
+            "version": shell_value(source, "LIBSSH2_COMMIT"),
             "sourceSHA256": shell_value(source, "LIBSSH2_SHA256"),
         },
         {

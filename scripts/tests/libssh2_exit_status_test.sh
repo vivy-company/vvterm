@@ -2,9 +2,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$ROOT/scripts/build.sh"
-SOURCE="$BUILD_DIR_SSH/libssh2-$LIBSSH2_VERSION"
+SOURCE="$BUILD_DIR_SSH/libssh2-$LIBSSH2_COMMIT"
 if [[ ! -f "$SOURCE/build-macos/src/libssh2_config.h" ]]; then
-    echo 'Run scripts/build.sh ssh before this native test.' >&2
+    echo 'Run scripts/build.sh ssh-engine (or ssh) before this native test.' >&2
     exit 1
 fi
 xcrun clang -DLIBSSH2_OPENSSL -DHAVE_CONFIG_H \

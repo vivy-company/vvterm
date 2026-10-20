@@ -103,9 +103,9 @@
       },
       {
         "id": "libssh2",
-        "sourceURL": "https://www.libssh2.org/download/",
-        "version": "1.11.1",
-        "sourceSHA256": "d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7",
+        "sourceURL": "https://github.com/libssh2/libssh2",
+        "version": "3209951db4e47ef902db047d12f9f464f835c27e",
+        "sourceSHA256": "fe5bc1939d7dae5b35441084b88793e84d33ad23899bfa6113f1e51468fe76cc",
         "attributionID": "libssh2"
       },
       {
@@ -226,7 +226,7 @@
       "id": "libssh2",
       "name": "libssh2",
       "role": "networkTransport",
-      "projectURL": "https://github.com/libssh2/libssh2/tree/libssh2-1.11.1",
+      "projectURL": "https://github.com/libssh2/libssh2/tree/3209951db4e47ef902db047d12f9f464f835c27e",
       "licenseName": "BSD-3-Clause",
       "licenseResource": "libssh2.txt"
     },
