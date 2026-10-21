@@ -213,7 +213,7 @@ final class TeleportServerFormFlowUITests: XCTestCase {
             cancel.tap()
         } else {
             // Native popover confirmations omit Cancel. A tap outside closes them.
-            app.navigationBars["Server Duplicate Test"].tap()
+            app.otherElements["PopoverDismissRegion"].tap()
         }
         XCTAssertTrue(warning.waitForNonExistence(timeout: 5))
         XCTAssertTrue(manage.isEnabled)
