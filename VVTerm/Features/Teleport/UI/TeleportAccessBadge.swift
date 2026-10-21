@@ -97,9 +97,14 @@ struct TeleportAccessBadge: View {
     }
 
     private func badgeLabel(_ title: Text, icon: String, color: Color) -> some View {
-        Label { title } icon: { Image(systemName: icon) }
-            .font(.caption2)
-            .foregroundStyle(color)
-            .lineLimit(1)
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .accessibilityHidden(true)
+            title
+        }
+        .font(.caption2)
+        .foregroundStyle(color)
+        .lineLimit(1)
+        .accessibilityElement(children: .combine)
     }
 }
