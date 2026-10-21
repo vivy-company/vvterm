@@ -11,7 +11,6 @@ struct TeleportDeviceCredentialUITestControls: View {
     private let content: Content
     @StateObject private var model: TeleportProfileModel
     @State private var password = ""
-    @State private var isSigningIn = false
 
     init(signedIn: Bool = false, content: Content = .device) {
         self.content = content
@@ -44,13 +43,12 @@ struct TeleportDeviceCredentialUITestControls: View {
     var body: some View {
         switch content {
         case .device:
-            TeleportDeviceCredentialControls(
-                service: service, model: model, password: $password,
-                isSigningIn: $isSigningIn, onSignIn: {}
-            )
+            Section("Security") {
+                TeleportDeviceCredentialControls(service: service, model: model)
+            }
         case .signIn:
             TeleportProfileSection(
-                model: model, service: service, clusterName: .constant(""),
+                model: model, service: service, password: $password, clusterName: .constant(""),
                 nodeID: .constant(""), login: .constant(""), onSelectNode: { _ in }
             )
         }

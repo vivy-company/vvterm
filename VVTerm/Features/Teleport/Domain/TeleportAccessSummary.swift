@@ -60,7 +60,7 @@ nonisolated enum TeleportAccessError: Error {
         case .biometricsUnavailable:
             return String(localized: "Face ID or Touch ID is not available. Check system settings or sign in another way.")
         case .deviceCredentialMissing:
-            return String(localized: "The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again.")
+            return String(localized: "This device is not set up or its key cannot be used. Use another method, then open Security → Teleport verification.")
         case .deviceCredentialExists:
             return String(localized: "A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again.")
         case .deviceCredentialStorage:

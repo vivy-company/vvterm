@@ -4,97 +4,55 @@ import TeleportKit
 struct TeleportDeviceCredentialControls: View {
     let service: TeleportAccessService
     @ObservedObject var model: TeleportProfileModel
-    @Binding var password: String
-    @Binding var isSigningIn: Bool
-    let onSignIn: () -> Void
 
-    private enum Presentation { case setup, removal }
+    private enum Presentation { case menu, setup, removal }
     @State private var presentation: Presentation?
 
     var body: some View {
-        Section {
-            if presentation == .setup {
-                TeleportDeviceCredentialSetup(service: service, model: model) { presentation = nil }
-            } else if isSigningIn {
-                SecureField("Password", text: $password)
-                    .accessibilityIdentifier("vvterm.teleport.credential.password")
-                    .disabled(model.isBusy)
-                Button("Sign in", action: onSignIn)
-                    .accessibilityIdentifier("vvterm.teleport.credential.signIn")
-                    .disabled(model.isBusy || password.isEmpty)
-                Button("Use another method") {
-                    password = ""
-                    isSigningIn = false
+        DisclosureGroup(isExpanded: Binding(
+            get: { presentation != nil },
+            set: { expanded in
+                if expanded {
+                    if presentation == nil { presentation = .menu }
+                } else if presentation != .setup && !model.isBusy {
+                    presentation = nil
                 }
-                .disabled(model.isBusy)
+            }
+        )) {
+            if presentation == .setup {
+                TeleportDeviceCredentialSetup(service: service, model: model) { presentation = .menu }
             } else {
-                Button("Use Face ID or Touch ID") { isSigningIn = true }
-                    .accessibilityIdentifier("vvterm.teleport.credential.use")
+                Text("Use Face ID or Touch ID instead of a code.").foregroundStyle(.secondary)
+                Button(model.canRegisterCredential ? "Set up this device" : "Sign in before setup") { presentation = .setup }
+                    .accessibilityIdentifier("vvterm.teleport.credential.setup")
+                    .disabled(model.isBusy || !model.canRegisterCredential)
+                Button("Remove from this device…", role: .destructive) { presentation = .removal }
+                    .accessibilityIdentifier("vvterm.teleport.credential.remove")
                     .disabled(model.isBusy)
             }
-            if let failure = model.failure, showsFailure(for: failure.operation) {
+            if let failure = model.failure, failure.operation.isCredentialManagement,
+               failure.operation != .registeringCredential || presentation == .setup {
                 Text(failure.message).foregroundStyle(.red)
             }
-            if model.isBusy && model.operation.isDeviceAuthentication {
-                ProgressView(progressLabel)
-                if model.operation == .biometricLogin {
-                    Button("Cancel") { model.cancel() }
-                }
+            if model.isBusy && model.operation.isCredentialManagement {
+                ProgressView(model.operation == .registeringCredential ? "Setting up…" : "Removing…")
             }
             if model.credentialResult == .registered {
                 Text("Device added.").foregroundStyle(.secondary)
             } else if model.credentialResult == .deleted {
                 Text("Device removed.").foregroundStyle(.secondary)
             }
-        } header: {
-            HStack {
-                Text("Biometric sign-in")
-                    .accessibilityIdentifier("vvterm.teleport.credential.controls")
-                Spacer()
-                Menu("Manage") {
-                    Button(model.canRegisterCredential ? "Set up this device" : "Sign in before setup") {
-                        password = ""
-                        isSigningIn = false
-                        presentation = .setup
-                    }
-                    .accessibilityIdentifier("vvterm.teleport.credential.setup")
-                    .disabled(!model.canRegisterCredential)
-                    Button("Remove from this device…", role: .destructive) {
-                        password = ""
-                        isSigningIn = false
-                        presentation = .removal
-                    }
-                        .accessibilityIdentifier("vvterm.teleport.credential.remove")
-                }
-                .accessibilityIdentifier("vvterm.teleport.credential.manage")
-                .disabled(model.isBusy)
-                .textCase(nil)
-            }
+        } label: {
+            Text("Teleport verification")
+                .accessibilityIdentifier("vvterm.teleport.credential.controls")
         }
         .confirmationDialog("Remove local key?", isPresented: Binding(
             get: { presentation == .removal },
-            set: { if !$0 && presentation == .removal { presentation = nil } }
+            set: { if !$0 && presentation == .removal { presentation = .menu } }
         )) {
             Button("Remove local key", role: .destructive) { model.deleteSecureEnclaveCredential() }
         } message: {
             Text("Access stays valid. Keep another sign-in method. Remove the device entry in Teleport before setup again.")
-        }
-    }
-
-    private func showsFailure(for operation: TeleportProfileModel.Operation) -> Bool {
-        switch operation {
-        case .biometricLogin: isSigningIn
-        case .registeringCredential: presentation == .setup
-        case .deletingCredential: true
-        default: false
-        }
-    }
-
-    private var progressLabel: LocalizedStringKey {
-        switch model.operation {
-        case .biometricLogin: "Signing in…"
-        case .registeringCredential: "Setting up…"
-        default: "Removing…"
         }
     }
 }

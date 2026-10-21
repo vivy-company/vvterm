@@ -5,6 +5,7 @@ import TeleportKit
 struct TeleportProfileSection: View {
     let model: TeleportProfileModel
     let service: TeleportAccessService
+    @Binding var password: String
     @Binding var clusterName: String
     @Binding var nodeID: String
     @Binding var login: String
@@ -12,7 +13,7 @@ struct TeleportProfileSection: View {
 
     var body: some View {
         TeleportProfileContent(
-            model: model, service: service, clusterName: $clusterName,
+            model: model, service: service, password: $password, clusterName: $clusterName,
             nodeID: $nodeID, login: $login, onSelectNode: onSelectNode
         )
         .id(model.profile)
@@ -23,13 +24,13 @@ struct TeleportProfileSection: View {
 private struct TeleportProfileContent: View {
     let onSelectNode: (String) -> Void
     private let service: TeleportAccessService
+    @Binding private var password: String
     @Binding private var clusterName: String
     @Binding private var nodeID: String
     @Binding private var login: String
     @ObservedObject private var model: TeleportProfileModel
     private enum SignInMethod: Hashable { case code, browser, device }
     @State private var selectedMethod: SignInMethod?
-    @State private var password = ""
     @State private var otp = ""
     @State private var hasReadNodePage = false
     @State private var showingSignOutConfirmation = false
@@ -37,6 +38,7 @@ private struct TeleportProfileContent: View {
     init(
         model: TeleportProfileModel,
         service: TeleportAccessService,
+        password: Binding<String>,
         clusterName: Binding<String>,
         nodeID: Binding<String>,
         login: Binding<String>,
@@ -44,6 +46,7 @@ private struct TeleportProfileContent: View {
     ) {
         self.service = service
         self.onSelectNode = onSelectNode
+        _password = password
         _clusterName = clusterName
         _nodeID = nodeID
         _login = login
@@ -71,19 +74,6 @@ private struct TeleportProfileContent: View {
             }
             if let summary = validSummary {
                 serverSection(summary: summary)
-            }
-            if model.discovery?.authenticationType == "local" {
-                TeleportDeviceCredentialControls(
-                    service: service, model: model, password: $password,
-                    isSigningIn: Binding(
-                        get: { selectedMethod == .device },
-                        set: { selectedMethod = $0 ? .device : nil }
-                    ),
-                    onSignIn: {
-                        model.loginWithSecureEnclave(password: password)
-                        clearSignInFields()
-                    }
-                )
             }
         }
         .onReceive(model.$summary.dropFirst()) { _ in
@@ -119,8 +109,7 @@ private struct TeleportProfileContent: View {
     }
 
     private var showsSignIn: Bool {
-        guard selectedMethod != .device else { return false }
-        return selectedMethod != nil || validSummary == nil
+        selectedMethod != nil || validSummary == nil
     }
 
     private func serverSection(summary: TeleportAccessSummary) -> some View {
@@ -146,22 +135,22 @@ private struct TeleportProfileContent: View {
         }
         .confirmationDialog("Sign out?", isPresented: $showingSignOutConfirmation) {
             Button("Sign out", role: .destructive) {
-                clearSignInFields()
+                otp = ""
                 selectedMethod = nil
                 model.signOut()
             }
         } message: {
-            Text("This closes this account's sessions on this device.")
+            Text("This closes this account's sessions on this device. The saved password stays.")
         }
     }
 
     @ViewBuilder
     private var operationFeedback: some View {
-        if let failure = model.failure, !failure.operation.isDeviceAuthentication {
+        if let failure = model.failure, !failure.operation.isCredentialManagement {
             Text(failure.message)
                 .foregroundStyle(.red)
         }
-        if model.isBusy && !model.operation.isDeviceAuthentication {
+        if model.isBusy && !model.operation.isCredentialManagement {
             HStack {
                 ProgressView()
                     .controlSize(.small)
@@ -181,23 +170,33 @@ private struct TeleportProfileContent: View {
             if discovery.authenticationType == "local" {
                 if discovery.webAuthnConfigured {
                     Picker("Verify with", selection: Binding(
-                        get: { selectedMethod == .browser ? SignInMethod.browser : .code },
+                        get: { selectedMethod ?? .code },
                         set: { selectedMethod = $0 }
                     )) {
                         Text(discovery.secondFactor == "off" ? "Password" : "Authenticator code").tag(SignInMethod.code)
                         Text("Passkey or security key").tag(SignInMethod.browser)
+                        Text("This device").tag(SignInMethod.device)
                     }
                     .accessibilityIdentifier("vvterm.teleport.signInMethod")
                     .disabled(model.isBusy)
                 }
                 SecureField("Password", text: $password)
+                    .textContentType(.password)
                     .accessibilityIdentifier("vvterm.teleport.password")
                     .disabled(model.isBusy)
                 if selectedMethod == .browser && discovery.webAuthnConfigured {
                     TeleportBrowserSignInButton(
                         method: .localMFA(password: password), service: service, model: model,
-                        onStart: clearSignInFields
+                        onStart: { otp = "" }
                     )
+                    .disabled(model.isBusy || password.isEmpty)
+                } else if selectedMethod == .device && discovery.webAuthnConfigured {
+                    Text("Approve with Face ID or Touch ID.").foregroundStyle(.secondary)
+                    Button("Sign in") {
+                        model.loginWithSecureEnclave(password: password)
+                        otp = ""
+                    }
+                    .accessibilityIdentifier("vvterm.teleport.signIn")
                     .disabled(model.isBusy || password.isEmpty)
                 } else {
                     if discovery.secondFactor != "off" {
@@ -207,7 +206,7 @@ private struct TeleportProfileContent: View {
                     }
                     Button("Sign in") {
                         model.login(password: password, otp: otp)
-                        clearSignInFields()
+                        otp = ""
                     }
                     .accessibilityIdentifier("vvterm.teleport.signIn")
                     .disabled(model.isBusy || password.isEmpty)
@@ -216,7 +215,7 @@ private struct TeleportProfileContent: View {
             ForEach(model.connectors, id: \.profileButtonID) { connector in
                 TeleportBrowserSignInButton(
                     method: .sso(connector), service: service, model: model,
-                    onStart: clearSignInFields
+                    onStart: { otp = "" }
                 )
                 .disabled(model.isBusy)
             }
@@ -272,11 +271,6 @@ private struct TeleportProfileContent: View {
                     .disabled(model.isBusy)
             }
         }
-    }
-
-    private func clearSignInFields() {
-        password = ""
-        otp = ""
     }
 
     private func selectNode(_ node: TeleportNode) {

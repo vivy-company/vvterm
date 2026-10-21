@@ -24,9 +24,9 @@ final class TeleportProfileModel: ObservableObject {
         case loadingNodes
         case signingOut
 
-        var isDeviceAuthentication: Bool {
+        var isCredentialManagement: Bool {
             switch self {
-            case .biometricLogin, .registeringCredential, .deletingCredential: true
+            case .registeringCredential, .deletingCredential: true
             default: false
             }
         }

@@ -86,7 +86,14 @@ VVTerm supplies its pinned upstream libssh2 engine. The engine has no local
 patches and uses upstream defaults, which disable legacy DSA, SHA-1 SSH
 algorithms, and several old ciphers and encrypted key formats.
 
-Teleport profiles store issued identities only in the device Keychain. Proxy,
+Teleport profiles store issued identities only in the device Keychain. Local
+account passwords use the same server credential store as SSH. Save the server
+to keep the password; Cancel keeps the previous saved value. The existing iCloud
+sync setting controls password sync. The password and its account binding share
+one Keychain item, so a partial sync cannot mix accounts. Each password is bound
+to that server's Teleport proxy and account. Changing either clears the draft password.
+Passwords are not shared automatically between entries. Duplicate Server copies
+the password after the normal source-server approval. Proxy,
 account, root cluster, exact node ID, and OS login settings can sync through CloudKit.
 Local server data uses JSON. New transport settings share one versioned
 `transportConfiguration` payload in local data and CloudKit. Each transport keeps
@@ -130,8 +137,14 @@ distinct Teleport icon. Access status refreshes on display, in the foreground, a
 once per minute while visible. Expiry is never stored in CloudKit.
 
 Local accounts can also set up a device-bound Secure Enclave credential in the
-profile's **Biometric sign-in → Manage** menu. **Use Face ID or Touch ID** opens
-its password field. Setup stays inside the server form. Sign in first, then use a fresh
+profile's **Security → Teleport verification** settings. Select **This device**
+under **Verify with** to use it. The saved password is filled like an SSH password.
+Face ID or Touch ID replaces code entry; this is MFA, not passwordless login.
+The separate **Require Face ID or Touch ID to open this server** setting protects
+local app access. It does not approve Teleport MFA; both can need a prompt.
+That lock applies to one saved entry. It does not lock the shared account identity;
+another entry can use the same account's valid issued access.
+Setup stays inside the server form. Sign in first, then use a fresh
 one-time code or browser approval from an existing credential to authorize setup.
 Wait for a new authenticator code after login; Teleport rejects a reused code.
 Setup first checks server policy. If a code is required, enter its 6–8 digits
@@ -140,6 +153,10 @@ The server decides which approval is required. Later sign-in still needs the
 Teleport password, plus Face ID or Touch ID. TeleportKit owns registration,
 WebAuthn, key use, and certificate checks. VVTerm supplies the setup and recovery
 screens, browser, prompt text, and storage settings.
+Sign-out clears issued access and keeps the saved password. To forget it, open
+sign-in, clear the password field, and save the server. Removing the
+local device key keeps the password. Deleting the server removes its password
+through the normal credential store; shared issued access is kept for other entries.
 
 The library stores this authentication key under the injected identity Keychain
 service plus `.secure-enclave`, in the app's default signing access group. It is
@@ -151,13 +168,15 @@ not remove the server credential, sign out, or revoke issued access. Remove a
 stale or failed setup entry through Teleport before setup again. Hardware SSH
 key policies and Device Trust remain unsupported.
 This app-owned credential is not saved as an Apple passkey. Use the device
-biometric sign-in button for it; the browser cannot use this private key.
+verification choice for it; the browser cannot use this private key.
 
 Focused app tests cover transport settings, local and CloudKit storage, node
-selection, cancellation, setup, and recovery. UI fixtures do not create keys or
+selection, cancellation, setup, and recovery. Password tests use memory storage
+to check account binding, partial sync, deletion, and failed-save recovery.
+UI fixtures do not create keys or
 contact a server. Software-key protocol checks passed against Teleport 18.11.4.
 Physical-device checks are still required for Secure Enclave, biometric prompts,
-signed Keychain behavior, browser MFA, and real-provider SSO.
+signed Keychain behavior, actual iCloud password sync, browser MFA, and real-provider SSO.
 
 ## Documentation
 

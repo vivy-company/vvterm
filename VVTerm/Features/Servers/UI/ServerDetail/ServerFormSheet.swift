@@ -1,4 +1,5 @@
 import SwiftUI
+import TeleportKit
 
 extension ServerTransportSelection {
     var displayName: String {
@@ -313,6 +314,7 @@ struct ServerFormSheet: View {
            let teleportAccess {
             TeleportProfileSection(
                 model: teleportModel, service: teleportAccess,
+                password: $form.password,
                 clusterName: $form.teleportClusterName,
                 nodeID: $form.teleportNodeID, login: $form.username
             ) { nodeName in
@@ -437,7 +439,12 @@ struct ServerFormSheet: View {
                 updateTeleportProfile()
                 teleportModel?.load()
             }
-            .onChange(of: activeTeleportProfile) { _ in updateTeleportProfile() }
+            .onChange(of: activeTeleportProfile) { _ in
+                // A password for another origin or account must never reach this profile.
+                form.password = ""
+                operations.invalidateCredentialLoading()
+                updateTeleportProfile()
+            }
             .onChange(of: operations.connectionTestFailure) { failure in
                 if failure?.requiresCloudflareOverrides == true {
                     showCloudflareOverrides = true
@@ -638,7 +645,10 @@ struct ServerFormSheet: View {
     @ViewBuilder
     private var authSection: some View {
         Section {
-            Picker("Transport", selection: $form.transportSelection) {
+            Picker("Transport", selection: Binding(
+                get: { form.transportSelection },
+                set: { form.selectTransport($0) }
+            )) {
                 if form.transportSelection == .unsupported {
                     Text("Unsupported connection type").tag(ServerTransportSelection.unsupported)
                 }
@@ -856,6 +866,13 @@ struct ServerFormSheet: View {
                 Text(message)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+            if let teleportModel,
+               teleportModel.profile == activeTeleportProfile,
+               teleportModel.discovery?.authenticationType == "local",
+               teleportModel.discovery?.webAuthnConfigured == true,
+               let teleportAccess {
+                TeleportDeviceCredentialControls(service: teleportAccess, model: teleportModel)
             }
         } header: {
             sectionHeader("Security")

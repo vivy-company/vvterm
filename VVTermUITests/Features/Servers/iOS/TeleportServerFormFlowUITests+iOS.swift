@@ -27,19 +27,16 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         draftName.typeText("My Teleport server\n")
         let controls = app.staticTexts["vvterm.teleport.credential.controls"]
         reveal(controls, in: app, scrollingUp: true)
-        app.buttons["vvterm.teleport.credential.use"].tap()
-        XCTAssertTrue(app.secureTextFields["vvterm.teleport.credential.password"].waitForExistence(timeout: 5))
+        app.buttons["Teleport verification"].tap()
 
         for _ in 0..<2 {
-            app.buttons["vvterm.teleport.credential.manage"].tap()
             let setup = app.buttons["vvterm.teleport.credential.setup"]
             reveal(setup, in: app, scrollingUp: true)
             XCTAssertTrue(setup.isEnabled)
             setup.tap()
             let credentialName = app.textFields["vvterm.teleport.credential.name"]
             XCTAssertTrue(credentialName.waitForExistence(timeout: 5))
-            XCTAssertFalse(app.secureTextFields["vvterm.teleport.credential.password"].exists)
-            XCTAssertFalse(app.buttons["vvterm.teleport.credential.use"].exists)
+            XCTAssertFalse(app.secureTextFields["vvterm.teleport.password"].exists)
             XCTAssertTrue(draftName.exists, "Setup must stay inside Add Server")
             XCTAssertEqual(draftName.value as? String, "My Teleport server")
             let enable = app.buttons["vvterm.teleport.credential.enable"]
@@ -85,6 +82,9 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         XCTAssertTrue(password.waitForExistence(timeout: 5))
         XCTAssertTrue(code.exists)
         XCTAssertFalse(app.buttons["vvterm.teleport.credential.remove"].exists)
+        password.tap()
+        password.typeText("ui-only-password\n")
+        let filledPassword = password.value as? String
         let screenshot = XCTAttachment(screenshot: app.screenshot())
         screenshot.name = "Compact sign-in"
         screenshot.lifetime = .keepAlways
@@ -98,19 +98,21 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         app.buttons["Passkey or security key"].tap()
         XCTAssertTrue(code.waitForNonExistence(timeout: 5))
         XCTAssertTrue(password.exists)
+        XCTAssertEqual(password.value as? String, filledPassword)
 
-        let useBiometrics = app.buttons["vvterm.teleport.credential.use"]
-        reveal(useBiometrics, in: app, scrollingUp: true)
-        useBiometrics.tap()
-        let devicePassword = app.secureTextFields["vvterm.teleport.credential.password"]
-        XCTAssertTrue(devicePassword.waitForExistence(timeout: 5))
-        XCTAssertFalse(password.exists)
+        method.tap()
+        app.buttons["This device"].tap()
+        XCTAssertTrue(password.exists)
+        XCTAssertEqual(password.value as? String, filledPassword)
         XCTAssertFalse(code.exists)
-        app.buttons["Use another method"].tap()
+        XCTAssertEqual(app.secureTextFields.count, 1)
+        XCTAssertTrue(app.buttons["vvterm.teleport.signIn"].isEnabled)
+        method.tap()
+        app.buttons["Authenticator code"].tap()
         reveal(code, in: app, scrollingUp: false)
         XCTAssertTrue(code.exists)
         XCTAssertTrue(password.exists)
-        XCTAssertFalse(devicePassword.exists)
+        XCTAssertEqual(password.value as? String, filledPassword)
         XCTAssertTrue((code.value as? String) == code.placeholderValue || (code.value as? String) == "")
     }
 
@@ -186,7 +188,7 @@ final class TeleportServerFormFlowUITests: XCTestCase {
     private func checkLocalCredentialRecovery(in app: XCUIApplication) {
         let controls = app.staticTexts["vvterm.teleport.credential.controls"]
         reveal(controls, in: app, scrollingUp: false)
-        let manage = app.buttons["vvterm.teleport.credential.manage"]
+        let manage = app.buttons["Teleport verification"]
         manage.tap()
         let setup = app.buttons["vvterm.teleport.credential.setup"]
         XCTAssertTrue(setup.waitForExistence(timeout: 5))
