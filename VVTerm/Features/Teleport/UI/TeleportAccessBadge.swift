@@ -101,8 +101,5 @@ struct TeleportAccessBadge: View {
             .font(.caption2)
             .foregroundStyle(color)
             .lineLimit(1)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(color.opacity(0.10), in: Capsule())
     }
 }
