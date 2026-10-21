@@ -167,6 +167,10 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         let row = app.descendants(matching: .any)["vvterm.serverDuplicateTest.row"]
         reveal(row, in: app, scrollingUp: true)
         XCTAssertTrue(row.waitForExistence(timeout: 5))
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Teleport row divider"
+        screenshot.lifetime = .keepAlways
+        self.add(screenshot)
         row.press(forDuration: 1)
         app.buttons["Edit"].tap()
         XCTAssertTrue(app.navigationBars["Edit Server"].waitForExistence(timeout: 10))

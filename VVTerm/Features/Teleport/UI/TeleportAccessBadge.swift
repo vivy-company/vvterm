@@ -13,12 +13,13 @@ struct TeleportAccessBadge: View {
     }
 
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.locale) private var locale
     @State private var access = Access.checking
 
     var body: some View {
         Group {
-            if scenePhase == .active {
-                TimelineView(.periodic(from: .now, by: 60)) { context in
+            if scenePhase == .active, case .expires = access {
+                TimelineView(.periodic(from: .now, by: 1)) { context in
                     badge(at: context.date)
                 }
             } else {
@@ -67,12 +68,28 @@ struct TeleportAccessBadge: View {
         case .expires(let expiry):
             if expiry <= now {
                 badgeLabel("Access expired · Sign in", icon: "clock.badge.exclamationmark", color: .orange)
+            } else if let remaining = Self.remainingTime(expiry.timeIntervalSince(now), locale: locale) {
+                badgeLabel(Text(remaining), icon: "clock", color: .secondary)
+                    .accessibilityLabel(Text("Access expires in \(remaining)"))
             } else {
-                badgeLabel(Text("Expires in \(expiry, style: .relative)"), icon: "clock", color: .secondary)
+                badgeLabel("Access unavailable", icon: "exclamationmark.circle", color: .secondary)
             }
         case .unavailable:
             badgeLabel("Access unavailable", icon: "exclamationmark.circle", color: .secondary)
         }
+    }
+
+    static func remainingTime(_ seconds: TimeInterval, locale: Locale = .autoupdatingCurrent) -> String? {
+        // Duration stores whole seconds as Int64. Reject invalid dates before conversion.
+        guard seconds.isFinite, seconds > 0, seconds < Double(Int64.max) else { return nil }
+        let units: Set<Duration.UnitsFormatStyle.Unit> = seconds < 60 ? [.seconds] : [.hours, .minutes]
+        return Duration.seconds(seconds).formatted(
+            .units(
+                allowed: units,
+                width: .narrow,
+                fractionalPart: .hide(rounded: seconds < 60 ? .up : .down)
+            ).locale(locale)
+        )
     }
 
     private func badgeLabel(_ title: LocalizedStringKey, icon: String, color: Color) -> some View {

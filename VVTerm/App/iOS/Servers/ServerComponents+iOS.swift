@@ -54,6 +54,7 @@ struct ServerListRow: View {
                         .fontWeight(.medium)
                         .lineLimit(isSidebar ? 1 : nil)
                         .foregroundStyle(isLocked ? .secondary : .primary)
+                        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
 
                     HStack(spacing: 4) {
                         if server.connectionMode == .teleport {
