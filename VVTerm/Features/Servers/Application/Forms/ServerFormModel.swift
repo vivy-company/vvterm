@@ -254,8 +254,25 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         }
     }
 
+    mutating func selectTransport(_ selection: ServerTransportSelection) {
+        guard selection != transportSelection else { return }
+        if selection == .teleport || transportSelection == .teleport {
+            password = ""
+        }
+        transportSelection = selection
+    }
+
     mutating func apply(_ credentials: ServerCredentials, for server: Server) {
-        if server.connectionMode != .tailscale && server.connectionMode != .teleport {
+        if server.connectionMode == .teleport || transportSelection == .teleport {
+            guard server.connectionMode == .teleport,
+                  transportSelection == .teleport,
+                  credentials.serverId == server.id,
+                  let profile = server.teleportConfiguration?.profile,
+                  teleportProfile == profile else { return }
+            password = credentials.password ?? ""
+            return
+        }
+        if server.connectionMode != .tailscale {
             switch server.authMethod {
             case .password:
                 password = credentials.password ?? ""
@@ -323,7 +340,12 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     func makeCredentials(serverID: UUID) -> ServerCredentials {
         var credentials = ServerCredentials(serverId: serverID)
 
-        guard transportSelection != .tailscale && transportSelection != .teleport else {
+        if transportSelection == .teleport {
+            credentials.password = password.isEmpty ? nil : password
+            return credentials
+        }
+
+        guard transportSelection != .tailscale else {
             return credentials
         }
 

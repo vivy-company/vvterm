@@ -33,12 +33,13 @@ final class KeychainManager {
         init(credentials: ServerCredentials, server: Server) {
             serverID = server.id
             binding = ServerCredentialBinding(server: server)
-            password = credentials.password
-            privateKey = credentials.privateKey
-            publicKey = credentials.publicKey
-            passphrase = credentials.passphrase
-            cloudflareClientID = credentials.cloudflareClientID
-            cloudflareClientSecret = credentials.cloudflareClientSecret
+            let isTeleport = server.connectionMode == .teleport
+            password = isTeleport && credentials.password?.isEmpty == true ? nil : credentials.password
+            privateKey = isTeleport ? nil : credentials.privateKey
+            publicKey = isTeleport ? nil : credentials.publicKey
+            passphrase = isTeleport ? nil : credentials.passphrase
+            cloudflareClientID = isTeleport ? nil : credentials.cloudflareClientID
+            cloudflareClientSecret = isTeleport ? nil : credentials.cloudflareClientSecret
         }
     }
 
@@ -184,14 +185,22 @@ final class KeychainManager {
 
         logger.info("Getting credentials for server \(server.id.uuidString), authMethod: \(String(describing: server.authMethod))")
 
-        if server.connectionMode == .tailscale || server.connectionMode == .teleport {
+        if server.connectionMode == .teleport {
+            credentials.password = try getTeleportPassword(for: server)
+            return credentials
+        }
+
+        if server.connectionMode == .tailscale {
             logger.info("Server \(server.id.uuidString) uses profile authentication; skipping SSH credential lookup")
             return credentials
         }
 
         let resolution = try credentialStorageResolution(for: server)
+        if resolution?.binding?.connectionMode == .teleport {
+            return credentials
+        }
         let scope = resolution?.scope ?? preferredStorageScope
-        if resolution?.bindingMatches == false {
+        if let resolution, resolution.binding != ServerCredentialBinding(server: server) {
             try bindCredentials(to: server, scope: scope)
         }
 
@@ -232,7 +241,18 @@ final class KeychainManager {
         }
 
         let scope = preferredStorageScope
-        if server.connectionMode != .tailscale && server.connectionMode != .teleport {
+        if server.connectionMode == .teleport {
+            try replaceCredentialBundle(
+                CredentialBundle(credentials: credentials, server: server),
+                for: server,
+                scope: scope
+            )
+            if !isSyncEnabled() {
+                try offlineChanges.record(.updated, for: .server(server.id))
+            }
+            return
+        }
+        if server.connectionMode != .tailscale {
             switch server.authMethod {
             case .password:
                 if let password = credentials.password {
@@ -275,6 +295,7 @@ final class KeychainManager {
         }
 
         try bindCredentials(to: server, scope: scope)
+        try store.delete(teleportCredentialsKey(for: server.id), scope: scope)
         if !isSyncEnabled() {
             try offlineChanges.record(.updated, for: .server(server.id))
         }
@@ -440,23 +461,7 @@ final class KeychainManager {
         if !isSyncEnabled() {
             try offlineChanges.record(.deleted, for: .server(serverId))
         }
-        let passwordKey = passwordKey(for: serverId)
-        let keyKey = sshKeyKey(for: serverId)
-        let passphraseKey = sshPassphraseKey(for: serverId)
-        let publicKeyKey = sshPublicKeyKey(for: serverId)
-        let cloudflareIDKey = cloudflareClientIDKey(for: serverId)
-        let cloudflareSecretKey = cloudflareClientSecretKey(for: serverId)
-        let bindingKey = credentialBindingKey(for: serverId)
-
-        for key in [
-            passwordKey,
-            keyKey,
-            passphraseKey,
-            publicKeyKey,
-            cloudflareIDKey,
-            cloudflareSecretKey,
-            bindingKey
-        ] {
+        for key in credentialBundleKeys(for: serverId) {
             try deleteCredentialKey(key, scopes: KeychainStorageScope.allCases)
         }
 
@@ -493,6 +498,10 @@ final class KeychainManager {
         "server.\(serverId.uuidString).credential-binding.v1"
     }
 
+    private func teleportCredentialsKey(for serverId: UUID) -> String {
+        "server.\(serverId.uuidString).teleport-credentials.v1"
+    }
+
     private func credentialKeys(for serverId: UUID) -> [String] {
         [
             passwordKey(for: serverId),
@@ -500,7 +509,8 @@ final class KeychainManager {
             sshPassphraseKey(for: serverId),
             sshPublicKeyKey(for: serverId),
             cloudflareClientIDKey(for: serverId),
-            cloudflareClientSecretKey(for: serverId)
+            cloudflareClientSecretKey(for: serverId),
+            teleportCredentialsKey(for: serverId)
         ]
     }
 
@@ -516,7 +526,11 @@ final class KeychainManager {
         for server: Server,
         scope: KeychainStorageScope
     ) throws -> CredentialBundle {
+        if let stored = try storedTeleportCredentials(for: server.id, scope: scope) { return stored }
         var credentials = ServerCredentials(serverId: server.id)
+        if server.connectionMode == .teleport {
+            return CredentialBundle(credentials: credentials, server: server)
+        }
         credentials.password = try getPassword(for: server.id, scope: scope)
         if let key = try getSSHKey(for: server.id, scope: scope) {
             credentials.privateKey = key.key
@@ -535,6 +549,18 @@ final class KeychainManager {
         for server: Server,
         scope: KeychainStorageScope
     ) throws {
+        if bundle.binding.connectionMode == .teleport {
+            let key = teleportCredentialsKey(for: server.id)
+            let data = try JSONEncoder().encode(bundle)
+            try store.set(data, forKey: key, scope: scope)
+            guard try store.get(key, scope: scope) == data else {
+                throw KeychainError.copyVerificationFailed
+            }
+            for oldKey in credentialBundleKeys(for: server.id) where oldKey != key {
+                try store.delete(oldKey, scope: scope)
+            }
+            return
+        }
         for key in credentialBundleKeys(for: server.id) {
             try store.delete(key, scope: scope)
         }
@@ -586,7 +612,7 @@ final class KeychainManager {
 
     private struct CredentialStorageResolution {
         let scope: KeychainStorageScope
-        let bindingMatches: Bool
+        let binding: ServerCredentialBinding?
     }
 
     private var preferredStorageScope: KeychainStorageScope {
@@ -597,6 +623,36 @@ final class KeychainManager {
         isSyncEnabled() ? [.iCloud, .deviceOnly] : [.deviceOnly]
     }
 
+    private func getTeleportPassword(for server: Server) throws -> String? {
+        guard let profile = server.teleportConfiguration?.profile else { return nil }
+        for scope in readScopes {
+            guard let bundle = try storedTeleportCredentials(for: server.id, scope: scope) else { continue }
+            // A cloud record also owns a cleared password. Never fall back to an older device copy.
+            guard bundle.binding.transportConfiguration?.teleport?.profile.identifier == profile.identifier else {
+                return nil
+            }
+            return bundle.password
+        }
+        return nil
+    }
+
+    private func storedTeleportCredentials(
+        for serverID: UUID, scope: KeychainStorageScope
+    ) throws -> CredentialBundle? {
+        guard let data = try store.get(teleportCredentialsKey(for: serverID), scope: scope) else { return nil }
+        let bundle: CredentialBundle
+        do {
+            bundle = try JSONDecoder().decode(CredentialBundle.self, from: data)
+        } catch {
+            throw KeychainError.decodingFailed
+        }
+        guard bundle.serverID == serverID, bundle.binding.connectionMode == .teleport,
+              bundle.binding.authMethod == nil, bundle.binding.transportConfiguration?.teleport != nil else {
+            throw KeychainError.credentialServerMismatch
+        }
+        return bundle
+    }
+
     private func credentialStorageResolution(
         for server: Server
     ) throws -> CredentialStorageResolution? {
@@ -604,6 +660,9 @@ final class KeychainManager {
         var firstStoredResolution: CredentialStorageResolution?
 
         for scope in readScopes {
+            if let bundle = try storedTeleportCredentials(for: server.id, scope: scope) {
+                return CredentialStorageResolution(scope: scope, binding: bundle.binding)
+            }
             let hasCredentials = try credentialKeys(for: server.id).contains { key in
                 try store.contains(key, scope: scope)
             }
@@ -623,9 +682,9 @@ final class KeychainManager {
             }
             let resolution = CredentialStorageResolution(
                 scope: scope,
-                bindingMatches: storedBinding == currentBinding
+                binding: storedBinding
             )
-            if resolution.bindingMatches {
+            if storedBinding == currentBinding {
                 return resolution
             }
             if firstStoredResolution == nil {
@@ -1071,7 +1130,8 @@ final class KeychainManager {
             ".publickey",
             ".cloudflare.clientid",
             ".cloudflare.clientsecret",
-            ".credential-binding.v1"
+            ".credential-binding.v1",
+            ".teleport-credentials.v1"
         ].contains { key.hasSuffix($0) }
     }
 
