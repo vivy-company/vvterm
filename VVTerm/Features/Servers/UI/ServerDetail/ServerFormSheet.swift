@@ -660,7 +660,7 @@ struct ServerFormSheet: View {
             .accessibilityIdentifier("vvterm.serverForm.transport")
 
             if form.transportSelection == .teleport {
-                TextField("Teleport URL", text: $form.teleportProxyURL, prompt: Text("https://teleport.example.com"))
+                TextField("Teleport address", text: $form.teleportProxyURL, prompt: Text("teleport.example.com"))
                     .accessibilityIdentifier("vvterm.serverForm.teleport.proxy")
                     .autocorrectionDisabled()
                     #if os(iOS)

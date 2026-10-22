@@ -45,6 +45,48 @@ struct ServerFormModelTests {
         #expect(!model.isValid)
     }
 
+    @Test(arguments: [
+        ("proxy.example.test", "https://proxy.example.test"),
+        (" PROXY.EXAMPLE.TEST:443/ ", "https://proxy.example.test"),
+        ("mac-studio.local:18443", "https://mac-studio.local:18443"),
+        ("127.0.0.1:8443", "https://127.0.0.1:8443"),
+        ("[::1]:8443", "https://[::1]:8443"),
+        ("HTTPS://PROXY.EXAMPLE.TEST:443/", "https://proxy.example.test"),
+        ("https://proxy.example.test:8443", "https://proxy.example.test:8443"),
+    ])
+    func teleportProxyInputStoresOneHTTPSOrigin(input: String, expected: String) throws {
+        var model = validTeleportModel()
+        model.teleportProxyURL = input
+
+        #expect(model.isValid)
+        let profile = try #require(model.teleportProfile)
+        #expect(profile.proxyURL == expected)
+        #expect(profile.identifier == (try TeleportProfileConfiguration(
+            proxyURL: expected, account: model.teleportAccount
+        )).identifier)
+        let server = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        #expect(server.teleportConfiguration?.profile.proxyURL == expected)
+    }
+
+    @Test(arguments: [
+        "", "http://proxy.example.test", "ssh://proxy.example.test",
+        "https:proxy.example.test", "https://https://proxy.example.test",
+        "//proxy.example.test", "alice@proxy.example.test",
+        "alice:password@proxy.example.test", "proxy.example.test/path",
+        "proxy.example.test?query", "proxy.example.test#fragment",
+        "proxy.example.test:0", "proxy.example.test:65536", "proxy.example.test:abc",
+        "proxy.example.test:", "proxy.example.test:/", "https://proxy.example.test:",
+        "proxy.example.test:443:8443", "::1", "2001:db8::1",
+    ])
+    func invalidTeleportProxyInputCannotBeSaved(input: String) {
+        var model = validTeleportModel()
+        model.teleportProxyURL = input
+
+        #expect(model.teleportProfile == nil)
+        #expect(model.teleportConfiguration == nil)
+        #expect(!model.isValid)
+    }
+
     @Test
     func teleportPasswordUsesTheSavedServerWithoutSSHCredentials() throws {
         var model = validTeleportModel()

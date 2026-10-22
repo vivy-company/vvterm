@@ -146,7 +146,7 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         reveal(advanced, in: app, scrollingUp: true)
         advanced.tap()
         let values = [
-            ("vvterm.serverForm.teleport.proxy", "https://teleport.example.invalid"),
+            ("vvterm.serverForm.teleport.proxy", "teleport.example.invalid"),
             ("vvterm.serverForm.teleport.account", "test-user"),
             ("vvterm.serverForm.teleport.cluster", "root.example.test"),
             ("vvterm.serverForm.teleport.nodeID", "teleport-ui-node"),
@@ -180,7 +180,9 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         for (index, pair) in values.enumerated() {
             let field = app.textFields[pair.0]
             reveal(field, in: app, scrollingUp: index != 0)
-            XCTAssertEqual(field.value as? String, pair.1)
+            let expected = pair.0 == "vvterm.serverForm.teleport.proxy"
+                ? "https://teleport.example.invalid" : pair.1
+            XCTAssertEqual(field.value as? String, expected)
         }
         XCTAssertFalse(app.textFields["vvterm.serverForm.host"].exists)
         XCTAssertFalse(app.secureTextFields.firstMatch.exists)

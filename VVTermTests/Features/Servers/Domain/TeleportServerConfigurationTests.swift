@@ -26,6 +26,7 @@ struct TeleportServerConfigurationTests {
     }
 
     @Test(arguments: [
+        "proxy.example.test", "proxy.example.test:8443",
         "http://proxy.example.test", "https://alice@proxy.example.test",
         "https://proxy.example.test/path", "https://proxy.example.test?query",
         "https://proxy.example.test#fragment", "https://proxy.example.test:0",

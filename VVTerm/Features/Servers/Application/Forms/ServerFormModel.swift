@@ -175,8 +175,12 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     var teleportProfile: TeleportProfileConfiguration? {
-        try? TeleportProfileConfiguration(
-            proxyURL: teleportProxyURL,
+        let input = teleportProxyURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        // URLComponents can discard an empty port when it normalizes the host.
+        guard !input.hasSuffix(":"), !input.hasSuffix(":/") else { return nil }
+        let origin = input.contains("://") ? input : "https://" + input
+        return try? TeleportProfileConfiguration(
+            proxyURL: origin,
             account: teleportAccount,
             connectorID: teleportConnectorID
         )

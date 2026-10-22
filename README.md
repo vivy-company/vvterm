@@ -128,8 +128,11 @@ Chromium fixture download did not complete. Physical keys, system browser
 approval, and real provider SSO still need live checks; see TeleportKit's
 validation notes.
 
-To add a server, select **Teleport**, enter its URL and your Teleport username,
-then tap **Continue**. Choose a sign-in method and sign in. Only that method's
+To add a server, select **Teleport**, enter its domain and your Teleport username,
+then tap **Continue**. A port is optional, for example `teleport.example.com:8443`.
+VVTerm adds HTTPS when no scheme is entered; explicit HTTPS also works. HTTP,
+user information, non-root paths, query strings, and fragments are rejected.
+Choose a sign-in method and sign in. Only that method's
 fields appear. Then choose the server and SSH login. A single available choice
 fills an empty field; existing choices stay. Manual IDs and an optional SSO
 connector are under **Advanced**. The server list shows local access expiry and a
