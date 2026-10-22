@@ -17,6 +17,110 @@ private final class TeleportSignOutRecorder {
 
 @MainActor
 struct TeleportAccessServiceTests {
+    @Test(arguments: ["oidc", "saml", "github", "unknown"])
+    func nonlocalAccountsAreRejected(authenticationType: String) {
+        let discovery = TeleportDiscovery(
+            clusterName: "root", serverVersion: "18.11.4", authenticationType: authenticationType,
+            secondFactor: "off", connectors: [], webAuthnConfigured: true
+        )
+        #expect(throws: TeleportAccessError.localAccountsOnly) {
+            try TeleportAccessService.requireLocalAccount(discovery)
+        }
+    }
+
+    @Test
+    func localAccountsDoNotRequireAnAppPasswordOrConnector() throws {
+        try TeleportAccessService.requireLocalAccount(TeleportDiscovery(
+            clusterName: "root", serverVersion: "18.11.4", authenticationType: "local",
+            secondFactor: "webauthn", connectors: [], webAuthnConfigured: true
+        ))
+        let name = TeleportAccessService.deviceCredentialName()
+        #expect(name.hasPrefix("VVTerm-"))
+        #expect(name.utf8.count <= 30)
+    }
+
+    @Test(arguments: [
+        TeleportError.accessDenied, .biometricsUnavailable, .deviceCredentialStorage,
+        .deviceCredentialExists, .unsupportedPolicy(.hardwareKey),
+    ])
+    func failedDeviceApprovalDoesNotStartBrowserSetup(error: TeleportError) async throws {
+        let calls = TeleportAuthenticationCalls()
+        do {
+            _ = try await TeleportAccessService.authenticate(
+                withDeviceKey: { throw error },
+                registerDeviceKey: {
+                    await calls.record("registration")
+                    throw TeleportError.invalidResponse("unexpected registration")
+                }
+            )
+            Issue.record("The native failure must reach the caller")
+        } catch let actual as TeleportError {
+            #expect(actual == error)
+        }
+        #expect(await calls.values == [])
+    }
+
+    @Test
+    func cancellationDoesNotStartBrowserSetup() async throws {
+        let calls = TeleportAuthenticationCalls()
+        let task = Task {
+            try await TeleportAccessService.authenticate(
+                withDeviceKey: {
+                    withUnsafeCurrentTask { $0?.cancel() }
+                    throw TeleportError.deviceCredentialMissing
+                },
+                registerDeviceKey: {
+                    await calls.record("registration")
+                    throw TeleportError.invalidResponse("unexpected registration")
+                }
+            )
+        }
+        do {
+            _ = try await task.value
+            Issue.record("Cancellation must stop setup")
+        } catch is CancellationError {}
+        #expect(await calls.values == [])
+    }
+
+    @Test
+    func failedSetupIsReportedWithoutDeletingOrRetryingTheKey() async throws {
+        let calls = TeleportAuthenticationCalls()
+        do {
+            _ = try await TeleportAccessService.authenticate(
+                withDeviceKey: { throw TeleportError.deviceCredentialMissing },
+                registerDeviceKey: {
+                    await calls.record("registration")
+                    throw TeleportError.deviceCredentialExists
+                }
+            )
+            Issue.record("Setup failure must reach the caller")
+        } catch TeleportError.deviceCredentialExists {}
+        #expect(await calls.values == ["registration"])
+    }
+
+    #if os(macOS)
+    @Test(arguments: [false, true])
+    func nativeLoginOrMissingKeySetupReturnsTheCompleteIdentity(missingKey: Bool) async throws {
+        let fixture = try await Task.detached { try TeleportIdentityFixture() }.value
+        let calls = TeleportAuthenticationCalls()
+        let result = try await TeleportAccessService.authenticate(
+            withDeviceKey: {
+                await calls.record("native")
+                if missingKey { throw TeleportError.deviceCredentialMissing }
+                return fixture.identity
+            },
+            registerDeviceKey: {
+                await calls.record("registration")
+                return fixture.identity
+            }
+        )
+        #expect(result.username == fixture.identity.username)
+        let returnedCertificate = result.sshCertificateOpenSSH == fixture.identity.sshCertificateOpenSSH
+        #expect(returnedCertificate)
+        #expect(await calls.values == (missingKey ? ["native", "registration"] : ["native"]))
+    }
+    #endif
+
     @Test
     func missingIdentityFailsBeforeAnyNodeConnection() async throws {
         let keychain = KeychainStore(service: "test.teleport", backing: InMemoryKeychainStoreBacking())
@@ -81,4 +185,9 @@ struct TeleportAccessServiceTests {
             didSignOut: { recorder?.profileIDs.append($0) }
         )
     }
+}
+
+private actor TeleportAuthenticationCalls {
+    private(set) var values: [String] = []
+    func record(_ value: String) { values.append(value) }
 }

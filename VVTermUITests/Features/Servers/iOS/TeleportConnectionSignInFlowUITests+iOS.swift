@@ -5,22 +5,16 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
     @MainActor
-    func testExpiredAccessOpensSignInWithSavedPasswordAndCancelStopsConnection() {
+    func testExpiredAccessOpensSignInWithoutPasswordAndCancelStopsConnection() {
         let app = launchHarness()
         defer { app.terminate() }
         openSignIn(in: app)
 
-        let password = app.secureTextFields["vvterm.teleport.password"]
-        XCTAssertTrue(password.waitForExistence(timeout: 5))
         let signIn = app.buttons["vvterm.teleport.signIn"]
-        let passwordLoaded = XCTNSPredicateExpectation(
-            predicate: NSPredicate { _, _ in signIn.isEnabled }, object: nil
-        )
-        XCTAssertEqual(XCTWaiter.wait(for: [passwordLoaded], timeout: 5), .completed)
-        XCTAssertNotEqual(password.value as? String, "Password")
-        XCTAssertFalse((password.value as? String ?? "").isEmpty)
+        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
         XCTAssertTrue(signIn.isEnabled)
-        XCTAssertTrue(app.secureTextFields["vvterm.teleport.otp"].exists)
+        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
+        XCTAssertFalse(app.descendants(matching: .any)["vvterm.teleport.signInMethod"].exists)
         XCTAssertEqual(app.textFields.count, 0, "Renewal must not edit the saved server")
         XCTAssertFalse(app.buttons["vvterm.teleport.node"].exists)
         XCTAssertFalse(app.buttons["vvterm.teleport.login"].exists)
@@ -66,7 +60,18 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
     @MainActor
     private func openSignIn(in app: XCUIApplication) {
         let connect = app.buttons["vvterm.teleport.renewalTest.connect"]
-        XCTAssertTrue(connect.waitForExistence(timeout: 10))
+        let hasConnect = connect.waitForExistence(timeout: 10)
+        if !hasConnect {
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "Teleport renewal launch failure"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            let hierarchy = XCTAttachment(string: app.debugDescription)
+            hierarchy.name = "Teleport renewal launch hierarchy"
+            hierarchy.lifetime = .keepAlways
+            add(hierarchy)
+        }
+        XCTAssertTrue(hasConnect)
         connect.tap()
         XCTAssertTrue(app.navigationBars["Sign in to Teleport"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["Renewal UI server"].exists)

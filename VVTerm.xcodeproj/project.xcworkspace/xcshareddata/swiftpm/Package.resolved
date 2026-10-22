@@ -113,7 +113,7 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/wiedymi/swift-teleport",
       "state" : {
-        "revision" : "6bec063ff2c2cdc487104953025ad936d2c0e0dc"
+        "revision" : "ebf8c4a9755327a8b65408c2ab3bb0bcbb72971e"
       }
     },
     {

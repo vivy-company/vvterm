@@ -77,7 +77,7 @@ struct TeleportLoginExclusionTests {
         let keychain = KeychainStore(service: "test.teleport.login", backing: InMemoryKeychainStoreBacking())
         let service = makeService(keychain: keychain)
         let profile = try TeleportProfileConfiguration(proxyURL: "https://PROXY.example.test:443/", account: "alice")
-        let equivalent = try TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: " alice ", connectorID: "other")
+        let equivalent = try TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: " alice ")
         #expect(profile.identifier == equivalent.identifier)
         let pause = TeleportLoginPause()
         let first = Task {

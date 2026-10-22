@@ -10,9 +10,8 @@ struct TeleportDeviceCredentialUITestControls: View {
     private let service: TeleportAccessService
     private let content: Content
     @StateObject private var model: TeleportProfileModel
-    @State private var password = ""
 
-    init(signedIn: Bool = false, content: Content = .device) {
+    init(content: Content = .device) {
         self.content = content
         let service = TeleportAccessService(
             keychain: KeychainStore(service: "test.teleport.credential.ui", backing: UnusedKeychain()),
@@ -24,16 +23,12 @@ struct TeleportDeviceCredentialUITestControls: View {
             let profile = try TeleportProfileConfiguration(proxyURL: "https://proxy.example.invalid", account: "test-user")
             _model = StateObject(wrappedValue: TeleportProfileModel(
                 profile: profile, service: service,
-                summary: signedIn ? TeleportAccessSummary(
-                    account: profile.account, clusterName: "test-cluster",
-                    validBefore: .distantFuture, allowedLogins: ["test-login"]
-                ) : nil,
+                summary: nil,
                 discovery: TeleportDiscovery(
                     clusterName: "test-cluster", serverVersion: "18.11.4",
                     authenticationType: "local", secondFactor: "otp", connectors: [],
-                    webAuthnConfigured: content == .signIn
-                ),
-                credentialResult: signedIn ? .codeRequired : nil
+                    webAuthnConfigured: true
+                )
             ))
         } catch {
             preconditionFailure("Invalid fixed Teleport UI profile")
@@ -44,11 +39,11 @@ struct TeleportDeviceCredentialUITestControls: View {
         switch content {
         case .device:
             Section("Security") {
-                TeleportDeviceCredentialControls(service: service, model: model)
+                TeleportDeviceCredentialControls(model: model)
             }
         case .signIn:
             TeleportProfileSection(
-                model: model, service: service, password: $password, clusterName: .constant(""),
+                model: model, service: service, clusterName: .constant(""),
                 nodeID: .constant(""), login: .constant(""), onSelectNode: { _ in }
             )
         }
@@ -90,9 +85,7 @@ struct TeleportCredentialSetupFormUITestFixture: View {
                     TextField("Name", text: $name)
                         .accessibilityIdentifier("vvterm.teleport.setupTest.draftName")
                 }
-                TeleportDeviceCredentialUITestControls(
-                    signedIn: !testsSignIn, content: testsSignIn ? .signIn : .device
-                )
+                TeleportDeviceCredentialUITestControls(content: testsSignIn ? .signIn : .device)
             }
             .navigationTitle("Add Server")
             .toolbar {

@@ -88,7 +88,7 @@ struct ServerFormModelTests {
     }
 
     @Test
-    func teleportPasswordUsesTheSavedServerWithoutSSHCredentials() throws {
+    func teleportNeverCreatesOrLoadsOrdinaryCredentials() throws {
         var model = validTeleportModel()
         model.password = "test-password"
         model.sshKey = "unused-key"
@@ -97,7 +97,7 @@ struct ServerFormModelTests {
         let server = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
         let credentials = model.makeCredentials(serverID: server.id)
         #expect(server.authMethod == nil)
-        #expect(credentials.password == "test-password")
+        #expect(credentials.password == nil)
         #expect(credentials.privateKey == nil)
         #expect(credentials.passphrase == nil)
         #expect(credentials.cloudflareClientSecret == nil)
@@ -105,30 +105,12 @@ struct ServerFormModelTests {
         var reopened = validTeleportModel()
         reopened.teleportNodeID = "other-node"
         reopened.username = "other-login"
-        reopened.apply(credentials, for: server)
-        #expect(reopened.password == "test-password")
+        reopened.apply(ServerCredentials(serverId: server.id, password: "old-password"), for: server)
+        #expect(reopened.password.isEmpty)
         #expect(reopened.sshKey.isEmpty)
-        reopened.password = ""
-        #expect(reopened.makeCredentials(serverID: server.id).password == nil)
-    }
-
-    @Test(arguments: TeleportPasswordChange.allCases)
-    func oldTeleportPasswordDoesNotReplaceAnEditedAccount(change: TeleportPasswordChange) {
-        var model = validTeleportModel()
-        let server = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
-        switch change {
-        case .proxy: model.teleportProxyURL = "https://other.example.test"
-        case .port: model.teleportProxyURL = "https://proxy.example.test:8443"
-        case .account: model.teleportAccount = "bob"
-        case .accountCase: model.teleportAccount = "Alice"
-        case .connector: model.teleportConnectorID = "other-connector"
-        case .transport: model.selectTransport(.standard)
-        }
-        model.password = "new-input"
-
-        model.apply(ServerCredentials(serverId: server.id, password: "old-password"), for: server)
-
-        #expect(model.password == "new-input")
+        reopened.selectTransport(.standard)
+        reopened.apply(ServerCredentials(serverId: server.id, password: "old-password"), for: server)
+        #expect(reopened.password.isEmpty)
     }
 
     @Test
@@ -148,8 +130,6 @@ struct ServerFormModelTests {
         model.selectTransport(.mosh)
         #expect(model.password == "ssh-password")
     }
-
-    enum TeleportPasswordChange: CaseIterable { case proxy, port, account, accountCase, connector, transport }
 
     @Test
     func teleportProfileChangesInvalidateConnectionResultsAndSystemDetection() {

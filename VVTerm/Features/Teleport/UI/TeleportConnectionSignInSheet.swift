@@ -4,23 +4,21 @@ struct TeleportConnectionSignInSheet: View {
     let request: TeleportConnectionSignInCoordinator.Request
     let coordinator: TeleportConnectionSignInCoordinator
     let service: TeleportAccessService
-    let credentials: any ServerCredentialRepository
+    private let startsAutomatically: Bool
     @StateObject private var model: TeleportProfileModel
     @EnvironmentObject private var appLock: AppLockManager
-    @State private var password = ""
-    @State private var passwordLoadFailed = false
 
     init(
         request: TeleportConnectionSignInCoordinator.Request,
         coordinator: TeleportConnectionSignInCoordinator,
         service: TeleportAccessService,
-        credentials: any ServerCredentialRepository,
-        model: TeleportProfileModel
+        model: TeleportProfileModel,
+        startsAutomatically: Bool = true
     ) {
         self.request = request
         self.coordinator = coordinator
         self.service = service
-        self.credentials = credentials
+        self.startsAutomatically = startsAutomatically
         _model = StateObject(wrappedValue: model)
     }
 
@@ -35,17 +33,16 @@ struct TeleportConnectionSignInSheet: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
-                if passwordLoadFailed {
-                    Text("Saved password could not be read. Enter it to sign in.")
-                        .foregroundStyle(.orange)
+                Section {
+                    TeleportSignInButton(service: service, model: model, startsAutomatically: startsAutomatically)
+                        .disabled(model.isBusy)
+                    if model.isBusy {
+                        ProgressView("Signing in…")
+                    }
+                    if let message = model.errorMessage {
+                        Text(message).foregroundStyle(.red)
+                    }
                 }
-                TeleportProfileSection(
-                    model: model, service: service, password: $password,
-                    clusterName: .constant(request.server.teleportConfiguration?.clusterName ?? ""),
-                    nodeID: .constant(request.server.teleportConfiguration?.nodeID ?? ""),
-                    login: .constant(request.server.username), onSelectNode: { _ in },
-                    showsServerSelection: false
-                )
                 if let summary = model.summary, summary.validBefore > Date(),
                    !TeleportConnectionSignInCoordinator.isUsable(summary, for: request.server, at: Date()) {
                     Text("This access does not match the saved cluster or SSH login.")
@@ -63,18 +60,6 @@ struct TeleportConnectionSignInSheet: View {
         #if os(macOS)
         .frame(minWidth: 400, idealWidth: 460, minHeight: 340)
         #endif
-        .task {
-            do {
-                let saved = try credentials.getCredentials(for: request.server)
-                if saved.isAuthorized(for: request.server) {
-                    password = saved.password ?? ""
-                } else {
-                    passwordLoadFailed = true
-                }
-            }
-            catch { passwordLoadFailed = true }
-            if model.discovery == nil { model.load() }
-        }
         .task(id: model.operation) {
             guard model.operation == .idle,
                   TeleportConnectionSignInCoordinator.isUsable(model.summary, for: request.server, at: Date()) else { return }
@@ -87,7 +72,6 @@ struct TeleportConnectionSignInSheet: View {
         }
         .onDisappear {
             model.cancel()
-            password = ""
             coordinator.cancel(request.id)
         }
     }

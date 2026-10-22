@@ -4,7 +4,6 @@ import Foundation
 nonisolated enum TeleportConfigurationError: Error, Equatable {
     case invalidProxyURL
     case invalidAccount
-    case invalidConnector
     case invalidNode
 }
 
@@ -12,9 +11,8 @@ nonisolated enum TeleportConfigurationError: Error, Equatable {
 nonisolated struct TeleportProfileConfiguration: Codable, Hashable, Sendable {
     let proxyURL: String
     let account: String
-    let connectorID: String?
 
-    init(proxyURL: String, account: String, connectorID: String? = nil) throws {
+    init(proxyURL: String, account: String) throws {
         let value = proxyURL.trimmingCharacters(in: .whitespacesAndNewlines)
         guard var components = URLComponents(string: value),
               components.scheme?.lowercased() == "https",
@@ -36,13 +34,8 @@ nonisolated struct TeleportProfileConfiguration: Codable, Hashable, Sendable {
         guard Self.validIdentifier(account) else {
             throw TeleportConfigurationError.invalidAccount
         }
-        let connector = connectorID?.trimmingCharacters(in: .whitespacesAndNewlines)
-        if let connector, !connector.isEmpty, !Self.validIdentifier(connector) {
-            throw TeleportConfigurationError.invalidConnector
-        }
         self.proxyURL = origin
         self.account = account
-        self.connectorID = connector.flatMap { $0.isEmpty ? nil : $0 }
     }
 
     var identifier: String {
@@ -50,14 +43,13 @@ nonisolated struct TeleportProfileConfiguration: Codable, Hashable, Sendable {
         return SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
     }
 
-    private enum CodingKeys: String, CodingKey { case proxyURL, account, connectorID }
+    private enum CodingKeys: String, CodingKey { case proxyURL, account }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         try self.init(
             proxyURL: values.decode(String.self, forKey: .proxyURL),
-            account: values.decode(String.self, forKey: .account),
-            connectorID: values.decodeIfPresent(String.self, forKey: .connectorID)
+            account: values.decode(String.self, forKey: .account)
         )
     }
 

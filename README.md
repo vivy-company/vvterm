@@ -86,23 +86,12 @@ VVTerm supplies its pinned upstream libssh2 engine. The engine has no local
 patches and uses upstream defaults, which disable legacy DSA, SHA-1 SSH
 algorithms, and several old ciphers and encrypted key formats.
 
-Teleport profiles store issued identities only in the device Keychain. Local
-account passwords use the same server credential store as SSH. Save the server
-to keep the password; Cancel keeps the previous saved value. The existing iCloud
-sync setting controls password sync. The password and its account binding share
-one Keychain item, so a partial sync cannot mix accounts. Each password is bound
-to that server's Teleport proxy and account. Changing either clears the draft password.
-Passwords are not shared automatically between entries. Duplicate Server copies
-the password after the normal source-server approval. Proxy,
-account, root cluster, exact node ID, and OS login settings can sync through CloudKit.
-Local server data uses JSON. New transport settings share one versioned
-`transportConfiguration` payload in local data and CloudKit. Each transport keeps
-its own typed settings; adding another transport does not require another CloudKit
-field. Unknown types or versions stay stored and cannot connect as ordinary SSH.
-Released Cloudflare and Eternal Terminal fields retain their existing format.
-Sign-out disconnects this device's sessions for the same proxy and account.
-It does not revoke credentials on the server or other devices. Each profile
-requires trusted HTTPS and a new local sign-in on each device.
+Teleport identities and device keys stay in the device Keychain. VVTerm does not
+store Teleport passwords. Proxy, account, root cluster, node ID, and SSH login can
+sync through CloudKit. Local server data uses JSON. Transport settings use one
+versioned `transportConfiguration` payload, so a new transport does not need a new
+CloudKit field. Unknown types or versions stay stored and cannot connect as SSH.
+Released Cloudflare and Eternal Terminal fields keep their existing format.
 
 The integration is still a draft. Older released VVTerm builds cannot read new
 transport records and can reject a CloudKit server batch that includes them.
@@ -113,90 +102,62 @@ CloudKit schema needs the generic Data field before release. CloudKit stores the
 payload as one Data value; the app decodes its settings. Updates apply to the whole
 payload, like the current server sync.
 
-Local accounts can use a password and TOTP, or a password with browser approval
-from an existing passkey or security key. The latter button appears when the
-proxy advertises WebAuthn. The server still decides whether browser MFA is
-enabled. Browser MFA is separate from GitHub, OIDC, and SAML sign-in; those
-buttons use the advertised SSO connector. Both paths use the system
-authentication browser and device-only identity storage. Native access to saved
-Apple passkeys is not part of this support.
-Browser approval needs a separate passkey or security key registered in Teleport.
-Use the same account in the browser and VVTerm. Start a new sign-in attempt if
-the browser page is old or the app attempt was cancelled.
-The local browser MFA path has callback and protocol unit checks. Its pinned
-Chromium fixture download did not complete. Physical keys, system browser
-approval, and real provider SSO still need live checks; see TeleportKit's
-validation notes.
+VVTerm supports local Teleport accounts only. GitHub, OIDC, and SAML sign-in
+are not available in the app. The generic TeleportKit library keeps those APIs.
 
-To add a server, select **Teleport**, enter its domain and your Teleport username,
-then tap **Continue**. A port is optional, for example `teleport.example.com:8443`.
-VVTerm adds HTTPS when no scheme is entered; explicit HTTPS also works. HTTP,
-user information, non-root paths, query strings, and fragments are rejected.
-Choose a sign-in method and sign in. Only that method's
-fields appear. Then choose the server and SSH login. A single available choice
-fills an empty field; existing choices stay. Manual IDs and an optional SSO
-connector are under **Advanced**. The server list shows local access expiry and a
-distinct Teleport icon. Access status refreshes on display, in the foreground, and
-once per minute while visible. Expiry is never stored in CloudKit.
+To add a server, select **Teleport**, enter its domain and Teleport username,
+then tap **Continue** and **Sign in**. A port is optional, for example
+`teleport.example.com:8443`. VVTerm adds HTTPS when the scheme is absent.
+HTTP, user information, paths, query strings, and fragments are rejected.
+After sign-in, choose the server and SSH login. Manual node IDs are under
+**Advanced**. The list shows local access expiry with a distinct Teleport icon.
+Expiry comes from local certificates and is not stored in CloudKit.
 
-Starting a connection with missing or expired access opens a sign-in sheet.
-It uses that server's saved password after local unlock. Successful sign-in
-continues the connection; Cancel opens no tab. Each window has its own request.
-Reopening a disconnected server and its manual Retry action use the same check.
-Live transports stay open.
-The saved entry and issued account, cluster, SSH login, and expiry are checked
-again before the connection starts. A server edit or deletion cancels the attempt;
-automatic connection-history updates do not.
-This sheet does not edit the server or save a changed password; use the server
-form to save changes. Automatic reconnect does not wait for interactive sign-in.
-Expiry or sign-out after the check can still stop a connection; transport checks
-remain strict.
+First sign-in opens the system browser for approval with an existing Teleport
+passkey or security key. The library then registers a device key. Teleport can
+ask for a second browser approval for device management. The temporary setup
+certificate lasts one minute and stays in memory. Only the normal identity from
+the final native sign-in is stored. Setup needs trusted HTTPS, server support for
+headless and passwordless login, and working Face ID or Touch ID. TOTP alone
+cannot approve this browser setup.
 
-Renewal UI tests use expired in-memory access and a simulated stored login result.
-They check the saved-password field, fixed server details, Cancel, and handoff.
-They do not prove real sign-in, Keychain sync, browser approval, or SSH.
+Setup and the first certificate request can each ask for biometric approval.
+Later sign-ins use Face ID or Touch ID to obtain fresh SSH/TLS certificates.
+Starting or retrying a connection with missing or expired access opens this
+sign-in flow. Cancel stops the connection. The app rechecks the saved entry,
+account, cluster, SSH login, and expiry before connecting. Server edits or deletion
+cancel the attempt; connection-history updates do not. Existing sessions keep
+running. Automatic reconnect does not wait for interactive sign-in.
 
-Local accounts can also set up a device-bound Secure Enclave credential in the
-profile's **Security → Teleport verification** settings. Select **This device**
-under **Verify with** to use it. The saved password is filled like an SSH password.
-Face ID or Touch ID replaces code entry; this is MFA, not passwordless login.
+The device-bound P-256 authentication key is separate from the SSH/TLS private
+key. It stays under the app's identity Keychain service plus `.secure-enclave`,
+in its default signing group. There is no Associated Domains requirement or
+native access to saved Apple passkeys. The browser cannot use this app-owned key.
+Hardware SSH-key and Device Trust policies remain unsupported.
+
+The server's **Security** settings have a deliberate local-key removal action.
+Local removal does not remove Teleport's registered device or revoke certificates.
+Remove a stale entry in Teleport before setup again. Old MFA-only app keys need
+this reset before passwordless use. Device replacement or biometric enrollment
+changes can also require recovery. Keep a working browser passkey or security key.
+Sign-out clears this device's issued access and keeps the device key.
+
 The separate **Require Face ID or Touch ID to open this server** setting protects
-local app access. It does not approve Teleport MFA; both can need a prompt.
-That lock applies to one saved entry. It does not lock the shared account identity;
-another entry can use the same account's valid issued access.
-Setup stays inside the server form. Sign in first, then use a fresh
-one-time code or browser approval from an existing credential to authorize setup.
-Wait for a new authenticator code after login; Teleport rejects a reused code.
-Setup first checks server policy. If a code is required, enter its 6–8 digits
-before you can continue. Servers that require no existing approval need no code.
-The server decides which approval is required. Later sign-in still needs the
-Teleport password, plus Face ID or Touch ID. TeleportKit owns registration,
-WebAuthn, key use, and certificate checks. VVTerm supplies the setup and recovery
-screens, browser, prompt text, and storage settings.
-Sign-out clears issued access and keeps the saved password. To forget it, open
-sign-in, clear the password field, and save the server. Removing the
-local device key keeps the password. Deleting the server removes its password
-through the normal credential store; shared issued access is kept for other entries.
+one saved entry. It does not lock the shared account identity; another entry for
+the same account can use its valid certificates. Local unlock and a new Teleport
+signature can require separate biometric prompts.
 
-The library stores this authentication key under the injected identity Keychain
-service plus `.secure-enclave`, in the app's default signing access group. It is
-device-only and separate from App Lock and SSH/TLS keys. The iOS Face ID usage
-text covers Teleport. Existing Keychain signing settings are used; no Associated
-Domains capability is needed. Biometric enrollment changes or device replacement
-can make the local key unusable. Keep another sign-in method. Local removal does
-not remove the server credential, sign out, or revoke issued access. Remove a
-stale or failed setup entry through Teleport before setup again. Hardware SSH
-key policies and Device Trust remain unsupported.
-This app-owned credential is not saved as an Apple passkey. Use the device
-verification choice for it; the browser cannot use this private key.
+Old Teleport password items are deleted by their exact Keychain key. Ordinary
+SSH credentials stay intact. Cloud cleanup waits while sync is disabled; enabling
+sync removes those old cloud items. No password value is read or copied.
 
-Focused app tests cover transport settings, local and CloudKit storage, node
-selection, cancellation, setup, and recovery. Password tests use memory storage
-to check account binding, partial sync, deletion, and failed-save recovery.
-UI fixtures do not create keys or
-contact a server. Software-key protocol checks passed against Teleport 18.11.4.
-Physical-device checks are still required for Secure Enclave, biometric prompts,
-signed Keychain behavior, actual iCloud password sync, browser MFA, and real-provider SSO.
+Tests cover local-account policy, native-first sign-in, missing-key setup,
+cancellation, certificate binding, storage cleanup, and UI retention. UI fixtures
+use no server or device key and disable automatic authentication. Real-server
+software-key tests are separate from browser approval and Apple hardware checks.
+Secure Enclave, biometric prompts, signed Keychain behavior, full browser setup,
+and app SSH/files still need real-device evidence. See TeleportKit's validation
+notes for the exact checks.
 
 ## Documentation
 

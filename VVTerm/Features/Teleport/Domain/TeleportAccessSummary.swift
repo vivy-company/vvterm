@@ -22,17 +22,17 @@ protocol TeleportBrowserSession: TeleportBrowserPresenter {
     func cancel()
 }
 
-nonisolated enum TeleportAccessError: Error {
+nonisolated enum TeleportAccessError: Error, Equatable {
     case loginInProgress
-    case deviceSetupCodeRequired
+    case localAccountsOnly
 
     static func message(for error: any Error) -> String {
         if let accessError = error as? TeleportAccessError {
             switch accessError {
             case .loginInProgress:
                 return String(localized: "This Teleport profile is signing in. Finish or cancel it, then try again.")
-            case .deviceSetupCodeRequired:
-                return String(localized: "Enter a fresh code from your authenticator app to set up device sign-in. Wait for a new code after login.")
+            case .localAccountsOnly:
+                return String(localized: "VVTerm supports local Teleport accounts only.")
             }
         }
         guard let error = error as? TeleportError else {
@@ -40,13 +40,13 @@ nonisolated enum TeleportAccessError: Error {
         }
         switch error {
         case .oneTimeCodeRequired:
-            return message(for: TeleportAccessError.deviceSetupCodeRequired)
+            return String(localized: "This server requires a sign-in method that VVTerm does not support. Contact your administrator.")
         case .authenticationRequired:
             return String(localized: "Sign in to this Teleport profile before connecting.")
         case .accessDenied, .httpStatus(401), .httpStatus(403):
-            return String(localized: "Teleport denied access. Check the account, code, and node permissions.")
+            return String(localized: "Teleport denied access. Check the account and node permissions.")
         case .unsupportedPolicy(.browserMFA):
-            return String(localized: "Browser approval is not available for this account. Use a password and code, or check your registered passkeys and server settings.")
+            return String(localized: "Browser approval is not available for this account. Check your registered passkeys and server settings.")
         case .unsupportedPolicy, .unsupportedVersion:
             return String(localized: "This Teleport server or policy is not supported. Contact your administrator.")
         case .invalidCertificate:
@@ -56,15 +56,15 @@ nonisolated enum TeleportAccessError: Error {
         case .ambiguousNode:
             return String(localized: "More than one Teleport node has this name. Use its exact node ID.")
         case .secureEnclaveUnavailable:
-            return String(localized: "Secure Enclave is not available. Use another sign-in method.")
+            return String(localized: "Secure Enclave is not available on this device.")
         case .biometricsUnavailable:
-            return String(localized: "Face ID or Touch ID is not available. Check system settings or sign in another way.")
+            return String(localized: "Face ID or Touch ID is not available. Check system settings.")
         case .deviceCredentialMissing:
-            return String(localized: "This device is not set up or its key cannot be used. Use another method, then open Security → Teleport verification.")
+            return String(localized: "This device key cannot be used. Remove it from this device and Teleport, then sign in again.")
         case .deviceCredentialExists:
-            return String(localized: "A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again.")
+            return String(localized: "A device key already exists. Remove it from this device and Teleport, then sign in again.")
         case .deviceCredentialStorage:
-            return String(localized: "Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry.")
+            return String(localized: "Device key storage failed. Check Teleport for a failed setup entry before you try again.")
         default:
             return String(localized: "Teleport connection failed. Check the profile and sign in again.")
         }

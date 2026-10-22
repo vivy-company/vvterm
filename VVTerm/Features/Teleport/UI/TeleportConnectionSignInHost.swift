@@ -33,7 +33,6 @@ struct TeleportConnectionSignInHost: ViewModifier {
                    let profile = request.server.teleportConfiguration?.profile {
                     TeleportConnectionSignInSheet(
                         request: request, coordinator: coordinator, service: service,
-                        credentials: dependencies.credentials,
                         model: TeleportProfileModel(profile: profile, service: service)
                     )
                 } else {

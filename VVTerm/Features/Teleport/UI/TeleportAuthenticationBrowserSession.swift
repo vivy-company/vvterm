@@ -2,8 +2,8 @@ import AuthenticationServices
 import Foundation
 import TeleportKit
 
-/// The package owns the loopback response. This object keeps the system browser
-/// open until the login finishes or the user cancels it.
+/// The package receives authentication results. This object owns the system browser
+/// through login and device approval, until the operation finishes or the user cancels.
 @MainActor
 final class TeleportAuthenticationBrowserSession: NSObject, TeleportBrowserSession {
     private enum State {
@@ -34,14 +34,33 @@ final class TeleportAuthenticationBrowserSession: NSObject, TeleportBrowserSessi
     }
 
     func open(_ url: URL) async throws {
-        try Task.checkCancellation()
-        guard case .ready(let context) = state else {
-            throw TeleportError.invalidConfiguration("browser session has already started")
+        try open(url) { url, completion in
+            ASWebAuthenticationSession(url: url, callbackURLScheme: nil, completionHandler: completion)
         }
-        let session = ASWebAuthenticationSession(url: url, callbackURLScheme: nil) { [weak self] _, error in
+    }
+
+    func open(
+        _ url: URL,
+        makeSession: @MainActor (URL, @escaping ASWebAuthenticationSession.CompletionHandler) -> ASWebAuthenticationSession
+    ) throws {
+        try Task.checkCancellation()
+        let context: PresentationContext
+        switch state {
+        case .ready(let readyContext):
+            context = readyContext
+        case .running(let previous, let previousContext):
+            context = PresentationContext(anchor: previousContext.anchor)
+            // Invalidate the old callback before programmatic cancellation can complete it.
+            state = .ready(context)
+            previous.cancel()
+        case .closed:
+            throw TeleportError.invalidConfiguration("browser session is closed")
+        }
+        let session = makeSession(url) { [weak self, weak context] _, error in
             guard error != nil else { return }
-            Task { @MainActor [weak self] in
-                guard let self, case .running = state else { return }
+            Task { @MainActor [weak self, weak context] in
+                guard let self, let context, case .running(_, let currentContext) = state,
+                      currentContext === context else { return }
                 state = .closed
                 onCancel()
             }

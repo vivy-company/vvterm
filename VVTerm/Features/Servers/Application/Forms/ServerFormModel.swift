@@ -89,7 +89,6 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     var transportSelection: ServerTransportSelection
     var teleportProxyURL: String
     var teleportAccount: String
-    var teleportConnectorID: String
     var teleportClusterName: String
     var teleportNodeID: String
     var authMethod: AuthMethod
@@ -130,7 +129,6 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         transportSelection = server.map(ServerTransportSelection.init) ?? .standard
         teleportProxyURL = server?.teleportConfiguration?.profile.proxyURL ?? ""
         teleportAccount = server?.teleportConfiguration?.profile.account ?? ""
-        teleportConnectorID = server?.teleportConfiguration?.profile.connectorID ?? ""
         teleportClusterName = server?.teleportConfiguration?.clusterName ?? ""
         teleportNodeID = server?.teleportConfiguration?.nodeID ?? ""
         authMethod = server?.authMethod ?? .password
@@ -181,8 +179,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         let origin = input.contains("://") ? input : "https://" + input
         return try? TeleportProfileConfiguration(
             proxyURL: origin,
-            account: teleportAccount,
-            connectorID: teleportConnectorID
+            account: teleportAccount
         )
     }
 
@@ -267,15 +264,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     mutating func apply(_ credentials: ServerCredentials, for server: Server) {
-        if server.connectionMode == .teleport || transportSelection == .teleport {
-            guard server.connectionMode == .teleport,
-                  transportSelection == .teleport,
-                  credentials.serverId == server.id,
-                  let profile = server.teleportConfiguration?.profile,
-                  teleportProfile == profile else { return }
-            password = credentials.password ?? ""
-            return
-        }
+        guard server.connectionMode != .teleport, transportSelection != .teleport else { return }
         if server.connectionMode != .tailscale {
             switch server.authMethod {
             case .password:
@@ -344,12 +333,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     func makeCredentials(serverID: UUID) -> ServerCredentials {
         var credentials = ServerCredentials(serverId: serverID)
 
-        if transportSelection == .teleport {
-            credentials.password = password.isEmpty ? nil : password
-            return credentials
-        }
-
-        guard transportSelection != .tailscale else {
+        guard transportSelection != .tailscale && transportSelection != .teleport else {
             return credentials
         }
 

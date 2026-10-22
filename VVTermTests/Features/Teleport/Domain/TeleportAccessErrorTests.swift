@@ -33,6 +33,12 @@ struct TeleportAccessErrorTests {
     }
 
     @Test
+    func localOnlyPolicyHasAShortMessageWithoutAnotherSignInChoice() {
+        #expect(TeleportAccessError.message(for: TeleportAccessError.localAccountsOnly)
+            == String(localized: "VVTerm supports local Teleport accounts only.", bundle: .main))
+    }
+
+    @Test
     func unavailableBrowserMFAGivesItsOwnSafeRecoveryMessage() {
         #expect(TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.browserMFA))
             != TeleportAccessError.message(for: TeleportError.unsupportedPolicy(.hardwareKey)))

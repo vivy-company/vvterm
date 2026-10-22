@@ -4,12 +4,12 @@ import Testing
 
 struct TeleportServerConfigurationTests {
     @Test
-    func equivalentOriginsShareOneCredentialProfileAcrossNodesAndConnectors() throws {
+    func equivalentOriginsShareOneCredentialProfileAcrossNodes() throws {
         let first = try TeleportProfileConfiguration(
             proxyURL: " HTTPS://PROXY.EXAMPLE.TEST:443/ ", account: " alice "
         )
         let second = try TeleportProfileConfiguration(
-            proxyURL: "https://proxy.example.test", account: "alice", connectorID: "github"
+            proxyURL: "https://proxy.example.test", account: "alice"
         )
         #expect(first.proxyURL == "https://proxy.example.test")
         #expect(first.account == "alice")
@@ -23,6 +23,10 @@ struct TeleportServerConfigurationTests {
         )
         #expect(first.identifier != otherAccount.identifier)
         #expect(first.identifier != otherPort.identifier)
+        let object = try #require(JSONSerialization.jsonObject(
+            with: JSONEncoder().encode(first)
+        ) as? [String: Any])
+        #expect(Set(object.keys) == ["proxyURL", "account"])
     }
 
     @Test(arguments: [

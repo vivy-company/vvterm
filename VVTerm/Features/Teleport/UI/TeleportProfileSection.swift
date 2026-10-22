@@ -5,53 +5,42 @@ import TeleportKit
 struct TeleportProfileSection: View {
     let model: TeleportProfileModel
     let service: TeleportAccessService
-    @Binding var password: String
     @Binding var clusterName: String
     @Binding var nodeID: String
     @Binding var login: String
     let onSelectNode: (String) -> Void
-    var showsServerSelection = true
 
     var body: some View {
         TeleportProfileContent(
-            model: model, service: service, password: $password, clusterName: $clusterName,
-            nodeID: $nodeID, login: $login, onSelectNode: onSelectNode,
-            showsServerSelection: showsServerSelection
+            model: model, service: service, clusterName: $clusterName,
+            nodeID: $nodeID, login: $login, onSelectNode: onSelectNode
         )
         .id(model.profile)
     }
 }
 
-/// Profile changes clear the sign-in fields. The server form owns authentication tasks.
+/// The model owns sign-in. This view selects a node and an SSH login.
 private struct TeleportProfileContent: View {
     let onSelectNode: (String) -> Void
     private let service: TeleportAccessService
-    private let showsServerSelection: Bool
-    @Binding private var password: String
     @Binding private var clusterName: String
     @Binding private var nodeID: String
     @Binding private var login: String
     @ObservedObject private var model: TeleportProfileModel
-    private enum SignInMethod: Hashable { case code, browser, device }
-    @State private var selectedMethod: SignInMethod?
-    @State private var otp = ""
+    @State private var showsSignInAgain = false
     @State private var hasReadNodePage = false
     @State private var showingSignOutConfirmation = false
 
     init(
         model: TeleportProfileModel,
         service: TeleportAccessService,
-        password: Binding<String>,
         clusterName: Binding<String>,
         nodeID: Binding<String>,
         login: Binding<String>,
-        onSelectNode: @escaping (String) -> Void,
-        showsServerSelection: Bool
+        onSelectNode: @escaping (String) -> Void
     ) {
         self.service = service
-        self.showsServerSelection = showsServerSelection
         self.onSelectNode = onSelectNode
-        _password = password
         _clusterName = clusterName
         _nodeID = nodeID
         _login = login
@@ -77,20 +66,19 @@ private struct TeleportProfileContent: View {
                     Text("Sign in")
                 }
             }
-            if showsServerSelection, let summary = validSummary {
+            if let summary = validSummary {
                 serverSection(summary: summary)
             }
         }
         .onReceive(model.$summary.dropFirst()) { _ in
-            selectedMethod = nil
+            showsSignInAgain = false
         }
-        .onChange(of: selectedMethod) { _ in otp = "" }
         .onChange(of: model.summary?.allowedLogins ?? []) { logins in
             if login.isEmpty, logins.count == 1 { login = logins[0] }
         }
         .onChange(of: model.operation) { operation in
             switch operation {
-            case .loading, .passwordLogin, .browserLogin, .biometricLogin:
+            case .loading, .signingIn:
                 hasReadNodePage = false
             default:
                 break
@@ -114,7 +102,7 @@ private struct TeleportProfileContent: View {
     }
 
     private var showsSignIn: Bool {
-        !showsServerSelection || selectedMethod != nil || validSummary == nil
+        showsSignInAgain || validSummary == nil
     }
 
     private func serverSection(summary: TeleportAccessSummary) -> some View {
@@ -128,7 +116,7 @@ private struct TeleportProfileContent: View {
                     hasReadNodePage = false
                     model.loadNodes()
                 }
-                Button("Sign in again") { selectedMethod = .code }
+                Button("Sign in again") { showsSignInAgain = true }
                 Button("Sign out", role: .destructive) { showingSignOutConfirmation = true }
             }
             .disabled(model.isBusy)
@@ -140,22 +128,21 @@ private struct TeleportProfileContent: View {
         }
         .confirmationDialog("Sign out?", isPresented: $showingSignOutConfirmation) {
             Button("Sign out", role: .destructive) {
-                otp = ""
-                selectedMethod = nil
+                showsSignInAgain = false
                 model.signOut()
             }
         } message: {
-            Text("This closes this account's sessions on this device. The saved password stays.")
+            Text("This closes this account's sessions on this device. The device key stays.")
         }
     }
 
     @ViewBuilder
     private var operationFeedback: some View {
-        if let failure = model.failure, !failure.operation.isCredentialManagement {
+        if let failure = model.failure, failure.operation != .deletingCredential {
             Text(failure.message)
                 .foregroundStyle(.red)
         }
-        if model.isBusy && !model.operation.isCredentialManagement {
+        if model.isBusy && model.operation != .deletingCredential {
             HStack {
                 ProgressView()
                     .controlSize(.small)
@@ -169,66 +156,9 @@ private struct TeleportProfileContent: View {
         }
     }
 
-    @ViewBuilder
     private var loginControls: some View {
-        if let discovery = model.discovery {
-            if discovery.authenticationType == "local" {
-                if discovery.webAuthnConfigured {
-                    Picker("Verify with", selection: Binding(
-                        get: { selectedMethod ?? .code },
-                        set: { selectedMethod = $0 }
-                    )) {
-                        Text(discovery.secondFactor == "off" ? "Password" : "Authenticator code").tag(SignInMethod.code)
-                        Text("Passkey or security key").tag(SignInMethod.browser)
-                        Text("This device").tag(SignInMethod.device)
-                    }
-                    .accessibilityIdentifier("vvterm.teleport.signInMethod")
-                    .disabled(model.isBusy)
-                }
-                SecureField("Password", text: $password)
-                    .textContentType(.password)
-                    .accessibilityIdentifier("vvterm.teleport.password")
-                    .disabled(model.isBusy)
-                if selectedMethod == .browser && discovery.webAuthnConfigured {
-                    TeleportBrowserSignInButton(
-                        method: .localMFA(password: password), service: service, model: model,
-                        onStart: { otp = "" }
-                    )
-                    .disabled(model.isBusy || password.isEmpty)
-                } else if selectedMethod == .device && discovery.webAuthnConfigured {
-                    Text("Approve with Face ID or Touch ID.").foregroundStyle(.secondary)
-                    Button("Sign in") {
-                        model.loginWithSecureEnclave(password: password)
-                        otp = ""
-                    }
-                    .accessibilityIdentifier("vvterm.teleport.signIn")
-                    .disabled(model.isBusy || password.isEmpty)
-                } else {
-                    if discovery.secondFactor != "off" {
-                        SecureField("Authenticator code", text: $otp)
-                            .accessibilityIdentifier("vvterm.teleport.otp")
-                            .disabled(model.isBusy)
-                    }
-                    Button("Sign in") {
-                        model.login(password: password, otp: otp)
-                        otp = ""
-                    }
-                    .accessibilityIdentifier("vvterm.teleport.signIn")
-                    .disabled(model.isBusy || password.isEmpty)
-                }
-            }
-            ForEach(model.connectors, id: \.profileButtonID) { connector in
-                TeleportBrowserSignInButton(
-                    method: .sso(connector), service: service, model: model,
-                    onStart: { otp = "" }
-                )
-                .disabled(model.isBusy)
-            }
-            if discovery.authenticationType != "local" && model.connectors.isEmpty {
-                Text("No supported sign-in method is available for this profile.")
-                    .foregroundStyle(.secondary)
-            }
-        }
+        TeleportSignInButton(service: service, model: model)
+            .disabled(model.isBusy)
     }
 
     @ViewBuilder
@@ -293,15 +223,10 @@ private struct TeleportProfileContent: View {
         switch model.operation {
         case .idle: ""
         case .loading: "Checking access…"
-        case .passwordLogin, .browserLogin, .biometricLogin: "Signing in…"
-        case .registeringCredential: "Setting up device credential…"
+        case .signingIn: "Signing in…"
         case .deletingCredential: "Removing local credential…"
         case .loadingNodes: "Loading nodes…"
         case .signingOut: "Signing out…"
         }
     }
-}
-
-private extension TeleportConnector {
-    var profileButtonID: String { kind.rawValue + ":" + id }
 }

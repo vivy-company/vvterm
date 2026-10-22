@@ -314,7 +314,6 @@ struct ServerFormSheet: View {
            let teleportAccess {
             TeleportProfileSection(
                 model: teleportModel, service: teleportAccess,
-                password: $form.password,
                 clusterName: $form.teleportClusterName,
                 nodeID: $form.teleportNodeID, login: $form.username
             ) { nodeName in
@@ -695,12 +694,6 @@ struct ServerFormSheet: View {
                         #if os(iOS)
                         .textInputAutocapitalization(.never)
                         #endif
-                    TextField("SSO Connector (Optional)", text: $form.teleportConnectorID)
-                        .accessibilityIdentifier("vvterm.serverForm.teleport.connector")
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        #endif
                     Button("Test Connection") {
                         Task { await runConnectionTest(force: true) }
                     }
@@ -869,10 +862,8 @@ struct ServerFormSheet: View {
             }
             if let teleportModel,
                teleportModel.profile == activeTeleportProfile,
-               teleportModel.discovery?.authenticationType == "local",
-               teleportModel.discovery?.webAuthnConfigured == true,
-               let teleportAccess {
-                TeleportDeviceCredentialControls(service: teleportAccess, model: teleportModel)
+               teleportModel.discovery?.authenticationType == "local" {
+                TeleportDeviceCredentialControls(model: teleportModel)
             }
         } header: {
             sectionHeader("Security")

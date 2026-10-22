@@ -83,7 +83,6 @@ struct TeleportConnectionSignInUITestHarness: View {
             if let profile = request.server.teleportConfiguration?.profile {
                 TeleportConnectionSignInSheet(
                     request: request, coordinator: coordinator, service: service,
-                    credentials: SavedPassword(),
                     model: TeleportProfileModel(
                         profile: profile, service: service, summary: expired,
                         discovery: TeleportDiscovery(
@@ -91,7 +90,8 @@ struct TeleportConnectionSignInUITestHarness: View {
                             authenticationType: "local", secondFactor: "otp", connectors: [],
                             webAuthnConfigured: true
                         )
-                    )
+                    ),
+                    startsAutomatically: false
                 )
                 .safeAreaInset(edge: .bottom) {
                     Button("Finish test sign-in") {
@@ -124,24 +124,6 @@ struct TeleportConnectionSignInUITestHarness: View {
     }
 
     private nonisolated enum Failure: Error { case unexpectedExternalOperation }
-
-    @MainActor
-    private final class SavedPassword: ServerCredentialRepository {
-        func getCredentials(for server: Server) throws -> ServerCredentials {
-            ServerCredentials(
-                serverId: server.id, credentialBinding: ServerCredentialBinding(server: server),
-                password: "UI-ONLY-SAVED-PASSWORD"
-            )
-        }
-        func storeCredentials(_ credentials: ServerCredentials, for server: Server) throws {
-            throw Failure.unexpectedExternalOperation
-        }
-        func deleteCredentials(for serverID: UUID) throws { throw Failure.unexpectedExternalOperation }
-        func getStoredSSHKeys() -> [SSHKeyEntry] { [] }
-        func getStoredSSHKeyData(for id: UUID) throws -> (key: Data, passphrase: String?)? {
-            throw Failure.unexpectedExternalOperation
-        }
-    }
 
     private nonisolated struct UnusedKeychain: KeychainStoreBacking {
         func set(_ data: Data, service: String, key: String, scope: KeychainStorageScope) throws {

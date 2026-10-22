@@ -47,59 +47,59 @@ actor TeleportAccessService {
         let client = try configuredClient(profile)
         let discovery = try await client.discover()
         try validateCurrentClient(client, profileID: profile.identifier)
+        try Self.requireLocalAccount(discovery)
         return discovery
     }
 
-    func login(profile: TeleportProfileConfiguration, password: String, otp: String) async throws -> TeleportAccessSummary {
-        try await performLogin(profile: profile) { client in
-            try await client.login(username: profile.account, password: password, otp: otp)
-        }
-    }
-
-    func login(
+    func signIn(
         profile: TeleportProfileConfiguration,
-        password: String,
-        presenter: any TeleportBrowserPresenter
+        prompt: String,
+        makeBrowserSession: @escaping @MainActor @Sendable () throws -> any TeleportBrowserSession
     ) async throws -> TeleportAccessSummary {
         try await performLogin(profile: profile) { client in
-            try await client.login(username: profile.account, password: password, browser: presenter)
-        }
-    }
-
-    func loginWithSecureEnclave(
-        profile: TeleportProfileConfiguration, password: String, prompt: String
-    ) async throws -> TeleportAccessSummary {
-        try await performLogin(profile: profile) { client in
-            try await client.loginWithSecureEnclave(
-                username: profile.account, password: password, prompt: prompt
+            try Self.requireLocalAccount(try await client.discover())
+            return try await Self.authenticate(
+                withDeviceKey: {
+                    try await client.loginWithSecureEnclave(username: profile.account, prompt: prompt)
+                },
+                registerDeviceKey: {
+                    let browser = try await makeBrowserSession()
+                    return try await client.registerSecureEnclaveCredential(
+                        username: profile.account, name: Self.deviceCredentialName(),
+                        browser: browser, prompt: prompt
+                    )
+                }
             )
         }
     }
 
-    func registerSecureEnclaveCredential(
-        profile: TeleportProfileConfiguration, name: String, otp: String,
-        presenter: (any TeleportBrowserPresenter)?, prompt: String
-    ) async throws {
-        try await performAuthentication(profile: profile) { client in
-            try await client.registerSecureEnclaveCredential(
-                name: name, otp: otp, browser: presenter, prompt: prompt
-            )
+    /// Only an absent key starts setup. Failed approval or storage must stay visible.
+    nonisolated static func authenticate(
+        withDeviceKey login: @Sendable () async throws -> TeleportIdentity,
+        registerDeviceKey register: @Sendable () async throws -> TeleportIdentity
+    ) async throws -> TeleportIdentity {
+        do {
+            try Task.checkCancellation()
+            return try await login()
+        } catch TeleportError.deviceCredentialMissing {
+            try Task.checkCancellation()
+            return try await register()
         }
+    }
+
+    nonisolated static func requireLocalAccount(_ discovery: TeleportDiscovery) throws {
+        guard discovery.authenticationType == "local" else {
+            throw TeleportAccessError.localAccountsOnly
+        }
+    }
+
+    nonisolated static func deviceCredentialName() -> String {
+        "VVTerm-" + String(UUID().uuidString.prefix(8))
     }
 
     func deleteSecureEnclaveCredential(profile: TeleportProfileConfiguration) async throws {
         try await performAuthentication(profile: profile) { client in
             try await client.deleteSecureEnclaveCredential(username: profile.account)
-        }
-    }
-
-    func login(
-        profile: TeleportProfileConfiguration,
-        connector: TeleportConnector,
-        presenter: any TeleportBrowserPresenter
-    ) async throws -> TeleportAccessSummary {
-        try await performLogin(profile: profile) { client in
-            try await client.login(browser: presenter, connector: connector)
         }
     }
 

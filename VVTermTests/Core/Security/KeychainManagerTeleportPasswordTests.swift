@@ -3,341 +3,196 @@ import Testing
 @testable import VVTerm
 
 @MainActor
-@Suite(.serialized)
 struct KeychainManagerTeleportPasswordTests {
     @Test(arguments: [false, true])
-    func savedPasswordUsesTheServerScopeWithoutSSHKeys(syncEnabled: Bool) throws {
+    func teleportReturnsBoundEmptyCredentialsAndStoresNoPassword(syncEnabled: Bool) throws {
         let fixture = Fixture()
         let manager = fixture.manager(syncEnabled: syncEnabled)
         let server = try makeServer()
-        let credentials = ServerCredentials(
-            serverId: server.id, password: "test-password",
-            privateKey: Data("unused-private-key".utf8), publicKey: Data("unused-public-key".utf8),
+        try manager.storeCredentials(ServerCredentials(
+            serverId: server.id, password: "unused-password", privateKey: Data("unused-key".utf8),
             passphrase: "unused-passphrase", cloudflareClientID: "unused-id",
             cloudflareClientSecret: "unused-secret"
-        )
+        ), for: server)
 
-        try manager.storeCredentials(credentials, for: server)
-
-        let loaded = try manager.getCredentials(for: server)
-        let scope: KeychainStorageScope = syncEnabled ? .iCloud : .deviceOnly
-        #expect(server.authMethod == nil)
-        #expect(loaded.password == credentials.password)
-        #expect(loaded.privateKey == nil)
-        #expect(loaded.passphrase == nil)
-        #expect(loaded.cloudflareClientSecret == nil)
-        #expect(try fixture.store.keys(in: scope) == [teleportKey(server)])
-        let data = try #require(try fixture.store.get(teleportKey(server), scope: scope))
-        let record = try #require(try JSONSerialization.jsonObject(with: data) as? [String: Any])
-        #expect(record["privateKey"] == nil)
-        #expect(record["passphrase"] == nil)
-        #expect(record["cloudflareClientSecret"] == nil)
-        #expect(try fixture.store.keys(in: scope.alternate).isEmpty)
-        if !syncEnabled {
-            #expect(fixture.offlineChanges.change(for: .server(server.id)) == .updated)
-        }
+        let result = try manager.getCredentials(for: server)
+        #expect(result.isAuthorized(for: server))
+        #expect(result.password == nil)
+        #expect(result.privateKey == nil)
+        #expect(result.passphrase == nil)
+        #expect(result.cloudflareClientID == nil)
+        #expect(result.cloudflareClientSecret == nil)
+        #expect(try fixture.store.keys(in: .iCloud).isEmpty)
+        #expect(try fixture.store.keys(in: .deviceOnly).isEmpty)
+        #expect(fixture.offlineChanges.snapshot().isEmpty)
     }
 
-    @Test(arguments: AccountChange.allCases)
-    func anotherAccountCannotReadOrRebindThePassword(change: AccountChange) throws {
+    @Test(arguments: [false, true])
+    func approvedLoadOrSaveDeletesOnlyTheLegacyItem(saving: Bool) throws {
         let fixture = Fixture()
         let manager = fixture.manager(syncEnabled: true)
-        let original = try makeServer()
-        try manager.storeCredentials(
-            ServerCredentials(serverId: original.id, password: "test-password"), for: original
-        )
-        var proxy = "https://proxy.example.test"
-        var account = "alice"
-        switch change {
-        case .proxy: proxy = "https://other.example.test"
-        case .port: proxy = "https://proxy.example.test:8443"
-        case .account: account = "bob"
-        case .accountCase: account = "Alice"
+        let server = try makeServer()
+        let other = try makeServer()
+        for scope in KeychainStorageScope.allCases {
+            try fixture.store.set(Data("invalid-old-record".utf8), forKey: teleportKey(server), scope: scope)
+            try fixture.store.set(Data("other-entry".utf8), forKey: teleportKey(other), scope: scope)
+            try fixture.store.set(Data("ssh-password".utf8), forKey: passwordKey(server), scope: scope)
+            try fixture.store.set(Data("ssh-key".utf8), forKey: sshKey(server), scope: scope)
+            try fixture.store.set(Data("cloudflare-secret".utf8), forKey: cloudflareKey(server), scope: scope)
+            try fixture.store.set(Data("binding".utf8), forKey: bindingKey(server), scope: scope)
+            try fixture.store.set(Data("device-identity".utf8), forKey: "device.identity", scope: scope)
         }
-        let changed = try makeServer(id: original.id, proxy: proxy, account: account)
-        let recordBefore = try fixture.store.get(teleportKey(original), scope: .iCloud)
-
-        let loaded = try manager.getCredentials(for: changed)
-
-        #expect(loaded.password == nil)
-        #expect(try fixture.store.get(teleportKey(original), scope: .iCloud) == recordBefore)
+        let expected = fixture.backing.snapshot().filter { $0.key.key != teleportKey(server) }
+        if saving {
+            try manager.storeCredentials(ServerCredentials(serverId: server.id), for: server)
+        } else {
+            #expect(try manager.getCredentials(for: server).password == nil)
+        }
+        #expect(fixture.backing.snapshot() == expected)
     }
 
     @Test
-    func anSSHPasswordCannotBeReadAsATeleportPassword() throws {
+    func offlineCleanupDefersCloudDeletionAndPreservesSSHWhenSyncReturns() throws {
+        let fixture = Fixture()
+        let cloud = fixture.manager(syncEnabled: true)
+        let local = fixture.manager(syncEnabled: false)
+        let server = try makeServer()
+        let ssh = makeSSHServer(from: server)
+        try cloud.storeCredentials(ServerCredentials(serverId: server.id, password: "ssh-password"), for: ssh)
+        try cloud.synchronizeCredentialStorage(isEnabled: false)
+        for scope in KeychainStorageScope.allCases {
+            try fixture.store.set(Data("invalid-old-record".utf8), forKey: teleportKey(server), scope: scope)
+        }
+
+        #expect(try local.getCredentials(for: server).password == nil)
+        #expect(try !fixture.store.contains(teleportKey(server), scope: .deviceOnly))
+        #expect(try fixture.store.contains(teleportKey(server), scope: .iCloud))
+        #expect(fixture.offlineChanges.change(for: .server(server.id)) == .updated)
+        #expect(try local.getCredentials(for: ssh).password == "ssh-password")
+
+        try local.synchronizeCredentialStorage(isEnabled: true)
+        #expect(try !fixture.store.contains(teleportKey(server), scope: .iCloud))
+        #expect(try cloud.getCredentials(for: ssh).password == "ssh-password")
+        #expect(try fixture.store.keys(in: .deviceOnly).isEmpty)
+    }
+
+    @Test
+    func snapshotDoesNotCopyLegacyRecordsAndEnableRemovesCloudOnlyRecords() throws {
         let fixture = Fixture()
         let manager = fixture.manager(syncEnabled: true)
-        let teleport = try makeServer()
-        var ssh = teleport
-        ssh.connectionMode = .standard
-        ssh.authMethod = .password
-        try manager.storeCredentials(
-            ServerCredentials(serverId: ssh.id, password: "ssh-password"), for: ssh
-        )
+        let server = try makeServer()
+        try fixture.store.set(Data("invalid-old-record".utf8), forKey: teleportKey(server), scope: .iCloud)
 
-        #expect(try manager.getCredentials(for: teleport).password == nil)
+        try manager.synchronizeCredentialStorage(isEnabled: false)
+        #expect(try !fixture.store.contains(teleportKey(server), scope: .deviceOnly))
+        #expect(try fixture.store.contains(teleportKey(server), scope: .iCloud))
+        try manager.synchronizeCredentialStorage(isEnabled: true)
+        #expect(try !fixture.store.contains(teleportKey(server), scope: .iCloud))
+    }
+
+    @Test(arguments: [false, true])
+    func cleanupFailureIsReportedAndCanBeRetried(syncEnabled: Bool) throws {
+        let fixture = Fixture()
+        let manager = fixture.manager(syncEnabled: syncEnabled)
+        let server = try makeServer()
+        let scope: KeychainStorageScope = syncEnabled ? .iCloud : .deviceOnly
+        try fixture.store.set(Data("invalid-old-record".utf8), forKey: teleportKey(server), scope: scope)
+        fixture.backing.failDeletes(from: scope, service: fixture.store.service, key: teleportKey(server))
+
+        #expect(throws: InMemoryKeychainStoreBacking.Failure.deleteRejected) {
+            _ = try manager.getCredentials(for: server)
+        }
+        #expect(try fixture.store.contains(teleportKey(server), scope: scope))
+        fixture.backing.allowDeletes(from: scope, service: fixture.store.service, key: teleportKey(server))
+        #expect(try manager.getCredentials(for: server).isAuthorized(for: server))
+        #expect(try !fixture.store.contains(teleportKey(server), scope: scope))
+    }
+
+    @Test
+    func stagedTeleportSaveContainsNoPasswordAndKeepsOrdinarySSHCredentials() throws {
+        let fixture = Fixture()
+        let manager = fixture.manager(syncEnabled: true)
+        let server = try makeServer()
+        let ssh = makeSSHServer(from: server)
+        try manager.storeCredentials(ServerCredentials(serverId: server.id, password: "ssh-password"), for: ssh)
+        let original = fixture.backing.snapshot()
+        let transactionID = UUID()
+        try manager.prepareServerCredentialTransaction(
+            id: transactionID, previousServer: server, server: server,
+            credentials: ServerCredentials(serverId: server.id, password: "unused-password")
+        )
+        let staged = try #require(try fixture.store.get(
+            "server-credential-transaction.\(transactionID.uuidString).v1", scope: .deviceOnly
+        ))
+        #expect(!String(decoding: staged, as: UTF8.self).contains("unused-password"))
+        try manager.commitServerCredentialTransaction(id: transactionID, previousServer: server, server: server)
+        try manager.discardServerCredentialTransaction(id: transactionID)
+
+        #expect(fixture.backing.snapshot() == original)
         #expect(try manager.getCredentials(for: ssh).password == "ssh-password")
     }
 
     @Test
-    func canonicalProxyAndSameAccountAllowNodeAndLoginChanges() throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: true)
-        let original = try makeServer(proxy: "HTTPS://PROXY.EXAMPLE.TEST:443/")
-        try manager.storeCredentials(
-            ServerCredentials(serverId: original.id, password: "test-password"), for: original
-        )
-        var changed = try makeServer(id: original.id)
-        changed.name = "Renamed"
-        changed.username = "other-login"
-        changed.transportConfiguration = .teleport(try TeleportServerConfiguration(
-            profile: try #require(changed.teleportConfiguration?.profile),
-            clusterName: "other-cluster", nodeID: "other-node"
-        ))
-
-        #expect(try manager.getCredentials(for: changed).password == "test-password")
-        let duplicate = try makeServer()
-        #expect(try manager.getCredentials(for: duplicate).password == nil)
-    }
-
-    @Test
-    func changingToSSHDoesNotReadOrRebindTheTeleportPassword() throws {
+    func failedTeleportSaveNeverDeletesOrdinarySSHCredentials() throws {
         let fixture = Fixture()
         let manager = fixture.manager(syncEnabled: true)
         let server = try makeServer()
-        try manager.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "test-password"), for: server
-        )
-        let recordBefore = try fixture.store.get(teleportKey(server), scope: .iCloud)
-        var changed = server
-        changed.connectionMode = .standard
-        changed.authMethod = .password
-        changed.host = "ssh.example.test"
-
-        #expect(try manager.getCredentials(for: changed).password == nil)
-        #expect(try fixture.store.get(teleportKey(server), scope: .iCloud) == recordBefore)
-        #expect(try fixture.store.get(passwordKey(server), scope: .iCloud) == nil)
-
-        try manager.storeCredentials(
-            ServerCredentials(serverId: changed.id, password: "ssh-password"), for: changed
-        )
-        #expect(try manager.getCredentials(for: changed).password == "ssh-password")
-        #expect(try fixture.store.get(teleportKey(server), scope: .iCloud) == nil)
-        #expect(try manager.getCredentials(for: server).password == nil)
-    }
-
-    @Test(arguments: [false, true])
-    func separateSSHItemsDoNotSupplyATeleportPassword(invalidBinding: Bool) throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: true)
-        let server = try makeServer()
-        try fixture.store.set(Data("test-password".utf8), forKey: passwordKey(server), scope: .iCloud)
-        let binding = invalidBinding ? Data("invalid".utf8)
-            : try JSONEncoder().encode(ServerCredentialBinding(server: server))
-        try fixture.store.set(binding, forKey: bindingKey(server), scope: .iCloud)
-
-        #expect(try manager.getCredentials(for: server).password == nil)
-        #expect(try fixture.store.get(bindingKey(server), scope: .iCloud) == binding)
-    }
-
-    @Test(arguments: [false, true])
-    func separatePasswordAndBindingUpdatesCannotChangeAtomicCredentials(oldBinding: Bool) throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: true)
-        let original = try makeServer()
-        let changed = try makeServer(id: original.id, proxy: "https://other.example.test", account: "bob")
-        try manager.storeCredentials(
-            ServerCredentials(serverId: original.id, password: "original-password"), for: original
-        )
-        try fixture.store.set(Data("other-password".utf8), forKey: passwordKey(original), scope: .iCloud)
-        try fixture.store.set(
-            try JSONEncoder().encode(ServerCredentialBinding(server: oldBinding ? original : changed)),
-            forKey: bindingKey(original), scope: .iCloud
-        )
-
-        #expect(try manager.getCredentials(for: original).password == "original-password")
-        #expect(try manager.getCredentials(for: changed).password == nil)
-    }
-
-    @Test(arguments: [false, true])
-    func cloudRecordStopsFallbackToAnOlderLocalPassword(cleared: Bool) throws {
-        let fixture = Fixture()
-        let local = fixture.manager(syncEnabled: false)
-        let cloud = fixture.manager(syncEnabled: true)
-        let original = try makeServer()
-        try local.storeCredentials(
-            ServerCredentials(serverId: original.id, password: "stale-local-password"), for: original
-        )
-        let cloudServer = cleared ? original : try makeServer(id: original.id, account: "bob")
-        try cloud.storeCredentials(
-            ServerCredentials(serverId: original.id, password: cleared ? nil : "other-password"), for: cloudServer
-        )
-
-        #expect(try cloud.getCredentials(for: original).password == nil)
-        #expect(try fixture.store.get(teleportKey(original), scope: .iCloud) != nil)
-        #expect(try local.getCredentials(for: original).password == "stale-local-password")
-    }
-
-    @Test
-    func corruptCloudRecordReportsFailureWithoutUsingTheLocalPassword() throws {
-        let fixture = Fixture()
-        let local = fixture.manager(syncEnabled: false)
-        let cloud = fixture.manager(syncEnabled: true)
-        let server = try makeServer()
-        try local.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "local-password"), for: server
-        )
-        try fixture.store.set(Data("invalid".utf8), forKey: teleportKey(server), scope: .iCloud)
-
-        do {
-            _ = try cloud.getCredentials(for: server)
-            Issue.record("Expected a corrupt-record error")
-        } catch KeychainError.decodingFailed {
-            // Expected; the stale local value must not hide this error.
-        } catch {
-            Issue.record("Expected KeychainError.decodingFailed")
-        }
-        #expect(try local.getCredentials(for: server).password == "local-password")
-    }
-
-    @Test
-    func copiedRecordWithAnotherServerIDIsRejected() throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: true)
-        let original = try makeServer()
-        let other = try makeServer()
-        try manager.storeCredentials(
-            ServerCredentials(serverId: other.id, password: "other-password"), for: other
-        )
-        let data = try #require(try fixture.store.get(teleportKey(other), scope: .iCloud))
-        try fixture.store.set(data, forKey: teleportKey(original), scope: .iCloud)
-
-        do {
-            _ = try manager.getCredentials(for: original)
-            Issue.record("Expected a server mismatch error")
-        } catch KeychainError.credentialServerMismatch {
-            // Expected.
-        } catch {
-            Issue.record("Expected KeychainError.credentialServerMismatch")
-        }
-    }
-
-    @Test
-    func syncToggleAndOfflineDeletionUseTheExistingServerUnit() throws {
-        let fixture = Fixture()
-        let server = try makeServer()
-        let cloud = fixture.manager(syncEnabled: true)
-        let local = fixture.manager(syncEnabled: false)
-        try cloud.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "first-password"), for: server
-        )
-        #expect(try local.getCredentials(for: server).password == nil)
-        try cloud.synchronizeCredentialStorage(isEnabled: false)
-        #expect(try local.getCredentials(for: server).password == "first-password")
-        try local.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "updated-password"), for: server
-        )
-        try local.synchronizeCredentialStorage(isEnabled: true)
-        #expect(try cloud.getCredentials(for: server).password == "updated-password")
-        #expect(try fixture.store.get(teleportKey(server), scope: .deviceOnly) == nil)
-
-        try cloud.synchronizeCredentialStorage(isEnabled: false)
-        try local.deleteCredentials(for: server.id)
-        #expect(fixture.offlineChanges.change(for: .server(server.id)) == .deleted)
-        try local.synchronizeCredentialStorage(isEnabled: true)
-        #expect(try cloud.getCredentials(for: server).password == nil)
-        #expect(try fixture.store.get(teleportKey(server), scope: .iCloud) == nil)
-    }
-
-    @Test
-    func saveTransactionStagesPasswordAndCanClearItWithoutStoringSSHKeys() throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: true)
-        let server = try makeServer()
-        try manager.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "old-password"), for: server
-        )
-        let discardedID = UUID()
-        try manager.prepareServerCredentialTransaction(
-            id: discardedID, previousServer: server, server: server,
-            credentials: ServerCredentials(serverId: server.id, password: "discarded-password")
-        )
-        try manager.discardServerCredentialTransaction(id: discardedID)
-        #expect(try manager.getCredentials(for: server).password == "old-password")
-
-        let savedID = UUID()
-        try manager.prepareServerCredentialTransaction(
-            id: savedID, previousServer: server, server: server,
-            credentials: ServerCredentials(
-                serverId: server.id, password: "new-password", privateKey: Data("unused-key".utf8)
-            )
-        )
-        try manager.commitServerCredentialTransaction(id: savedID, previousServer: server, server: server)
-        try manager.discardServerCredentialTransaction(id: savedID)
-        #expect(try manager.getCredentials(for: server).password == "new-password")
-        #expect(try fixture.store.get("server.\(server.id.uuidString).sshkey", scope: .iCloud) == nil)
-
-        let clearedID = UUID()
-        try manager.prepareServerCredentialTransaction(
-            id: clearedID, previousServer: server, server: server,
-            credentials: ServerCredentials(serverId: server.id, password: "")
-        )
-        try manager.commitServerCredentialTransaction(id: clearedID, previousServer: server, server: server)
-        try manager.discardServerCredentialTransaction(id: clearedID)
-        #expect(try manager.getCredentials(for: server).password == nil)
-        #expect(try fixture.store.get(passwordKey(server), scope: .iCloud) == nil)
-        #expect(try fixture.store.get(teleportKey(server), scope: .iCloud) != nil)
-        #expect(try fixture.store.keys(in: .deviceOnly).isEmpty)
-    }
-
-    @Test(arguments: [false, true])
-    func failedSaveRestoresThePreviousPassword(metadataChangedToSSH: Bool) throws {
-        let fixture = Fixture()
-        let manager = fixture.manager(syncEnabled: false)
-        let server = try makeServer()
-        try manager.storeCredentials(
-            ServerCredentials(serverId: server.id, password: "old-password"), for: server
-        )
-        var target = server
-        if metadataChangedToSSH {
-            target.connectionMode = .standard
-            target.authMethod = .password
-        }
+        let ssh = makeSSHServer(from: server)
+        try manager.storeCredentials(ServerCredentials(serverId: server.id, password: "ssh-password"), for: ssh)
+        try fixture.store.set(Data("old-record".utf8), forKey: teleportKey(server), scope: .iCloud)
+        fixture.backing.failDeletes(from: .iCloud, service: fixture.store.service, key: teleportKey(server))
         let transactionID = UUID()
         try manager.prepareServerCredentialTransaction(
-            id: transactionID, previousServer: target, server: target,
-            credentials: ServerCredentials(serverId: server.id, password: "new-password")
+            id: transactionID, previousServer: ssh, server: server,
+            credentials: ServerCredentials(serverId: server.id)
         )
-        // The change marker must fail after the password write when sync is being completed.
-        try fixture.offlineChanges.markRemoteChangesApplied()
-
-        #expect(throws: CredentialSyncError.offlineReconciliationPending) {
-            try manager.commitServerCredentialTransaction(
-                id: transactionID, previousServer: target, server: target
-            )
+        #expect(throws: InMemoryKeychainStoreBacking.Failure.deleteRejected) {
+            try manager.commitServerCredentialTransaction(id: transactionID, previousServer: ssh, server: server)
         }
-
-        #expect(try manager.getCredentials(for: server).password == "old-password")
+        #expect(try manager.getCredentials(for: ssh).password == "ssh-password")
         try manager.discardServerCredentialTransaction(id: transactionID)
-        #expect(try fixture.store.keys(in: .deviceOnly) == [teleportKey(server)])
     }
 
-    enum AccountChange: CaseIterable { case proxy, port, account, accountCase }
+    @Test
+    func failedOrdinarySSHSaveStillRestoresItsPassword() throws {
+        let fixture = Fixture()
+        let manager = fixture.manager(syncEnabled: false)
+        let ssh = makeSSHServer(from: try makeServer())
+        try manager.storeCredentials(ServerCredentials(serverId: ssh.id, password: "old-password"), for: ssh)
+        let transactionID = UUID()
+        try manager.prepareServerCredentialTransaction(
+            id: transactionID, previousServer: ssh, server: ssh,
+            credentials: ServerCredentials(serverId: ssh.id, password: "new-password")
+        )
+        try fixture.offlineChanges.markRemoteChangesApplied()
+        #expect(throws: CredentialSyncError.offlineReconciliationPending) {
+            try manager.commitServerCredentialTransaction(id: transactionID, previousServer: ssh, server: ssh)
+        }
+        #expect(try manager.getCredentials(for: ssh).password == "old-password")
+        try manager.discardServerCredentialTransaction(id: transactionID)
+    }
 
-    private func makeServer(
-        id: UUID = UUID(), proxy: String = "https://proxy.example.test", account: String = "alice"
-    ) throws -> Server {
+    private func makeServer() throws -> Server {
         Server(
-            id: id, workspaceId: UUID(), name: "Teleport", host: "node-id", username: "deploy",
+            workspaceId: UUID(), name: "Teleport", host: "node-id", username: "deploy",
             connectionMode: .teleport,
             teleportConfiguration: try TeleportServerConfiguration(
-                profile: TeleportProfileConfiguration(proxyURL: proxy, account: account),
+                profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
                 clusterName: "root.example.test", nodeID: "node-id"
             )
         )
     }
 
+    private func makeSSHServer(from server: Server) -> Server {
+        var ssh = server
+        ssh.connectionMode = .standard
+        ssh.authMethod = .password
+        return ssh
+    }
+
     private func passwordKey(_ server: Server) -> String { "server.\(server.id.uuidString).password" }
+    private func sshKey(_ server: Server) -> String { "server.\(server.id.uuidString).sshkey" }
+    private func cloudflareKey(_ server: Server) -> String { "server.\(server.id.uuidString).cloudflare.clientsecret" }
     private func bindingKey(_ server: Server) -> String { "server.\(server.id.uuidString).credential-binding.v1" }
     private func teleportKey(_ server: Server) -> String { "server.\(server.id.uuidString).teleport-credentials.v1" }
 
@@ -345,14 +200,13 @@ struct KeychainManagerTeleportPasswordTests {
     private final class Fixture {
         private let suiteName = "KeychainManagerTeleportPasswordTests.\(UUID().uuidString)"
         private let defaults: UserDefaults
+        let backing = InMemoryKeychainStoreBacking()
         let store: KeychainStore
         let offlineChanges: CredentialOfflineChangeStore
 
         init() {
             defaults = UserDefaults(suiteName: suiteName)!
-            store = KeychainStore(
-                service: KeychainManager.credentialService, backing: InMemoryKeychainStoreBacking()
-            )
+            store = KeychainStore(service: KeychainManager.credentialService, backing: backing)
             offlineChanges = CredentialOfflineChangeStore(defaults: defaults)
         }
 
