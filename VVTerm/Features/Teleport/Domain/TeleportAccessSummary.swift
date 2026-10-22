@@ -27,6 +27,9 @@ nonisolated enum TeleportAccessError: Error, Equatable {
     case localAccountsOnly
 
     static func message(for error: any Error) -> String {
+        if (error as? URLError)?.code == .timedOut {
+            return String(localized: "Sign-in timed out. Try again.")
+        }
         if let accessError = error as? TeleportAccessError {
             switch accessError {
             case .loginInProgress:
@@ -39,6 +42,10 @@ nonisolated enum TeleportAccessError: Error, Equatable {
             return String(localized: "Teleport connection failed. Check the profile and sign in again.")
         }
         switch error {
+        case .transport("browser login timeout"):
+            return String(localized: "Sign-in timed out. Try again.")
+        case .transport("browser could not start"):
+            return String(localized: "The approval browser could not open. Try again.")
         case .oneTimeCodeRequired:
             return String(localized: "This server requires a sign-in method that VVTerm does not support. Contact your administrator.")
         case .authenticationRequired:

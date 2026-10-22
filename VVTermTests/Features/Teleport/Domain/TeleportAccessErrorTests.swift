@@ -5,6 +5,19 @@ import Testing
 
 struct TeleportAccessErrorTests {
     @Test
+    func approvalTimeoutsAskForANewAttemptWithoutSystemDetails() {
+        let expected = String(localized: "Sign-in timed out. Try again.", bundle: .main)
+        #expect(TeleportAccessError.message(for: URLError(.timedOut)) == expected)
+        #expect(TeleportAccessError.message(for: TeleportError.transport("browser login timeout")) == expected)
+    }
+
+    @Test
+    func browserStartFailureHasItsOwnSafeMessage() {
+        #expect(TeleportAccessError.message(for: TeleportError.transport("browser could not start"))
+            == String(localized: "The approval browser could not open. Try again.", bundle: .main))
+    }
+
+    @Test
     func errorMessagesNeverIncludeAnUntrustedReason() {
         let reason = "PRIVATE_VALUE_MUST_NOT_APPEAR_7f492dd4"
         let errors: [any Error] = [

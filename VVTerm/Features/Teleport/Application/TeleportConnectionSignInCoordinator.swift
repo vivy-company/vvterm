@@ -1,9 +1,15 @@
 import Combine
 import Foundation
+import TeleportKit
 
 /// One window owns its sign-in request. The caller resumes before any transport starts.
 @MainActor
 final class TeleportConnectionSignInCoordinator: ObservableObject {
+    typealias Authentication = @MainActor @Sendable (
+        TeleportProfileConfiguration,
+        @escaping @MainActor @Sendable () throws -> any TeleportBrowserSession
+    ) async throws -> Void
+
     nonisolated struct Request: Identifiable {
         let id: UUID
         let server: Server
@@ -24,11 +30,14 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         case idle
         case checking(Request, Task<Void, Never>)
         case waiting(Request)
+        case signingIn(Request, Task<Void, Never>, (any TeleportBrowserSession)?)
+        case failed(Request, String)
 
         var attempt: Request? {
             switch self {
             case .idle: nil
-            case .checking(let request, _), .waiting(let request): request
+            case .checking(let request, _), .waiting(let request),
+                 .signingIn(let request, _, _), .failed(let request, _): request
             }
         }
     }
@@ -39,8 +48,15 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
     private let now: @Sendable () -> Date
 
     var request: Request? {
-        guard case .waiting(let request) = state else { return nil }
-        return request
+        switch state {
+        case .waiting(let request), .signingIn(let request, _, _), .failed(let request, _): request
+        case .idle, .checking: nil
+        }
+    }
+
+    var failureMessage: String? {
+        guard case .failed(_, let message) = state else { return nil }
+        return message
     }
 
     init(
@@ -80,7 +96,60 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         return allowed && !Task.isCancelled
     }
 
-    /// A successful screen result alone is insufficient; read the stored identity again.
+    func signIn(
+        _ requestID: UUID,
+        authenticate: @escaping Authentication,
+        makeBrowserSession: @escaping TeleportProfileModel.BrowserFactory,
+        authorize: @escaping @MainActor @Sendable (Server) async -> Bool
+    ) {
+        let request: Request
+        switch state {
+        case .waiting(let current), .failed(let current, _): request = current
+        default: return
+        }
+        guard request.id == requestID, matchesCurrentServer(request.server),
+              let profile = request.server.teleportConfiguration?.profile else {
+            cancel(requestID)
+            return
+        }
+        let task = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try Task.checkCancellation()
+                try await authenticate(profile) { [weak self] in
+                    guard let self else { throw CancellationError() }
+                    return try self.startBrowser(requestID, factory: makeBrowserSession)
+                }
+                try Task.checkCancellation()
+                closeBrowser(requestID)
+                guard self.request?.id == requestID, matchesCurrentServer(request.server),
+                      await authorize(request.server), !Task.isCancelled else {
+                    cancel(requestID)
+                    return
+                }
+                guard await complete(requestID) else {
+                    fail(requestID, error: TeleportError.invalidCertificate("saved access"))
+                    return
+                }
+            } catch {
+                if Task.isCancelled || error is CancellationError {
+                    cancel(requestID)
+                } else {
+                    fail(requestID, error: error)
+                }
+            }
+        }
+        state = .signingIn(request, task, nil)
+    }
+
+    func savedServersDidChange(_ servers: [Server]) {
+        guard let attempt = state.attempt else { return }
+        if !matchesCurrentServer(attempt.server, current: servers.first { $0.id == attempt.server.id }) {
+            cancel(attempt.id)
+        }
+    }
+
+    /// Authentication success alone is insufficient; read the stored identity again.
     func complete(_ requestID: UUID) async -> Bool {
         guard let request, request.id == requestID else { return false }
         guard !Task.isCancelled, matchesCurrentServer(request.server),
@@ -137,7 +206,11 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
     }
 
     private func matchesCurrentServer(_ server: Server) -> Bool {
-        guard var current = currentServer(server.id) else { return false }
+        matchesCurrentServer(server, current: currentServer(server.id))
+    }
+
+    private func matchesCurrentServer(_ server: Server, current: Server?) -> Bool {
+        guard var current else { return false }
         // Connection reporting can refresh these facts while a sign-in is open.
         current.lastConnected = server.lastConnected
         current.detectedSystemIdentity = server.detectedSystemIdentity
@@ -145,11 +218,50 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         return current == server
     }
 
+    private func startBrowser(
+        _ requestID: UUID, factory: TeleportProfileModel.BrowserFactory
+    ) throws -> any TeleportBrowserSession {
+        try Task.checkCancellation()
+        guard case .signingIn(let request, let task, nil) = state,
+              request.id == requestID, matchesCurrentServer(request.server) else {
+            throw CancellationError()
+        }
+        let browser = try factory { [weak self] in self?.cancel(requestID) }
+        guard case .signingIn(let current, _, nil) = state,
+              current.id == requestID, !Task.isCancelled else {
+            browser.cancel()
+            throw CancellationError()
+        }
+        state = .signingIn(request, task, browser)
+        return browser
+    }
+
+    private func closeBrowser(_ requestID: UUID) {
+        guard case .signingIn(let request, let task, let browser) = state,
+              request.id == requestID else { return }
+        state = .signingIn(request, task, nil)
+        browser?.cancel()
+    }
+
+    private func fail(_ requestID: UUID, error: any Error) {
+        guard let request = state.attempt, request.id == requestID else { return }
+        let previous = state
+        state = .failed(request, TeleportAccessError.message(for: error))
+        if case .signingIn(_, let task, let browser) = previous {
+            task.cancel()
+            browser?.cancel()
+        }
+    }
+
     private func finish(_ requestID: UUID, returning result: Bool) {
         guard let request = state.attempt, request.id == requestID else { return }
         let previous = state
         state = .idle
         if case .checking(_, let task) = previous { task.cancel() }
+        if case .signingIn(_, let task, let browser) = previous {
+            task.cancel()
+            browser?.cancel()
+        }
         request.resume(returning: result)
     }
 }

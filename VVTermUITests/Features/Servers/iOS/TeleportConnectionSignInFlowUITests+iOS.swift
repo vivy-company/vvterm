@@ -5,47 +5,51 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
     @MainActor
-    func testExpiredAccessOpensSignInWithoutPasswordAndCancelStopsConnection() {
+    func testExpiredAccessAuthenticatesDirectlyWithoutAnAppSignInSheet() {
         let app = launchHarness()
         defer { app.terminate() }
-        openSignIn(in: app)
-
-        let signIn = app.buttons["vvterm.teleport.signIn"]
-        XCTAssertTrue(signIn.waitForExistence(timeout: 5))
-        XCTAssertTrue(signIn.isEnabled)
-        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
-        XCTAssertFalse(app.descendants(matching: .any)["vvterm.teleport.signInMethod"].exists)
-        XCTAssertEqual(app.textFields.count, 0, "Renewal must not edit the saved server")
-        XCTAssertFalse(app.buttons["vvterm.teleport.node"].exists)
-        XCTAssertFalse(app.buttons["vvterm.teleport.login"].exists)
-        XCTAssertFalse(app.buttons["vvterm.teleport.credential.setup"].exists)
-
-        let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "Teleport connection sign-in"
-        screenshot.lifetime = .keepAlways
-        add(screenshot)
-
-        app.navigationBars["Sign in to Teleport"].buttons["Cancel"].tap()
-        XCTAssertTrue(app.staticTexts["cancelled"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.navigationBars["Sign in to Teleport"].waitForNonExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["vvterm.teleport.renewalTest.connect"].isEnabled)
-    }
-
-    @MainActor
-    func testApprovedStoredAccessResumesConnectionAndClosesSignIn() {
-        let app = launchHarness()
-        defer { app.terminate() }
-        openSignIn(in: app)
-
-        app.buttons["vvterm.teleport.renewalTest.finish"].tap()
+        connect(in: app)
 
         XCTAssertTrue(app.staticTexts["connected"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.navigationBars["Sign in to Teleport"].waitForNonExistence(timeout: 5))
+        assertNoSignInForm(in: app)
         XCTAssertTrue(app.buttons["vvterm.teleport.renewalTest.connect"].isEnabled)
     }
 
     @MainActor
-    private func launchHarness() -> XCUIApplication {
+    func testFailedAuthenticationOffersCancelWithoutOpeningConnection() {
+        let app = launchHarness(failFirst: true)
+        defer { app.terminate() }
+        connect(in: app)
+
+        let alert = app.alerts["Teleport sign-in failed"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.buttons["Retry"].exists)
+        assertNoSignInForm(in: app)
+        alert.buttons["Cancel"].tap()
+
+        XCTAssertTrue(app.staticTexts["cancelled"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["connected"].exists)
+        XCTAssertTrue(alert.waitForNonExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["vvterm.teleport.renewalTest.connect"].isEnabled)
+    }
+
+    @MainActor
+    func testRetryAuthenticatesThePendingConnectionWithoutAnAppSheet() {
+        let app = launchHarness(failFirst: true)
+        defer { app.terminate() }
+        connect(in: app)
+
+        let alert = app.alerts["Teleport sign-in failed"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        alert.buttons["Retry"].tap()
+
+        XCTAssertTrue(app.staticTexts["connected"].waitForExistence(timeout: 5))
+        XCTAssertTrue(alert.waitForNonExistence(timeout: 5))
+        assertNoSignInForm(in: app)
+    }
+
+    @MainActor
+    private func launchHarness(failFirst: Bool = false) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
             "--vvterm-ui-test-teleport-connection-sign-in",
@@ -53,12 +57,13 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
             "-hasSeenWelcome", "YES", "-iCloudSyncEnabled", "NO",
             "-security.privacyModeEnabled", "NO", "-security.fullAppLockEnabled", "NO"
         ]
+        if failFirst { app.launchArguments.append("--vvterm-ui-test-teleport-renewal-failure") }
         app.launch()
         return app
     }
 
     @MainActor
-    private func openSignIn(in app: XCUIApplication) {
+    private func connect(in app: XCUIApplication) {
         let connect = app.buttons["vvterm.teleport.renewalTest.connect"]
         let hasConnect = connect.waitForExistence(timeout: 10)
         if !hasConnect {
@@ -73,9 +78,14 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
         }
         XCTAssertTrue(hasConnect)
         connect.tap()
-        XCTAssertTrue(app.navigationBars["Sign in to Teleport"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["Renewal UI server"].exists)
-        XCTAssertTrue(app.staticTexts["ui-test-user"].exists)
+    }
+
+    @MainActor
+    private func assertNoSignInForm(in app: XCUIApplication) {
+        XCTAssertFalse(app.navigationBars["Sign in to Teleport"].exists)
+        XCTAssertFalse(app.buttons["vvterm.teleport.signIn"].exists)
+        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
+        XCTAssertEqual(app.textFields.count, 0)
     }
 }
 #endif

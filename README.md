@@ -123,8 +123,9 @@ cannot approve this browser setup.
 
 Setup and the first certificate request can each ask for biometric approval.
 Later sign-ins use Face ID or Touch ID to obtain fresh SSH/TLS certificates.
-Starting or retrying a connection with missing or expired access opens this
-sign-in flow. Cancel stops the connection. The app rechecks the saved entry,
+Starting or retrying a connection with missing or expired access starts Face ID
+or the browser directly. There is no app sign-in sheet. A failure offers Retry
+and Cancel; Cancel stops the connection. The app rechecks the saved entry,
 account, cluster, SSH login, and expiry before connecting. Server edits or deletion
 cancel the attempt; connection-history updates do not. Existing sessions keep
 running. Automatic reconnect does not wait for interactive sign-in.
@@ -153,8 +154,9 @@ sync removes those old cloud items. No password value is read or copied.
 
 Tests cover local-account policy, native-first sign-in, missing-key setup,
 cancellation, certificate binding, storage cleanup, and UI retention. UI fixtures
-use no server or device key and disable automatic authentication. Real-server
-software-key tests are separate from browser approval and Apple hardware checks.
+use memory authentication and no real browser or device key. Connection fixtures
+exercise automatic completion and Retry/Cancel through the same window host.
+Real-server software-key tests are separate from browser and Apple hardware checks.
 Secure Enclave, biometric prompts, signed Keychain behavior, full browser setup,
 and app SSH/files still need real-device evidence. See TeleportKit's validation
 notes for the exact checks.

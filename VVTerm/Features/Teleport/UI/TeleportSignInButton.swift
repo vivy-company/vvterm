@@ -5,9 +5,7 @@ import TeleportKit
 struct TeleportSignInButton: View {
     let service: TeleportAccessService
     let model: TeleportProfileModel
-    var startsAutomatically = false
     @State private var presentationWindow = TeleportPresentationWindow()
-    @State private var didStartAutomatically = false
 
     var body: some View {
         Button("Sign in", action: signIn)
@@ -16,11 +14,6 @@ struct TeleportSignInButton: View {
                 TeleportPresentationWindowReader(presentationWindow: presentationWindow)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
-            }
-            .task {
-                guard startsAutomatically, !didStartAutomatically else { return }
-                didStartAutomatically = true
-                signIn()
             }
     }
 

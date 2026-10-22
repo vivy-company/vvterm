@@ -1,5 +1,6 @@
 import Combine
 import Foundation
+import TeleportKit
 import Testing
 @testable import VVTerm
 
@@ -306,6 +307,226 @@ struct TeleportConnectionSignInCoordinatorTests {
         #expect(await completion.value == false)
     }
 
+    @Test(arguments: [false, true])
+    func directAuthenticationRechecksLocalApprovalAndStoredAccess(approvalAllowed: Bool) async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        let browser = TestBrowser()
+        var approvals = 0
+        var browserCreations = 0
+        let fresh = makeSummary()
+
+        coordinator.signIn(request.id, authenticate: { profile, _ in
+            #expect(profile == server.teleportConfiguration?.profile)
+            await source.set(fresh)
+        }, makeBrowserSession: { _ in
+            browserCreations += 1
+            return browser
+        }, authorize: { approvedServer in
+            approvals += 1
+            #expect(approvedServer == server)
+            return approvalAllowed
+        })
+
+        #expect(await attempt.value == approvalAllowed)
+        #expect(approvals == 1)
+        #expect(browserCreations == 0)
+        #expect(await source.readCount == (approvalAllowed ? 2 : 1))
+        #expect(coordinator.request == nil)
+    }
+
+    @Test(arguments: [false, true])
+    func cancellationDuringAuthenticationClosesBrowserAndRejectsLateResult(profileEdited: Bool) async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        let gate = SummaryGate()
+        let browser = TestBrowser()
+        var approvals = 0
+        coordinator.signIn(request.id, authenticate: { _, makeBrowser in
+            _ = try makeBrowser()
+            _ = try await gate.read()
+        }, makeBrowserSession: { _ in browser }, authorize: { _ in
+            approvals += 1
+            return true
+        })
+        await gate.waitForRead()
+        if profileEdited {
+            current.server?.notes = "Changed"
+            coordinator.savedServersDidChange(current.server.map { [$0] } ?? [])
+        } else {
+            coordinator.cancel()
+        }
+
+        #expect(await attempt.value == false)
+        #expect(browser.cancellations == 1)
+        #expect(coordinator.request == nil)
+        await gate.resolve(nil)
+        #expect(approvals == 0)
+    }
+
+    @Test
+    func cancellationDuringLocalApprovalDoesNotCompleteANewerRequest() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let firstAttempt = Task { await coordinator.ensureAccess(for: server) }
+        let first = await waitForRequest(coordinator)
+        let gate = SummaryGate()
+        coordinator.signIn(first.id, authenticate: { _, _ in }, makeBrowserSession: { _ in TestBrowser() },
+                           authorize: { _ in _ = try? await gate.read(); return true })
+        await gate.waitForRead()
+        coordinator.cancel(first.id)
+        #expect(await firstAttempt.value == false)
+
+        let secondAttempt = Task { await coordinator.ensureAccess(for: server) }
+        let second = await waitForRequest(coordinator)
+        await gate.resolve(nil)
+        #expect(coordinator.request?.id == second.id)
+        coordinator.cancel(second.id)
+        #expect(await secondAttempt.value == false)
+    }
+
+    @Test
+    func cancelledAuthenticationCannotAffectANewerRequest() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let firstAttempt = Task { await coordinator.ensureAccess(for: server) }
+        let first = await waitForRequest(coordinator)
+        let gate = SummaryGate()
+        var approvals = 0
+        coordinator.signIn(first.id, authenticate: { _, _ in _ = try await gate.read() },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in
+            approvals += 1
+            return true
+        })
+        await gate.waitForRead()
+        coordinator.cancel(first.id)
+        #expect(await firstAttempt.value == false)
+
+        let secondAttempt = Task { await coordinator.ensureAccess(for: server) }
+        let second = await waitForRequest(coordinator)
+        await gate.resolve(nil)
+        #expect(coordinator.request?.id == second.id)
+        #expect(approvals == 0)
+        coordinator.cancel(second.id)
+        #expect(await secondAttempt.value == false)
+    }
+
+    @Test
+    func failedAuthenticationCanRetryOnceWithoutStartingConcurrentWork() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        coordinator.signIn(request.id, authenticate: { _, _ in throw TeleportError.accessDenied },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        await waitForFailure(coordinator)
+        #expect(coordinator.request?.id == request.id)
+        #expect(coordinator.failureMessage == TeleportAccessError.message(for: TeleportError.accessDenied))
+
+        let gate = SummaryGate()
+        let fresh = makeSummary()
+        var calls = 0
+        let authenticate: TeleportConnectionSignInCoordinator.Authentication = { _, _ in
+            calls += 1
+            _ = try await gate.read()
+            await source.set(fresh)
+        }
+        coordinator.signIn(request.id, authenticate: authenticate,
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        await gate.waitForRead()
+        #expect(coordinator.failureMessage == nil)
+        coordinator.signIn(request.id, authenticate: authenticate,
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        #expect(await coordinator.ensureAccess(for: server) == false)
+        #expect(calls == 1)
+        await gate.resolve(nil)
+        #expect(await attempt.value)
+        #expect(coordinator.request == nil)
+    }
+
+    @Test
+    func changedProfileCannotRetryFailedAuthentication() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        coordinator.signIn(request.id, authenticate: { _, _ in throw TeleportError.accessDenied },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        await waitForFailure(coordinator)
+        current.server?.username = "other-login"
+        coordinator.signIn(request.id, authenticate: { _, _ in Issue.record("A changed profile must not retry") },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        #expect(await attempt.value == false)
+        #expect(coordinator.request == nil)
+    }
+
+    @Test
+    func authenticationCancellationStopsConnectionWithoutAnErrorAlert() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        coordinator.signIn(request.id, authenticate: { _, _ in throw CancellationError() },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        #expect(await attempt.value == false)
+        #expect(coordinator.failureMessage == nil)
+    }
+
+    @Test
+    func browserCancellationDuringCreationCannotRestoreTheCancelledRequest() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        let browser = TestBrowser()
+        coordinator.signIn(request.id, authenticate: { _, makeBrowser in _ = try makeBrowser() },
+                           makeBrowserSession: { cancel in cancel(); return browser }, authorize: { _ in
+            Issue.record("A cancelled browser must not reach local approval")
+            return true
+        })
+        #expect(await attempt.value == false)
+        #expect(coordinator.request == nil)
+        #expect(coordinator.failureMessage == nil)
+        #expect(browser.cancellations == 1)
+    }
+
+    @Test
+    func successfulAuthenticationCannotConnectWithMismatchedStoredAccess() async throws {
+        let server = try makeServer()
+        let source = SummarySource(value: nil)
+        let current = CurrentServer(server)
+        let coordinator = makeCoordinator(source: source, current: current)
+        let attempt = Task { await coordinator.ensureAccess(for: server) }
+        let request = await waitForRequest(coordinator)
+        let wrong = makeSummary(account: "other-account")
+        coordinator.signIn(request.id, authenticate: { _, _ in await source.set(wrong) },
+                           makeBrowserSession: { _ in TestBrowser() }, authorize: { _ in true })
+        await waitForFailure(coordinator)
+        #expect(coordinator.request?.id == request.id)
+        coordinator.cancel(request.id)
+        #expect(await attempt.value == false)
+    }
+
     enum InvalidAccess: CaseIterable {
         case missing, readFailure, account, cluster, login, expired, expiryBoundary, invalidExpiry
     }
@@ -368,6 +589,24 @@ struct TeleportConnectionSignInCoordinatorTests {
             if let request = coordinator.request { return request }
         }
         preconditionFailure("The coordinator must publish a sign-in request")
+    }
+
+    private func waitForFailure(_ coordinator: TeleportConnectionSignInCoordinator) async {
+        if coordinator.failureMessage != nil { return }
+        let (changes, continuation) = AsyncStream<Void>.makeStream(bufferingPolicy: .bufferingNewest(1))
+        let subscription = coordinator.objectWillChange.sink { continuation.yield(()) }
+        defer { subscription.cancel(); continuation.finish() }
+        for await _ in changes {
+            await Task.yield()
+            if coordinator.failureMessage != nil { return }
+        }
+    }
+
+    @MainActor
+    private final class TestBrowser: TeleportBrowserSession {
+        private(set) var cancellations = 0
+        func open(_ url: URL) async throws {}
+        func cancel() { cancellations += 1 }
     }
 
     @MainActor
