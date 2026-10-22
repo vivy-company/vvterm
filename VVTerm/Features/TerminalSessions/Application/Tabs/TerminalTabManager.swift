@@ -314,7 +314,10 @@ final class TerminalTabManager {
 
     /// Open a new tab for a server
     @discardableResult
-    func openTab(for server: Server) async throws -> TerminalTab {
+    func openTab(
+        for server: Server,
+        authorizeConnection: @MainActor () async -> Bool = { true }
+    ) async throws -> TerminalTab {
         if tabOpenAttemptsByServer[server.id] != nil {
             throw TerminalTabOpeningError.alreadyOpening
         }
@@ -334,6 +337,10 @@ final class TerminalTabManager {
         guard isAuthorized else {
             throw VVTermError.authenticationFailed
         }
+
+        guard await authorizeConnection() else { throw CancellationError() }
+        try Task.checkCancellation()
+        guard tabOpenAttemptsByServer[server.id] == attemptID else { throw CancellationError() }
 
         if sessionState.tabs(for: server.id).isEmpty {
             dependencies.effects.prepareInitialConnection(server)

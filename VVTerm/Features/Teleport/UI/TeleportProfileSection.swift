@@ -10,11 +10,13 @@ struct TeleportProfileSection: View {
     @Binding var nodeID: String
     @Binding var login: String
     let onSelectNode: (String) -> Void
+    var showsServerSelection = true
 
     var body: some View {
         TeleportProfileContent(
             model: model, service: service, password: $password, clusterName: $clusterName,
-            nodeID: $nodeID, login: $login, onSelectNode: onSelectNode
+            nodeID: $nodeID, login: $login, onSelectNode: onSelectNode,
+            showsServerSelection: showsServerSelection
         )
         .id(model.profile)
     }
@@ -24,6 +26,7 @@ struct TeleportProfileSection: View {
 private struct TeleportProfileContent: View {
     let onSelectNode: (String) -> Void
     private let service: TeleportAccessService
+    private let showsServerSelection: Bool
     @Binding private var password: String
     @Binding private var clusterName: String
     @Binding private var nodeID: String
@@ -42,9 +45,11 @@ private struct TeleportProfileContent: View {
         clusterName: Binding<String>,
         nodeID: Binding<String>,
         login: Binding<String>,
-        onSelectNode: @escaping (String) -> Void
+        onSelectNode: @escaping (String) -> Void,
+        showsServerSelection: Bool
     ) {
         self.service = service
+        self.showsServerSelection = showsServerSelection
         self.onSelectNode = onSelectNode
         _password = password
         _clusterName = clusterName
@@ -72,7 +77,7 @@ private struct TeleportProfileContent: View {
                     Text("Sign in")
                 }
             }
-            if let summary = validSummary {
+            if showsServerSelection, let summary = validSummary {
                 serverSection(summary: summary)
             }
         }
@@ -109,7 +114,7 @@ private struct TeleportProfileContent: View {
     }
 
     private var showsSignIn: Bool {
-        selectedMethod != nil || validSummary == nil
+        !showsServerSelection || selectedMethod != nil || validSummary == nil
     }
 
     private func serverSection(summary: TeleportAccessSummary) -> some View {

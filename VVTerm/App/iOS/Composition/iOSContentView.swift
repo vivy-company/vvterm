@@ -27,6 +27,8 @@ struct iOSContentView: View {
     @ObservedObject private var engagementTracker: EngagementTracker
     private let tabManager: TerminalTabManager
     @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
+    @EnvironmentObject private var appLockManager: AppLockManager
     @Environment(\.requestReview) private var requestReview
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
@@ -109,7 +111,7 @@ struct iOSContentView: View {
                 onSelection()
             },
             onActiveConnectionSelected: { server in
-                terminalRoute = .active(serverId: server.id)
+                activateExistingConnection(to: server)
                 onSelection()
             }
         )
@@ -134,7 +136,7 @@ struct iOSContentView: View {
                 route: terminalRoute,
                 makeLocalDiscoveryManager: makeLocalDiscoveryManager,
                 onToggleSidebar: onToggleSidebar,
-                onSessionServerSelected: { self.terminalRoute = .active(serverId: $0.id) },
+                onSessionServerSelected: { activateExistingConnection(to: $0) },
                 onBack: { self.terminalRoute = nil }
             )
             .id(terminalRoute.serverId)
@@ -249,7 +251,7 @@ struct iOSContentView: View {
     private func beginConnection(to server: Server) {
         if usesAdaptiveNavigation {
             if !tabManager.sessionState.tabs(for: server.id).isEmpty || !fileTabs.tabs(for: server.id).isEmpty {
-                terminalRoute = .active(serverId: server.id)
+                activateExistingConnection(to: server)
                 return
             }
             guard terminalRoute?.serverId != server.id else { return }
@@ -289,6 +291,27 @@ struct iOSContentView: View {
         }
     }
 
+    private func activateExistingConnection(to server: Server) {
+        guard server.connectionMode == .teleport,
+              !tabManager.sessionState.navigationState.connectedServerIds.contains(server.id) else {
+            terminalRoute = .active(serverId: server.id)
+            return
+        }
+        let previousRoute = terminalRoute
+        Task {
+            guard await appLockManager.ensureServerUnlocked(server),
+                  await teleportSignIn.ensureAccess(for: server), !Task.isCancelled,
+                  terminalRoute == previousRoute else { return }
+            terminalRoute = .active(serverId: server.id)
+            if let paneID = (tabManager.sessionState.selectedTab(for: server.id)
+                ?? tabManager.sessionState.tabs(for: server.id).first)?.focusedPaneId,
+               let pane = tabManager.sessionState.paneState(for: paneID),
+               !pane.connectionState.isConnected, !pane.connectionState.isConnecting {
+                _ = tabManager.reconnectCoordinator.request(for: paneID, requiresReadyNetwork: false)
+            }
+        }
+    }
+
     @discardableResult
     private func resolveConnection(
         for attemptID: UUID,
@@ -313,7 +336,9 @@ struct iOSContentView: View {
         let pendingConnection = PendingConnection(
             operationID: UUID(),
             task: Task {
-                try await tabManager.openTab(for: server)
+                try await tabManager.openTab(for: server) {
+                    await teleportSignIn.ensureAccess(for: server)
+                }
             }
         )
         pendingConnections[server.id] = pendingConnection

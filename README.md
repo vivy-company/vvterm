@@ -139,6 +139,23 @@ connector are under **Advanced**. The server list shows local access expiry and 
 distinct Teleport icon. Access status refreshes on display, in the foreground, and
 once per minute while visible. Expiry is never stored in CloudKit.
 
+Starting a connection with missing or expired access opens a sign-in sheet.
+It uses that server's saved password after local unlock. Successful sign-in
+continues the connection; Cancel opens no tab. Each window has its own request.
+Reopening a disconnected server and its manual Retry action use the same check.
+Live transports stay open.
+The saved entry and issued account, cluster, SSH login, and expiry are checked
+again before the connection starts. A server edit or deletion cancels the attempt;
+automatic connection-history updates do not.
+This sheet does not edit the server or save a changed password; use the server
+form to save changes. Automatic reconnect does not wait for interactive sign-in.
+Expiry or sign-out after the check can still stop a connection; transport checks
+remain strict.
+
+Renewal UI tests use expired in-memory access and a simulated stored login result.
+They check the saved-password field, fixed server details, Cancel, and handoff.
+They do not prove real sign-in, Keychain sync, browser approval, or SSH.
+
 Local accounts can also set up a device-bound Secure Enclave credential in the
 profile's **Security → Teleport verification** settings. Select **This device**
 under **Verify with** to use it. The saved password is filled like an SSH password.

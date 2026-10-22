@@ -14,6 +14,7 @@ struct ServerSidebarView: View {
 
     @EnvironmentObject private var storeManager: StoreManager
     @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
     @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
     private let tabManager: TerminalTabManager
     @ObservedObject private var terminalNavigation: TerminalSessionNavigationProjection
@@ -706,9 +707,22 @@ struct ServerSidebarView: View {
     // MARK: - Empty States
 
     private func selectServer(_ server: Server) {
+        let previousSelection = selectedServer?.id
         Task { @MainActor in
             guard await appLockManager.ensureServerUnlocked(server) else { return }
+            if server.connectionMode == .teleport,
+               !tabManager.sessionState.navigationState.connectedServerIds.contains(server.id) {
+                guard await teleportSignIn.ensureAccess(for: server), !Task.isCancelled,
+                      selectedServer?.id == previousSelection else { return }
+            }
             selectedServer = server
+            if server.connectionMode == .teleport,
+               let paneID = (tabManager.sessionState.selectedTab(for: server.id)
+                ?? tabManager.sessionState.tabs(for: server.id).first)?.focusedPaneId,
+               let pane = tabManager.sessionState.paneState(for: paneID),
+               !pane.connectionState.isConnected, !pane.connectionState.isConnecting {
+                _ = tabManager.reconnectCoordinator.request(for: paneID, requiresReadyNetwork: false)
+            }
         }
     }
 
@@ -716,7 +730,9 @@ struct ServerSidebarView: View {
         Task {
             guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
-                let tab = try await tabManager.openTab(for: server)
+                let tab = try await tabManager.openTab(for: server) {
+                    await teleportSignIn.ensureAccess(for: server)
+                }
                 await MainActor.run {
                     selectedServer = server
                     tabManager.sessionState.selectView(

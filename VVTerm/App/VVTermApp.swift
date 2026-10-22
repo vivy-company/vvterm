@@ -334,6 +334,8 @@ struct VVTermApp: App {
         } else if Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-composer") {
             TerminalComposerUITestHarness(keyboard: tabManager.keyboardCoordinator)
                 .environmentObject(ghosttyApp)
+        } else if Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-teleport-connection-sign-in") {
+            TeleportConnectionSignInUITestHarness()
         } else if Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-custom-theme-duplicate") {
             CustomThemeDuplicateUITestHarness()
         } else if Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-notification-settings") {
@@ -460,6 +462,9 @@ struct VVTermApp: App {
                         macOSRootContent
                         #endif
                     }
+                    .modifier(TeleportConnectionSignInHost(
+                        dependencies: serverFormDependencies, serverManager: serverManager
+                    ))
                     .adaptiveSoftScrollEdges()
                     .environment(\.locale, appLocale)
                     .environment(\.privacyModeEnabled, privacyModeEnabled)
