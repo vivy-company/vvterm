@@ -121,8 +121,9 @@ the final native sign-in is stored. Setup needs trusted HTTPS, server support fo
 headless and passwordless login, and working Face ID or Touch ID. TOTP alone
 cannot approve this browser setup.
 
-Setup and the first certificate request can each ask for biometric approval.
-Later sign-ins use Face ID or Touch ID to obtain fresh SSH/TLS certificates.
+The library shares biometric approval across local device setup and the first
+certificate request. Browser passkey checks are separate. Later sign-ins need
+fresh Face ID or Touch ID to obtain SSH/TLS certificates.
 Starting or retrying a connection with missing or expired access starts Face ID
 or the browser directly. There is no app sign-in sheet. A failure offers Retry
 and Cancel; Cancel stops the connection. The app rechecks the saved entry,
@@ -157,8 +158,8 @@ cancellation, certificate binding, storage cleanup, and UI retention. UI fixture
 use memory authentication and no real browser or device key. Connection fixtures
 exercise automatic completion and Retry/Cancel through the same window host.
 Real-server software-key tests are separate from browser and Apple hardware checks.
-Secure Enclave, biometric prompts, signed Keychain behavior, full browser setup,
-and app SSH/files still need real-device evidence. See TeleportKit's validation
+The reduced setup prompt count, Secure Enclave, signed Keychain behavior, full
+browser setup, and app SSH/files still need real-device evidence. See TeleportKit's validation
 notes for the exact checks.
 
 ## Documentation
