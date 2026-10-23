@@ -61,7 +61,7 @@ final class TeleportServerFormFlowUITests: XCTestCase {
     }
 
     @MainActor
-    func testTeleportMetadataCanBeSavedBeforeSignInAndReopened() {
+    func testTeleportFormHasNoManualConnectionOverrides() {
         let app = XCUIApplication()
         app.launchArguments = [
             "--vvterm-ui-test-server-duplicate-harness", "--vvterm-ui-test-teleport-server-form",
@@ -84,51 +84,20 @@ final class TeleportServerFormFlowUITests: XCTestCase {
         XCTAssertTrue(teleport.waitForExistence(timeout: 5))
         teleport.tap()
 
+        enter(app.textFields["vvterm.serverForm.teleport.proxy"], with: "teleport.example.invalid", in: app, scrollingUp: true)
+        enter(app.textFields["vvterm.serverForm.teleport.account"], with: "test-user", in: app, scrollingUp: true)
+        XCTAssertFalse(app.buttons["vvterm.serverForm.teleport.advanced"].exists)
         XCTAssertFalse(app.textFields["vvterm.serverForm.teleport.cluster"].exists)
         XCTAssertFalse(app.textFields["vvterm.serverForm.teleport.nodeID"].exists)
-        let advanced = app.buttons["vvterm.serverForm.teleport.advanced"]
-        reveal(advanced, in: app, scrollingUp: true)
-        advanced.tap()
-        let values = [
-            ("vvterm.serverForm.teleport.proxy", "teleport.example.invalid"),
-            ("vvterm.serverForm.teleport.account", "test-user"),
-            ("vvterm.serverForm.teleport.cluster", "root.example.test"),
-            ("vvterm.serverForm.teleport.nodeID", "teleport-ui-node"),
-            ("vvterm.serverForm.username", "deploy")
-        ]
-        for (index, pair) in values.enumerated() {
-            enter(app.textFields[pair.0], with: pair.1, in: app, scrollingUp: index != 0)
-        }
+        XCTAssertFalse(app.textFields["vvterm.serverForm.username"].exists)
         XCTAssertFalse(app.textFields["vvterm.serverForm.host"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["vvterm.serverForm.authMethod"].exists)
         XCTAssertFalse(app.secureTextFields.firstMatch.exists)
-        let add = app.buttons["Add"]
-        XCTAssertTrue(add.isEnabled)
-        add.tap()
-        XCTAssertTrue(app.textFields["vvterm.serverForm.name"].waitForNonExistence(timeout: 10))
-
-        let row = app.descendants(matching: .any)["vvterm.serverDuplicateTest.row"]
-        reveal(row, in: app, scrollingUp: true)
-        XCTAssertTrue(row.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["Add"].isEnabled, "A new server needs a selected node and SSH login")
         let screenshot = XCTAttachment(screenshot: app.screenshot())
-        screenshot.name = "Teleport row divider"
+        screenshot.name = "Teleport form without manual overrides"
         screenshot.lifetime = .keepAlways
-        self.add(screenshot)
-        row.press(forDuration: 1)
-        app.buttons["Edit"].tap()
-        XCTAssertTrue(app.navigationBars["Edit Server"].waitForExistence(timeout: 10))
-        XCTAssertEqual(app.textFields["vvterm.serverForm.name"].value as? String, "Teleport UI Node")
-        reveal(advanced, in: app, scrollingUp: true)
-        advanced.tap()
-        for (index, pair) in values.enumerated() {
-            let field = app.textFields[pair.0]
-            reveal(field, in: app, scrollingUp: index != 0)
-            let expected = pair.0 == "vvterm.serverForm.teleport.proxy"
-                ? "https://teleport.example.invalid" : pair.1
-            XCTAssertEqual(field.value as? String, expected)
-        }
-        XCTAssertFalse(app.textFields["vvterm.serverForm.host"].exists)
-        XCTAssertFalse(app.secureTextFields.firstMatch.exists)
+        add(screenshot)
         app.buttons["Cancel"].tap()
         checkLocalCredentialRecovery(in: app)
     }

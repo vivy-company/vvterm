@@ -45,6 +45,26 @@ struct ServerFormModelTests {
         #expect(!model.isValid)
     }
 
+    @Test
+    func editingTeleportKeepsSavedNodeAndLogin() {
+        let original = validTeleportModel().makeServer(
+            id: UUID(), workspaceID: UUID(), createdAt: .distantPast
+        )
+        var model = ServerFormModel(
+            server: original, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        model.name = "Updated name"
+
+        #expect(model.isValid)
+        let saved = model.makeServer(
+            id: original.id, workspaceID: original.workspaceId, createdAt: original.createdAt
+        )
+        #expect(saved.teleportConfiguration == original.teleportConfiguration)
+        #expect(saved.username == original.username)
+        #expect(saved.name == "Updated name")
+    }
+
     @Test(arguments: [
         ("proxy.example.test", "https://proxy.example.test"),
         (" PROXY.EXAMPLE.TEST:443/ ", "https://proxy.example.test"),

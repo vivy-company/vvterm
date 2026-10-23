@@ -109,9 +109,9 @@ To add a server, select **Teleport**, enter its domain and Teleport username,
 then tap **Continue** and **Sign in**. A port is optional, for example
 `teleport.example.com:8443`. VVTerm adds HTTPS when the scheme is absent.
 HTTP, user information, paths, query strings, and fragments are rejected.
-After sign-in, choose the server and SSH login. Manual node IDs are under
-**Advanced**. The list shows local access expiry with a distinct Teleport icon.
-Expiry comes from local certificates and is not stored in CloudKit.
+After sign-in, choose the server and SSH login from the selectors. The app fills
+the cluster and node ID. The list shows local access expiry with a distinct
+Teleport icon. Expiry comes from local certificates and is not stored in CloudKit.
 
 First sign-in opens the system browser for approval with an existing Teleport
 passkey or security key. The library then registers a device key. Teleport can

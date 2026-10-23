@@ -675,33 +675,6 @@ struct ServerFormSheet: View {
                 Text("Sign in, then choose a node and OS login. Profile settings sync between devices. Issued access stays on this device.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                DisclosureGroup {
-                    TextField("Root Cluster", text: $form.teleportClusterName)
-                        .accessibilityIdentifier("vvterm.serverForm.teleport.cluster")
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        #endif
-                    TextField("Node ID", text: $form.teleportNodeID)
-                        .accessibilityIdentifier("vvterm.serverForm.teleport.nodeID")
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        #endif
-                    TextField("OS Login", text: $form.username)
-                        .accessibilityIdentifier("vvterm.serverForm.username")
-                        .autocorrectionDisabled()
-                        #if os(iOS)
-                        .textInputAutocapitalization(.never)
-                        #endif
-                    Button("Test Connection") {
-                        Task { await runConnectionTest(force: true) }
-                    }
-                    .disabled(!form.isValid || isTestingConnection || isSaving)
-                } label: {
-                    Text("Advanced")
-                        .accessibilityIdentifier("vvterm.serverForm.teleport.advanced")
-                }
             }
 
             if form.transportSelection == .eternalTerminal {
