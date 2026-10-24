@@ -168,9 +168,10 @@ cancellation, certificate binding, storage cleanup, and UI retention. UI fixture
 use memory authentication and no real browser or device key. Connection fixtures
 exercise automatic completion and Retry/Cancel through the same window host.
 Real-server software-key tests are separate from browser and Apple hardware checks.
-Combined connection/edit approval tests use simulated authentication. The actual
-Face ID/Touch ID prompt count, Secure Enclave, signed Keychain behavior, full
-browser setup, and app SSH/files still need real-device evidence. See TeleportKit's
+Automated approval tests use simulated authentication. A user confirmed normal
+Connect and same-account Edit/Save behavior on an iPhone. That run did not trace
+certificate renewal. Fresh-renewal and setup prompt counts, key recovery, full
+browser setup, and broad SSH/files coverage remain unverified. See TeleportKit's
 validation notes for the exact checks.
 
 ## Documentation
