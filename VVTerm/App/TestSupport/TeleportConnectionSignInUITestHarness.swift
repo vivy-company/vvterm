@@ -31,7 +31,7 @@ struct TeleportConnectionSignInUITestHarness: View {
             let server = Server(
                 workspaceId: UUID(), name: "Renewal UI server", host: configuration.nodeID,
                 username: "ui-test-login", connectionMode: .teleport,
-                teleportConfiguration: configuration
+                teleportConfiguration: configuration, requiresBiometricUnlock: true
             )
             let expired = TeleportAccessSummary(
                 account: profile.account, clusterName: configuration.clusterName,
@@ -49,7 +49,7 @@ struct TeleportConnectionSignInUITestHarness: View {
                 Button("Connect") {
                     outcome = .waiting
                     connectionTask = Task {
-                        let allowed = await coordinator.ensureAccess(for: Self.fixture.server)
+                        let allowed = await coordinator.ensureAccess(for: Self.fixture.server, authorize: { _ in true })
                         outcome = allowed ? .connected : .cancelled
                         connectionTask = nil
                     }

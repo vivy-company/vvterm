@@ -316,7 +316,7 @@ final class TerminalTabManager {
     @discardableResult
     func openTab(
         for server: Server,
-        authorizeConnection: @MainActor () async -> Bool = { true }
+        authorizeConnection: (@MainActor () async -> Bool)? = nil
     ) async throws -> TerminalTab {
         if tabOpenAttemptsByServer[server.id] != nil {
             throw TerminalTabOpeningError.alreadyOpening
@@ -329,18 +329,22 @@ final class TerminalTabManager {
             }
         }
 
-        let isAuthorized = await dependencies.effects.authorizeServer(server)
+        // A supplied operation owns the full connection approval, including the
+        // entry lock. This lets fresh device authentication approve both at once.
+        let isAuthorized: Bool
+        if let authorizeConnection {
+            isAuthorized = await authorizeConnection()
+        } else {
+            isAuthorized = await dependencies.effects.authorizeServer(server)
+        }
         try Task.checkCancellation()
         guard tabOpenAttemptsByServer[server.id] == attemptID else {
             throw CancellationError()
         }
         guard isAuthorized else {
+            if authorizeConnection != nil { throw CancellationError() }
             throw VVTermError.authenticationFailed
         }
-
-        guard await authorizeConnection() else { throw CancellationError() }
-        try Task.checkCancellation()
-        guard tabOpenAttemptsByServer[server.id] == attemptID else { throw CancellationError() }
 
         if sessionState.tabs(for: server.id).isEmpty {
             dependencies.effects.prepareInitialConnection(server)

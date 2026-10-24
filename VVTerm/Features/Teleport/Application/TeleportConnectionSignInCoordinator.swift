@@ -6,8 +6,13 @@ import TeleportKit
 @MainActor
 final class TeleportConnectionSignInCoordinator: ObservableObject {
     typealias Authentication = @MainActor @Sendable (
-        TeleportProfileConfiguration,
+        Server,
         @escaping @MainActor @Sendable () throws -> any TeleportBrowserSession
+    ) async throws -> Void
+    typealias FreshAuthorization = @MainActor @Sendable (
+        Server,
+        @MainActor @Sendable (TeleportAccessSummary) -> Bool,
+        @MainActor @Sendable () async throws -> TeleportAccessSummary
     ) async throws -> Void
 
     nonisolated struct Request: Identifiable {
@@ -69,8 +74,15 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         self.now = now
     }
 
-    func ensureAccess(for server: Server) async -> Bool {
-        guard server.connectionMode == .teleport else { return true }
+    func ensureAccess(
+        for server: Server,
+        authorize: @escaping @MainActor @Sendable (Server) async -> Bool
+    ) async -> Bool {
+        guard !Task.isCancelled else { return false }
+        guard server.connectionMode == .teleport else {
+            let allowed = await authorize(server)
+            return allowed && !Task.isCancelled
+        }
         guard !Task.isCancelled, let profile = server.teleportConfiguration?.profile,
               matchesCurrentServer(server), case .idle = state else { return false }
         let id = UUID()
@@ -86,7 +98,7 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
                 let task = Task<Void, Never> { [weak self] in
                     guard !Task.isCancelled else { return }
                     let stored = try? await summary(profile)
-                    self?.checked(stored, requestID: id)
+                    await self?.checked(stored, requestID: id, authorize: authorize)
                 }
                 state = .checking(request, task)
             }
@@ -100,7 +112,7 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         _ requestID: UUID,
         authenticate: @escaping Authentication,
         makeBrowserSession: @escaping TeleportProfileModel.BrowserFactory,
-        authorize: @escaping @MainActor @Sendable (Server) async -> Bool
+        authorizeFresh: @escaping FreshAuthorization
     ) {
         let request: Request
         switch state {
@@ -108,7 +120,7 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         default: return
         }
         guard request.id == requestID, matchesCurrentServer(request.server),
-              let profile = request.server.teleportConfiguration?.profile else {
+              request.server.teleportConfiguration?.profile != nil else {
             cancel(requestID)
             return
         }
@@ -116,14 +128,24 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
             guard let self else { return }
             do {
                 try Task.checkCancellation()
-                try await authenticate(profile) { [weak self] in
-                    guard let self else { throw CancellationError() }
-                    return try self.startBrowser(requestID, factory: makeBrowserSession)
+                try await authorizeFresh(request.server, { [weak self] stored in
+                    guard let self, currentRequest(requestID) != nil else { return false }
+                    return Self.isUsable(stored, for: request.server, at: now())
+                }) { [weak self] in
+                    guard let self, currentRequest(requestID) != nil else { throw CancellationError() }
+                    try await authenticate(request.server) { [weak self] in
+                        guard let self else { throw CancellationError() }
+                        return try self.startBrowser(requestID, factory: makeBrowserSession)
+                    }
+                    try Task.checkCancellation()
+                    closeBrowser(requestID)
+                    guard let stored = await readUsableAccess(requestID) else {
+                        throw TeleportError.invalidCertificate("saved access")
+                    }
+                    return stored
                 }
                 try Task.checkCancellation()
-                closeBrowser(requestID)
-                guard self.request?.id == requestID, matchesCurrentServer(request.server),
-                      await authorize(request.server), !Task.isCancelled else {
+                guard currentRequest(requestID) != nil else {
                     cancel(requestID)
                     return
                 }
@@ -151,20 +173,9 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
 
     /// Authentication success alone is insufficient; read the stored identity again.
     func complete(_ requestID: UUID) async -> Bool {
-        guard let request, request.id == requestID else { return false }
-        guard !Task.isCancelled, matchesCurrentServer(request.server),
-              let profile = request.server.teleportConfiguration?.profile else {
-            cancel(requestID)
-            return false
-        }
+        guard request?.id == requestID else { return false }
         return await withTaskCancellationHandler {
-            let stored = try? await summary(profile)
-            guard self.request?.id == requestID else { return false }
-            guard !Task.isCancelled, matchesCurrentServer(request.server) else {
-                cancel(requestID)
-                return false
-            }
-            guard Self.isUsable(stored, for: request.server, at: now()) else { return false }
+            guard await readUsableAccess(requestID) != nil else { return false }
             finish(requestID, returning: true)
             return true
         } onCancel: {
@@ -192,17 +203,50 @@ final class TeleportConnectionSignInCoordinator: ObservableObject {
         return remaining.isFinite && remaining > 0
     }
 
-    private func checked(_ stored: TeleportAccessSummary?, requestID: UUID) {
+    private func checked(
+        _ stored: TeleportAccessSummary?, requestID: UUID,
+        authorize: @MainActor @Sendable (Server) async -> Bool
+    ) async {
         guard case .checking(let request, _) = state, request.id == requestID else { return }
         guard !Task.isCancelled, matchesCurrentServer(request.server) else {
             cancel(requestID)
             return
         }
         if Self.isUsable(stored, for: request.server, at: now()) {
-            finish(requestID, returning: true)
-        } else {
-            state = .waiting(request)
+            let allowed = await authorize(request.server)
+            guard currentRequest(requestID) != nil else {
+                cancel(requestID)
+                return
+            }
+            guard allowed else { finish(requestID, returning: false); return }
+            // The certificate or saved entry can change while local approval is open.
+            if await readUsableAccess(requestID) != nil {
+                finish(requestID, returning: true)
+                return
+            }
         }
+        guard currentRequest(requestID) != nil else { return }
+        state = .waiting(request)
+    }
+
+    private func readUsableAccess(_ requestID: UUID) async -> TeleportAccessSummary? {
+        guard let request = currentRequest(requestID),
+              let profile = request.server.teleportConfiguration?.profile else {
+            cancel(requestID)
+            return nil
+        }
+        let stored = try? await summary(profile)
+        guard currentRequest(requestID) != nil else {
+            cancel(requestID)
+            return nil
+        }
+        return Self.isUsable(stored, for: request.server, at: now()) ? stored : nil
+    }
+
+    private func currentRequest(_ requestID: UUID) -> Request? {
+        guard !Task.isCancelled, let request = state.attempt, request.id == requestID,
+              matchesCurrentServer(request.server) else { return nil }
+        return request
     }
 
     private func matchesCurrentServer(_ server: Server) -> Bool {

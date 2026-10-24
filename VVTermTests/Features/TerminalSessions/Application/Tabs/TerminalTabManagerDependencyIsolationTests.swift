@@ -454,7 +454,7 @@ struct TerminalTabManagerDependencyIsolationTests {
             try await manager.openTab(for: server) { await gate.wait() }
         }
         #expect(await gate.waitUntilBlocked())
-        #expect(effects.authorizationRequests == [server.id])
+        #expect(effects.authorizationRequests.isEmpty)
         #expect(manager.sessionState.tabs(for: server.id).isEmpty)
         #expect(effects.initialConnectionPreparations.isEmpty)
 
@@ -476,7 +476,7 @@ struct TerminalTabManagerDependencyIsolationTests {
     }
 
     @Test
-    func serverAuthorizationDenialDoesNotStartConnectionApproval() async throws {
+    func defaultServerAuthorizationDenialStopsTabOpening() async throws {
         let effects = TerminalEffectRecorder()
         effects.authorizeResult = false
         let manager = makeManager(
@@ -487,20 +487,38 @@ struct TerminalTabManagerDependencyIsolationTests {
             deviceID: "server-authorization-denied"
         )
         let server = makeServer()
-        var connectionApprovalStarted = false
         do {
-            _ = try await manager.openTab(for: server) {
-                connectionApprovalStarted = true
-                return true
-            }
+            _ = try await manager.openTab(for: server)
             Issue.record("Server authorization must stop the tab open")
         } catch {
             #expect(error as? VVTermError == .authenticationFailed)
         }
         #expect(effects.authorizationRequests == [server.id])
-        #expect(!connectionApprovalStarted)
         #expect(manager.sessionState.tabs(for: server.id).isEmpty)
         #expect(effects.initialConnectionPreparations.isEmpty)
+        await manager.resetForTesting()
+    }
+
+    @Test
+    func combinedConnectionApprovalDoesNotAskForAnotherServerUnlock() async throws {
+        let effects = TerminalEffectRecorder()
+        effects.authorizeResult = false
+        let manager = makeManager(
+            network: PassthroughSubject<TerminalNetworkReadiness, Never>(),
+            effects: effects,
+            remoteSessions: RecordingTerminalRemoteTmuxService(),
+            remoteMosh: RecordingTerminalRemoteMoshService(),
+            deviceID: "combined-connection-approval"
+        )
+        let server = makeServer()
+        var approvals = 0
+        let tab = try await manager.openTab(for: server) {
+            approvals += 1
+            return true
+        }
+        #expect(approvals == 1)
+        #expect(effects.authorizationRequests.isEmpty)
+        #expect(manager.sessionState.tabs(for: server.id) == [tab])
         await manager.resetForTesting()
     }
 
@@ -516,14 +534,14 @@ struct TerminalTabManagerDependencyIsolationTests {
             effects: effects,
             remoteSessions: RecordingTerminalRemoteTmuxService(),
             remoteMosh: RecordingTerminalRemoteMoshService(),
-            deviceID: "tab-open-generation"
+            deviceID: "tab-open-attempt"
         )
         let server = makeServer()
         let staleOpen = Task {
-            try await manager.openTab(for: server) {
-                if waitingForConnectionApproval { return await gate.wait() }
-                return true
+            if waitingForConnectionApproval {
+                return try await manager.openTab(for: server) { await gate.wait() }
             }
+            return try await manager.openTab(for: server)
         }
         #expect(await gate.waitUntilBlocked())
 

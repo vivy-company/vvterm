@@ -5,7 +5,7 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
     override func setUpWithError() throws { continueAfterFailure = false }
 
     @MainActor
-    func testExpiredAccessAuthenticatesDirectlyWithoutAnAppSignInSheet() {
+    func testProtectedExpiredAccessUsesCombinedApprovalWithNoGracePeriod() {
         let app = launchHarness()
         defer { app.terminate() }
         connect(in: app)
@@ -55,7 +55,8 @@ final class TeleportConnectionSignInFlowUITests: XCTestCase {
             "--vvterm-ui-test-teleport-connection-sign-in",
             "-AppleLanguages", "(en)", "-AppleLocale", "en_US",
             "-hasSeenWelcome", "YES", "-iCloudSyncEnabled", "NO",
-            "-security.privacyModeEnabled", "NO", "-security.fullAppLockEnabled", "NO"
+            "-security.privacyModeEnabled", "NO", "-security.fullAppLockEnabled", "NO",
+            "-security.authGraceSeconds", "0"
         ]
         if failFirst { app.launchArguments.append("--vvterm-ui-test-teleport-renewal-failure") }
         app.launch()

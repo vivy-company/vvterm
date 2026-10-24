@@ -709,11 +709,14 @@ struct ServerSidebarView: View {
     private func selectServer(_ server: Server) {
         let previousSelection = selectedServer?.id
         Task { @MainActor in
-            guard await appLockManager.ensureServerUnlocked(server) else { return }
             if server.connectionMode == .teleport,
                !tabManager.sessionState.navigationState.connectedServerIds.contains(server.id) {
-                guard await teleportSignIn.ensureAccess(for: server), !Task.isCancelled,
+                guard await teleportSignIn.ensureAccess(for: server, authorize: {
+                    await appLockManager.ensureServerUnlocked($0)
+                }), !Task.isCancelled,
                       selectedServer?.id == previousSelection else { return }
+            } else {
+                guard await appLockManager.ensureServerUnlocked(server) else { return }
             }
             selectedServer = server
             if server.connectionMode == .teleport,
@@ -728,10 +731,11 @@ struct ServerSidebarView: View {
 
     private func connectToServer(_ server: Server) {
         Task {
-            guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
                 let tab = try await tabManager.openTab(for: server) {
-                    await teleportSignIn.ensureAccess(for: server)
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
                 }
                 await MainActor.run {
                     selectedServer = server

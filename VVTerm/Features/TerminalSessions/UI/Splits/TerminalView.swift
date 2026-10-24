@@ -1168,8 +1168,9 @@ struct TerminalPaneView: View {
         }
         reconnectCoordinator.cancelAutomaticRetry(for: paneId)
         Task {
-            guard await appLockManager.ensureServerUnlocked(server),
-                  await teleportSignIn.ensureAccess(for: server), !Task.isCancelled else { return }
+            guard await teleportSignIn.ensureAccess(for: server, authorize: {
+                await appLockManager.ensureServerUnlocked($0)
+            }), !Task.isCancelled else { return }
             retryConnection()
         }
     }

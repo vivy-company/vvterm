@@ -145,9 +145,19 @@ changes can also require recovery. Keep a working browser passkey or security ke
 Sign-out clears this device's issued access and keeps the device key.
 
 The separate **Require Face ID or Touch ID to open this server** setting protects
-one saved entry. It does not lock the shared account identity; another entry for
-the same account can use its valid certificates. Local unlock and a new Teleport
-signature can require separate biometric prompts.
+one saved entry. Fresh device-key sign-in also approves that connection's entry
+unlock. Valid certificates use the normal entry unlock instead. This does not
+unlock other entries or the whole app, and a zero-second grace setting does not
+add another prompt to the same connection.
+If cached access expires during local approval, renewal needs another approval.
+Locking the whole app cancels pending sign-in. Background locking can therefore
+stop setup when the system opens an external browser.
+
+A Teleport edit can reuse the current entry unlock. Its approval covers Save in
+that sheet, including edits longer than the connection grace period. Changing the
+proxy/account or saved binding, or locking the app again, needs fresh approval.
+Delete and ordinary SSH edit/save checks stay unchanged. The account identity is
+shared: another saved entry for the account can use its valid certificates.
 
 Old Teleport password items are deleted by their exact Keychain key. Ordinary
 SSH credentials stay intact. Cloud cleanup waits while sync is disabled; enabling
@@ -158,9 +168,10 @@ cancellation, certificate binding, storage cleanup, and UI retention. UI fixture
 use memory authentication and no real browser or device key. Connection fixtures
 exercise automatic completion and Retry/Cancel through the same window host.
 Real-server software-key tests are separate from browser and Apple hardware checks.
-The reduced setup prompt count, Secure Enclave, signed Keychain behavior, full
-browser setup, and app SSH/files still need real-device evidence. See TeleportKit's validation
-notes for the exact checks.
+Combined connection/edit approval tests use simulated authentication. The actual
+Face ID/Touch ID prompt count, Secure Enclave, signed Keychain behavior, full
+browser setup, and app SSH/files still need real-device evidence. See TeleportKit's
+validation notes for the exact checks.
 
 ## Documentation
 

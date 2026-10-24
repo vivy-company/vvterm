@@ -644,7 +644,9 @@ struct ServerTerminalRoute: View {
         Task {
             do {
                 let tab = try await tabManager.openTab(for: server) {
-                    await teleportSignIn.ensureAccess(for: server)
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
                 }
                 tabManager.sessionState.selectView(viewTabConfig.effectiveView(for: .terminal), for: server.id)
                 tabManager.sessionState.selectTab(tab.id, for: server.id)

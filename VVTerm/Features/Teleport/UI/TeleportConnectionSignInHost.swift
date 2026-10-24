@@ -14,11 +14,13 @@ struct TeleportConnectionSignInHost: ViewModifier {
     init(dependencies: ServerFormDependencies, serverManager: ServerManager) {
         let service = dependencies.teleportAccess
         browserFactory = service?.makeBrowserSession
-        authenticate = { profile, makeBrowserSession in
-            guard let service else { throw TeleportError.authenticationRequired }
+        authenticate = { server, makeBrowserSession in
+            guard let service, let profile = server.teleportConfiguration?.profile else {
+                throw TeleportError.authenticationRequired
+            }
             _ = try await service.signIn(
                 profile: profile,
-                prompt: String(localized: "Approve Teleport sign-in with Face ID or Touch ID."),
+                prompt: Self.signInPrompt(serverName: server.name),
                 makeBrowserSession: makeBrowserSession
             )
         }
@@ -46,6 +48,14 @@ struct TeleportConnectionSignInHost: ViewModifier {
     }
     #endif
 
+    static func signInPrompt(serverName: String) -> String {
+        let shortened = String(decoding: serverName.utf8.prefix(160), as: UTF8.self)
+        let name = shortened.components(separatedBy: .controlCharacters).joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let label = name.isEmpty ? String(localized: "this server") : name
+        return String(localized: "Open \(label) and sign in to Teleport with Face ID or Touch ID.")
+    }
+
     func body(content: Content) -> some View {
         let requestID = coordinator.request?.id
         content
@@ -59,6 +69,9 @@ struct TeleportConnectionSignInHost: ViewModifier {
                 if let id { signIn(id) }
             }
             .onReceive(serverUpdates) { coordinator.savedServersDidChange($0) }
+            .onChange(of: appLock.isAppLocked) { locked in
+                if locked { coordinator.cancel() }
+            }
             .alert("Teleport sign-in failed", isPresented: Binding(
                 get: { coordinator.failureMessage != nil },
                 // The actions own completion. Dismissal must not cancel a retry.
@@ -86,7 +99,11 @@ struct TeleportConnectionSignInHost: ViewModifier {
                 }
                 return browserFactory(anchor, onCancel)
             },
-            authorize: { server in await appLock.ensureServerUnlocked(server) }
+            authorizeFresh: { server, validate, operation in
+                _ = try await appLock.withServerBiometricAuthentication(
+                    server, validate: validate, operation: operation
+                )
+            }
         )
     }
 }

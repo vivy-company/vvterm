@@ -210,10 +210,11 @@ struct ContentView: View {
 
     private func connectToServer(_ server: Server) {
         Task {
-            guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
                 let tab = try await tabManager.openTab(for: server) {
-                    await teleportSignIn.ensureAccess(for: server)
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
                 }
                 await MainActor.run {
                     tabManager.sessionState.selectView(

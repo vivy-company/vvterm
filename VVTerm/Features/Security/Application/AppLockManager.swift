@@ -170,6 +170,37 @@ final class AppLockManager: ObservableObject {
         return true
     }
 
+    /// The caller must perform fresh native biometric authentication and validate
+    /// its result. This grants only this entry; it never unlocks the app.
+    func withServerBiometricAuthentication<Result: Sendable>(
+        _ server: Server,
+        validate: @MainActor (Result) -> Bool,
+        operation: @MainActor () async throws -> Result
+    ) async throws -> Result {
+        try Task.checkCancellation()
+        guard authenticationState == .idle, !isAppLocked else {
+            throw CancellationError()
+        }
+        let attemptID = dependencies.makeID()
+        let purpose = AppLockAuthenticationState.Purpose.unlockServer(serverID: server.id)
+        authenticationState = .authenticating(attemptID: attemptID, purpose: purpose)
+        defer {
+            if authenticationState.accepts(attemptID: attemptID, purpose: purpose) {
+                authenticationState = .idle
+            }
+        }
+
+        let result = try await operation()
+        try Task.checkCancellation()
+        guard authenticationState.accepts(attemptID: attemptID, purpose: purpose),
+              !isAppLocked, validate(result) else { throw CancellationError() }
+        if server.requiresBiometricUnlock {
+            unlockedServers[server.id] = dependencies.now()
+        }
+        lastFailure = nil
+        return result
+    }
+
     func handleSceneActivation() {
         refreshBiometryAvailability()
     }

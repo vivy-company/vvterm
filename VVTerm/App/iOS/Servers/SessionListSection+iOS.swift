@@ -13,6 +13,7 @@ struct SessionListSection: View {
     @ObservedObject private var titles: TerminalPaneTitleStore
     @ObservedObject private var viewSelections: ConnectionViewSelectionStore
     @EnvironmentObject private var appLock: AppLockManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
     @State private var collapsed: Set<UUID> = []
     @State private var requestedDestination: SessionDestination?
     @State private var presentation: Presentation?
@@ -76,7 +77,7 @@ struct SessionListSection: View {
             guard let destination = requestedDestination else { return }
             defer { if requestedDestination == destination { requestedDestination = nil } }
             guard let server = servers.first(where: { $0.id == destination.serverID }),
-                  await appLock.ensureServerUnlocked(server), !Task.isCancelled,
+                  await authorizeOpen(server), !Task.isCancelled,
                   actions.select(destination) else { return }
             onOpen(server)
         }
@@ -99,6 +100,16 @@ struct SessionListSection: View {
             case .server: Text("All terminal and file tabs for this server will be closed.")
             }
         }
+    }
+
+    private func authorizeOpen(_ server: Server) async -> Bool {
+        if server.connectionMode == .teleport,
+           !sessionState.navigationState.connectedServerIds.contains(server.id) {
+            return await teleportSignIn.ensureAccess(for: server) {
+                await appLock.ensureServerUnlocked($0)
+            }
+        }
+        return await appLock.ensureServerUnlocked(server)
     }
 
     @ViewBuilder
