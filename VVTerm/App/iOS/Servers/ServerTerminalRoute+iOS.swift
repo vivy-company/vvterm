@@ -38,12 +38,14 @@ struct ServerTerminalRoute: View {
     @StateObject private var toolbarProjection: TerminalServerToolbarProjection
     @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
     @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
     @EnvironmentObject private var screenAwakeCoordinator: TerminalScreenAwakeCoordinator
     @EnvironmentObject private var storeManager: StoreManager
 
     @State private var isRouteVisible = false
     @State private var screenAwakeRequestID = UUID()
     @State private var presentedRouteSheet: PresentedRouteSheet?
+    @State private var pendingSessionSelection: Server?
     @State private var isTerminalChildModalPresented = false
     @State private var showingTabLimitAlert = false
     @State private var showingFileTabLimitAlert = false
@@ -163,13 +165,13 @@ struct ServerTerminalRoute: View {
             .toolbar(isZenModeEnabled ? .hidden : .automatic, for: .bottomBar)
             .limitReachedAlert(.tabs, isPresented: $showingTabLimitAlert)
             .limitReachedAlert(.fileTabs, isPresented: $showingFileTabLimitAlert)
-            .sheet(item: $presentedRouteSheet, onDismiss: updateTerminalRouteActivation) { sheet in
+            .sheet(item: $presentedRouteSheet, onDismiss: routeSheetDidDismiss) { sheet in
                 switch sheet {
                 case .sessions:
                     SessionsScreen(serverManager: serverManager, tabManager: tabManager,
                                    fileTabs: fileTabs, fileBrowser: fileBrowser, selectedServerID: route.serverId) { server in
+                        pendingSessionSelection = server
                         presentedRouteSheet = nil
-                        onSessionServerSelected?(server)
                     }
                 case .settings:
                     SettingsView(
@@ -226,6 +228,9 @@ struct ServerTerminalRoute: View {
                 updateTerminalRouteActivation()
             }
             .onChange(of: isContentObscured) { _ in
+                updateTerminalRouteActivation()
+            }
+            .onChange(of: teleportSignIn.request?.id) { _ in
                 updateTerminalRouteActivation()
             }
             .onChange(of: keepScreenAwakeEnabled) { _ in
@@ -443,7 +448,7 @@ struct ServerTerminalRoute: View {
     }
 
     private var keyboardPresentationOwnership: TerminalKeyboardRouteActivationPolicy.PresentationOwnership {
-        presentedRouteSheet == nil && !isTerminalChildModalPresented
+        presentedRouteSheet == nil && !isTerminalChildModalPresented && teleportSignIn.request == nil
             ? .terminal
             : .routeModal
     }
@@ -611,6 +616,13 @@ struct ServerTerminalRoute: View {
         keyboardCoordinator.deactivateInputImmediately(reason: .routeModal)
     }
 
+    private func routeSheetDidDismiss() {
+        updateTerminalRouteActivation()
+        guard let server = pendingSessionSelection else { return }
+        pendingSessionSelection = nil
+        onSessionServerSelected?(server)
+    }
+
     private func performKeyboardCommandForFocusedTerminal() {
         guard selectedView == .terminal else { return }
         clearPendingVoiceReturnForFocusedPane()
@@ -631,7 +643,11 @@ struct ServerTerminalRoute: View {
 
         Task {
             do {
-                let tab = try await tabManager.openTab(for: server)
+                let tab = try await tabManager.openTab(for: server) {
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
+                }
                 tabManager.sessionState.selectView(viewTabConfig.effectiveView(for: .terminal), for: server.id)
                 tabManager.sessionState.selectTab(tab.id, for: server.id)
             } catch {

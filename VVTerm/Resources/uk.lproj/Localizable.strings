@@ -2329,3 +2329,77 @@
 "Sidebar" = "Бічна панель";
 
 "Terminal tab %lld" = "Вкладка термінала %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Кореневий кластер";
+"Node ID" = "ID вузла";
+"OS Login" = "Користувач системи";
+"Proxy URL" = "URL проксі";
+"SSO Connector (Optional)" = "Конектор SSO (необов’язково)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Увійдіть на проксі, потім виберіть вузол і користувача системи. Між пристроями синхронізуються лише налаштування профілю та вузла.";
+"Access expires" = "Доступ спливає";
+"Sign in again to renew access." = "Увійдіть знову, щоб поновити доступ.";
+"Sign in again" = "Увійти знову";
+"Sign out" = "Вийти";
+"Check access" = "Перевірити доступ";
+"Teleport access" = "Доступ Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Наданий доступ зберігається лише на цьому пристрої. Паролі й одноразові коди не зберігаються.";
+"Sign out of Teleport?" = "Вийти з Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Усі сеанси цього профілю Teleport на цьому пристрої буде від’єднано.";
+"One-time code (if needed)" = "Одноразовий код (якщо потрібен)";
+"Sign in" = "Увійти";
+"Sign in with %@" = "Увійти через %@";
+"No supported sign-in method is available for this profile." = "Для цього профілю немає підтримуваного способу входу.";
+"No nodes are available in this page." = "На цій сторінці немає доступних вузлів.";
+"Node" = "Вузол";
+"Select a node" = "Виберіть вузол";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Користувач системи";
+"No permitted login" = "Немає дозволеного користувача";
+"Use selected node" = "Використати вибраний вузол";
+"More nodes" = "Більше вузлів";
+"Refresh nodes" = "Оновити вузли";
+"Checking access…" = "Перевірка доступу…";
+"Signing in…" = "Вхід…";
+"Loading nodes…" = "Завантаження вузлів…";
+"Signing out…" = "Вихід…";
+"Teleport connection failed. Check the profile and sign in again." = "Не вдалося підключитися до Teleport. Перевірте профіль і ввійдіть знову.";
+"Sign in to this Teleport profile before connecting." = "Перед підключенням увійдіть у цей профіль Teleport.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport відмовив у доступі. Перевірте обліковий запис, код і права доступу до вузла.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Цей сервер або політика Teleport не підтримується. Зверніться до адміністратора.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Не вдалося перевірити сертифікат Teleport. Перевірте проксі, обліковий запис і кластер.";
+"The Teleport node was not found. Choose its exact node ID again." = "Вузол Teleport не знайдено. Знову виберіть його точний ID.";
+"More than one Teleport node has this name. Use its exact node ID." = "Це ім’я мають кілька вузлів Teleport. Використайте точний ID вузла.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Виконується вхід до цього профілю Teleport. Завершіть або скасуйте його, а потім спробуйте знову.";
+"Approve with a passkey or security key" = "Підтвердити ключем доступу або ключем безпеки";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Вхід із біометрією пристрою";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Пароль Teleport усе ще потрібен. Збережіть інший спосіб входу для відновлення доступу.";
+"Set up device credential…" = "Налаштувати облікові дані пристрою…";
+"Sign in to this local account before setup." = "Перед налаштуванням увійдіть до цього локального облікового запису.";
+"Remove local device credential…" = "Видалити локальні дані пристрою…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Локальне видалення не видаляє запис Teleport і не відкликає виданий доступ. Перед повторним налаштуванням видаліть запис на сервері Teleport.";
+"Remove this device's Teleport credential?" = "Видалити дані Teleport цього пристрою?";
+"Remove local credential" = "Видалити локальні дані";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Увійдіть іншим способом і перед повторним налаштуванням видаліть запис на сервері Teleport. Поточний доступ залишиться чинним.";
+"Device credential name" = "Назва облікових даних пристрою";
+"Fresh one-time code (if required)" = "Новий одноразовий код (якщо потрібно)";
+"Set up with one-time code" = "Налаштувати одноразовим кодом";
+"Set up with browser approval" = "Налаштувати з підтвердженням у браузері";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Використайте новий код, наявний ключ доступу або ключ безпеки. Face ID чи Touch ID захищає новий ключ. Він залишається на цьому пристрої окремо від ключів SSH.";
+"Set up Teleport credential" = "Налаштувати облікові дані Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Дані пристрою зареєстровано. Увійдіть із паролем і Face ID чи Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Локальні дані пристрою видалено. Окремо видаліть їхній запис на сервері Teleport.";
+"Sign in with device biometrics" = "Увійти з біометрією пристрою";
+"Setting up device credential…" = "Налаштування даних пристрою…";
+"Removing local credential…" = "Видалення локальних даних…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Підтвердьте вхід до Teleport через Face ID чи Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Налаштуйте вхід до Teleport через Face ID чи Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave недоступний. Скористайтеся іншим способом входу.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID чи Touch ID недоступний. Перевірте системні параметри або ввійдіть іншим способом.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Локальний ключ пристрою відсутній або непридатний. Увійдіть іншим способом. Перед повторним налаштуванням видаліть його запис у Teleport.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Локальні дані вже існують. Використайте біометрію пристрою або перед повторним налаштуванням видаліть локальний ключ і його запис у Teleport.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Не вдалося зберегти дані пристрою. Увійдіть іншим способом. Перевірте Teleport на наявність запису невдалого налаштування.";

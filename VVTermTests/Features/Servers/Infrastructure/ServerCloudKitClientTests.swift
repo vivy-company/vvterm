@@ -87,6 +87,58 @@ private final class ServerCloudKitRecordTransportStub: CloudKitRecordChangeTrans
 @MainActor
 struct ServerCloudKitClientTests {
     @Test
+    func unknownTransportsAndVersionsDoNotBlockOtherServerChanges() async throws {
+        let transport = ServerCloudKitRecordTransportStub()
+        let date = Date(timeIntervalSinceReferenceDate: 9_000)
+        let ordinary = makeServer(id: UUID(), workspaceID: UUID(), name: "SSH")
+        var future = makeServer(id: UUID(), workspaceID: ordinary.workspaceId, name: "Future")
+        future.connectionMode = .unsupported("future-provider")
+        future.transportConfiguration = .unsupported(
+            type: "future-provider", version: 1, settings: Data([0, 255])
+        )
+        var laterVersion = makeServer(id: UUID(), workspaceID: ordinary.workspaceId, name: "Later")
+        laterVersion.connectionMode = .teleport
+        laterVersion.transportConfiguration = .unsupported(
+            type: "teleport", version: 2, settings: Data("future-settings".utf8)
+        )
+        let records = try [ordinary, future, laterVersion].map {
+            try serverRecord($0, transport: transport, now: date)
+        }
+        transport.changesResult = .success(CloudKitRawRecordChanges(
+            changes: records.map { .record($0) }, isFullFetch: false,
+            checkpoint: CloudKitRecordChangeCheckpoint(id: UUID())
+        ))
+        let client = ServerCloudKitClient(transport: transport, now: { date })
+        let changes = try await client.fetchServerChanges(forceFullFetch: false)
+        #expect(changes.servers.count == 3)
+        let decodedFuture = try #require(changes.servers.first { $0.id == future.id })
+        let decodedVersion = try #require(changes.servers.first { $0.id == laterVersion.id })
+        #expect(decodedFuture.connectionMode == future.connectionMode)
+        #expect(decodedFuture.transportConfiguration == future.transportConfiguration)
+        #expect(decodedVersion.transportConfiguration == laterVersion.transportConfiguration)
+        #expect(!decodedFuture.isTransportSupported)
+        #expect(!decodedVersion.isTransportSupported)
+        #expect(changes.servers.first { $0.id == ordinary.id }?.isTransportSupported == true)
+        try client.acceptServerChanges(changes.checkpoint)
+        #expect(transport.committedCheckpoints.count == 1)
+    }
+
+    @Test
+    func invalidTransportSettingsStopTheSaveBeforeCloudKit() async {
+        let transport = ServerCloudKitRecordTransportStub()
+        var server = makeServer(id: UUID(), workspaceID: UUID(), name: "Too large")
+        server.connectionMode = .unsupported("future-provider")
+        server.transportConfiguration = .unsupported(
+            type: "future-provider", version: 1,
+            settings: Data(repeating: 0, count: ServerTransportConfiguration.maximumSettingsSize + 1)
+        )
+        let client = ServerCloudKitClient(transport: transport, now: Date.init)
+        await #expect(throws: EncodingError.self) { try await client.saveServer(server) }
+        #expect(transport.mutationCount == 0)
+        #expect(transport.upsertedRecords.isEmpty)
+    }
+
+    @Test
     func rawChangesDecodeAndDedupeWithLastEventWinning() async throws {
         let transport = ServerCloudKitRecordTransportStub()
         let fallbackDate = Date(timeIntervalSinceReferenceDate: 9_000)
@@ -101,12 +153,12 @@ struct ServerCloudKitClientTests {
         transport.changesResult = .success(
             CloudKitRawRecordChanges(
                 changes: [
-                    .record(serverRecord(server, transport: transport, now: fallbackDate)),
+                    .record(try serverRecord(server, transport: transport, now: fallbackDate)),
                     .deletion(
                         recordID: recordID(server.id, transport: transport),
                         recordType: ServerCloudKitRecordCodec.recordType
                     ),
-                    .record(serverRecord(updatedServer, transport: transport, now: fallbackDate)),
+                    .record(try serverRecord(updatedServer, transport: transport, now: fallbackDate)),
                     .record(workspaceRecord(workspace, transport: transport, now: fallbackDate)),
                     .record(workspaceRecord(updatedWorkspace, transport: transport, now: fallbackDate)),
                     .deletion(
@@ -310,8 +362,8 @@ struct ServerCloudKitClientTests {
         _ server: Server,
         transport: ServerCloudKitRecordTransportStub,
         now: Date
-    ) -> CKRecord {
-        ServerCloudKitRecordCodec.record(
+    ) throws -> CKRecord {
+        try ServerCloudKitRecordCodec.record(
             for: server,
             in: transport.cloudKitRecordZoneID,
             now: now

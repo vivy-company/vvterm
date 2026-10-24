@@ -12,8 +12,8 @@ BUILD_DIR_SSH="$PROJECT_ROOT/.build/ssh"
 
 OPENSSL_VERSION="3.2.0"
 OPENSSL_SHA256="14c826f07c7e433706fb5c69fa9e25dab95684844b4c962a2cf1bf183eb4690e"
-LIBSSH2_VERSION="1.11.1"
-LIBSSH2_SHA256="d9ec76cbe34db98eec3539fe2c899d26b0c837cb3eb466a56b0f109cabf658f7"
+LIBSSH2_COMMIT="3209951db4e47ef902db047d12f9f464f835c27e"
+LIBSSH2_SHA256="fe5bc1939d7dae5b35441084b88793e84d33ad23899bfa6113f1e51468fe76cc"
 MACOS_DEPLOYMENT_TARGET="13.3"
 IOS_DEPLOYMENT_TARGET="16.0"
 
@@ -46,6 +46,7 @@ Commands:
   all       Build GhosttyKit + libssh2/OpenSSL (default)
   ghostty   Build GhosttyKit.xcframework
   ssh       Build libssh2 + OpenSSL (macOS + iOS + simulator)
+  ssh-engine Build libssh2 using the verified committed OpenSSL archives
   verify    Verify pinned sources and committed native artifact hashes
   clean     Remove .build + Vendor libraries
   help      Show this help message
@@ -75,7 +76,6 @@ check_deps_ssh() {
     require_cmd curl
     require_cmd tar
     require_cmd cmake
-    require_cmd patch
     require_cmd make
     require_cmd rsync
     require_cmd xcrun
@@ -142,6 +142,7 @@ verify_native_sources() {
     }
     validate_sha256 "${OPENSSL_SHA256}" || return 1
     validate_sha256 "${LIBSSH2_SHA256}" || return 1
+    validate_git_commit "${LIBSSH2_COMMIT}" || return 1
 
     local vendored_ghostty_commit
     vendored_ghostty_commit="$(tr -d '[:space:]' < "${VENDOR_GHOSTTY}/VERSION")"
@@ -371,26 +372,25 @@ download_sources() {
 
     log_info "Downloading and verifying OpenSSL ${OPENSSL_VERSION}..."
     download_verified_archive \
-        "https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz" \
+        "https://www.openssl.org/source/old/${OPENSSL_VERSION%.*}/openssl-${OPENSSL_VERSION}.tar.gz" \
         "openssl-${OPENSSL_VERSION}.tar.gz" \
         "${OPENSSL_SHA256}"
     rm -rf "openssl-${OPENSSL_VERSION}"
     tar xzf "openssl-${OPENSSL_VERSION}.tar.gz"
 
-    log_info "Downloading and verifying libssh2 ${LIBSSH2_VERSION}..."
+    log_info "Downloading and verifying libssh2 ${LIBSSH2_COMMIT}..."
     download_verified_archive \
-        "https://www.libssh2.org/download/libssh2-${LIBSSH2_VERSION}.tar.gz" \
-        "libssh2-${LIBSSH2_VERSION}.tar.gz" \
+        "https://codeload.github.com/libssh2/libssh2/tar.gz/${LIBSSH2_COMMIT}" \
+        "libssh2-${LIBSSH2_COMMIT}.tar.gz" \
         "${LIBSSH2_SHA256}"
-    rm -rf "libssh2-${LIBSSH2_VERSION}"
-    tar xzf "libssh2-${LIBSSH2_VERSION}.tar.gz"
-    patch --batch --fuzz=0 -p1 -d "libssh2-${LIBSSH2_VERSION}" \
-        < "${SCRIPT_DIR}/patches/libssh2-exit-status-presence.patch"
+    rm -rf "libssh2-${LIBSSH2_COMMIT}"
+    tar xzf "libssh2-${LIBSSH2_COMMIT}.tar.gz"
 }
 
 build_openssl_macos() {
     log_info "Building OpenSSL for macOS arm64..."
     cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+    rm -rf "${BUILD_DIR_SSH}/openssl-macos"
 
     make clean 2>/dev/null || true
 
@@ -406,6 +406,9 @@ build_openssl_macos() {
 
     make -j"$(sysctl -n hw.ncpu)"
     make install_sw
+    mkdir -p "${VENDOR_SSH}/macos/lib"
+    cp "${BUILD_DIR_SSH}/openssl-macos/lib/libssl.a" \
+        "${BUILD_DIR_SSH}/openssl-macos/lib/libcrypto.a" "${VENDOR_SSH}/macos/lib/"
 
     unset MACOSX_DEPLOYMENT_TARGET CC
 }
@@ -413,6 +416,7 @@ build_openssl_macos() {
 build_openssl_ios() {
     log_info "Building OpenSSL for iOS arm64..."
     cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+    rm -rf "${BUILD_DIR_SSH}/openssl-ios"
 
     make clean 2>/dev/null || true
 
@@ -431,6 +435,9 @@ build_openssl_ios() {
 
     make -j"$(sysctl -n hw.ncpu)" build_libs
     make install_sw
+    mkdir -p "${VENDOR_SSH}/ios/lib"
+    cp "${BUILD_DIR_SSH}/openssl-ios/lib/libssl.a" \
+        "${BUILD_DIR_SSH}/openssl-ios/lib/libcrypto.a" "${VENDOR_SSH}/ios/lib/"
 
     unset CROSS_TOP CROSS_SDK CC
 }
@@ -438,6 +445,7 @@ build_openssl_ios() {
 build_openssl_simulator() {
     log_info "Building OpenSSL for iOS Simulator arm64..."
     cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+    rm -rf "${BUILD_DIR_SSH}/openssl-simulator"
 
     make clean 2>/dev/null || true
 
@@ -456,99 +464,78 @@ build_openssl_simulator() {
 
     make -j"$(sysctl -n hw.ncpu)" build_libs
     make install_sw
+    mkdir -p "${VENDOR_SSH}/ios-simulator/lib"
+    cp "${BUILD_DIR_SSH}/openssl-simulator/lib/libssl.a" \
+        "${BUILD_DIR_SSH}/openssl-simulator/lib/libcrypto.a" "${VENDOR_SSH}/ios-simulator/lib/"
 
     unset CROSS_TOP CROSS_SDK CC
 }
 
-build_libssh2_macos() {
-    log_info "Building libssh2 for macOS arm64..."
-    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
-
-    rm -rf build-macos
-    mkdir -p build-macos && cd build-macos
-
-    cmake .. \
-        -Wno-dev \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-        -DCMAKE_OSX_ARCHITECTURES=arm64 \
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET} \
-        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/macos" \
-        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-macos" \
-        -DBUILD_SHARED_LIBS=OFF \
-        -DBUILD_EXAMPLES=OFF \
-        -DBUILD_TESTING=OFF
-
-    make -j"$(sysctl -n hw.ncpu)"
-    make install
-
-    cp "${BUILD_DIR_SSH}/openssl-macos/lib/libssl.a" "${VENDOR_SSH}/macos/lib/"
-    cp "${BUILD_DIR_SSH}/openssl-macos/lib/libcrypto.a" "${VENDOR_SSH}/macos/lib/"
+# Generate the same public headers as the committed OpenSSL 3.2.0 builds.
+# The SSH-only command never compiles or replaces the crypto archives.
+prepare_committed_openssl() {
+    local platform target artifact expected
+    # Only these archives are reused. A previous failed SSH-only build can
+    # therefore be retried without accepting an unverified crypto input.
+    for platform in macos ios ios-simulator; do
+        for artifact in libcrypto.a libssl.a; do
+            local relative="Vendor/libssh2/$platform/lib/$artifact"
+            expected="$(awk -v path="$relative" '$2 == path { print $1 }' "$NATIVE_ARTIFACT_MANIFEST")"
+            verify_sha256 "$PROJECT_ROOT/$relative" "$expected"
+        done
+    done
+    for platform in macos ios ios-simulator; do
+        case "$platform" in
+            macos) target=darwin64-arm64-cc ;;
+            ios) target=ios64-xcrun ;;
+            ios-simulator) target=iossimulator-xcrun ;;
+        esac
+        local prefix="${BUILD_DIR_SSH}/openssl-${platform}"
+        local options=(no-shared no-tests)
+        if [[ "$platform" != macos ]]; then options+=(no-apps); fi
+        (
+            cd "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}"
+            ./Configure "$target" "${options[@]}"
+            make build_generated
+        )
+        mkdir -p "$prefix/lib"
+        rsync -a --delete "${BUILD_DIR_SSH}/openssl-${OPENSSL_VERSION}/include/" "$prefix/include/"
+        ln -sf "${VENDOR_SSH}/${platform}/lib/libcrypto.a" "$prefix/lib/libcrypto.a"
+        ln -sf "${VENDOR_SSH}/${platform}/lib/libssl.a" "$prefix/lib/libssl.a"
+    done
 }
 
-build_libssh2_ios() {
-    log_info "Building libssh2 for iOS arm64..."
-    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
-
-    rm -rf build-ios
-    mkdir -p build-ios && cd build-ios
-
-    local ios_sdk
-    ios_sdk=$(xcrun --sdk iphoneos --show-sdk-path)
-
-    cmake .. \
+build_libssh2() {
+    local platform="$1"
+    local sdk="$2"
+    local openssl_prefix="$3"
+    local deployment_target="$4"
+    local source="${BUILD_DIR_SSH}/libssh2-${LIBSSH2_COMMIT}"
+    local build="$source/build-$platform"
+    local system_name=Darwin
+    if [[ "$platform" != macos ]]; then system_name=iOS; fi
+    log_info "Building upstream libssh2 for $platform arm64..."
+    rm -rf "$build"
+    cmake -S "$source" -B "$build" \
         -Wno-dev \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-        -DCMAKE_SYSTEM_NAME=iOS \
-        -DCMAKE_OSX_SYSROOT="${ios_sdk}" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_SYSTEM_NAME="$system_name" \
+        -DCMAKE_OSX_SYSROOT="$(xcrun --sdk "$sdk" --show-sdk-path)" \
         -DCMAKE_OSX_ARCHITECTURES=arm64 \
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET} \
-        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/ios" \
-        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-ios" \
-        -DOPENSSL_INCLUDE_DIR="${BUILD_DIR_SSH}/openssl-ios/include" \
-        -DOPENSSL_CRYPTO_LIBRARY="${BUILD_DIR_SSH}/openssl-ios/lib/libcrypto.a" \
-        -DOPENSSL_SSL_LIBRARY="${BUILD_DIR_SSH}/openssl-ios/lib/libssl.a" \
+        -DCMAKE_OSX_DEPLOYMENT_TARGET="$deployment_target" \
+        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/$platform" \
+        -DCRYPTO_BACKEND=OpenSSL \
+        -DOPENSSL_USE_STATIC_LIBS=ON \
+        -DOPENSSL_ROOT_DIR="$openssl_prefix" \
+        -DOPENSSL_INCLUDE_DIR="$openssl_prefix/include" \
+        -DOPENSSL_CRYPTO_LIBRARY="$openssl_prefix/lib/libcrypto.a" \
+        -DOPENSSL_SSL_LIBRARY="$openssl_prefix/lib/libssl.a" \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_EXAMPLES=OFF \
-        -DBUILD_TESTING=OFF
-
-    make -j"$(sysctl -n hw.ncpu)"
-    make install
-
-    cp "${BUILD_DIR_SSH}/openssl-ios/lib/libssl.a" "${VENDOR_SSH}/ios/lib/"
-    cp "${BUILD_DIR_SSH}/openssl-ios/lib/libcrypto.a" "${VENDOR_SSH}/ios/lib/"
-}
-
-build_libssh2_simulator() {
-    log_info "Building libssh2 for iOS Simulator arm64..."
-    cd "${BUILD_DIR_SSH}/libssh2-${LIBSSH2_VERSION}"
-
-    rm -rf build-simulator
-    mkdir -p build-simulator && cd build-simulator
-
-    local sim_sdk
-    sim_sdk=$(xcrun --sdk iphonesimulator --show-sdk-path)
-
-    cmake .. \
-        -Wno-dev \
-        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-        -DCMAKE_SYSTEM_NAME=iOS \
-        -DCMAKE_OSX_SYSROOT="${sim_sdk}" \
-        -DCMAKE_OSX_ARCHITECTURES=arm64 \
-        -DCMAKE_OSX_DEPLOYMENT_TARGET=${IOS_DEPLOYMENT_TARGET} \
-        -DCMAKE_INSTALL_PREFIX="${VENDOR_SSH}/ios-simulator" \
-        -DOPENSSL_ROOT_DIR="${BUILD_DIR_SSH}/openssl-simulator" \
-        -DOPENSSL_INCLUDE_DIR="${BUILD_DIR_SSH}/openssl-simulator/include" \
-        -DOPENSSL_CRYPTO_LIBRARY="${BUILD_DIR_SSH}/openssl-simulator/lib/libcrypto.a" \
-        -DOPENSSL_SSL_LIBRARY="${BUILD_DIR_SSH}/openssl-simulator/lib/libssl.a" \
-        -DBUILD_SHARED_LIBS=OFF \
-        -DBUILD_EXAMPLES=OFF \
-        -DBUILD_TESTING=OFF
-
-    make -j"$(sysctl -n hw.ncpu)"
-    make install
-
-    cp "${BUILD_DIR_SSH}/openssl-simulator/lib/libssl.a" "${VENDOR_SSH}/ios-simulator/lib/"
-    cp "${BUILD_DIR_SSH}/openssl-simulator/lib/libcrypto.a" "${VENDOR_SSH}/ios-simulator/lib/"
+        -DBUILD_TESTING=OFF \
+        -DLIBSSH2_BUILD_DOCS=OFF
+    cmake --build "$build" --parallel "$(sysctl -n hw.ncpu)"
+    cmake --install "$build"
 }
 
 create_modulemap() {
@@ -573,11 +560,11 @@ build_ssh() {
     log_section "libssh2 + OpenSSL"
     download_sources
     build_openssl_macos
-    build_libssh2_macos
+    build_libssh2 macos macosx "${BUILD_DIR_SSH}/openssl-macos" "${MACOS_DEPLOYMENT_TARGET}"
     build_openssl_ios
-    build_libssh2_ios
+    build_libssh2 ios iphoneos "${BUILD_DIR_SSH}/openssl-ios" "${IOS_DEPLOYMENT_TARGET}"
     build_openssl_simulator
-    build_libssh2_simulator
+    build_libssh2 ios-simulator iphonesimulator "${BUILD_DIR_SSH}/openssl-simulator" "${IOS_DEPLOYMENT_TARGET}"
     create_modulemap
     write_native_artifact_manifest
 
@@ -585,6 +572,17 @@ build_ssh() {
     log_info "  macOS: $(ls -lh "${VENDOR_SSH}/macos/lib/libssh2.a" | awk '{print $5}')"
     log_info "  iOS: $(ls -lh "${VENDOR_SSH}/ios/lib/libssh2.a" | awk '{print $5}')"
     log_info "  iOS Simulator: $(ls -lh "${VENDOR_SSH}/ios-simulator/lib/libssh2.a" | awk '{print $5}')"
+}
+
+build_ssh_engine() {
+    log_section "Upstream libssh2 with committed OpenSSL"
+    download_sources
+    prepare_committed_openssl
+    build_libssh2 macos macosx "${BUILD_DIR_SSH}/openssl-macos" "${MACOS_DEPLOYMENT_TARGET}"
+    build_libssh2 ios iphoneos "${BUILD_DIR_SSH}/openssl-ios" "${IOS_DEPLOYMENT_TARGET}"
+    build_libssh2 ios-simulator iphonesimulator "${BUILD_DIR_SSH}/openssl-ios-simulator" "${IOS_DEPLOYMENT_TARGET}"
+    create_modulemap
+    write_native_artifact_manifest
 }
 
 clean() {
@@ -612,6 +610,10 @@ main() {
         ssh)
             check_deps_ssh
             build_ssh
+            ;;
+        ssh-engine)
+            check_deps_ssh
+            build_ssh_engine
             ;;
         verify)
             require_cmd shasum

@@ -1,4 +1,5 @@
 #if DEBUG
+import Foundation
 import SwiftUI
 
 @MainActor
@@ -23,19 +24,44 @@ struct ServerDuplicateUITestHarness: View {
         uuidString: "9B678329-F5FC-4A81-971C-CFCAC3261656"
     )!
 
-    let serverManager: ServerManager
+    @StateObject private var serverManager: ServerManager
     let dependencies: ServerFormDependencies
     let makeLocalDiscoveryManager: LocalSSHDiscoveryManagerFactory
 
     @State private var formIntent: ServerFormIntent?
     @State private var wakeActionCount = 0
+    @State private var showingCredentialSetupTest = false
+
+    private static var usesTeleportFormHarness: Bool {
+        Foundation.ProcessInfo.processInfo.arguments.contains("--vvterm-ui-test-teleport-server-form")
+    }
+
+    init(
+        serverManager: ServerManager,
+        dependencies: ServerFormDependencies,
+        makeLocalDiscoveryManager: @escaping LocalSSHDiscoveryManagerFactory
+    ) {
+        if Self.usesTeleportFormHarness {
+            let composition = TeleportServerFormUITestComposition(template: dependencies)
+            _serverManager = StateObject(wrappedValue: composition.serverManager)
+            self.dependencies = composition.formDependencies
+        } else {
+            _serverManager = StateObject(wrappedValue: serverManager)
+            self.dependencies = dependencies
+        }
+        self.makeLocalDiscoveryManager = makeLocalDiscoveryManager
+    }
 
     private var workspace: Workspace? {
         serverManager.workspaces.first
     }
 
     private var sourceServer: Server {
-        Server(
+        if Self.usesTeleportFormHarness,
+           let saved = serverManager.servers.first {
+            return saved
+        }
+        return Server(
             id: UUID(uuidString: "4BEE9E2E-E2CF-438C-A44C-B2391D0606E5")!,
             workspaceId: workspace?.id ?? Self.fallbackWorkspaceID,
             name: "DEV-397 UI Test Source",
@@ -55,33 +81,48 @@ struct ServerDuplicateUITestHarness: View {
     var body: some View {
         NavigationStack {
             List {
-                #if os(iOS)
-                ServerListRow(
-                    serverManager: serverManager,
-                    server: sourceServer,
-                    onTap: {},
-                    onEdit: { formIntent = .edit(sourceServer) },
-                    onMove: {},
-                    onDuplicate: { formIntent = .duplicate(sourceServer) },
-                    onWake: { wakeActionCount += 1 }
-                )
-                .accessibilityIdentifier("vvterm.serverDuplicateTest.row")
-
-                Text("\(wakeActionCount)")
-                    .accessibilityIdentifier("vvterm.serverWakeTest.actionCount")
-                #else
-                Button {
-                    formIntent = .duplicate(sourceServer)
-                } label: {
-                    Label("Duplicate", systemImage: "plus.square.on.square")
+                if Self.usesTeleportFormHarness {
+                    Button("Add Server") { formIntent = .create(prefill: nil) }
+                        .accessibilityIdentifier("vvterm.teleportFormTest.add")
+                    if !showingCredentialSetupTest {
+                        TeleportDeviceCredentialUITestControls()
+                    }
+                    Button("Check credential setup") { showingCredentialSetupTest = true }
+                        .accessibilityIdentifier("vvterm.teleport.setupTest.open")
                 }
-                .accessibilityIdentifier("vvterm.serverDuplicateTest.action")
-                #endif
+                if !Self.usesTeleportFormHarness || !serverManager.servers.isEmpty {
+                    #if os(iOS)
+                    ServerListRow(
+                        serverManager: serverManager,
+                        server: sourceServer,
+                        teleportAccess: dependencies.teleportAccess,
+                        onTap: {},
+                        onEdit: { formIntent = .edit(sourceServer) },
+                        onMove: {},
+                        onDuplicate: { formIntent = .duplicate(sourceServer) },
+                        onWake: { wakeActionCount += 1 }
+                    )
+                    .accessibilityIdentifier("vvterm.serverDuplicateTest.row")
+
+                    Text("\(wakeActionCount)")
+                        .accessibilityIdentifier("vvterm.serverWakeTest.actionCount")
+                    #else
+                    Button {
+                        formIntent = .duplicate(sourceServer)
+                    } label: {
+                        Label("Duplicate", systemImage: "plus.square.on.square")
+                    }
+                    .accessibilityIdentifier("vvterm.serverDuplicateTest.action")
+                    #endif
+                }
             }
             .navigationTitle("Server Duplicate Test")
         }
         .sheet(item: $formIntent) { intent in
             formSheet(for: intent)
+        }
+        .sheet(isPresented: $showingCredentialSetupTest) {
+            TeleportCredentialSetupFormUITestFixture()
         }
         .accessibilityIdentifier("vvterm.serverDuplicateTest.root")
     }

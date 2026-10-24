@@ -6,6 +6,10 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
     case mosh
     case eternalTerminal
     case cloudflare
+    case teleport
+    case unsupported
+
+    static let allCases: [Self] = [.standard, .tailscale, .mosh, .eternalTerminal, .cloudflare, .teleport]
 
     var id: String { rawValue }
 
@@ -21,10 +25,18 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
             return .eternalTerminal
         case .cloudflare:
             return .cloudflare
+        case .teleport:
+            return .teleport
+        case .unsupported:
+            return .unsupported("unsupported")
         }
     }
 
     init(server: Server) {
+        guard server.isTransportSupported else {
+            self = .unsupported
+            return
+        }
         switch server.connectionMode {
         case .standard:
             self = .standard
@@ -36,6 +48,10 @@ nonisolated enum ServerTransportSelection: String, CaseIterable, Identifiable, E
             self = .eternalTerminal
         case .cloudflare:
             self = .cloudflare
+        case .teleport:
+            self = .teleport
+        case .unsupported:
+            self = .unsupported
         }
     }
 }
@@ -53,6 +69,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         let eternalTerminalPort: String
         let username: String
         let transportSelection: ServerTransportSelection
+        let teleportConfiguration: TeleportServerConfiguration?
         let authMethod: AuthMethod
         let password: String
         let sshKey: String
@@ -70,6 +87,10 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     var eternalTerminalPort: String
     var username: String
     var transportSelection: ServerTransportSelection
+    var teleportProxyURL: String
+    var teleportAccount: String
+    var teleportClusterName: String
+    var teleportNodeID: String
     var authMethod: AuthMethod
     var iconSelection: ServerIconSelection
     private(set) var detectedSystemIdentity: RemoteSystemIdentity?
@@ -106,6 +127,10 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         eternalTerminalPort = String(server?.eternalTerminalPort ?? 2022)
         username = server?.username ?? ""
         transportSelection = server.map(ServerTransportSelection.init) ?? .standard
+        teleportProxyURL = server?.teleportConfiguration?.profile.proxyURL ?? ""
+        teleportAccount = server?.teleportConfiguration?.profile.account ?? ""
+        teleportClusterName = server?.teleportConfiguration?.clusterName ?? ""
+        teleportNodeID = server?.teleportConfiguration?.nodeID ?? ""
         authMethod = server?.authMethod ?? .password
         iconSelection = server?.iconSelection ?? .automatic
         detectedSystemIdentity = server?.detectedSystemIdentity
@@ -139,14 +164,55 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     var isValid: Bool {
-        !name.isEmpty
-            && !host.isEmpty
-            && validPort(port)
-            && (transportSelection != .eternalTerminal || validPort(eternalTerminalPort))
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && hasValidEndpoint
             && hasValidCredentials
             && remoteShellStartupAction.isValid(
                 remoteSessionEnabled: remoteSessionEnabled
             )
+    }
+
+    var teleportProfile: TeleportProfileConfiguration? {
+        let input = teleportProxyURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        // URLComponents can discard an empty port when it normalizes the host.
+        guard !input.hasSuffix(":"), !input.hasSuffix(":/") else { return nil }
+        let origin = input.contains("://") ? input : "https://" + input
+        return try? TeleportProfileConfiguration(
+            proxyURL: origin,
+            account: teleportAccount
+        )
+    }
+
+    var teleportConfiguration: TeleportServerConfiguration? {
+        guard transportSelection == .teleport, let profile = teleportProfile else { return nil }
+        return try? TeleportServerConfiguration(
+            profile: profile,
+            clusterName: teleportClusterName,
+            nodeID: teleportNodeID
+        )
+    }
+
+    private var hasValidEndpoint: Bool {
+        guard transportSelection != .unsupported else { return false }
+        if transportSelection == .teleport {
+            return teleportConfiguration != nil
+                && !username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+        return !host.isEmpty && validPort(port)
+            && (transportSelection != .eternalTerminal || validPort(eternalTerminalPort))
+    }
+
+    /// One authorized Teleport edit can include Save beyond the connection grace
+    /// period. A changed profile, saved binding, or app lock needs fresh approval.
+    func canReuseTeleportEditApproval(
+        source: Server, current: Server?, hasAuthorizedSourceAccess: Bool, isAppLocked: Bool
+    ) -> Bool {
+        guard hasAuthorizedSourceAccess, !isAppLocked,
+              source.connectionMode == .teleport, transportSelection == .teleport,
+              let profile = source.teleportConfiguration?.profile, teleportProfile == profile,
+              let current, current.id == source.id,
+              current.requiresBiometricUnlock == source.requiresBiometricUnlock else { return false }
+        return ServerCredentialBinding(server: current) == ServerCredentialBinding(server: source)
     }
 
     var effectiveUsername: String {
@@ -161,6 +227,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
             eternalTerminalPort: eternalTerminalPort,
             username: effectiveUsername,
             transportSelection: transportSelection,
+            teleportConfiguration: teleportConfiguration,
             authMethod: authMethod,
             password: password,
             sshKey: sshKey,
@@ -178,6 +245,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     func wakeOnLANSavePlan(existingServer: Server?) -> WakeOnLANSavePlan {
+        guard transportSelection != .teleport else { return .clearConfiguration }
         if let existingServer,
            Self.normalizedHost(existingServer.host) == Self.normalizedHost(host),
            let configuration = existingServer.wakeOnLANConfiguration {
@@ -200,7 +268,16 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
         }
     }
 
+    mutating func selectTransport(_ selection: ServerTransportSelection) {
+        guard selection != transportSelection else { return }
+        if selection == .teleport || transportSelection == .teleport {
+            password = ""
+        }
+        transportSelection = selection
+    }
+
     mutating func apply(_ credentials: ServerCredentials, for server: Server) {
+        guard server.connectionMode != .teleport, transportSelection != .teleport else { return }
         if server.connectionMode != .tailscale {
             switch server.authMethod {
             case .password:
@@ -213,6 +290,8 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
                 if server.authMethod == .sshKeyWithPassphrase {
                     sshPassphrase = credentials.passphrase ?? ""
                 }
+            case nil:
+                break
             }
         }
 
@@ -236,12 +315,14 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
             workspaceId: workspaceID,
             environment: environment,
             name: name,
-            host: host,
-            port: Int(port) ?? 22,
+            host: transportSelection == .teleport ? teleportNodeID : host,
+            port: transportSelection == .teleport ? 22 : (Int(port) ?? 22),
             eternalTerminalPort: Int(eternalTerminalPort) ?? 2022,
             username: effectiveUsername,
             connectionMode: transportSelection.connectionMode,
-            authMethod: transportSelection == .tailscale ? .password : authMethod,
+            authMethod: transportSelection == .teleport
+                ? nil : (transportSelection == .tailscale ? .password : authMethod),
+            teleportConfiguration: teleportConfiguration,
             iconSelection: iconSelection,
             detectedSystemIdentity: currentDetectedSystemIdentity,
             cloudflareAccessMode: transportSelection == .cloudflare ? cloudflareAccessMode : nil,
@@ -251,7 +332,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
             cloudflareAppDomainOverride: transportSelection == .cloudflare
                 ? normalizedOptional(cloudflareAppDomainOverride)
                 : nil,
-            autoWakeOnLANEnabled: autoWakeOnLANEnabled,
+            autoWakeOnLANEnabled: transportSelection == .teleport ? false : autoWakeOnLANEnabled,
             notes: notes.isEmpty ? nil : notes,
             requiresBiometricUnlock: requiresBiometricUnlock,
             remoteSessionEnabledOverride: remoteSessionEnabled,
@@ -265,7 +346,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     func makeCredentials(serverID: UUID) -> ServerCredentials {
         var credentials = ServerCredentials(serverId: serverID)
 
-        guard transportSelection != .tailscale else {
+        guard transportSelection != .tailscale && transportSelection != .teleport else {
             return credentials
         }
 
@@ -290,7 +371,7 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
     }
 
     private var hasValidCredentials: Bool {
-        guard transportSelection != .tailscale else {
+        guard transportSelection != .tailscale && transportSelection != .teleport else {
             return true
         }
 
@@ -318,7 +399,8 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
             connectionMode: transportSelection.connectionMode,
             eternalTerminalPort: Int(eternalTerminalPort),
             cloudflareTeamDomainOverride: cloudflareTeamDomainOverride,
-            cloudflareAppDomainOverride: cloudflareAppDomainOverride
+            cloudflareAppDomainOverride: cloudflareAppDomainOverride,
+            teleportConfiguration: teleportConfiguration
         )
     }
 

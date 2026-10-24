@@ -1,4 +1,5 @@
 import SwiftUI
+import TeleportKit
 
 extension ServerTransportSelection {
     var displayName: String {
@@ -13,6 +14,10 @@ extension ServerTransportSelection {
             return String(localized: "Eternal Terminal")
         case .cloudflare:
             return String(localized: "Cloudflare")
+        case .teleport:
+            return String(localized: "Teleport")
+        case .unsupported:
+            return String(localized: "Unsupported connection type")
         }
     }
 
@@ -28,6 +33,10 @@ extension ServerTransportSelection {
             return "arrow.trianglehead.2.clockwise.rotate.90"
         case .cloudflare:
             return "shield.lefthalf.filled"
+        case .teleport:
+            return "arrow.up.forward.circle"
+        case .unsupported:
+            return "questionmark.circle"
         }
     }
 
@@ -49,6 +58,8 @@ struct ServerFormSheet: View {
 
     @State private var form: ServerFormModel
     @StateObject private var operations: ServerFormOperationController
+    // Keep authentication alive when its form sections move off screen.
+    @State private var teleportModel: TeleportProfileModel?
     @State private var showCloudflareOverrides: Bool = false
 
     @State private var showingServerLimitAlert = false
@@ -61,10 +72,19 @@ struct ServerFormSheet: View {
     private let now: @Sendable () -> Date
     private let makeID: @Sendable () -> UUID
     private let remoteSessionBackends: [RemoteSessionBackendMetadata]
+    private let teleportAccess: TeleportAccessService?
 
     var isEditing: Bool { intent.isEditing }
 
     private var sourceServer: Server? { intent.sourceServer }
+
+    private var activeTeleportProfile: TeleportProfileConfiguration? {
+        form.transportSelection == .teleport ? form.teleportProfile : nil
+    }
+
+    private var teleportSourceLockState: AppLockState? {
+        sourceServer?.connectionMode == .teleport ? appLockManager.lockState : nil
+    }
 
     private var hostKeyTrustRequest: ServerSecurityApprovalRequest? {
         operations.hostKeyChallenge.map(ServerSecurityApprovalRequest.hostKey)
@@ -86,6 +106,7 @@ struct ServerFormSheet: View {
         self.now = dependencies.now
         self.makeID = dependencies.makeID
         remoteSessionBackends = dependencies.remoteSessionBackends
+        teleportAccess = dependencies.teleportAccess
         let saveUseCase = ServerSaveUseCase(mutations: serverManager)
         self.onSave = onSave
         _operations = StateObject(
@@ -208,6 +229,7 @@ struct ServerFormSheet: View {
     private var automaticConnectionTestSnapshot: ServerFormModel.ConnectionSnapshot? {
         let snapshot = form.connectionSnapshot
         guard hasAuthorizedSourceAccess,
+              form.transportSelection != .teleport,
               form.iconSelection == .automatic,
               form.isValid,
               !isLoadingCredentials,
@@ -291,6 +313,19 @@ struct ServerFormSheet: View {
         limitSection
         serverSection
         authSection
+        if let profile = activeTeleportProfile,
+           let teleportModel, teleportModel.profile == profile,
+           let teleportAccess {
+            TeleportProfileSection(
+                model: teleportModel, service: teleportAccess,
+                clusterName: $form.teleportClusterName,
+                nodeID: $form.teleportNodeID, login: $form.username
+            ) { nodeName in
+                if form.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    form.name = nodeName
+                }
+            }
+        }
         iconSection
         sessionSection
         RemoteShellStartupActionSection(
@@ -304,7 +339,7 @@ struct ServerFormSheet: View {
         securitySection
         assignmentSection
         notesSection
-        if isEditing {
+        if isEditing && form.transportSelection != .teleport {
             advancedSection
         }
         errorSection
@@ -324,12 +359,18 @@ struct ServerFormSheet: View {
     private var presentedFormContent: some View {
         styledFormContent
         .interactiveDismissDisabled(isSaving)
-        .task {
+        .task(id: teleportSourceLockState) {
+            if sourceServer?.connectionMode == .teleport, appLockManager.isAppLocked { return }
             if let sourceServer {
-                guard await appLockManager.authorizeProtectedServerAction(
-                    sourceServer,
-                    action: .edit
-                ) else {
+                let authorized: Bool
+                if sourceServer.connectionMode == .teleport {
+                    let current = serverManager.server(id: sourceServer.id) ?? sourceServer
+                    authorized = await appLockManager.ensureServerUnlocked(current)
+                } else {
+                    authorized = await appLockManager.authorizeProtectedServerAction(sourceServer, action: .edit)
+                }
+                guard !Task.isCancelled else { return }
+                guard authorized else {
                     dismiss()
                     return
                 }
@@ -404,6 +445,20 @@ struct ServerFormSheet: View {
             }
             .onAppear {
                 reconcileAssignmentWorkspace()
+                updateTeleportProfile()
+                teleportModel?.load()
+            }
+            .onChange(of: activeTeleportProfile) { _ in
+                // A password for another origin or account must never reach this profile.
+                form.password = ""
+                operations.invalidateCredentialLoading()
+                updateTeleportProfile()
+            }
+            .onChange(of: teleportSourceLockState) { state in
+                guard state?.isLocked == true else { return }
+                hasAuthorizedSourceAccess = false
+                operations.cancel()
+                teleportModel?.cancel()
             }
             .onChange(of: operations.connectionTestFailure) { failure in
                 if failure?.requiresCloudflareOverrides == true {
@@ -412,12 +467,14 @@ struct ServerFormSheet: View {
             }
             .onDisappear {
                 operations.cancel()
+                teleportModel?.cancel()
             }
             .onChange(of: form.host) { _ in resetConnectionTestState() }
             .onChange(of: form.port) { _ in resetConnectionTestState() }
             .onChange(of: form.eternalTerminalPort) { _ in resetConnectionTestState() }
             .onChange(of: form.username) { _ in resetConnectionTestState() }
             .onChange(of: form.transportSelection) { _ in handleCredentialIntentChange() }
+            .onChange(of: form.teleportConfiguration) { _ in resetConnectionTestState() }
             .onChange(of: form.authMethod) { _ in handleCredentialIntentChange() }
     }
 
@@ -558,39 +615,42 @@ struct ServerFormSheet: View {
                 .textContentType(.name)
                 #endif
 
-            HStack(spacing: 12) {
-                TextField("Host", text: $form.host, prompt: Text(String(localized: "203.0.113.10")))
-                    .accessibilityIdentifier("vvterm.serverForm.host")
+            if form.transportSelection != .teleport {
+                HStack(spacing: 12) {
+                    TextField("Host", text: $form.host, prompt: Text(String(localized: "203.0.113.10")))
+                        .accessibilityIdentifier("vvterm.serverForm.host")
+                        #if os(iOS)
+                        .textContentType(.URL)
+                        #endif
+                        .autocorrectionDisabled()
+                        #if os(iOS)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.URL)
+                        #endif
+
+                    TextField("Port", text: $form.port, prompt: Text(String(localized: "22")))
+                        #if os(iOS)
+                        .keyboardType(.numberPad)
+                        #endif
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 76)
+                }
+
+                TextField("Username", text: $form.username, prompt: Text(String(localized: "root")))
+                    .accessibilityIdentifier("vvterm.serverForm.username")
                     #if os(iOS)
-                    .textContentType(.URL)
+                    .textContentType(.username)
                     #endif
                     .autocorrectionDisabled()
                     #if os(iOS)
                     .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
                     #endif
 
-                TextField("Port", text: $form.port, prompt: Text(String(localized: "22")))
-                    #if os(iOS)
-                    .keyboardType(.numberPad)
-                    #endif
-                    .multilineTextAlignment(.trailing)
-                    .frame(width: 76)
-            }
-
-            TextField("Username", text: $form.username, prompt: Text(String(localized: "root")))
-                #if os(iOS)
-                .textContentType(.username)
-                #endif
-                .autocorrectionDisabled()
-                #if os(iOS)
-                .textInputAutocapitalization(.never)
-                #endif
-
-            Button {
-                presentLocalDiscovery()
-            } label: {
-                Label(String(localized: "Pick from Local Discovery..."), systemImage: "dot.radiowaves.left.and.right")
+                Button {
+                    presentLocalDiscovery()
+                } label: {
+                    Label(String(localized: "Pick from Local Discovery..."), systemImage: "dot.radiowaves.left.and.right")
+                }
             }
         } header: {
             sectionHeader("Server")
@@ -600,11 +660,37 @@ struct ServerFormSheet: View {
     @ViewBuilder
     private var authSection: some View {
         Section {
-            Picker("Transport", selection: $form.transportSelection) {
+            Picker("Transport", selection: Binding(
+                get: { form.transportSelection },
+                set: { form.selectTransport($0) }
+            )) {
+                if form.transportSelection == .unsupported {
+                    Text("Unsupported connection type").tag(ServerTransportSelection.unsupported)
+                }
                 ForEach(ServerTransportSelection.allCases) { transport in
                     Label(transport.displayName, systemImage: transport.icon)
                         .tag(transport)
                 }
+            }
+            .accessibilityIdentifier("vvterm.serverForm.transport")
+
+            if form.transportSelection == .teleport {
+                TextField("Teleport address", text: $form.teleportProxyURL, prompt: Text("teleport.example.com"))
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.proxy")
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.URL)
+                    #endif
+                TextField("Username", text: $form.teleportAccount, prompt: Text("Teleport username"))
+                    .accessibilityIdentifier("vvterm.serverForm.teleport.account")
+                    .autocorrectionDisabled()
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    #endif
+                Text("Sign in, then choose a node and OS login. Profile settings sync between devices. Issued access stays on this device.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             if form.transportSelection == .eternalTerminal {
@@ -657,13 +743,14 @@ struct ServerFormSheet: View {
                 }
             }
 
-            if form.transportSelection != .tailscale {
+            if form.transportSelection != .tailscale && form.transportSelection != .teleport {
                 Picker("Method", selection: $form.authMethod) {
                     ForEach(AuthMethod.allCases) { method in
                         Label(method.displayName, systemImage: method.icon)
                             .tag(method)
                     }
                 }
+                .accessibilityIdentifier("vvterm.serverForm.authMethod")
 
                 switch form.authMethod {
                 case .password:
@@ -679,7 +766,7 @@ struct ServerFormSheet: View {
                     keyInputView
                     SecureField("Key Passphrase", text: $form.sshPassphrase, prompt: Text(String(localized: "Optional")))
                 }
-            } else {
+            } else if form.transportSelection == .tailscale {
                 Text(String(localized: "Uses server-side Tailscale SSH policy. No password or SSH key is required."))
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -761,6 +848,11 @@ struct ServerFormSheet: View {
                 Text(message)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+            if let teleportModel,
+               teleportModel.profile == activeTeleportProfile,
+               teleportModel.discovery?.authenticationType == "local" {
+                TeleportDeviceCredentialControls(model: teleportModel)
             }
         } header: {
             sectionHeader("Security")
@@ -851,6 +943,18 @@ struct ServerFormSheet: View {
             form.sshPassphrase = passphrase
         }
         form.sshPublicKey = loadedKey.publicKey
+    }
+
+    private func updateTeleportProfile() {
+        guard let profile = activeTeleportProfile, let teleportAccess else {
+            teleportModel?.cancel()
+            teleportModel = nil
+            return
+        }
+        if teleportModel?.profile != profile {
+            teleportModel?.cancel()
+            teleportModel = TeleportProfileModel(profile: profile, service: teleportAccess)
+        }
     }
 
     // MARK: - Connection Test
@@ -956,7 +1060,8 @@ struct ServerFormSheet: View {
         operations.save(
             mutation: intent.mutation(for: newServer),
             credentials: form.makeCredentials(serverID: serverID),
-            systemDetection: form.iconSelection == .automatic
+            systemDetection: form.transportSelection != .teleport
+                && form.iconSelection == .automatic
                 && !operations.hasCompletedConnectionTest(for: form.connectionSnapshot)
                 ? .attempt
                 : .skip,
@@ -964,6 +1069,20 @@ struct ServerFormSheet: View {
             hasProAccess: storeManager.allowsProFeatures,
             authorize: {
                 guard let editedServer = intent.editedServer else { return true }
+                if editedServer.connectionMode == .teleport {
+                    guard !appLockManager.isAppLocked,
+                          let current = serverManager.server(id: editedServer.id) else { return false }
+                    if form.canReuseTeleportEditApproval(
+                        source: editedServer, current: current,
+                        hasAuthorizedSourceAccess: hasAuthorizedSourceAccess,
+                        isAppLocked: appLockManager.isAppLocked
+                    ) { return true }
+                    let authorized = await appLockManager.authorizeProtectedServerAction(current, action: .save)
+                    guard authorized, !Task.isCancelled, !appLockManager.isAppLocked,
+                          let latest = serverManager.server(id: editedServer.id),
+                          latest.requiresBiometricUnlock == current.requiresBiometricUnlock else { return false }
+                    return ServerCredentialBinding(server: latest) == ServerCredentialBinding(server: current)
+                }
                 return await appLockManager.authorizeProtectedServerAction(
                     editedServer,
                     action: .save

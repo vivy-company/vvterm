@@ -55,6 +55,8 @@ struct ConnectionTerminalContainer: View {
 
     @EnvironmentObject var ghosttyApp: GhosttyRuntime
     @EnvironmentObject var storeManager: StoreManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
+    @EnvironmentObject private var appLockManager: AppLockManager
     @EnvironmentObject private var terminalThemeManager: TerminalThemeManager
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject private var viewTabConfig: ViewTabConfigurationManager
@@ -383,7 +385,11 @@ struct ConnectionTerminalContainer: View {
 
         Task {
             do {
-                let tab = try await tabManager.openTab(for: server)
+                let tab = try await tabManager.openTab(for: server) {
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
+                }
                 await MainActor.run {
                     if selectTerminalViewOnSuccess {
                         tabManager.sessionState.selectView(

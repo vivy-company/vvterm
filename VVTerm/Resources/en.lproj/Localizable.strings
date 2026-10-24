@@ -2321,3 +2321,77 @@
 "Sidebar" = "Sidebar";
 
 "Terminal tab %lld" = "Terminal tab %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Root Cluster";
+"Node ID" = "Node ID";
+"OS Login" = "OS Login";
+"Proxy URL" = "Proxy URL";
+"SSO Connector (Optional)" = "SSO Connector (Optional)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices.";
+"Access expires" = "Access expires";
+"Sign in again to renew access." = "Sign in again to renew access.";
+"Sign in again" = "Sign in again";
+"Sign out" = "Sign out";
+"Check access" = "Check access";
+"Teleport access" = "Teleport access";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Issued access is stored only on this device. Passwords and one-time codes are not saved.";
+"Sign out of Teleport?" = "Sign out of Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "This disconnects all sessions for this Teleport profile on this device.";
+"One-time code (if needed)" = "One-time code (if needed)";
+"Sign in" = "Sign in";
+"Sign in with %@" = "Sign in with %@";
+"No supported sign-in method is available for this profile." = "No supported sign-in method is available for this profile.";
+"No nodes are available in this page." = "No nodes are available in this page.";
+"Node" = "Node";
+"Select a node" = "Select a node";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "OS login";
+"No permitted login" = "No permitted login";
+"Use selected node" = "Use selected node";
+"More nodes" = "More nodes";
+"Refresh nodes" = "Refresh nodes";
+"Checking access…" = "Checking access…";
+"Signing in…" = "Signing in…";
+"Loading nodes…" = "Loading nodes…";
+"Signing out…" = "Signing out…";
+"Teleport connection failed. Check the profile and sign in again." = "Teleport connection failed. Check the profile and sign in again.";
+"Sign in to this Teleport profile before connecting." = "Sign in to this Teleport profile before connecting.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport denied access. Check the account, code, and node permissions.";
+"This Teleport server or policy is not supported. Contact your administrator." = "This Teleport server or policy is not supported. Contact your administrator.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Teleport certificate validation failed. Check the proxy, account, and cluster.";
+"The Teleport node was not found. Choose its exact node ID again." = "The Teleport node was not found. Choose its exact node ID again.";
+"More than one Teleport node has this name. Use its exact node ID." = "More than one Teleport node has this name. Use its exact node ID.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "This Teleport profile is signing in. Finish or cancel it, then try again.";
+"Approve with a passkey or security key" = "Approve with a passkey or security key";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Device biometric sign-in";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Your Teleport password is still required. Keep another sign-in method for recovery.";
+"Set up device credential…" = "Set up device credential…";
+"Sign in to this local account before setup." = "Sign in to this local account before setup.";
+"Remove local device credential…" = "Remove local device credential…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again.";
+"Remove this device's Teleport credential?" = "Remove this device's Teleport credential?";
+"Remove local credential" = "Remove local credential";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid.";
+"Device credential name" = "Device credential name";
+"Fresh one-time code (if required)" = "Fresh one-time code (if required)";
+"Set up with one-time code" = "Set up with one-time code";
+"Set up with browser approval" = "Set up with browser approval";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys.";
+"Set up Teleport credential" = "Set up Teleport credential";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Device credential registered. Use your password and Face ID or Touch ID to sign in.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Local device credential removed. Remove its server entry in Teleport separately.";
+"Sign in with device biometrics" = "Sign in with device biometrics";
+"Setting up device credential…" = "Setting up device credential…";
+"Removing local credential…" = "Removing local credential…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Approve Teleport sign-in with Face ID or Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Set up Teleport sign-in with Face ID or Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave is not available. Use another sign-in method.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID or Touch ID is not available. Check system settings or sign in another way.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry.";

@@ -11,6 +11,7 @@ import SwiftUI
 struct ServerListRow: View {
     @ObservedObject var serverManager: ServerManager
     let server: Server
+    let teleportAccess: TeleportAccessService?
     var isSidebar = false
     let onTap: () -> Void
     let onEdit: () -> Void
@@ -53,8 +54,15 @@ struct ServerListRow: View {
                         .fontWeight(.medium)
                         .lineLimit(isSidebar ? 1 : nil)
                         .foregroundStyle(isLocked ? .secondary : .primary)
+                        .alignmentGuide(.listRowSeparatorLeading) { $0[.leading] }
 
-                    Text(server.visibleAddress(privacyModeEnabled: privacyModeEnabled))
+                    HStack(spacing: 4) {
+                        if server.connectionMode == .teleport {
+                            Image(systemName: ServerTransportSelection.teleport.icon)
+                                .accessibilityLabel("Teleport")
+                        }
+                        Text(server.visibleAddress(privacyModeEnabled: privacyModeEnabled))
+                    }
                         .font(.caption)
                         .lineLimit(isSidebar ? 1 : nil)
                         .truncationMode(isSidebar ? .middle : .tail)
@@ -63,12 +71,19 @@ struct ServerListRow: View {
 
                 Spacer()
 
-                if isLocked {
-                    LockedBadge()
-                } else {
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                HStack(spacing: 8) {
+                    if server.connectionMode == .teleport, let configuration = server.teleportConfiguration {
+                        TeleportAccessBadge(configuration: configuration, service: teleportAccess)
+                            .id(configuration)
+                    }
+
+                    if isLocked {
+                        LockedBadge()
+                    } else {
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
                 }
             }
             .contentShape(Rectangle())

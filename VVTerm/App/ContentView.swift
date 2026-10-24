@@ -27,6 +27,7 @@ struct ContentView: View {
     private let tabManager: TerminalTabManager
     @StateObject private var terminalNavigation: TerminalSessionNavigationProjection
     @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
     @EnvironmentObject private var storeManager: StoreManager
     @Environment(\.requestReview) private var requestReview
     @Environment(\.colorScheme) private var colorScheme
@@ -209,9 +210,12 @@ struct ContentView: View {
 
     private func connectToServer(_ server: Server) {
         Task {
-            guard await appLockManager.ensureServerUnlocked(server) else { return }
             do {
-                let tab = try await tabManager.openTab(for: server)
+                let tab = try await tabManager.openTab(for: server) {
+                    await teleportSignIn.ensureAccess(for: server) {
+                        await appLockManager.ensureServerUnlocked($0)
+                    }
+                }
                 await MainActor.run {
                     tabManager.sessionState.selectView(
                         viewTabConfigurationManager.effectiveDefaultTab(),
@@ -392,6 +396,7 @@ struct ContentView: View {
             .environmentObject(terminalThemeManager)
             .environmentObject(terminalAccessoryPreferencesManager)
             .environmentObject(appLockManager)
+            .environmentObject(teleportSignIn)
             .environmentObject(serverManager)
             .environmentObject(storeManager)
             .environmentObject(viewTabConfigurationManager)

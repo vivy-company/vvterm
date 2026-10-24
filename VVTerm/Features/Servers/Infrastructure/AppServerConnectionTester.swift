@@ -69,9 +69,10 @@ nonisolated enum ServerConnectionTestPlan: Equatable, Sendable {
     case mosh(portRange: ClosedRange<Int>)
     case eternalTerminal(port: UInt16)
 
-    init(server: Server) {
+    init?(server: Server) {
+        guard server.isTransportSupported else { return nil }
         switch server.connectionMode {
-        case .standard, .tailscale, .cloudflare:
+        case .standard, .tailscale, .cloudflare, .teleport:
             self = .sshOnly
         case .mosh:
             self = .mosh(portRange: 60_001...61_000)
@@ -79,6 +80,8 @@ nonisolated enum ServerConnectionTestPlan: Equatable, Sendable {
             let port = server.eternalTerminalPort
             let resolvedPort: UInt16 = (1...Int(UInt16.max)).contains(port) ? UInt16(port) : 2_022
             self = .eternalTerminal(port: resolvedPort)
+        case .unsupported:
+            return nil
         }
     }
 }
@@ -92,6 +95,8 @@ nonisolated enum ServerConnectionApprovalPolicy {
         for error: Error,
         server: Server
     ) -> ServerConnectionApprovalRequirement? {
+        // Teleport trusts a signed host certificate, never a stored host fingerprint.
+        guard server.connectionMode != .teleport else { return nil }
         if let sshError = error as? SSHError,
            case .hostKeyApprovalRequired = sshError {
             return .hostKey(host: server.host, port: server.port)
@@ -111,7 +116,8 @@ extension ServerFormDependencies {
         defaultRemoteSessionBackendIdentifier: @escaping @MainActor () -> RemoteSessionBackendIdentifier,
         defaultRemoteSessionStartupBehavior: @escaping @MainActor () -> RemoteSessionStartupBehavior,
         now: @escaping @Sendable () -> Date,
-        makeID: @escaping @Sendable () -> UUID
+        makeID: @escaping @Sendable () -> UUID,
+        teleportAccess: TeleportAccessService? = nil
     ) -> Self {
         Self(
             credentials: credentials,
@@ -131,7 +137,8 @@ extension ServerFormDependencies {
             defaultRemoteSessionBackendIdentifier: defaultRemoteSessionBackendIdentifier,
             defaultRemoteSessionStartupBehavior: defaultRemoteSessionStartupBehavior,
             now: now,
-            makeID: makeID
+            makeID: makeID,
+            teleportAccess: teleportAccess
         )
     }
 }
@@ -158,7 +165,12 @@ nonisolated struct AppServerConnectionTester: ServerConnectionTesting {
     }
 
     func test(server: Server, credentials: ServerCredentials) async -> ServerConnectionTestResult {
-        let plan = ServerConnectionTestPlan(server: server)
+        guard let plan = ServerConnectionTestPlan(server: server) else {
+            return .failure(.init(
+                reason: .message(String(localized: "This connection type is not supported. Update VVTerm before connecting.")),
+                requiresCloudflareOverrides: false, hostKeyChallenge: nil
+            ))
+        }
         let detectedSystem = ServerConnectionDetectedSystemCapture()
         let remoteSystemDetector = remoteSystemDetector
         do {

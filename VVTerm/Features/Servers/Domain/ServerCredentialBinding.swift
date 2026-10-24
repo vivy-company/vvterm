@@ -6,7 +6,8 @@ nonisolated struct ServerCredentialBinding: Codable, Equatable, Sendable {
     let eternalTerminalPort: Int?
     let username: String
     let connectionMode: SSHConnectionMode
-    let authMethod: AuthMethod
+    let authMethod: AuthMethod?
+    let transportConfiguration: ServerTransportConfiguration?
     let cloudflareAccessMode: CloudflareAccessMode?
     let cloudflareTeamDomain: String?
     let cloudflareAppDomain: String?
@@ -20,6 +21,7 @@ nonisolated struct ServerCredentialBinding: Codable, Equatable, Sendable {
         username = server.username.trimmingCharacters(in: .whitespacesAndNewlines)
         connectionMode = server.connectionMode
         authMethod = server.authMethod
+        transportConfiguration = server.transportConfiguration
 
         if server.connectionMode == .cloudflare {
             cloudflareAccessMode = server.cloudflareAccessMode ?? .oauth

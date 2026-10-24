@@ -42,6 +42,9 @@ actor SSHSession {
     var connectedPeerAddress: String?
     let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "VVTerm", category: "SSHSession")
     let startupTrace: SSHStartupTrace?
+    var preparedConnection: (any SSHPreparedConnection)?
+    var connectionStartupInFlight = false
+    var nativeFileOperationsInFlight: Set<UUID> = []
 
     /// Atomic socket storage for emergency abort from any thread
     let atomicSocket = AtomicSocket()
@@ -60,11 +63,13 @@ actor SSHSession {
     init(
         config: SSHSessionConfig,
         hostKeyVerifier: any SSHHostKeyVerifying,
-        startupTrace: SSHStartupTrace? = nil
+        startupTrace: SSHStartupTrace? = nil,
+        preparedConnection: (any SSHPreparedConnection)? = nil
     ) {
         self.config = config
         self.hostKeyVerifier = hostKeyVerifier
         self.startupTrace = startupTrace
+        self.preparedConnection = preparedConnection
     }
 
     var isConnected: Bool {
@@ -119,9 +124,12 @@ actor SSHSession {
     }
 
     func cleanupLibssh2() {
-        // A startup operation may still own a channel pointer across an actor
-        // suspension. Its defer releases that ownership before final cleanup.
-        guard shellStartupsInFlight.isEmpty, execCleanupsInFlight.isEmpty else { return }
+        // Native work can retain a session or channel pointer across an actor
+        // suspension. Its owner must finish before final cleanup.
+        guard !connectionStartupInFlight,
+              nativeFileOperationsInFlight.isEmpty,
+              shellStartupsInFlight.isEmpty,
+              execCleanupsInFlight.isEmpty else { return }
         // Prevent double cleanup
         guard !hasBeenCleaned else { return }
         sftpSession = nil
@@ -129,6 +137,7 @@ actor SSHSession {
         guard let session = libssh2Session else {
             hasBeenCleaned = true
             atomicSocket.close()
+            releasePreparedConnection()
             return
         }
 
@@ -139,23 +148,45 @@ actor SSHSession {
                 break
             }
         }
-        if freeResult == 0 {
-            libssh2Session = nil
-            hasBeenCleaned = true
-            atomicSocket.close()
-        } else {
+        if freeResult != 0 {
             // No Swift operation may call the native session at this point. If
             // libssh2 still cannot finish, abandon its allocation rather than
             // calling into a partial operation or leaking the descriptor.
             logger.error("Abandoning incomplete libssh2 session cleanup: \(freeResult)")
-            libssh2Session = nil
-            hasBeenCleaned = true
-            atomicSocket.close()
+        }
+        libssh2Session = nil
+        hasBeenCleaned = true
+        atomicSocket.close()
+        releasePreparedConnection()
+    }
+
+    private func releasePreparedConnection() {
+        guard let preparedConnection else { return }
+        self.preparedConnection = nil
+        Task { await preparedConnection.close() }
+    }
+
+    func beginNativeFileOperation() throws -> UUID {
+        try validateNativeFileOperation()
+        let id = UUID()
+        nativeFileOperationsInFlight.insert(id)
+        return id
+    }
+
+    func finishNativeFileOperation(_ id: UUID) {
+        nativeFileOperationsInFlight.remove(id)
+        if !isActive { cleanupLibssh2() }
+    }
+
+    func validateNativeFileOperation() throws {
+        try Task.checkCancellation()
+        guard isActive, libssh2Session != nil, atomicSocket.isUsable else {
+            throw SSHError.notConnected
         }
     }
 
     func cleanup() {
-        // Close socket first to abort any blocking I/O
+        // Interrupt I/O now; close the descriptor after native cleanup.
         atomicSocket.interrupt()
         socket = -1
         connectedPeerAddress = nil

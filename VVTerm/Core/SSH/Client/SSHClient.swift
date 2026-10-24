@@ -59,18 +59,21 @@ actor SSHClient {
     let uploadTimeout: Duration = .seconds(60)
     private let runtimeSettings: SSHRuntimeSettings
     private let hostKeyVerifier: any SSHHostKeyVerifying
+    private let prepareConnection: SSHPreparedConnectionProvider?
     let moshBootstrap: any SSHMoshBootstrapping
 
     init(
         connectTimeout: Duration = .seconds(30),
         runtimeSettings: SSHRuntimeSettings,
         hostKeyVerifier: any SSHHostKeyVerifying,
-        moshBootstrap: any SSHMoshBootstrapping
+        moshBootstrap: any SSHMoshBootstrapping,
+        prepareConnection: SSHPreparedConnectionProvider? = nil
     ) {
         self.connectTimeout = connectTimeout
         self.runtimeSettings = runtimeSettings
         self.hostKeyVerifier = hostKeyVerifier
         self.moshBootstrap = moshBootstrap
+        self.prepareConnection = prepareConnection
     }
 
     #if DEBUG
@@ -210,6 +213,9 @@ actor SSHClient {
 
     func connect(to server: Server, credentials: ServerCredentials,
                  preferredPlatform: RemotePlatform? = nil) async throws -> SSHSession {
+        guard server.isTransportSupported else {
+            throw SSHError.connectionFailed(String(localized: "This connection type is not supported. Update VVTerm before connecting."))
+        }
         let key = connectionKey(for: server)
 
         connectionPreparation: while true {
@@ -298,7 +304,10 @@ actor SSHClient {
     }
 
     private func connectionKey(for server: Server) -> String {
-        "\(server.host):\(server.port):\(server.username):\(server.connectionMode):\(server.authMethod):\(server.cloudflareAccessMode?.rawValue ?? "none"):\(server.cloudflareTeamDomainOverride ?? "")"
+        let providerKey = server.teleportConfiguration.map {
+            "\($0.profile.identifier):\($0.clusterName):\($0.nodeID)"
+        } ?? ""
+        return "\(server.host):\(server.port):\(server.username):\(server.connectionMode):\(String(describing: server.authMethod)):\(server.cloudflareAccessMode?.rawValue ?? "none"):\(server.cloudflareTeamDomainOverride ?? ""):\(providerKey)"
     }
 
     private func performConnectionAttempt(
@@ -315,8 +324,40 @@ actor SSHClient {
 
         var dialHost = server.host
         var dialPort = server.port
+        var preparedConnection: (any SSHPreparedConnection)?
+        var sessionTimeout = connectTimeout
 
-        if server.connectionMode == .cloudflare {
+        if server.connectionMode == .teleport {
+            await disconnectCloudflareTransport(reason: "provider connection")
+            guard let configuration = server.teleportConfiguration,
+                  let prepareConnection else {
+                throw SSHError.connectionFailed("Teleport connection is not available")
+            }
+            let request = SSHPreparedConnectionRequest(
+                profileID: configuration.profile.identifier,
+                clusterName: configuration.clusterName,
+                nodeID: configuration.nodeID,
+                login: server.username
+            )
+            let deadline = ContinuousClock.now.advanced(by: connectTimeout)
+            do {
+                preparedConnection = try await HardOperationDeadline.run(timeout: connectTimeout) {
+                    let connection = try await prepareConnection(request)
+                    guard !Task.isCancelled else {
+                        await connection.close()
+                        throw CancellationError()
+                    }
+                    return connection
+                }
+            } catch is HardOperationDeadlineError {
+                throw SSHError.timeout
+            }
+            sessionTimeout = ContinuousClock.now.duration(to: deadline)
+            guard sessionTimeout > .zero else {
+                await preparedConnection?.close()
+                throw SSHError.timeout
+            }
+        } else if server.connectionMode == .cloudflare {
             let localPort = try await cloudflareTransportManager.connect(
                 server: server,
                 credentials: credentials
@@ -331,6 +372,7 @@ actor SSHClient {
         guard case .connecting(let currentState) = lifecycle,
               currentState.id == operationID,
               !Task.isCancelled else {
+            await preparedConnection?.close()
             if shouldCleanupConnectionTransport(for: operationID) {
                 await disconnectCloudflareTransport(reason: "cancelled transport preparation")
             }
@@ -349,17 +391,21 @@ actor SSHClient {
             connectionMode: server.connectionMode,
             authMethod: server.authMethod,
             credentials: credentials,
+            connectionTimeout: Double(sessionTimeout.components.seconds)
+                + Double(sessionTimeout.components.attoseconds) / 1_000_000_000_000_000_000,
             keepAlive: runtimeSettings.keepAlive
         )
         let pendingSession = SSHSession(
             config: config,
             hostKeyVerifier: hostKeyVerifier,
-            startupTrace: startupTrace
+            startupTrace: startupTrace,
+            preparedConnection: preparedConnection
         )
 
         guard case .connecting(var connectingState) = lifecycle,
               connectingState.id == operationID else {
             pendingSession.abort()
+            await pendingSession.disconnect()
             throw CancellationError()
         }
         connectingState.pendingSession = pendingSession
@@ -367,7 +413,7 @@ actor SSHClient {
 
         do {
             try await HardOperationDeadline.run(
-                timeout: connectTimeout,
+                timeout: sessionTimeout,
                 onTimeout: {
                     startupTrace.recordOnce(
                         .connectionDeadline,

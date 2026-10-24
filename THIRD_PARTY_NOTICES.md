@@ -353,3 +353,16 @@ License: Apache License 2.0
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+## TeleportKit and SwiftNIO dependencies
+
+TeleportKit is pinned to the revision in `Package.resolved`. Its original Swift
+code uses MIT terms. Its Teleport API schemas and generated Swift messages retain
+Gravitational Apache-2.0 notices. No Teleport server binary is included in VVTerm.
+
+The complete shipped license texts and notices are in
+`VVTerm/Resources/OpenSource/Licenses/`: `TeleportKit.txt`, `SwiftNIO.txt`,
+`SwiftNIOHTTP2.txt`, `SwiftNIOTransportServices.txt`, `SwiftAtomics.txt`,
+`SwiftCollections.txt`, `SwiftSystem.txt`, and `SwiftProtobuf.txt`. The app shows
+these texts in its open-source notices. Exact source pins are recorded in
+`VVTerm/Resources/OpenSource/Attributions.json`.

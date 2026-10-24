@@ -78,10 +78,25 @@ struct AppComposition {
         let knownHostsManager = KnownHostsManager.shared
         let liveActivityManager = LiveActivityManager.shared
         let remoteMosh = RemoteMoshManager.shared
+        let teleportSessionCleanup = TeleportSessionCleanupRelay()
+        let teleportAccess = TeleportAccessService(
+            keychain: KeychainStore(
+                service: (Bundle.main.bundleIdentifier ?? "app.vivy.VivyTerm") + ".teleport.identity"
+            ),
+            makeBrowserSession: { anchor, onCancel in
+                TeleportAuthenticationBrowserSession(anchor: anchor, onCancel: onCancel)
+            },
+            didSignOut: { profileID in
+                teleportSessionCleanup.disconnect(profileID: profileID)
+            }
+        )
         let sshClientFactory = SSHClientLiveComposition.makeFactory(
             defaults: defaults,
             knownHostsManager: knownHostsManager,
-            remoteMoshManager: remoteMosh
+            remoteMoshManager: remoteMosh,
+            prepareConnection: { request in
+                try await teleportAccess.prepare(request)
+            }
         )
         let connectionOperations = SSHConnectionOperationService(
             clientFactory: sshClientFactory
@@ -187,7 +202,8 @@ struct AppComposition {
                     .flatMap(RemoteSessionStartupBehavior.init(persistedRawValue:)) ?? .ask
             },
             now: now,
-            makeID: makeID
+            makeID: makeID,
+            teleportAccess: teleportAccess
         )
         let engagementTracker = EngagementTracker(
             dependencies: .live(
@@ -248,6 +264,8 @@ struct AppComposition {
             applicationIsActive: applicationIsActive
         )
         serverDeletionTerminalCleanup.bind(to: tabManager)
+        teleportSessionCleanup.servers = serverManager
+        teleportSessionCleanup.tabs = tabManager
         let storeManager = StoreManager(
             client: AppStoreKitClient(),
             effects: .live(

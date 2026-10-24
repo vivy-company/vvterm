@@ -2322,3 +2322,77 @@
 "Sidebar" = "แถบด้านข้าง";
 
 "Terminal tab %lld" = "แท็บเทอร์มินัล %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "คลัสเตอร์ราก";
+"Node ID" = "ID โหนด";
+"OS Login" = "ชื่อผู้ใช้ระบบ";
+"Proxy URL" = "URL พร็อกซี";
+"SSO Connector (Optional)" = "ตัวเชื่อมต่อ SSO (ไม่บังคับ)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "ลงชื่อเข้าใช้พร็อกซี แล้วเลือกโหนดและชื่อผู้ใช้ระบบ ซิงค์ระหว่างอุปกรณ์เฉพาะการตั้งค่าโปรไฟล์และโหนดเท่านั้น";
+"Access expires" = "สิทธิ์เข้าถึงหมดอายุ";
+"Sign in again to renew access." = "ลงชื่อเข้าใช้อีกครั้งเพื่อต่ออายุสิทธิ์เข้าถึง";
+"Sign in again" = "ลงชื่อเข้าใช้อีกครั้ง";
+"Sign out" = "ลงชื่อออก";
+"Check access" = "ตรวจสอบสิทธิ์เข้าถึง";
+"Teleport access" = "สิทธิ์เข้าถึง Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "ข้อมูลสิทธิ์เข้าถึงที่ได้รับจะเก็บไว้ในอุปกรณ์นี้เท่านั้น จะไม่บันทึกรหัสผ่านและรหัสใช้ครั้งเดียว";
+"Sign out of Teleport?" = "ลงชื่อออกจาก Teleport หรือไม่?";
+"This disconnects all sessions for this Teleport profile on this device." = "การดำเนินการนี้จะตัดการเชื่อมต่อทุกเซสชันของโปรไฟล์ Teleport นี้บนอุปกรณ์นี้";
+"One-time code (if needed)" = "รหัสใช้ครั้งเดียว (หากจำเป็น)";
+"Sign in" = "ลงชื่อเข้าใช้";
+"Sign in with %@" = "ลงชื่อเข้าใช้ด้วย %@";
+"No supported sign-in method is available for this profile." = "ไม่มีวิธีลงชื่อเข้าใช้ที่รองรับสำหรับโปรไฟล์นี้";
+"No nodes are available in this page." = "ไม่มีโหนดที่ใช้ได้ในหน้านี้";
+"Node" = "โหนด";
+"Select a node" = "เลือกโหนด";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "ชื่อผู้ใช้ระบบ";
+"No permitted login" = "ไม่มีชื่อผู้ใช้ที่ได้รับอนุญาต";
+"Use selected node" = "ใช้โหนดที่เลือก";
+"More nodes" = "โหนดเพิ่มเติม";
+"Refresh nodes" = "รีเฟรชโหนด";
+"Checking access…" = "กำลังตรวจสอบสิทธิ์เข้าถึง…";
+"Signing in…" = "กำลังลงชื่อเข้าใช้…";
+"Loading nodes…" = "กำลังโหลดโหนด…";
+"Signing out…" = "กำลังลงชื่อออก…";
+"Teleport connection failed. Check the profile and sign in again." = "เชื่อมต่อ Teleport ไม่สำเร็จ ตรวจสอบโปรไฟล์แล้วลงชื่อเข้าใช้อีกครั้ง";
+"Sign in to this Teleport profile before connecting." = "ลงชื่อเข้าใช้โปรไฟล์ Teleport นี้ก่อนเชื่อมต่อ";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport ปฏิเสธสิทธิ์เข้าถึง ตรวจสอบบัญชี รหัส และสิทธิ์ของโหนด";
+"This Teleport server or policy is not supported. Contact your administrator." = "ไม่รองรับเซิร์ฟเวอร์หรือนโยบาย Teleport นี้ ติดต่อผู้ดูแลระบบ";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "ตรวจสอบใบรับรอง Teleport ไม่สำเร็จ ตรวจสอบพร็อกซี บัญชี และคลัสเตอร์";
+"The Teleport node was not found. Choose its exact node ID again." = "ไม่พบโหนด Teleport เลือก ID โหนดที่ตรงกันอีกครั้ง";
+"More than one Teleport node has this name. Use its exact node ID." = "มีโหนด Teleport หลายโหนดที่ใช้ชื่อนี้ ให้ใช้ ID โหนดที่ตรงกัน";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "กำลังลงชื่อเข้าใช้โปรไฟล์ Teleport นี้ โปรดดำเนินการให้เสร็จหรือยกเลิก แล้วลองอีกครั้ง";
+"Approve with a passkey or security key" = "อนุมัติด้วยพาสคีย์หรือคีย์ความปลอดภัย";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "ลงชื่อเข้าด้วยไบโอเมตริกของอุปกรณ์";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "ยังต้องใช้รหัสผ่าน Teleport เก็บวิธีลงชื่อเข้าแบบอื่นไว้เพื่อกู้คืนการเข้าถึง";
+"Set up device credential…" = "ตั้งค่าข้อมูลรับรองอุปกรณ์…";
+"Sign in to this local account before setup." = "ลงชื่อเข้าบัญชีภายในนี้ก่อนตั้งค่า";
+"Remove local device credential…" = "ลบข้อมูลรับรองอุปกรณ์ในเครื่อง…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "การลบในเครื่องไม่ลบรายการ Teleport หรือเพิกถอนสิทธิ์ที่ออกแล้ว ลบรายการบนเซิร์ฟเวอร์ใน Teleport ก่อนตั้งค่าอีกครั้ง";
+"Remove this device's Teleport credential?" = "ลบข้อมูลรับรอง Teleport ของอุปกรณ์นี้หรือไม่?";
+"Remove local credential" = "ลบข้อมูลรับรองในเครื่อง";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "ลงชื่อเข้าด้วยวิธีอื่น แล้วลบรายการบนเซิร์ฟเวอร์ใน Teleport ก่อนตั้งค่าอีกครั้ง สิทธิ์ปัจจุบันยังใช้ได้";
+"Device credential name" = "ชื่อข้อมูลรับรองอุปกรณ์";
+"Fresh one-time code (if required)" = "รหัสใช้ครั้งเดียวใหม่ (หากต้องใช้)";
+"Set up with one-time code" = "ตั้งค่าด้วยรหัสใช้ครั้งเดียว";
+"Set up with browser approval" = "ตั้งค่าด้วยการอนุมัติในเบราว์เซอร์";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "ใช้รหัสใหม่ หรือพาสคีย์หรือกุญแจความปลอดภัยที่มีอยู่ Face ID หรือ Touch ID ปกป้องกุญแจใหม่ กุญแจจะอยู่บนอุปกรณ์นี้โดยแยกจากกุญแจ SSH";
+"Set up Teleport credential" = "ตั้งค่าข้อมูลรับรอง Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "ลงทะเบียนข้อมูลรับรองอุปกรณ์แล้ว ลงชื่อเข้าด้วยรหัสผ่านและ Face ID หรือ Touch ID";
+"Local device credential removed. Remove its server entry in Teleport separately." = "ลบข้อมูลรับรองอุปกรณ์ในเครื่องแล้ว ลบรายการบนเซิร์ฟเวอร์ใน Teleport แยกต่างหาก";
+"Sign in with device biometrics" = "ลงชื่อเข้าด้วยไบโอเมตริกของอุปกรณ์";
+"Setting up device credential…" = "กำลังตั้งค่าข้อมูลรับรองอุปกรณ์…";
+"Removing local credential…" = "กำลังลบข้อมูลรับรองในเครื่อง…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "อนุมัติการลงชื่อเข้า Teleport ด้วย Face ID หรือ Touch ID";
+"Set up Teleport sign-in with Face ID or Touch ID." = "ตั้งค่าการลงชื่อเข้า Teleport ด้วย Face ID หรือ Touch ID";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave ไม่พร้อมใช้งาน ใช้วิธีลงชื่อเข้าแบบอื่น";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID หรือ Touch ID ไม่พร้อมใช้งาน ตรวจสอบการตั้งค่าระบบหรือลงชื่อเข้าด้วยวิธีอื่น";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "ไม่พบกุญแจอุปกรณ์ในเครื่องหรือใช้ไม่ได้ ลงชื่อเข้าด้วยวิธีอื่น ลบรายการ Teleport ของกุญแจก่อนตั้งค่าอีกครั้ง";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "มีข้อมูลรับรองในเครื่องอยู่แล้ว ใช้ไบโอเมตริกของอุปกรณ์ หรือลบกุญแจในเครื่องและรายการ Teleport ก่อนตั้งค่าอีกครั้ง";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "จัดเก็บข้อมูลรับรองอุปกรณ์ไม่สำเร็จ ลงชื่อเข้าด้วยวิธีอื่น ตรวจสอบ Teleport เพื่อหารายการจากการตั้งค่าที่ล้มเหลว";

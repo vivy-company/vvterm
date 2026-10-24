@@ -39,13 +39,14 @@ final class RemoteFileBrowserLayoutTests: XCTestCase {
         XCTAssertEqual(initialFrame.height, updatedFrame.height, accuracy: 1)
     }
 
-    private func makeScreen() -> RemoteFileBrowserScreen {
+    private func makeScreen() -> RemoteFileBrowserScreen<EmptyView> {
         let server = Server(workspaceId: UUID(), name: "Test", host: "example.invalid", username: "test")
         let defaults = UserDefaults(suiteName: "RemoteFileBrowserLayoutTests.\(UUID().uuidString)")!
         return RemoteFileBrowserScreen(
             browser: RemoteFileBrowserStore(defaults: defaults),
             server: server,
-            fileTab: RemoteFileTab(serverId: server.id, seedPath: "/")
+            fileTab: RemoteFileTab(serverId: server.id, seedPath: "/"),
+            connectionActions: { EmptyView() }
         )
     }
 

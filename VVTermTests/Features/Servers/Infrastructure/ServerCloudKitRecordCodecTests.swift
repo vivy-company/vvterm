@@ -5,12 +5,129 @@ import Testing
 
 struct ServerCloudKitRecordCodecTests {
     @Test
+    func savedTeleportCloudSettingsAreReadAndClearedOnTheNextWrite() throws {
+        let configuration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        var server = makeServer()
+        server.connectionMode = .teleport
+        server.teleportConfiguration = configuration
+        let zone = CKRecordZone.ID(zoneName: "test-zone")
+        let record = try ServerCloudKitRecordCodec.record(for: server, in: zone, now: .distantPast)
+        record["transportConfiguration"] = nil
+        record["teleportConfiguration"] = try JSONEncoder().encode(configuration)
+        let decoded = try #require(ServerCloudKitRecordCodec.server(from: record, now: .distantPast))
+        #expect(decoded.teleportConfiguration == configuration)
+        let saved = try ServerCloudKitRecordCodec.record(for: decoded, in: zone, now: .distantPast)
+        #expect(saved["transportConfiguration"] is Data)
+        #expect(saved["teleportConfiguration"] == nil)
+        #expect(saved.changedKeys().contains("teleportConfiguration"))
+        #expect(ServerCloudKitRecordCodec.recordKeys.contains("teleportConfiguration"))
+
+        record["transportConfiguration"] = Data("{}".utf8)
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: .distantPast) == nil)
+        let future = ServerTransportConfiguration.unsupported(
+            type: "teleport", version: 2, settings: Data([0, 255])
+        )
+        record["transportConfiguration"] = try JSONEncoder().encode(future)
+        let unsupported = try #require(ServerCloudKitRecordCodec.server(from: record, now: .distantPast))
+        #expect(unsupported.transportConfiguration == future)
+        #expect(unsupported.teleportConfiguration == nil)
+        #expect(!unsupported.isTransportSupported)
+    }
+
+    @Test(arguments: [false, true])
+    func legacyCloudSettingsMustBeValidAndBounded(isOversized: Bool) throws {
+        let server = makeServer()
+        let record = try ServerCloudKitRecordCodec.record(
+            for: server, in: CKRecordZone.ID(zoneName: "test-zone"), now: .distantPast
+        )
+        record["connectionMode"] = SSHConnectionMode.teleport.rawValue
+        record["transportConfiguration"] = nil
+        record["teleportConfiguration"] = isOversized
+            ? Data(repeating: 32, count: ServerTransportConfiguration.maximumSettingsSize + 1)
+            : Data("{}".utf8)
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: .distantPast) == nil)
+    }
+
+    @Test
+    func transportChangeClearsTheCloudFieldWithChangedKeys() throws {
+        var server = makeServer()
+        server.connectionMode = .teleport
+        server.teleportConfiguration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        server.connectionMode = .standard
+        let record = try ServerCloudKitRecordCodec.record(
+            for: server, in: CKRecordZone.ID(zoneName: "test-zone"), now: .distantPast
+        )
+        #expect(record["transportConfiguration"] == nil)
+        #expect(record.changedKeys().contains("transportConfiguration"))
+    }
+
+    @Test
+    func oversizedCloudPayloadIsRejectedBeforeDecoding() throws {
+        let record = try ServerCloudKitRecordCodec.record(
+            for: makeServer(), in: CKRecordZone.ID(zoneName: "test-zone"), now: .distantPast
+        )
+        record["transportConfiguration"] = Data(
+            repeating: 32, count: ServerTransportConfiguration.maximumEncodedSize + 1
+        )
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: .distantPast) == nil)
+    }
+
+    @Test
+    func invalidCloudTransportTypeCannotBecomeOrdinarySSH() throws {
+        let record = try ServerCloudKitRecordCodec.record(
+            for: makeServer(), in: CKRecordZone.ID(zoneName: "test-zone"), now: .distantPast
+        )
+        record["connectionMode"] = 1
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: .distantPast) == nil)
+    }
+
+    @Test
+    func teleportCloudRecordSyncsMetadataAndDoesNotRequireAnSSHAuthMethod() throws {
+        let configuration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "alice"),
+            clusterName: "root.example.test", nodeID: "node-id"
+        )
+        let server = Server(
+            workspaceId: UUID(), name: "Teleport", host: configuration.nodeID,
+            username: "deploy", connectionMode: .teleport,
+            teleportConfiguration: configuration
+        )
+        let now = Date(timeIntervalSinceReferenceDate: 3_000)
+        let record = try ServerCloudKitRecordCodec.record(
+            for: server, in: CKRecordZone.ID(zoneName: "test-zone"), now: now
+        )
+        #expect(record["authMethod"] == nil)
+        let decoded = try #require(ServerCloudKitRecordCodec.server(from: record, now: now))
+        #expect(decoded.teleportConfiguration == configuration)
+        #expect(decoded.authMethod == nil)
+        #expect(decoded.username == "deploy")
+        let metadata = try #require(record["transportConfiguration"] as? Data)
+        let payload = try JSONDecoder().decode(ServerTransportConfiguration.self, from: metadata)
+        #expect(payload == .teleport(configuration))
+        #expect(record["teleportConfiguration"] == nil)
+        let object = try #require(JSONSerialization.jsonObject(
+            with: JSONEncoder().encode(configuration)
+        ) as? [String: Any])
+        #expect(Set(object.keys) == ["profile", "clusterName", "nodeID"])
+        let profile = try #require(object["profile"] as? [String: Any])
+        #expect(Set(profile.keys) == ["proxyURL", "account"])
+        record["transportConfiguration"] = nil
+        #expect(ServerCloudKitRecordCodec.server(from: record, now: now) == nil)
+    }
+
+    @Test
     func serverRecordPreservesIdentityAndRoundTripsFields() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let server = makeServer()
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
 
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: server,
             in: zoneID,
             now: now
@@ -38,7 +155,7 @@ struct ServerCloudKitRecordCodecTests {
     func legacyCloudRecordDefaultsToAutomaticWithoutDetection() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: now
@@ -62,14 +179,14 @@ struct ServerCloudKitRecordCodecTests {
     func currentTmuxSettingsUpdateTheirLegacyCloudKitProjection(
         behavior: RemoteSessionStartupBehavior,
         legacyRawValue: String
-    ) {
+    ) throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         var server = makeServer()
         server.remoteSessionEnabledOverride = true
         server.remoteSessionBackendIdentifier = .tmux
         server.remoteSessionStartupBehaviorOverride = behavior
 
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: server,
             in: zoneID,
             now: Date(timeIntervalSinceReferenceDate: 3_000)
@@ -83,7 +200,7 @@ struct ServerCloudKitRecordCodecTests {
     func legacyTmuxRecordMigratesToCurrentRemoteSessionFields() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: now
@@ -109,7 +226,7 @@ struct ServerCloudKitRecordCodecTests {
         server.remoteSessionBackendIdentifier = .tmux
         server.remoteSessionEnabledOverride = true
         server.remoteSessionStartupBehaviorOverride = .createManaged
-        let record = ServerCloudKitRecordCodec.record(for: server, in: zoneID, now: now)
+        let record = try ServerCloudKitRecordCodec.record(for: server, in: zoneID, now: now)
         record["tmuxEnabledOverride"] = false
         record["tmuxStartupBehaviorOverride"] = "askEveryTime"
 
@@ -127,7 +244,7 @@ struct ServerCloudKitRecordCodecTests {
         server.remoteSessionBackendIdentifier = .zmx
         server.remoteSessionEnabledOverride = true
         server.remoteSessionStartupBehaviorOverride = .ask
-        let record = ServerCloudKitRecordCodec.record(for: server, in: zoneID, now: now)
+        let record = try ServerCloudKitRecordCodec.record(for: server, in: zoneID, now: now)
         record["tmuxEnabledOverride"] = false
         record["tmuxStartupBehaviorOverride"] = "skipTmux"
 
@@ -141,7 +258,7 @@ struct ServerCloudKitRecordCodecTests {
     func invalidSyncedStartupCommandIsIgnored() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: now
@@ -160,7 +277,7 @@ struct ServerCloudKitRecordCodecTests {
     func invalidSyncedWakeConfigurationIsIgnored() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: now
@@ -176,7 +293,7 @@ struct ServerCloudKitRecordCodecTests {
     func missingAutomaticWakeFieldDefaultsToOff() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let now = Date(timeIntervalSinceReferenceDate: 3_000)
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: now
@@ -212,7 +329,7 @@ struct ServerCloudKitRecordCodecTests {
     func missingRecordDatesUseOneExplicitFallbackClock() throws {
         let zoneID = CKRecordZone.ID(zoneName: "test-zone", ownerName: "test-owner")
         let fallback = Date(timeIntervalSinceReferenceDate: 4_000)
-        let serverRecord = ServerCloudKitRecordCodec.record(
+        let serverRecord = try ServerCloudKitRecordCodec.record(
             for: makeServer(),
             in: zoneID,
             now: fallback

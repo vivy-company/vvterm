@@ -4,6 +4,239 @@ import Testing
 
 struct ServerFormModelTests {
     @Test
+    func unsupportedTransportCannotBeSavedAsSSH() {
+        let server = Server(
+            workspaceId: UUID(), name: "Future connection", host: "example.test", username: "test",
+            connectionMode: .unsupported("future-transport")
+        )
+        let model = ServerFormModel(
+            server: server, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        #expect(model.transportSelection == .unsupported)
+        #expect(!model.isValid)
+        #expect(!ServerTransportSelection.allCases.contains(.unsupported))
+    }
+
+    @Test
+    func teleportDraftSavesBeforeLoginWithoutSSHKeysOrDirectPorts() throws {
+        var model = validTeleportModel()
+        model.host = ""
+        model.port = "not-a-TCP-port"
+        model.autoWakeOnLANEnabled = true
+        #expect(model.isValid)
+        let serverID = UUID()
+        let server = model.makeServer(id: serverID, workspaceID: UUID(), createdAt: .distantPast)
+        let credentials = model.makeCredentials(serverID: serverID)
+        #expect(server.connectionMode == .teleport)
+        #expect(server.authMethod == nil)
+        #expect(server.teleportConfiguration?.nodeID == "node-id")
+        #expect(server.teleportConfiguration?.profile.account == "alice")
+        #expect(!server.autoWakeOnLANEnabled)
+        #expect(model.wakeOnLANSavePlan(existingServer: nil) == .clearConfiguration)
+        #expect(credentials.password == nil)
+        #expect(credentials.privateKey == nil)
+        #expect(credentials.passphrase == nil)
+        #expect(credentials.cloudflareClientID == nil)
+        model.username = " "
+        #expect(!model.isValid)
+        model.username = "deploy"
+        model.teleportClusterName = ""
+        #expect(!model.isValid)
+    }
+
+    @Test
+    func editingTeleportKeepsSavedNodeAndLogin() {
+        let original = validTeleportModel().makeServer(
+            id: UUID(), workspaceID: UUID(), createdAt: .distantPast
+        )
+        var model = ServerFormModel(
+            server: original, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        model.name = "Updated name"
+
+        #expect(model.isValid)
+        let saved = model.makeServer(
+            id: original.id, workspaceID: original.workspaceId, createdAt: original.createdAt
+        )
+        #expect(saved.teleportConfiguration == original.teleportConfiguration)
+        #expect(saved.username == original.username)
+        #expect(saved.name == "Updated name")
+    }
+
+    @Test
+    func oneTeleportEditApprovalCoversItsSaveWithoutAConnectionGraceTimer() {
+        var source = validTeleportModel().makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        source.requiresBiometricUnlock = true
+        var form = ServerFormModel(
+            server: source, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        form.name = "Edited name"
+        form.notes = "Edited notes"
+        var current = source
+        current.lastConnected = Date()
+        current.updatedAt = Date()
+        #expect(form.canReuseTeleportEditApproval(
+            source: source, current: current, hasAuthorizedSourceAccess: true, isAppLocked: false
+        ))
+    }
+
+    enum EditApprovalChange: CaseIterable {
+        case unapproved, appLocked, draftProxy, draftAccount, draftTransport
+        case missingSource, anotherSource, savedProfile, savedNode, savedLogin, savedLockSetting, savedTransport
+    }
+
+    @Test(arguments: EditApprovalChange.allCases)
+    func changedTeleportEditingScopeRequiresFreshSaveApproval(change: EditApprovalChange) throws {
+        var source = validTeleportModel().makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        source.requiresBiometricUnlock = true
+        var form = ServerFormModel(
+            server: source, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        var current: Server? = source
+        switch change {
+        case .unapproved, .appLocked: break
+        case .draftProxy: form.teleportProxyURL = "https://other.example.test"
+        case .draftAccount: form.teleportAccount = "other-account"
+        case .draftTransport: form.transportSelection = .standard
+        case .missingSource: current = nil
+        case .anotherSource: current = form.makeServer(id: UUID(), workspaceID: source.workspaceId, createdAt: source.createdAt)
+        case .savedLogin: current?.username = "other-login"
+        case .savedLockSetting: current?.requiresBiometricUnlock = false
+        case .savedTransport: current?.connectionMode = .standard
+        case .savedProfile, .savedNode:
+            let configuration = try #require(source.teleportConfiguration)
+            current?.teleportConfiguration = try TeleportServerConfiguration(
+                profile: change == .savedProfile
+                    ? TeleportProfileConfiguration(proxyURL: "https://other.example.test", account: "other-account")
+                    : configuration.profile,
+                clusterName: configuration.clusterName,
+                nodeID: change == .savedNode ? "other-node" : configuration.nodeID
+            )
+        }
+        #expect(!form.canReuseTeleportEditApproval(
+            source: source, current: current,
+            hasAuthorizedSourceAccess: change != .unapproved, isAppLocked: change == .appLocked
+        ))
+    }
+
+    @Test(arguments: [
+        ("proxy.example.test", "https://proxy.example.test"),
+        (" PROXY.EXAMPLE.TEST:443/ ", "https://proxy.example.test"),
+        ("mac-studio.local:18443", "https://mac-studio.local:18443"),
+        ("127.0.0.1:8443", "https://127.0.0.1:8443"),
+        ("[::1]:8443", "https://[::1]:8443"),
+        ("HTTPS://PROXY.EXAMPLE.TEST:443/", "https://proxy.example.test"),
+        ("https://proxy.example.test:8443", "https://proxy.example.test:8443"),
+    ])
+    func teleportProxyInputStoresOneHTTPSOrigin(input: String, expected: String) throws {
+        var model = validTeleportModel()
+        model.teleportProxyURL = input
+
+        #expect(model.isValid)
+        let profile = try #require(model.teleportProfile)
+        #expect(profile.proxyURL == expected)
+        #expect(profile.identifier == (try TeleportProfileConfiguration(
+            proxyURL: expected, account: model.teleportAccount
+        )).identifier)
+        let server = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        #expect(server.teleportConfiguration?.profile.proxyURL == expected)
+    }
+
+    @Test(arguments: [
+        "", "http://proxy.example.test", "ssh://proxy.example.test",
+        "https:proxy.example.test", "https://https://proxy.example.test",
+        "//proxy.example.test", "alice@proxy.example.test",
+        "alice:password@proxy.example.test", "proxy.example.test/path",
+        "proxy.example.test?query", "proxy.example.test#fragment",
+        "proxy.example.test:0", "proxy.example.test:65536", "proxy.example.test:abc",
+        "proxy.example.test:", "proxy.example.test:/", "https://proxy.example.test:",
+        "proxy.example.test:443:8443", "::1", "2001:db8::1",
+    ])
+    func invalidTeleportProxyInputCannotBeSaved(input: String) {
+        var model = validTeleportModel()
+        model.teleportProxyURL = input
+
+        #expect(model.teleportProfile == nil)
+        #expect(model.teleportConfiguration == nil)
+        #expect(!model.isValid)
+    }
+
+    @Test
+    func teleportNeverCreatesOrLoadsOrdinaryCredentials() throws {
+        var model = validTeleportModel()
+        model.password = "test-password"
+        model.sshKey = "unused-key"
+        model.sshPassphrase = "unused-passphrase"
+        model.cloudflareClientSecret = "unused-secret"
+        let server = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        let credentials = model.makeCredentials(serverID: server.id)
+        #expect(server.authMethod == nil)
+        #expect(credentials.password == nil)
+        #expect(credentials.privateKey == nil)
+        #expect(credentials.passphrase == nil)
+        #expect(credentials.cloudflareClientSecret == nil)
+
+        var reopened = validTeleportModel()
+        reopened.teleportNodeID = "other-node"
+        reopened.username = "other-login"
+        reopened.apply(ServerCredentials(serverId: server.id, password: "old-password"), for: server)
+        #expect(reopened.password.isEmpty)
+        #expect(reopened.sshKey.isEmpty)
+        reopened.selectTransport(.standard)
+        reopened.apply(ServerCredentials(serverId: server.id, password: "old-password"), for: server)
+        #expect(reopened.password.isEmpty)
+    }
+
+    @Test
+    func selectingTeleportClearsSSHPasswordAndRejectsItsLateLoad() {
+        var model = validPasswordModel()
+        let source = model.makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        model.password = "ssh-password"
+        model.selectTransport(.teleport)
+        #expect(model.password.isEmpty)
+        model.apply(ServerCredentials(serverId: source.id, password: "late-password"), for: source)
+        #expect(model.password.isEmpty)
+
+        model.password = "teleport-password"
+        model.selectTransport(.standard)
+        #expect(model.password.isEmpty)
+        model.password = "ssh-password"
+        model.selectTransport(.mosh)
+        #expect(model.password == "ssh-password")
+    }
+
+    @Test
+    func teleportProfileChangesInvalidateConnectionResultsAndSystemDetection() {
+        var model = validTeleportModel()
+        model.applyDetectedSystemIdentity(RemoteSystemIdentity(kind: .ubuntu))
+        let snapshot = model.connectionSnapshot
+        #expect(model.currentDetectedSystemIdentity != nil)
+        model.teleportAccount = "bob"
+        #expect(model.connectionSnapshot != snapshot)
+        #expect(model.currentDetectedSystemIdentity == nil)
+    }
+
+    private func validTeleportModel() -> ServerFormModel {
+        var model = ServerFormModel(
+            defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux,
+            defaultRemoteSessionStartupBehavior: .ask
+        )
+        model.name = "Teleport node"
+        model.transportSelection = .teleport
+        model.teleportProxyURL = "https://proxy.example.test"
+        model.teleportAccount = "alice"
+        model.teleportClusterName = "root.example.test"
+        model.teleportNodeID = "node-id"
+        model.username = "deploy"
+        return model
+    }
+
+    @Test
     func modelBuildsServerAndCredentialsFromOneDraft() throws {
         let workspaceID = UUID()
         let serverID = UUID()

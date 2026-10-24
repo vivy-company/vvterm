@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm은 앱 및 보호된 서버의 잠금 해제를 위해 Face ID를 사용합니다.";
+"NSFaceIDUsageDescription" = "VVTerm은 Face ID를 사용하여 앱과 보호된 서버의 잠금을 해제하고 Teleport 로그인을 승인합니다.";
 "NSLocalNetworkUsageDescription" = "VVTerm은 로컬 네트워크를 사용하여 SSH 서버를 찾고, 깨우고, 연결합니다.";
 "NSMicrophoneUsageDescription" = "VVTerm은 음성 명령을 터미널 입력으로 변환하기 위해 마이크를 사용합니다.";
 "NSSpeechRecognitionUsageDescription" = "VVTerm은 음성 인식을 사용하여 음성을 터미널 명령으로 변환합니다.";

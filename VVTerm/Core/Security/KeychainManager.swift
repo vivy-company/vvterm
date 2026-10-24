@@ -33,12 +33,14 @@ final class KeychainManager {
         init(credentials: ServerCredentials, server: Server) {
             serverID = server.id
             binding = ServerCredentialBinding(server: server)
-            password = credentials.password
-            privateKey = credentials.privateKey
-            publicKey = credentials.publicKey
-            passphrase = credentials.passphrase
-            cloudflareClientID = credentials.cloudflareClientID
-            cloudflareClientSecret = credentials.cloudflareClientSecret
+            let stored = server.connectionMode == .teleport
+                ? ServerCredentials(serverId: server.id) : credentials
+            password = stored.password
+            privateKey = stored.privateKey
+            publicKey = stored.publicKey
+            passphrase = stored.passphrase
+            cloudflareClientID = stored.cloudflareClientID
+            cloudflareClientSecret = stored.cloudflareClientSecret
         }
     }
 
@@ -184,14 +186,19 @@ final class KeychainManager {
 
         logger.info("Getting credentials for server \(server.id.uuidString), authMethod: \(String(describing: server.authMethod))")
 
+        if server.connectionMode == .teleport {
+            try removeLegacyTeleportCredentials(for: server.id)
+            return credentials
+        }
+
         if server.connectionMode == .tailscale {
-            logger.info("Server \(server.id.uuidString) uses tailscale mode; skipping keychain credential lookup")
+            logger.info("Server \(server.id.uuidString) uses profile authentication; skipping SSH credential lookup")
             return credentials
         }
 
         let resolution = try credentialStorageResolution(for: server)
         let scope = resolution?.scope ?? preferredStorageScope
-        if resolution?.bindingMatches == false {
+        if let resolution, resolution.binding != ServerCredentialBinding(server: server) {
             try bindCredentials(to: server, scope: scope)
         }
 
@@ -210,6 +217,8 @@ final class KeychainManager {
                 credentials.passphrase = sshData.passphrase
                 credentials.publicKey = sshData.publicKey
             }
+        case nil:
+            break
         }
 
         if server.connectionMode == .cloudflare, server.cloudflareAccessMode == .serviceToken,
@@ -230,6 +239,10 @@ final class KeychainManager {
         }
 
         let scope = preferredStorageScope
+        if server.connectionMode == .teleport {
+            try removeLegacyTeleportCredentials(for: server.id)
+            return
+        }
         if server.connectionMode != .tailscale {
             switch server.authMethod {
             case .password:
@@ -250,6 +263,8 @@ final class KeychainManager {
                         scope: scope
                     )
                 }
+            case nil:
+                break
             }
         }
 
@@ -271,6 +286,7 @@ final class KeychainManager {
         }
 
         try bindCredentials(to: server, scope: scope)
+        try store.delete(teleportCredentialsKey(for: server.id), scope: scope)
         if !isSyncEnabled() {
             try offlineChanges.record(.updated, for: .server(server.id))
         }
@@ -337,10 +353,12 @@ final class KeychainManager {
                 for: server,
                 scope: staged.replacementScope
             )
-            if staged.replacementScope == .deviceOnly {
+            if staged.replacementScope == .deviceOnly, server.connectionMode != .teleport {
                 try offlineChanges.record(.updated, for: .server(server.id))
             }
         } catch {
+            // Teleport cleanup cannot change an ordinary credential or create a replacement.
+            guard server.connectionMode != .teleport else { throw error }
             do {
                 try restoreCredentialBundle(
                     staged.previous,
@@ -436,23 +454,7 @@ final class KeychainManager {
         if !isSyncEnabled() {
             try offlineChanges.record(.deleted, for: .server(serverId))
         }
-        let passwordKey = passwordKey(for: serverId)
-        let keyKey = sshKeyKey(for: serverId)
-        let passphraseKey = sshPassphraseKey(for: serverId)
-        let publicKeyKey = sshPublicKeyKey(for: serverId)
-        let cloudflareIDKey = cloudflareClientIDKey(for: serverId)
-        let cloudflareSecretKey = cloudflareClientSecretKey(for: serverId)
-        let bindingKey = credentialBindingKey(for: serverId)
-
-        for key in [
-            passwordKey,
-            keyKey,
-            passphraseKey,
-            publicKeyKey,
-            cloudflareIDKey,
-            cloudflareSecretKey,
-            bindingKey
-        ] {
+        for key in credentialBundleKeys(for: serverId) {
             try deleteCredentialKey(key, scopes: KeychainStorageScope.allCases)
         }
 
@@ -489,6 +491,10 @@ final class KeychainManager {
         "server.\(serverId.uuidString).credential-binding.v1"
     }
 
+    private func teleportCredentialsKey(for serverId: UUID) -> String {
+        "server.\(serverId.uuidString).teleport-credentials.v1"
+    }
+
     private func credentialKeys(for serverId: UUID) -> [String] {
         [
             passwordKey(for: serverId),
@@ -501,7 +507,9 @@ final class KeychainManager {
     }
 
     private func credentialBundleKeys(for serverID: UUID) -> [String] {
-        credentialKeys(for: serverID) + [credentialBindingKey(for: serverID)]
+        credentialKeys(for: serverID) + [
+            credentialBindingKey(for: serverID), teleportCredentialsKey(for: serverID)
+        ]
     }
 
     private func serverCredentialTransactionKey(_ id: UUID) -> String {
@@ -531,6 +539,10 @@ final class KeychainManager {
         for server: Server,
         scope: KeychainStorageScope
     ) throws {
+        if bundle.binding.connectionMode == .teleport {
+            try removeLegacyTeleportCredentials(for: server.id)
+            return
+        }
         for key in credentialBundleKeys(for: server.id) {
             try store.delete(key, scope: scope)
         }
@@ -582,7 +594,7 @@ final class KeychainManager {
 
     private struct CredentialStorageResolution {
         let scope: KeychainStorageScope
-        let bindingMatches: Bool
+        let binding: ServerCredentialBinding?
     }
 
     private var preferredStorageScope: KeychainStorageScope {
@@ -593,9 +605,22 @@ final class KeychainManager {
         isSyncEnabled() ? [.iCloud, .deviceOnly] : [.deviceOnly]
     }
 
+    private func removeLegacyTeleportCredentials(for serverID: UUID) throws {
+        let key = teleportCredentialsKey(for: serverID)
+        try credentialOfflineWrites.resumePendingWrite()
+        if isSyncEnabled() {
+            try deleteCredentialKey(key, scopes: KeychainStorageScope.allCases)
+        } else if try store.contains(key, scope: .deviceOnly) {
+            try credentialOfflineWrites.commitUpdate(
+                for: .server(serverID), operations: [.init(targetKey: key, value: nil)]
+            )
+        }
+    }
+
     private func credentialStorageResolution(
         for server: Server
     ) throws -> CredentialStorageResolution? {
+        guard server.connectionMode != .teleport else { return nil }
         let currentBinding = ServerCredentialBinding(server: server)
         var firstStoredResolution: CredentialStorageResolution?
 
@@ -619,9 +644,9 @@ final class KeychainManager {
             }
             let resolution = CredentialStorageResolution(
                 scope: scope,
-                bindingMatches: storedBinding == currentBinding
+                binding: storedBinding
             )
-            if resolution.bindingMatches {
+            if storedBinding == currentBinding {
                 return resolution
             }
             if firstStoredResolution == nil {
@@ -645,6 +670,8 @@ final class KeychainManager {
         try credentialOfflineWrites.resumePendingWrite()
         try oauthOfflineWrites.resumePendingWrite()
         if isEnabled {
+            // Old Teleport password records have no reader or writer. Do not copy them again.
+            try store.deleteAll(in: .iCloud, where: Self.isLegacyTeleportCredentialKey)
             if offlineChanges.reconciliationPhase == .preparingOfflineSnapshot {
                 try prepareOfflineCredentialSnapshot()
             }
@@ -745,7 +772,9 @@ final class KeychainManager {
         in selectedStore: KeychainStore,
         where shouldCopy: (String) -> Bool
     ) throws -> [String] {
-        let sourceKeys = try selectedStore.keys(in: .iCloud).filter(shouldCopy)
+        let sourceKeys = try selectedStore.keys(in: .iCloud).filter {
+            shouldCopy($0) && !Self.isLegacyTeleportCredentialKey($0)
+        }
         let snapshot = try Dictionary(uniqueKeysWithValues: sourceKeys.map { key in
             guard let value = try selectedStore.get(key, scope: .iCloud) else {
                 throw KeychainError.itemNotFound
@@ -960,7 +989,7 @@ final class KeychainManager {
             store: selectedStore,
             scope: .deviceOnly,
             includingOrphans: false
-        )
+        ).filter { !Self.isLegacyTeleportCredentialKey($0) }
         let values = try Dictionary(uniqueKeysWithValues: keys.map { key in
             guard let value = try selectedStore.get(key, scope: .deviceOnly) else {
                 throw KeychainError.itemNotFound
@@ -1067,8 +1096,15 @@ final class KeychainManager {
             ".publickey",
             ".cloudflare.clientid",
             ".cloudflare.clientsecret",
-            ".credential-binding.v1"
+            ".credential-binding.v1",
+            ".teleport-credentials.v1"
         ].contains { key.hasSuffix($0) }
+    }
+
+    nonisolated private static func isLegacyTeleportCredentialKey(_ key: String) -> Bool {
+        let parts = key.split(separator: ".", maxSplits: 2)
+        return parts.count == 3 && parts[0] == "server"
+            && UUID(uuidString: String(parts[1])) != nil && parts[2] == "teleport-credentials.v1"
     }
 
     // MARK: - Reusable SSH Keys (Keychain Library)

@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm dùng Face ID để mở khóa ứng dụng và các máy chủ được bảo vệ.";
+"NSFaceIDUsageDescription" = "VVTerm dùng Face ID để mở khóa ứng dụng và máy chủ được bảo vệ, đồng thời phê duyệt đăng nhập Teleport.";
 "NSLocalNetworkUsageDescription" = "VVTerm dùng mạng cục bộ để tìm, đánh thức và kết nối với máy chủ SSH.";
 "NSMicrophoneUsageDescription" = "VVTerm cần dùng micrô để chuyển lệnh thoại thành dữ liệu nhập vào terminal.";
 "NSSpeechRecognitionUsageDescription" = "VVTerm dùng nhận dạng giọng nói để chuyển lời nói thành lệnh terminal.";

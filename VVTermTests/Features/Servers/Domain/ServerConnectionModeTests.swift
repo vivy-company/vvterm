@@ -96,14 +96,17 @@ struct ServerConnectionModeTests {
     }
 
     @Test
-    func decodeWithUnknownConnectionModeDefaultsToStandard() throws {
+    func unknownConnectionModeIsRetainedAndCannotUseSSH() throws {
         let server = makeServer(connectionMode: .standard, authMethod: .password)
         let data = try mutateJSON(server) { object in
             object["connectionMode"] = "future-mode"
         }
 
         let decoded = try JSONDecoder().decode(Server.self, from: data)
-        #expect(decoded.connectionMode == .standard)
+        #expect(decoded.connectionMode == .unsupported("future-mode"))
+        #expect(!decoded.isTransportSupported)
+        let roundTrip = try JSONDecoder().decode(Server.self, from: JSONEncoder().encode(decoded))
+        #expect(roundTrip.connectionMode.rawValue == "future-mode")
     }
 
     @Test

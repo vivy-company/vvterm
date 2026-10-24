@@ -278,6 +278,198 @@ final class AppLockManagerTests: XCTestCase {
         XCTAssertEqual(manager.authenticationState, .idle)
     }
 
+    func testFreshBiometricOperationGrantsOnlyItsProtectedEntry() async throws {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let server = biometricServer()
+        let other = biometricServer()
+
+        let result = try await manager.withServerBiometricAuthentication(server, validate: { _ in true }) { 42 }
+
+        XCTAssertEqual(result, 42)
+        XCTAssertTrue(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(other))
+        XCTAssertTrue(auth.authenticateReasons.isEmpty)
+        XCTAssertEqual(manager.authenticationState, .idle)
+        XCTAssertEqual(manager.lockState, .unlocked(at: nil))
+    }
+
+    func testUnprotectedBiometricOperationDoesNotCreateAnEntryGrant() async throws {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        var server = biometricServer()
+        server.requiresBiometricUnlock = false
+        _ = try await manager.withServerBiometricAuthentication(server, validate: { _ in true }) { 42 }
+        server.requiresBiometricUnlock = true
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertTrue(auth.authenticateReasons.isEmpty)
+    }
+
+    func testFreshBiometricOperationAuthorizesItsResultWithZeroGrace() async throws {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        manager.authGraceSeconds = 0
+        let server = biometricServer()
+        let result = try await manager.withServerBiometricAuthentication(server, validate: { _ in true }) { 42 }
+        XCTAssertEqual(result, 42)
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertTrue(auth.authenticateReasons.isEmpty)
+    }
+
+    func testFailedBiometricOperationDoesNotGrantAccessOrExposeItsError() async {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let server = biometricServer()
+        do {
+            let _: Int = try await manager.withServerBiometricAuthentication(server, validate: { _ in true }) {
+                throw NativeOperationFailure.failed
+            }
+            XCTFail("The operation must fail")
+        } catch NativeOperationFailure.failed {} catch { XCTFail("Unexpected error type") }
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertNil(manager.lastFailure)
+        XCTAssertEqual(manager.authenticationState, .idle)
+    }
+
+    func testCancelledBiometricOperationRejectsLateSuccess() async {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let native = DelayedBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let server = biometricServer()
+        let task = Task {
+            try await manager.withServerBiometricAuthentication(server, validate: { _ in true }) {
+                try await native.authenticate(reason: .unlockServer(name: "Native test"), allowPasscodeFallback: false)
+                return 42
+            }
+        }
+        await native.waitUntilAuthenticationStarts()
+        task.cancel()
+        native.succeed()
+        do { _ = try await task.value; XCTFail("Cancellation must reject the result") }
+        catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertEqual(manager.authenticationState, .idle)
+    }
+
+    func testChangedBiometricBindingRejectsLateSuccess() async {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let native = DelayedBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let server = biometricServer()
+        var isCurrent = true
+        let task = Task {
+            try await manager.withServerBiometricAuthentication(server, validate: { _ in isCurrent }) {
+                try await native.authenticate(reason: .unlockServer(name: "Native test"), allowPasscodeFallback: false)
+                return 42
+            }
+        }
+        await native.waitUntilAuthenticationStarts()
+        isCurrent = false
+        native.succeed()
+        do { _ = try await task.value; XCTFail("Changed binding must reject the result") }
+        catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertEqual(manager.authenticationState, .idle)
+    }
+
+    func testInvalidBiometricResultDoesNotGrantAccess() async {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let server = biometricServer()
+        do {
+            _ = try await manager.withServerBiometricAuthentication(server, validate: { result in
+                XCTAssertEqual(result, 42)
+                return false
+            }) { 42 }
+            XCTFail("An invalid result must fail")
+        } catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertFalse(manager.canAccessServerWithoutPrompt(server))
+        XCTAssertEqual(manager.authenticationState, .idle)
+        XCTAssertTrue(auth.authenticateReasons.isEmpty)
+    }
+
+    func testConcurrentBiometricOperationCannotReplaceThePendingAttempt() async throws {
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let native = DelayedBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: makeDefaults(), authService: auth)
+        let task = Task {
+            try await manager.withServerBiometricAuthentication(biometricServer(), validate: { _ in true }) {
+                try await native.authenticate(reason: .unlockServer(name: "Native test"), allowPasscodeFallback: false)
+                return 42
+            }
+        }
+        await native.waitUntilAuthenticationStarts()
+        let pending = manager.authenticationState
+        do {
+            _ = try await manager.withServerBiometricAuthentication(biometricServer(), validate: { _ in true }) {
+                XCTFail("A second operation must not start")
+                return 43
+            }
+            XCTFail("A second operation must fail")
+        } catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertEqual(manager.authenticationState, pending)
+        native.succeed()
+        let result = try await task.value
+        XCTAssertEqual(result, 42)
+    }
+
+    func testAppLockRejectsBiometricOperationWithoutStartingIt() async {
+        let defaults = makeDefaults()
+        defaults.set(true, forKey: "security.fullAppLockEnabled")
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: defaults, authService: auth)
+        do {
+            _ = try await manager.withServerBiometricAuthentication(biometricServer(), validate: { _ in true }) {
+                XCTFail("A locked app must not start this operation")
+                return 42
+            }
+            XCTFail("A locked app must reject the operation")
+        } catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertTrue(manager.isAppLocked)
+        XCTAssertTrue(auth.authenticateReasons.isEmpty)
+    }
+
+    func testRelockedOperationCannotGrantAccessOrClearANewerAttempt() async throws {
+        let defaults = makeDefaults()
+        defaults.set(true, forKey: "security.fullAppLockEnabled")
+        let auth = StubBiometricAuthService(availabilityResult: .available(.faceID))
+        let manager = AppLockManager(defaults: defaults, authService: auth)
+        _ = await manager.ensureAppUnlocked()
+        let firstNative = DelayedBiometricAuthService(availabilityResult: .available(.faceID))
+        let first = Task {
+            try await manager.withServerBiometricAuthentication(biometricServer(), validate: { _ in true }) {
+                try await firstNative.authenticate(reason: .unlockServer(name: "First"), allowPasscodeFallback: false)
+                return 1
+            }
+        }
+        await firstNative.waitUntilAuthenticationStarts()
+        manager.lockAppNow()
+        _ = await manager.ensureAppUnlocked()
+        let nextNative = DelayedBiometricAuthService(availabilityResult: .available(.faceID))
+        let next = Task {
+            try await manager.withServerBiometricAuthentication(biometricServer(), validate: { _ in true }) {
+                try await nextNative.authenticate(reason: .unlockServer(name: "Next"), allowPasscodeFallback: false)
+                return 2
+            }
+        }
+        await nextNative.waitUntilAuthenticationStarts()
+        let nextState = manager.authenticationState
+        firstNative.succeed()
+        do { _ = try await first.value; XCTFail("The old attempt must fail") }
+        catch is CancellationError {} catch { XCTFail("Unexpected error type") }
+        XCTAssertEqual(manager.authenticationState, nextState)
+        nextNative.succeed()
+        let result = try await next.value
+        XCTAssertEqual(result, 2)
+        XCTAssertEqual(manager.authenticationState, .idle)
+    }
+
+    private enum NativeOperationFailure: Error { case failed }
+
+    private func biometricServer() -> Server {
+        Server(workspaceId: UUID(), name: "Protected", host: "example.test", username: "root", requiresBiometricUnlock: true)
+    }
+
     func testGraceSecondsClampToUpperBound() {
         let defaults = makeDefaults()
         let authService = StubBiometricAuthService(

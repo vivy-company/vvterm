@@ -1,4 +1,4 @@
-"NSFaceIDUsageDescription" = "VVTerm 使用 Face ID 解锁应用和受保护的服务器。";
+"NSFaceIDUsageDescription" = "VVTerm 使用面容 ID 解锁应用和受保护的服务器，并批准 Teleport 登录。";
 "NSLocalNetworkUsageDescription" = "VVTerm 使用本地网络查找、唤醒和连接 SSH 服务器。";
 "NSMicrophoneUsageDescription" = "VVTerm 需要使用麦克风，将语音命令转为终端输入。";
 "NSSpeechRecognitionUsageDescription" = "VVTerm 使用语音识别，将语音转为终端命令。";

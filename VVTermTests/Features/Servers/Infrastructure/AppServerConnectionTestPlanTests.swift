@@ -94,6 +94,38 @@ private nonisolated struct ConnectionTestHostKeyRepositoryFake: ServerHostKeyRep
 }
 
 struct AppServerConnectionTestPlanTests {
+    @Test(arguments: [false, true])
+    func unsupportedSettingsNeverStartAConnectionTest(unknownMode: Bool) async {
+        var server = makeServer(mode: unknownMode ? .unsupported("future") : .standard)
+        server.transportConfiguration = .unsupported(type: "future", version: 1, settings: Data())
+        let operations = ServerConnectionOperationRunnerFake()
+        let tester = AppServerConnectionTester(
+            connectionOperations: operations, remoteMosh: ServerMoshConnectionTesterFake(),
+            remoteSystemDetector: ServerRemoteSystemDetectorFake(),
+            hostKeys: ConnectionTestHostKeyRepositoryFake(), now: { .distantPast }
+        )
+        #expect(ServerConnectionTestPlan(server: server) == nil)
+        let result = await tester.test(server: server, credentials: ServerCredentials(serverId: server.id))
+        guard case .failure = result else {
+            Issue.record("Unsupported settings must fail the test")
+            return
+        }
+        #expect(await operations.calls() == 0)
+    }
+
+    @Test
+    func teleportUsesOnlySSHAndNeverOffersAHostKeyApprovalOverride() throws {
+        var server = makeServer(mode: .teleport)
+        server.teleportConfiguration = try TeleportServerConfiguration(
+            profile: TeleportProfileConfiguration(proxyURL: "https://proxy.example.test", account: "test"),
+            clusterName: "test-cluster", nodeID: "test-node"
+        )
+        #expect(ServerConnectionTestPlan(server: server) == .sshOnly)
+        #expect(ServerConnectionApprovalPolicy.requirement(
+            for: SSHError.hostKeyApprovalRequired, server: server
+        ) == nil)
+    }
+
     @Test
     func standardUsesOnlyTheSSHProbe() {
         #expect(ServerConnectionTestPlan(server: makeServer(mode: .standard)) == .sshOnly)

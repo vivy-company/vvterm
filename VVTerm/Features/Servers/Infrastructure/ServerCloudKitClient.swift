@@ -46,7 +46,7 @@ final class ServerCloudKitClient: ServerRemoteRepository, ServerRemoteMutationCl
     }
 
     func saveServer(_ server: Server) async throws {
-        let record = ServerCloudKitRecordCodec.record(
+        let record = try ServerCloudKitRecordCodec.record(
             for: server,
             in: transport.cloudKitRecordZoneID,
             now: now()

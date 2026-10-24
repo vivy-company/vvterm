@@ -573,6 +573,7 @@ struct TerminalPaneView: View {
 
     @EnvironmentObject var ghosttyApp: GhosttyRuntime
     @EnvironmentObject private var appLockManager: AppLockManager
+    @EnvironmentObject private var teleportSignIn: TeleportConnectionSignInCoordinator
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
 
@@ -904,7 +905,7 @@ struct TerminalPaneView: View {
                     connectionAttemptID: connectWatchdog.token,
                     surfaceStyle: noticeSurfaceStyle,
                     isActive: shouldFocus,
-                    onRetry: retryConnection,
+                    onRetry: retryAfterSignIn,
                     onTrustNewHostKey: presentHostKeyTrustConfirmation
                 )
 
@@ -1158,6 +1159,20 @@ struct TerminalPaneView: View {
             sceneIsActive: foregroundSceneIsActive,
             automaticReconnectAllowed: automaticReconnectAllowed
         )
+    }
+
+    private func retryAfterSignIn() {
+        guard server.connectionMode == .teleport else {
+            retryConnection()
+            return
+        }
+        reconnectCoordinator.cancelAutomaticRetry(for: paneId)
+        Task {
+            guard await teleportSignIn.ensureAccess(for: server, authorize: {
+                await appLockManager.ensureServerUnlocked($0)
+            }), !Task.isCancelled else { return }
+            retryConnection()
+        }
     }
 
     private func retryConnection() {

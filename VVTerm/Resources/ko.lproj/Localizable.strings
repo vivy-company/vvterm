@@ -2321,3 +2321,77 @@
 "Sidebar" = "사이드바";
 
 "Terminal tab %lld" = "터미널 탭 %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "루트 클러스터";
+"Node ID" = "노드 ID";
+"OS Login" = "OS 사용자 이름";
+"Proxy URL" = "프록시 URL";
+"SSO Connector (Optional)" = "SSO 커넥터(선택 사항)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "프록시에 로그인한 다음 노드와 해당 OS 사용자 이름을 선택하세요. 기기 간에는 프로필과 노드 설정만 동기화됩니다.";
+"Access expires" = "접근 만료 시간";
+"Sign in again to renew access." = "접근 권한을 갱신하려면 다시 로그인하세요.";
+"Sign in again" = "다시 로그인";
+"Sign out" = "로그아웃";
+"Check access" = "접근 확인";
+"Teleport access" = "Teleport 접근";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "발급된 접근 정보는 이 기기에만 저장됩니다. 암호와 일회용 코드는 저장되지 않습니다.";
+"Sign out of Teleport?" = "Teleport에서 로그아웃할까요?";
+"This disconnects all sessions for this Teleport profile on this device." = "이 기기에서 이 Teleport 프로필의 모든 세션 연결이 끊어집니다.";
+"One-time code (if needed)" = "일회용 코드(필요한 경우)";
+"Sign in" = "로그인";
+"Sign in with %@" = "%@로 로그인";
+"No supported sign-in method is available for this profile." = "이 프로필에 지원되는 로그인 방법이 없습니다.";
+"No nodes are available in this page." = "이 페이지에 사용 가능한 노드가 없습니다.";
+"Node" = "노드";
+"Select a node" = "노드 선택";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "OS 사용자 이름";
+"No permitted login" = "허용된 사용자 이름 없음";
+"Use selected node" = "선택한 노드 사용";
+"More nodes" = "노드 더 보기";
+"Refresh nodes" = "노드 새로 고침";
+"Checking access…" = "접근 확인 중…";
+"Signing in…" = "로그인 중…";
+"Loading nodes…" = "노드 불러오는 중…";
+"Signing out…" = "로그아웃 중…";
+"Teleport connection failed. Check the profile and sign in again." = "Teleport 연결에 실패했습니다. 프로필을 확인하고 다시 로그인하세요.";
+"Sign in to this Teleport profile before connecting." = "연결하기 전에 이 Teleport 프로필에 로그인하세요.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport가 접근을 거부했습니다. 계정, 코드 및 노드 권한을 확인하세요.";
+"This Teleport server or policy is not supported. Contact your administrator." = "이 Teleport 서버 또는 정책은 지원되지 않습니다. 관리자에게 문의하세요.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Teleport 인증서 검증에 실패했습니다. 프록시, 계정 및 클러스터를 확인하세요.";
+"The Teleport node was not found. Choose its exact node ID again." = "Teleport 노드를 찾을 수 없습니다. 정확한 노드 ID를 다시 선택하세요.";
+"More than one Teleport node has this name. Use its exact node ID." = "같은 이름의 Teleport 노드가 여러 개 있습니다. 정확한 노드 ID를 사용하세요.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "이 Teleport 프로필에 로그인하는 중입니다. 로그인을 완료하거나 취소한 후 다시 시도하세요.";
+"Approve with a passkey or security key" = "패스키 또는 보안 키로 승인";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "기기 생체 인증 로그인";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Teleport 암호도 필요합니다. 복구를 위해 다른 로그인 방법을 유지하세요.";
+"Set up device credential…" = "기기 자격 증명 설정…";
+"Sign in to this local account before setup." = "설정 전에 이 로컬 계정에 로그인하세요.";
+"Remove local device credential…" = "로컬 기기 자격 증명 제거…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "로컬에서 제거해도 Teleport 항목이나 발급된 접근 권한은 취소되지 않습니다. 다시 설정하기 전에 Teleport에서 서버 항목을 제거하세요.";
+"Remove this device's Teleport credential?" = "이 기기의 Teleport 자격 증명을 제거할까요?";
+"Remove local credential" = "로컬 자격 증명 제거";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "다른 방법으로 로그인한 후, 다시 설정하기 전에 Teleport에서 서버 항목을 제거하세요. 현재 접근 권한은 유지됩니다.";
+"Device credential name" = "기기 자격 증명 이름";
+"Fresh one-time code (if required)" = "새 일회용 코드(필요한 경우)";
+"Set up with one-time code" = "일회용 코드로 설정";
+"Set up with browser approval" = "브라우저 승인으로 설정";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "새 코드나 기존 패스키 또는 보안 키를 사용하세요. Face ID 또는 Touch ID가 새 키를 보호합니다. 이 키는 SSH 키와 별도로 이 기기에만 보관됩니다.";
+"Set up Teleport credential" = "Teleport 자격 증명 설정";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "기기 자격 증명이 등록되었습니다. 암호와 Face ID 또는 Touch ID로 로그인하세요.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "로컬 기기 자격 증명을 제거했습니다. Teleport에서 서버 항목을 별도로 제거하세요.";
+"Sign in with device biometrics" = "기기 생체 인증으로 로그인";
+"Setting up device credential…" = "기기 자격 증명 설정 중…";
+"Removing local credential…" = "로컬 자격 증명 제거 중…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Face ID 또는 Touch ID로 Teleport 로그인을 승인하세요.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Face ID 또는 Touch ID로 Teleport 로그인을 설정하세요.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave를 사용할 수 없습니다. 다른 로그인 방법을 사용하세요.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID 또는 Touch ID를 사용할 수 없습니다. 시스템 설정을 확인하거나 다른 방법으로 로그인하세요.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "로컬 기기 키가 없거나 사용할 수 없습니다. 다른 방법으로 로그인하세요. 다시 설정하기 전에 Teleport 항목을 제거하세요.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "로컬 자격 증명이 이미 있습니다. 기기 생체 인증을 사용하거나 다시 설정하기 전에 로컬 키와 Teleport 항목을 제거하세요.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "기기 자격 증명 저장에 실패했습니다. 다른 방법으로 로그인하세요. Teleport에서 설정 실패로 남은 항목을 확인하세요.";

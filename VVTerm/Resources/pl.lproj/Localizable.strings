@@ -2324,3 +2324,77 @@
 "Sidebar" = "Pasek boczny";
 
 "Terminal tab %lld" = "Karta terminala %lld";
+
+/* Teleport */
+"Teleport" = "Teleport";
+"Root Cluster" = "Klaster główny";
+"Node ID" = "ID węzła";
+"OS Login" = "Użytkownik systemu";
+"Proxy URL" = "URL proxy";
+"SSO Connector (Optional)" = "Łącznik SSO (opcjonalny)";
+"Sign in to the proxy, then select a node and its OS login. Only profile and node settings sync between devices." = "Zaloguj się do proxy, a następnie wybierz węzeł i użytkownika systemu. Między urządzeniami synchronizują się tylko ustawienia profilu i węzła.";
+"Access expires" = "Dostęp wygasa";
+"Sign in again to renew access." = "Zaloguj się ponownie, aby odnowić dostęp.";
+"Sign in again" = "Zaloguj się ponownie";
+"Sign out" = "Wyloguj się";
+"Check access" = "Sprawdź dostęp";
+"Teleport access" = "Dostęp Teleport";
+"Issued access is stored only on this device. Passwords and one-time codes are not saved." = "Przyznany dostęp jest przechowywany tylko na tym urządzeniu. Hasła i kody jednorazowe nie są zapisywane.";
+"Sign out of Teleport?" = "Wylogować się z Teleport?";
+"This disconnects all sessions for this Teleport profile on this device." = "Spowoduje to rozłączenie wszystkich sesji tego profilu Teleport na tym urządzeniu.";
+"One-time code (if needed)" = "Kod jednorazowy (jeśli wymagany)";
+"Sign in" = "Zaloguj się";
+"Sign in with %@" = "Zaloguj się przez %@";
+"No supported sign-in method is available for this profile." = "Ten profil nie ma obsługiwanej metody logowania.";
+"No nodes are available in this page." = "Na tej stronie nie ma dostępnych węzłów.";
+"Node" = "Węzeł";
+"Select a node" = "Wybierz węzeł";
+"%@ (%@)" = "%@ (%@)";
+"OS login" = "Użytkownik systemu";
+"No permitted login" = "Brak dozwolonego użytkownika";
+"Use selected node" = "Użyj wybranego węzła";
+"More nodes" = "Więcej węzłów";
+"Refresh nodes" = "Odśwież węzły";
+"Checking access…" = "Sprawdzanie dostępu…";
+"Signing in…" = "Logowanie…";
+"Loading nodes…" = "Wczytywanie węzłów…";
+"Signing out…" = "Wylogowywanie…";
+"Teleport connection failed. Check the profile and sign in again." = "Połączenie z Teleport nie powiodło się. Sprawdź profil i zaloguj się ponownie.";
+"Sign in to this Teleport profile before connecting." = "Przed połączeniem zaloguj się do tego profilu Teleport.";
+"Teleport denied access. Check the account, code, and node permissions." = "Teleport odmówił dostępu. Sprawdź konto, kod i uprawnienia do węzła.";
+"This Teleport server or policy is not supported. Contact your administrator." = "Ten serwer lub zasady Teleport nie są obsługiwane. Skontaktuj się z administratorem.";
+"Teleport certificate validation failed. Check the proxy, account, and cluster." = "Weryfikacja certyfikatu Teleport nie powiodła się. Sprawdź proxy, konto i klaster.";
+"The Teleport node was not found. Choose its exact node ID again." = "Nie znaleziono węzła Teleport. Wybierz ponownie jego dokładny identyfikator.";
+"More than one Teleport node has this name. Use its exact node ID." = "Więcej niż jeden węzeł Teleport ma tę nazwę. Użyj dokładnego identyfikatora węzła.";
+
+"This Teleport profile is signing in. Finish or cancel it, then try again." = "Trwa logowanie do tego profilu Teleport. Dokończ je lub anuluj, a następnie spróbuj ponownie.";
+"Approve with a passkey or security key" = "Zatwierdź kluczem dostępu lub kluczem bezpieczeństwa";
+
+/* Teleport device credentials */
+"Device biometric sign-in" = "Logowanie biometrią urządzenia";
+"Your Teleport password is still required. Keep another sign-in method for recovery." = "Hasło Teleport jest nadal wymagane. Zachowaj inną metodę logowania do odzyskiwania dostępu.";
+"Set up device credential…" = "Skonfiguruj dane urządzenia…";
+"Sign in to this local account before setup." = "Przed konfiguracją zaloguj się do tego konta lokalnego.";
+"Remove local device credential…" = "Usuń lokalne dane urządzenia…";
+"Local removal does not remove the Teleport entry or revoke issued access. Remove the server entry in Teleport before setup again." = "Usunięcie lokalne nie usuwa wpisu w Teleport ani nie unieważnia dostępu. Usuń wpis na serwerze Teleport przed ponowną konfiguracją.";
+"Remove this device's Teleport credential?" = "Usunąć dane Teleport tego urządzenia?";
+"Remove local credential" = "Usuń lokalne dane logowania";
+"Sign in another way, then remove the server entry in Teleport before setup again. Current access stays valid." = "Zaloguj się inaczej, a potem usuń wpis na serwerze Teleport przed ponowną konfiguracją. Obecny dostęp pozostaje ważny.";
+"Device credential name" = "Nazwa danych urządzenia";
+"Fresh one-time code (if required)" = "Nowy kod jednorazowy (jeśli wymagany)";
+"Set up with one-time code" = "Skonfiguruj kodem jednorazowym";
+"Set up with browser approval" = "Skonfiguruj przez zatwierdzenie w przeglądarce";
+"Use a fresh code or an existing passkey or security key. Face ID or Touch ID protects the new key. It stays on this device, separate from SSH keys." = "Użyj nowego kodu lub istniejącego klucza dostępu albo klucza bezpieczeństwa. Face ID lub Touch ID chroni nowy klucz. Pozostaje on na tym urządzeniu, oddzielnie od kluczy SSH.";
+"Set up Teleport credential" = "Skonfiguruj dane Teleport";
+"Device credential registered. Use your password and Face ID or Touch ID to sign in." = "Zarejestrowano dane urządzenia. Loguj się hasłem i Face ID lub Touch ID.";
+"Local device credential removed. Remove its server entry in Teleport separately." = "Usunięto lokalne dane urządzenia. Oddzielnie usuń ich wpis na serwerze Teleport.";
+"Sign in with device biometrics" = "Zaloguj biometrią urządzenia";
+"Setting up device credential…" = "Konfigurowanie danych urządzenia…";
+"Removing local credential…" = "Usuwanie lokalnych danych…";
+"Approve Teleport sign-in with Face ID or Touch ID." = "Zatwierdź logowanie Teleport przez Face ID lub Touch ID.";
+"Set up Teleport sign-in with Face ID or Touch ID." = "Skonfiguruj logowanie Teleport przez Face ID lub Touch ID.";
+"Secure Enclave is not available. Use another sign-in method." = "Secure Enclave jest niedostępne. Użyj innej metody logowania.";
+"Face ID or Touch ID is not available. Check system settings or sign in another way." = "Face ID lub Touch ID jest niedostępne. Sprawdź ustawienia systemu lub zaloguj się inaczej.";
+"The local device key is missing or cannot be used. Sign in another way. Remove its Teleport entry before setup again." = "Brak lokalnego klucza urządzenia lub nie można go użyć. Zaloguj się inaczej. Usuń jego wpis w Teleport przed ponowną konfiguracją.";
+"A local credential already exists. Use device biometrics, or remove the local key and its Teleport entry before setup again." = "Lokalne dane już istnieją. Użyj biometrii urządzenia lub usuń lokalny klucz i jego wpis w Teleport przed ponowną konfiguracją.";
+"Device credential storage failed. Sign in another way. Check Teleport for a failed setup entry." = "Zapis danych urządzenia nie powiódł się. Zaloguj się inaczej. Sprawdź Teleport pod kątem wpisu nieudanej konfiguracji.";

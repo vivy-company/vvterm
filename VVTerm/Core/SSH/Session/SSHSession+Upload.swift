@@ -8,6 +8,8 @@ extension SSHSession {
         permissions: Int32 = 0o600,
         strategy: SSHUploadStrategy = .automatic
     ) async throws {
+        let operationID = try beginNativeFileOperation()
+        defer { finishNativeFileOperation(operationID) }
         if strategy == .execPreferred {
             logger.info("Using exec-preferred upload strategy [path: \(remotePath, privacy: .private(mask: .hash))]")
             try await uploadViaExec(data, to: remotePath)
@@ -20,6 +22,7 @@ extension SSHSession {
         } catch is CancellationError {
             throw CancellationError()
         } catch {
+            try validateNativeFileOperation()
             logger.warning("SCP upload failed, retrying with exec channel [error: \(LogPrivacy.errorClass(error), privacy: .public)]")
             try await uploadViaExec(data, to: remotePath)
         }
@@ -37,7 +40,7 @@ extension SSHSession {
         var scpChannel: OpaquePointer?
         do {
             while scpChannel == nil {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 scpChannel = remotePath.withCString { pathPtr in
                     libssh2_scp_send64(
                         session,
@@ -68,7 +71,7 @@ extension SSHSession {
             let bytes = [UInt8](data)
             var offset = 0
             while offset < bytes.count {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 let written = bytes.withUnsafeBufferPointer { buffer -> Int in
                     guard let baseAddress = buffer.baseAddress else { return -1 }
                     let pointer = UnsafeRawPointer(baseAddress.advanced(by: offset)).assumingMemoryBound(to: CChar.self)
@@ -109,7 +112,7 @@ extension SSHSession {
         var execChannel: OpaquePointer?
         do {
             while execChannel == nil {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 execChannel = libssh2_channel_open_ex(
                     session,
                     "session",
@@ -142,7 +145,7 @@ extension SSHSession {
             )
 
             while true {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 let execResult = libssh2_channel_process_startup(
                     execChannel,
                     "exec",
@@ -163,7 +166,7 @@ extension SSHSession {
             let bytes = [UInt8](data)
             var offset = 0
             while offset < bytes.count {
-                try Task.checkCancellation()
+                try validateNativeFileOperation()
                 let written = bytes.withUnsafeBufferPointer { buffer -> Int in
                     guard let baseAddress = buffer.baseAddress else { return -1 }
                     let pointer = UnsafeRawPointer(baseAddress.advanced(by: offset)).assumingMemoryBound(to: CChar.self)
@@ -198,7 +201,7 @@ extension SSHSession {
         drainOutput: Bool = false
     ) async throws -> Int32 {
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let sendEOFResult = libssh2_channel_send_eof(channel)
             if sendEOFResult == 0 {
                 break
@@ -211,7 +214,7 @@ extension SSHSession {
         }
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             if drainOutput {
                 try await drainChannelOutput(channel)
             }
@@ -227,7 +230,7 @@ extension SSHSession {
         }
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let closeResult = libssh2_channel_close(channel)
             if closeResult == 0 {
                 break
@@ -240,7 +243,7 @@ extension SSHSession {
         }
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let waitClosedResult = libssh2_channel_wait_closed(channel)
             if waitClosedResult == 0 {
                 break
@@ -261,7 +264,7 @@ extension SSHSession {
         var buffer = [CChar](repeating: 0, count: 4096)
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let stdoutRead = libssh2_channel_read_ex(channel, 0, &buffer, buffer.count)
             if stdoutRead > 0 {
                 continue
@@ -273,7 +276,7 @@ extension SSHSession {
         }
 
         while true {
-            try Task.checkCancellation()
+            try validateNativeFileOperation()
             let stderrRead = libssh2_channel_read_ex(channel, 1, &buffer, buffer.count)
             if stderrRead > 0 {
                 continue

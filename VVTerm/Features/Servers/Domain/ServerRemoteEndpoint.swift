@@ -4,6 +4,7 @@ nonisolated struct ServerRemoteEndpoint: Equatable, Hashable, Sendable {
     let host: String
     let sshPort: Int?
     let connectionMode: SSHConnectionMode
+    let transportConfiguration: ServerTransportConfiguration?
     let eternalTerminalPort: Int?
     let cloudflareTeamDomainOverride: String?
     let cloudflareAppDomainOverride: String?
@@ -15,7 +16,8 @@ nonisolated struct ServerRemoteEndpoint: Equatable, Hashable, Sendable {
             connectionMode: server.connectionMode,
             eternalTerminalPort: server.eternalTerminalPort,
             cloudflareTeamDomainOverride: server.cloudflareTeamDomainOverride,
-            cloudflareAppDomainOverride: server.cloudflareAppDomainOverride
+            cloudflareAppDomainOverride: server.cloudflareAppDomainOverride,
+            transportConfiguration: server.transportConfiguration
         )
     }
 
@@ -25,11 +27,15 @@ nonisolated struct ServerRemoteEndpoint: Equatable, Hashable, Sendable {
         connectionMode: SSHConnectionMode,
         eternalTerminalPort: Int?,
         cloudflareTeamDomainOverride: String?,
-        cloudflareAppDomainOverride: String?
+        cloudflareAppDomainOverride: String?,
+        teleportConfiguration: TeleportServerConfiguration? = nil,
+        transportConfiguration: ServerTransportConfiguration? = nil
     ) {
         self.host = Self.normalized(host) ?? ""
         self.sshPort = sshPort
         self.connectionMode = connectionMode
+        self.transportConfiguration = transportConfiguration
+            ?? (connectionMode == .teleport ? teleportConfiguration.map { .teleport($0) } : nil)
         self.eternalTerminalPort = connectionMode == .eternalTerminal
             ? eternalTerminalPort
             : nil
