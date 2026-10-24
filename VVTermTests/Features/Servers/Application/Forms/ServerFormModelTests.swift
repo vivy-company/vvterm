@@ -65,6 +65,64 @@ struct ServerFormModelTests {
         #expect(saved.name == "Updated name")
     }
 
+    @Test
+    func oneTeleportEditApprovalCoversItsSaveWithoutAConnectionGraceTimer() {
+        var source = validTeleportModel().makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        source.requiresBiometricUnlock = true
+        var form = ServerFormModel(
+            server: source, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        form.name = "Edited name"
+        form.notes = "Edited notes"
+        var current = source
+        current.lastConnected = Date()
+        current.updatedAt = Date()
+        #expect(form.canReuseTeleportEditApproval(
+            source: source, current: current, hasAuthorizedSourceAccess: true, isAppLocked: false
+        ))
+    }
+
+    enum EditApprovalChange: CaseIterable {
+        case unapproved, appLocked, draftProxy, draftAccount, draftTransport
+        case missingSource, anotherSource, savedProfile, savedNode, savedLogin, savedLockSetting, savedTransport
+    }
+
+    @Test(arguments: EditApprovalChange.allCases)
+    func changedTeleportEditingScopeRequiresFreshSaveApproval(change: EditApprovalChange) throws {
+        var source = validTeleportModel().makeServer(id: UUID(), workspaceID: UUID(), createdAt: .distantPast)
+        source.requiresBiometricUnlock = true
+        var form = ServerFormModel(
+            server: source, defaultRemoteSessionEnabled: false,
+            defaultRemoteSessionBackendIdentifier: .tmux, defaultRemoteSessionStartupBehavior: .ask
+        )
+        var current: Server? = source
+        switch change {
+        case .unapproved, .appLocked: break
+        case .draftProxy: form.teleportProxyURL = "https://other.example.test"
+        case .draftAccount: form.teleportAccount = "other-account"
+        case .draftTransport: form.transportSelection = .standard
+        case .missingSource: current = nil
+        case .anotherSource: current = form.makeServer(id: UUID(), workspaceID: source.workspaceId, createdAt: source.createdAt)
+        case .savedLogin: current?.username = "other-login"
+        case .savedLockSetting: current?.requiresBiometricUnlock = false
+        case .savedTransport: current?.connectionMode = .standard
+        case .savedProfile, .savedNode:
+            let configuration = try #require(source.teleportConfiguration)
+            current?.teleportConfiguration = try TeleportServerConfiguration(
+                profile: change == .savedProfile
+                    ? TeleportProfileConfiguration(proxyURL: "https://other.example.test", account: "other-account")
+                    : configuration.profile,
+                clusterName: configuration.clusterName,
+                nodeID: change == .savedNode ? "other-node" : configuration.nodeID
+            )
+        }
+        #expect(!form.canReuseTeleportEditApproval(
+            source: source, current: current,
+            hasAuthorizedSourceAccess: change != .unapproved, isAppLocked: change == .appLocked
+        ))
+    }
+
     @Test(arguments: [
         ("proxy.example.test", "https://proxy.example.test"),
         (" PROXY.EXAMPLE.TEST:443/ ", "https://proxy.example.test"),

@@ -82,6 +82,10 @@ struct ServerFormSheet: View {
         form.transportSelection == .teleport ? form.teleportProfile : nil
     }
 
+    private var teleportSourceLockState: AppLockState? {
+        sourceServer?.connectionMode == .teleport ? appLockManager.lockState : nil
+    }
+
     private var hostKeyTrustRequest: ServerSecurityApprovalRequest? {
         operations.hostKeyChallenge.map(ServerSecurityApprovalRequest.hostKey)
     }
@@ -355,12 +359,18 @@ struct ServerFormSheet: View {
     private var presentedFormContent: some View {
         styledFormContent
         .interactiveDismissDisabled(isSaving)
-        .task {
+        .task(id: teleportSourceLockState) {
+            if sourceServer?.connectionMode == .teleport, appLockManager.isAppLocked { return }
             if let sourceServer {
-                guard await appLockManager.authorizeProtectedServerAction(
-                    sourceServer,
-                    action: .edit
-                ) else {
+                let authorized: Bool
+                if sourceServer.connectionMode == .teleport {
+                    let current = serverManager.server(id: sourceServer.id) ?? sourceServer
+                    authorized = await appLockManager.ensureServerUnlocked(current)
+                } else {
+                    authorized = await appLockManager.authorizeProtectedServerAction(sourceServer, action: .edit)
+                }
+                guard !Task.isCancelled else { return }
+                guard authorized else {
                     dismiss()
                     return
                 }
@@ -443,6 +453,12 @@ struct ServerFormSheet: View {
                 form.password = ""
                 operations.invalidateCredentialLoading()
                 updateTeleportProfile()
+            }
+            .onChange(of: teleportSourceLockState) { state in
+                guard state?.isLocked == true else { return }
+                hasAuthorizedSourceAccess = false
+                operations.cancel()
+                teleportModel?.cancel()
             }
             .onChange(of: operations.connectionTestFailure) { failure in
                 if failure?.requiresCloudflareOverrides == true {
@@ -1053,6 +1069,20 @@ struct ServerFormSheet: View {
             hasProAccess: storeManager.allowsProFeatures,
             authorize: {
                 guard let editedServer = intent.editedServer else { return true }
+                if editedServer.connectionMode == .teleport {
+                    guard !appLockManager.isAppLocked,
+                          let current = serverManager.server(id: editedServer.id) else { return false }
+                    if form.canReuseTeleportEditApproval(
+                        source: editedServer, current: current,
+                        hasAuthorizedSourceAccess: hasAuthorizedSourceAccess,
+                        isAppLocked: appLockManager.isAppLocked
+                    ) { return true }
+                    let authorized = await appLockManager.authorizeProtectedServerAction(current, action: .save)
+                    guard authorized, !Task.isCancelled, !appLockManager.isAppLocked,
+                          let latest = serverManager.server(id: editedServer.id),
+                          latest.requiresBiometricUnlock == current.requiresBiometricUnlock else { return false }
+                    return ServerCredentialBinding(server: latest) == ServerCredentialBinding(server: current)
+                }
                 return await appLockManager.authorizeProtectedServerAction(
                     editedServer,
                     action: .save

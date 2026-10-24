@@ -202,6 +202,19 @@ nonisolated struct ServerFormModel: Equatable, Sendable {
             && (transportSelection != .eternalTerminal || validPort(eternalTerminalPort))
     }
 
+    /// One authorized Teleport edit can include Save beyond the connection grace
+    /// period. A changed profile, saved binding, or app lock needs fresh approval.
+    func canReuseTeleportEditApproval(
+        source: Server, current: Server?, hasAuthorizedSourceAccess: Bool, isAppLocked: Bool
+    ) -> Bool {
+        guard hasAuthorizedSourceAccess, !isAppLocked,
+              source.connectionMode == .teleport, transportSelection == .teleport,
+              let profile = source.teleportConfiguration?.profile, teleportProfile == profile,
+              let current, current.id == source.id,
+              current.requiresBiometricUnlock == source.requiresBiometricUnlock else { return false }
+        return ServerCredentialBinding(server: current) == ServerCredentialBinding(server: source)
+    }
+
     var effectiveUsername: String {
         let trimmed = username.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "root" : trimmed
